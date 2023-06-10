@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerImpl;
@@ -35,15 +36,18 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
 
     private final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
+    private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
     private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
     protected CardinalityInsensitiveJoinTransferLJOptimizer(RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
                                                             RightProvenanceNormalizer rightProvenanceNormalizer,
+                                                            JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                                             CoreSingletons coreSingletons) {
         this.requiredDataNodeExtractor = requiredDataNodeExtractor;
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
+        this.variableNullabilityTools = variableNullabilityTools;
         this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
     }
@@ -59,6 +63,7 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
                         query.getVariableGenerator(),
                         requiredDataNodeExtractor,
                         rightProvenanceNormalizer,
+                        variableNullabilityTools,
                         coreSingletons),
                 coreSingletons);
 
@@ -77,8 +82,10 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
                                                     Supplier<VariableNullability> variableNullabilitySupplier,
                                                     VariableGenerator variableGenerator, RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
                                                     RightProvenanceNormalizer rightProvenanceNormalizer,
+                                                    JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                                     CoreSingletons coreSingletons) {
-            super(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor, rightProvenanceNormalizer, coreSingletons);
+            super(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor, rightProvenanceNormalizer,
+                    variableNullabilityTools, coreSingletons);
             this.lookForDistinctTransformer = lookForDistinctTransformer;
         }
 
@@ -123,7 +130,7 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
         protected IQTree transformBySearchingFromScratchFromDistinctTree(IQTree tree) {
             CardinalityInsensitiveTransformer newTransformer = new CardinalityInsensitiveTransformer(lookForDistinctTransformer,
                     tree::getVariableNullability, variableGenerator, requiredDataNodeExtractor,
-                    rightProvenanceNormalizer, coreSingletons);
+                    rightProvenanceNormalizer, variableNullabilityTools, coreSingletons);
             return tree.acceptTransformer(newTransformer);
         }
 

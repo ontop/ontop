@@ -10,26 +10,23 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
+import java.util.function.Supplier;
 
 /**
  * Restricted to LJs on the right to limit overlap with existing techniques.
@@ -43,15 +40,18 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
     private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
     private final CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer;
+    private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
 
     @Inject
     protected LJWithNestingOnRightToInnerJoinOptimizer(RightProvenanceNormalizer rightProvenanceNormalizer,
                                                        CoreSingletons coreSingletons,
-                                                       CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer) {
+                                                       CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer,
+                                                       JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
         this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
         this.otherLJOptimizer = otherLJOptimizer;
+        this.variableNullabilityTools = variableNullabilityTools;
     }
 
     @Override
@@ -59,10 +59,12 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
         IQTree initialTree = query.getTree();
 
         Transformer transformer = new Transformer(
+                initialTree::getVariableNullability,
                 query.getVariableGenerator(),
                 rightProvenanceNormalizer,
                 coreSingletons,
-                otherLJOptimizer);
+                otherLJOptimizer,
+                variableNullabilityTools);
 
         IQTree newTree = initialTree.acceptTransformer(transformer);
 
@@ -72,49 +74,51 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    protected static class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-
-        private final VariableGenerator variableGenerator;
-        private final RightProvenanceNormalizer rightProvenanceNormalizer;
-        private final TermFactory termFactory;
+    protected static class Transformer extends AbstractLJTransformer {
         private final CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer;
         private final AtomFactory atomFactory;
-        private final SubstitutionFactory substitutionFactory;
 
-        protected Transformer(VariableGenerator variableGenerator, RightProvenanceNormalizer rightProvenanceNormalizer,
-                              CoreSingletons coreSingletons, CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer) {
-            super(coreSingletons);
-            this.variableGenerator = variableGenerator;
-            this.rightProvenanceNormalizer = rightProvenanceNormalizer;
-            this.termFactory = coreSingletons.getTermFactory();
+        protected Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
+                              VariableGenerator variableGenerator, RightProvenanceNormalizer rightProvenanceNormalizer,
+                              CoreSingletons coreSingletons, CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer,
+                              JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
+            super(variableNullabilitySupplier, variableGenerator, rightProvenanceNormalizer, variableNullabilityTools,
+                    coreSingletons);
             this.otherLJOptimizer = otherLJOptimizer;
             this.atomFactory = coreSingletons.getAtomFactory();
-            this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         }
 
         @Override
-        public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            IQTree newLeftChild = transform(leftChild);
-            IQTree newRightChild = transform(rightChild);
-
-            Optional<ConstructionNode> rightConstructionNode = Optional.of(newRightChild.getRootNode())
+        protected Optional<IQTree> furtherTransformLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+            Optional<ConstructionNode> rightConstructionNode = Optional.of(rightChild.getRootNode())
                     .filter(n -> n instanceof ConstructionNode)
                     .map(n -> (ConstructionNode) n);
 
             Optional<BinaryNonCommutativeIQTree> rightLJ = rightConstructionNode
-                    .map(c -> newRightChild.getChildren().get(0))
-                    .or(() -> Optional.of(newRightChild))
+                    .map(c -> rightChild.getChildren().get(0))
+                    .or(() -> Optional.of(rightChild))
                     .filter(t -> t.getRootNode() instanceof LeftJoinNode)
                     .map(t -> (BinaryNonCommutativeIQTree) t);
 
-            Optional<IQTree> simplifiedTree = rightLJ
-                    .flatMap(rLJ -> tryToSimplify(newLeftChild, newRightChild, rootNode.getOptionalFilterCondition(), rLJ));
+            return rightLJ
+                    .flatMap(rLJ -> tryToSimplify(leftChild, rightChild, rootNode.getOptionalFilterCondition(), rLJ));
+        }
 
-            return simplifiedTree
-                    .orElseGet(() -> newLeftChild.equals(leftChild) && newRightChild.equals(rightChild)
-                            ? tree
-                            : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild)
-                            .normalizeForOptimization(variableGenerator));
+        @Override
+        protected IQTree transformBySearchingFromScratch(IQTree tree) {
+            Transformer newTransformer = new Transformer(tree::getVariableNullability, variableGenerator,
+                    rightProvenanceNormalizer, coreSingletons, otherLJOptimizer, variableNullabilityTools);
+            return tree.acceptTransformer(newTransformer);
+        }
+
+        @Override
+        protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition) {
+            Supplier<VariableNullability> variableNullabilitySupplier =
+                    () -> computeRightChildVariableNullability(rightChild, ljCondition);
+
+            Transformer newTransformer = new Transformer(variableNullabilitySupplier, variableGenerator,
+                    rightProvenanceNormalizer, coreSingletons, otherLJOptimizer, variableNullabilityTools);
+            return rightChild.acceptTransformer(newTransformer);
         }
 
         private Optional<IQTree> tryToSimplify(IQTree leftChild, IQTree rightChild,
@@ -144,21 +148,41 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
         }
 
         private boolean canLJBeReduced(IQTree leftChild, IQTree safeLeftOfRightDescendant) {
+
+            ImmutableSet<Variable> leftChildVariables = leftChild.getVariables();
+
             RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(
-                    safeLeftOfRightDescendant, leftChild.getVariables(), Optional.empty(), variableGenerator);
+                    safeLeftOfRightDescendant, leftChildVariables, Optional.empty(), variableGenerator);
+
+            VariableNullability inheritedVariableNullability = getInheritedVariableNullability();
+
+            Optional<ImmutableExpression> nonNullabilityCondition = termFactory.getConjunction(
+                    leftChildVariables.stream()
+                            .filter(v -> !inheritedVariableNullability.isPossiblyNullable(v))
+                            .map(termFactory::getDBIsNotNull));
+
+            ImmutableExpression isNullCondition = termFactory.getDBIsNull(rightProvenance.getProvenanceVariable());
+
+            ImmutableExpression filterCondition = nonNullabilityCondition
+                    .map(c -> termFactory.getConjunction(isNullCondition, c))
+                    .orElse(isNullCondition);
 
             IQTree minusTree = iqFactory.createUnaryIQTree(
-                    iqFactory.createFilterNode(termFactory.getDBIsNull(rightProvenance.getProvenanceVariable())),
+                    iqFactory.createFilterNode(filterCondition),
                     iqFactory.createBinaryNonCommutativeIQTree(
                             iqFactory.createLeftJoinNode(),
                             leftChild, rightProvenance.getRightTree()));
 
+            ConstructionNode constructionNode = iqFactory.createConstructionNode(
+                    ImmutableSet.of(rightProvenance.getProvenanceVariable()));
+
             // Hack
             DistinctVariableOnlyDataAtom minusFakeProjectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(
-                    atomFactory.getRDFAnswerPredicate(minusTree.getVariables().size()),
-                    ImmutableList.copyOf(minusTree.getVariables()));
+                    atomFactory.getRDFAnswerPredicate(1),
+                    ImmutableList.copyOf(constructionNode.getVariables()));
 
-            return otherLJOptimizer.optimize(iqFactory.createIQ(minusFakeProjectionAtom, minusTree))
+            return otherLJOptimizer.optimize(iqFactory.createIQ(minusFakeProjectionAtom,
+                            iqFactory.createUnaryIQTree(constructionNode, minusTree)))
                     .normalizeForOptimization().getTree()
                     .isDeclaredAsEmpty();
         }
