@@ -12,8 +12,8 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ArgumentSubstitution;
@@ -26,19 +26,23 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransformer {
 
+    protected final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
+
     protected AbstractJoinTransferLJTransformer(Supplier<VariableNullability> variableNullabilitySupplier,
                                                 VariableGenerator variableGenerator,
                                                 RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
                                                 RightProvenanceNormalizer rightProvenanceNormalizer,
+                                                JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                                 CoreSingletons coreSingletons) {
-        super(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor, rightProvenanceNormalizer, coreSingletons);
+        super(variableNullabilitySupplier, variableGenerator, rightProvenanceNormalizer, variableNullabilityTools,
+                coreSingletons);
+        this.requiredDataNodeExtractor = requiredDataNodeExtractor;
     }
 
     /**

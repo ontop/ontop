@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -23,22 +24,22 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
     private VariableNullability variableNullability;
 
     protected final VariableGenerator variableGenerator;
-    protected final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
     protected final RightProvenanceNormalizer rightProvenanceNormalizer;
     protected final CoreSingletons coreSingletons;
     protected final IntermediateQueryFactory iqFactory;
     protected final TermFactory termFactory;
     protected final SubstitutionFactory substitutionFactory;
+    protected final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
 
     protected AbstractLJTransformer(Supplier<VariableNullability> variableNullabilitySupplier,
                                     VariableGenerator variableGenerator,
-                                    RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
                                     RightProvenanceNormalizer rightProvenanceNormalizer,
+                                    JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                     CoreSingletons coreSingletons) {
         this.variableNullabilitySupplier = variableNullabilitySupplier;
         this.variableGenerator = variableGenerator;
-        this.requiredDataNodeExtractor = requiredDataNodeExtractor;
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
+        this.variableNullabilityTools = variableNullabilityTools;
 
         this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
@@ -159,6 +160,34 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     abstract protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition);
+
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    protected VariableNullability computeRightChildVariableNullability(IQTree rightChild, Optional<ImmutableExpression> ljCondition) {
+        VariableNullability bottomUpNullability = rightChild.getVariableNullability();
+
+        VariableNullability nullabilityWithLJCondition = ljCondition
+                .map(c -> variableNullabilityTools.updateWithFilter(c, bottomUpNullability.getNullableGroups(),
+                        rightChild.getVariables()))
+                .orElse(bottomUpNullability);
+
+        ImmutableSet<Variable> nullableVariablesAfterLJCondition = nullabilityWithLJCondition.getNullableVariables();
+
+        if (nullableVariablesAfterLJCondition.isEmpty())
+            return nullabilityWithLJCondition;
+
+        VariableNullability inheritedNullability = getInheritedVariableNullability();
+
+        // Non-nullability information coming from the ancestors
+        Optional<ImmutableExpression> additionalFilter = termFactory.getConjunction(nullableVariablesAfterLJCondition.stream()
+                .filter(v -> !inheritedNullability.isPossiblyNullable(v))
+                .map(termFactory::getDBIsNotNull));
+
+        return additionalFilter
+                .map(c -> variableNullabilityTools.updateWithFilter(c, nullabilityWithLJCondition.getNullableGroups(),
+                        rightChild.getVariables()))
+                .orElse(nullabilityWithLJCondition);
+    }
 
 
 }
