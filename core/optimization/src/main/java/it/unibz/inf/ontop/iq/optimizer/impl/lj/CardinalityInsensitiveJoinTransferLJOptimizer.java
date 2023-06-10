@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerImpl;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -127,7 +128,7 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
         }
 
         @Override
-        protected IQTree preTransformLJRightChild(IQTree rightChild) {
+        protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition) {
             return transformBySearchingFromScratchFromDistinctTree(rightChild);
         }
 
