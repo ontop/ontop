@@ -16,7 +16,7 @@ public class OntopVirtualRepositoryBean {
     private OntopSystemConfiguration setupOntopConfiguration(@Value("${mapping}") String mappings,
                                                              @Value("${ontology:#{null}}") String ontology,
                                                              @Value("${facts:#{null}}") String facts,
-                                                             @Value("${fact-format:#{null}}") String factFormat,
+                                                             @Value("${facts-format:#{null}}") String factFormat,
                                                              @Value("${facts-base-iri:#{null}}") String factsBaseIRI,
                                                              @Value("${xml-catalog:#{null}}") String xmlCatalog,
                                                              @Value("${properties:#{null}}") String properties,

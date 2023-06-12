@@ -20,7 +20,7 @@ abstract class OntopMappingOntologyRelatedCommand extends AbstractOntopCommand i
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String factFile;
 
-    @Option(type = OptionType.COMMAND, name = {"--fact-format"}, title = "format of facts file",
+    @Option(type = OptionType.COMMAND, name = {"--facts-format"}, title = "format of facts file",
             description = "The format of the 'facts' input file.")
     @AllowedEnumValues(RDFFormatTypes.class)
     RDFFormatTypes factFormat;

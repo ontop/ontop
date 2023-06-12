@@ -88,7 +88,7 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
             argList.add("--facts=" + this.factFile);
 
         if (this.factFormat != null)
-            argList.add("--fact-format=" + this.factFormat.getExtension());
+            argList.add("--facts-format=" + this.factFormat.getExtension());
 
         if (this.factsBaseIRI != null)
             argList.add("--facts-base-iri=" + this.factsBaseIRI);

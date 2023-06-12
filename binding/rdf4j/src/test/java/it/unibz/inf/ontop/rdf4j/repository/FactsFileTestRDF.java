@@ -1,9 +1,6 @@
-package it.unibz.inf.ontop.owlapi;
+package it.unibz.inf.ontop.rdf4j.repository;
 
-import com.google.common.collect.ImmutableList;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 /***
  * A test querying triples provided by an external "facts" file.

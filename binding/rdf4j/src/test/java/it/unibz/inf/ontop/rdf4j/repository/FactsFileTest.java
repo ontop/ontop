@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.owlapi;
+package it.unibz.inf.ontop.rdf4j.repository;
 
 import com.google.common.collect.ImmutableList;
 import org.junit.AfterClass;
@@ -10,15 +10,15 @@ import javax.annotation.Nullable;
 /***
  * A test querying triples provided by an external "facts" file.
  */
-public abstract class FactsFileTest extends AbstractOWLAPITest {
+public abstract class FactsFileTest extends AbstractRDF4JTest {
 
 	@AfterClass
 	public static void tearDown() throws Exception {
-		release();
+		AbstractRDF4JTest.release();
 	}
 
 	protected static void init(@Nullable String factsFile, @Nullable String factsBaseIRI) throws Exception {
-		initOBDA("/facts/facts-h2.sql",
+		AbstractRDF4JTest.initOBDAWithFacts("/facts/facts-h2.sql",
 				"/facts/mapping.obda",
 				"/facts/ontology.ttl",
 				null,
@@ -40,9 +40,9 @@ public abstract class FactsFileTest extends AbstractOWLAPITest {
 				"  ?c :name ?v.\n" +
 				"} ORDER BY ?v\n";
 
-		checkReturnedValues(query, "v", ImmutableList.of(
-				"\"Big Company\"^^xsd:string",
-				"\"Some Factory\"^^xsd:string",
-				"\"The Fact Company\"^^xsd:string"));
+		runQueryAndCompare(query, ImmutableList.of(
+				"Big Company",
+				"Some Factory",
+				"The Fact Company"));
 	}
 }

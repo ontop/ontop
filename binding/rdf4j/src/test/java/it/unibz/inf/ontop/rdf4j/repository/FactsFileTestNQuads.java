@@ -1,7 +1,6 @@
-package it.unibz.inf.ontop.owlapi;
+package it.unibz.inf.ontop.rdf4j.repository;
 
 import com.google.common.collect.ImmutableList;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -16,7 +15,7 @@ public class FactsFileTestNQuads extends FactsFileTest {
 	}
 
 	@Test
-	public void testSubgraph() throws Exception {
+	public void testSubgraph() {
 		String query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
 				"PREFIX beam:   <https://data.beamery.com/ontologies/talent#>\n" +
 				"PREFIX foaf:   <http://xmlns.com/foaf/0.1/>\n" +
@@ -28,7 +27,7 @@ public class FactsFileTestNQuads extends FactsFileTest {
 				"  GRAPH :extra { ?s ?p ?v . } \n" +
 				"} ORDER BY ?v\n";
 
-		checkReturnedValues(query, "v", ImmutableList.of(
-				"\"2022\"^^xsd:integer"));
+		runQueryAndCompare(query, ImmutableList.of(
+				"2022"));
 	}
 }
