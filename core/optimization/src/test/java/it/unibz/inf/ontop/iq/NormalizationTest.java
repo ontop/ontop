@@ -3617,8 +3617,7 @@ public class NormalizationTest {
                 IQ_FACTORY.createDistinctNode(),
                 newDataNode1);
 
-        var expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
-                IQ_FACTORY.createUnaryIQTree(constructionNode, newTree));
+        var expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newTree);
 
         normalizeAndCompare(initialIQ, expectedIQ);
     }
