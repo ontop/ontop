@@ -41,6 +41,9 @@ Boolean flag variables can be enabled by setting them to any value (even empty) 
 - **`ONTOP_ENABLE_ANNOTATIONS`** *(boolean flag)* - Enables annotation properties defined in the ontology. Corresponds to the argument `--enable-annotations`. Added in 5.0.0.
 - **`ONTOP_LENSES_FILE`** *(file path, optional)* - Specifies a user-supplied lenses file (lenses were formerly named Ontop views). Corresponds to the argument `--ontop-lenses`. Added as `ONTOP_VIEW_FILE` in 4.1.0, renamed in 5.0.0.
 - **`ONTOP_SPARQL_RULES_FILE`** (file path) - Specifies a user-supplied SPARQL rules file. Corresponds to the argument `--sparql-rules`. Added in 5.0.0.
+- **`ONTOP_FACTS_FILE`** *(file path)* - Specifies a user-supplied facts file that may contain additional RDF facts.
+- **`ONTOP_FACTS_FORMAT`** *(string)* - Specifies the format of the input fact file. If not provided, Ontop attempts to guess the format based on the file extension. Possible values: `rdfxml`, `turtle`, `ntriples`, `nquads`, `trig`, `jsonld`.
+- **`ONTOP_FACTS_BASE_IRI`** *(string)* - Specifies the base IRI used for the fact file. If not provided, a random IRI is automatically generated.
 
 **Endpoint Settings: Portal, Predefined Queries, Ontology Download, CORS, Start/Restart** *(endpoint)*:
 - **`ONTOP_PORTAL_FILE`** *(file path)* - Specifies the TOML portal configuration file ([example](https://ontop-vkg.org/examples/example-portal.toml)) with portal title and SPARQL queries organized in tabs. Corresponds to the argument `--portal`.

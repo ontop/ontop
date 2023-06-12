@@ -59,6 +59,15 @@ public class AbstractRDF4JTest {
                 propertyFile, viewFile, dbMetadataFile, sparqlRulesRelativePath);
     }
 
+    protected static void initOBDAWithFacts(String dbScriptRelativePath, String obdaRelativePath,
+                                   @Nullable String ontologyRelativePath, @Nullable String propertyFile,
+                                   @Nullable String factsFile, @Nullable String factsBaseIRI) throws SQLException, IOException {
+        String jdbcUrl = H2RDF4JTestTools.generateJdbcUrl();
+        SQL_CONNECTION = H2RDF4JTestTools.createH2Instance(jdbcUrl, dbScriptRelativePath);
+        REPO_CONNECTION = H2RDF4JTestTools.initOBDA(jdbcUrl, obdaRelativePath, ontologyRelativePath,
+                propertyFile, null, null, null, factsFile, factsBaseIRI);
+    }
+
 
     protected static void initR2RML(String dbScriptRelativePath, String r2rmlRelativePath) throws SQLException, IOException {
         initR2RML(dbScriptRelativePath, r2rmlRelativePath, null, null);

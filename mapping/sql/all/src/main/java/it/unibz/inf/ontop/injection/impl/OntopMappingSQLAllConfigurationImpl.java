@@ -38,13 +38,13 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
 
     @Override
     protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
-        return loadSpecification(Optional::empty);
+        return loadSpecification(Optional::empty, Optional::empty);
     }
 
-    OBDASpecification loadSpecification(OntologySupplier ontologySupplier)
+    OBDASpecification loadSpecification(OntologySupplier ontologySupplier, FactsSupplier factsSupplier)
             throws OBDASpecificationException {
 
-        return loadSpecification(ontologySupplier,
+        return loadSpecification(ontologySupplier, factsSupplier,
                 () -> options.mappingFile,
                 () -> options.mappingReader,
                 () -> options.mappingGraph,

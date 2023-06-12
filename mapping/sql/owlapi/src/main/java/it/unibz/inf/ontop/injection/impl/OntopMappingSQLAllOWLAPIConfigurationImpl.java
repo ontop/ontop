@@ -1,10 +1,12 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllSettings;
 import it.unibz.inf.ontop.spec.OBDASpecification;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -27,11 +29,16 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
 
     @Override
     protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
-        return loadSpecification(mappingOWLConfiguration::loadOntology);
+        return loadSpecification(mappingOWLConfiguration::loadOntology, mappingOWLConfiguration::loadInputFacts);
     }
     @Override
     public Optional<OWLOntology> loadInputOntology() throws OWLOntologyCreationException {
         return mappingOWLConfiguration.loadInputOntology();
+    }
+
+    @Override
+    public Optional<ImmutableSet<RDFFact>> loadInputFacts() throws OBDASpecificationException {
+        return mappingOWLConfiguration.loadInputFacts();
     }
 
     static class OntopMappingSQLAllOWLAPIOptions {
@@ -89,6 +96,36 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
         @Override
         public B xmlCatalogFile(@Nonnull String file) {
             return ontologyBuilderFragment.xmlCatalogFile(file);
+        }
+
+        @Override
+        public B factsFile(@Nonnull String urlOrPath) {
+            return ontologyBuilderFragment.factsFile(urlOrPath);
+        }
+
+        @Override
+        public B factFormat(@Nonnull String factFormat) {
+            return ontologyBuilderFragment.factFormat(factFormat);
+        }
+
+        @Override
+        public B factsBaseIRI(@Nonnull String factsBaseIRI) {
+            return ontologyBuilderFragment.factsBaseIRI(factsBaseIRI);
+        }
+
+        @Override
+        public B factsFile(@Nonnull URL url) {
+            return ontologyBuilderFragment.factsFile(url);
+        }
+
+        @Override
+        public B factsFile(@Nonnull File owlFile) {
+            return ontologyBuilderFragment.factsFile(owlFile);
+        }
+
+        @Override
+        public B factsReader(@Nonnull Reader reader) {
+            return ontologyBuilderFragment.factsReader(reader);
         }
 
         protected final void declareOntologyDefined() {
