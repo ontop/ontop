@@ -12,6 +12,13 @@
     <artifactId>ontop-rdf4j</artifactId>
     <description>This is the rdf4j API implementation based on Ontop</description>
 
+    <repositories>
+        <repository>
+            <id>dremio-free</id>
+            <url>https://maven.dremio.com/free/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -176,9 +183,20 @@
         </dependency>
 
         <!-- Dremio -->
+        <dependency>
+            <groupId>com.dremio.distribution</groupId>
+            <artifactId>dremio-jdbc-driver</artifactId>
+            <version>24.0.0-202302100528110223-3a169b7c</version>
+        </dependency>
 
         <!-- Denodo -->
-
+        <dependency>
+            <groupId>com.denodo</groupId>
+            <artifactId>denodo</artifactId>
+            <version>8.0</version>
+            <scope>system</scope>
+            <systemPath>/Users/zet/connectedJar/denodo-vdp-jdbcdriver.jar</systemPath>
+        </dependency>
 
         <!-- PostgreSQL -->
         <dependency>

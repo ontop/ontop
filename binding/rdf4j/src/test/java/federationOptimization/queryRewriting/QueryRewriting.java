@@ -52,11 +52,13 @@ public class QueryRewriting {
     public static QuotedIDFactory idFactory;
     public static DBTypeFactory dbTypeFactory;
 
-    public QueryRewriting(String owlPath, String obdaPath, String PROPERTY, String hintFile, String sourceFile, String effLabel) {
+    public QueryRewriting(String owlPath, String obdaPath, String constraintFile, String PROPERTY, String hintFile, String sourceFile, String effLabel) {
         try {
             this.configuration = OntopSQLOWLAPIConfiguration
                     .defaultBuilder()
                     .ontologyFile(owlPath)
+                    //.lensesFile(lenseFile)
+                    .basicImplicitConstraintFile(constraintFile)
                     .nativeOntopMappingFile(obdaPath)
                     .propertyFile(PROPERTY)
                     .enableTestMode()
@@ -134,11 +136,23 @@ public class QueryRewriting {
 
         IQTree iqt = iq.getTree();
 
+//        System.out.println("original IQ tree");
+//        System.out.println(iqt);
+//
+//        List<IQTree> sub_trees = getAllSubTree(iqt);
+//        for(IQTree t : sub_trees){
+//            if(t instanceof ExtensionalDataNode){
+//                System.out.println(t);
+//                List<Integer> pk_index = getSinglePrimaryKeyIndexOfRelations((ExtensionalDataNode) t);
+//                System.out.println(pk_index);
+//            }
+//        }
+
         DistinctVariableOnlyDataAtom project_original = iq.getProjectionAtom();
         IQTree iqtopt = rewriteIQTree(iqt);
 
         IQ iqopt = IQTreeToIQ(project_original, iqtopt);
-        IQ executableQuery = reformulator.generateExecutableQuery(iqopt);
+       IQ executableQuery = reformulator.generateExecutableQuery(iqopt);
         return ((NativeNodeImpl)executableQuery.getTree().getChildren().get(0)).getNativeQueryString();
     }
 
@@ -1064,6 +1078,11 @@ public class QueryRewriting {
     public List<IQTree> removeSemanticRedundancyAndRollingBack(List<IQTree> trees){
         List<IQTree> results = trees;
 
+        System.out.println("======rolling back and semantic redundancy checking:");
+        for(IQTree t: trees){
+            System.out.println(t);
+        }
+
         //check and remove semantic redundancy
         List<Integer> index = new ArrayList<Integer>();
 
@@ -1264,12 +1283,12 @@ public class QueryRewriting {
 
         ImmutableList<Attribute> attrs = dataNode.getRelationDefinition().getAttributes();
         for(UniqueConstraint uc: dataNode.getRelationDefinition().getUniqueConstraints()){
-            if(uc.isPrimaryKey()){
+            //if(uc.isPrimaryKey()){
                 ImmutableList<Attribute> ats = uc.getAttributes();
                 if(ats.size() == 1){
                     index.add(attrs.indexOf(ats.get(0)));
                 }
-            }
+            //}
         }
 
         return index;

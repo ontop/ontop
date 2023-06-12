@@ -1,0 +1,199 @@
+{
+    "relations": [{
+        "name": ["\"lenses\"", "\"offer\""],
+        "type": "BasicLens",
+        "baseRelation": ["\"ss4\"", "\"offer\""],
+        "columns": {"added": [], "hidden": []},
+        "nonNullConstraints": {"added": [
+            "\"nr\""
+        ]},
+        "uniqueConstraints": {"added": [
+            {"name": "pk_offer", "determinants": ["\"nr\""]}
+        ]},
+        "foreignKeys": {"added": [
+            {"name": "fk_offer_vendor", "from": ["\"vendor\""], "to": {"relation": ["\"ss4\"", "\"vendor\""], "columns": ["\"nr\""]}}
+        ]},
+        "otherFunctionalDependencies": { "added": [
+            {"determinants": ["\"product\""], "dependents": ["\"producer\""]}
+        ]}
+    }, {
+        "name": ["\"lenses\"", "\"person\""],
+        "type": "BasicLens",
+        "baseRelation": ["\"ss2\"", "\"person\""],
+        "columns": {"added": [], "hidden": []},
+        "nonNullConstraints": {"added": [
+            "\"nr\""
+        ]},
+        "uniqueConstraints": {"added": [
+            {"name": "pk_person", "determinants": ["\"nr\""]}
+        ]}
+    }, {
+        "name": ["\"lenses\"", "\"producer\""],
+        "type": "BasicLens",
+        "baseRelation": ["\"ss4\"", "\"producer\""],
+        "columns": {"added": [], "hidden": []},
+        "nonNullConstraints": {"added": [
+            "\"nr\""
+        ]},
+        "uniqueConstraints": {"added": [
+            {"name": "pk_producer", "determinants": ["\"nr\""]}
+        ]}
+    }, {
+        "name": ["\"lenses\"", "\"product1\""],
+        "type": "BasicLens",
+        "baseRelation": ["\"ss1\"", "\"product1\""],
+        "columns": {"added": [], "hidden": []},
+        "nonNullConstraints": {"added": [ "\"nr\"" ]},
+        "uniqueConstraints": {"added": [
+            {"name": "pk_product1", "determinants": ["\"nr\""]}
+        ]},
+        "foreignKeys": {"added": [
+            {"name": "fk_product1_producer", "from": ["\"producer\""], "to": {"relation": ["\"ss4\"", "\"producer\""], "columns": ["\"nr\""]}}
+        ]}
+    }, {
+        "name": ["\"lenses\"", "\"product2\""],
+        "type": "BasicLens",
+        "baseRelation": ["\"ss5\"", "\"product2\""],
+        "columns": {"added": [], "hidden": []},
+        "nonNullConstraints": {"added": [
+            "\"nr\""
+        ]},
+        "uniqueConstraints": {"added": [
+            {"name": "pk_product2", "determinants": ["\"nr\""]}
+        ]},
+        "foreignKeys": {"added": [
+            {"name": "fk_product2_producer", "from": ["\"producer\""], "to": {"relation": ["\"ss4\"", "\"producer\""], "columns": ["\"nr\""]}}
+        ]}
+    }, {
+        "name": ["\"lenses\"", "\"productfeature\""],
+        "type": "BasicLens",
+        "baseRelation": ["\"ss3\"", "\"productfeature\""],
+        "columns": {"added": [], "hidden": []},
+        "nonNullConstraints": {"added": [
+            "\"nr\""
+        ]},
+        "uniqueConstraints": {"added": [
+            {"name": "pk_productfeature", "determinants": ["\"nr\""]}
+        ]}
+    }, {
+        "name": ["\"lenses\"", "\"productfeatureproduct1\""],
+        "type": "BasicLens",
+        "baseRelation": ["\"ss1\"", "\"productfeatureproduct1\""],
+        "columns": {"added": [], "hidden": []},
+        "nonNullConstraints": {"added": [
+            "\"product\"",
+            "\"productfeature\""
+        ]},
+        "uniqueConstraints": {"added": [
+            {"name": "pk_productfeatureproduct1", "determinants": ["\"product\"", "\"productfeature\""]}
+        ]},
+        "foreignKeys": {"added": [
+            {"name": "fk_productfeatureproduct1_product", "from": ["\"product\""], "to": {"relation": ["\"ss1\"", "\"product1\""], "columns": ["\"nr\""]}},
+            {"name": "fk_productfeatureproduct1_productfeature", "from": ["\"productfeature\""], "to": {"relation": ["\"ss3\"", "\"productfeature\""], "columns": ["\"nr\""]}}
+        ]}
+    }, {
+        "name": ["\"lenses\"", "\"productfeatureproduct2\""],
+        "type": "BasicLens",
+        "baseRelation": ["\"ss5\"", "\"productfeatureproduct2\""],
+        "columns": {"added": [], "hidden": []},
+        "nonNullConstraints": {"added": [
+            "\"product\"",
+            "\"productfeature\""
+        ]},
+        "uniqueConstraints": {"added": [
+            {"name": "pk_productfeatureproduct2", "determinants": ["\"product\"", "\"productfeature\""]}
+        ]},
+        "foreignKeys": {"added": [
+            {"name": "fk_productfeatureproduct2_product", "from": ["\"product\""], "to": {"relation": ["\"ss5\"", "\"product2\""], "columns": ["\"nr\""]}},
+            {"name": "fk_productfeatureproduct2_productfeature", "from": ["\"productfeature\""], "to": {"relation": ["\"ss3\"", "\"productfeature\""], "columns": ["\"nr\""]}}
+        ]}
+    }, {
+        "name": ["\"lenses\"", "\"producttype\""],
+        "type": "BasicLens",
+        "baseRelation": ["\"ss3\"", "\"producttype\""],
+        "columns": {"added": [], "hidden": []},
+        "nonNullConstraints": {"added": [
+            "\"nr\""
+        ]},
+        "uniqueConstraints": {"added": [
+            {"name": "pk_producttype",  "determinants": ["\"nr\""]}
+        ]}
+    }, {
+        "name": ["\"lenses\"", "\"producttypeproduct1\""],
+        "type": "BasicLens",
+        "baseRelation": ["\"ss1\"", "\"producttypeproduct1\""],
+        "columns": {"added": [], "hidden": []},
+        "nonNullConstraints": {"added": [
+            "\"product\"",
+            "\"producttype\""
+        ]},
+        "uniqueConstraints": {"added": [
+            {"name": "pk_producttypeproduct1", "determinants": ["\"product\"", "\"producttype\""]}
+        ]},
+        "foreignKeys": {"added": [
+            {"name": "fk_producttypeproduct1_product", "from": ["\"product\""], "to": {"relation": ["\"ss1\"", "\"product1\""], "columns": ["\"nr\""]}},
+            {"name": "fk_producttypeproduct1_producttype", "from": ["\"producttype\""], "to": {"relation": ["\"ss3\"", "\"producttype\""], "columns": ["\"nr\""]}}
+        ]}
+    }, {
+        "name": ["\"lenses\"", "\"producttypeproduct2\""],
+        "type": "BasicLens",
+        "baseRelation": ["\"ss5\"", "\"producttypeproduct2\""],
+        "columns": {"added": [], "hidden": []},
+        "nonNullConstraints": {"added": [
+            "\"product\"",
+            "\"producttype\""
+        ]},
+        "uniqueConstraints": {"added": [
+            {"name": "pk_producttypeproduct2", "determinants": ["\"product\"", "\"producttype\""]}
+        ]},
+        "foreignKeys": {"added": [
+            {"name": "fk_producttypeproduct2_product", "from": ["\"product\""], "to": {"relation": ["\"ss5\"", "\"product2\""], "columns": ["\"nr\""]}},
+            {"name": "fk_producttypeproduct2_producttype", "from": ["\"producttype\""], "to": {"relation": ["\"ss3\"", "\"producttype\""], "columns": ["\"nr\""]}}
+        ]}
+    }, {
+        "name": ["\"lenses\"", "\"review\""],
+        "type": "BasicLens",
+        "baseRelation": ["\"ss2\"", "\"review\""],
+        "columns": {"added": [], "hidden": []},
+        "nonNullConstraints": {"added": [
+            "\"nr\""
+        ]},
+        "uniqueConstraints": {"added": [
+            {"name": "pk_review", "determinants": ["\"nr\""]}
+        ]},
+        "foreignKeys": {"added": [
+            {"name": "fk_review_person", "from": ["\"person\""], "to": {"relation": ["\"ss2\"", "\"person\""], "columns": ["\"nr\""]}}
+        ]},
+        "otherFunctionalDependencies": { "added": [
+            {"determinants": ["\"product\""], "dependents": ["\"producer\""]}
+        ]}
+    }, {
+        "name": ["\"lenses\"", "\"reviewc\""],
+        "type": "BasicLens",
+        "baseRelation": ["\"ss1\"", "\"reviewc\""],
+        "columns": {"added": [], "hidden": []},
+        "nonNullConstraints": {"added": [
+            "\"nr\""
+        ]},
+        "uniqueConstraints": {"added": [
+            {"name": "pk_reviewc", "determinants": ["\"nr\""]}
+        ]},
+        "foreignKeys": {"added": [
+            {"name": "fk_reviewc_person", "from": ["\"person\""], "to": {"relation": ["\"ss2\"", "\"person\""], "columns": ["\"nr\""]}}
+        ]},
+        "otherFunctionalDependencies": { "added": [
+            {"determinants": ["\"product\""], "dependents": ["\"producer\""]}
+        ]}
+    }, {
+        "name": ["\"lenses\"", "\"vendor\""],
+        "type": "BasicLens",
+        "baseRelation": ["\"ss4\"", "\"vendor\""],
+        "columns": {"added": [], "hidden": []},
+        "nonNullConstraints": {"added": [
+            "\"nr\""
+        ]},
+        "uniqueConstraints": {"added": [
+            {"name": "pk_vendor", "determinants": ["\"nr\""]}
+        ]}
+    }]
+}
