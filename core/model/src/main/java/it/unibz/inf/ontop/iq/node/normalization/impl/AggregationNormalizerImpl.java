@@ -59,6 +59,15 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         if (aggregationNode.getGroupingVariables().isEmpty() && aggregationNode.getSubstitution().isEmpty()) {
             return iqFactory.createTrueNode();
         }
+        else if (aggregationNode.getSubstitution().isEmpty()) {
+            IQTree newTree = iqFactory.createUnaryIQTree(
+                    iqFactory.createDistinctNode(),
+                    iqFactory.createUnaryIQTree(
+                            iqFactory.createConstructionNode(aggregationNode.getGroupingVariables()),
+                            child));
+
+            return newTree.normalizeForOptimization(variableGenerator);
+        }
 
         IQTree shrunkChild = notRequiredVariableRemover.optimize(child.normalizeForOptimization(variableGenerator),
                 aggregationNode.getLocallyRequiredVariables(), variableGenerator);
