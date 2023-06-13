@@ -52,7 +52,7 @@ public class QueryRewriting {
     public static QuotedIDFactory idFactory;
     public static DBTypeFactory dbTypeFactory;
 
-    public QueryRewriting(String owlPath, String obdaPath, String constraintFile, String PROPERTY, String hintFile, String sourceFile, String effLabel) {
+    public QueryRewriting(String owlPath, String obdaPath, String PROPERTY, String constraintFile, String hintFile, String sourceFile, String effLabel) {
         try {
             this.configuration = OntopSQLOWLAPIConfiguration
                     .defaultBuilder()
@@ -158,7 +158,7 @@ public class QueryRewriting {
 
     public IQTree rewriteIQTree(IQTree iqt){
         //check the possibility of applying the hints in advance
-        System.out.println("the IQ tree before hint-based optimization");
+        System.out.println("the IQ tree before hint-based optimization:");
         System.out.println(iqt);
         if(hints.get(0).size()>0){
             iqt = removeStrictRedundancy(iqt);
@@ -166,6 +166,8 @@ public class QueryRewriting {
         if(hints.get(1).size()>0){
             iqt = removeEquivalentRedundancy(iqt);
         }
+        System.out.println("the IQ tree after removing redundancy:");
+        System.out.println(iqt);
         if(hints.get(2).size()>0){
             iqt = rewriteInnerJoin(iqt);
 
@@ -175,7 +177,7 @@ public class QueryRewriting {
             iqt = rewriteInnerJoinBasedOnMatV(iqt);
         }
 
-        System.out.println("the IQ tree after hint-based optimization");
+        System.out.println("the IQ tree after hint-based optimization:");
         System.out.println(iqt);
 
         return iqt;
@@ -689,7 +691,6 @@ public class QueryRewriting {
         boolean update = true;
         int count = 0;
 
-
         module: while(update){
             update = false;
             List<IQTree> subTrees = getAllSubTree(iqt);
@@ -720,10 +721,12 @@ public class QueryRewriting {
                                     }
                                     InnerJoinNode root_new_new = (InnerJoinNode) root;
                                     IQTree subt_new = IQ_FACTORY.createNaryIQTree(root_new_new, ImmutableList.copyOf(childern_new));
+
                                     iqt_new = iqt.replaceSubTree(subt, subt_new);
                                 } else {
                                     iqt_new = iqt.replaceSubTree(subt, sub_new);
                                 }
+
                                 List<Integer> cost1 = getCostOfIQTree(iqt);
                                 List<Integer> cost2 = getCostOfIQTree(iqt_new);
 
@@ -819,6 +822,9 @@ public class QueryRewriting {
             }
         }
 
+        System.out.println("<<<<< new rewriten: ");
+        System.out.println(iqt_new);
+
         return iqt_new;
     }
 
@@ -895,19 +901,24 @@ public class QueryRewriting {
 
         Set<Variable> vars_l_r = new HashSet<>();
         List<IQTree> childern_new = new ArrayList<IQTree>();
+        List<Integer> right_index = new ArrayList<Integer>(); //记录右边被SJ消除的部分
+
         for(int i=0; i<left.dataNodes.size(); i++){
             IQTree t = left.dataNodes.get(i);
             FilterNode fn = left.filters.get(i);
 
-            List<Integer> index_right = new ArrayList<Integer>();  //for sj checking
+            List<Integer> right_index_new = new ArrayList<Integer>();  //for sj checking
             Map<Integer, VariableOrGroundTerm> arg_maps = new HashMap<Integer, VariableOrGroundTerm>();
             if(right.relations.contains(left.relations.get(i))){ // try sjr rewriting
                 for(int j=0; j<right.relations.size(); j++){
+                    if(right_index.contains(j)){
+                        continue;
+                    }
                     if(right.relations.get(j).equals(left.relations.get(i))){
                         for(int index: getSinglePrimaryKeyIndexOfRelations(left.dataNodes.get(i))){
                             if(left.dataNodes.get(i).getArgumentMap().containsKey(index) && right.dataNodes.get(j).getArgumentMap().containsKey(index) &&
                                     left.dataNodes.get(i).getArgumentMap().get(index).equals(right.dataNodes.get(j).getArgumentMap().get(index))){
-                                index_right.add(j);
+                                right_index_new.add(j);
                                 arg_maps.putAll(right.dataNodes.get(j).getArgumentMap());
                                 ER.sjRewrite = true;
                             }
@@ -916,7 +927,7 @@ public class QueryRewriting {
                 }
             }
 
-            if(index_right.size() == 0){
+            if(right_index_new.size() == 0){  //不存在SJ优化
                 if(fn != null){
                     IQTree t_new = IQ_FACTORY.createUnaryIQTree(fn, t);
                     childern_new.add(t_new);
@@ -924,7 +935,8 @@ public class QueryRewriting {
                     childern_new.add(t);
                 }
                 vars_l_r.addAll(t.getVariables());
-            } else {
+            } else {   //存在SJ优化
+
                 arg_maps.putAll(left.dataNodes.get(i).getArgumentMap());
                 ExtensionalDataNode dataNode_new = IQ_FACTORY.createExtensionalDataNode(left.dataNodes.get(i).getRelationDefinition(), ImmutableMap.copyOf(arg_maps));
                 //all the filter conditions are AND
@@ -939,7 +951,7 @@ public class QueryRewriting {
                         conditions.add(left.filters.get(i).getFilterCondition());
                     }
                 }
-                for(int j: index_right){
+                for(int j: right_index_new){
                     if(right.filters.get(j) != null){
                         BooleanFunctionSymbol bfs = right.filters.get(j).getFilterCondition().getFunctionSymbol();
                         if(bfs.toString().startsWith("AND")){ //change
@@ -952,9 +964,9 @@ public class QueryRewriting {
                     }
                     vars_l_r.addAll(right.dataNodes.get(j).getVariables());
                     vars_l_r.addAll(left.dataNodes.get(i).getVariables());
-                    right.dataNodes.remove(j);
-                    right.filters.remove(j);
                 }
+                right_index.addAll(right_index_new);
+
                 if(conditions.size() == 0){
                     childern_new.add(dataNode_new);
                 } else {
@@ -964,7 +976,11 @@ public class QueryRewriting {
                 }
             }
         }
+
         for(int i=0; i<right.dataNodes.size(); i++){
+            if(right_index.contains(i)){
+                continue;
+            }
             IQTree t = right.dataNodes.get(i);
             FilterNode fn = right.filters.get(i);
             if(fn != null){
@@ -1077,11 +1093,6 @@ public class QueryRewriting {
 
     public List<IQTree> removeSemanticRedundancyAndRollingBack(List<IQTree> trees){
         List<IQTree> results = trees;
-
-        System.out.println("======rolling back and semantic redundancy checking:");
-        for(IQTree t: trees){
-            System.out.println(t);
-        }
 
         //check and remove semantic redundancy
         List<Integer> index = new ArrayList<Integer>();

@@ -1,0 +1,253 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://obda.inf.unibz.it/ontop/benchmark/bsbm.owl"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     ontologyIRI="http://obda.inf.unibz.it/ontop/benchmark/bsbm.owl">
+    <Prefix name="" IRI="http://obda.inf.unibz.it/ontop/benchmark/bsbm.owl"/>
+    <Prefix name="dc" IRI="http://purl.org/dc/elements/1.1/"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="rev" IRI="http://purl.org/stuff/rev#"/>
+    <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="bsbm" IRI="http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/"/>
+    <Prefix name="foaf" IRI="http://xmlns.com/foaf/0.1/"/>
+    <Prefix name="obda" IRI="https://w3id.org/obda/vocabulary#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Prefix name="iso3166" IRI="http://downlode.org/rdf/iso-3166/countries#"/>
+    <Prefix name="bsbm-inst" IRI="http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/"/>
+    <Declaration>
+        <Class abbreviatedIRI="bsbm:Offer"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="bsbm:Producer"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="bsbm:Product"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="bsbm:ProductFeature"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="bsbm:ProductType"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="bsbm:Review"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="bsbm:Vendor"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="foaf:Person"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dc:publisher"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="rev:reviewer"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="bsbm:country"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="bsbm:producer"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="bsbm:product"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="bsbm:productFeature"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="bsbm:reviewFor"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="bsbm:subClassOf"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="bsbm:type"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="bsbm:vendor"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="dc:date"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="dc:title"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rev:text"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rdfs:comment"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rdfs:label"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:deliveryDays"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:language"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:offerId"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:offerWebpage"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:personId"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:price"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:producerId"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:productFeatureId"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:productId"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:productPropertyNumeric1"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:productPropertyNumeric2"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:productPropertyNumeric3"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:productPropertyNumeric4"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:productPropertyNumeric5"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:productPropertyNumeric6"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:productPropertyTextual1"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:productPropertyTextual2"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:productPropertyTextual3"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:productPropertyTextual4"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:productPropertyTextual5"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:productPropertyTextual6"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:rating1"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:rating2"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:rating3"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:rating4"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:reviewDate"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:reviewProductId"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:reviewerId"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:validFrom"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:validTo"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="bsbm:vendorId"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="foaf:homepage"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="foaf:mbox_sha1sum"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="foaf:name"/>
+    </Declaration>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="dc:publisher"/>
+        <Class abbreviatedIRI="bsbm:Product"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="rev:reviewer"/>
+        <Class abbreviatedIRI="bsbm:Review"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="bsbm:producer"/>
+        <Class abbreviatedIRI="bsbm:Product"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="bsbm:product"/>
+        <Class abbreviatedIRI="bsbm:Offer"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="bsbm:productFeature"/>
+        <Class abbreviatedIRI="bsbm:Product"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="bsbm:reviewFor"/>
+        <Class abbreviatedIRI="bsbm:Review"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="bsbm:vendor"/>
+        <Class abbreviatedIRI="bsbm:Offer"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="dc:publisher"/>
+        <Class abbreviatedIRI="bsbm:Producer"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="rev:reviewer"/>
+        <Class abbreviatedIRI="foaf:Person"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="bsbm:producer"/>
+        <Class abbreviatedIRI="bsbm:Producer"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="bsbm:product"/>
+        <Class abbreviatedIRI="bsbm:Product"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="bsbm:productFeature"/>
+        <Class abbreviatedIRI="bsbm:ProductFeature"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="bsbm:reviewFor"/>
+        <Class abbreviatedIRI="bsbm:Product"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="bsbm:vendor"/>
+        <Class abbreviatedIRI="bsbm:Vendor"/>
+    </ObjectPropertyRange>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi -->

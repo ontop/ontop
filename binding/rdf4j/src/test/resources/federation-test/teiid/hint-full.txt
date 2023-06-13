@@ -1,0 +1,45 @@
+empty_federated_join:"s5"."product2"<>"s1"."producttypeproduct1"<>0<>0
+empty_federated_join:"s1"."product1"<>"s5"."product2"<>0<>0
+empty_federated_join:"s5"."productfeatureproduct2"<>"s1"."producttypeproduct1"<>0<>0
+empty_federated_join:"s5"."producttypeproduct2"<>"s1"."productfeatureproduct1"<>0<>0
+empty_federated_join:"s1"."product1"<>"s5"."producttypeproduct2"<>0<>0
+empty_federated_join:"s1"."productfeatureproduct1"<>"s5"."productfeatureproduct2"<>0<>0
+empty_federated_join:"s1"."product1"<>"s5"."productfeatureproduct2"<>0<>0
+empty_federated_join:"s5"."producttypeproduct2"<>"s1"."producttypeproduct1"<>0<>0
+empty_federated_join:"s5"."product2"<>"s1"."productfeatureproduct1"<>0<>0
+equivalent_redundancy:"s1"."reviewc"<>"s2"."review"
+equivalent_redundancy:"s1"."reviewc"(0)<>"s2"."review"(0)
+equivalent_redundancy:"s2"."review"(0,12)<>"s1"."reviewc"(0,12)
+equivalent_redundancy:"s1"."reviewc"(0,3)<>"s2"."review"(0,3)
+equivalent_redundancy:"s1"."reviewc"(0,13)<>"s2"."review"(0,13)
+equivalent_redundancy:"s1"."reviewc"(0,5)<>"s2"."review"(0,5)
+equivalent_redundancy:"s2"."review"(0,7)<>"s1"."reviewc"(0,7)
+equivalent_redundancy:"s1"."reviewc"(0,1)<>"s2"."review"(0,1)
+equivalent_redundancy:"s2"."review"(0,4)<>"s1"."reviewc"(0,4)
+equivalent_redundancy:"s2"."review"(0,6)<>"s1"."reviewc"(0,6)
+equivalent_redundancy:"s1"."reviewc"(0,11)<>"s2"."review"(0,11)
+equivalent_redundancy:"s1"."reviewc"(0,10)<>"s2"."review"(0,10)
+equivalent_redundancy:"s1"."reviewc"(0,9)<>"s2"."review"(0,9)
+equivalent_redundancy:"s2"."review"(0,8)<>"s1"."reviewc"(0,8)
+materialized_view:"smatv"."MatV_ss2_person_ss1_reviewc"("1_0" int4,"1_1" varchar,"1_2" varchar,"1_3" varchar,"1_4" int4,"1_5" date,"2_0" int4,"2_1" int4,"2_2" int4,"2_3" int4,"2_4" date,"2_5" varchar,"2_6" varchar,"2_7" varchar,"2_8" int4,"2_9" int4,"2_10" int4,"2_11" int4,"2_12" int4,"2_13" date)<-"s2"."person"<>"s1"."reviewc"<>0<>3
+materialized_view:"smatv"."MatV_ss1_product1_ss4_offer"("1_0" int4,"1_1" varchar,"1_2" varchar,"1_3" int4,"1_4" int4,"1_5" int4,"1_6" int4,"1_7" int4,"1_8" int4,"1_9" int4,"1_10" varchar,"1_11" varchar,"1_12" varchar,"1_13" varchar,"1_14" varchar,"1_16" int4,"1_15" varchar,"1_17" date,"2_0" int4,"2_1" int4,"2_2" int4,"2_3" int4,"2_4" double precision,"2_5" date,"2_6" date,"2_7" int4,"2_8" varchar,"2_9" int4,"2_10" date)<-"s1"."product1"<>"s4"."offer"<>0<>1
+materialized_view:"smatv"."MatV_ss4_offer_ss1_productfeatureproduct1"("1_0" int4,"1_1" int4,"1_2" int4,"1_3" int4,"1_4" double precision,"1_5" date,"1_6" date,"1_7" int4,"1_8" varchar,"1_9" int4,"1_10" date,"2_0" int4,"2_1" int4)<-"s4"."offer"<>"s1"."productfeatureproduct1"<>1<>0
+materialized_view:"smatv"."MatV_ss5_product2_ss2_review"("1_0" int4,"1_1" varchar,"1_2" varchar,"1_3" int4,"1_4" int4,"1_5" int4,"1_6" int4,"1_7" int4,"1_8" int4,"1_9" int4,"1_10" varchar,"1_11" varchar,"1_12" varchar,"1_13" varchar,"1_14" varchar,"1_16" int4,"1_15" varchar,"1_17" date,"2_0" int4,"2_1" int4,"2_2" int4,"2_3" int4,"2_4" date,"2_5" varchar,"2_6" varchar,"2_7" varchar,"2_8" int4,"2_9" int4,"2_10" int4,"2_11" int4,"2_12" int4,"2_13" date)<-"s5"."product2"<>"s2"."review"<>0<>1
+materialized_view:"smatv"."MatV_ss3_producttype_ss5_producttypeproduct2"("1_0" int4,"1_1" varchar,"1_2" varchar,"1_3" int4,"1_4" int4,"1_5" date,"2_0" int4,"2_1" int4)<-"s3"."producttype"<>"s5"."producttypeproduct2"<>0<>1
+materialized_view:"smatv"."MatV_ss1_reviewc_ss5_productfeatureproduct2"("1_0" int4,"1_1" int4,"1_2" int4,"1_3" int4,"1_4" date,"1_5" varchar,"1_6" varchar,"1_7" varchar,"1_8" int4,"1_9" int4,"1_10" int4,"1_11" int4,"1_12" int4,"1_13" date,"2_0" int4,"2_1" int4)<-"s1"."reviewc"<>"s5"."productfeatureproduct2"<>1<>0
+materialized_view:"smatv"."MatV_ss1_reviewc_ss5_producttypeproduct2"("1_0" int4,"1_1" int4,"1_2" int4,"1_3" int4,"1_4" date,"1_5" varchar,"1_6" varchar,"1_7" varchar,"1_8" int4,"1_9" int4,"1_10" int4,"1_11" int4,"1_12" int4,"1_13" date,"2_0" int4,"2_1" int4)<-"s1"."reviewc"<>"s5"."producttypeproduct2"<>1<>0
+materialized_view:"smatv"."MatV_ss3_productfeature_ss5_productfeatureproduct2"("1_0" int4,"1_1" varchar,"1_2" varchar,"1_3" int4,"1_4" date,"2_0" int4,"2_1" int4)<-"s3"."productfeature"<>"s5"."productfeatureproduct2"<>0<>1
+materialized_view:"smatv"."MatV_ss5_producttypeproduct2_ss2_review"("1_0" int4,"1_1" int4,"2_0" int4,"2_1" int4,"2_2" int4,"2_3" int4,"2_4" date,"2_5" varchar,"2_6" varchar,"2_7" varchar,"2_8" int4,"2_9" int4,"2_10" int4,"2_11" int4,"2_12" int4,"2_13" date)<-"s5"."producttypeproduct2"<>"s2"."review"<>0<>1
+materialized_view:"smatv"."MatV_ss5_productfeatureproduct2_ss2_review"("1_0" int4,"1_1" int4,"2_0" int4,"2_1" int4,"2_2" int4,"2_3" int4,"2_4" date,"2_5" varchar,"2_6" varchar,"2_7" varchar,"2_8" int4,"2_9" int4,"2_10" int4,"2_11" int4,"2_12" int4,"2_13" date)<-"s5"."productfeatureproduct2"<>"s2"."review"<>0<>1
+materialized_view:"smatv"."MatV_ss1_productfeatureproduct1_ss2_review"("1_0" int4,"1_1" int4,"2_0" int4,"2_1" int4,"2_2" int4,"2_3" int4,"2_4" date,"2_5" varchar,"2_6" varchar,"2_7" varchar,"2_8" int4,"2_9" int4,"2_10" int4,"2_11" int4,"2_12" int4,"2_13" date)<-"s1"."productfeatureproduct1"<>"s2"."review"<>0<>1
+materialized_view:"smatv"."MatV_ss4_offer_ss5_productfeatureproduct2"("1_0" int4,"1_1" int4,"1_2" int4,"1_3" int4,"1_4" double precision,"1_5" date,"1_6" date,"1_7" int4,"1_8" varchar,"1_9" int4,"1_10" date,"2_0" int4,"2_1" int4)<-"s4"."offer"<>"s5"."productfeatureproduct2"<>1<>0
+materialized_view:"smatv"."MatV_ss2_review_ss1_producttypeproduct1"("1_0" int4,"1_1" int4,"1_2" int4,"1_3" int4,"1_4" date,"1_5" varchar,"1_6" varchar,"1_7" varchar,"1_8" int4,"1_9" int4,"1_10" int4,"1_11" int4,"1_12" int4,"1_13" date,"2_0" int4,"2_1" int4)<-"s2"."review"<>"s1"."producttypeproduct1"<>1<>0
+materialized_view:"smatv"."MatV_ss1_product1_ss2_review"("1_0" int4,"1_1" varchar,"1_2" varchar,"1_3" int4,"1_4" int4,"1_5" int4,"1_6" int4,"1_7" int4,"1_8" int4,"1_9" int4,"1_10" varchar,"1_11" varchar,"1_12" varchar,"1_13" varchar,"1_14" varchar,"1_16" int4,"1_15" varchar,"1_17" date,"2_0" int4,"2_1" int4,"2_2" int4,"2_3" int4,"2_4" date,"2_5" varchar,"2_6" varchar,"2_7" varchar,"2_8" int4,"2_9" int4,"2_10" int4,"2_11" int4,"2_12" int4,"2_13" date)<-"s1"."product1"<>"s2"."review"<>0<>1
+materialized_view:"smatv"."MatV_ss4_offer_ss1_producttypeproduct1"("1_0" int4,"1_1" int4,"1_2" int4,"1_3" int4,"1_4" double precision,"1_5" date,"1_6" date,"1_7" int4,"1_8" varchar,"1_9" int4,"1_10" date,"2_0" int4,"2_1" int4)<-"s4"."offer"<>"s1"."producttypeproduct1"<>1<>0
+materialized_view:"smatv"."MatV_ss3_productfeature_ss1_productfeatureproduct1"("1_0" int4,"1_1" varchar,"1_2" varchar,"1_3" int4,"1_4" date,"2_0" int4,"2_1" int4)<-"s3"."productfeature"<>"s1"."productfeatureproduct1"<>0<>1
+materialized_view:"smatv"."MatV_ss4_producer_ss1_product1"("1_0" int4,"1_1" varchar,"1_2" varchar,"1_3" varchar,"1_4" varchar,"1_5" int4,"1_6" date,"2_0" int4,"2_1" varchar,"2_2" varchar,"2_3" int4,"2_4" int4,"2_5" int4,"2_6" int4,"2_7" int4,"2_8" int4,"2_9" int4,"2_10" varchar,"2_11" varchar,"2_12" varchar,"2_13" varchar,"2_14" varchar,"2_16" int4,"2_15" varchar,"2_17" date)<-"s4"."producer"<>"s1"."product1"<>0<>3
+materialized_view:"smatv"."MatV_ss4_producer_ss5_product2"("1_0" int4,"1_1" varchar,"1_2" varchar,"1_3" varchar,"1_4" varchar,"1_5" int4,"1_6" date,"2_0" int4,"2_1" varchar,"2_2" varchar,"2_3" int4,"2_4" int4,"2_5" int4,"2_6" int4,"2_7" int4,"2_8" int4,"2_9" int4,"2_10" varchar,"2_11" varchar,"2_12" varchar,"2_13" varchar,"2_14" varchar,"2_16" int4,"2_15" varchar,"2_17" date)<-"s4"."producer"<>"s5"."product2"<>0<>3
+materialized_view:"smatv"."MatV_ss3_producttype_ss1_producttypeproduct1"("1_0" int4,"1_1" varchar,"1_2" varchar,"1_3" int4,"1_4" int4,"1_5" date,"2_0" int4,"2_1" int4)<-"s3"."producttype"<>"s1"."producttypeproduct1"<>0<>1
+materialized_view:"smatv"."MatV_ss1_reviewc_ss5_product2"("1_0" int4,"1_1" int4,"1_2" int4,"1_3" int4,"1_4" date,"1_5" varchar,"1_6" varchar,"1_7" varchar,"1_8" int4,"1_9" int4,"1_10" int4,"1_11" int4,"1_12" int4,"1_13" date,"2_0" int4,"2_1" varchar,"2_2" varchar,"2_3" int4,"2_4" int4,"2_5" int4,"2_6" int4,"2_7" int4,"2_8" int4,"2_9" int4,"2_10" varchar,"2_11" varchar,"2_12" varchar,"2_13" varchar,"2_14" varchar,"2_16" int4,"2_15" varchar,"2_17" date)<-"s1"."reviewc"<>"s5"."product2"<>1<>0
+materialized_view:"smatv"."MatV_ss5_product2_ss4_offer"("1_0" int4,"1_1" varchar,"1_2" varchar,"1_3" int4,"1_4" int4,"1_5" int4,"1_6" int4,"1_7" int4,"1_8" int4,"1_9" int4,"1_10" varchar,"1_11" varchar,"1_12" varchar,"1_13" varchar,"1_14" varchar,"1_16" int4,"1_15" varchar,"1_17" date,"2_0" int4,"2_1" int4,"2_2" int4,"2_3" int4,"2_4" double precision,"2_5" date,"2_6" date,"2_7" int4,"2_8" varchar,"2_9" int4,"2_10" date)<-"s5"."product2"<>"s4"."offer"<>0<>1
+materialized_view:"smatv"."MatV_ss4_offer_ss5_producttypeproduct2"("1_0" int4,"1_1" int4,"1_2" int4,"1_3" int4,"1_4" double precision,"1_5" date,"1_6" date,"1_7" int4,"1_8" varchar,"1_9" int4,"1_10" date,"2_0" int4,"2_1" int4)<-"s4"."offer"<>"s5"."producttypeproduct2"<>1<>0
