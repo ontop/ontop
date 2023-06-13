@@ -2,6 +2,10 @@ package federationOptimization.queryRewriting;
 
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+
 public class QueryRewritingTest {
 
     private static final String owlFile = "src/test/resources/federation-test/teiid/bsbm-ontology.owl";
@@ -12,23 +16,22 @@ public class QueryRewritingTest {
     private static final String sourceFile = "src/test/resources/federation-test/teiid/SourceFile.txt";
     private static final String effLabel = "src/test/resources/federation-test/teiid/hom-effLabel.txt";
     private static final String constraintFile = "src/test/resources/federation-test/teiid/constraints.fed.txt";
-    //private static final String lenseFile = "src/test/resources/federation-test/teiid/lenses.fed.json";
 
-    private static final String query = "PREFIX rev: <http://purl.org/stuff/rev#>\n" +
-            "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n" +
-            "PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\n" +
-            "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
-            "\n" +
-            "SELECT ?p ?mbox_sha1sum ?country ?r ?product ?title\n" +
-            "WHERE {\n" +
-            "<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite/Review88> rev:reviewer ?p .\n" +
-            "?p foaf:name ?name .\n" +
-            "?p foaf:mbox_sha1sum ?mbox_sha1sum .\n" +
-            "?p bsbm:country ?country .\n" +
-            "?r rev:reviewer ?p .\n" +
-            "?r bsbm:reviewFor ?product .\n" +
-            "?r dc:title ?title .\n" +
-            "}";
+    private static final String queryFile = "src/test/resources/federation-test/SPARQL/02.SPARQL";
+    //private static final String lenseFile = "src/test/resources/federation-test/teiid/lenses.fed.json";
+    private static String query = "";
+    {
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(queryFile)));
+            String line = null;
+            while((line=br.readLine()) != null ){
+                query = query + line +" ";
+            }
+            br.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void testQueryRewriting() throws Exception {

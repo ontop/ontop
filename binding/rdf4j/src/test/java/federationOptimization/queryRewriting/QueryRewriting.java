@@ -536,6 +536,7 @@ public class QueryRewriting {
     }
 
     public boolean checkEquivalentRedundancy(IQTree ele_1, IQTree ele_2){
+
         boolean b = false;
         if(ele_1.getRootNode() instanceof LeftJoinNode){
             return false;
@@ -550,6 +551,18 @@ public class QueryRewriting {
                 return checkEquivalentRedundancyDataNode((ExtensionalDataNode) ele_1, (ExtensionalDataNode) ele_2);
 
             }
+        } else if((ele_1.getRootNode() instanceof ConstructionNode) && (ele_2.getRootNode() instanceof ConstructionNode)){
+
+            if((ele_1.getChildren().get(0) instanceof ExtensionalDataNode) && (ele_2.getChildren().get(0) instanceof ExtensionalDataNode)){
+                return checkEquivalentRedundancyDataNode((ExtensionalDataNode) ele_1.getChildren().get(0), (ExtensionalDataNode) ele_2.getChildren().get(0));
+            } else if ((ele_1.getChildren().get(0).getRootNode() instanceof FilterNode) && (ele_2.getChildren().get(0).getRootNode() instanceof FilterNode)){
+                if((ele_1.getChildren().get(0).getChildren().get(0) instanceof ExtensionalDataNode) && (ele_2.getChildren().get(0).getChildren().get(0) instanceof ExtensionalDataNode)){
+                    //improve this part;
+                    //return checkEquivalentRedundancyDataNode((ExtensionalDataNode) ele_1.getChildren().get(0).getChildren().get(0), (ExtensionalDataNode) ele_2.getChildren().get(0).getChildren().get(0));
+                    return true;
+                }
+            }
+
         } else if((ele_1.getRootNode() instanceof FilterNode) && (ele_2.getRootNode() instanceof FilterNode)){
             //improve the following compare conditions
             if((ele_1.getChildren().get(0) instanceof ExtensionalDataNode) && (ele_2.getChildren().get(0) instanceof ExtensionalDataNode)){
@@ -631,6 +644,7 @@ public class QueryRewriting {
 //        String normalName2 = getNormalFormOfRelation(predicate2.getName());
         String name1 = predicate1.getName();
         String name2 = predicate2.getName();
+
         if(hints.get(1).contains(name1+"<>"+name2) || hints.get(1).contains(name2+"<>"+name1)){
             for(int i: args1.keySet()){
                 for(int j: args2.keySet()){
@@ -659,6 +673,7 @@ public class QueryRewriting {
             }
             cand1 = cand1.substring(0, cand1.length()-1)+")";
             cand2 = cand2.substring(0, cand2.length()-1)+")";
+
             if(hints.get(1).contains(cand1+"<>"+cand2)){
                 return true;
             } else {
@@ -678,6 +693,7 @@ public class QueryRewriting {
                 }
                 cand1 = cand1.substring(0, cand1.length()-1)+")";
                 cand2 = cand2.substring(0, cand2.length()-1)+")";
+
                 if(hints.get(1).contains(cand2+"<>"+cand1)){
                     return true;
                 }
@@ -821,9 +837,6 @@ public class QueryRewriting {
                 iqt_new = en;
             }
         }
-
-        System.out.println("<<<<< new rewriten: ");
-        System.out.println(iqt_new);
 
         return iqt_new;
     }
@@ -1050,6 +1063,8 @@ public class QueryRewriting {
                 JOL.filters.add((FilterNode)t.getRootNode());
                 JOL.dataNodes.add((ExtensionalDataNode)t.getChildren().get(0));
                 JOL.relations.add(((ExtensionalDataNode)t.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
+            } else {
+                JOL.otherSubTrees.add(t);
             }
         } else if(t.getRootNode() instanceof InnerJoinNode){
             JOL.conditions = ((InnerJoinNode) t.getRootNode()).getOptionalFilterCondition();
@@ -1065,6 +1080,8 @@ public class QueryRewriting {
                         JOL.filters.add((FilterNode) t_new.getRootNode());
                         JOL.dataNodes.add((ExtensionalDataNode) t_new.getChildren().get(0));
                         JOL.relations.add(((ExtensionalDataNode) t_new.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
+                    } else {
+                        JOL.otherSubTrees.add(t_new);
                     }
                 }  else if(t_new.getRootNode() instanceof InnerJoinNode){
                     //lift join condition
@@ -1077,21 +1094,24 @@ public class QueryRewriting {
                             JOL.filters.add((FilterNode)sub.getRootNode());
                             JOL.dataNodes.add((ExtensionalDataNode) sub.getChildren().get(0));
                             JOL.relations.add(((ExtensionalDataNode) sub.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
+                        } else {
+                            JOL.otherSubTrees.add(sub);
                         }
                     }
                 }
                 else {
-                    return JOL;
+                    JOL.otherSubTrees.add(t_new);
                 }
             }
 
         } else {
-            return JOL;
+            JOL.otherSubTrees.add(t);
         }
         return JOL;
     }
 
     public List<IQTree> removeSemanticRedundancyAndRollingBack(List<IQTree> trees){
+
         List<IQTree> results = trees;
 
         //check and remove semantic redundancy
@@ -1107,7 +1127,18 @@ public class QueryRewriting {
             int ind = -1;
             for(int j=0; j<subs.size(); j++){
                 if(subs.get(j).getVariables().size() == 1){
-                    ind = j;
+                    //可能非一元，extensionalNode中含有常量绑定
+                    if(subs.get(j) instanceof ExtensionalDataNode){
+                        if(((ExtensionalDataNode) subs.get(j)).getArgumentMap().size() == 1){
+                            ind = j;
+                        }
+                    } else if (subs.get(j).getRootNode() instanceof FilterNode){
+                        if(subs.get(j).getChildren().get(0) instanceof ExtensionalDataNode){
+                            if(((ExtensionalDataNode)subs.get(j).getChildren().get(0)).getArgumentMap().size() == 1){
+                                ind = j;
+                            }
+                        }
+                    }
                 }
             }
             if(ind == -1){
@@ -1319,8 +1350,11 @@ public class QueryRewriting {
 //                        continue;
 //                    }
                     ImmutableList<IQTree> childern =t.getChildren(); // only have two childern
+
                     ExpRewriten rewriten = rewriteAtomicLeftJoin((LeftJoinNode)qn, childern.get(0), childern.get(1));
+
                     if(rewriten.canRewrite){
+
                         IQTree t_new = iqt.replaceSubTree(t, rewriten.newRewritten);
                         List<Integer> cost_new = getCostOfIQTree(t_new);
                         List<Integer> cost_old = getCostOfIQTree(iqt);
@@ -1505,6 +1539,7 @@ public class QueryRewriting {
                         List<Integer> pk_index_i = getSinglePrimaryKeyIndexOfRelations(left_part.get(i).dataNodes.get(ind));
                         for(int pk_ind: pk_index_i){
                             if(arg_j.containsKey(pk_ind) && arg_i.containsKey(pk_ind) && (arg_j.get(pk_ind).equals(arg_i.get(pk_ind)))){
+
                                 b=true;
                                 ind_i = ind;
                             }
@@ -1566,6 +1601,9 @@ public class QueryRewriting {
                                     }
                                 }
                             }
+
+                            sub_sub_t.addAll(left_part.get(i).otherSubTrees);  //新添加的;
+
                             subtrees.add(IQ_FACTORY.createNaryIQTree(join, ImmutableList.copyOf(sub_sub_t)));
                         }
                     } else {
@@ -1926,12 +1964,14 @@ class JoinOfLeafs{
     public List<FilterNode> filters;
     public List<RelationPredicate> relations;
     public Optional<ImmutableExpression> conditions;
+    public List<IQTree> otherSubTrees;
 
     public JoinOfLeafs(){
         dataNodes = new ArrayList<ExtensionalDataNode>();
         filters = new ArrayList<FilterNode>();
         relations = new ArrayList<RelationPredicate>();
         conditions = null;
+        otherSubTrees = new ArrayList<IQTree>();
     }
 }
 
