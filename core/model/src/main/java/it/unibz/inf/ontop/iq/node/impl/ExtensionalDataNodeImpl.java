@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -47,7 +48,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
     // LAZY
     @Nullable
-    private ImmutableSet<Variable> notInternallyRequiredVariables;
+    private VariableNonRequirement variableNonRequirement;
 
     // LAZY
     @Nullable
@@ -233,19 +234,20 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
      * Only co-occuring variables are required.
      */
     @Override
-    public synchronized ImmutableSet<Variable> getNotInternallyRequiredVariables() {
-        if (notInternallyRequiredVariables == null) {
+    public synchronized VariableNonRequirement getVariableNonRequirement() {
+        if (variableNonRequirement == null) {
             ImmutableMultiset<Variable> multiset = argumentMap.values().stream()
                     .filter(t -> t instanceof Variable)
                     .map(t -> (Variable)t)
                     .collect(ImmutableCollectors.toMultiset());
 
-            notInternallyRequiredVariables = multiset.entrySet().stream()
-                    .filter(e -> e.getCount() == 1)
-                    .map(Multiset.Entry::getElement)
-                    .collect(ImmutableCollectors.toSet());
+            variableNonRequirement = VariableNonRequirement.of(
+                    multiset.entrySet().stream()
+                            .filter(e -> e.getCount() == 1)
+                            .map(Multiset.Entry::getElement)
+                            .collect(ImmutableCollectors.toSet()));
         }
-        return notInternallyRequiredVariables;
+        return variableNonRequirement;
     }
 
     @Override
