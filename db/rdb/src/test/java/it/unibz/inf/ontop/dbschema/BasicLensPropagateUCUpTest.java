@@ -68,6 +68,36 @@ public class BasicLensPropagateUCUpTest {
         assertHasUCs(lensMap.get("lenses.x1"), ImmutableSet.of(ImmutableSet.of("id")));
     }
 
+    @Test
+    public void testNoPropagationFilter() {
+        assertHasUCs(tableMap.get("base_table_2"), ImmutableSet.of());
+    }
+
+    @Test
+    public void testNoPropagationOverride() {
+        assertHasUCs(tableMap.get("base_table_3"), ImmutableSet.of());
+    }
+
+    @Test
+    public void testNoPropagationCompositeOverride() {
+        assertHasUCs(tableMap.get("base_table_4"), ImmutableSet.of());
+    }
+
+    @Test
+    public void testPropagateCompositeConstraint() {
+        assertHasUCs(tableMap.get("base_table_5"), ImmutableSet.of(ImmutableSet.of("a", "b")));
+    }
+
+    @Test
+    public void testSomeVariablesOverridden() {
+        assertHasUCs(tableMap.get("base_table_6"), ImmutableSet.of(ImmutableSet.of("c")));
+    }
+
+    @Test
+    public void testPropagateMultipleConstraints() {
+        assertHasUCs(tableMap.get("base_table_7"), ImmutableSet.of(ImmutableSet.of("a"), ImmutableSet.of("b")));
+    }
+
     private void assertHasUCs(NamedRelationDefinition relation, ImmutableSet<ImmutableSet<String>> expected) {
         assertEquals(expected, relation.getUniqueConstraints().stream()
                 .map(uc -> uc.getDeterminants().stream()

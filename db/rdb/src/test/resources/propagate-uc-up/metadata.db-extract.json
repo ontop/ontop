@@ -14,10 +14,236 @@
           "name": "\"name\"",
           "datatype": "VARCHAR",
           "isNullable": false
+        },
+        {
+          "name": "\"a\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"b\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"c\"",
+          "datatype": "INTEGER",
+          "isNullable": false
         }
       ],
       "name": [
         "\"base_table\""
+      ]
+    },
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"name\"",
+          "datatype": "VARCHAR",
+          "isNullable": false
+        },
+        {
+          "name": "\"a\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"b\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"c\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"base_table_2\""
+      ]
+    },
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"name\"",
+          "datatype": "VARCHAR",
+          "isNullable": false
+        },
+        {
+          "name": "\"a\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"b\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"c\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"base_table_3\""
+      ]
+    },
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"name\"",
+          "datatype": "VARCHAR",
+          "isNullable": false
+        },
+        {
+          "name": "\"a\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"b\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"c\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"base_table_4\""
+      ]
+    },
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"name\"",
+          "datatype": "VARCHAR",
+          "isNullable": false
+        },
+        {
+          "name": "\"a\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"b\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"c\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"base_table_5\""
+      ]
+    },
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"name\"",
+          "datatype": "VARCHAR",
+          "isNullable": false
+        },
+        {
+          "name": "\"a\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"b\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"c\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"base_table_6\""
+      ]
+    },
+
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"name\"",
+          "datatype": "VARCHAR",
+          "isNullable": false
+        },
+        {
+          "name": "\"a\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"b\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"c\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"base_table_7\""
       ]
     }
   ],
