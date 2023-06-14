@@ -84,6 +84,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
         for (int i = 0; i < MAX_ITERATIONS; i++) {
             LJNormalizationState newState = state
+                    .checkRightChildContribution()
                     .optimizeLeftJoinCondition()
                     .liftRightChild()
                     // A DISTINCT on the left might have been waiting because of a not-yet distinct right child
@@ -755,6 +756,20 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             }
             else
                 return this;
+        }
+
+        /**
+         * If the right child does not contribute new variables and does not change the cardinality,
+         * we can drop it
+         */
+        public LJNormalizationState checkRightChildContribution() {
+            if (Sets.difference(rightChild.getVariables(), leftChild.getVariables()).isEmpty()
+                    && (!rightChild.inferUniqueConstraints().isEmpty())) {
+                TrueNode newRightChild = iqFactory.createTrueNode();
+                return new LJNormalizationState(projectedVariables, leftChild, newRightChild, Optional.empty(),
+                        ancestors, variableGenerator);
+            }
+            return this;
         }
     }
 }
