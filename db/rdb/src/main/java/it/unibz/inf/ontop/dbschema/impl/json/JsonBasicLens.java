@@ -58,21 +58,21 @@ public class JsonBasicLens extends JsonBasicOrJoinLens {
     public boolean propagateUniqueConstraintsUp(Lens relation, ImmutableList<NamedRelationDefinition> parents,
                                                 QuotedIDFactory idFactory) throws MetadataExtractionException {
         //There is no guarantee a UC will hold in the parent if the lens performed a filter.
-        if(filterExpression != null && filterExpression.isEmpty())
+        if(filterExpression != null && !filterExpression.isEmpty())
             return false;
 
-        var ucs = relation.getUniqueConstraints();
-        var propagableConstraints = ucs.stream()
+        ImmutableList<UniqueConstraint> ucs = relation.getUniqueConstraints();
+        ImmutableList<UniqueConstraint> propagableConstraints = ucs.stream()
                 .filter(u -> hasNoDeterminantOverridden(u, idFactory))
                 .filter(u -> isUcNotInParent(u, parents.get(0)))
                 .collect(ImmutableCollectors.toList());
         if(propagableConstraints.isEmpty())
             return false;
 
-        for(var uc : propagableConstraints) {
+        for(UniqueConstraint uc : propagableConstraints) {
             try {
-                var builder = UniqueConstraint.builder(parents.get(0), uc.getName());
-                for (var attribute : uc.getDeterminants()) {
+                UniqueConstraint.Builder builder = UniqueConstraint.builder(parents.get(0), uc.getName());
+                for (Attribute attribute : uc.getDeterminants()) {
                     builder.addDeterminant(attribute.getID());
                 }
                 builder.build();
@@ -84,14 +84,9 @@ public class JsonBasicLens extends JsonBasicOrJoinLens {
     }
 
     private boolean hasNoDeterminantOverridden(UniqueConstraint uc, QuotedIDFactory idFactory) {
-        return Sets.intersection(
-                uc.getDeterminants().stream()
-                        .map(a -> a.getID())
-                        .collect(ImmutableCollectors.toSet()),
-                columns.added.stream()
-                        .map(a -> idFactory.createAttributeID(a.name))
-                        .collect(ImmutableCollectors.toSet())
-        ).isEmpty();
+        return uc.getDeterminants().stream()
+                .noneMatch(a -> columns.added.stream()
+                        .anyMatch(c -> a.getID().equals(idFactory.createAttributeID(c.name))));
     }
 
     private boolean isUcNotInParent(UniqueConstraint uc, NamedRelationDefinition parent) {
@@ -100,7 +95,7 @@ public class JsonBasicLens extends JsonBasicOrJoinLens {
     }
 
     private boolean ucEquals(UniqueConstraint uc1, UniqueConstraint uc2) {
-        var determinants = Stream.of(uc1, uc2)
+        ImmutableList<ImmutableSet<QuotedID>> determinants = Stream.of(uc1, uc2)
                 .map(uc -> uc.getDeterminants().stream()
                         .map(Attribute::getID)
                         .collect(ImmutableCollectors.toSet())

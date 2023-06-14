@@ -147,9 +147,9 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
                 Queue<NamedRelationDefinition> lensesForPropagation = new ArrayDeque<>();
                 lensesForPropagation.add(relation);
                 while(!lensesForPropagation.isEmpty()) {
-                    var currentPropagationLens = lensesForPropagation.poll();
-                    var currentPropagationJsonLens = jsonMap.get(currentPropagationLens.getID());
-                    var currentPropagationParents = dependencyCacheMetadataLookup.getBaseRelations(currentPropagationLens.getID());
+                    NamedRelationDefinition currentPropagationLens = lensesForPropagation.poll();
+                    JsonLens currentPropagationJsonLens = jsonMap.get(currentPropagationLens.getID());
+                    ImmutableList<NamedRelationDefinition> currentPropagationParents = dependencyCacheMetadataLookup.getBaseRelations(currentPropagationLens.getID());
                     if(currentPropagationJsonLens.propagateUniqueConstraintsUp((Lens)currentPropagationLens, currentPropagationParents, getQuotedIDFactory())) {
                         lensesForPropagation.addAll(currentPropagationParents.stream()
                                 .filter(l -> l instanceof Lens)
