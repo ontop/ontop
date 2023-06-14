@@ -1,0 +1,98 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"", "\"l1\""],
+      "baseRelation": ["\"base_table\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"l2\""],
+      "baseRelation": ["\"lenses\"", "\"l1\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"l3\""],
+      "baseRelation": ["\"lenses\"", "\"l2\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"l4\""],
+      "baseRelation": ["\"lenses\"", "\"l3\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "uc",
+            "determinants": [
+              "\"id\""
+            ],
+            "isPrimaryKey": false
+          }
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"x1\""],
+      "baseRelation": ["\"lenses\"", "\"x2\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "uc",
+            "determinants": [
+              "\"id\""
+            ],
+            "isPrimaryKey": false
+          }
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"x2\""],
+      "baseRelation": ["\"lenses\"", "\"x3\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"x3\""],
+      "baseRelation": ["\"base_table\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"a\""],
+      "baseRelation": ["\"base_table\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    }
+  ]
+}

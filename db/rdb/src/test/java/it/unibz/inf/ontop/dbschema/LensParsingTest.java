@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.io.FileReader;
 import java.io.Reader;
+import java.util.stream.Collectors;
 
 public class LensParsingTest {
 
@@ -57,6 +58,20 @@ public class LensParsingTest {
         );
     }
 
+    public static ImmutableSet<NamedRelationDefinition> loadLensesAndTablesH2(String viewFilePath,
+                                                  String dbMetadataFilePath)
+            throws Exception {
+
+        return loadLensesAndTables(
+                viewFilePath,
+                dbMetadataFilePath,
+                OntopSQLCoreConfiguration.defaultBuilder()
+                        .jdbcUrl("jdbc:h2:mem:nowhere")
+                        .jdbcDriver("org.h2.Driver")
+                        .build()
+        );
+    }
+
 
     public static ImmutableSet<Lens> loadViewDefinitionsPostgres(String viewFilePath, String dbMetadataFilePath)
             throws Exception {
@@ -90,6 +105,28 @@ public class LensParsingTest {
         return metadata.getAllRelations().stream()
                 .filter(r -> r instanceof Lens)
                 .map(r -> (Lens) r)
+                .collect(ImmutableCollectors.toSet());
+
+    }
+
+    private static ImmutableSet<NamedRelationDefinition> loadLensesAndTables(String viewFilePath, String dbMetadataFilePath, OntopSQLCoreConfiguration configuration) throws Exception {
+        Injector injector = configuration.getInjector();
+        SerializedMetadataProvider.Factory serializedMetadataProviderFactory = injector.getInstance(SerializedMetadataProvider.Factory.class);
+        LensMetadataProvider.Factory viewMetadataProviderFactory = injector.getInstance(LensMetadataProvider.Factory.class);
+
+        SerializedMetadataProvider dbMetadataProvider;
+        try (Reader dbMetadataReader = new FileReader(dbMetadataFilePath)) {
+            dbMetadataProvider = serializedMetadataProviderFactory.getMetadataProvider(dbMetadataReader);
+        }
+
+        LensMetadataProvider viewMetadataProvider;
+        try (Reader viewReader = new FileReader(viewFilePath)) {
+            viewMetadataProvider = viewMetadataProviderFactory.getMetadataProvider(dbMetadataProvider, viewReader);
+        }
+
+        ImmutableMetadata metadata = ImmutableMetadata.extractImmutableMetadata(viewMetadataProvider);
+
+        return metadata.getAllRelations().stream()
                 .collect(ImmutableCollectors.toSet());
 
     }

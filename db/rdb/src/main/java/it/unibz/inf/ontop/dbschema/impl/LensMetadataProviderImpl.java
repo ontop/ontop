@@ -138,6 +138,19 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
 
                 jsonLens.insertIntegrityConstraints((Lens) relation, baseRelations, metadataLookupForFK,
                         getDBParameters());
+
+                JsonLens currentPropagateLens = jsonLens;
+                NamedRelationDefinition currentPropagateRelation = relation;
+                ImmutableList<NamedRelationDefinition> currentPropagateParents = baseRelations;
+                while(!currentPropagateParents.isEmpty() && currentPropagateLens != null && currentPropagateLens.propagateUniqueConstraintsUp((Lens)currentPropagateRelation, currentPropagateParents, getQuotedIDFactory())) {
+                    currentPropagateRelation = currentPropagateParents.get(0);
+                    currentPropagateLens = jsonMap.get(currentPropagateRelation.getID());
+                    try {
+                        currentPropagateParents = dependencyCacheMetadataLookup.getBaseRelations(currentPropagateRelation.getID());
+                    } catch (NullPointerException ex) {
+                        break;
+                    }
+                }
             }
         }
         else {
