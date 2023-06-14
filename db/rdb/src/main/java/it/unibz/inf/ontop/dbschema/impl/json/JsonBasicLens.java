@@ -5,14 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.UniqueConstraintImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @JsonDeserialize(as = JsonBasicLens.class)
 public class JsonBasicLens extends JsonBasicOrJoinLens {
@@ -57,51 +55,57 @@ public class JsonBasicLens extends JsonBasicOrJoinLens {
         return getDerivedFromParentAttributes(lens, parentAttributes);
     }
 
-    public boolean propagateUniqueConstraintsUp(Lens relation, ImmutableList<NamedRelationDefinition> parents, QuotedIDFactory idFactory) throws MetadataExtractionException {
+    public boolean propagateUniqueConstraintsUp(Lens relation, ImmutableList<NamedRelationDefinition> parents,
+                                                QuotedIDFactory idFactory) throws MetadataExtractionException {
         //There is no guarantee a UC will hold in the parent if the lens performed a filter.
-        if(filterExpression != null)
+        if(filterExpression != null && filterExpression.isEmpty())
             return false;
 
         var ucs = relation.getUniqueConstraints();
-        var propagableConstraints = ucs.stream().filter(this::noDeterminantOverridden).filter(u -> this.ucNotInParent(u, parents.get(0))).collect(Collectors.toList());
+        var propagableConstraints = ucs.stream()
+                .filter(u -> hasNoDeterminantOverridden(u, idFactory))
+                .filter(u -> isUcNotInParent(u, parents.get(0)))
+                .collect(ImmutableCollectors.toList());
         if(propagableConstraints.isEmpty())
             return false;
+
         for(var uc : propagableConstraints) {
-            var builder = UniqueConstraint.builder(parents.get(0), uc.getName());
-            JsonMetadata.deserializeAttributeList(idFactory, uc.getDeterminants().stream().map(d -> d.getID().getSQLRendering()).collect(Collectors.toList()), builder::addDeterminant);
-            builder.build();
+            try {
+                var builder = UniqueConstraint.builder(parents.get(0), uc.getName());
+                for (var attribute : uc.getDeterminants()) {
+                    builder.addDeterminant(attribute.getID());
+                }
+                builder.build();
+            } catch (AttributeNotFoundException e) {
+                throw new MetadataExtractionException(e);
+            }
         }
         return true;
     }
 
-    private boolean noDeterminantOverridden(UniqueConstraint uc) {
+    private boolean hasNoDeterminantOverridden(UniqueConstraint uc, QuotedIDFactory idFactory) {
         return Sets.intersection(
-                uc.getDeterminants().stream().map(a -> a.getID().getName()).collect(Collectors.toSet()),
-                columns.added.stream().map(a -> a.name).collect(Collectors.toSet())
+                uc.getDeterminants().stream()
+                        .map(a -> a.getID())
+                        .collect(ImmutableCollectors.toSet()),
+                columns.added.stream()
+                        .map(a -> idFactory.createAttributeID(a.name))
+                        .collect(ImmutableCollectors.toSet())
         ).isEmpty();
     }
 
-    private boolean ucNotInParent(UniqueConstraint uc, NamedRelationDefinition parent) {
-        return !parent.getUniqueConstraints().stream()
-                .anyMatch(u -> this.ucEquals(uc, u));
+    private boolean isUcNotInParent(UniqueConstraint uc, NamedRelationDefinition parent) {
+        return parent.getUniqueConstraints().stream()
+                .noneMatch(u -> ucEquals(uc, u));
     }
 
     private boolean ucEquals(UniqueConstraint uc1, UniqueConstraint uc2) {
-        return uc1.getDeterminants().stream()
-                .map(a -> a.getID().getSQLRendering())
-                .collect(Collectors.toSet()).equals(
-                        uc2.getDeterminants().stream()
-                                .map(a -> a.getID().getSQLRendering())
-                                .collect(Collectors.toSet())
-                );
+        var determinants = Stream.of(uc1, uc2)
+                .map(uc -> uc.getDeterminants().stream()
+                        .map(Attribute::getID)
+                        .collect(ImmutableCollectors.toSet())
+                )
+                .collect(ImmutableCollectors.toList());
+        return determinants.get(0).equals(determinants.get(1));
     }
-
-    @Override
-    protected void insertUniqueConstraints(Lens relation, QuotedIDFactory idFactory,
-                                           List<AddUniqueConstraints> addUniqueConstraints,
-                                           ImmutableList<NamedRelationDefinition> baseRelations,
-                                           CoreSingletons coreSingletons) throws MetadataExtractionException {
-        super.insertUniqueConstraints(relation, idFactory, addUniqueConstraints, baseRelations, coreSingletons);
-    }
-
 }

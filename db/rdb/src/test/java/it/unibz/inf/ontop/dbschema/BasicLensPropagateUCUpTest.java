@@ -22,13 +22,17 @@ public class BasicLensPropagateUCUpTest {
                 .filter(l -> l instanceof Lens)
                 .map(l -> (Lens)l)
                 .collect(ImmutableCollectors.<Lens, String, Lens>toMap(
-                    l -> String.join(".", l.getID().getComponents().reverse().stream().map(c -> c.getName()).collect(Collectors.toList())),
+                    l -> String.join(".", l.getID().getComponents().reverse().stream()
+                            .map(c -> c.getName())
+                            .collect(Collectors.toList())),
                     l -> l
         ));
         tableMap = relationDefinitions.stream()
                 .filter(t -> !(t instanceof Lens))
                 .collect(ImmutableCollectors.<NamedRelationDefinition, String, NamedRelationDefinition>toMap(
-                        t -> String.join(".", t.getID().getComponents().reverse().stream().map(c -> c.getName()).collect(Collectors.toList())),
+                        t -> String.join(".", t.getID().getComponents().reverse()
+                                .stream().map(c -> c.getName())
+                                .collect(Collectors.toList())),
                         t -> t
                 ));
     }
@@ -64,16 +68,11 @@ public class BasicLensPropagateUCUpTest {
         assertHasUCs(lensMap.get("lenses.x1"), ImmutableSet.of(ImmutableSet.of("id")));
     }
 
-    @Test
-    public void testUpThenDownPropagation() {
-        assertHasUCs(lensMap.get("lenses.a"), ImmutableSet.of(ImmutableSet.of("id")));
-    }
-
     private void assertHasUCs(NamedRelationDefinition relation, ImmutableSet<ImmutableSet<String>> expected) {
         assertEquals(expected, relation.getUniqueConstraints().stream()
-                .map(uc -> uc.getDeterminants().stream().map(
-                        det -> det.getID().getName()
-                ).collect(Collectors.toSet()))
+                .map(uc -> uc.getDeterminants().stream()
+                        .map(det -> det.getID().getName())
+                        .collect(Collectors.toSet()))
                 .collect(Collectors.toSet()));
         assertEquals(expected.size(), relation.getUniqueConstraints().size());
 

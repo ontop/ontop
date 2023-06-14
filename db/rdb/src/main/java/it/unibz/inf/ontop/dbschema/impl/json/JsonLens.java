@@ -84,7 +84,7 @@ public abstract class JsonLens extends JsonOpenObject {
      * Propagates unique constraints of this lens to its parents, if possible. Returns true if at least one constraint was propagated.
      */
     public boolean propagateUniqueConstraintsUp(Lens relation, ImmutableList<NamedRelationDefinition> parents, QuotedIDFactory idFactory) throws MetadataExtractionException {
-        //Does nothing by default, but is implemented by JsonBasicLens.
+        //Does nothing by default, but is implemented by JsonBasicLens. May also be implemented by other lenses under certain conditions.
         return false;
     }
 

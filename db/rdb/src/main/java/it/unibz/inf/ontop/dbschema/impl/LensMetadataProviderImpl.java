@@ -18,6 +18,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class LensMetadataProviderImpl implements LensMetadataProvider {
@@ -139,16 +140,20 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
                 jsonLens.insertIntegrityConstraints((Lens) relation, baseRelations, metadataLookupForFK,
                         getDBParameters());
 
-                JsonLens currentPropagateLens = jsonLens;
-                NamedRelationDefinition currentPropagateRelation = relation;
-                ImmutableList<NamedRelationDefinition> currentPropagateParents = baseRelations;
-                while(!currentPropagateParents.isEmpty() && currentPropagateLens != null && currentPropagateLens.propagateUniqueConstraintsUp((Lens)currentPropagateRelation, currentPropagateParents, getQuotedIDFactory())) {
-                    currentPropagateRelation = currentPropagateParents.get(0);
-                    currentPropagateLens = jsonMap.get(currentPropagateRelation.getID());
-                    try {
-                        currentPropagateParents = dependencyCacheMetadataLookup.getBaseRelations(currentPropagateRelation.getID());
-                    } catch (NullPointerException ex) {
-                        break;
+                /* Propagate UCs to the parent relation.
+                If at least one UC was sent up this way, repeat this process from the parent.
+                Keep going until either no UC could be propagated up or the root element is reached.
+                 */
+                Queue<NamedRelationDefinition> lensesForPropagation = new ArrayDeque<>();
+                lensesForPropagation.add(relation);
+                while(!lensesForPropagation.isEmpty()) {
+                    var currentPropagationLens = lensesForPropagation.poll();
+                    var currentPropagationJsonLens = jsonMap.get(currentPropagationLens.getID());
+                    var currentPropagationParents = dependencyCacheMetadataLookup.getBaseRelations(currentPropagationLens.getID());
+                    if(currentPropagationJsonLens.propagateUniqueConstraintsUp((Lens)currentPropagationLens, currentPropagationParents, getQuotedIDFactory())) {
+                        lensesForPropagation.addAll(currentPropagationParents.stream()
+                                .filter(l -> l instanceof Lens)
+                                .collect(Collectors.toList()));
                     }
                 }
             }
