@@ -3466,6 +3466,32 @@ public class LeftJoinOptimizationTest {
     }
 
     @Test
+    public void testProjectionAway8() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(1), ImmutableList.of(A));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, A, 2, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 1, C, 2, D));
+
+        IQTree subLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getConjunction(
+                                TERM_FACTORY.getDBNumericInequality(InequalityLabel.LT, C, B),
+                                TERM_FACTORY.getDBNumericInequality(InequalityLabel.LT, D, ONE)
+                        )),
+                dataNode1, dataNode2);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, subLJTree));
+
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, A));
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newDataNode1);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
     public void testPartialProjectionAway1() {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -3576,6 +3602,54 @@ public class LeftJoinOptimizationTest {
                 newSubLJTree);
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newTopLJTree);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testNonProjectionAway2() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(A, D));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, A, 2, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 1, C, 2, D));
+
+        IQTree subLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getDBNumericInequality(InequalityLabel.LT, C, B)),
+                dataNode1, dataNode2);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, subLJTree));
+
+        optimizeAndCompare(initialIQ, initialIQ);
+    }
+
+    @Test
+    public void testNonProjectionAway3() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(A, D));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, A, 1, E,2, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 1, C, 2, D));
+
+        IQTree subLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getDBNumericInequality(InequalityLabel.LT, C, B)),
+                dataNode1, dataNode2);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, subLJTree));
+
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, A,2, B));
+
+        IQTree newSubLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getDBNumericInequality(InequalityLabel.LT, C, B)),
+                newDataNode1, dataNode2);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, newSubLJTree));
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }
