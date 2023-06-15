@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -149,7 +150,8 @@ public interface IQTree {
     ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints();
 
     /**
-     * Variables that are the tree proposes for removal if the ancestor trees do not need them.
+     * Variables that the tree proposes for removal if the ancestor trees do not need them.
+     * Some variables can only be removed if some others are removed too.
      */
-    ImmutableSet<Variable> getNotInternallyRequiredVariables();
+    VariableNonRequirement getVariableNonRequirement();
 }

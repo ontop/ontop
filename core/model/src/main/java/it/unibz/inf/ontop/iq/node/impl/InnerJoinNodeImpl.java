@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -337,8 +338,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(ImmutableList<IQTree> children) {
-        return super.computeNotInternallyRequiredVariables(children);
+    public VariableNonRequirement computeVariableNonRequirement(ImmutableList<IQTree> children) {
+        return super.computeVariableNonRequirement(children);
     }
 
     private Stream<Map.Entry<IQTree, IQTree>> extractFunctionalDependencies(

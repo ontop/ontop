@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.Constant;
@@ -43,17 +44,10 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         if (variables.equals(requiredVariables))
             return tree;
 
-        ImmutableSet<Variable> notInternallyRequiredVariables = tree.getNotInternallyRequiredVariables();
-        if (notInternallyRequiredVariables.isEmpty())
-            return tree;
+        ImmutableSet<Variable> variablesToRemove = tree.getVariableNonRequirement()
+                .computeVariablesToRemove(variables, requiredVariables);
 
-        Sets.SetView<Variable> variablesToRemove = Sets.intersection(
-                Sets.difference(variables, requiredVariables), notInternallyRequiredVariables);
-
-        if (variablesToRemove.isEmpty())
-            return tree;
-
-        return removeNonRequiredVariables(tree, variablesToRemove.immutableCopy(), variableGenerator);
+        return removeNonRequiredVariables(tree, variablesToRemove, variableGenerator);
     }
 
     protected IQTree removeNonRequiredVariables(IQTree tree, ImmutableSet<Variable> variablesToRemove,
@@ -217,6 +211,15 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
         @Override
         public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+            /*
+             * If filter condition involves a variable to remove, we are in the special case
+             *  where the right child can be removed (see LeftJoinNodeImpl.applyFilterToVariableNonRequirement)
+             */
+            if (rootNode.getOptionalFilterCondition()
+                    .filter(c -> c.getVariableStream().anyMatch(variablesToRemove::contains))
+                    .isPresent())
+                return transformNonUniqueChild(leftChild);
+
             return iqFactory.createBinaryNonCommutativeIQTree(
                     rootNode,
                     transformNonUniqueChild(leftChild),
@@ -224,7 +227,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         }
 
         /**
-         * Transforms the non unique child only if needed
+         * Transforms the non-unique child only if needed
          */
         private IQTree transformNonUniqueChild(IQTree child) {
             Sets.SetView<Variable> childVariablesToRemove = Sets.intersection(child.getVariables(), variablesToRemove);

@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.impl.ExpressionAndSubstitutionImpl;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -408,8 +409,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree leftChild, IQTree rightChild) {
-        return computeNotInternallyRequiredVariables(ImmutableList.of(leftChild, rightChild));
+    public VariableNonRequirement computeNotInternallyRequiredVariables(IQTree leftChild, IQTree rightChild) {
+        return computeVariableNonRequirement(ImmutableList.of(leftChild, rightChild));
     }
 
     /**
@@ -545,4 +546,45 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 ImmutableList.of(leftChild, rightChild));
     }
 
+    @Override
+    protected VariableNonRequirement applyFilterToVariableNonRequirement(VariableNonRequirement nonRequirementBeforeFilter,
+                                                                         ImmutableList<IQTree> children) {
+
+        if (nonRequirementBeforeFilter.isEmpty())
+            return nonRequirementBeforeFilter;
+
+        IQTree leftChild = children.get(0);
+        IQTree rightChild = children.get(1);
+
+        var rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables());
+
+        if (rightSpecificVariables.isEmpty())
+            return nonRequirementBeforeFilter;
+
+        var commonVariables = Sets.intersection(leftChild.getVariables(), rightChild.getVariables());
+
+        /*
+         * If the right child has no impact on cardinality (i.e. at most one match per row on the left),
+         *  it can potentially be eliminated if no right-specific variables is used above the LJ.
+         *
+         * Not required variables (before the LJ condition) that are involved in the LJ condition can be eliminated
+         *   if all the right-specific variables are removed too.
+         */
+        if ((!commonVariables.isEmpty())
+                && rightChild.inferUniqueConstraints().stream()
+                    .anyMatch(commonVariables::containsAll)) {
+
+            var rightSpecificNonRequiredVariables = Sets.intersection(
+                    rightSpecificVariables, nonRequirementBeforeFilter.getNotRequiredVariables());
+
+            ImmutableSet<Variable> filterVariables = getLocalVariables();
+
+            return nonRequirementBeforeFilter.transformConditions(
+                    (v, conditions) -> filterVariables.contains(v)
+                            ? Sets.union(conditions, rightSpecificNonRequiredVariables).immutableCopy()
+                            : conditions);
+        }
+        else
+            return super.applyFilterToVariableNonRequirement(nonRequirementBeforeFilter, children);
+    }
 }

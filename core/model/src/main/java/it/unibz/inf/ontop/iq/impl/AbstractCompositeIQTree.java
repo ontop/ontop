@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -263,18 +264,18 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     protected abstract ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints();
 
     @Override
-    public synchronized ImmutableSet<Variable> getNotInternallyRequiredVariables() {
+    public synchronized VariableNonRequirement getVariableNonRequirement() {
         // Non-final
-        ImmutableSet<Variable> notInternallyRequiredVariables = treeCache.getNotInternallyRequiredVariables();
+        VariableNonRequirement notInternallyRequiredVariables = treeCache.getVariableNonRequirement();
         if (notInternallyRequiredVariables != null)
             return notInternallyRequiredVariables;
 
-        notInternallyRequiredVariables = computeNotInternallyRequiredVariables();
-        treeCache.setNotInternallyRequiredVariables(notInternallyRequiredVariables);
+        notInternallyRequiredVariables = computeVariableNonRequirement();
+        treeCache.setVariableNonRequirement(notInternallyRequiredVariables);
         return notInternallyRequiredVariables;
     }
 
-    protected abstract ImmutableSet<Variable> computeNotInternallyRequiredVariables();
+    protected abstract VariableNonRequirement computeVariableNonRequirement();
 
 
     @Override

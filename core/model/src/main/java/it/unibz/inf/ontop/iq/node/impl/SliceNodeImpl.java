@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -390,8 +391,8 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
-        return child.getNotInternallyRequiredVariables();
+    public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
+        return child.getVariableNonRequirement();
     }
 
     @Override

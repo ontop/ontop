@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.FlattenNormalizer;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -208,10 +209,9 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
      * Only the flattened variable is required
      */
     @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
-        return child.getNotInternallyRequiredVariables().stream()
-                .filter(v -> !v.equals(flattenedVariable))
-                .collect(ImmutableCollectors.toSet());
+    public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
+        return child.getVariableNonRequirement()
+                .filter((v, conds) -> !v.equals(flattenedVariable));
     }
 
     @Override
