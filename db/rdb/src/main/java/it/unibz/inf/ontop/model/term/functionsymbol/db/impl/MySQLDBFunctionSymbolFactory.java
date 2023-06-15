@@ -516,4 +516,12 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         serializationBuilder.append(" ELSE NULL END");
         return serializationBuilder.toString();
     }
+
+    @Override
+    public DBFunctionSymbol getDBDateTrunc(String datePart) {
+        if(ImmutableSet.of("microseconds", "milliseconds", "microsecond", "millisecond", "decade", "millennium").contains(datePart.toLowerCase())) {
+            throw new IllegalArgumentException(String.format("MySQL does not support DATE_TRUNC on %s.", datePart));
+        }
+        return super.getDBDateTrunc(datePart);
+    }
 }

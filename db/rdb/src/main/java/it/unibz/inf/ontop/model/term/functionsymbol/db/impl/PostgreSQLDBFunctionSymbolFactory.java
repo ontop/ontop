@@ -600,4 +600,12 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                 term);
     }
 
+    @Override
+    public DBFunctionSymbol getDBDateTrunc(String datePart) {
+        if(ImmutableSet.of("microsecond", "millisecond").contains(datePart.toLowerCase())) {
+            throw new IllegalArgumentException("PostgreSQL does not support DATE_TRUNC on 'millisecond' or 'microsend'. Use 'milliseconds' or 'microseconds' instead.");
+        }
+        return super.getDBDateTrunc(datePart);
+    }
+
 }
