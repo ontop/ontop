@@ -679,4 +679,12 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         serializationBuilder.append(" ELSE NULL END");
         return serializationBuilder.toString();
     }
+
+    @Override
+    public DBFunctionSymbol getDBDateTrunc(String datePart) {
+        if(ImmutableSet.of("microseconds", "milliseconds", "decade", "century", "millennium").contains(datePart.toLowerCase())) {
+            throw new IllegalArgumentException(String.format("SQL Server does not support DATE_TRUNC on %s.", datePart));
+        }
+        return super.getDBDateTrunc(datePart);
+    }
 }

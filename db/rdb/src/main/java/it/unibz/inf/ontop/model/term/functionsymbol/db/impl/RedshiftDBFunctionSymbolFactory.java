@@ -236,6 +236,21 @@ public class RedshiftDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
         return new RedshiftSQLEncodeURLorIRIFunctionSymbolImpl(dbStringType, preserveInternationalChars);
     }
 
+    @Override
+    protected String serializeMilliseconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(EXTRACT(SECOND FROM %s) * 1000 + EXTRACT(MILLISECOND FROM %s))", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(EXTRACT(SECOND FROM %s) * 1000000 + EXTRACT(MILLISECOND FROM %s) * 1000 + EXTRACT(MICROSECOND FROM %s))", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDecade(ImmutableList<? extends ImmutableTerm> terms,
+                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(EXTRACT(DECADE FROM %s) - 1)", termConverter.apply(terms.get(0)));
+    }
 
 
 }

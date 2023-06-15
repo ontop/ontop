@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -324,6 +321,14 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("FLOOR(EXTRACT(SECOND FROM %s) * 1000000)", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    public DBFunctionSymbol getDBDateTrunc(String datePart) {
+        if(ImmutableSet.of("microseconds", "milliseconds", "decade", "century", "millennium").contains(datePart.toLowerCase())) {
+            throw new IllegalArgumentException(String.format("SparkSQL does not support DATE_TRUNC on %s.", datePart));
+        }
+        return super.getDBDateTrunc(datePart);
     }
 }
 

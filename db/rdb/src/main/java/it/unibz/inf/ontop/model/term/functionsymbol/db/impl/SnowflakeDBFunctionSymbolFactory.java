@@ -309,4 +309,12 @@ public class SnowflakeDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     protected String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("EXTRACT(SECOND FROM %s) * 1000000", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
     }
+
+    @Override
+    public DBFunctionSymbol getDBDateTrunc(String datePart) {
+        if(ImmutableSet.of("microseconds", "milliseconds", "decade", "century", "millennium").contains(datePart.toLowerCase())) {
+            throw new IllegalArgumentException(String.format("Snowflake does not support DATE_TRUNC on %s.", datePart));
+        }
+        return super.getDBDateTrunc(datePart);
+    }
 }

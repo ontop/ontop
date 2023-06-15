@@ -241,16 +241,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_MICROSECONDS", Ontop.MICROSECONDS_FROM_DATETIME,
                         xsdDatetime, xsdInteger, false, TermFactory::getDBMicroseconds),
 
-                new DateOrDateTimeManupulationBinarySPARQLFunctionSymbolImpl("SP_DATE_TRUNC", Ontop.DATE_TRUNC, dateOrDatetime,
-                        xsdString, false,
-                        (dbType) -> {
-                            if(dbType.isA(dbDate)) {
-                                return Optional.of(dbFunctionSymbolFactory.getDBDateTrunc());
-                            } else if(dbType.isA(dbTimestamp)) {
-                                return Optional.of(dbFunctionSymbolFactory.getDBTimestampTrunc());
-                            }
-                            return Optional.empty();
-                        }),
+                new DateTruncSPARQLFunctionSymbolImpl(xsdDatetime,
+                        xsdString, (t) -> dbFunctionSymbolFactory.getDBDateTrunc(t)),
 
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_SECONDS", XPathFunction.SECONDS_FROM_DATETIME,
                         xsdDatetime, xsdDecimal, false, TermFactory::getDBSeconds),

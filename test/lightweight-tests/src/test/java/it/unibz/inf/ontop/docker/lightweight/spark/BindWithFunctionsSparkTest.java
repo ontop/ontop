@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.docker.lightweight.SparkSQLLightweightTest;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -12,6 +13,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 @SparkSQLLightweightTest
 public class BindWithFunctionsSparkTest extends AbstractBindTestWithFunctions {
@@ -123,5 +127,20 @@ public class BindWithFunctionsSparkTest extends AbstractBindTestWithFunctions {
     @Override
     protected ImmutableSet<String> getSimpleDateTrunkExpectedValues() {
         return ImmutableSet.of("\"1970-01-01T00:00:00.000+00:00\"^^xsd:dateTime", "\"2011-01-01T00:00:00.000+00:00\"^^xsd:dateTime", "\"2014-01-01T00:00:00.000+00:00\"^^xsd:dateTime", "\"2015-01-01T00:00:00.000+00:00\"^^xsd:dateTime");
+    }
+
+    @Test
+    public void testDateTruncFailsDialectDoesNotSupport() {
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "PREFIX dc:  <http://purl.org/dc/elements/1.1/>"
+                + "PREFIX  fn: <https://w3id.org/obda/functions#>\n"
+                + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT (fn:dateTrunc(?date, 'century') AS ?v) WHERE \n"
+                + "{  "
+                + "   ?x ns:pubYear ?date .\n"
+                + "} ORDER BY ?date";
+
+        var error = assertThrows(QueryEvaluationException.class, () -> this.runQuery(query));
+        assertEquals("it.unibz.inf.ontop.exception.OntopReformulationException: java.lang.IllegalArgumentException: SparkSQL does not support DATE_TRUNC on century.", error.getMessage());
     }
 }

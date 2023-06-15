@@ -1365,12 +1365,8 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getDBDateTrunc(ImmutableTerm dbDatetimeTerm, ImmutableTerm datePartTerm) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDateTrunc(), dbDatetimeTerm, datePartTerm);
+	public ImmutableFunctionalTerm getDBDateTrunc(ImmutableTerm dbDatetimeTerm, ImmutableTerm datePartTerm, String datePart) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDateTrunc(datePart), dbDatetimeTerm, datePartTerm);
 	}
 
-	@Override
-	public ImmutableFunctionalTerm getDBTimestampTrunc(ImmutableTerm dbDatetimeTerm, ImmutableTerm datePartTerm) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBTimestampTrunc(), dbDatetimeTerm, datePartTerm);
-	}
 }

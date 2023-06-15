@@ -627,4 +627,12 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                                         Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("TRUNC(%s, %s)", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(1)));
     }
+
+    @Override
+    public DBFunctionSymbol getDBDateTrunc(String datePart) {
+        if(ImmutableSet.of("microseconds", "milliseconds", "microsecond", "millisecond", "decade", "century", "millennium").contains(datePart.toLowerCase())) {
+            throw new IllegalArgumentException(String.format("Oracle does not support DATE_TRUNC on %s.", datePart));
+        }
+        return super.getDBDateTrunc(datePart);
+    }
 }

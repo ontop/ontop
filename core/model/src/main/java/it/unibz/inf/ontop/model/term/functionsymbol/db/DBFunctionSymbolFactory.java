@@ -399,6 +399,5 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBMilliseconds();
     DBFunctionSymbol getDBMicroseconds();
 
-    DBFunctionSymbol getDBDateTrunc();
-    DBFunctionSymbol getDBTimestampTrunc();
+    DBFunctionSymbol getDBDateTrunc(String datePart);
 }

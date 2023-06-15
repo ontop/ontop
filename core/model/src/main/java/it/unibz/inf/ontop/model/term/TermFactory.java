@@ -653,6 +653,5 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBMilliseconds(ImmutableTerm dbDatetimeTerm);
 	ImmutableFunctionalTerm getDBMicroseconds(ImmutableTerm dbDatetimeTerm);
 
-	ImmutableFunctionalTerm getDBDateTrunc(ImmutableTerm dbDatetimeTerm, ImmutableTerm datePartTerm);
-	ImmutableFunctionalTerm getDBTimestampTrunc(ImmutableTerm dbDatetimeTerm, ImmutableTerm datePartTerm);
+	ImmutableFunctionalTerm getDBDateTrunc(ImmutableTerm dbDatetimeTerm, ImmutableTerm datePartTerm, String datePart);
 }

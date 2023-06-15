@@ -411,4 +411,12 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         serializationBuilder.append(" ELSE NULL END");
         return serializationBuilder.toString();
     }
+
+    @Override
+    public DBFunctionSymbol getDBDateTrunc(String datePart) {
+        if(ImmutableSet.of("microseconds", "milliseconds", "microsecond", "millisecond", "decade", "second", "millennium").contains(datePart.toLowerCase())) {
+            throw new IllegalArgumentException(String.format("Denodo does not support DATE_TRUNC on %s.", datePart));
+        }
+        return super.getDBDateTrunc(datePart);
+    }
 }

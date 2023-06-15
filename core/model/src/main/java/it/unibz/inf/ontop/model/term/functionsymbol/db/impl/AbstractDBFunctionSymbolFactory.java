@@ -102,7 +102,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     //Created in init
     private DBFunctionSymbol dateTruncFunctionSymbol;
     //Created in init
-    private DBFunctionSymbol timestampTruncFunctionSymbol;
     // Created in init()
     private DBFunctionSymbol tzFunctionSymbol;
 
@@ -453,7 +452,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         millisecondsFunctionSymbol = createMillisecondsFunctionSymbol();
         microsecondsFunctionSymbol = createMicrosecondsFunctionSymbol();
         dateTruncFunctionSymbol = createDateTruncFunctionSymbol();
-        timestampTruncFunctionSymbol = createTimestampTruncFunctionSymbol();
         tzFunctionSymbol = createTzFunctionSymbol();
 
         weeksBetweenFromDateTimeFunctionSymbol = createWeeksBetweenFromDateTimeFunctionSymbol();
@@ -1035,13 +1033,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBFunctionSymbol getDBDateTrunc() {
+    public DBFunctionSymbol getDBDateTrunc(String datePart) {
         return dateTruncFunctionSymbol;
-    }
-
-    @Override
-    public DBFunctionSymbol getDBTimestampTrunc() {
-        return timestampTruncFunctionSymbol;
     }
 
     @Override
@@ -1477,17 +1470,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 this::serializeDateTrunc) {
             @Override
             protected boolean mayReturnNullWithoutNullArguments() {
-                return true;
-            }
-        };
-    }
-
-    protected DBFunctionSymbol createTimestampTruncFunctionSymbol() {
-        return new DBFunctionSymbolWithSerializerImpl("DB_TIMESTAMP_TRUNC", ImmutableList.of(dbStringType, dbDateTimestampType), dbDateTimestampType, false,
-                this::serializeTimestampTrunc) {
-            @Override
-            protected boolean mayReturnNullWithoutNullArguments() {
-                return true;
+                return false;
             }
         };
     }
@@ -1702,10 +1685,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract String serializeDateTrunc(ImmutableList<? extends ImmutableTerm> terms,
                                                     Function<ImmutableTerm, String> termConverter,
                                                     TermFactory termFactory);
-
-    protected abstract String serializeTimestampTrunc(ImmutableList<? extends ImmutableTerm> terms,
-                                                 Function<ImmutableTerm, String> termConverter,
-                                                 TermFactory termFactory);
 
     protected abstract String serializeTz(ImmutableList<? extends ImmutableTerm> terms,
                                                Function<ImmutableTerm, String> termConverter,
