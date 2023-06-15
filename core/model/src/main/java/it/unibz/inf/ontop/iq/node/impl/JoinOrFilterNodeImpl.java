@@ -9,14 +9,12 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.request.impl.VariableNonRequirementImpl;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Map;
 import java.util.Optional;
 
 
@@ -91,6 +89,11 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
             throw new InvalidIntermediateQueryException("Expression " + expression + " of "
                     + expression + " uses unbound variables (" + unboundVariables +  ").\n" + this);
         }
+    }
+
+    protected VariableNonRequirement applyFilterToVariableNonRequirement(VariableNonRequirement nonRequirementBeforeFilter,
+                                                                         ImmutableList<IQTree> children) {
+        return applyFilterToVariableNonRequirement(nonRequirementBeforeFilter);
     }
 
     protected VariableNonRequirement applyFilterToVariableNonRequirement(VariableNonRequirement nonRequirementBeforeFilter) {

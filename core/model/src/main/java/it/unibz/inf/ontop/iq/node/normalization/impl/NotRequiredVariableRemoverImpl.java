@@ -211,6 +211,15 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
         @Override
         public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+            /*
+             * If filter condition involves a variable to remove, we are in the special case
+             *  where the right child can be removed (see LeftJoinNodeImpl.applyFilterToVariableNonRequirement)
+             */
+            if (rootNode.getOptionalFilterCondition()
+                    .filter(c -> c.getVariableStream().anyMatch(variablesToRemove::contains))
+                    .isPresent())
+                return transformNonUniqueChild(leftChild);
+
             return iqFactory.createBinaryNonCommutativeIQTree(
                     rootNode,
                     transformNonUniqueChild(leftChild),
@@ -218,7 +227,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         }
 
         /**
-         * Transforms the non unique child only if needed
+         * Transforms the non-unique child only if needed
          */
         private IQTree transformNonUniqueChild(IQTree child) {
             Sets.SetView<Variable> childVariablesToRemove = Sets.intersection(child.getVariables(), variablesToRemove);

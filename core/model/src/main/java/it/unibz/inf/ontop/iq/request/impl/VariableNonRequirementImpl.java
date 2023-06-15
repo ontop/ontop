@@ -12,8 +12,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
-import java.util.stream.Stream;
 
 public class VariableNonRequirementImpl implements VariableNonRequirement {
 
@@ -45,11 +45,6 @@ public class VariableNonRequirementImpl implements VariableNonRequirement {
     @Override
     public ImmutableSet<Variable> getCondition(Variable variable) {
         return conditions.getOrDefault(variable, ImmutableSet.of());
-    }
-
-    @Override
-    public Stream<Map.Entry<Variable, ImmutableSet<Variable>>> entryStream() {
-        return conditions.entrySet().stream();
     }
 
     @Override
@@ -86,13 +81,22 @@ public class VariableNonRequirementImpl implements VariableNonRequirement {
                 break;
             variablesToRemove.removeAll(variablesToKeep);
         }
-        
+
         return ImmutableSet.copyOf(variablesToRemove);
     }
 
     @Override
     public boolean isEmpty() {
         return conditions.isEmpty();
+    }
+
+    @Override
+    public VariableNonRequirement transformConditions(BiFunction<Variable, ImmutableSet<Variable>, ImmutableSet<Variable>> fct) {
+        return new VariableNonRequirementImpl(
+                conditions.entrySet().stream()
+                        .collect(ImmutableCollectors.toMap(
+                                Map.Entry::getKey,
+                                e -> fct.apply(e.getKey(), e.getValue()))));
     }
 
 }

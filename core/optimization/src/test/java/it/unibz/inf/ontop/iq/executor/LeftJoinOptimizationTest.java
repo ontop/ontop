@@ -3353,7 +3353,6 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
-    @Ignore("TODO: support it (see if it deserves making NotRequiredVariableRemover more complex)")
     @Test
     public void testProjectionAway3() {
 
@@ -3441,7 +3440,6 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
-    @Ignore("TODO: support it (see if it deserves making NotRequiredVariableRemover more complex)")
     @Test
     public void testProjectionAway7() {
 

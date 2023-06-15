@@ -83,7 +83,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
 
         // All variables are required
         if (candidates.isEmpty())
-            return new VariableNonRequirementImpl(ImmutableMap.of());
+            return VariableNonRequirement.empty();
 
         ImmutableMultiset<Variable> childVariableMultiset = children.stream()
                 .flatMap(c -> c.getVariables().stream())
@@ -95,13 +95,13 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                 .map(Multiset.Entry::getElement)
                 .collect(ImmutableCollectors.toSet());
 
-        VariableNonRequirement nonRequirementBeforeFilter = new VariableNonRequirementImpl(
+        VariableNonRequirement nonRequirementBeforeFilter = VariableNonRequirement.of(
                 candidates.entrySet().stream()
                         .filter(e -> notSharedVariables.contains(e.getKey()))
                         .collect(ImmutableCollectors.toMap()));
 
         return getOptionalFilterCondition()
-                .map(f -> applyFilterToVariableNonRequirement(nonRequirementBeforeFilter))
+                .map(f -> applyFilterToVariableNonRequirement(nonRequirementBeforeFilter, children))
                 .orElse(nonRequirementBeforeFilter);
     }
 }
