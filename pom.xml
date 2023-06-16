@@ -149,7 +149,7 @@
         <maven-surefire-report-plugin.version>3.0.0-M9</maven-surefire-report-plugin.version>
         <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
         <sortpom-maven-plugin.version>3.2.1</sortpom-maven-plugin.version>
-        <spring-boot-maven-plugin.version>2.7.9</spring-boot-maven-plugin.version> <!-- 3.0.0+ needs JDK17 (via Spring Boot 3) -->
+        <spring-boot-maven-plugin.version>3.1.0</spring-boot-maven-plugin.version> <!-- 3.0.0+ needs JDK17 (via Spring Boot 3) -->
         <versions-maven-plugin.version>2.15.0</versions-maven-plugin.version>
 
         <!-- Dependency versions: core dependencies -->
