@@ -571,4 +571,9 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                         termConverter.apply(terms.get(0))
                 ));
     }
+
+    @Override
+    protected DBFunctionSymbol createDBSample(DBTermType termType) {
+        return new DBSampleFunctionSymbolImpl(termType, "ANY_VALUE");
+    }
 }

@@ -84,6 +84,15 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
         if (this.owlFile != null)
             argList.add("--ontology=" + this.owlFile);
 
+        if (this.factFile != null)
+            argList.add("--facts=" + this.factFile);
+
+        if (this.factFormat != null)
+            argList.add("--facts-format=" + this.factFormat.getExtension());
+
+        if (this.factsBaseIRI != null)
+            argList.add("--facts-base-iri=" + this.factsBaseIRI);
+
         if (this.xmlCatalogFile != null)
             argList.add("--xml-catalog=" + this.xmlCatalogFile);
 

@@ -368,4 +368,9 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                         " THEN NULL ELSE CAST(%1$s AS DATE) END",
                 term);
     }
+
+    @Override
+    protected DBFunctionSymbol createDBSample(DBTermType termType) {
+        return new DBSampleFunctionSymbolImpl(termType, "FIRST");
+    }
 }

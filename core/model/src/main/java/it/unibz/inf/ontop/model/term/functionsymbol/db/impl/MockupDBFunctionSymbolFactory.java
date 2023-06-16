@@ -95,6 +95,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    protected DBFunctionSymbol createDBSample(DBTermType termType) {
+        return new DBSampleFunctionSymbolImpl(termType, "MIN");
+    }
+
+    @Override
     protected DBFunctionSymbol createRegularUntypedFunctionSymbol(String nameInDialect, int arity) {
         switch (nameInDialect) {
             case AND_STR:

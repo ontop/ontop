@@ -1,12 +1,14 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.name.Names;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.*;
 import it.unibz.inf.ontop.generation.algebra.*;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
-import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
@@ -64,5 +66,22 @@ public class OntopSQLCoreModule extends OntopAbstractModule {
 
         Module mdProvider = buildFactory(ImmutableList.of(DBMetadataProvider.class), JDBCMetadataProviderFactory.class);
         install(mdProvider);
+
+        for (var c : ImmutableList.of(
+                BigQueryQuotedIDFactory.class,
+                DremioQuotedIDFactory.class,
+                DuckDBQuotedIDFactory.class,
+                MySQLCaseNotSensitiveTableNamesQuotedIDFactory.class,
+                MySQLCaseSensitiveTableNamesQuotedIDFactory.class,
+                PostgreSQLQuotedIDFactory.class,
+                SQLServerQuotedIDFactory.class,
+                SparkSQLQuotedIDFactory.class,
+                TeiidQuotedIDFactory.class,
+                TrinoQuotedIDFactory.class
+        )) {
+            String idFactoryType = QuotedIDFactory.getIDFactoryType(c);
+            bindFromSettings(Key.get(QuotedIDFactory.class, Names.named(idFactoryType)), c);
+        }
     }
+
 }

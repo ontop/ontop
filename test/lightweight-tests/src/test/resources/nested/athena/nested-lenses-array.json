@@ -1,8 +1,21 @@
 {
   "relations": [
     {
+      "name": [ "lenses", "company_data_arrays" ],
+      "baseRelation": ["nested", "company_data_arrays" ],
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "uc",
+            "determinants": [ "id" ]
+          }
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
       "name": ["lenses","flattened_dates"],
-      "baseRelation": ["nested","company_data_arrays"],
+      "baseRelation": ["lenses","company_data_arrays"],
       "flattenedColumn": {
         "name": "days",
         "datatype": "array<timestamp>"
@@ -18,7 +31,7 @@
     },
     {
       "name": ["lenses","flattened_income"],
-      "baseRelation": ["nested", "company_data_arrays"],
+      "baseRelation": ["lenses", "company_data_arrays"],
       "flattenedColumn": {
         "name": "income",
         "datatype": "array<integer>"
@@ -34,7 +47,7 @@
     },
     {
       "name": ["lenses","flattened_workers_mid"],
-      "baseRelation": ["nested", "company_data_arrays"],
+      "baseRelation": ["lenses", "company_data_arrays"],
       "flattenedColumn": {
         "name": "workers",
         "datatype": "array<array<varchar>>"
@@ -66,7 +79,7 @@
     },
     {
       "name": ["lenses","flattened_managers"],
-      "baseRelation": ["nested", "company_data_arrays"],
+      "baseRelation": ["lenses", "company_data_arrays"],
       "flattenedColumn": {
         "name": "managers",
         "datatype": "array<varchar>"

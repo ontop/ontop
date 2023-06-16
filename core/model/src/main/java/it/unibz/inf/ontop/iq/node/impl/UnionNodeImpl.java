@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -397,8 +398,8 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
      * All the variables of a union could be projected out
      */
     @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(ImmutableList<IQTree> children) {
-        return getVariables();
+    public VariableNonRequirement computeVariableNonRequirement(ImmutableList<IQTree> children) {
+        return VariableNonRequirement.of(getVariables());
     }
 
     @Override

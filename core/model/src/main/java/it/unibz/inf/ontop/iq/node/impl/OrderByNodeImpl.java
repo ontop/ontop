@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.node.normalization.OrderByNormalizer;
@@ -152,12 +153,11 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
      * Subtracts from the variables proposed by the child the one used for ordering
      */
     @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
+    public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
         ImmutableSet<Variable> localVariables = getLocalVariables();
 
-        return child.getNotInternallyRequiredVariables().stream()
-                .filter(v -> !localVariables.contains(v))
-                .collect(ImmutableCollectors.toSet());
+        return child.getVariableNonRequirement()
+                .filter((v, conds) -> !localVariables.contains(v));
     }
 
     @Override

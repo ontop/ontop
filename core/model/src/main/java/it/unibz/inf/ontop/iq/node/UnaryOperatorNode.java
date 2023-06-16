@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -66,5 +67,5 @@ public interface UnaryOperatorNode extends QueryNode {
 
     ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child);
 
-    ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child);
+    VariableNonRequirement computeVariableNonRequirement(IQTree child);
 }
