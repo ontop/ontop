@@ -18,6 +18,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class LensMetadataProviderImpl implements LensMetadataProvider {
@@ -138,6 +139,23 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
 
                 jsonLens.insertIntegrityConstraints((Lens) relation, baseRelations, metadataLookupForFK,
                         getDBParameters());
+
+                /* Propagate UCs to the parent relation.
+                If at least one UC was sent up this way, repeat this process from the parent.
+                Keep going until either no UC could be propagated up or the root element is reached.
+                 */
+                Queue<NamedRelationDefinition> lensesForPropagation = new ArrayDeque<>();
+                lensesForPropagation.add(relation);
+                while(!lensesForPropagation.isEmpty()) {
+                    NamedRelationDefinition currentPropagationLens = lensesForPropagation.poll();
+                    JsonLens currentPropagationJsonLens = jsonMap.get(currentPropagationLens.getID());
+                    ImmutableList<NamedRelationDefinition> currentPropagationParents = dependencyCacheMetadataLookup.getBaseRelations(currentPropagationLens.getID());
+                    if(currentPropagationJsonLens.propagateUniqueConstraintsUp((Lens)currentPropagationLens, currentPropagationParents, getQuotedIDFactory())) {
+                        lensesForPropagation.addAll(currentPropagationParents.stream()
+                                .filter(l -> l instanceof Lens)
+                                .collect(Collectors.toList()));
+                    }
+                }
             }
         }
         else {
