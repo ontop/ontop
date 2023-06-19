@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.AggregationNormalizer;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -329,8 +330,8 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
      * Out of the projected variables, only the grouping variables are required
      */
     @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
-        return substitution.getDomain();
+    public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
+        return VariableNonRequirement.of(substitution.getDomain());
     }
 
     @Override

@@ -113,6 +113,13 @@ public class LeftJoinProfPrestoTest extends AbstractLeftJoinProfTest {
     @Test
     public void testUselessRightPart2() { super.testUselessRightPart2(); }
 
+    @Disabled("This test requires avoiding applying ORDER BY to a sub-query")
+    @Test
+    @Override
+    public void testDistinctAsGroupBy1() {
+        super.testDistinctAsGroupBy1();
+    }
+
     @Disabled("This test requires integrity constraints that are not currently supported by presto.")
     @Test
     public void testMinusMultitypedAvg() { super.testMinusMultitypedAvg(); }

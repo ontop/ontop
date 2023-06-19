@@ -126,6 +126,19 @@ if [ "${ONTOP_LENSES_FILE+x}" ]; then
   set -- "$@" "--lenses=${ONTOP_LENSES_FILE}"
 fi
 
+if [ "${ONTOP_FACTS_FILE+x}" ]; then
+  set -- "$@" "--facts=${ONTOP_FACTS_FILE}"
+fi
+
+if [ "${ONTOP_FACTS_FORMAT+x}" ]; then
+  set -- "$@" "--facts-format=${ONTOP_FACTS_FORMAT}"
+fi
+
+if [ "${ONTOP_FACTS_BASE_IRI+x}" ]; then
+  set -- "$@" "--facts-base-iri=${ONTOP_FACTS_BASE_IRI}"
+fi
+
+
 if [ "${ONTOP_SPARQL_RULES_FILE+x}" ]; then
   set -- "$@" "--sparql-rules=${ONTOP_SPARQL_RULES_FILE}"
 fi

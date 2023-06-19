@@ -67,31 +67,6 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
 
     private static final int TRIPLE_LIMIT_PER_FILE = 500000;
     private static final String DEFAULT_FETCH_SIZE = "50000";
-
-    public enum OutputFormat {
-        rdfxml(".rdf", RDFXMLWriter::new),
-        turtle(".ttl", w ->  new TurtleWriter(w).set(BasicWriterSettings.PRETTY_PRINT, false)),
-        ntriples(".nt", w ->  new NTriplesWriter(w).set(BasicWriterSettings.PRETTY_PRINT, false)),
-        nquads(".nq", w ->  new NQuadsWriter(w).set(BasicWriterSettings.PRETTY_PRINT, false)),
-        trig(".trig", TriGWriter::new),
-        jsonld(".jsonld", JSONLDWriter::new);
-
-        private final String extension;
-        private final Function<BufferedWriter, RDFHandler> rdfHandlerProvider;
-
-        OutputFormat(String extension, Function<BufferedWriter, RDFHandler> rdfHandlerProvider) {
-            this.extension = extension;
-            this.rdfHandlerProvider = rdfHandlerProvider;
-        }
-
-        String getExtension() {
-            return extension;
-        }
-
-        RDFHandler createRDFHandler(BufferedWriter writer) {
-            return rdfHandlerProvider.apply(writer);
-        }
-    }
     
     @Option(type = OptionType.COMMAND, override = true, name = {"-o", "--output"},
             title = "output", description = "output file (default) or prefix (only for --separate-files)")
@@ -102,8 +77,8 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
             description = "The format of the materialized ontology. " +
                     //" Options: rdfxml, turtle. " +
                     "Default: rdfxml")
-    @AllowedEnumValues(OutputFormat.class)
-    public OutputFormat format = OutputFormat.rdfxml;
+    @AllowedEnumValues(RDFFormatTypes.class)
+    public RDFFormatTypes format = RDFFormatTypes.rdfxml;
 
     @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "output to separate files",
             description = "generating separate files for different classes/properties. This is useful for" +
@@ -295,6 +270,15 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
 
         if (owlFile != null)
             configBuilder.ontologyFile(owlFile);
+
+        if (factFile != null)
+            configBuilder.factsFile(factFile);
+
+        if (factFormat != null)
+            configBuilder.factFormat(factFormat.getExtension());
+
+        if (factsBaseIRI != null)
+            configBuilder.factsBaseIRI(factsBaseIRI);
 
         if (isR2rmlFile(mappingFile)) {
             configBuilder.r2rmlMappingFile(mappingFile);

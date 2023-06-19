@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -69,5 +70,5 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree leftChild, IQTree rightChild);
 
-    ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree leftChild, IQTree rightChild);
+    VariableNonRequirement computeNotInternallyRequiredVariables(IQTree leftChild, IQTree rightChild);
 }

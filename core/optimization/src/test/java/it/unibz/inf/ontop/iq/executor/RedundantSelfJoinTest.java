@@ -325,10 +325,8 @@ public class RedundantSelfJoinTest {
                         dataNode3)));
 
         ExtensionalDataNode dataNode5 = createExtensionalDataNode(TABLE1, ImmutableList.of(M, N, O));
-        ExtensionalDataNode dataNode6 = createExtensionalDataNode(TABLE2, ImmutableList.of(M, N, O));
 
-        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
-                IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode, dataNode5, dataNode6));
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, dataNode5);
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }

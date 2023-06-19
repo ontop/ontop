@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -175,7 +176,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    protected ImmutableSet<Variable> computeNotInternallyRequiredVariables() {
-        return getRootNode().computeNotInternallyRequiredVariables(getChildren());
+    protected VariableNonRequirement computeVariableNonRequirement() {
+        return getRootNode().computeVariableNonRequirement(getChildren());
     }
 }

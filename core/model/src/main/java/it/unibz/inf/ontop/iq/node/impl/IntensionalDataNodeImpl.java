@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -133,7 +134,7 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
      * All the variables are required, because an intensional data node cannot be sparse.
      */
     @Override
-    public synchronized ImmutableSet<Variable> getNotInternallyRequiredVariables() {
-        return ImmutableSet.of();
+    public synchronized VariableNonRequirement getVariableNonRequirement() {
+        return VariableNonRequirement.empty();
     }
 }
