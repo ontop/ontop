@@ -8,17 +8,18 @@ import java.io.InputStreamReader;
 
 public class QueryRewritingTest {
 
-    private static final String owlFile = "src/test/resources/federation-test/teiid/bsbm-ontology.owl";
-    private static final String obdaFile = "src/test/resources/federation-test/teiid/bsbm-mappings-hom-het.obda";
-    private static final String propertyFile = "src/test/resources/federation-test/teiid/system-hom.properties";
-    private static final String hintFile = "src/test/resources/federation-test/teiid/hint-full.txt";
-    private static final String labFile = "src/test/resources/federation-test/teiid/SourceLab.txt";
-    private static final String sourceFile = "src/test/resources/federation-test/teiid/SourceFile.txt";
-    private static final String effLabel = "src/test/resources/federation-test/teiid/hom-effLabel.txt";
-    private static final String constraintFile = "src/test/resources/federation-test/teiid/constraints.fed.txt";
+    private static final String owlFile = "src/test/resources/federation-test/dremio/bsbm-ontology.owl";
+    private static final String obdaFile = "src/test/resources/federation-test/dremio/bsbm-mappings-hom-het.obda";
+    private static final String propertyFile = "src/test/resources/federation-test/dremio/system-het.properties";
+    private static final String hintFile = "src/test/resources/federation-test/dremio/hint-full.txt";
+    private static final String labFile = "src/test/resources/federation-test/dremio/SourceLab.txt";
+    private static final String sourceFile = "src/test/resources/federation-test/dremio/SourceFile.txt";
+    private static final String effLabel = "src/test/resources/federation-test/dremio/hom-effLabel.txt";
+    private static final String constraintFile = "src/test/resources/federation-test/dremio/constraints.fed.txt";
+    private static final String lenseFile = "src/test/resources/federation-test/dremio/lenses.fed.json";
 
-    private static final String queryFile = "src/test/resources/federation-test/SPARQL/02.SPARQL";
-    //private static final String lenseFile = "src/test/resources/federation-test/teiid/lenses.fed.json";
+    private static final String queryFile = "src/test/resources/federation-test/SPARQL/01.SPARQL";
+
     private static String query = "";
     {
         try {

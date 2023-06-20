@@ -29,6 +29,8 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.query.KGQuery;
 import it.unibz.inf.ontop.query.KGQueryFactory;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -136,23 +138,11 @@ public class QueryRewriting {
 
         IQTree iqt = iq.getTree();
 
-//        System.out.println("original IQ tree");
-//        System.out.println(iqt);
-//
-//        List<IQTree> sub_trees = getAllSubTree(iqt);
-//        for(IQTree t : sub_trees){
-//            if(t instanceof ExtensionalDataNode){
-//                System.out.println(t);
-//                List<Integer> pk_index = getSinglePrimaryKeyIndexOfRelations((ExtensionalDataNode) t);
-//                System.out.println(pk_index);
-//            }
-//        }
-
         DistinctVariableOnlyDataAtom project_original = iq.getProjectionAtom();
         IQTree iqtopt = rewriteIQTree(iqt);
 
         IQ iqopt = IQTreeToIQ(project_original, iqtopt);
-       IQ executableQuery = reformulator.generateExecutableQuery(iqopt);
+        IQ executableQuery = reformulator.generateExecutableQuery(iqopt);
         return ((NativeNodeImpl)executableQuery.getTree().getChildren().get(0)).getNativeQueryString();
     }
 
@@ -170,7 +160,6 @@ public class QueryRewriting {
         System.out.println(iqt);
         if(hints.get(2).size()>0){
             iqt = rewriteInnerJoin(iqt);
-
             iqt = rewriteLeftJoin(iqt);
         }
         if(hint_matv.size()>0){
@@ -337,6 +326,7 @@ public class QueryRewriting {
         return sources;
     }
 
+    //增加情形来处理更多的redundancy的情形;;
     public IQTree removeStrictRedundancy(IQTree iqt){
         boolean change = true;
         while(change){
@@ -492,7 +482,9 @@ public class QueryRewriting {
                     ImmutableList<IQTree> childern = t.getChildren();
                     for(int i=0; i<childern.size()-1; i++){
                         for(int j=i+1; j<childern.size(); j++){
-                            if(checkEquivalentRedundancy(childern.get(i), childern.get(j))){
+                            boolean b = checkEquivalentRedundancy(childern.get(i), childern.get(j));
+
+                            if(b){
                                 //remove sub1 or sub2, based on removing which part can obtain query with less cost
                                 IQTree iqt1 = null;  // for removing sub1
                                 IQTree iqt2 = null;  // for removing sub2
@@ -538,6 +530,13 @@ public class QueryRewriting {
     public boolean checkEquivalentRedundancy(IQTree ele_1, IQTree ele_2){
 
         boolean b = false;
+
+        Set<String> sources = getSources(ele_1);
+        sources.addAll(getSources(ele_2));
+        if(sources.size() == 1){
+            return false;
+        }
+
         if(ele_1.getRootNode() instanceof LeftJoinNode){
             return false;
         }
@@ -545,89 +544,41 @@ public class QueryRewriting {
             return false;
         }
 
-        if(ele_1.isLeaf() && ele_2.isLeaf()){
-            if((ele_1 instanceof ExtensionalDataNode) && (ele_2 instanceof ExtensionalDataNode)){
-                //the following code needs to be changed according to the different ways of representing hints
-                return checkEquivalentRedundancyDataNode((ExtensionalDataNode) ele_1, (ExtensionalDataNode) ele_2);
+        if(((ele_1 instanceof ExtensionalDataNode ) && (ele_2 instanceof ExtensionalDataNode)) || ((ele_1.getRootNode() instanceof FilterNode) && (ele_2.getRootNode() instanceof FilterNode)) || ((ele_1.getRootNode() instanceof ConstructionNode) && (ele_2.getRootNode() instanceof ConstructionNode))){
 
-            }
-        } else if((ele_1.getRootNode() instanceof ConstructionNode) && (ele_2.getRootNode() instanceof ConstructionNode)){
+            return checkEquivalentRedundancyDataElement(ele_1, ele_2);
+        }  else if((ele_1.getRootNode() instanceof InnerJoinNode) && (ele_2.getRootNode() instanceof InnerJoinNode)){
+            if((ele_1.getChildren().size() == ele_2.getChildren().size()) && (ele_1.getRootNode().equals(ele_2.getRootNode()))){
+                //只包含一个不同的子树
+                List<IQTree> subs1 = ele_1.getChildren();
+                List<IQTree> subs2 = ele_2.getChildren();
 
-            if((ele_1.getChildren().get(0) instanceof ExtensionalDataNode) && (ele_2.getChildren().get(0) instanceof ExtensionalDataNode)){
-                return checkEquivalentRedundancyDataNode((ExtensionalDataNode) ele_1.getChildren().get(0), (ExtensionalDataNode) ele_2.getChildren().get(0));
-            } else if ((ele_1.getChildren().get(0).getRootNode() instanceof FilterNode) && (ele_2.getChildren().get(0).getRootNode() instanceof FilterNode)){
-                if((ele_1.getChildren().get(0).getChildren().get(0) instanceof ExtensionalDataNode) && (ele_2.getChildren().get(0).getChildren().get(0) instanceof ExtensionalDataNode)){
-                    //improve this part;
-                    //return checkEquivalentRedundancyDataNode((ExtensionalDataNode) ele_1.getChildren().get(0).getChildren().get(0), (ExtensionalDataNode) ele_2.getChildren().get(0).getChildren().get(0));
-                    return true;
-                }
-            }
+                IQTree t1_check = null;
+                IQTree t2_check = null;
 
-        } else if((ele_1.getRootNode() instanceof FilterNode) && (ele_2.getRootNode() instanceof FilterNode)){
-            //improve the following compare conditions
-            if((ele_1.getChildren().get(0) instanceof ExtensionalDataNode) && (ele_2.getChildren().get(0) instanceof ExtensionalDataNode)){
-                if(ele_1.getRootNode().equals(ele_2.getRootNode())){
-                    return checkEquivalentRedundancyDataNode((ExtensionalDataNode) ele_1.getChildren().get(0), (ExtensionalDataNode) ele_2.getChildren().get(0));
-                }
-            }
-        } else if((ele_1.getRootNode() instanceof InnerJoinNode) && (ele_2.getRootNode() instanceof InnerJoinNode)){
-
-            if(ele_1.getChildren().size() == ele_2.getChildren().size()){
-                List<ExtensionalDataNode> leafs_left = new ArrayList<ExtensionalDataNode>();
-                List<FilterNode> filter_left = new ArrayList<FilterNode>();
-                List<ExtensionalDataNode> leafs_right = new ArrayList<ExtensionalDataNode>();
-                List<FilterNode> filter_right = new ArrayList<FilterNode>();
-
-                for(IQTree t: ele_1.getChildren()){
-                    if(t instanceof ExtensionalDataNode){
-                        leafs_left.add((ExtensionalDataNode)t);
-                        filter_left.add(null);
-                    } else if(t.getRootNode() instanceof FilterNode){
-                        leafs_left.add((ExtensionalDataNode)t.getChildren().get(0));
-                        filter_left.add((FilterNode) t.getRootNode());
-                    } else {
-                        return false;
-                    }
-                }
-                for(IQTree t: ele_2.getChildren()){
-                    if(t instanceof ExtensionalDataNode){
-                        leafs_right.add((ExtensionalDataNode)t);
-                        filter_right.add(null);
-                    } else if(t.getRootNode() instanceof FilterNode){
-                        leafs_right.add((ExtensionalDataNode)t.getChildren().get(0));
-                        filter_right.add((FilterNode) t.getRootNode());
-                    } else {
-                        return false;
-                    }
-                }
-
-                int index_left = -1, index_right = -1;
-                for(int i=0; i<leafs_left.size(); i++){
-                    String relation_left = leafs_left.get(i).getRelationDefinition().getAtomPredicate().toString();
-                    for(int j=0; j<leafs_right.size(); j++){
-                        String relation_right = leafs_right.get(j).getRelationDefinition().getAtomPredicate().toString();
-                        if(checkEquivalentRedundancyDataNode(leafs_left.get(i), leafs_right.get(j))){
-                            index_left = i;
-                            index_right = j;
+                for(IQTree t: subs1){
+                    if((!subs2.contains(t))){
+                        if(t1_check == null){
+                            t1_check = t;
+                        } else {
+                            return false;
                         }
                     }
                 }
-                if(index_left != -1){
-                    for(int i=0; i<leafs_left.size(); i++){
-                        if(i != index_left){
-                            if(leafs_right.contains( leafs_left.get(i))){
-                                if(filter_right.contains(filter_right.get(i))){
-                                    continue;
-                                } else {
-                                    return false;
-                                }
-                            }
+
+                for(IQTree t: subs2){
+                    if((!subs1.contains(t))){
+                        if(t2_check == null){
+                            t2_check = t;
+                        } else {
+                            return false;
                         }
                     }
-                    return true;
-                } else{
-                    return false;
                 }
+
+                return checkEquivalentRedundancyDataElement(t1_check, t2_check);
+            } else {
+                return false;
             }
         }
         return b;
@@ -702,6 +653,184 @@ public class QueryRewriting {
         }
         return res;
     }
+
+    public boolean checkEquivalentRedundancyDataNodeMayWithFilter(IQTree ele_1, IQTree ele_2){
+        boolean res = false;
+        if((ele_1 instanceof ExtensionalDataNode) && (ele_2 instanceof ExtensionalDataNode)){
+            return checkEquivalentRedundancyDataNode((ExtensionalDataNode) ele_1, (ExtensionalDataNode) ele_2);
+        } else if ((ele_1.getRootNode() instanceof FilterNode) && (ele_2.getRootNode() instanceof FilterNode)){
+            if(ele_1.getRootNode().equals(ele_2.getRootNode())){
+                if((ele_1.getChildren().get(0) instanceof ExtensionalDataNode) && (ele_2.getChildren().get(0) instanceof ExtensionalDataNode)){
+                    return checkEquivalentRedundancyDataNode((ExtensionalDataNode) ele_1.getChildren().get(0), (ExtensionalDataNode) ele_2.getChildren().get(0));
+                }
+            }
+        }
+        return res;
+    }
+
+    public boolean checkEquivalentRedundancyDataElement(IQTree ele_1, IQTree ele_2){
+        //DataNode 可能包含Filetr, Construction
+        //
+        boolean res = false;
+
+        if((ele_1.getRootNode() instanceof ConstructionNode) && (ele_2.getRootNode() instanceof ConstructionNode)){
+            if(ele_1.getChildren().get(0) instanceof ExtensionalDataNode){
+                if(!(ele_2.getRootNode() instanceof ExtensionalDataNode)){
+                    return false;
+                }
+            } else if (ele_1.getChildren().get(0).getRootNode() instanceof FilterNode){
+                if(!(ele_1.getChildren().get(0).getChildren().get(0) instanceof ExtensionalDataNode)){
+                    return false;
+                }
+                if(!(ele_2.getChildren().get(0).getRootNode() instanceof FilterNode)){
+                    return false;
+                }
+                if(!(ele_2.getChildren().get(0).getChildren().get(0) instanceof ExtensionalDataNode)){
+                    return false;
+                }
+            } else {
+                return false;
+            }
+
+            ConstructionNode cn1 = (ConstructionNode) ele_1.getRootNode();
+            ConstructionNode cn2 = (ConstructionNode) ele_2.getRootNode();
+
+            Set<Variable> cn1_vars_1 = cn1.getVariables();
+            Set<Variable> cn2_vars_2 = cn2.getVariables();
+
+            ImmutableMap<Variable, ImmutableTerm> subs1 = cn1.getSubstitution().getImmutableMap();
+            ImmutableMap<Variable, ImmutableTerm> subs2 = cn2.getSubstitution().getImmutableMap();
+
+            Map<Variable, Variable> replace_1 = new HashMap<Variable, Variable>();
+            Map<Variable, Variable> replace_2 = new HashMap<Variable, Variable>();
+
+            if(!subs1.isEmpty()){
+                for(Variable v: subs1.keySet()){
+                    if(!subs1.get(v).getVariableStream().findFirst().isEmpty()){
+                        Variable v_original = subs1.get(v).getVariableStream().findFirst().get();
+                        replace_1.put(v_original, v);
+                    }
+                }
+            }
+
+            if(!subs2.isEmpty()){
+                for(Variable v: subs2.keySet()){
+                    if(!subs2.get(v).getVariableStream().findFirst().isEmpty()){
+                        Variable v_original = subs2.get(v).getVariableStream().findFirst().get();
+                        replace_2.put(v_original, v);
+                    }
+                }
+            }
+
+            ExtensionalDataNode dn1 = null;
+            ExtensionalDataNode dn2 = null;
+
+            if(ele_1.getChildren().get(0) instanceof ExtensionalDataNode){
+                dn1 = (ExtensionalDataNode) ele_1.getChildren().get(0);
+            } else if(ele_1.getChildren().get(0).getRootNode() instanceof FilterNode){
+                if(ele_1.getChildren().get(0).getChildren().get(0) instanceof ExtensionalDataNode){
+                    dn1 = (ExtensionalDataNode) ele_1.getChildren().get(0).getChildren().get(0);
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+
+            if(ele_2.getChildren().get(0) instanceof ExtensionalDataNode){
+                dn2 = (ExtensionalDataNode) ele_2.getChildren().get(0);
+            } else if(ele_2.getChildren().get(0).getRootNode() instanceof FilterNode){
+                if(ele_2.getChildren().get(0).getChildren().get(0) instanceof ExtensionalDataNode){
+                    dn2 = (ExtensionalDataNode) ele_2.getChildren().get(0).getChildren().get(0);
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+
+            //构建额外的变量映射
+            int ct = 0;
+
+            for(Integer ind: dn1.getArgumentMap().keySet()){
+                VariableOrGroundTerm v1 = dn1.getArgumentMap().get(ind);
+                if(!v1.isGround()){
+                    Variable v1p = TERM_FACTORY.getVariable(v1.toString());
+                    if(cn1_vars_1.contains(v1p) || replace_1.containsKey(v1p)){
+                        continue;
+                    } else {
+                        if(dn2.getArgumentMap().keySet().contains(ind)){
+                            VariableOrGroundTerm v2 = dn2.getArgumentMap().get(ind);
+                            if(!v2.isGround()){
+                                Variable v2p = TERM_FACTORY.getVariable(v2.toString());
+                                Variable v_new = TERM_FACTORY.getVariable("Var"+ct);
+                                replace_1.put(v1p, v_new);
+                                replace_2.put(v2p, v_new);
+                                ct = ct + 1;
+                            }
+                        }
+                    }
+                }
+            }
+
+            IQTree t1_new = replaceVariable(replace_1, ele_1.getChildren().get(0));
+            IQTree t2_new = replaceVariable(replace_2, ele_2.getChildren().get(0));
+
+            return checkEquivalentRedundancyDataNodeMayWithFilter(t1_new, t2_new);
+
+        } else {
+            return checkEquivalentRedundancyDataNodeMayWithFilter(ele_1, ele_2);
+        }
+//        return res;
+    }
+
+    public IQTree replaceVariable(Map<Variable, Variable> substitution, IQTree t){
+        IQTree t_new = null;
+
+        if(substitution.size() == 0){
+            return t;
+        }
+
+        ExtensionalDataNode dn_old = null;
+        ExtensionalDataNode dn_new = null;
+
+        if(t instanceof ExtensionalDataNode){
+            dn_old = (ExtensionalDataNode) dn_old;
+        } else if(t.getRootNode() instanceof FilterNode) {
+            dn_old = (ExtensionalDataNode) t.getChildren().get(0);
+        } else {
+            return null;
+        }
+
+        HashMap<Integer, VariableOrGroundTerm> maps_new = new HashMap<Integer, VariableOrGroundTerm>();
+        for(Integer ind: dn_old.getArgumentMap().keySet()){
+            if(substitution.containsKey((dn_old.getArgumentMap().get(ind)))){
+                maps_new.put(ind, substitution.get((dn_old.getArgumentMap().get(ind))));
+            } else {
+                maps_new.put(ind, dn_old.getArgumentMap().get(ind));
+            }
+        }
+        dn_new = IQ_FACTORY.createExtensionalDataNode(dn_old.getRelationDefinition(), ImmutableMap.copyOf(maps_new));
+
+        FilterNode fn_old = null;
+        Set<Variable> fn_vars_old = new HashSet<Variable>();
+        FilterNode fn_new = null;
+        if(t.getRootNode() instanceof FilterNode){
+            fn_old = (FilterNode) t.getRootNode();
+        }
+        if(fn_old != null){
+            ImmutableExpression condition = fn_old.getFilterCondition();
+            fn_vars_old.addAll(fn_old.getLocalVariables());
+        }
+
+        if(fn_new == null){
+            return dn_new;
+        }
+
+        return t_new;
+    }
+
+
 
     public IQTree rewriteInnerJoin(IQTree iqt){
         boolean update = true;
@@ -781,12 +910,12 @@ public class QueryRewriting {
 
         if(root_l instanceof UnionNode){
             childern_l.addAll(left_part.getChildren());
-        } else if((root_l instanceof FilterNode) || (root_l instanceof InnerJoinNode) || (left_part instanceof ExtensionalDataNode)){
+        } else if((root_l instanceof FilterNode) || (root_l instanceof InnerJoinNode) || (root_l instanceof ConstructionNode) || (left_part instanceof ExtensionalDataNode) ){
             childern_l.add(left_part);
         }
         if(root_r instanceof UnionNode){
             childern_r.addAll(right_part.getChildren());
-        } else if((root_r instanceof FilterNode) || (root_r instanceof InnerJoinNode) || (right_part instanceof ExtensionalDataNode)){
+        } else if((root_r instanceof FilterNode) || (root_r instanceof InnerJoinNode) || (root_r instanceof ConstructionNode) || (right_part instanceof ExtensionalDataNode)){
             childern_r.add(right_part);
         }
         List<IQTree> SubTree_new = new ArrayList<IQTree>();
@@ -850,37 +979,41 @@ public class QueryRewriting {
         //Right part: B 或者 B1 JOIN B2 JOIN ... JOIN Bm
         //A, B, Ai, Bi, without UNION
 
-        JoinOfLeafs JOL_left = getLeafsOfJoin(left);
-        JoinOfLeafs JOL_right = getLeafsOfJoin(right);
+        JoinOfElements JOL_left = getElementsOfJoin(left);
+        JoinOfElements JOL_right = getElementsOfJoin(right);
         //keep the order of the leafs
         //目前只处理基于base relation的hints
-        if((JOL_left.dataNodes.size() == 0) || (JOL_right.dataNodes.size() == 0)){
+        if((JOL_left.dataElement.size() == 0) || (JOL_right.dataElement.size() == 0)){
             return ER;
         }
 
-        for(int i=0; i<JOL_left.dataNodes.size(); i++){
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_map_left = JOL_left.dataNodes.get(i).getArgumentMap();
-            for(int j=0; j<JOL_right.dataNodes.size(); j++){
-                ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_map_right = JOL_right.dataNodes.get(j).getArgumentMap();
-                for(int k: JOL_left.dataNodes.get(i).getArgumentMap().keySet()){
-                    for(int l: JOL_right.dataNodes.get(j).getArgumentMap().keySet()){
-                        if(JOL_left.dataNodes.get(i).getArgumentMap().get(k).equals(JOL_right.dataNodes.get(j).getArgumentMap().get(l))){
-                            //change the check condition based on different ways of representing hints
+        Set<String> sources = getSources(left);
+        sources.addAll(getSources(right));
+        if(sources.size() > 1){
+            for(int i=0; i<JOL_left.dataElement.size(); i++){
+                ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_map_left = JOL_left.dataElement.get(i).dn.getArgumentMap();
+                for(int j=0; j<JOL_right.dataElement.size(); j++){
+                    ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_map_right = JOL_right.dataElement.get(j).dn.getArgumentMap();
+                    for(int k: JOL_left.dataElement.get(i).dn.getArgumentMap().keySet()){
+                        for(int l: JOL_right.dataElement.get(j).dn.getArgumentMap().keySet()){
+                            if(JOL_left.dataElement.get(i).dn.getArgumentMap().get(k).equals(JOL_right.dataElement.get(j).dn.getArgumentMap().get(l))){
+                                //change the check condition based on different ways of representing hints
 
 //                            String normalName_left = getNormalFormOfRelation(JOL_left.relations.get(i).getName());
 //                            String normalName_right = getNormalFormOfRelation(JOL_right.relations.get(j).getName());
-                            String name_left = JOL_left.relations.get(i).getName();
-                            String name_right = JOL_right.relations.get(j).getName();
+                                String name_left = JOL_left.dataElement.get(i).relation.getName();
+                                String name_right = JOL_right.dataElement.get(j).relation.getName();
 
-                            if(hints.get(2).contains(name_left+"<>"+name_right+"<>"+k+"<>"+l) || hints.get(2).contains(name_right+"<>"+name_left+"<>"+l+"<>"+k)){
-                                ER.canRewrite = true;
-                                return ER;
+                                if(hints.get(2).contains(name_left+"<>"+name_right+"<>"+k+"<>"+l) || hints.get(2).contains(name_right+"<>"+name_left+"<>"+l+"<>"+k)){
+                                    ER.canRewrite = true;
+                                    return ER;
+                                }
+                                // check rewriting by materialized views
                             }
-                            // check rewriting by materialized views
                         }
                     }
-                }
 
+                }
             }
         }
 
@@ -909,105 +1042,63 @@ public class QueryRewriting {
     }
 
     //recreate join tree for (JoinNode, left, right) where sfr rule is applied
-    public ExpRewriten createJoinTree(InnerJoinNode root, JoinOfLeafs left, JoinOfLeafs right){
+    public ExpRewriten createJoinTree(InnerJoinNode root, JoinOfElements left, JoinOfElements right){
         ExpRewriten ER = new ExpRewriten();
+        //添加construction nodes;
 
         Set<Variable> vars_l_r = new HashSet<>();
         List<IQTree> childern_new = new ArrayList<IQTree>();
         List<Integer> right_index = new ArrayList<Integer>(); //记录右边被SJ消除的部分
 
-        for(int i=0; i<left.dataNodes.size(); i++){
-            IQTree t = left.dataNodes.get(i);
-            FilterNode fn = left.filters.get(i);
+        for(int i=0; i<left.dataElement.size(); i++){
+            IQTree t = left.dataElement.get(i).dn;
 
-            List<Integer> right_index_new = new ArrayList<Integer>();  //for sj checking
-            Map<Integer, VariableOrGroundTerm> arg_maps = new HashMap<Integer, VariableOrGroundTerm>();
-            if(right.relations.contains(left.relations.get(i))){ // try sjr rewriting
-                for(int j=0; j<right.relations.size(); j++){
-                    if(right_index.contains(j)){
-                        continue;
-                    }
-                    if(right.relations.get(j).equals(left.relations.get(i))){
-                        for(int index: getSinglePrimaryKeyIndexOfRelations(left.dataNodes.get(i))){
-                            if(left.dataNodes.get(i).getArgumentMap().containsKey(index) && right.dataNodes.get(j).getArgumentMap().containsKey(index) &&
-                                    left.dataNodes.get(i).getArgumentMap().get(index).equals(right.dataNodes.get(j).getArgumentMap().get(index))){
-                                right_index_new.add(j);
-                                arg_maps.putAll(right.dataNodes.get(j).getArgumentMap());
-                                ER.sjRewrite = true;
-                            }
+            List<Integer> right_index_new = new ArrayList<Integer>();  //for sj checking  //被溶解的点不含有投影
+
+            for(int j=0; j<right.dataElement.size(); j++){
+                if(right_index.contains(j)){
+                    continue;
+                }
+                if(right.dataElement.get(j).relation.equals(left.dataElement.get(i).relation)){
+                    for(int index: getSinglePrimaryKeyIndexOfRelations(left.dataElement.get(i).dn)){
+                        if(left.dataElement.get(i).dn.getArgumentMap().containsKey(index) && right.dataElement.get(j).dn.getArgumentMap().containsKey(index) &&
+                                left.dataElement.get(i).dn.getArgumentMap().get(index).equals(right.dataElement.get(j).dn.getArgumentMap().get(index))){
+                            //if(right.constructions.get(j) == null){   //new added conditions
+                            right_index_new.add(j);
+                            ER.sjRewrite = true;
+                            //}
                         }
                     }
                 }
             }
 
             if(right_index_new.size() == 0){  //不存在SJ优化
-                if(fn != null){
-                    IQTree t_new = IQ_FACTORY.createUnaryIQTree(fn, t);
-                    childern_new.add(t_new);
-                } else {
-                    childern_new.add(t);
-                }
+                childern_new.add(createDataTree(left.dataElement.get(i)));
                 vars_l_r.addAll(t.getVariables());
             } else {   //存在SJ优化
-
-                arg_maps.putAll(left.dataNodes.get(i).getArgumentMap());
-                ExtensionalDataNode dataNode_new = IQ_FACTORY.createExtensionalDataNode(left.dataNodes.get(i).getRelationDefinition(), ImmutableMap.copyOf(arg_maps));
-                //all the filter conditions are AND
-                List<ImmutableExpression> conditions = new ArrayList<ImmutableExpression>();
-                if(left.filters.get(i) != null){
-                    BooleanFunctionSymbol bfs = left.filters.get(i).getFilterCondition().getFunctionSymbol();
-                    if(bfs.toString().startsWith("AND")){ //change
-                        for(ImmutableTerm it: left.filters.get(i).getFilterCondition().getTerms()){
-                            conditions.add((ImmutableExpression) it);
-                        }
-                    } else {
-                        conditions.add(left.filters.get(i).getFilterCondition());
-                    }
-                }
+                vars_l_r.addAll(getVariablesOfDataElement(left.dataElement.get(i)));
+                List<DataElement> des = new ArrayList<DataElement>();
                 for(int j: right_index_new){
-                    if(right.filters.get(j) != null){
-                        BooleanFunctionSymbol bfs = right.filters.get(j).getFilterCondition().getFunctionSymbol();
-                        if(bfs.toString().startsWith("AND")){ //change
-                            for(ImmutableTerm it: right.filters.get(j).getFilterCondition().getTerms()){
-                                conditions.add((ImmutableExpression) it);
-                            }
-                        } else {
-                            conditions.add(right.filters.get(j).getFilterCondition());
-                        }
-                    }
-                    vars_l_r.addAll(right.dataNodes.get(j).getVariables());
-                    vars_l_r.addAll(left.dataNodes.get(i).getVariables());
+                    des.add(right.dataElement.get(j));
+                    vars_l_r.addAll(getVariablesOfDataElement(right.dataElement.get(j)));
                 }
-                right_index.addAll(right_index_new);
+                childern_new.add(mergeDataTreesSJ(left.dataElement.get(i),des));
 
-                if(conditions.size() == 0){
-                    childern_new.add(dataNode_new);
-                } else {
-                    ImmutableExpression exp = TERM_FACTORY.getConjunction(ImmutableList.copyOf(conditions));//null; //null;
-                    FilterNode fn_new = IQ_FACTORY.createFilterNode(exp);
-                    childern_new.add(IQ_FACTORY.createUnaryIQTree(fn_new, dataNode_new));
-                }
+                right_index.addAll(right_index_new);
             }
         }
 
-        for(int i=0; i<right.dataNodes.size(); i++){
+        for(int i=0; i<right.dataElement.size(); i++){
             if(right_index.contains(i)){
                 continue;
             }
-            IQTree t = right.dataNodes.get(i);
-            FilterNode fn = right.filters.get(i);
-            if(fn != null){
-                IQTree t_new = IQ_FACTORY.createUnaryIQTree(fn, t);
-                childern_new.add(t_new);
-            } else {
-                childern_new.add(t);
-            }
-            vars_l_r.addAll(t.getVariables());
+            childern_new.add(createDataTree(right.dataElement.get(i)));
+            vars_l_r.addAll(getVariablesOfDataElement(right.dataElement.get(i)));
         }
 
         InnerJoinNode root_new = root;
         ImmutableSet<Variable> vars = root.getLocalVariables();
-        //可能childern_new只有一个孩子, self-join rule的应用;;
+        //可能childern_new只有一个孩子, SJ的应用;;
         if(childern_new.size() == 1){
             if(vars.size() == 0){
                 //没有join condition
@@ -1048,58 +1139,27 @@ public class QueryRewriting {
         return ER;
     }
 
-    //improvement, add other types of nodes
-    public JoinOfLeafs getLeafsOfJoin(IQTree t){
-        JoinOfLeafs JOL = new JoinOfLeafs();
+    //这一块代码的优化
+    public JoinOfElements getElementsOfJoin(IQTree t){
+        JoinOfElements JOL = new JoinOfElements();
 
-        if(t.isLeaf()){
-            if(t instanceof ExtensionalDataNode){
-                JOL.dataNodes.add((ExtensionalDataNode) t);
-                JOL.filters.add(null);
-                JOL.relations.add(((ExtensionalDataNode) t).getRelationDefinition().getAtomPredicate());
-            }
-        } else if (t.getRootNode() instanceof FilterNode){
-            if(t.getChildren().get(0) instanceof ExtensionalDataNode){
-                JOL.filters.add((FilterNode)t.getRootNode());
-                JOL.dataNodes.add((ExtensionalDataNode)t.getChildren().get(0));
-                JOL.relations.add(((ExtensionalDataNode)t.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
-            } else {
-                JOL.otherSubTrees.add(t);
-            }
+        if((t.isLeaf()) || (t.getRootNode() instanceof FilterNode) || (t.getRootNode() instanceof ConstructionNode)){
+            addElement(JOL, t);
         } else if(t.getRootNode() instanceof InnerJoinNode){
             JOL.conditions = ((InnerJoinNode) t.getRootNode()).getOptionalFilterCondition();
             for(IQTree t_new: t.getChildren()){
-                if(t_new.isLeaf()){
-                    if(t_new instanceof ExtensionalDataNode){
-                        JOL.dataNodes.add((ExtensionalDataNode)t_new);
-                        JOL.filters.add(null);
-                        JOL.relations.add(((ExtensionalDataNode) t_new).getRelationDefinition().getAtomPredicate());
-                    }
-                } else if(t_new.getRootNode() instanceof FilterNode){
-                    if(t_new.getChildren().get(0) instanceof ExtensionalDataNode){
-                        JOL.filters.add((FilterNode) t_new.getRootNode());
-                        JOL.dataNodes.add((ExtensionalDataNode) t_new.getChildren().get(0));
-                        JOL.relations.add(((ExtensionalDataNode) t_new.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
-                    } else {
-                        JOL.otherSubTrees.add(t_new);
-                    }
-                }  else if(t_new.getRootNode() instanceof InnerJoinNode){
+                if((t_new instanceof ExtensionalDataNode) || (t_new.getRootNode() instanceof FilterNode) || (t_new.getRootNode() instanceof ConstructionNode)){
+                    addElement(JOL, t_new);
+                } else if(t_new.getRootNode() instanceof InnerJoinNode){
                     //lift join condition
                     for(IQTree sub: t_new.getChildren()){
-                        if(sub instanceof ExtensionalDataNode){
-                            JOL.dataNodes.add((ExtensionalDataNode)sub);
-                            JOL.filters.add(null);
-                            JOL.relations.add(((ExtensionalDataNode)sub).getRelationDefinition().getAtomPredicate());
-                        } else if(sub.getRootNode() instanceof FilterNode){
-                            JOL.filters.add((FilterNode)sub.getRootNode());
-                            JOL.dataNodes.add((ExtensionalDataNode) sub.getChildren().get(0));
-                            JOL.relations.add(((ExtensionalDataNode) sub.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
+                        if((sub instanceof ExtensionalDataNode) || (sub.getRootNode() instanceof FilterNode) || (sub.getRootNode() instanceof ConstructionNode)){
+                            addElement(JOL, sub);
                         } else {
                             JOL.otherSubTrees.add(sub);
                         }
                     }
-                }
-                else {
+                } else {
                     JOL.otherSubTrees.add(t_new);
                 }
             }
@@ -1110,11 +1170,156 @@ public class QueryRewriting {
         return JOL;
     }
 
+    public JoinOfElements addElement(JoinOfElements JOL, IQTree t){
+        if(t.isLeaf()){
+            if(t instanceof ExtensionalDataNode){
+                DataElement de = new DataElement((ExtensionalDataNode) t, null, null, ((ExtensionalDataNode)t).getRelationDefinition().getAtomPredicate());
+                JOL.dataElement.add(de);
+            } else {
+                JOL.otherSubTrees.add(t);
+            }
+        } else if (t.getRootNode() instanceof FilterNode){
+            if(t.getChildren().get(0) instanceof ExtensionalDataNode){
+                DataElement de = new DataElement((ExtensionalDataNode)t.getChildren().get(0),(FilterNode)t.getRootNode(),null, ((ExtensionalDataNode)t.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
+                JOL.dataElement.add(de);
+            } else {
+                JOL.otherSubTrees.add(t);
+            }
+        } else if (t.getRootNode() instanceof ConstructionNode){
+            if(t.getChildren().get(0) instanceof ExtensionalDataNode){
+                DataElement de = new DataElement((ExtensionalDataNode)t.getChildren().get(0),null,(ConstructionNode)t.getRootNode(), ((ExtensionalDataNode)t.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
+                JOL.dataElement.add(de);
+            } else if(t.getChildren().get(0).getRootNode() instanceof FilterNode){
+                if(t.getChildren().get(0).getChildren().get(0) instanceof ExtensionalDataNode){
+                    DataElement de = new DataElement((ExtensionalDataNode)t.getChildren().get(0).getChildren().get(0),(FilterNode)t.getChildren().get(0).getRootNode(),(ConstructionNode)t.getRootNode(), ((ExtensionalDataNode)t.getChildren().get(0).getChildren().get(0)).getRelationDefinition().getAtomPredicate());
+                    JOL.dataElement.add(de);
+                } else {
+                    JOL.otherSubTrees.add(t);
+                }
+
+            } else {
+                JOL.otherSubTrees.add(t);
+            }
+        }
+        return JOL;
+    }
+
+    public IQTree createDataTree(DataElement de){
+        IQTree t = null;
+        if((de.fn == null) && (de.cn == null)){
+            t = de.dn;
+        } else if(de.fn == null){
+            t = IQ_FACTORY.createUnaryIQTree(de.cn, de.dn);
+        } else if(de.cn == null){
+            t = IQ_FACTORY.createUnaryIQTree(de.fn, de.dn);
+        } else {
+            t = IQ_FACTORY.createUnaryIQTree(de.cn, IQ_FACTORY.createUnaryIQTree(de.fn, de.dn));
+        }
+        return t;
+    }
+
+    public Set<Variable> getVariablesOfDataElement(DataElement de){
+        if(de.cn != null){
+            return de.cn.getVariables();
+        } else {
+            return de.dn.getVariables();
+        }
+    }
+
+    public IQTree mergeDataTreesSJ(DataElement de_left, List<DataElement> des_right){
+        IQTree t = null;
+
+        HashMap<Integer, VariableOrGroundTerm> arg_maps = new HashMap<Integer, VariableOrGroundTerm>();
+        arg_maps.putAll(de_left.dn.getArgumentMap());
+        for(DataElement de: des_right){
+            arg_maps.putAll(de.dn.getArgumentMap());
+        }
+        ExtensionalDataNode dataNode_new = IQ_FACTORY.createExtensionalDataNode(de_left.dn.getRelationDefinition(), ImmutableMap.copyOf(arg_maps));
+
+
+        //创建filter nodes 并 构建filter node的conditions
+        List<ImmutableExpression> conditions = new ArrayList<ImmutableExpression>();
+        FilterNode fn_new = null;
+        if(de_left.fn != null){
+            BooleanFunctionSymbol bfs = de_left.fn.getFilterCondition().getFunctionSymbol();
+            if(bfs.toString().startsWith("AND")){ //change
+                for(ImmutableTerm it: de_left.fn.getFilterCondition().getTerms()){
+                    conditions.add((ImmutableExpression) it);
+                }
+            } else {
+                conditions.add(de_left.fn.getFilterCondition());
+            }
+        }
+        for(int j=0; j<des_right.size(); j++){
+            if(des_right.get(j).fn != null){
+                BooleanFunctionSymbol bfs = des_right.get(j).fn.getFilterCondition().getFunctionSymbol();
+                if(bfs.toString().startsWith("AND")){ //change
+                    for(ImmutableTerm it: des_right.get(j).fn.getFilterCondition().getTerms()){
+                        conditions.add((ImmutableExpression) it);
+                    }
+                } else {
+                    conditions.add(des_right.get(j).fn.getFilterCondition());
+                }
+            }
+        }
+        if(conditions.size() > 0){
+            ImmutableExpression exp = TERM_FACTORY.getConjunction(ImmutableList.copyOf(conditions));//null; //null;
+            fn_new = IQ_FACTORY.createFilterNode(exp);
+        }
+
+        //创建 construction node 并且判断是否有construction node :
+        boolean cn_b = false;
+        Set<Variable> vars_cn = new HashSet<Variable>();
+        List<ImmutableSubstitution<ImmutableTerm>> substitution_cn = new ArrayList<ImmutableSubstitution<ImmutableTerm>>();
+        ConstructionNode cn_new = null;
+        if(de_left.cn != null){
+            cn_b = true;
+            vars_cn.addAll(de_left.cn.getVariables());
+            if(!de_left.cn.getSubstitution().isEmpty()){
+                substitution_cn.add(de_left.cn.getSubstitution());
+            }
+        } else {
+            vars_cn.addAll(de_left.dn.getVariables());
+        }
+        for(int j=0; j<des_right.size(); j++){
+            if(des_right.get(j).cn != null){
+                cn_b = true;
+                vars_cn.addAll(des_right.get(j).cn.getVariables());
+                if(!des_right.get(j).cn.getSubstitution().isEmpty()){
+                    substitution_cn.add(des_right.get(j).cn.getSubstitution());
+                }
+            } else {
+                vars_cn.addAll(des_right.get(j).dn.getVariables());
+            }
+        }
+        if(cn_b){
+            if(substitution_cn.size() == 0){
+                cn_new = IQ_FACTORY.createConstructionNode(ImmutableSet.copyOf(vars_cn));
+            } else {
+                if(substitution_cn.size() == 1){
+                    cn_new = IQ_FACTORY.createConstructionNode(ImmutableSet.copyOf(vars_cn), substitution_cn.get(0));
+                } else {
+                    ImmutableSubstitution<ImmutableTerm> subs_merge = substitution_cn.get(0);
+                    for(int i=1; i<substitution_cn.size(); i++){
+                        subs_merge = subs_merge.composeWith(substitution_cn.get(i));
+                    }
+                    cn_new = IQ_FACTORY.createConstructionNode(ImmutableSet.copyOf(vars_cn), subs_merge);
+                }
+            }
+        }
+
+        t = createDataTree(new DataElement(dataNode_new, fn_new, cn_new, null));
+
+        return t;
+    }
+
+
     public List<IQTree> removeSemanticRedundancyAndRollingBack(List<IQTree> trees){
 
         List<IQTree> results = trees;
 
         //check and remove semantic redundancy
+
         List<Integer> index = new ArrayList<Integer>();
 
         for(int i=0; i<trees.size(); i++){
@@ -1138,6 +1343,9 @@ public class QueryRewriting {
                                 ind = j;
                             }
                         }
+                    } else if(subs.get(j).getRootNode() instanceof ConstructionNode){
+                        //新添加的
+                        ind = j;
                     }
                 }
             }
@@ -1145,88 +1353,113 @@ public class QueryRewriting {
                 continue;
             }
             //complex situation: inner join node:
-            if(subs.get(ind).isLeaf() || (subs.get(ind).getRootNode() instanceof UnionNode)){
-                subs.remove(ind);
-                if(subs.size() == 1){
-                    if(!((InnerJoinNode)trees.get(i).getRootNode()).getOptionalFilterCondition().isEmpty()){
-                        ImmutableExpression cond = ((InnerJoinNode)trees.get(i).getRootNode()).getOptionalFilterCondition().get();
-                        IQTree t_new = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(cond), subs.get(0));
-
-                        if(trees.contains(t_new)){
-                            index.add(i);
-                        }
-                    } else {
-                        if(trees.contains(subs.get(0))){
-                            index.add(i);
-                        }
-                    }
-                } else {
-                    IQTree t_new = IQ_FACTORY.createNaryIQTree((InnerJoinNode)trees.get(i).getRootNode(), ImmutableList.copyOf(subs));
-                    if(trees.contains(t_new)){
-                        index.add(i);
-                    }
+            Optional<ImmutableExpression> join_cond_ti = ((InnerJoinNode) trees.get(i).getRootNode()).getOptionalFilterCondition();
+            ImmutableExpression cond_join_ti = null;
+            ImmutableExpression cond_cn_ind = null;
+            ImmutableExpression cond_filter_ind = null;
+            if(!join_cond_ti.isEmpty()){
+                cond_join_ti = join_cond_ti.get();
+            }
+            if(subs.get(ind).getRootNode() instanceof ConstructionNode){
+                Variable v_cn = null;
+                for(Variable v: ((ConstructionNode) subs.get(ind).getRootNode()).getVariables()){
+                    v_cn = v;
                 }
-            } else if(subs.get(ind).getRootNode() instanceof FilterNode){
-                ImmutableExpression fil_cond = ((FilterNode)subs.get(ind).getRootNode()).getFilterCondition();
-                Optional<ImmutableExpression> join_cond = ((InnerJoinNode) trees.get(i).getRootNode()).getOptionalFilterCondition();
-                subs.remove(ind);
-                if(subs.size() == 1){
-                    if(trees.contains(subs.get(0))){
-                        index.add(i);
-                    } else {
-                        if(join_cond.isEmpty()){
-                            if(subs.get(0).getRootNode() instanceof FilterNode){
-                                FilterNode fn_new = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(((FilterNode)subs.get(0).getRootNode()).getFilterCondition()));
-                                IQTree t1 = IQ_FACTORY.createUnaryIQTree(fn_new, subs.get(0).getChildren().get(0));
-                                if(trees.contains(t1)){
-                                    index.add(i);
-                                } else {
-                                    fn_new = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(((FilterNode)subs.get(0).getRootNode()).getFilterCondition(), fil_cond));
-                                    t1 = IQ_FACTORY.createUnaryIQTree(fn_new, subs.get(0).getChildren().get(0));
-                                    if(trees.contains(t1)){
-                                        index.add(i);
-                                    }
-                                }
-                            }
-                        } else {
-                            if(subs.get(0).getRootNode() instanceof FilterNode){
-                                FilterNode fn_new = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(join_cond.get(), ((FilterNode)subs.get(0).getRootNode()).getFilterCondition()));
-                                IQTree t1 = IQ_FACTORY.createUnaryIQTree(fn_new, subs.get(0).getChildren().get(0));
-                                if(trees.contains(t1)){
-                                    index.add(i);
-                                } else {
-                                    fn_new = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(join_cond.get(), ((FilterNode)subs.get(0).getRootNode()).getFilterCondition(), fil_cond));
-                                    t1 = IQ_FACTORY.createUnaryIQTree(fn_new, subs.get(0).getChildren().get(0));
-                                    if(trees.contains(t1)){
-                                        index.add(i);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                cond_cn_ind = TERM_FACTORY.getDBIsNotNull(v_cn);
+                //create IS_NOT_NULL conditions on v_cn;
 
-                } else {
-                   IQTree t1 = IQ_FACTORY.createNaryIQTree((InnerJoinNode)trees.get(i).getRootNode(), ImmutableList.copyOf(subs));
-                   if(trees.contains(t1)){
-                       index.add(i);
-                   } else {
-                       if(join_cond.isEmpty()){
-                           InnerJoinNode join = IQ_FACTORY.createInnerJoinNode(fil_cond);
-                           t1 = IQ_FACTORY.createNaryIQTree(join, ImmutableList.copyOf(subs));
-                           if(trees.contains(t1)){
-                               index.add(i);
-                           }
-                       } else {
-                           InnerJoinNode join = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getConjunction(join_cond.get(), fil_cond));
-                           t1 = IQ_FACTORY.createNaryIQTree(join, ImmutableList.copyOf(subs));
-                           if(trees.contains(t1)){
-                               index.add(i);
-                           }
-                       }
-                   }
-                }
+            }
+            if(subs.get(ind).getRootNode() instanceof FilterNode){
+                cond_filter_ind = ((FilterNode) subs.get(ind).getRootNode()).getFilterCondition();
             }
 
+            subs.remove(ind);
+
+            List<ImmutableExpression> cond_extra = new ArrayList<ImmutableExpression>();
+            if(cond_filter_ind != null){
+                if(cond_filter_ind.getFunctionSymbol().getName().startsWith("AND")){
+                    for(ImmutableTerm term: cond_filter_ind.getTerms()){
+                        cond_extra.add((ImmutableExpression) term);
+                    }
+                } else {
+                    cond_extra.add(cond_filter_ind);
+                }
+            }
+            if(cond_cn_ind != null){
+                cond_extra.add(cond_cn_ind);
+            }
+
+            if(subs.size() == 1){
+                if(subs.get(0).getRootNode() instanceof FilterNode){
+                    List<ImmutableExpression> cond_fn = new ArrayList<ImmutableExpression>();
+                    FilterNode fn = (FilterNode) subs.get(0).getRootNode();
+                    if(fn.getFilterCondition().getFunctionSymbol().getName().startsWith("AND")){
+                        for(ImmutableTerm term: fn.getFilterCondition().getTerms()){
+                            cond_fn.add((ImmutableExpression) term);
+                        }
+                    } else {
+                        cond_fn.add(fn.getFilterCondition());
+                    }
+                    IQTree subt = subs.get(0).getChildren().get(0);
+                    if(cond_join_ti == null){
+                        if(trees.contains(subs.get(0))){
+                            index.add(i);
+                        } else {
+                            if(cond_extra.size() > 0){
+                                cond_fn.addAll(cond_extra);
+                                IQTree t_new = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(ImmutableList.copyOf(cond_fn))), subt);
+                                if(trees.contains(t_new)){
+                                    index.add(i);
+                                }
+                            }
+                        }
+                    } else {
+                        IQTree t_new = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(cond_join_ti, fn.getFilterCondition())), subt);
+                        if(trees.contains(t_new)){
+                            index.add(i);
+                        } else {
+                            if(cond_extra.size() > 0){
+                                cond_fn.addAll(cond_extra);
+                                t_new = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(cond_join_ti, TERM_FACTORY.getConjunction(ImmutableList.copyOf(cond_fn)))), subt);
+                                if(trees.contains(t_new)){
+                                    index.add(i);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if(cond_join_ti == null){
+                        if(trees.contains(subs.get(0))){
+                            index.add(i);
+                        } else {
+                            if(cond_extra.size() > 0){
+                                IQTree t_new = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(ImmutableList.copyOf(cond_extra))),subs.get(0));
+                                if(trees.contains(t_new)){
+                                    index.add(i);
+                                }
+                            }
+                        }
+                    } else {
+                        IQTree t_new = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(cond_join_ti),subs.get(0));
+                        if(trees.contains(t_new)){
+                            index.add(i);
+                        } else {
+                            if(cond_extra.size() > 0){
+                                ImmutableExpression exp = TERM_FACTORY.getConjunction(ImmutableList.copyOf(cond_extra));
+                                t_new = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(cond_join_ti,exp)),subs.get(0));
+                                if(trees.contains(t_new)){
+                                    index.add(i);
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                IQTree t_new = IQ_FACTORY.createNaryIQTree( (InnerJoinNode)trees.get(i).getRootNode(), ImmutableList.copyOf(subs));
+                if(trees.contains(t_new)){
+                    index.add(i);
+                }
+            }
         }
 
         if(index.size() > 0){
@@ -1381,20 +1614,20 @@ public class QueryRewriting {
             return ER;
         }
 
-        List<JoinOfLeafs> left_part = new ArrayList<JoinOfLeafs>();
-        List<JoinOfLeafs> right_part = new ArrayList<JoinOfLeafs>();
+        List<JoinOfElements> left_part = new ArrayList<JoinOfElements>();
+        List<JoinOfElements> right_part = new ArrayList<JoinOfElements>();
 
         if((left instanceof ExtensionalDataNode) || (left.getRootNode() instanceof FilterNode) || (left.getRootNode() instanceof InnerJoinNode) ){
-            if(getLeafsOfJoin(left).dataNodes.size() > 0){
-                left_part.add(getLeafsOfJoin(left));
+            if(getElementsOfJoin(left).dataElement.size() > 0){
+                left_part.add(getElementsOfJoin(left));
             } else {
                 return ER;
             }
         } else if(left.getRootNode() instanceof UnionNode){
             for(IQTree t: left.getChildren()){
                 if((t instanceof ExtensionalDataNode) || (t.getRootNode() instanceof FilterNode) || (t.getRootNode() instanceof InnerJoinNode)){
-                    if(getLeafsOfJoin(t).dataNodes.size()>0){
-                        left_part.add(getLeafsOfJoin(t));
+                    if(getElementsOfJoin(t).dataElement.size()>0){
+                        left_part.add(getElementsOfJoin(t));
                     } else {
                         return ER;
                     }
@@ -1405,16 +1638,16 @@ public class QueryRewriting {
         }
 
         if((right instanceof ExtensionalDataNode) || (right.getRootNode() instanceof FilterNode) || (right.getRootNode() instanceof InnerJoinNode) ){
-            if(getLeafsOfJoin(right).dataNodes.size() > 0){
-                right_part.add(getLeafsOfJoin(right));
+            if(getElementsOfJoin(right).dataElement.size() > 0){
+                right_part.add(getElementsOfJoin(right));
             } else {
                 return ER;
             }
         } else if(right.getRootNode() instanceof UnionNode){
             for(IQTree t: right.getChildren()){
                 if((t instanceof ExtensionalDataNode) || (t.getRootNode() instanceof FilterNode) || (t.getRootNode() instanceof InnerJoinNode)){
-                    if(getLeafsOfJoin(t).dataNodes.size()>0){
-                        right_part.add(getLeafsOfJoin(t));
+                    if(getElementsOfJoin(t).dataElement.size()>0){
+                        right_part.add(getElementsOfJoin(t));
                     } else {
                         return ER;
                     }
@@ -1425,21 +1658,22 @@ public class QueryRewriting {
         }
 
         Map<Integer, Integer> index = new HashMap<Integer, Integer>(); // Ai JOIN Bj not empty
+
         for(int i=0; i<left_part.size(); i++){
             for(int k=0; k<right_part.size(); k++){
                 boolean label = false;
 
-                for(int j=0; j<left_part.get(i).dataNodes.size(); j++){
-                    for(int l=0; l<right_part.get(k).dataNodes.size(); l++){
-                        RelationPredicate relation_left = left_part.get(i).relations.get(j);
+                for(int j=0; j<left_part.get(i).dataElement.size(); j++){
+                    for(int l=0; l<right_part.get(k).dataElement.size(); l++){
+                        RelationPredicate relation_left = left_part.get(i).dataElement.get(j).relation;
                         String name_left = relation_left.toString();
   //                      String normalName_left = getNormalFormOfRelation(name_left);
-                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_left = left_part.get(i).dataNodes.get(j).getArgumentMap();
+                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_left = left_part.get(i).dataElement.get(j).dn.getArgumentMap();
 
-                        RelationPredicate relation_right = right_part.get(k).relations.get(l);
+                        RelationPredicate relation_right = right_part.get(k).dataElement.get(l).relation;
                         String name_right = relation_right.toString();
   //                      String normalName_right = getNormalFormOfRelation(name_right);
-                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_right = right_part.get(k).dataNodes.get(l).getArgumentMap();
+                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_right = right_part.get(k).dataElement.get(l).dn.getArgumentMap();
 
                         for(int f: arg_left.keySet()){
                             for(int h: arg_right.keySet()){
@@ -1466,21 +1700,21 @@ public class QueryRewriting {
             }
         }
 
-        //check the pairwise disjoint feature of the elements in the unions in the left hand side.
+        //当LJ的左节点是一个UNION节点，检查左侧元素的两两不相交的性质
         if(left_part.size()>1){
             for(int i=0; i<left_part.size(); i++){
                 for(int j=i+1; j<left_part.size(); j++){
                     boolean b = false;
-                    for(int k=0; k<left_part.get(i).dataNodes.size(); k++){
-                        RelationPredicate relation_1 = left_part.get(i).relations.get(k);
+                    for(int k=0; k<left_part.get(i).dataElement.size(); k++){
+                        RelationPredicate relation_1 = left_part.get(i).dataElement.get(k).relation;
                         String name_1 = relation_1.toString();
 //                        String normalName_1 = getNormalFormOfRelation(name_1);
-                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_1 = left_part.get(i).dataNodes.get(k).getArgumentMap();
-                        for(int l=0; l<left_part.get(j).dataNodes.size(); l++){
-                            RelationPredicate relation_2 = left_part.get(j).relations.get(l);
+                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_1 = left_part.get(i).dataElement.get(k).dn.getArgumentMap();
+                        for(int l=0; l<left_part.get(j).dataElement.size(); l++){
+                            RelationPredicate relation_2 = left_part.get(j).dataElement.get(l).relation;
                             String name_2 = relation_2.toString();
 //                            String normalName_2 = getNormalFormOfRelation(name_2);
-                            ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_2 = left_part.get(j).dataNodes.get(l).getArgumentMap();
+                            ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_2 = left_part.get(j).dataElement.get(l).dn.getArgumentMap();
                             for(int h: arg_1.keySet()){
                                 for(int f: arg_2.keySet()){
                                     if(arg_1.get(h).equals(arg_2.get(f))){
@@ -1515,10 +1749,10 @@ public class QueryRewriting {
                 }
                 return ER;
             } else {
-                if(right_part.get(0).dataNodes.size() > 1){
+                if(right_part.get(0).dataElement.size() > 1){
                     //this situation cannot apply self-left-join rewriting
                     return ER;
-                }
+                } // 可以SLJ重写的内容，涵盖在了下面的实现中
             }
 
         }
@@ -1527,78 +1761,41 @@ public class QueryRewriting {
             List<IQTree> subtrees = new ArrayList<IQTree>();
             for(int i: index.keySet()){
                 int j = index.get(i);
-                if(right_part.get(j).dataNodes.size()==1){
+                if(right_part.get(j).dataElement.size()==1){
                     boolean b = false; //self-left-join check
                     int ind_i = 0;
-                    RelationPredicate relation_j = right_part.get(j).relations.get(0);
-                    ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_j = right_part.get(j).dataNodes.get(0).getArgumentMap();
+                    RelationPredicate relation_j = right_part.get(j).dataElement.get(0).relation;
+                    ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_j = right_part.get(j).dataElement.get(0).dn.getArgumentMap();
 
-                    if(left_part.get(i).relations.contains(relation_j)){
-                        int ind = left_part.get(i).relations.indexOf(relation_j);
-                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_i = left_part.get(i).dataNodes.get(ind).getArgumentMap();
-                        List<Integer> pk_index_i = getSinglePrimaryKeyIndexOfRelations(left_part.get(i).dataNodes.get(ind));
-                        for(int pk_ind: pk_index_i){
-                            if(arg_j.containsKey(pk_ind) && arg_i.containsKey(pk_ind) && (arg_j.get(pk_ind).equals(arg_i.get(pk_ind)))){
+                    for(int k=0; k<left_part.get(i).dataElement.size(); k++){
+                        if(left_part.get(i).dataElement.get(k).relation.equals(relation_j)){
+                            int ind = k;
+                            ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_i = left_part.get(i).dataElement.get(ind).dn.getArgumentMap();
+                            List<Integer> pk_index_i = getSinglePrimaryKeyIndexOfRelations(left_part.get(i).dataElement.get(ind).dn);
+                            for(int pk_ind: pk_index_i){
+                                if(arg_j.containsKey(pk_ind) && arg_i.containsKey(pk_ind) && (arg_j.get(pk_ind).equals(arg_i.get(pk_ind)))){
 
-                                b=true;
-                                ind_i = ind;
+                                    b=true;
+                                    ind_i = ind;
+                                }
                             }
                         }
                     }
                     if(b){
-                        //first create a new data node
-                        Map<Integer, VariableOrGroundTerm> args = new HashMap<Integer, VariableOrGroundTerm>();
-                        args.putAll(arg_j);
-                        args.putAll(left_part.get(i).dataNodes.get(ind_i).getArgumentMap());
-                        ExtensionalDataNode data_new = IQ_FACTORY.createExtensionalDataNode(left_part.get(i).dataNodes.get(ind_i).getRelationDefinition(), ImmutableMap.copyOf(args));
-                        List<ImmutableExpression> cond_new = new ArrayList<ImmutableExpression>();
-                        FilterNode fn_new = null;
-                        if(left_part.get(i).filters.get(ind_i) != null){
-                            if(left_part.get(i).filters.get(ind_i).getFilterCondition().getFunctionSymbol().getName().startsWith("AND")){
-                                for(ImmutableTerm it : left_part.get(i).filters.get(ind_i).getFilterCondition().getTerms()){
-                                    cond_new.add((ImmutableExpression)it);
-                                }
-                            } else {
-                                cond_new.add(left_part.get(i).filters.get(ind_i).getFilterCondition());
-                            }
-                        }
-                        if(right_part.get(j).filters.get(0) != null){
-                            if(right_part.get(j).filters.get(0).getFilterCondition().getFunctionSymbol().getName().startsWith("AND")){
-                                for(ImmutableTerm it : right_part.get(j).filters.get(0).getFilterCondition().getTerms()){
-                                    cond_new.add((ImmutableExpression)it);
-                                }
-                            } else {
-                                cond_new.add(right_part.get(j).filters.get(0).getFilterCondition());
-                            }
-                        }
-                        if(cond_new.size() == 1){
-                            fn_new = IQ_FACTORY.createFilterNode(cond_new.get(0));
-                        } else if(cond_new.size() > 1){
-                            fn_new = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(ImmutableList.copyOf(cond_new)));
-                        }
+                        List<DataElement> de_right = new ArrayList<DataElement>();
+                        de_right.add(right_part.get(j).dataElement.get(0));
+                        IQTree node_SJ = mergeDataTreesSJ(left_part.get(i).dataElement.get(ind_i), de_right);
 
-                        if(left_part.get(i).dataNodes.size() == 1){
-                            if(fn_new == null){
-                                subtrees.add(data_new);
-                            } else {
-                                subtrees.add(IQ_FACTORY.createUnaryIQTree(fn_new, data_new));
-                            }
+                        if(left_part.get(i).dataElement.size() == 1){
+                            subtrees.add(node_SJ);
                         } else {
                             InnerJoinNode join = IQ_FACTORY.createInnerJoinNode(left_part.get(i).conditions);
                             List<IQTree> sub_sub_t = new ArrayList<IQTree>();
-                            for(int l=0; l<left_part.get(i).dataNodes.size(); l++){
+                            for(int l=0; l<left_part.get(i).dataElement.size(); l++){
                                 if(l != ind_i){
-                                    if(left_part.get(i).filters.get(l) == null){
-                                        sub_sub_t.add(left_part.get(i).dataNodes.get(l));
-                                    } else {
-                                        sub_sub_t.add(IQ_FACTORY.createUnaryIQTree(left_part.get(i).filters.get(l), left_part.get(i).dataNodes.get(l)));
-                                    }
+                                    sub_sub_t.add(createDataTree(left_part.get(i).dataElement.get(l)));
                                 } else {
-                                    if(fn_new == null){
-                                        sub_sub_t.add(data_new);
-                                    } else {
-                                        sub_sub_t.add(IQ_FACTORY.createUnaryIQTree(fn_new, data_new));
-                                    }
+                                    sub_sub_t.add(node_SJ);
                                 }
                             }
 
@@ -1607,6 +1804,10 @@ public class QueryRewriting {
                             subtrees.add(IQ_FACTORY.createNaryIQTree(join, ImmutableList.copyOf(sub_sub_t)));
                         }
                     } else {
+                        if((left_part.size() == 1) && (right_part.size() == 1)){
+                            //此种情况下，不存在SLJ优化，就可以返回了;
+                            return ER;
+                        }
                         LeftJoinNode root_subtree = root; //make a copy of root
                         subtrees.add(IQ_FACTORY.createBinaryNonCommutativeIQTree(root_subtree, left.getChildren().get(i), right.getChildren().get(j)));
                     }
@@ -1622,6 +1823,7 @@ public class QueryRewriting {
             }
 
             ER.canRewrite = true;
+
             if(subtrees.size() == 1){
                 ER.newRewritten = subtrees.get(0);
             } else {
@@ -1792,126 +1994,157 @@ public class QueryRewriting {
         //Right B, B1 JOIN B2 JOIN ... JOIN Bm
         //A, B, Ai, Bi, without UNION
 
-        JoinOfLeafs JOL_left = getLeafsOfJoin(left);
-        JoinOfLeafs JOL_right = getLeafsOfJoin(right);
+        JoinOfElements JOL_left = getElementsOfJoin(left);
+        JoinOfElements JOL_right = getElementsOfJoin(right);
         //keep the order of the leafs
-        if((JOL_left.dataNodes.size() == 0) || (JOL_right.dataNodes.size() == 0)){
+        if((JOL_left.dataElement.size() == 0) || (JOL_right.dataElement.size() == 0)){
             return ER;
         }
 
-        for(int i=0; i<JOL_left.dataNodes.size(); i++){
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_map_left = JOL_left.dataNodes.get(i).getArgumentMap();
-            for(int j=0; j<JOL_right.dataNodes.size(); j++){
-                ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_map_right = JOL_right.dataNodes.get(j).getArgumentMap();
-                for(int k: JOL_left.dataNodes.get(i).getArgumentMap().keySet()){
-                    for(int l: JOL_right.dataNodes.get(j).getArgumentMap().keySet()){
-                        if(JOL_left.dataNodes.get(i).getArgumentMap().get(k).equals(JOL_right.dataNodes.get(j).getArgumentMap().get(l))){
-                            //change the check condition based on different ways of representing hints
-                            //check conditions for rewriting based on materialized views;
-                            String relation1 = JOL_left.relations.get(i).getName();
-        //                    String normalName_relation1 = getNormalFormOfRelation(relation1);
-                            int ind1 = k;
-                            String relation2 = JOL_right.relations.get(j).getName();
-        //                    String normalName_relation2 = getNormalFormOfRelation(relation2);
-                            int ind2 = l;
-                            if(hint_matv.containsKey(relation1+"<>"+relation2+"<>"+k+"<>"+l)||hint_matv.containsKey(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
-                                //create a new data node for left_i and right_j;
-                                FilterNode fn_ij = null;
-                                RelationPredicate matv = null; //name of the relations for MatV
-                                NamedRelationDefinition NRD = null;
-                                boolean b = true;
-                                if(hint_matv.containsKey(relation1+"<>"+relation2+"<>"+k+"<>"+l)){
-                                    NRD = createDatabaseRelationForMatV(hint_matv.get(relation1+"<>"+relation2+"<>"+k+"<>"+l));
-                                } else if(hint_matv.containsKey(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
-                                    NRD = createDatabaseRelationForMatV(hint_matv.get(relation2+"<>"+relation1+"<>"+l+"<>"+k));
-                                    b = false;
-                                }
+        Set<String> sources = getSources(left);
+        sources.addAll(getSources(right));
+        if(sources.size() > 1){
+            for(int i=0; i<JOL_left.dataElement.size(); i++){
+                ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_map_left = JOL_left.dataElement.get(i).dn.getArgumentMap();
+                for(int j=0; j<JOL_right.dataElement.size(); j++){
+                    ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_map_right = JOL_right.dataElement.get(j).dn.getArgumentMap();
+                    for(int k: JOL_left.dataElement.get(i).dn.getArgumentMap().keySet()){
+                        for(int l: JOL_right.dataElement.get(j).dn.getArgumentMap().keySet()){
+                            if(JOL_left.dataElement.get(i).dn.getArgumentMap().get(k).equals(JOL_right.dataElement.get(j).dn.getArgumentMap().get(l))){
+                                //change the check condition based on different ways of representing hints
+                                //check conditions for rewriting based on materialized views;
+                                String relation1 = JOL_left.dataElement.get(i).relation.getName();
+                                //                    String normalName_relation1 = getNormalFormOfRelation(relation1);
+                                int ind1 = k;
+                                String relation2 = JOL_right.dataElement.get(j).relation.getName();
+                                //                    String normalName_relation2 = getNormalFormOfRelation(relation2);
+                                int ind2 = l;
+                                if(hint_matv.containsKey(relation1+"<>"+relation2+"<>"+k+"<>"+l)||hint_matv.containsKey(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
+                                    //create a new data node for left_i and right_j;
+                                    FilterNode fn_ij = null;
+                                    RelationPredicate matv = null; //name of the relations for MatV
+                                    NamedRelationDefinition NRD = null;
+                                    boolean b = true;
+                                    if(hint_matv.containsKey(relation1+"<>"+relation2+"<>"+k+"<>"+l)){
+                                        NRD = createDatabaseRelationForMatV(hint_matv.get(relation1+"<>"+relation2+"<>"+k+"<>"+l));
+                                    } else if(hint_matv.containsKey(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
+                                        NRD = createDatabaseRelationForMatV(hint_matv.get(relation2+"<>"+relation1+"<>"+l+"<>"+k));
+                                        b = false;
+                                    }
 
-                                ImmutableList<Attribute> attrs_matv = NRD.getAttributes();
-                                Map<Integer, VariableOrGroundTerm> args_new = new HashMap<Integer, VariableOrGroundTerm>();
-                                //make sure the relations occurring in the left_part and right_part of the join
-                                if(b){
-                                    for(int k1: arg_map_left.keySet()){
-                                        for(int index=0; index<attrs_matv.size(); index++){
-                                            if(attrs_matv.get(index).getID().toString().equals("\"1_"+k1+"\"")){
-                                                args_new.put(index, arg_map_left.get(k1));
+                                    ImmutableList<Attribute> attrs_matv = NRD.getAttributes();
+                                    Map<Integer, VariableOrGroundTerm> args_new = new HashMap<Integer, VariableOrGroundTerm>();
+                                    //make sure the relations occurring in the left_part and right_part of the join
+                                    if(b){
+                                        for(int k1: arg_map_left.keySet()){
+                                            for(int index=0; index<attrs_matv.size(); index++){
+                                                if(attrs_matv.get(index).getID().toString().equals("\"1_"+k1+"\"")){
+                                                    args_new.put(index, arg_map_left.get(k1));
+                                                }
                                             }
                                         }
-                                    }
-                                    for(int l1: arg_map_right.keySet()){
-                                        if(l1 == l){
-                                            continue;
-                                        }
-                                        for(int index=0; index<attrs_matv.size(); index++){
-                                            if(attrs_matv.get(index).getID().toString().equals("\"2_"+l1+"\"")){
-                                                args_new.put(index, arg_map_right.get(l1));
+                                        for(int l1: arg_map_right.keySet()){
+                                            if(l1 == l){
+                                                continue;
                                             }
-                                        }
-                                    }
-                                } else {
-                                    for(int k1: arg_map_left.keySet()){
-                                        if(k1 == k){
-                                            continue;
-                                        }
-                                        for(int index=0; index<attrs_matv.size(); index++){
-                                            if(attrs_matv.get(index).getID().toString().equals("\"2_"+k1+"\"")){
-                                                args_new.put(index, arg_map_left.get(k1));
+                                            for(int index=0; index<attrs_matv.size(); index++){
+                                                if(attrs_matv.get(index).getID().toString().equals("\"2_"+l1+"\"")){
+                                                    args_new.put(index, arg_map_right.get(l1));
+                                                }
                                             }
-                                        }
-                                    }
-                                    for(int l1: arg_map_right.keySet()){
-                                        for(int index=0; index<attrs_matv.size(); index++){
-                                            if(attrs_matv.get(index).getID().toString().equals("\"1_"+l1+"\"")){
-                                                args_new.put(index, arg_map_right.get(l1));
-                                            }
-                                        }
-                                    }
-                                }
-
-                                List<ImmutableExpression> conds = new ArrayList<ImmutableExpression>();
-                                if(JOL_left.filters.get(i) != null){
-                                    ImmutableExpression exp = JOL_left.filters.get(i).getFilterCondition();
-                                    if(exp.getFunctionSymbol().getName().startsWith("AND")){
-                                        for(ImmutableTerm it: exp.getTerms()){
-                                            conds.add((ImmutableExpression) it);
                                         }
                                     } else {
-                                        conds.add(exp);
-                                    }
-                                }
-                                if(JOL_right.filters.get(j) != null){
-                                    ImmutableExpression exp = JOL_right.filters.get(j).getFilterCondition();
-                                    if(exp.getFunctionSymbol().getName().startsWith("AND")){
-                                        for(ImmutableTerm it: exp.getTerms()){
-                                            conds.add((ImmutableExpression) it);
+                                        for(int k1: arg_map_left.keySet()){
+                                            if(k1 == k){
+                                                continue;
+                                            }
+                                            for(int index=0; index<attrs_matv.size(); index++){
+                                                if(attrs_matv.get(index).getID().toString().equals("\"2_"+k1+"\"")){
+                                                    args_new.put(index, arg_map_left.get(k1));
+                                                }
+                                            }
                                         }
-                                    } else {
-                                        conds.add(exp);
+                                        for(int l1: arg_map_right.keySet()){
+                                            for(int index=0; index<attrs_matv.size(); index++){
+                                                if(attrs_matv.get(index).getID().toString().equals("\"1_"+l1+"\"")){
+                                                    args_new.put(index, arg_map_right.get(l1));
+                                                }
+                                            }
+                                        }
                                     }
+
+                                    List<ImmutableExpression> conds = new ArrayList<ImmutableExpression>();
+                                    if(JOL_left.dataElement.get(i).fn != null){
+                                        ImmutableExpression exp = JOL_left.dataElement.get(i).fn.getFilterCondition();
+                                        if(exp.getFunctionSymbol().getName().startsWith("AND")){
+                                            for(ImmutableTerm it: exp.getTerms()){
+                                                conds.add((ImmutableExpression) it);
+                                            }
+                                        } else {
+                                            conds.add(exp);
+                                        }
+                                    }
+                                    if(JOL_right.dataElement.get(j).fn != null){
+                                        ImmutableExpression exp = JOL_right.dataElement.get(j).fn.getFilterCondition();
+                                        if(exp.getFunctionSymbol().getName().startsWith("AND")){
+                                            for(ImmutableTerm it: exp.getTerms()){
+                                                conds.add((ImmutableExpression) it);
+                                            }
+                                        } else {
+                                            conds.add(exp);
+                                        }
+                                    }
+
+                                    if(conds.size() == 1){
+                                        fn_ij = IQ_FACTORY.createFilterNode(conds.get(0));
+                                    } else if(conds.size() >1){
+                                        fn_ij = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(ImmutableList.copyOf(conds)));
+                                    }
+
+                                    ConstructionNode cn_ij = null;
+                                    boolean cn_node = false;
+                                    Set<Variable> cn_vars = new HashSet<Variable>();
+                                    List<ImmutableSubstitution<ImmutableTerm>> cn_subs = new ArrayList<ImmutableSubstitution<ImmutableTerm>>();
+                                    if(JOL_left.dataElement.get(i).cn != null){
+                                        cn_node = true;
+                                        cn_vars.addAll(JOL_left.dataElement.get(i).cn.getVariables());
+                                        cn_subs.add(JOL_left.dataElement.get(i).cn.getSubstitution());
+                                    } else {
+                                        cn_vars.addAll(getVariablesOfDataElement(JOL_left.dataElement.get(i)));
+                                    }
+                                    if(JOL_right.dataElement.get(j).cn != null){
+                                        cn_node = true;
+                                        cn_vars.addAll(JOL_right.dataElement.get(j).cn.getVariables());
+                                        cn_subs.add(JOL_right.dataElement.get(j).cn.getSubstitution());
+                                    } else {
+                                        cn_vars.addAll(getVariablesOfDataElement(JOL_right.dataElement.get(j)));
+                                    }
+                                    if(cn_node){
+                                        if(cn_subs.size() == 0){
+                                            cn_ij = IQ_FACTORY.createConstructionNode(ImmutableSet.copyOf(cn_vars));
+                                        } else if(cn_subs.size() == 1){
+                                            cn_ij = IQ_FACTORY.createConstructionNode(ImmutableSet.copyOf(cn_vars), cn_subs.get(0));
+                                        } else {
+                                            cn_ij = IQ_FACTORY.createConstructionNode(ImmutableSet.copyOf(cn_vars), cn_subs.get(0).composeWith(cn_subs.get(1)));
+                                        }
+                                    }
+
+                                    ExtensionalDataNode edn_ij = IQ_FACTORY.createExtensionalDataNode(NRD, ImmutableMap.copyOf(args_new));
+                                    DataElement de = new DataElement(edn_ij, fn_ij, cn_ij, null);
+
+                                    JOL_left.dataElement.set(i,de);
+
+                                    JOL_right.dataElement.remove(j);
+
+                                    ER = createJoinTree(root, JOL_left, JOL_right);
+                                    ER.canRewrite = true;
+                                    return ER;
                                 }
-
-                                if(conds.size() == 1){
-                                    fn_ij = IQ_FACTORY.createFilterNode(conds.get(0));
-                                } else if(conds.size() >1){
-                                    fn_ij = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(ImmutableList.copyOf(conds)));
-                                }
-                                ExtensionalDataNode edn_ij = IQ_FACTORY.createExtensionalDataNode(NRD, ImmutableMap.copyOf(args_new));
-
-                                JOL_left.dataNodes.set(i,edn_ij);
-                                JOL_left.filters.set(i, fn_ij);
-
-                                JOL_right.dataNodes.remove(j);
-                                JOL_right.filters.remove(j);
-                                JOL_right.relations.remove(j);
-
-                                ER = createJoinTree(root, JOL_left, JOL_right);
-                                ER.canRewrite = true;
-                                return ER;
                             }
                         }
                     }
-                }
 
+                }
             }
         }
 
@@ -1959,19 +2192,38 @@ class ExpRewriten{
     }
 }
 
-class JoinOfLeafs{
-    public List<ExtensionalDataNode> dataNodes;
-    public List<FilterNode> filters;
-    public List<RelationPredicate> relations;
+class JoinOfElements{
+    //represent the nodes of join trees, DataNode, FilterNode+DataNode, ConstructionNode+DataNode, ConstructionNode+FilterNode+DataNode, Other SubTrees
+    public List<DataElement> dataElement;
     public Optional<ImmutableExpression> conditions;
     public List<IQTree> otherSubTrees;
 
-    public JoinOfLeafs(){
-        dataNodes = new ArrayList<ExtensionalDataNode>();
-        filters = new ArrayList<FilterNode>();
-        relations = new ArrayList<RelationPredicate>();
+    public JoinOfElements(){
+        dataElement = new ArrayList<DataElement>();
         conditions = null;
         otherSubTrees = new ArrayList<IQTree>();
     }
 }
+
+class DataElement{
+    public ExtensionalDataNode dn;
+    public FilterNode fn;
+    public ConstructionNode cn;
+    public RelationPredicate relation;
+
+    public DataElement(){
+        dn = null;
+        fn = null;
+        cn = null;
+        relation = null;
+    }
+    public DataElement(ExtensionalDataNode dn, FilterNode fn, ConstructionNode cn, RelationPredicate relation){
+        this.dn = dn;
+        this.fn = fn;
+        this.cn = cn;
+        this.relation = relation;
+    }
+}
+
+
 
