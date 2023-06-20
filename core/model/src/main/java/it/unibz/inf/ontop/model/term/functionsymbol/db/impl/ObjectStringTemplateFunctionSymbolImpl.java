@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.StringConstantDecomposer;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractEncodeURIorIRIFunctionSymbol.IRISafeEnDecoder;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -457,8 +458,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     }
 
     @Override
-    public Optional<Function<DBConstant, Optional<ImmutableList<DBConstant>>>> getDecomposer(ImmutableList<? extends ImmutableTerm> terms,
-                                                                                             TermFactory termFactory, VariableNullability variableNullability) {
+    public Optional<StringConstantDecomposer> getDecomposer(ImmutableList<? extends ImmutableTerm> terms,
+                                                            TermFactory termFactory, VariableNullability variableNullability) {
 
         if (isInjective(terms, variableNullability, termFactory)) {
             Pattern pattern = getPattern();

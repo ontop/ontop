@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.StringConstantDecomposer;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import javax.annotation.Nonnull;
@@ -78,6 +79,16 @@ public class DefaultSimpleDBCastFunctionSymbol extends AbstractDBTypeConversionF
     @Override
     public boolean isSimple() {
         return true;
+    }
+
+    @Override
+    public Optional<StringConstantDecomposer> getDecomposer(TermFactory termFactory) {
+        if (inputType == null || (!inputType.areEqualitiesStrict()))
+            return Optional.empty();
+
+        return Optional.of(cst -> inputType.isValidLexicalValue(cst.getValue())
+                .filter(isValid -> isValid)
+                .map(b -> ImmutableList.of(termFactory.getDBConstant(cst.getValue(), inputType))));
     }
 
     @Override

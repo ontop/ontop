@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.StringConstantDecomposer;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -33,7 +34,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -447,10 +447,9 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
             return decomposeObjectTemplateString(variableGenerator, variable, functionalTerm,
                     (ObjectStringTemplateFunctionSymbol) functionSymbol);
         }
-        if ((functionSymbol instanceof DBTypeConversionFunctionSymbol)
-                && ((DBTypeConversionFunctionSymbol) functionSymbol).isSimple()) {
-            return decomposeSimpleCast(variable, (DBTypeConversionFunctionSymbol) functionSymbol, variableGenerator);
-
+        if (functionSymbol instanceof DBTypeConversionFunctionSymbol) {
+            return ((DBTypeConversionFunctionSymbol) functionSymbol).getDecomposer(termFactory)
+                    .flatMap(decomposer -> decompose(decomposer, variable, functionSymbol, variableGenerator));
         }
         return Optional.empty();
     }
@@ -465,12 +464,12 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         if (optionalDecomposer.isEmpty())
             return Optional.empty();
 
-        Function<DBConstant, Optional<ImmutableList<DBConstant>>> decomposer = optionalDecomposer.get();
+        StringConstantDecomposer decomposer = optionalDecomposer.get();
 
         return decompose(decomposer, variableToReplace, templateFunctionSymbol, variableGenerator);
     }
 
-    private Optional<IQTree> decompose(Function<DBConstant, Optional<ImmutableList<DBConstant>>> decomposer,
+    private Optional<IQTree> decompose(StringConstantDecomposer decomposer,
                                        Variable variableToReplace, FunctionSymbol functionSymbol,
                                        VariableGenerator variableGenerator) {
         int variablePosition = orderedVariables.indexOf(variableToReplace);
@@ -479,7 +478,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 .map(row -> Optional.of(row.get(variablePosition))
                         .filter(c -> c instanceof DBConstant)
                         .map(c -> (DBConstant) c)
-                        .flatMap(c -> decomposer.apply(c)
+                        .flatMap(c -> decomposer.decompose(c)
                                 .map(additionalColumns -> mergeColumns(row, variablePosition, additionalColumns))))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -488,21 +487,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         return buildNewTreeWithDecomposition(variableGenerator, variableToReplace, functionSymbol, newValues);
     }
 
-    private Optional<IQTree> decomposeSimpleCast(Variable variableToReplace, DBTypeConversionFunctionSymbol functionSymbol,
-                                                 VariableGenerator variableGenerator) {
-        Optional<DBTermType> optionalInputType = functionSymbol.getInputType();
-        if (optionalInputType.isEmpty())
-            return Optional.empty();
-
-        DBTermType inputType = optionalInputType.get();
-
-        return decompose(
-                cst -> inputType.isValidLexicalValue(cst.getValue())
-                        .filter(isValid -> isValid)
-                        .map(b -> ImmutableList.of(termFactory.getDBConstant(cst.getValue(), inputType))),
-                variableToReplace, functionSymbol, variableGenerator);
-
-    }
 
     private Optional<IQTree> buildNewTreeWithDecomposition(VariableGenerator variableGenerator, Variable variableToReplace,
                                                            FunctionSymbol functionSymbol,
