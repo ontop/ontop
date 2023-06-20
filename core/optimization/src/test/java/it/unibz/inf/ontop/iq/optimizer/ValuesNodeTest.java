@@ -489,6 +489,50 @@ public class ValuesNodeTest {
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
 
+    @Test
+    public void testJoinIRITemplateString8() {
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR2, ImmutableMap.of(0, A, 1, B));
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        X, TERM_FACTORY.getIRIFunctionalTerm(
+                                Template.builder()
+                                        .addSeparator("http://localhost/thing/")
+                                        .addColumn()
+                                        .addSeparator("/")
+                                        .addColumn()
+                                        .build(),
+                                ImmutableList.of(A, B)
+                        ).getTerm(0)));
+
+        ValuesNode valuesNode = IQ_FACTORY.createValuesNode(
+                ImmutableList.of(X),
+                ImmutableList.of(
+                        ImmutableList.of(TERM_FACTORY.getDBStringConstant("http://localhost/thing/1%2F/3")),
+                        ImmutableList.of(TERM_FACTORY.getDBStringConstant("http://localhost/thing/2/4")),
+                        ImmutableList.of(TERM_FACTORY.getNullConstant()),
+                        ImmutableList.of(TERM_FACTORY.getDBStringConstant("http://localhost/somethingelse"))));
+
+        IQTree initialTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(valuesNode, IQ_FACTORY.createUnaryIQTree(constructionNode, dataNode)));
+
+        ValuesNode newValuesNode = IQ_FACTORY.createValuesNode(
+                ImmutableList.of(A, B),
+                ImmutableList.of(
+                        ImmutableList.of(TERM_FACTORY.getDBStringConstant("1/"), TERM_FACTORY.getDBStringConstant("3")),
+                        ImmutableList.of(TERM_FACTORY.getDBStringConstant("2"), TERM_FACTORY.getDBStringConstant("4"))));
+
+        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createNaryIQTree(
+                        IQ_FACTORY.createInnerJoinNode(),
+                        ImmutableList.of(newValuesNode, dataNode)));
+
+        assertTrue(baseTestNormalization(initialTree, expectedTree));
+    }
+
     private Boolean baseTestNormalization(IQTree initialTree, IQTree expectedTree) {
         System.out.println('\n' + "Tree before normalizing:");
         System.out.println(initialTree);

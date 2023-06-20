@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -465,7 +466,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 Matcher matcher = pattern.matcher(cst.getValue());
                 if (matcher.find()) {
                     return Optional.of(IntStream.range(0, getArity())
-                            .mapToObj(i -> termFactory.getDBStringConstant(matcher.group(i + 1)))
+                            .mapToObj(i -> termFactory.getDBStringConstant(
+                                    R2RMLIRISafeEncoder.decode(matcher.group(i + 1))))
                             .collect(ImmutableCollectors.toList()));
                 }
                 return Optional.empty();
