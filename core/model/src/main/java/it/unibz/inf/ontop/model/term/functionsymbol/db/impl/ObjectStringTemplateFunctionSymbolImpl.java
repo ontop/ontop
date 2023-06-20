@@ -456,16 +456,20 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     }
 
     @Override
-    public Optional<ImmutableList<DBConstant>> decompose(ImmutableList<? extends ImmutableTerm> terms, DBConstant constant,
-                                                         TermFactory termFactory, VariableNullability variableNullability) {
+    public Optional<Function<DBConstant, Optional<ImmutableList<DBConstant>>>> getDecomposer(ImmutableList<? extends ImmutableTerm> terms,
+                                                                                             TermFactory termFactory, VariableNullability variableNullability) {
 
         if (isInjective(terms, variableNullability, termFactory)) {
-            Matcher matcher = getPattern().matcher(constant.getValue());
-            if (matcher.find()) {
-                return Optional.of(IntStream.range(0, getArity())
-                                .mapToObj(i -> termFactory.getDBStringConstant(matcher.group(i + 1)))
-                                .collect(ImmutableCollectors.toList()));
-            }
+            Pattern pattern = getPattern();
+            return Optional.of( cst -> {
+                Matcher matcher = pattern.matcher(cst.getValue());
+                if (matcher.find()) {
+                    return Optional.of(IntStream.range(0, getArity())
+                            .mapToObj(i -> termFactory.getDBStringConstant(matcher.group(i + 1)))
+                            .collect(ImmutableCollectors.toList()));
+                }
+                return Optional.empty();
+            });
         }
         return Optional.empty();
     }

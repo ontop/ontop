@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -392,7 +393,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
         ImmutableExpression firstStrictEquality = strictEqualities.get(0);
 
-        Optional<IQTree> optionalReshapedTree = tryToReshapeValuesNode(firstStrictEquality, variableGenerator);
+        Optional<IQTree> optionalReshapedTree = tryToReshapeValuesNodeToConstructFunctionalTerm(firstStrictEquality, variableGenerator);
         if (optionalReshapedTree.isPresent()) {
             IQTree reshapedTree = optionalReshapedTree.get();
             // Propagates down other constraints
@@ -415,9 +416,12 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     /**
-     * TODO: find a better name
+     * Tries to extract a functional term to match the strict equality and allow further decomposition
+     * Tries to return an IQTree constructing the expected functional term and to which rows have been filtered.
+     * If not possible, returns empty.
      */
-    private Optional<IQTree> tryToReshapeValuesNode(ImmutableExpression binaryStrictEquality, VariableGenerator variableGenerator) {
+    private Optional<IQTree> tryToReshapeValuesNodeToConstructFunctionalTerm(ImmutableExpression binaryStrictEquality,
+                                                                             VariableGenerator variableGenerator) {
         Variable variable = binaryStrictEquality.getTerms().stream()
                 .filter(t -> t instanceof Variable)
                 .map(v -> (Variable) v)
@@ -438,19 +442,74 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
 
         if (functionSymbol instanceof ObjectStringTemplateFunctionSymbol) {
-            ObjectStringTemplateFunctionSymbol templateFunctionSymbol = (ObjectStringTemplateFunctionSymbol) functionSymbol;
-
-            VariableNullability simplifiedVariableNullability = coreUtilsFactory.createSimplifiedVariableNullability(functionalTerm);
-
-            Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition> injectivity = functionalTerm.analyzeInjectivity(
-                    ImmutableSet.of(), simplifiedVariableNullability, variableGenerator);
-
-            if (injectivity.isEmpty())
-                return Optional.empty();
-
-            // TODO: continue
+            return decomposeObjectTemplateString(variableGenerator, variable, functionalTerm,
+                    (ObjectStringTemplateFunctionSymbol) functionSymbol);
         }
         return Optional.empty();
+    }
+
+    private Optional<IQTree> decomposeObjectTemplateString(VariableGenerator variableGenerator, Variable variableToReplace,
+                                                           ImmutableFunctionalTerm functionalTerm,
+                                                           ObjectStringTemplateFunctionSymbol templateFunctionSymbol) {
+        VariableNullability simplifiedVariableNullability = coreUtilsFactory.createSimplifiedVariableNullability(functionalTerm);
+
+        var optionalDecomposer = templateFunctionSymbol.getDecomposer(functionalTerm.getTerms(),
+                termFactory, simplifiedVariableNullability);
+        if (optionalDecomposer.isEmpty())
+            return Optional.empty();
+
+        Function<DBConstant, Optional<ImmutableList<DBConstant>>> decomposer = optionalDecomposer.get();
+
+        int variablePosition = orderedVariables.indexOf(variableToReplace);
+
+        ImmutableList<ImmutableList<Constant>> newValues = values.stream()
+                .map(row -> Optional.of(row.get(variablePosition))
+                        .filter(c -> c instanceof DBConstant)
+                        .map(c -> (DBConstant) c)
+                        .flatMap(c -> decomposer.apply(c)
+                                .map(additionalColumns -> mergeColumns(row, variablePosition, additionalColumns))))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(ImmutableCollectors.toList());
+
+        return buildNewTreeWithDecomposition(variableGenerator, variableToReplace, templateFunctionSymbol, newValues);
+    }
+
+    private Optional<IQTree> buildNewTreeWithDecomposition(VariableGenerator variableGenerator, Variable variableToReplace,
+                                                           FunctionSymbol functionSymbol,
+                                                           ImmutableList<ImmutableList<Constant>> newValues) {
+        if (newValues.isEmpty())
+            return Optional.of(iqFactory.createEmptyNode(projectedVariables));
+
+        ImmutableList<Variable> newVariables = IntStream.range(0, functionSymbol.getArity())
+                .mapToObj(i -> variableGenerator.generateNewVariable())
+                .collect(ImmutableCollectors.toList());
+
+        ImmutableList<Variable> newOrderedVariables = Stream.concat(
+                orderedVariables.stream()
+                        .filter(v -> !v.equals(variableToReplace)),
+                newVariables.stream())
+                .collect(ImmutableCollectors.toList());
+
+        ValuesNode newValueNode = iqFactory.createValuesNode(newOrderedVariables, newValues);
+
+        ConstructionNode constructionNode = iqFactory.createConstructionNode(
+                projectedVariables,
+                substitutionFactory.getSubstitution(variableToReplace,
+                        termFactory.getImmutableFunctionalTerm(functionSymbol, newVariables)));
+
+        return Optional.of(iqFactory.createUnaryIQTree(constructionNode, newValueNode)
+                .normalizeForOptimization(variableGenerator));
+    }
+
+    private ImmutableList<Constant> mergeColumns(ImmutableList<Constant> row, int variableToRemovePosition,
+                                                 ImmutableList<? extends Constant> additionalColumns) {
+        return Stream.concat(
+                        IntStream.range(0, row.size())
+                                .filter(i -> i != variableToRemovePosition)
+                                .mapToObj(row::get),
+                        additionalColumns.stream())
+                .collect(ImmutableCollectors.toList());
     }
 
 
