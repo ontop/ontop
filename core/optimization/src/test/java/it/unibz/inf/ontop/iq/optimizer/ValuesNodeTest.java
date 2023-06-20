@@ -9,9 +9,7 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.ValuesNode;
 import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.term.GroundFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import org.junit.Test;
 
@@ -19,6 +17,7 @@ import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.TABLE1_AR1;
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.TABLE1_AR2;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.LT;
+import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.LTE;
 import static junit.framework.TestCase.assertTrue;
 
 public class ValuesNodeTest {
@@ -528,6 +527,75 @@ public class ValuesNodeTest {
                 constructionNode,
                 IQ_FACTORY.createNaryIQTree(
                         IQ_FACTORY.createInnerJoinNode(),
+                        ImmutableList.of(newValuesNode, dataNode)));
+
+        assertTrue(baseTestNormalization(initialTree, expectedTree));
+    }
+
+    @Test
+    public void testJoinIRITemplateString9() {
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR2, ImmutableMap.of(0, A, 1, B));
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        X, TERM_FACTORY.getIRIFunctionalTerm(
+                                Template.builder()
+                                        .addSeparator("http://localhost/thing/")
+                                        .addColumn()
+                                        .addSeparator("/")
+                                        .addColumn()
+                                        .build(),
+                                ImmutableList.of(A, B)
+                        ).getTerm(0),
+                Y, TERM_FACTORY.getIRIFunctionalTerm(
+                        Template.builder()
+                                .addSeparator("http://localhost/other/")
+                                .addColumn()
+                                .build(),
+                        ImmutableList.of(B)
+                        ).getTerm(0)));
+
+        DBConstant zero = TERM_FACTORY.getDBIntegerConstant(0);
+
+        ValuesNode valuesNode = IQ_FACTORY.createValuesNode(
+                ImmutableList.of(X,Y,Z),
+                ImmutableList.of(
+                        ImmutableList.of(TERM_FACTORY.getDBStringConstant("http://localhost/thing/1%2F/3"),
+                                TERM_FACTORY.getDBStringConstant("http://localhost/other/3"),
+                                zero),
+                        ImmutableList.of(TERM_FACTORY.getDBStringConstant("http://localhost/thing/2/4"),
+                                TERM_FACTORY.getDBStringConstant("http://localhost/other/4"),
+                                ONE),
+                        ImmutableList.of(TERM_FACTORY.getNullConstant(),
+                                TERM_FACTORY.getDBStringConstant("http://localhost/other/4"),
+                                ONE),
+                        ImmutableList.of(TERM_FACTORY.getDBStringConstant("http://localhost/somethingelse"),
+                                TERM_FACTORY.getDBStringConstant("http://localhost/other/5"),
+                                ONE),
+                ImmutableList.of(TERM_FACTORY.getDBStringConstant("http://localhost/thing/1%2F/3"),
+                        TERM_FACTORY.getDBStringConstant("http://localhost/other/11"),
+                        ONE),
+                ImmutableList.of(TERM_FACTORY.getDBStringConstant("http://localhost/thing/1%2F/3"),
+                        TERM_FACTORY.getDBStringConstant("http://localhost/other/3"),
+                        TWO)));
+
+        ImmutableExpression condition = TERM_FACTORY.getDBNumericInequality(LTE, Z, ONE);
+
+        IQTree initialTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(condition),
+                ImmutableList.of(valuesNode, IQ_FACTORY.createUnaryIQTree(constructionNode, dataNode)));
+
+        ValuesNode newValuesNode = IQ_FACTORY.createValuesNode(
+                ImmutableList.of(Z, A, B),
+                ImmutableList.of(
+                        ImmutableList.of(zero, TERM_FACTORY.getDBStringConstant("1/"), TERM_FACTORY.getDBStringConstant("3")),
+                        ImmutableList.of(ONE, TERM_FACTORY.getDBStringConstant("2"), TERM_FACTORY.getDBStringConstant("4"))));
+
+        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(initialTree.getVariables(), constructionNode.getSubstitution()),
+                IQ_FACTORY.createNaryIQTree(
+                        IQ_FACTORY.createInnerJoinNode(condition),
                         ImmutableList.of(newValuesNode, dataNode)));
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
