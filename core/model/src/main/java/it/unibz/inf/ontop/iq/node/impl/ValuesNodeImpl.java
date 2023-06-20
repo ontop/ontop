@@ -1,10 +1,12 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -19,6 +21,9 @@ import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -365,7 +370,92 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     public IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
         if (constraint.isGround())
             return this;
-        getVariableNullability();
+
+        ImmutableMap<Boolean, ImmutableList<ImmutableExpression>> constraintClassification = constraint.flattenAND()
+                .collect(ImmutableCollectors.partitioningBy(
+                        e -> (e.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol)
+                                && e.getArity() == 2
+                                && e.getTerms().stream()
+                                .filter(t -> t instanceof Variable)
+                                .map(t -> (Variable) t)
+                                .anyMatch(projectedVariables::contains)));
+
+        ImmutableList<ImmutableExpression> strictEqualities = Optional.ofNullable(constraintClassification.get(true))
+                .orElseGet(ImmutableList::of);
+
+        ImmutableList<ImmutableExpression> otherConditions = Optional.ofNullable(constraintClassification.get(false))
+                .orElseGet(ImmutableList::of);
+
+        if (strictEqualities.isEmpty()) {
+            return filterValuesNodeEntries(constraint);
+        }
+
+        ImmutableExpression firstStrictEquality = strictEqualities.get(0);
+
+        Optional<IQTree> optionalReshapedTree = tryToReshapeValuesNode(firstStrictEquality, variableGenerator);
+        if (optionalReshapedTree.isPresent()) {
+            IQTree reshapedTree = optionalReshapedTree.get();
+            // Propagates down other constraints
+            return termFactory.getConjunction(constraint.flattenAND()
+                            .filter(c -> !c.equals(firstStrictEquality)))
+                    .map(c -> reshapedTree.propagateDownConstraint(c, variableGenerator))
+                    .orElse(reshapedTree);
+        }
+
+        ValuesNode filteredValuesNode = filterValuesNodeEntries(termFactory.getConjunction(
+                        Stream.concat(
+                                Stream.of(firstStrictEquality),
+                                otherConditions.stream())
+                                .collect(ImmutableCollectors.toList())));
+
+        ImmutableList<ImmutableExpression> otherStrictEqualities = strictEqualities.subList(1, strictEqualities.size());
+        return otherStrictEqualities.isEmpty()
+                ? filteredValuesNode
+                : propagateDownConstraint(termFactory.getConjunction(otherStrictEqualities), variableGenerator);
+    }
+
+    /**
+     * TODO: find a better name
+     */
+    private Optional<IQTree> tryToReshapeValuesNode(ImmutableExpression binaryStrictEquality, VariableGenerator variableGenerator) {
+        Variable variable = binaryStrictEquality.getTerms().stream()
+                .filter(t -> t instanceof Variable)
+                .map(v -> (Variable) v)
+                .filter(projectedVariables::contains)
+                .findAny()
+                .orElseThrow(() -> new MinorOntopInternalBugException("A projected variable was expected as argument"));
+
+        Optional<ImmutableFunctionalTerm> optionalFunctionalArgument = binaryStrictEquality.getTerms().stream()
+                .filter(t -> !t.equals(variable))
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t)
+                .findAny();
+
+        if (optionalFunctionalArgument.isEmpty())
+            return Optional.empty();
+
+        ImmutableFunctionalTerm functionalTerm = optionalFunctionalArgument.get();
+        FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
+
+        if (functionSymbol instanceof ObjectStringTemplateFunctionSymbol) {
+            ObjectStringTemplateFunctionSymbol templateFunctionSymbol = (ObjectStringTemplateFunctionSymbol) functionSymbol;
+
+            VariableNullability simplifiedVariableNullability = coreUtilsFactory.createSimplifiedVariableNullability(functionalTerm);
+
+            Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition> injectivity = functionalTerm.analyzeInjectivity(
+                    ImmutableSet.of(), simplifiedVariableNullability, variableGenerator);
+
+            if (injectivity.isEmpty())
+                return Optional.empty();
+
+            // TODO: continue
+        }
+        return Optional.empty();
+    }
+
+
+    private ValuesNode filterValuesNodeEntries(ImmutableExpression constraint) {
+        var variableNullability = getVariableNullability();
         ImmutableList<ImmutableList<Constant>> newValues = values.stream()
                 .filter(constants -> !(substitutionFactory.getSubstitution(orderedVariables, constants)
                         .apply(constraint))
