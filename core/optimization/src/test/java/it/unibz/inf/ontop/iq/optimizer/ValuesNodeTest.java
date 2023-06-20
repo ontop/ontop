@@ -1,14 +1,20 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
+import it.unibz.inf.ontop.iq.node.ValuesNode;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.GroundFunctionalTerm;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.Substitution;
 import org.junit.Test;
 
+import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.TABLE1_AR1;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.LT;
 import static junit.framework.TestCase.assertTrue;
@@ -188,6 +194,47 @@ public class ValuesNodeTest {
                     .createValuesNode(ImmutableList.of(X, Y), ImmutableList.of(ImmutableList.of(ONE, TWO))));
 
         assertTrue(baseTestPropagateDownConstraints(initialTree, expectedTree));
+    }
+
+    @Test
+    public void testJoinIRITemplate() {
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR1, ImmutableMap.of(0, A));
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        X, TERM_FACTORY.getIRIFunctionalTerm(
+                                Template.builder()
+                                        .addSeparator("http://localhost/thing/")
+                                        .addColumn()
+                                        .build(),
+                                ImmutableList.of(A)
+                        )));
+
+        ValuesNode valuesNode = IQ_FACTORY.createValuesNode(
+                ImmutableList.of(X),
+                ImmutableList.of(
+                        ImmutableList.of(TERM_FACTORY.getConstantIRI("http://localhost/thing/1")),
+                        ImmutableList.of(TERM_FACTORY.getConstantIRI("http://localhost/thing/2"))));
+
+        IQTree initialTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(valuesNode, IQ_FACTORY.createUnaryIQTree(constructionNode, dataNode)));
+
+        ValuesNode newValuesNode = IQ_FACTORY.createValuesNode(
+                ImmutableList.of(A),
+                ImmutableList.of(
+                        ImmutableList.of(
+                                TERM_FACTORY.getDBStringConstant("1"),
+                                TERM_FACTORY.getDBStringConstant("2"))));
+
+        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createNaryIQTree(
+                        IQ_FACTORY.createInnerJoinNode(),
+                        ImmutableList.of(newValuesNode, dataNode)));
+
+        assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
 
     private Boolean baseTestNormalization(IQTree initialTree, IQTree expectedTree) {
