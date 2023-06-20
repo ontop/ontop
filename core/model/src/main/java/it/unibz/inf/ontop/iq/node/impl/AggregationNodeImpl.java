@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.AggregationNormalizer;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
@@ -324,6 +325,21 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                                 .filter(groupingVariables::containsAll),
                         Stream.of(getGroupingVariables()))
                   .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
+    public FunctionalDependencies inferFunctionalDependencies(IQTree child) {
+        var childFDs = child.inferFunctionalDependencies();
+
+        //Return all of the child's functional dependencies that are included entirely inside the grouping variables.
+        return childFDs.stream()
+                .filter(e -> groupingVariables.containsAll(e.getKey()))
+                .filter(e -> e.getValue().stream()
+                        .anyMatch(groupingVariables::contains))
+                .map(e -> Map.entry(e.getKey(), e.getValue().stream()
+                        .filter(groupingVariables::contains)
+                        .collect(ImmutableCollectors.toSet())))
+                .collect(FunctionalDependencies.toFunctionalDependencies());
     }
 
     /**

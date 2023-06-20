@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
@@ -148,6 +149,11 @@ public interface IQTree {
      * Warning: some determinants may be nullable!
      */
     ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints();
+
+    /**
+     * NOT guaranteed to return all the functional dependencies (MAY BE INCOMPLETE)
+     */
+    FunctionalDependencies inferFunctionalDependencies();
 
     /**
      * Variables that the tree proposes for removal if the ancestor trees do not need them.

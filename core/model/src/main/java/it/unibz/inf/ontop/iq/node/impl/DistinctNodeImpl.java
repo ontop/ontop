@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
@@ -105,6 +106,11 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
         return Sets.union(
                 child.inferUniqueConstraints(),
                 ImmutableSet.of(child.getVariables())).immutableCopy();
+    }
+
+    @Override
+    public FunctionalDependencies inferFunctionalDependencies(IQTree child) {
+        return child.inferFunctionalDependencies();
     }
 
     /**

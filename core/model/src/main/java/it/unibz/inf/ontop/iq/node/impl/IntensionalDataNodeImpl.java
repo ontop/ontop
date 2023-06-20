@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
@@ -93,6 +94,11 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
         return ImmutableSet.of(getVariables());
+    }
+
+    @Override
+    public FunctionalDependencies inferFunctionalDependencies() {
+        return FunctionalDependencies.empty();
     }
 
     @Override

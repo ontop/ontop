@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
@@ -27,10 +28,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.VariableGeneratorImpl;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -325,6 +323,35 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .map(substitutionFactory::extractAnInjectiveVar2VarSubstitutionFromInverseOf)
                 .map(s -> substitutionFactory.apply(s, childConstraint))
                 .filter(projectedVariables::containsAll);
+    }
+
+    @Override
+    public FunctionalDependencies inferFunctionalDependencies(IQTree child) {
+        var childFDs = child.inferFunctionalDependencies();
+        childFDs.stream()
+                .flatMap(e -> translateFunctionalDependency(e.getKey(), e.getValue(), child))
+                .collect(FunctionalDependencies.toFunctionalDependencies());
+        return childFDs;
+    }
+
+    private Stream<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> translateFunctionalDependency(ImmutableSet<Variable> determinants, ImmutableSet<Variable> dependents, IQTree child) {
+        //Dependents of new FD are all projected previous dependents + new variables that only use dependent variables in their substitution.
+        var keptDependents = Sets.intersection(dependents, projectedVariables);
+        var newDependents = substitution.stream()
+                .filter(s -> dependents.containsAll(s.getValue().getVariableStream().collect(ImmutableCollectors.toSet())))
+                .map(s -> s.getKey());
+        var allDependents = Stream.concat(keptDependents.stream(), newDependents)
+                .collect(ImmutableCollectors.toSet());
+        if(allDependents.isEmpty())
+            return Stream.of();
+
+
+        Stream<ImmutableSet<Variable>> preservedDeterminants = projectedVariables.containsAll(determinants) ? Stream.of(determinants) : Stream.of();
+        var nullability = getVariableNullability(child);
+        var newDeterminants = extractTransformedUniqueConstraint(determinants, nullability);
+        var allDeterminants = Streams.concat(preservedDeterminants, newDeterminants);
+
+        return allDeterminants.map(determinant -> Map.entry(determinant, allDependents));
     }
 
     /**

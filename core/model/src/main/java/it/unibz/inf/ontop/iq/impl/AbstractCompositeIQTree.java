@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -15,6 +16,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -262,6 +264,27 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     }
 
     protected abstract ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints();
+
+    @Override
+    public synchronized FunctionalDependencies inferFunctionalDependencies() {
+        // Non-final
+        FunctionalDependencies dependencies = treeCache.getFunctionalDependencies();
+        if (dependencies == null) {
+            dependencies = computeAllFunctionalDependencies();
+            treeCache.setFunctionalDependencies(dependencies);
+        }
+        return dependencies;
+    }
+
+    protected abstract FunctionalDependencies computeFunctionalDependencies();
+
+    protected FunctionalDependencies computeAllFunctionalDependencies() {
+        FunctionalDependencies inferredDependencies = computeFunctionalDependencies();
+        FunctionalDependencies fromUCs = inferUniqueConstraints().stream()
+                .map(uc -> Map.entry(uc, getVariables()))
+                .collect(FunctionalDependencies.toFunctionalDependencies());
+        return inferredDependencies.concat(fromUCs);
+    }
 
     @Override
     public synchronized VariableNonRequirement getVariableNonRequirement() {
