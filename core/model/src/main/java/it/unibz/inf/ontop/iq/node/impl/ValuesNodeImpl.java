@@ -23,7 +23,9 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -445,6 +447,11 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
             return decomposeObjectTemplateString(variableGenerator, variable, functionalTerm,
                     (ObjectStringTemplateFunctionSymbol) functionSymbol);
         }
+        if ((functionSymbol instanceof DBTypeConversionFunctionSymbol)
+                && ((DBTypeConversionFunctionSymbol) functionSymbol).isSimple()) {
+            return decomposeSimpleCast(variable, (DBTypeConversionFunctionSymbol) functionSymbol, variableGenerator);
+
+        }
         return Optional.empty();
     }
 
@@ -460,6 +467,12 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
         Function<DBConstant, Optional<ImmutableList<DBConstant>>> decomposer = optionalDecomposer.get();
 
+        return decompose(decomposer, variableToReplace, templateFunctionSymbol, variableGenerator);
+    }
+
+    private Optional<IQTree> decompose(Function<DBConstant, Optional<ImmutableList<DBConstant>>> decomposer,
+                                       Variable variableToReplace, FunctionSymbol functionSymbol,
+                                       VariableGenerator variableGenerator) {
         int variablePosition = orderedVariables.indexOf(variableToReplace);
 
         ImmutableList<ImmutableList<Constant>> newValues = values.stream()
@@ -472,7 +485,23 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 .map(Optional::get)
                 .collect(ImmutableCollectors.toList());
 
-        return buildNewTreeWithDecomposition(variableGenerator, variableToReplace, templateFunctionSymbol, newValues);
+        return buildNewTreeWithDecomposition(variableGenerator, variableToReplace, functionSymbol, newValues);
+    }
+
+    private Optional<IQTree> decomposeSimpleCast(Variable variableToReplace, DBTypeConversionFunctionSymbol functionSymbol,
+                                                 VariableGenerator variableGenerator) {
+        Optional<DBTermType> optionalInputType = functionSymbol.getInputType();
+        if (optionalInputType.isEmpty())
+            return Optional.empty();
+
+        DBTermType inputType = optionalInputType.get();
+
+        return decompose(
+                cst -> inputType.isValidLexicalValue(cst.getValue())
+                        .filter(isValid -> isValid)
+                        .map(b -> ImmutableList.of(termFactory.getDBConstant(cst.getValue(), inputType))),
+                variableToReplace, functionSymbol, variableGenerator);
+
     }
 
     private Optional<IQTree> buildNewTreeWithDecomposition(VariableGenerator variableGenerator, Variable variableToReplace,
