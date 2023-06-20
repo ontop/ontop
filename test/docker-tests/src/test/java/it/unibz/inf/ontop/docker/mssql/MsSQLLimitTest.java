@@ -88,7 +88,7 @@ public class MsSQLLimitTest extends AbstractVirtualModeTest {
                 "LIMIT 2 \n OFFSET 2";
         String val = runQueryAndReturnStringOfIndividualX(query);
         countResults(2, query);
-        assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-992>", val);
+        assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-993>", val);
     }
 
 }
