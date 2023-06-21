@@ -86,9 +86,17 @@ public class DefaultSimpleDBCastFunctionSymbol extends AbstractDBTypeConversionF
         if (inputType == null || (!inputType.areEqualitiesStrict()))
             return Optional.empty();
 
-        return Optional.of(cst -> inputType.isValidLexicalValue(cst.getValue())
+        StringConstantDecomposer decomposer = cst -> checkValueValidityForDecomposition(cst.getValue())
+                ? Optional.of(ImmutableList.of(termFactory.getDBConstant(cst.getValue(), inputType)))
+                : Optional.empty();
+
+        return Optional.of(decomposer);
+    }
+
+    protected boolean checkValueValidityForDecomposition(String value) {
+        return (inputType != null) && inputType.isValidLexicalValue(value)
                 .filter(isValid -> isValid)
-                .map(b -> ImmutableList.of(termFactory.getDBConstant(cst.getValue(), inputType))));
+                .isPresent();
     }
 
     @Override

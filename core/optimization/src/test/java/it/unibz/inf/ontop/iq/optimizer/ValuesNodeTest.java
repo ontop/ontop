@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.ValuesNode;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.TABLE1_AR1;
@@ -596,6 +597,57 @@ public class ValuesNodeTest {
                 IQ_FACTORY.createConstructionNode(initialTree.getVariables(), constructionNode.getSubstitution()),
                 IQ_FACTORY.createNaryIQTree(
                         IQ_FACTORY.createInnerJoinNode(condition),
+                        ImmutableList.of(newValuesNode, dataNode)));
+
+        assertTrue(baseTestNormalization(initialTree, expectedTree));
+    }
+
+    @Ignore("TODO: use type-specific casting function in the mockup factory")
+    @Test
+    public void testJoinIRITemplateString10() {
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR2, ImmutableMap.of(0, A, 1, B));
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        X, TERM_FACTORY.getIRIFunctionalTerm(
+                                Template.builder()
+                                        .addSeparator("http://localhost/thing/")
+                                        .addColumn()
+                                        .addSeparator("/")
+                                        .addColumn()
+                                        .build(),
+                                ImmutableList.of(TERM_FACTORY.getDBCastFunctionalTerm(
+                                                TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType(),
+                                                TYPE_FACTORY.getDBTypeFactory().getDBStringType(),
+                                                A),
+                                        B)
+                        ).getTerm(0)));
+
+        ValuesNode valuesNode = IQ_FACTORY.createValuesNode(
+                ImmutableList.of(X),
+                ImmutableList.of(
+                        ImmutableList.of(TERM_FACTORY.getDBStringConstant("http://localhost/thing/%2B1/3")),
+                        ImmutableList.of(TERM_FACTORY.getDBStringConstant("http://localhost/thing/2/4")),
+                        ImmutableList.of(TERM_FACTORY.getDBStringConstant("http://localhost/thing/5/6")),
+                        ImmutableList.of(TERM_FACTORY.getDBStringConstant("http://localhost/thing/notANumber/5")),
+                        ImmutableList.of(TERM_FACTORY.getNullConstant()),
+                        ImmutableList.of(TERM_FACTORY.getDBStringConstant("http://localhost/somethingelse"))));
+
+        IQTree initialTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(valuesNode, IQ_FACTORY.createUnaryIQTree(constructionNode, dataNode)));
+
+        ValuesNode newValuesNode = IQ_FACTORY.createValuesNode(
+                ImmutableList.of(B, A),
+                ImmutableList.of(
+                        ImmutableList.of(TERM_FACTORY.getDBStringConstant("4"), TERM_FACTORY.getDBIntegerConstant(2)),
+                        ImmutableList.of(TERM_FACTORY.getDBStringConstant("6"), TERM_FACTORY.getDBIntegerConstant(5))));
+
+        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createNaryIQTree(
+                        IQ_FACTORY.createInnerJoinNode(),
                         ImmutableList.of(newValuesNode, dataNode)));
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
