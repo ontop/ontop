@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -26,6 +27,14 @@ public interface DBTypeConversionFunctionSymbol extends DBFunctionSymbol {
      * Useful for simplifying nested casts ( A-to-B(B-to-A(x)) === x if both casts are simple)
      */
     boolean isSimple();
+
+    /**
+     * Returns no decomposer if it is not safe to decompose
+     *  (e.g. no respect of strict equalities, etc.)
+     */
+    default Optional<StringConstantDecomposer> getDecomposer(TermFactory termFactory) {
+        return Optional.empty();
+    }
 
     static boolean isTemporary(FunctionSymbol fs) {
         return (fs instanceof DBTypeConversionFunctionSymbol

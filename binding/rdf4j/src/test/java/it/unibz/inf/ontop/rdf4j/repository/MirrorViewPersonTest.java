@@ -34,6 +34,15 @@ public class MirrorViewPersonTest extends AbstractRDF4JTest {
     }
 
     @Test
+    public void testPerson2() {
+        int count = runQueryAndCount("SELECT * WHERE {\n" +
+                "\t?p a <http://person.example.org/Person> \n" +
+                " VALUES ?p { <http://person.example.org/person/1> <http://person.example.org/person/2> <http://person.example.org/person/%2B1> }\n" +
+                "}");
+        assertEquals(count, 1);
+    }
+
+    @Test
     public void testFullNameIn() {
         int count = runQueryAndCount("SELECT * WHERE {\n" +
                 "\t?p <http://person.example.org/fullName> ?n \n" +
