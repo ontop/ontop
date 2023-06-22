@@ -68,7 +68,7 @@ public interface UnaryOperatorNode extends QueryNode {
 
     ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child);
 
-    FunctionalDependencies inferFunctionalDependencies(IQTree child);
+    FunctionalDependencies inferFunctionalDependencies(IQTree child, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables);
 
     VariableNonRequirement computeVariableNonRequirement(IQTree child);
 }

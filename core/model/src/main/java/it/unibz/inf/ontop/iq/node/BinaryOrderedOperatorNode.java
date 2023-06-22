@@ -70,7 +70,7 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
     IQTree removeDistincts(IQTree leftChild, IQTree rightChild, IQTreeCache treeCache);
 
     ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree leftChild, IQTree rightChild);
-    FunctionalDependencies inferFunctionalDependencies(IQTree leftChild, IQTree rightChild);
+    FunctionalDependencies inferFunctionalDependencies(IQTree leftChild, IQTree rightChild, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables);
 
     VariableNonRequirement computeNotInternallyRequiredVariables(IQTree leftChild, IQTree rightChild);
 }

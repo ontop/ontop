@@ -342,7 +342,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     We can simply collect all FDs from the children.
      */
     @Override
-    public FunctionalDependencies inferFunctionalDependencies(ImmutableList<IQTree> children) {
+    public FunctionalDependencies inferFunctionalDependencies(ImmutableList<IQTree> children, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
         return children.stream()
                 .flatMap(child -> child.inferFunctionalDependencies().stream())
                 .collect(FunctionalDependencies.toFunctionalDependencies());

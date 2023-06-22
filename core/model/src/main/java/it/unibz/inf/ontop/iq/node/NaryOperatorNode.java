@@ -69,7 +69,7 @@ public interface NaryOperatorNode extends QueryNode {
     IQTree removeDistincts(ImmutableList<IQTree> children, IQTreeCache treeCache);
 
     ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(ImmutableList<IQTree> children);
-    FunctionalDependencies inferFunctionalDependencies(ImmutableList<IQTree> children);
+    FunctionalDependencies inferFunctionalDependencies(ImmutableList<IQTree> children, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables);
 
     VariableNonRequirement computeVariableNonRequirement(ImmutableList<IQTree> children);
 }

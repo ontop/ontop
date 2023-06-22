@@ -109,7 +109,7 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
-    public FunctionalDependencies inferFunctionalDependencies(IQTree child) {
+    public FunctionalDependencies inferFunctionalDependencies(IQTree child, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
         return child.inferFunctionalDependencies();
     }
 

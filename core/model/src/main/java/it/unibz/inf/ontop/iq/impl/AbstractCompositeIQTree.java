@@ -2,8 +2,6 @@ package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
@@ -278,9 +276,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         return dependencies;
     }
 
-    protected FunctionalDependencies computeFunctionalDependencies() {
-        return getRootNode().inferFunctionalDependencies(getChildren(), inferUniqueConstraints(), getVariables());
-    }
+    protected abstract FunctionalDependencies computeFunctionalDependencies();
 
     @Override
     public synchronized VariableNonRequirement getVariableNonRequirement() {

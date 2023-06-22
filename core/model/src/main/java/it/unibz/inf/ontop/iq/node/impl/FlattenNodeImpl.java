@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -210,7 +209,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public FunctionalDependencies inferFunctionalDependencies(IQTree child) {
+    public FunctionalDependencies inferFunctionalDependencies(IQTree child, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
         var childFDs = child.inferFunctionalDependencies();
         if(indexVariable.isEmpty())
             return childFDs;
@@ -220,7 +219,8 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 .filter(fd -> fd.getValue().contains(flattenedVariable))
                 .map(fd -> Maps.immutableEntry(Sets.union(fd.getKey(), ImmutableSet.of(index)).immutableCopy(), ImmutableSet.of(outputVariable)))
                 .collect(FunctionalDependencies.toFunctionalDependencies())
-                .concat(childFDs);
+                .concat(childFDs)
+                .concat(FunctionalDependencies.fromUniqueConstraints(uniqueConstraints, variables));
     }
 
     /**

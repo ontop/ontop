@@ -326,12 +326,13 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    public FunctionalDependencies inferFunctionalDependencies(IQTree child) {
+    public FunctionalDependencies inferFunctionalDependencies(IQTree child, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
         var childFDs = child.inferFunctionalDependencies();
         var nullability = getVariableNullability(child);
         return Stream.concat(childFDs.stream(), newDependenciesFromSubstitution(nullability))
                 .flatMap(e -> translateFunctionalDependency(e.getKey(), e.getValue(), child))
-                .collect(FunctionalDependencies.toFunctionalDependencies());
+                .collect(FunctionalDependencies.toFunctionalDependencies())
+                .concat(FunctionalDependencies.fromUniqueConstraints(uniqueConstraints, variables));
     }
 
 

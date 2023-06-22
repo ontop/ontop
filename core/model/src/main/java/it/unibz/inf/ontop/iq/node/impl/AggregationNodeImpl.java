@@ -328,7 +328,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     }
 
     @Override
-    public FunctionalDependencies inferFunctionalDependencies(IQTree child) {
+    public FunctionalDependencies inferFunctionalDependencies(IQTree child, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
         var childFDs = child.inferFunctionalDependencies();
 
         //Return all of the child's functional dependencies that are included entirely inside the grouping variables.
@@ -339,7 +339,8 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().stream()
                         .filter(groupingVariables::contains)
                         .collect(ImmutableCollectors.toSet())))
-                .collect(FunctionalDependencies.toFunctionalDependencies());
+                .collect(FunctionalDependencies.toFunctionalDependencies())
+                .concat(FunctionalDependencies.fromUniqueConstraints(uniqueConstraints, variables));
     }
 
     /**

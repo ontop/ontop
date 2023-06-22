@@ -172,4 +172,9 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     public IQTree getChild() {
         return getChildren().get(0);
     }
+
+    @Override
+    protected FunctionalDependencies computeFunctionalDependencies() {
+        return getRootNode().inferFunctionalDependencies(getChild(), inferUniqueConstraints(), getVariables());
+    }
 }

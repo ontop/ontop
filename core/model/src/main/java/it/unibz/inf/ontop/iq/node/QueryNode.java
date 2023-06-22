@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.iq.node;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
@@ -66,6 +63,4 @@ public interface QueryNode {
      *
      */
     boolean wouldKeepDescendingGroundTermInFilterAbove(Variable variable, boolean isConstant);
-
-    FunctionalDependencies inferFunctionalDependencies(ImmutableList<IQTree> children, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables);
 }
