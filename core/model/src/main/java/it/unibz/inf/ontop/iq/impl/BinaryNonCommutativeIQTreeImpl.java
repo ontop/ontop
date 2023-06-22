@@ -201,11 +201,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    protected FunctionalDependencies computeFunctionalDependencies() {
-        return getRootNode().inferFunctionalDependencies(leftChild, rightChild);
-    }
-
-    @Override
     protected VariableNonRequirement computeVariableNonRequirement() {
         return getRootNode().computeNotInternallyRequiredVariables(leftChild, rightChild);
     }

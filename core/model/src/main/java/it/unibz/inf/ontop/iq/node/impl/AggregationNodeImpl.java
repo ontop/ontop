@@ -336,7 +336,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 .filter(e -> groupingVariables.containsAll(e.getKey()))
                 .filter(e -> e.getValue().stream()
                         .anyMatch(groupingVariables::contains))
-                .map(e -> Map.entry(e.getKey(), e.getValue().stream()
+                .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().stream()
                         .filter(groupingVariables::contains)
                         .collect(ImmutableCollectors.toSet())))
                 .collect(FunctionalDependencies.toFunctionalDependencies());

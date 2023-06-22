@@ -267,7 +267,7 @@ public class FunctionalDependencyInferenceTest {
                 children.get(0),
                 children.get(1)
         );
-        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B), ImmutableSet.of(C), ImmutableSet.of(D)), tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
+        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B)), tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
     }
 
     @Test
@@ -288,7 +288,7 @@ public class FunctionalDependencyInferenceTest {
                 children.get(0),
                 children.get(1)
         );
-        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B, D, C)), tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
+        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B), ImmutableSet.of(D, A), ImmutableSet.of(C)), tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
     }
 
     @Test

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
@@ -271,21 +272,14 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         // Non-final
         FunctionalDependencies dependencies = treeCache.getFunctionalDependencies();
         if (dependencies == null) {
-            dependencies = computeAllFunctionalDependencies();
+            dependencies = computeFunctionalDependencies();
             treeCache.setFunctionalDependencies(dependencies);
         }
         return dependencies;
     }
 
-    protected abstract FunctionalDependencies computeFunctionalDependencies();
-
-    protected FunctionalDependencies computeAllFunctionalDependencies() {
-        FunctionalDependencies inferredDependencies = computeFunctionalDependencies();
-        FunctionalDependencies fromUCs = inferUniqueConstraints().stream()
-                .map(uc -> Map.entry(uc, Sets.difference(getVariables(), uc).immutableCopy()))
-                .filter(fd -> !fd.getValue().isEmpty())
-                .collect(FunctionalDependencies.toFunctionalDependencies());
-        return inferredDependencies.concat(fromUCs);
+    protected FunctionalDependencies computeFunctionalDependencies() {
+        return getRootNode().inferFunctionalDependencies(getChildren(), inferUniqueConstraints(), getVariables());
     }
 
     @Override

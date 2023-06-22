@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.iq.request;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import it.unibz.inf.ontop.iq.request.impl.FunctionalDependenciesImpl;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -33,7 +35,7 @@ public interface FunctionalDependencies {
         var dependents = IntStream.range(0, dependencies.length)
                 .filter(i -> i % 2 == 1)
                 .mapToObj(i -> dependencies[i]);
-        return new FunctionalDependenciesImpl(Streams.zip(determinants, dependents, (a, b) -> Map.entry(a, b))
+        return new FunctionalDependenciesImpl(Streams.zip(determinants, dependents, (a, b) -> Maps.immutableEntry(a, b))
                 .collect(ImmutableCollectors.toSet())
             );
     }
@@ -44,6 +46,13 @@ public interface FunctionalDependencies {
 
     static Collector<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>, ?, FunctionalDependencies> toFunctionalDependencies() {
         return FunctionalDependenciesImpl.getCollector();
+    }
+
+    static FunctionalDependencies fromUniqueConstraints(ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> allVariables) {
+        return uniqueConstraints.stream()
+                .map(uc -> Maps.immutableEntry(uc, Sets.difference(allVariables, uc).immutableCopy()))
+                .filter(fd -> !fd.getValue().isEmpty())
+                .collect(FunctionalDependencies.toFunctionalDependencies());
     }
 
 }

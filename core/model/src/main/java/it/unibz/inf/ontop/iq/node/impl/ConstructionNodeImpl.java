@@ -341,7 +341,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     private Stream<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> newDependenciesFromSubstitution(VariableNullability nullability) {
         var variableToSubstitution = substitution.stream()
                 .filter(e -> isDeterministic(e.getValue()))
-                .map(e -> Map.entry(
+                .map(e -> Maps.immutableEntry(
                         e.getValue().getVariableStream().collect(ImmutableCollectors.toSet()),
                         ImmutableSet.of(e.getKey())
                 ))
@@ -349,7 +349,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         var substitutionToVariable = substitution.stream()
                 .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
                 .filter(e -> isAtomicConstraint((ImmutableFunctionalTerm) e.getValue(), ((ImmutableFunctionalTerm) e.getValue()).getVariables(), nullability))
-                .map(e -> Map.entry(
+                .map(e -> Maps.immutableEntry(
                         ImmutableSet.of(e.getKey()),
                         e.getValue().getVariableStream().collect(ImmutableCollectors.toSet())
                 ))
@@ -358,7 +358,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .restrictRangeTo(Variable.class)
                 .build()
                 .stream()
-                .map(entry -> Map.entry(ImmutableSet.of(entry.getKey()), ImmutableSet.of(entry.getValue())));
+                .map(entry -> Maps.immutableEntry(ImmutableSet.of(entry.getKey()), ImmutableSet.of(entry.getValue())));
         return Streams.concat(variableToSubstitution, substitutionToVariable, renamingDependencies);
     }
 
@@ -381,7 +381,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         var allDeterminants = Streams.concat(preservedDeterminants, newDeterminants);
 
         return allDeterminants
-                .map(determinant -> Map.entry(determinant, Sets.difference(allDependents, determinant).immutableCopy()))
+                .map(determinant -> Maps.immutableEntry(determinant, Sets.difference(allDependents, determinant).immutableCopy()))
                 .filter(e -> !e.getValue().isEmpty());
     }
 

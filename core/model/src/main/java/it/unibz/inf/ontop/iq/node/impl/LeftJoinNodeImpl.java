@@ -411,7 +411,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     @Override
     public FunctionalDependencies inferFunctionalDependencies(IQTree leftChild, IQTree rightChild) {
-        return leftChild.inferFunctionalDependencies().concat(rightChild.inferFunctionalDependencies());
+        //TODO: Infer functional dependencies for the right child (we have to filter those from the right to not impact the left child)
+        return leftChild.inferFunctionalDependencies();
     }
 
     @Override

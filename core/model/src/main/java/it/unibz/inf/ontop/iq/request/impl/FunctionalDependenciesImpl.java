@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.request.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -30,21 +31,21 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
         return dependencies.stream()
                 .flatMap(entry -> dependencies.stream()
                         .filter(entry2 -> Sets.union(entry2.getValue(), entry2.getKey()).containsAll(entry.getKey()))
-                        .map(entry2 -> Map.entry(entry2.getKey(), Sets.difference(entry.getValue(), entry2.getKey()).immutableCopy()))
+                        .map(entry2 -> Maps.immutableEntry(entry2.getKey(), Sets.difference(entry.getValue(), entry2.getKey()).immutableCopy()))
                 );
     }
 
     @Override
     public Stream<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> stream() {
         return dependencies.stream()
-                .map(fd -> Map.entry(fd.determinants, fd.dependents));
+                .map(fd -> Maps.immutableEntry(fd.determinants, fd.dependents));
     }
 
     @Override
     public FunctionalDependencies rename(InjectiveSubstitution<Variable> renamingSubstitution, SubstitutionFactory substitutionFactory) {
         return new FunctionalDependenciesImpl(dependencies.stream()
                 .map(fd -> fd.rename(renamingSubstitution, substitutionFactory))
-                .map(fd -> Map.entry(fd.determinants, fd.dependents))
+                .map(fd -> Maps.immutableEntry(fd.determinants, fd.dependents))
                 .collect(ImmutableCollectors.toSet())
         ).complete();
     }
@@ -115,7 +116,7 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
                 .filter(fd -> !fd.dependents.isEmpty())
                 .collect(ImmutableCollectors.toSet());
         return new FunctionalDependenciesImpl(packedDependencies.stream()
-                .map(fd -> Map.entry(fd.determinants, fd.dependents))
+                .map(fd -> Maps.immutableEntry(fd.determinants, fd.dependents))
                 .collect(ImmutableCollectors.toSet()));
     }
 

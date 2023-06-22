@@ -135,12 +135,6 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    protected FunctionalDependencies computeFunctionalDependencies() {
-        return getRootNode().inferFunctionalDependencies(getChild());
-    }
-
-
-    @Override
     public IQTree removeDistincts() {
         IQTreeCache treeCache = getTreeCache();
 

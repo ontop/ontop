@@ -416,7 +416,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     private Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>> appendDeterminant(Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>> fd, Variable v) {
-        return Map.entry(
+        return Maps.immutableEntry(
                 Stream.concat(
                     fd.getKey().stream(),
                     Stream.of(v)).collect(ImmutableCollectors.toSet()

@@ -252,7 +252,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
         if (!determinants.stream().allMatch(Optional::isPresent) || !dependents.stream().anyMatch(Optional::isPresent))
             return Optional.empty();
 
-        return Optional.of(Map.entry(
+        return Optional.of(Maps.immutableEntry(
                     determinants.stream()
                             .map(Optional::get)
                             .filter(t -> t instanceof Variable)

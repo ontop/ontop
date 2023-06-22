@@ -177,11 +177,6 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    protected FunctionalDependencies computeFunctionalDependencies() {
-        return getRootNode().inferFunctionalDependencies(getChildren());
-    }
-
-    @Override
     protected VariableNonRequirement computeVariableNonRequirement() {
         return getRootNode().computeVariableNonRequirement(getChildren());
     }

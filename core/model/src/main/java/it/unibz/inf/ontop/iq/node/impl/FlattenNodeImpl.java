@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -217,7 +218,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         //if FD A -> B exists, and B contains the flattened field, then there is a FD (A, index) -> output.
         return childFDs.stream()
                 .filter(fd -> fd.getValue().contains(flattenedVariable))
-                .map(fd -> Map.entry(Sets.union(fd.getKey(), ImmutableSet.of(index)).immutableCopy(), ImmutableSet.of(outputVariable)))
+                .map(fd -> Maps.immutableEntry(Sets.union(fd.getKey(), ImmutableSet.of(index)).immutableCopy(), ImmutableSet.of(outputVariable)))
                 .collect(FunctionalDependencies.toFunctionalDependencies())
                 .concat(childFDs);
     }
