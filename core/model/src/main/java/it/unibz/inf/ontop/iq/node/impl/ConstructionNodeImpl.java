@@ -328,17 +328,46 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     @Override
     public FunctionalDependencies inferFunctionalDependencies(IQTree child) {
         var childFDs = child.inferFunctionalDependencies();
-        childFDs.stream()
+        var nullability = getVariableNullability(child);
+        return Stream.concat(childFDs.stream(), newDependenciesFromSubstitution(nullability))
                 .flatMap(e -> translateFunctionalDependency(e.getKey(), e.getValue(), child))
                 .collect(FunctionalDependencies.toFunctionalDependencies());
-        return childFDs;
+    }
+
+
+    /**
+     * Computes the functional dependencies that can be taken from substitutions. E.g. x = F(a) ==> a -> x
+     */
+    private Stream<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> newDependenciesFromSubstitution(VariableNullability nullability) {
+        var variableToSubstitution = substitution.stream()
+                .filter(e -> isDeterministic(e.getValue()))
+                .map(e -> Map.entry(
+                        e.getValue().getVariableStream().collect(ImmutableCollectors.toSet()),
+                        ImmutableSet.of(e.getKey())
+                ))
+                .filter(e -> !e.getKey().isEmpty());
+        var substitutionToVariable = substitution.stream()
+                .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
+                .filter(e -> isAtomicConstraint((ImmutableFunctionalTerm) e.getValue(), ((ImmutableFunctionalTerm) e.getValue()).getVariables(), nullability))
+                .map(e -> Map.entry(
+                        ImmutableSet.of(e.getKey()),
+                        e.getValue().getVariableStream().collect(ImmutableCollectors.toSet())
+                ))
+                .filter(e -> !e.getValue().isEmpty());
+        var renamingDependencies = getSubstitution().builder()
+                .restrictRangeTo(Variable.class)
+                .build()
+                .stream()
+                .map(entry -> Map.entry(ImmutableSet.of(entry.getKey()), ImmutableSet.of(entry.getValue())));
+        return Streams.concat(variableToSubstitution, substitutionToVariable, renamingDependencies);
     }
 
     private Stream<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> translateFunctionalDependency(ImmutableSet<Variable> determinants, ImmutableSet<Variable> dependents, IQTree child) {
-        //Dependents of new FD are all projected previous dependents + new variables that only use dependent variables in their substitution.
+        //Dependents of new FD are all projected previous dependents + new variables that only use dependent variables in their substitution (with deterministic functions).
         var keptDependents = Sets.intersection(dependents, projectedVariables);
         var newDependents = substitution.stream()
-                .filter(s -> dependents.containsAll(s.getValue().getVariableStream().collect(ImmutableCollectors.toSet())))
+                .filter(s -> dependents.containsAll(s.getValue().getVariableStream().collect(ImmutableCollectors.toSet()))
+                        && this.isDeterministic(s.getValue()))
                 .map(s -> s.getKey());
         var allDependents = Stream.concat(keptDependents.stream(), newDependents)
                 .collect(ImmutableCollectors.toSet());
@@ -351,7 +380,19 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         var newDeterminants = extractTransformedUniqueConstraint(determinants, nullability);
         var allDeterminants = Streams.concat(preservedDeterminants, newDeterminants);
 
-        return allDeterminants.map(determinant -> Map.entry(determinant, allDependents));
+        return allDeterminants
+                .map(determinant -> Map.entry(determinant, Sets.difference(allDependents, determinant).immutableCopy()))
+                .filter(e -> !e.getValue().isEmpty());
+    }
+
+    private boolean isDeterministic(ImmutableTerm term) {
+        if(!(term instanceof ImmutableFunctionalTerm))
+            return true;
+        ImmutableFunctionalTerm f = (ImmutableFunctionalTerm) term;
+        if(!f.getFunctionSymbol().isDeterministic())
+            return false;
+        return f.getTerms().stream()
+                .allMatch(this::isDeterministic);
     }
 
     /**

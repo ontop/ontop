@@ -421,7 +421,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                     fd.getKey().stream(),
                     Stream.of(v)).collect(ImmutableCollectors.toSet()
                 ),
-                fd.getValue()
+                Sets.difference(fd.getValue(), ImmutableSet.of(v)).immutableCopy()
         );
     }
 

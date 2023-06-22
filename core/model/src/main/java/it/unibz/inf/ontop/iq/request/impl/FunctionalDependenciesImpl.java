@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.iq.request.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Streams;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -11,17 +13,25 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.*;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FunctionalDependenciesImpl implements FunctionalDependencies {
 
     private final ImmutableSet<FunctionalDependency>  dependencies;
 
-
     public FunctionalDependenciesImpl(ImmutableSet<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> dependencies) {
         this.dependencies = dependencies.stream()
-                .map(e -> new FunctionalDependency(e.getKey(), e.getValue()))
+                .map(entry -> new FunctionalDependency(entry.getKey(), entry.getValue()))
                 .collect(ImmutableCollectors.toSet());
+    }
+
+    private static Stream<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> inferTransitiveDependencies(ImmutableSet<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> dependencies) {
+        return dependencies.stream()
+                .flatMap(entry -> dependencies.stream()
+                        .filter(entry2 -> Sets.union(entry2.getValue(), entry2.getKey()).containsAll(entry.getKey()))
+                        .map(entry2 -> Map.entry(entry2.getKey(), Sets.difference(entry.getValue(), entry2.getKey()).immutableCopy()))
+                );
     }
 
     @Override
@@ -36,7 +46,7 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
                 .map(fd -> fd.rename(renamingSubstitution, substitutionFactory))
                 .map(fd -> Map.entry(fd.determinants, fd.dependents))
                 .collect(ImmutableCollectors.toSet())
-        );
+        ).complete();
     }
 
     @Override
@@ -49,7 +59,7 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
         return new FunctionalDependenciesImpl(
                 Stream.concat(stream(), other.stream())
                         .collect(ImmutableCollectors.toSet())
-        );
+        ).complete();
     }
 
     @Override
@@ -58,8 +68,73 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
                 .anyMatch(dp -> determinants.containsAll(dp.determinants) && dp.dependents.containsAll(dependents));
     }
 
+    @Override
+    public String toString() {
+        return String.format("[%s]", String.join("; ", dependencies.stream()
+                .map(FunctionalDependency::toString)
+                .collect(ImmutableCollectors.toList())));
+    }
+
+    /**
+     * Completes the list of functional dependencies by applying the following actions:
+     *     - Infer transitive dependencies
+     *     - Merge dependencies with related determinants
+     *     - Remove duplicate dependencies
+     *     - Remove empty dependencies
+     */
+    protected FunctionalDependencies complete() {
+        var dependencyPairs = stream().collect(ImmutableCollectors.toSet());
+        var collectedDependencies = Streams.concat(dependencyPairs.stream(), inferTransitiveDependencies(dependencyPairs))
+                .collect(Collectors.groupingBy(Map.Entry::getKey))
+                .entrySet().stream()
+                .map(e -> new FunctionalDependency(e.getKey(), e.getValue().stream()
+                        .reduce(
+                                ImmutableSet.of(),
+                                (set, entry) -> Sets.union(set, entry.getValue()).immutableCopy(),
+                                (set1, set2) -> Sets.union(set1, set2).immutableCopy()
+                        )
+                ))
+                .collect(ImmutableCollectors.toSet());
+
+        var dependenciesToRemove = collectedDependencies.stream()
+                .collect(ImmutableCollectors.toMap(
+                        fd -> fd,
+                        fd -> collectedDependencies.stream()
+                                .filter(dependencies2 -> !dependencies2.equals(fd))
+                                .filter(dependency2 -> fd.determinants.containsAll(dependency2.determinants))
+                                .flatMap(dependency2 -> Sets.intersection(fd.dependents, dependency2.dependents).stream())
+                                .collect(ImmutableCollectors.toSet())
+                ));
+        var packedDependencies = Streams.concat(
+                        collectedDependencies.stream()
+                                .filter(fd -> dependenciesToRemove.get(fd).isEmpty()),
+                        dependenciesToRemove.entrySet().stream()
+                                .map(entry -> entry.getKey().removeDependents(entry.getValue()))
+                                .filter(fd -> !fd.dependents.isEmpty())
+                )
+                .filter(fd -> !fd.dependents.isEmpty())
+                .collect(ImmutableCollectors.toSet());
+        return new FunctionalDependenciesImpl(packedDependencies.stream()
+                .map(fd -> Map.entry(fd.determinants, fd.dependents))
+                .collect(ImmutableCollectors.toSet()));
+    }
+
     public static Collector<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>, ?, FunctionalDependencies> getCollector() {
         return new FunctionalDependenciesCollector();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof FunctionalDependenciesImpl))
+            return false;
+        var fd = (FunctionalDependenciesImpl) obj;
+        return fd.dependencies.equals(dependencies);
+    }
+
+    @Override
+    public int hashCode() {
+        return dependencies.stream()
+                .reduce(0, (sum, n) -> sum ^ n.hashCode(), Integer::sum);
     }
 
     private static class FunctionalDependency {
@@ -102,6 +177,22 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
                             .collect(ImmutableCollectors.toSet())
             );
         }
+
+        public FunctionalDependency removeDependents(ImmutableSet<Variable> dependents) {
+            return new FunctionalDependency(determinants, Sets.difference(this.dependents, dependents).immutableCopy());
+        }
+
+        @Override
+        public String toString() {
+            return String.format("(%s) --> (%s)",
+                            String.join(", ", determinants.stream()
+                                    .map(Variable::toString)
+                                    .collect(Collectors.toList())),
+                            String.join(", ", dependents.stream()
+                                    .map(Variable::toString)
+                                    .collect(Collectors.toList()))
+                    );
+        }
     }
 
     protected static class FunctionalDependenciesCollector implements Collector<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>, ImmutableSet.Builder<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>>, FunctionalDependencies> {
@@ -127,7 +218,7 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
 
         @Override
         public Function<ImmutableSet.Builder<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>>, FunctionalDependencies> finisher() {
-            return builder -> new FunctionalDependenciesImpl(builder.build());
+            return builder -> new FunctionalDependenciesImpl(builder.build()).complete();
         }
 
         @Override
