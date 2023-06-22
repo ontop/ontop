@@ -49,33 +49,17 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
 
             @Override
             protected String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
-                return noSortCondition
-                        ? selectFromWhere.isDistinct()
-                            ? String.format("ORDER BY 1\nOFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit)
-                            : String.format("ORDER BY (SELECT NULL)\nOFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit)
-                        : String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
+                return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
             }
 
-            /**
-             * LIMIT without ORDER BY not supported in SQLServer
-             * ORDER BY (SELECT NULL) or ORDER BY 1 are added as a default when no ORDER BY is present
-             */
             @Override
             protected String serializeLimit(long limit, boolean noSortCondition) {
-                return noSortCondition
-                        ? selectFromWhere.isDistinct()
-                            ? String.format("ORDER BY 1\nOFFSET 0 ROWS\nFETCH NEXT %d ROWS ONLY", limit)
-                            : String.format("ORDER BY (SELECT NULL)\nOFFSET 0 ROWS\nFETCH NEXT %d ROWS ONLY", limit)
-                        : String.format("OFFSET 0 ROWS\nFETCH NEXT %d ROWS ONLY", limit);
+                return String.format("OFFSET 0 ROWS\nFETCH NEXT %d ROWS ONLY", limit);
             }
 
             @Override
             protected String serializeOffset(long offset, boolean noSortCondition) {
-                return noSortCondition
-                        ? selectFromWhere.isDistinct()
-                            ? String.format("ORDER BY 1\nOFFSET %d ROWS", offset)
-                            : String.format("ORDER BY (SELECT NULL)\nOFFSET %d ROWS", offset)
-                        : String.format("OFFSET %d ROWS", offset);
+                return String.format("OFFSET %d ROWS", offset);
             }
 
             @Override
