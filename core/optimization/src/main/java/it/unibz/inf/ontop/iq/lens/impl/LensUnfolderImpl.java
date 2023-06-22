@@ -108,7 +108,7 @@ public class LensUnfolderImpl implements LensUnfolder {
                     renamedDefinition.getProjectionAtom().getArguments());
 
             Substitution<VariableOrGroundTerm> descendingSubstitution = dataNode.getArgumentMap().entrySet().stream()
-                    .collect(substitutionFactory.toSubstitution(
+                    .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries(
                             e -> sourceAtomArguments.get(e.getKey()),
                             Map.Entry::getValue));
 
