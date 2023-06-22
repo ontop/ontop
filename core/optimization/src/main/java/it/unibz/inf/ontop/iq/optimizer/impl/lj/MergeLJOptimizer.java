@@ -310,9 +310,10 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
                     atomFactory.getRDFAnswerPredicate(1),
                     ImmutableList.of(rightProvenance.getProvenanceVariable()));
 
+            IQ minusIQ = iqFactory.createIQ(minusFakeProjectionAtom, minusTree);
+
             IQTree optimizedTree = ljReductionOptimizer.optimize(
-                    joinTransferOptimizer.optimize(
-                            iqFactory.createIQ(minusFakeProjectionAtom, minusTree)))
+                    joinTransferOptimizer.optimize(minusIQ.normalizeForOptimization()))
                     .normalizeForOptimization().getTree();
 
             return optimizedTree.isDeclaredAsEmpty();
