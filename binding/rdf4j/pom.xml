@@ -194,8 +194,8 @@
             <groupId>com.denodo</groupId>
             <artifactId>denodo</artifactId>
             <version>8.0</version>
-            <scope>system</scope>
-            <systemPath>/Users/zet/connectedJar/denodo-vdp-jdbcdriver.jar</systemPath>
+			<!--            <scope>system</scope>
+			<systemPath>/Users/zet/connectedJar/denodo-vdp-jdbcdriver.jar</systemPath>-->
         </dependency>
 
         <!-- PostgreSQL -->

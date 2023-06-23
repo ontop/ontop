@@ -242,7 +242,7 @@
         <dependency>
             <groupId>com.dremio.distribution</groupId>
             <artifactId>dremio-jdbc-driver</artifactId>
-            <version>22.0.0-202206221430090603-1fa4049f</version>
+            <version>24.0.0-202302100528110223-3a169b7c</version>
             <scope>test</scope>
         </dependency>
         <!-- teiid JDBC Driver-->
