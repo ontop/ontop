@@ -8,8 +8,10 @@ import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeExtendedTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -36,14 +38,7 @@ public class SQLServerInsertOrderByInSliceNormalizer extends DefaultRecursiveIQT
     }
 
     private boolean isOrderByPresent(IQTree child) {
-        if(child instanceof OrderByNode)
-            return true;
-        if(child instanceof DistinctNode) {
-            var grandchild = child.getChildren().get(0);
-            if(grandchild instanceof OrderByNode)
-                return true;
-        }
-        return false;
+        return child.acceptVisitor(new OrderBySearcher());
     }
 
     @Override
@@ -76,5 +71,108 @@ public class SQLServerInsertOrderByInSliceNormalizer extends DefaultRecursiveIQT
                         )
                 )
         );
+    }
+
+    static class OrderBySearcher implements IQVisitor<Boolean> {
+
+        @Override
+        public Boolean visitIntensionalData(IntensionalDataNode dataNode) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitExtensionalData(ExtensionalDataNode dataNode) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitEmpty(EmptyNode node) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitTrue(TrueNode node) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitNative(NativeNode nativeNode) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitValues(ValuesNode valuesNode) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitNonStandardLeafNode(LeafIQTree leafNode) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitConstruction(ConstructionNode rootNode, IQTree child) {
+            return child.acceptVisitor(this);
+        }
+
+        @Override
+        public Boolean visitAggregation(AggregationNode aggregationNode, IQTree child) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitFilter(FilterNode rootNode, IQTree child) {
+            return child.acceptVisitor(this);
+        }
+
+        @Override
+        public Boolean visitFlatten(FlattenNode rootNode, IQTree child) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitDistinct(DistinctNode rootNode, IQTree child) {
+            return child.acceptVisitor(this);
+        }
+
+        @Override
+        public Boolean visitSlice(SliceNode sliceNode, IQTree child) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitOrderBy(OrderByNode rootNode, IQTree child) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitNonStandardUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitNonStandardBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitInnerJoin(InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitUnion(UnionNode rootNode, ImmutableList<IQTree> children) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitNonStandardNaryNode(NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+            return false;
+        }
     }
 }
