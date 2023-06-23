@@ -83,7 +83,10 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .orElse("");
 
             String groupByString = serializeGroupBy(selectFromWhere.getGroupByVariables(), columnIDs);
-            String orderByString = serializeOrderBy(selectFromWhere.getSortConditions(), columnIDs);
+            String orderByString = serializeOrderBy(selectFromWhere.getSortConditions(),
+                    columnIDs,
+                    selectFromWhere.getOffset().isPresent(),
+                    selectFromWhere.getLimit().isPresent());
             String sliceString = serializeSlice(selectFromWhere.getLimit(), selectFromWhere.getOffset(),
                     selectFromWhere.getSortConditions().isEmpty());
 
@@ -166,6 +169,11 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .collect(Collectors.joining(", "));
 
             return String.format("ORDER BY %s\n", conditionString);
+        }
+
+        protected String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions,
+                                          ImmutableMap<Variable, QualifiedAttributeID> columnIDs, boolean hasOffset, boolean hasLimit) {
+            return serializeOrderBy(sortConditions, columnIDs);
         }
 
         /**

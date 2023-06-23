@@ -73,6 +73,9 @@ public class SQLServerInsertOrderByInSliceNormalizer extends DefaultRecursiveIQT
         );
     }
 
+    /**
+     * Search for an ORDER BY clause in the child IQTree. Keep searching until a node is found that will cause a new sub-query.
+     */
     static class OrderBySearcher implements IQVisitor<Boolean> {
 
         @Override
@@ -112,7 +115,7 @@ public class SQLServerInsertOrderByInSliceNormalizer extends DefaultRecursiveIQT
 
         @Override
         public Boolean visitConstruction(ConstructionNode rootNode, IQTree child) {
-            return child.acceptVisitor(this);
+            return false;
         }
 
         @Override

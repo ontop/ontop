@@ -1,11 +1,13 @@
 package it.unibz.inf.ontop.generation.serializer.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SQLOneTupleDummyQueryExpression;
+import it.unibz.inf.ontop.generation.algebra.SQLOrderComparator;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
@@ -60,6 +62,13 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
             @Override
             protected String serializeOffset(long offset, boolean noSortCondition) {
                 return String.format("OFFSET %d ROWS", offset);
+            }
+
+            @Override
+            protected String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions, ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap, boolean hasOffset, boolean hasLimit) {
+                return String.format("%s%s",
+                        super.serializeOrderBy(sortConditions, fromColumnMap),
+                        hasOffset || hasLimit || sortConditions.isEmpty() ? "" : " OFFSET 0 ROWS\n");
             }
 
             @Override
