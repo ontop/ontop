@@ -65,10 +65,10 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
             }
 
             @Override
-            protected String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions, ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap, boolean hasOffset, boolean hasLimit) {
+            protected String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions, ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap, boolean hasOffsetOrLimit) {
                 return String.format("%s%s",
                         super.serializeOrderBy(sortConditions, fromColumnMap),
-                        hasOffset || hasLimit || sortConditions.isEmpty() ? "" : " OFFSET 0 ROWS\n");
+                        hasOffsetOrLimit || sortConditions.isEmpty() ? "" : " OFFSET 0 ROWS\n");
             }
 
             @Override
