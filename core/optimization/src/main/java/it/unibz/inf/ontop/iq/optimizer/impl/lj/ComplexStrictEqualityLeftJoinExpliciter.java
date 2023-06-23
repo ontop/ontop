@@ -41,15 +41,19 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
     }
 
     public LeftJoinNormalization makeComplexEqualitiesImplicit(IQTree leftChild, IQTree rightChild,
-                                                               Optional<ImmutableExpression> ljCondition, VariableGenerator variableGenerator) {
+                                                               Optional<ImmutableExpression> ljCondition,
+                                                               VariableGenerator variableGenerator) {
         if (ljCondition.isPresent())
-            return makeComplexEqualitiesImplicit(leftChild, rightChild, ljCondition.get(), variableGenerator);
+            return makeComplexEqualitiesImplicit(leftChild, rightChild, ljCondition.get(),
+                    substitutionFactory.getSubstitution(), variableGenerator);
 
         return new LeftJoinNormalization(leftChild, rightChild, ljCondition, false);
     }
 
     protected LeftJoinNormalization makeComplexEqualitiesImplicit(IQTree leftChild, IQTree rightChild,
-                                                               ImmutableExpression ljCondition, VariableGenerator variableGenerator) {
+                                                                  ImmutableExpression ljCondition,
+                                                                  Substitution<ImmutableTerm> downSubstitution,
+                                                                  VariableGenerator variableGenerator) {
 
         var leftVariables = leftChild.getVariables();
 
@@ -67,7 +71,7 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
                 .map(termFactory::getConjunction);
 
         var substitutionPair = computeSubstitutionPair(ImmutableSet.copyOf(strictEqualities),
-                rightSpecificVariables, variableGenerator);
+                rightSpecificVariables, downSubstitution, variableGenerator);
 
         var newRight = iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(
@@ -83,7 +87,9 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
 
     private SubstitutionPair computeSubstitutionPair(ImmutableSet<ImmutableExpression> strictEqualities,
                                                      ImmutableSet<Variable> rightSpecificVariables,
+                                                     Substitution<ImmutableTerm> downSubstitution,
                                                      VariableGenerator variableGenerator) {
+
         Map<Variable, ImmutableTerm> leftSubstitutionMap = new HashMap<>();
         Map<Variable, ImmutableTerm> rightSubstitutionMap = new HashMap<>();
 
@@ -101,14 +107,23 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
                 rightSubstitutionMap.put((Variable) leftArgument, rightArgument);
             }
             else {
-                Variable leftVariable = variableGenerator.generateNewVariable();
-                leftSubstitutionMap.put(leftVariable, leftArgument);
+                var leftVariableFromDownSubstitution = downSubstitution.getPreImage(t -> t.equals(leftArgument)).stream()
+                        .findAny();
+
+                var leftVariable = leftVariableFromDownSubstitution
+                        .orElseGet(variableGenerator::generateNewVariable);
+
+                if (leftVariableFromDownSubstitution.isEmpty())
+                    leftSubstitutionMap.put(leftVariable, leftArgument);
                 rightSubstitutionMap.put(leftVariable, rightArgument);
             }
         }
         return new SubstitutionPair(
-                leftSubstitutionMap.entrySet().stream().collect(substitutionFactory.toSubstitution()),
-                rightSubstitutionMap.entrySet().stream().collect(substitutionFactory.toSubstitution()));
+                downSubstitution.compose(
+                    leftSubstitutionMap.entrySet().stream()
+                        .collect(substitutionFactory.toSubstitution())),
+                rightSubstitutionMap.entrySet().stream()
+                        .collect(substitutionFactory.toSubstitution()));
     }
 
     private boolean isDecomposibleStrictEquality(ImmutableExpression expression, ImmutableSet<Variable> leftVariables,
@@ -159,13 +174,11 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
         }
 
         var localNormalization = makeComplexEqualitiesImplicit(leftChild, rightChild,
-                leftJoinCondition.get(), variableGenerator);
-
-        var newLeft = normalizeLeft(localNormalization.leftChild, downSubstitution, variableGenerator);
+                leftJoinCondition.get(), downSubstitution, variableGenerator);
 
         return iqFactory.createBinaryNonCommutativeIQTree(
                 iqFactory.createLeftJoinNode(localNormalization.ljCondition),
-                newLeft,
+                localNormalization.leftChild,
                 localNormalization.rightChild);
     }
 
