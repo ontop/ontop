@@ -44,7 +44,7 @@ public class OptimizationTestingTools {
     public static final Constant NULL;
     public static final UnionAndBindingLiftOptimizer UNION_AND_BINDING_LIFT_OPTIMIZER;
     public static final GeneralStructuralAndSemanticIQOptimizer GENERAL_STRUCTURAL_AND_SEMANTIC_IQ_OPTIMIZER;
-
+    public static final FederationOptimizer FEDERATION_OPTIMIZER;
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
     public static final FlattenLifter FLATTEN_LIFTER;
     public static final RDF RDF_FACTORY;
@@ -115,6 +115,7 @@ public class OptimizationTestingTools {
         OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
         GENERAL_STRUCTURAL_AND_SEMANTIC_IQ_OPTIMIZER = injector.getInstance(GeneralStructuralAndSemanticIQOptimizer.class);
+        FEDERATION_OPTIMIZER = injector.getInstance(FederationOptimizer.class);
 
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 

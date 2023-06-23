@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestQueryProcessor implements QueryReformulator {
 
-	public static boolean returnPlannedQuery = false;
+	public static boolean returnPlannedQuery = false; // only needed for QueryRewriting.class in order to return the intermediate query as iqtree and not the final sql query, delete when FederationOptimzer is implemented and QueryRewriting is not needed anymore
 	private static final Logger LOGGER = LoggerFactory.getLogger(QuestQueryProcessor.class);
 
 	private final QueryRewriter rewriter;
@@ -43,6 +43,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
 	private final QueryPlanner queryPlanner;
 	private final QueryLogger.Factory queryLoggerFactory;
+	private final FederationOptimizer federationOptimizer;
 
 	@AssistedInject
 	protected QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -54,12 +55,16 @@ public class QuestQueryProcessor implements QueryReformulator {
 								  KGQueryTranslator inputQueryTranslator,
 								  GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
 								  QueryPlanner queryPlanner,
-								  QueryLogger.Factory queryLoggerFactory) {
+								  QueryLogger.Factory queryLoggerFactory,
+	                              FederationOptimizer federationOptimizer) {
+
+
 		this.kgQueryFactory = kgQueryFactory;
 		this.rewriter = queryRewriter;
 		this.generalOptimizer = generalOptimizer;
 		this.queryPlanner = queryPlanner;
 		this.queryLoggerFactory = queryLoggerFactory;
+		this.federationOptimizer = federationOptimizer;
 
 		this.rewriter.setTBox(obdaSpecification.getSaturatedTBox());
 		this.queryUnfolder = queryUnfolderFactory.create(obdaSpecification.getSaturatedMapping());
@@ -116,7 +121,16 @@ public class QuestQueryProcessor implements QueryReformulator {
 					return plannedQuery;
 				}
 
-				IQ executableQuery = generateExecutableQuery(plannedQuery);
+				IQ federationOptimizedQuery;
+				if (Boolean.parseBoolean(System.getenv().getOrDefault("ONTOP_ENABLE_FEDERATION_OPTIMIZATIONS", "false"))) {
+					LOGGER.debug("My optimized query input:\n{}\n", plannedQuery);
+					federationOptimizedQuery = federationOptimizer.optimize(plannedQuery);
+					LOGGER.debug("My optimized query output:\n{}\n", federationOptimizedQuery);
+				} else {
+					federationOptimizedQuery = plannedQuery;
+				}
+
+				IQ executableQuery = generateExecutableQuery(federationOptimizedQuery);
 				queryCache.put(inputQuery, executableQuery);
 				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
 				LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
@@ -127,6 +141,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 				throw e;
 			}
 		}
+
 		catch (OntopInvalidKGQueryException e) {
 			OntopInvalidInputQueryException reformulationException = new OntopInvalidInputQueryException(e.getMessage());
 			queryLogger.declareReformulationException(reformulationException);
