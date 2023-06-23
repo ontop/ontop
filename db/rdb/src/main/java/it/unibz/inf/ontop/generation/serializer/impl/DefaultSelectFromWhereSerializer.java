@@ -171,6 +171,10 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return String.format("ORDER BY %s\n", conditionString);
         }
 
+        /**
+         * By default, calls serializeOrderBy without hasOffset and hasLimit. Can be used for specific dialects that
+         * have to handle ORDER BY differently if an offset or limit is provided (e.g. SQLServer)
+         */
         protected String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions,
                                           ImmutableMap<Variable, QualifiedAttributeID> columnIDs, boolean hasOffset, boolean hasLimit) {
             return serializeOrderBy(sortConditions, columnIDs);
