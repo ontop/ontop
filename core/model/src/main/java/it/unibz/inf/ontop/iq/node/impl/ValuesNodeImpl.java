@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
@@ -600,6 +601,12 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
         // TODO: Worth implementing?
         return ImmutableSet.of();
+    }
+
+    @Override
+    public FunctionalDependencies inferFunctionalDependencies() {
+        // TODO: Worth implementing?
+        return FunctionalDependencies.empty();
     }
 
     @Override

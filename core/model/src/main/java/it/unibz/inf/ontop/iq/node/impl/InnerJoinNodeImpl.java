@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
@@ -336,6 +337,17 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .flatMap(child -> constraintMap.get(child).stream())
                 .collect(ImmutableCollectors.toSet());
     }
+
+    /*
+    We can simply collect all FDs from the children.
+     */
+    @Override
+    public FunctionalDependencies inferFunctionalDependencies(ImmutableList<IQTree> children, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
+        return children.stream()
+                .flatMap(child -> child.inferFunctionalDependencies().stream())
+                .collect(FunctionalDependencies.toFunctionalDependencies());
+    }
+
 
     @Override
     public VariableNonRequirement computeVariableNonRequirement(ImmutableList<IQTree> children) {

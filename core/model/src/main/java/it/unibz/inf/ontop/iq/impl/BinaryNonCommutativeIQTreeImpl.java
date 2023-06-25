@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -13,6 +12,7 @@ import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
@@ -202,5 +202,10 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     @Override
     protected VariableNonRequirement computeVariableNonRequirement() {
         return getRootNode().computeNotInternallyRequiredVariables(leftChild, rightChild);
+    }
+
+    @Override
+    protected FunctionalDependencies computeFunctionalDependencies() {
+        return getRootNode().inferFunctionalDependencies(leftChild, rightChild, inferUniqueConstraints(), getVariables());
     }
 }

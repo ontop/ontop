@@ -2,6 +2,8 @@ package it.unibz.inf.ontop;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
@@ -24,6 +26,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.LegacyVariableGenerator;
 import org.apache.commons.rdf.api.RDF;
 
+import java.util.Map;
 import java.util.Properties;
 import java.util.stream.IntStream;
 
@@ -230,6 +233,16 @@ public class OptimizationTestingTools {
             UniqueConstraint.builder(tableDef, "uc_" + tableNumber)
                     .addDeterminant(1)
                     .build();
+            return tableDef;
+        }
+
+        public NamedRelationDefinition createRelationWithFD(int tableNumber, int arity, boolean canNull) {
+            DBTermType stringDBType = getDBTypeFactory().getDBStringType();
+            NamedRelationDefinition tableDef = createRelation(tableNumber, arity, stringDBType, "FD_", canNull);
+            FunctionalDependency.defaultBuilder(tableDef)
+                            .addDeterminant(1)
+                            .addDependent(2)
+                            .build();
             return tableDef;
         }
 

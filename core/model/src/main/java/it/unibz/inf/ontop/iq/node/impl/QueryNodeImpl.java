@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.Variable;
 
 public abstract class QueryNodeImpl implements QueryNode {
