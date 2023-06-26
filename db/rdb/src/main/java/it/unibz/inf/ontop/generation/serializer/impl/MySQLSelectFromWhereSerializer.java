@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SQLOrderComparator;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
@@ -11,8 +12,11 @@ import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.StringUtils;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -21,7 +25,7 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
     private static final ImmutableMap<Character, String> BACKSLASH = ImmutableMap.of('\\', "\\\\");
 
     @Inject
-    private MySQLSelectFromWhereSerializer(TermFactory termFactory) {
+    protected MySQLSelectFromWhereSerializer(TermFactory termFactory) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String serializeStringConstant(String constant) {
@@ -89,6 +93,43 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                     protected String formatBinaryJoin(String operatorString, QuerySerialization left, QuerySerialization right, String onString) {
                         return String.format("(%s\n %s \n%s %s)", left.getString(), operatorString, right.getString(), onString);
                     }
+
+                    @Override
+                    protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
+                        /* We build the query string of the form
+                        /  SELECT <variables> FROM <subquery> CROSS JOIN JSON_TABLE(<flattenedVariable>, '$[*]',
+                        /       COLUMNS (<outputVar> JSON path '$' [, <indexVar> for ordinality]))
+                        */
+                        StringBuilder builder = new StringBuilder();
+
+                        builder.append(
+                                String.format(
+                                        getFlattenFunctionFormat(),
+                                        subQuerySerialization.getString(),
+                                        allColumnIDs.get(flattenedVar).getSQLRendering(),
+                                        allColumnIDs.get(outputVar).getSQLRendering()
+
+                                ));
+                        indexVar.ifPresent(v -> builder.append(String.format(", %s for ordinality", allColumnIDs.get(v).getSQLRendering())));
+                        builder.append(")) ");
+                        builder.append(generateFreshViewAlias().getSQLRendering());
+
+                        return new QuerySerializationImpl(
+                                builder.toString(),
+                                allColumnIDs.entrySet().stream()
+                                        .filter(e -> e.getKey() != flattenedVar)
+                                        .collect(ImmutableCollectors.toMap())
+                        );
+                    }
                 });
+    }
+
+    protected String getFlattenFunctionFormat() {
+        /*
+        *   By default, running JSON_TABLE on a JSON-array that was created by a different JSON_TABLE call
+        *   will return an empty list. We can circumvent this, by putting another array around it (calling
+        *   `JSON_ARRAY`) and then de-referencing it again in the path selector ($[0][*]).
+         */
+        return "%s CROSS JOIN JSON_TABLE(JSON_ARRAY(%s), '$[0][*]' columns(%s JSON path '$'";
     }
 }

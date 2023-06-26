@@ -17,17 +17,14 @@ public interface MaterializationParams {
     boolean canMaterializationBeIncomplete();
 
 
-    static <B extends Builder<B>> Builder<B> defaultBuilder() {
-        return new MaterializationParamsImpl.DefaultBuilder<>();
+    static Builder<?> defaultBuilder() {
+        return new MaterializationParamsImpl.DefaultBuilder();
     }
-
 
     interface Builder<B extends Builder<B>> {
 
         B enableIncompleteMaterialization(boolean enable);
 
         MaterializationParams build();
-
     }
-
 }

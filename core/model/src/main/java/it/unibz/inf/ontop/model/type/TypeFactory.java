@@ -65,6 +65,8 @@ public interface TypeFactory {
 		return getDatatype(XSD.DATETIME);
 	}
 
+	default RDFDatatype getXsdDate() { return getDatatype(XSD.DATE); }
+
 	default RDFDatatype getXsdDatetimeStampDatatype() {
 		return getDatatype(XSD.DATETIMESTAMP);
 	}

@@ -29,7 +29,7 @@ public class LeftJoinProfOracleTest extends AbstractLeftJoinProfTest {
     @Disabled
     @Test
     @Override
-    public void testGroupConcat3() throws Exception {
+    public void testGroupConcat3() {
         super.testGroupConcat3();
     }
 
@@ -39,7 +39,7 @@ public class LeftJoinProfOracleTest extends AbstractLeftJoinProfTest {
     @Disabled
     @Test
     @Override
-    public void testGroupConcat5() throws Exception {
+    public void testGroupConcat5() {
         super.testGroupConcat5();
     }
 
@@ -97,5 +97,13 @@ public class LeftJoinProfOracleTest extends AbstractLeftJoinProfTest {
     @Override
     protected ImmutableList<String> getExpectedAggregationMappingProfStudentCountPropertyResults() {
         return ImmutableList.of("\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal", "\"31\"^^xsd:decimal");
+    }
+
+    @Override
+    protected ImmutableList<ImmutableList<String>> getExpectedValuesSample() {
+        return ImmutableList.of(
+                ImmutableList.of("\"11\"^^xsd:decimal", "\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal"),
+                ImmutableList.of("\"10\"^^xsd:decimal", "\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal")
+        );
     }
 }

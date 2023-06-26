@@ -1,11 +1,11 @@
 {
   "relations": [
     {
-      "name": ["\"hr\"","\"person-tags\""],
+      "name": ["\"hr\"","\"person-tags-flattened\""],
       "baseRelation": ["\"hr\"","\"person-xt\""],
       "flattenedColumn": {
         "name": "\"tags\"",
-        "datatype": "json"
+        "datatype": "jsonb"
       },
       "columns": {
         "kept": [
@@ -13,74 +13,70 @@
           "\"ssn\"",
           "\"fullName\""
         ],
-        "position": "\"pos\"",
-        "extracted": [
-          {
-            "name": "\"tag_str\"",
-            "datatype": "text"
-          },
-          {
-            "name": "\"tag_int\"",
-            "datatype": "integer"
-          }
-        ]
-      },
-      "uniqueConstraints": {
-        "added": []
-      },
-      "otherFunctionalDependencies": {
-        "added": []
-      },
-      "foreignKeys": {
-        "added": []
+        "new": "\"tag\"",
+        "position": "\"pos\""
       },
       "type": "FlattenLens"
     },
     {
-      "name": ["\"hr\"","\"persons-friends\""],
+      "name": ["\"hr\"","\"person-tags\""],
+      "baseRelation": ["\"hr\"","\"person-tags-flattened\""],
+      "columns": {
+        "added": [
+          {
+            "name": "\"tag_str\"",
+            "expression": "CASE WHEN jsonb_typeof(\"tag\") in ('boolean', 'string', 'number') THEN \"tag\"::text ELSE NULL END"
+          },
+          {
+            "name": "\"tag_int\"",
+            "expression": "CASE WHEN jsonb_typeof(\"tag\") = 'number' THEN \"tag\"::integer ELSE NULL END"
+          }
+        ],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"hr\"","\"persons-friends-flattened\""],
       "baseRelation": ["\"hr\"","\"person-xt\""],
       "flattenedColumn": {
         "name": "\"friends\"",
-        "datatype": "json"
+        "datatype": "jsonb"
       },
       "columns": {
         "kept": [
           "\"id\""
         ],
-        "position": "\"pos\"",
-        "extracted": [
+        "new": "\"friend\"",
+        "position": "\"pos\""
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["\"hr\"","\"persons-friends\""],
+      "baseRelation": ["\"hr\"","\"persons-friends-flattened\""],
+      "columns": {
+        "added": [
           {
             "name": "\"firstName\"",
-            "key": ["fName"],
-            "datatype": "text"
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"friend\", 'fName')) in ('boolean', 'string', 'number') THEN jsonb_extract_path_text(\"friend\", 'fName')::text ELSE NULL END"
           },
           {
             "name": "\"nickNames\"",
-            "key": ["nickname"],
-            "datatype": "jsonb"
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"friend\", 'nickname')) in ('boolean', 'string', 'number') THEN jsonb_extract_path(\"friend\", 'nickname') ELSE NULL END"
           },
           {
             "name": "\"nickName_str\"",
-            "key": ["nickname"],
-            "datatype": "text"
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"friend\", 'nickname')) in ('boolean', 'string', 'number') THEN jsonb_extract_path_text(\"friend\", 'nickname')::text ELSE NULL END"
           },
           {
             "name": "\"city\"",
-            "key": ["address", "city"],
-            "datatype": "text"
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"friend\", 'address', 'city')) in ('boolean', 'string', 'number') THEN jsonb_extract_path_text(\"friend\", 'address', 'city')::text ELSE NULL END"
           }
-        ]
+        ],
+        "hidden": []
       },
-      "uniqueConstraints": {
-        "added": []
-      },
-      "otherFunctionalDependencies": {
-        "added": []
-      },
-      "foreignKeys": {
-        "added": []
-      },
-      "type": "FlattenLens"
+      "type": "BasicLens"
     }
   ]
 }

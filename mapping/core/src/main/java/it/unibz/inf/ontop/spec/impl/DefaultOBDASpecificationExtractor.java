@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
@@ -42,9 +43,9 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
 
     @Override
     public OBDASpecification extract(@Nonnull OBDASpecInput specInput,
-                                     @Nonnull Optional<Ontology> optionalOntology)
+                                     @Nonnull Optional<Ontology> optionalOntology, @Nonnull ImmutableSet<RDFFact> previousFacts)
             throws OBDASpecificationException {
-        ImmutableSet<RDFFact> facts = factExtractor.extractAndSelect(optionalOntology);
+        ImmutableSet<RDFFact> facts = Sets.union(factExtractor.extractAndSelect(optionalOntology), previousFacts).immutableCopy();
 
         try {
             MappingAndDBParameters mappingAndDBMetadata = mappingExtractor.extract(specInput, optionalOntology);
@@ -60,13 +61,13 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
 
     @Override
     public OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull PreProcessedMapping<? extends PreProcessedTriplesMap> ppMapping,
-                                     @Nonnull Optional<Ontology> optionalOntology) throws OBDASpecificationException {
+                                     @Nonnull Optional<Ontology> optionalOntology, @Nonnull ImmutableSet<RDFFact> previousFacts) throws OBDASpecificationException {
 
         try {
             MappingAndDBParameters mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, optionalOntology);
             ImmutableList<IQ> rules = ruleExtractor.extract(specInput);
 
-            ImmutableSet<RDFFact> facts = factExtractor.extractAndSelect(optionalOntology);
+            ImmutableSet<RDFFact> facts = Sets.union(factExtractor.extractAndSelect(optionalOntology), previousFacts).immutableCopy();
 
             return mappingTransformer.transform(
                     mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBParameters(), optionalOntology, facts,

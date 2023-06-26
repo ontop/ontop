@@ -59,6 +59,15 @@ public class AbstractRDF4JTest {
                 propertyFile, viewFile, dbMetadataFile, sparqlRulesRelativePath);
     }
 
+    protected static void initOBDAWithFacts(String dbScriptRelativePath, String obdaRelativePath,
+                                   @Nullable String ontologyRelativePath, @Nullable String propertyFile,
+                                   @Nullable String factsFile, @Nullable String factsBaseIRI) throws SQLException, IOException {
+        String jdbcUrl = H2RDF4JTestTools.generateJdbcUrl();
+        SQL_CONNECTION = H2RDF4JTestTools.createH2Instance(jdbcUrl, dbScriptRelativePath);
+        REPO_CONNECTION = H2RDF4JTestTools.initOBDA(jdbcUrl, obdaRelativePath, ontologyRelativePath,
+                propertyFile, null, null, null, factsFile, factsBaseIRI);
+    }
+
 
     protected static void initR2RML(String dbScriptRelativePath, String r2rmlRelativePath) throws SQLException, IOException {
         initR2RML(dbScriptRelativePath, r2rmlRelativePath, null, null);
@@ -187,6 +196,26 @@ public class AbstractRDF4JTest {
         result.close();
 
         assertEquals(expectedGraph, statementBuilder.build());
+    }
+
+    protected int runGraphQueryAndCount(String queryString) {
+        return runGraphQueryAndCount(queryString, new MapBindingSet());
+    }
+
+    protected int runGraphQueryAndCount(String queryString,
+                                           BindingSet bindings) {
+        GraphQuery query = REPO_CONNECTION.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
+        bindings.getBindingNames()
+                .forEach(n -> query.setBinding(n, bindings.getValue(n)));
+
+        GraphQueryResult result = query.evaluate();
+        int count = 0;
+        while (result.hasNext()) {
+            count++;
+            result.next();
+        }
+        result.close();
+        return count;
     }
 
     protected TupleQueryResult evaluate(String queryString) {

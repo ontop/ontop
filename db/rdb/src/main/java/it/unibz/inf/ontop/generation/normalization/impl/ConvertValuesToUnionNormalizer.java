@@ -9,12 +9,11 @@ import it.unibz.inf.ontop.iq.node.ValuesNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.stream.IntStream;
 
 /**
  * Many databases do not support VALUES, they use this normalizer and replace ValuesNodes
@@ -44,27 +43,19 @@ public class ConvertValuesToUnionNormalizer extends DefaultRecursiveIQTreeVisiti
 
     private IQTree convertToUnion(ValuesNode valuesNode) {
         ImmutableList<Variable> orderedVariables = valuesNode.getOrderedVariables();
-        ImmutableList<ImmutableSubstitution<ImmutableTerm>> substitutionList =
+        ImmutableList<Substitution<ImmutableTerm>> substitutionList =
                 valuesNode.getValues().stream()
-                        .map(tuple -> substitutionFactory.getSubstitution(
-                                IntStream.range(0, orderedVariables.size())
-                                    .boxed()
-                                    .collect(ImmutableCollectors.toMap(
-                                        orderedVariables::get,
-                                        i -> (ImmutableTerm) tuple.get(i)))))
+                        .map(tuple -> substitutionFactory.<ImmutableTerm>getSubstitution(orderedVariables, tuple))
                 .collect(ImmutableCollectors.toList());
 
         return iqFactory.createNaryIQTree(
                 iqFactory.createUnionNode(
                         valuesNode.getVariables()),
                 substitutionList.stream()
-                        .map(this::createConstructionTrueTree)
+                        .map(s -> iqFactory.createUnaryIQTree(
+                                iqFactory.createConstructionNode(s.getDomain(), s),
+                                iqFactory.createTrueNode()))
                         .collect(ImmutableCollectors.toList()));
     }
 
-    private IQTree createConstructionTrueTree(ImmutableSubstitution<ImmutableTerm> substitution) {
-        return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(substitution.getDomain(), substitution),
-                iqFactory.createTrueNode());
-    }
 }

@@ -1,12 +1,17 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.SAME_TYPE_NO_CONSTANT;
@@ -31,17 +36,46 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String UUID_STR = "UUID";
     public static final String JSON_STR = "JSON";
     public static final String JSONB_STR = "JSONB";
-    public static final String ARRAY_STR = "ARRAY";
+    public static final String ARRAY_STR = "T[]";
     public static final String BYTEA_STR = "BYTEA";
 
     protected static final String GEOMETRY_STR = "GEOMETRY";
     protected static final String GEOGRAPHY_STR = "GEOGRAPHY";
 
+    //For the ARRAY definition style T[size] or T[]
+    private static final Pattern ARRAY_PATTERN = Pattern.compile("\\[[\\d ]*\\]$");
+
+    //For the ARRAY definition style T ARRAY[size] or T ARRAY
+    private static final Pattern ARRAY_PATTERN_2 = Pattern.compile(" ARRAY(\\[[\\d ]+\\])?$");
+
 
 
     @AssistedInject
     protected PostgreSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
-        super(createPostgreSQLTypeMap(rootTermType, typeFactory), createPostgreSQLCodeMap());
+        super(createPostgreSQLTypeMap(rootTermType, typeFactory), createPostgreSQLCodeMap(), createGenericAbstractTypeMap(rootTermType, typeFactory));
+    }
+
+    private static ImmutableList<GenericDBTermType> createGenericAbstractTypeMap(TermType rootTermType, TypeFactory typeFactory) {
+        TermTypeAncestry rootAncestry = rootTermType.getAncestry();
+
+        GenericDBTermType abstractArrayType = new ArrayDBTermType(ARRAY_STR, rootAncestry, s -> {
+            if(s.startsWith("_"))
+                return Optional.of(typeFactory.getDBTypeFactory().getDBTermType(s.substring(1)));
+
+            var matcher2 = ARRAY_PATTERN_2.matcher(s);
+            if(matcher2.find())
+                return Optional.of(typeFactory.getDBTypeFactory().getDBTermType(s.substring(0, matcher2.start())));
+
+            var matcher = ARRAY_PATTERN.matcher(s);
+            if(matcher.find())
+                return Optional.of(typeFactory.getDBTypeFactory().getDBTermType(s.substring(0, matcher.start())));
+
+            return Optional.empty();
+        });
+
+        List<GenericDBTermType> list = new ArrayList<>();
+        list.add(abstractArrayType);
+        return ImmutableList.copyOf(list);
     }
 
     protected static Map<String, DBTermType> createPostgreSQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {

@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.*;
@@ -38,10 +39,9 @@ import it.unibz.inf.ontop.spec.ontology.*;
 import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -64,16 +64,19 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private ImmutableCQContainmentCheckUnderLIDs<RDFAtomPredicate> containmentCheckUnderLIDs;
 
     private final SubstitutionFactory substitutionFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
 	private TreeWitnessRewriter(AtomFactory atomFactory,
 								TermFactory termFactory,
                                 IntermediateQueryFactory iqFactory,
 								CoreUtilsFactory coreUtilsFactory,
-                                SubstitutionFactory substitutionFactory) {
+                                SubstitutionFactory substitutionFactory,
+                                IQTreeTools iqTreeTools) {
         super(iqFactory, atomFactory, termFactory, coreUtilsFactory);
 
         this.substitutionFactory = substitutionFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
 	@Override
@@ -322,13 +325,17 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
 
     ImmutableCQ<RDFAtomPredicate> convert(CQ cq, ImmutableList<Variable> vars) {
-        ImmutableMap<Variable, VariableOrGroundTerm> equalities = cq.equalities.entrySet().stream()
+
+        Substitution<Variable> s = cq.equalities.entrySet().stream()
+                // the check needs to be done before cast in collect: equalities can contain a = a
                 .filter(e -> e.getKey() != e.getValue())
-                .collect(ImmutableCollectors.toMap(e -> (Variable)e.getKey(), Map.Entry::getValue));
+                .collect(substitutionFactory.toSubstitution(
+                        e -> (Variable)e.getKey(),
+                        e -> (Variable)e.getValue()));
 
-        ImmutableSubstitution s = substitutionFactory.getSubstitution(equalities);
-
-	    return new ImmutableCQ<RDFAtomPredicate>(s.apply(vars), ImmutableList.copyOf(cq.atoms));
+	    return new ImmutableCQ<>(
+                substitutionFactory.apply(s, vars),
+                ImmutableList.copyOf(cq.atoms));
     }
 
     private ImmutableList<IQTree> convertCQ(ImmutableCQ<RDFAtomPredicate> cq, ImmutableList<Variable> vars) {
@@ -337,12 +344,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 .map(a -> iqFactory.createIntensionalDataNode((DataAtom<AtomPredicate>)(DataAtom)a))
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableMap<Variable, ImmutableTerm> map = IntStream.range(0, vars.size())
-                .mapToObj(i -> Maps.<Variable, ImmutableTerm>immutableEntry(vars.get(i), cq.getAnswerVariables().get(i)))
-                .filter(e -> !e.getKey().equals(e.getValue()))
-                .collect(ImmutableCollectors.toMap());
-
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(map);
+        Substitution<? extends ImmutableTerm> substitution = substitutionFactory.getSubstitution(vars, cq.getAnswerVariables());
         if (substitution.isEmpty())
             return body;
 
@@ -422,9 +424,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableList<IQTree> unionChildren = joined.stream()
-                .map(c -> c.getVariables().equals(vars)
-                        ? c
-                        : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(vars), c))
+                .map(c -> iqTreeTools.createConstructionNodeTreeIfNontrivial(c, vars))
                 .collect(ImmutableCollectors.toList());
 
         return ImmutableList.of(iqFactory.createNaryIQTree(iqFactory.createUnionNode(vars), unionChildren));

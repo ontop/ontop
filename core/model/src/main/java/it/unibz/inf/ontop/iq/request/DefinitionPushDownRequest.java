@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.iq.request.impl.DefPushDownRequestImpl;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 /**
  * Request for pushing down in the IQTree the definition of a new variable
@@ -23,7 +23,7 @@ public interface DefinitionPushDownRequest {
 
     ImmutableSet<Variable> getDefinitionAndConditionVariables();
 
-    DefinitionPushDownRequest newRequest(ImmutableSubstitution<? extends ImmutableTerm> substitution);
+    DefinitionPushDownRequest newRequest(Substitution<? extends ImmutableTerm> substitution);
 
     static DefinitionPushDownRequest create(Variable newVariable, ImmutableTerm definition, ImmutableExpression condition) {
         return new DefPushDownRequestImpl(newVariable, definition, condition);

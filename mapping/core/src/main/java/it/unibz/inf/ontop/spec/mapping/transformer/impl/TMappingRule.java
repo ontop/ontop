@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.impl.IQ2CQ;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -101,7 +101,7 @@ public class TMappingRule {
 		if (projectionAtom.getArity() != headTerms.size())
 			throw new MinorOntopInternalBugException("size mismatch");
 
-		ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(projectionAtom.getArguments(), headTerms);
+		Substitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(projectionAtom.getArguments(), headTerms);
 
 		return iqFactory.createIQ(projectionAtom,
 				iqFactory.createUnaryIQTree(

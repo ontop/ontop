@@ -6,7 +6,7 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-build</artifactId>
-        <version>5.0.1-SNAPSHOT</version>
+        <version>5.1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-distribution</artifactId>
@@ -16,9 +16,14 @@
         <maven.deploy.skip>true</maven.deploy.skip>
         <assembly.appendAssemblyId>false</assembly.appendAssemblyId>
         <assembly.attach>false</assembly.attach>
+        <license.skipAddThirdParty>false</license.skipAddThirdParty> <!-- enable CLI execution of license:add-third-party -->
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-cli</artifactId>
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-owlapi</artifactId>
@@ -39,34 +44,16 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-third-party</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>add-third-party</goal>
-                        </goals>
-                        <configuration>
-                            <skipAddThirdParty>${thirdparty.skip}</skipAddThirdParty>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>attach-cli-assembly</id>
-                        <phase>package</phase>
+                        <phase>${asset-cli.phase-prefix}package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <skipAssembly>${assembly.cli.skip}</skipAssembly>
                             <descriptors>
                                 <descriptor>src/assembly/ontop-cli.xml</descriptor>
                             </descriptors>
@@ -79,26 +66,9 @@
     </build>
 
     <profiles>
-        <profile>
-            <id>cli</id>
-            <dependencies>
-                <dependency>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>ontop-cli</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>release</id>
-            <dependencies>
-                <dependency>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>ontop-cli</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-
-        <!-- Enforce a specific ontop-cli assembly format by setting -Dassembly.cli.format (used by Docker build-image.sh) -->
+        <!-- Enforce a specific ontop-cli assembly format by setting -Dassembly.cli.format (used by Docker build-image.sh)
+             (implemented as automatically activated profile, so to preserve the original format in the
+              XML assembly descriptor file in case property ${assembly.cli.format} is not specified)  -->
         <profile>
             <activation>
                 <property>

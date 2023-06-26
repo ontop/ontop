@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.docker.lightweight;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
@@ -44,34 +45,9 @@ public class AbstractDockerRDF4JTest {
 
         String propertyFilePath = AbstractDockerRDF4JTest.class.getResource(propertyFile).getPath();
 
-        // The properties required
-        String jdbcUrl = null;
-        String username = null;
-        String password = null;
-        String jdbcDriver = null;
-
-        try (InputStream input = Files.newInputStream(Paths.get(propertyFilePath))) {
-            Properties prop = new Properties();
-
-            // load a properties file
-            prop.load(input);
-
-            // get the property values
-            jdbcUrl = prop.getProperty("jdbc.url");
-            username = prop.getProperty("jdbc.user");
-            password = prop.getProperty("jdbc.password");
-            jdbcDriver = prop.getProperty("jdbc.driver");
-
-        } catch (IOException e) {
-            System.out.println("- ERROR loading '" + propertyFile + "'");
-        }
-
-        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder<?>> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(AbstractDockerRDF4JTest.class.getResource(obdaRelativePath).getPath())
-                .jdbcUrl(jdbcUrl)
-                .jdbcUser(username)
-                .jdbcPassword(password)
-                .jdbcDriver(jdbcDriver)
+                .propertyFile(propertyFilePath)
                 .enableTestMode();
 
         if (ontologyRelativePath != null)
@@ -120,6 +96,16 @@ public class AbstractDockerRDF4JTest {
     protected void executeAndCompareValues(String queryString, ImmutableSet<String> expectedVValues,
                                            BindingSet bindings) {
         ImmutableSet<String> vValues = ImmutableSet.copyOf(runQuery(queryString, bindings));
+        assertEquals(expectedVValues, vValues);
+    }
+
+    protected void executeAndCompareValues(String queryString, ImmutableMultiset<String> expectedVValues) {
+        executeAndCompareValues(queryString, expectedVValues, new MapBindingSet());
+    }
+
+    protected void executeAndCompareValues(String queryString, ImmutableMultiset<String> expectedVValues,
+                                           BindingSet bindings) {
+        ImmutableMultiset<String> vValues = ImmutableMultiset.copyOf(runQuery(queryString, bindings));
         assertEquals(expectedVValues, vValues);
     }
 

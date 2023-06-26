@@ -19,13 +19,15 @@ import java.util.stream.Stream;
 public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
 
     private static final long TERM_EVALUATOR_CACHE_SIZE = 10000;
+    private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
     private final CoreUtilsFactory coreUtilsFactory;
 
     private final Cache<Map.Entry<ImmutableExpression, ImmutableSet<Variable>>, Boolean> cache;
 
     @Inject
-    private TermNullabilityEvaluatorImpl(SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory) {
+    private TermNullabilityEvaluatorImpl(TermFactory termFactory, SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory) {
+        this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
         this.cache = CacheBuilder.newBuilder()
@@ -35,8 +37,9 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
 
     @Override
     public boolean isFilteringNullValue(ImmutableExpression expression, Variable variable) {
-        ImmutableExpression nullCaseExpression = substitutionFactory.getNullSubstitution(Stream.of(variable))
-                .applyToBooleanExpression(expression);
+        ImmutableExpression nullCaseExpression = Stream.of(variable)
+                .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()))
+                .apply(expression);
 
         return nullCaseExpression.evaluate2VL(coreUtilsFactory.createSimplifiedVariableNullability(expression))
                 .isEffectiveFalse();
@@ -50,8 +53,9 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
         if (cacheResult != null)
             return cacheResult;
 
-        ImmutableExpression nullCaseExpression = substitutionFactory.getNullSubstitution(tightVariables.stream())
-                .applyToBooleanExpression(expression);
+        ImmutableExpression nullCaseExpression = tightVariables.stream()
+                .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()))
+                .apply(expression);
 
         boolean result = nullCaseExpression.evaluate2VL(coreUtilsFactory.createSimplifiedVariableNullability(expression))
                 .isEffectiveFalse();

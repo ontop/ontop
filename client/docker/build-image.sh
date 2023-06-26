@@ -17,7 +17,7 @@ set -e
 cd "$( dirname "${BASH_SOURCE[0]}" )"/../..
 
 # Extract the Ontop version from pom.xml (to be used in Docker image tag, if not overridden)
-VERSION=$( grep '<artifactId>ontop</artifactId>' pom.xml -C3 | grep '<version>' | sed -E 's/.*>(.*)<.*/\1/' )
+VERSION=$( grep '<artifactId>ontop</artifactId>' pom.xml -C3 | grep '<version>' | sed -E 's/[^>]*>([^<]*)(\s*|<.*)$/\1/' )
 
 # Extract the Git revision, in case this script is running within a git working copy
 # This allows browsing the exact sources that contributed to the image:
@@ -39,7 +39,8 @@ PUSH="false"
 BINDIR="build/distribution/target/ontop-docker"
 PLATFORMS="linux/amd64,linux/arm64"
 
-# Initialize BUILDARGS and LABELARGS (revision-specific labels added to the latter, if info is available)
+# Initialize TAGARGS, BUILDARGS and LABELARGS (revision-specific labels added to the latter, if info is available)
+TAGARGS=
 BUILDARGS="--build-arg ONTOP_CLI_BINDIR=${BINDIR}"
 LABELARGS="--label org.opencontainers.image.version=${VERSION} --label org.opencontainers.image.created=$( date -u +'%Y-%m-%dT%H:%M:%SZ' )"
 if [ "${REVISION:+x}" ]; then
@@ -55,17 +56,14 @@ Builds and/or pushes the Ontop Docker image, using Docker buildx.
 (see https://docs.docker.com/buildx/working-with-buildx/ for buildx setup).
 
 Options:
-    -c            compile from scratch outside Docker ('mvn clean package -Pcli')
+    -c            compile from scratch outside Docker ('mvn clean package -Passet-cli')
     -C            compile from scratch inside Docker (as -c, but use dockerized Maven)
                   this option does not require a JDK and provide maximum reproducibility
                   at the expenses of longer build time (mostly to download dependencies)
     -n            build Docker image with --no-cache
-    -t name:tag   tagged image name ('name:tag' format) to apply to the generated image
-                  (default: ${NAME}:${TAG})
-    -T tag        image tag (the part after ':') to apply to the generated image
-                  (default: ${TAG})
-    -N name       image name (the part before ':') to apply to to the generated image
-                  (default: ${NAME})
+    -t name:tag   tagged image name to apply to the image (can be used multiple times),
+                  using 'name:tag' format with optional ':tag' defaulting to ${TAG}
+                  (default: -t ${NAME}:${TAG} -t ${NAME}:latest)
     -p            also pushes the created Docker image
     -x            cross build for linux/amd64 and linux/arm64; automatically pushes
                   (if not used, only the image for the local OS/arch platform is built)
@@ -94,15 +92,14 @@ exit 0
 fi
 
 # Parse script options, updating corresponding build variables
-while getopts cCnt:T:N:pxb:dq option
+while getopts cCnt:pxb:dq option
 do
     case "${option}" in
         c) CLEANARG="clean";;
         C) TARGET="ontop-image-from-sources";;
         n) NOCACHEARG="--no-cache";;
-        t) NAMETAG=${OPTARG};;
-        T) TAG=${OPTARG};;
-        N) NAME=${OPTARG};;
+        t) [[ "${OPTARG}" =~ ^[^:]+[:][^:]+$ ]] || OPTARG=${OPTARG}:${TAG}
+           TAGARGS="${TAGARGS}"" -t ${OPTARG}";;
         p) PUSH=1;;
         x) CROSS_BUILD=1; PUSH=1;;
         b) BUILDARGS=${BUILDARGS}" --build-arg "${OPTARG};;
@@ -112,8 +109,11 @@ do
     esac
 done
 
-# Assemble image name:tag from its components (-T, -N options), if not explicitly set (-t option)
-NAMETAG="${NAMETAG:-${NAME}:${TAG}}"
+# Apply default tags (if option '-t' never supplied) and extract space-separated list of tags
+if [ -z "${TAGARGS}" ]; then
+    TAGARGS="-t ${NAME}:${TAG} -t ${NAME}:latest"
+fi
+NAMETAGS=`echo "${TAGARGS}" | sed -E 's/ -t / /g' | sed -E 's/^ //'`
 
 # Helper function to log timestamped message (output suppressed if option -q is supplied)
 function log {
@@ -125,13 +125,13 @@ if [ "${TARGET}" = "ontop-image-from-binaries" ] || [ "${JDEPS}" ]; then
     # Compile via Maven ('clean' triggered by -c option; ontop-cli assembly not zipped)
     log "Compiling Ontop ${VERSION}"
     rm -rf build/distribution/target/ontop-cli-*/
-    ./mvnw ${QUIETARG} ${CLEANARG} package -Pcli -Dassembly.cli.format=dir
+    ./mvnw ${QUIETARG} ${CLEANARG} package -Passet-cli -Dmaven.test.skip -Dassembly.cli.format=dir
 
     # Rearrange generated ontop-cli files, dropping unused files and adding entrypoint.sh script
-    log "Assembling content of image ${NAMETAG}"
+    log "Assembling content of image ${NAMETAGS}"
     rm -rf ${BINDIR}
     mv build/distribution/target/ontop-cli-*/ ${BINDIR}
-    rm -rf ${BINDIR}/{ontop.bat,ontop,ontop-completion.sh,jdbc,logback.xml,log/logback-debug.xml}
+    rm -rf ${BINDIR}/{ontop.bat,ontop-completion.sh,jdbc,logback.xml,log/logback-debug.xml}
     cp client/docker/{entrypoint.sh,healthcheck.sh} ${BINDIR}
 fi
 
@@ -152,15 +152,17 @@ fi
 # Build via Docker 'buildx', differentiating "simple" (local platform only) vs "cross" (linux/amd64 + linux/arm64) build
 if [ "${CROSS_BUILD}" != "false" ]; then
     # When cross-building, the generated multi-platform image cannot be stored locally but need to be pushed to a Docker repository
-    log "Building & pushing multi-platform image ${NAMETAG}"
-    docker buildx build -f client/docker/Dockerfile --target ${TARGET} -t "${NAMETAG}" ${NOCACHEARG} ${QUIETARG} ${BUILDARGS} ${LABELARGS} --push --platform "${PLATFORMS}" .
+    log "Building & pushing multi-platform image ${NAMETAGS}"
+    docker buildx build -f client/docker/Dockerfile --target ${TARGET} ${TAGARGS} ${NOCACHEARG} ${QUIETARG} ${BUILDARGS} ${LABELARGS} --push --platform "${PLATFORMS}" .
 else
     # When not cross-building, pushing the image is optional and is triggered by supplying option '-p'
-    log "Building image ${NAMETAG}"
-    docker buildx build -f client/docker/Dockerfile --target ${TARGET} -t "${NAMETAG}" ${NOCACHEARG} ${QUIETARG} ${BUILDARGS} ${LABELARGS} --load .
+    log "Building image ${NAMETAGS}"
+    docker buildx build -f client/docker/Dockerfile --target ${TARGET} ${TAGARGS} ${NOCACHEARG} ${QUIETARG} ${BUILDARGS} ${LABELARGS} --load .
     if [ "${PUSH}" != "false" ]; then
-        log "Pushing image ${NAMETAG}"
-        docker push ${QUIETARG} "${NAMETAG}"
+        for NAMETAG in ${NAMETAGS}; do # need to iterate as --all-tags risks pushing also other local images with same name
+            log "Pushing image ${NAMETAG}"
+            docker push ${QUIETARG} "${NAMETAG}"
+        done
     fi
 fi
 

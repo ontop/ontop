@@ -1,0 +1,4 @@
+<http://www.semanticweb.org/ontop-facts#factCompany> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.semanticweb.org/ontop-facts#Company> .
+<http://www.semanticweb.org/ontop-facts#factCompany> <http://www.semanticweb.org/ontop-facts#id> "3"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://www.semanticweb.org/ontop-facts#factCompany> <http://www.semanticweb.org/ontop-facts#foundingYear> "2022"^^<http://www.w3.org/2001/XMLSchema#integer> <http://www.semanticweb.org/ontop-facts#extra>.
+<http://www.semanticweb.org/ontop-facts#factCompany> <http://www.semanticweb.org/ontop-facts#name> "The Fact Company"^^<http://www.w3.org/2001/XMLSchema#string> .

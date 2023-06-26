@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -54,7 +54,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         protected final QuotedIDFactory idFactory;
 
-        private final AtomicInteger viewCounter;
+        protected final AtomicInteger viewCounter;
 
         protected DefaultRelationVisitingSerializer(QuotedIDFactory idFactory) {
             this.idFactory = idFactory;
@@ -83,7 +83,9 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .orElse("");
 
             String groupByString = serializeGroupBy(selectFromWhere.getGroupByVariables(), columnIDs);
-            String orderByString = serializeOrderBy(selectFromWhere.getSortConditions(), columnIDs);
+            String orderByString = serializeOrderBy(selectFromWhere.getSortConditions(),
+                    columnIDs,
+                    selectFromWhere.getOffset().isPresent() || selectFromWhere.getLimit().isPresent());
             String sliceString = serializeSlice(selectFromWhere.getLimit(), selectFromWhere.getOffset(),
                     selectFromWhere.getSortConditions().isEmpty());
 
@@ -131,16 +133,14 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         protected String serializeProjection(ImmutableSortedSet<Variable> projectedVariables, // only for ORDER
                                              ImmutableMap<Variable, QuotedID> variableAliases,
-                                             ImmutableSubstitution<? extends ImmutableTerm> substitution,
+                                             Substitution<? extends ImmutableTerm> substitution,
                                              ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
 
             if (projectedVariables.isEmpty())
                 return "1 AS uselessVariable";
 
             return projectedVariables.stream()
-                    .map(v -> sqlTermSerializer.serialize(
-                            Optional.ofNullable((ImmutableTerm)substitution.get(v)).orElse(v),
-                            columnIDs)
+                    .map(v -> sqlTermSerializer.serialize(substitution.apply(v), columnIDs)
                             + " AS " + variableAliases.get(v).getSQLRendering())
                     .collect(Collectors.joining(", "));
         }
@@ -171,6 +171,15 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         }
 
         /**
+         * By default, calls serializeOrderBy without hasOffsetOrLimit. Can be used for specific dialects that
+         * have to handle ORDER BY differently if an offset or limit is provided (e.g. SQLServer)
+         */
+        protected String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions,
+                                          ImmutableMap<Variable, QualifiedAttributeID> columnIDs, boolean hasOffsetOrLimit) {
+            return serializeOrderBy(sortConditions, columnIDs);
+        }
+
+        /**
          * There is no standard for these three methods (may not work with many DB engines).
          */
         protected String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
@@ -188,7 +197,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        private String serializeSlice(Optional<Long> limit, Optional<Long> offset, boolean noSortCondition) {
+        protected String serializeSlice(Optional<Long> limit, Optional<Long> offset, boolean noSortCondition) {
             if (!limit.isPresent() && !offset.isPresent())
                 return "";
 
@@ -281,7 +290,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         /**
          * NB: the systematic use of ON conditions for inner and left joins saves us from putting parentheses.
          *
-         * Indeed since a join expression with a ON is always "CHILD_1 SOME_JOIN CHILD_2 ON COND",
+         * Indeed, since a join expression with a ON is always "CHILD_1 SOME_JOIN CHILD_2 ON COND",
          * the decomposition is unambiguous just following this pattern.
          *
          * For instance, "T1 LEFT JOIN T2 INNER JOIN T3 ON 1=1 ON 2=2"
@@ -294,7 +303,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             QuerySerialization left = getSQLSerializationForChild(binaryJoinExpression.getLeft());
             QuerySerialization right = getSQLSerializationForChild(binaryJoinExpression.getRight());
 
-            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableList.of(left,right).stream()
+            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableList.of(left, right).stream()
                             .flatMap(m -> m.getColumnIDs().entrySet().stream())
                             .collect(ImmutableCollectors.toMap());
 
@@ -318,6 +327,10 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return new QuerySerializationImpl(sqlSubString, ImmutableMap.of());
         }
 
+        protected String serializeValuesEntry(Constant constant, ImmutableMap<Variable, QualifiedAttributeID> childColumnIDs) {
+            return sqlTermSerializer.serialize(constant, childColumnIDs);
+        }
+
         @Override
         public QuerySerialization visit(SQLValuesExpression sqlValuesExpression) {
             ImmutableList<Variable> orderedVariables = sqlValuesExpression.getOrderedVariables();
@@ -327,7 +340,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             String tuplesSerialized = sqlValuesExpression.getValues().stream()
                     .map(tuple -> tuple.stream()
-                            .map(constant -> sqlTermSerializer.serialize(constant, childColumnIDs))
+                            .map(constant -> serializeValuesEntry(constant, childColumnIDs))
                             .collect(Collectors.joining(",", " (", ")")))
                     .collect(Collectors.joining(","));
             RelationID alias = generateFreshViewAlias();
@@ -344,7 +357,85 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         @Override
         public QuerySerialization visit(SQLFlattenExpression sqlFlattenExpression) {
+            QuerySerialization subQuerySerialization = getSQLSerializationForChild(sqlFlattenExpression.getSubExpression());
+            ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs = buildFlattenColumIDMap(
+                    sqlFlattenExpression,
+                    subQuerySerialization
+            );
+
+            Variable flattenedVar = sqlFlattenExpression.getFlattenedVar();
+            Variable outputVar = sqlFlattenExpression.getOutputVar();
+            DBTermType flattenedType = sqlFlattenExpression.getFlattenedType();
+            Optional<Variable> indexVar = sqlFlattenExpression.getIndexVar();
+
+            return serializeFlatten(sqlFlattenExpression, flattenedVar, outputVar, indexVar, flattenedType, allColumnIDs, subQuerySerialization);
+        }
+
+        protected ImmutableMap<Variable, QualifiedAttributeID> buildFlattenColumIDMap(SQLFlattenExpression sqlFlattenExpression,
+                                                                                    QuerySerialization subQuerySerialization) {
+            ImmutableMap<Variable, QualifiedAttributeID> freshVariableAliases = createVariableAliases(getFreshVariables(sqlFlattenExpression)).entrySet().stream()
+                    .collect(ImmutableCollectors.toMap(
+                            Map.Entry::getKey,
+                            e -> new QualifiedAttributeID(null, e.getValue())
+                    ));
+            return ImmutableMap.<Variable, QualifiedAttributeID>builder()
+                    .putAll(freshVariableAliases)
+                    .putAll(subQuerySerialization.getColumnIDs())
+                    .build();
+        }
+
+        private ImmutableSet<Variable> getFreshVariables(SQLFlattenExpression sqlFlattenExpression) {
+            ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
+            builder.add(sqlFlattenExpression.getOutputVar());
+            sqlFlattenExpression.getIndexVar().ifPresent(builder::add);
+            return builder.build();
+        }
+
+        protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar,
+                                                      Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType,
+                                                      ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
             throw new UnsupportedOperationException("Nested data support unavailable for this DBMS");
+        }
+
+        protected QuerySerialization serializeFlattenAsFunction(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
+                                                                QuerySerialization subQuerySerialization, String flattenFunctionCallWithAlias) {
+            var alias = this.generateFreshViewAlias().getSQLRendering();
+            var variableAliases = allColumnIDs.entrySet().stream()
+                    .filter(e -> e.getKey() != flattenedVar)
+                    .collect(ImmutableCollectors.toMap(
+                            v -> v.getKey(),
+                            v -> new QualifiedAttributeID(idFactory.createRelationID(alias), v.getValue().getAttribute())
+                    ));
+            var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()
+                    .filter(v -> variableAliases.containsKey(v))
+                    .map(
+                            v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + idFactory.createAttributeID(v.getName()).getSQLRendering()
+                    )
+                    .collect(Collectors.joining(", "));
+            if(subProjection.length() > 0)
+                subProjection += ",";
+
+            StringBuilder builder = new StringBuilder();
+
+            builder.append(String.format(
+                    "(SELECT %s %s FROM %s) %s",
+                    subProjection,
+                    flattenFunctionCallWithAlias,
+                    subQuerySerialization.getString(),
+                    alias
+            ));
+
+            return new QuerySerializationImpl(
+                    builder.toString(),
+                    variableAliases
+            );
+        }
+
+        protected QuerySerialization serializeFlattenAsFunction(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
+                                                                QuerySerialization subQuerySerialization, String flattenFunctionCall, String aliasFormat) {
+            var flattenFunctionCallWithAlias = String.format("%s AS %s",
+                    flattenFunctionCall, aliasFormat);
+            return serializeFlattenAsFunction(flattenedVar, allColumnIDs, subQuerySerialization, flattenFunctionCallWithAlias);
         }
     }
 

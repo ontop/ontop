@@ -164,4 +164,146 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(0, StringUtils.countMatches(sql.toUpperCase(), "DISTINCT"));
     }
 
+    @Test
+    public void testDataPropertyLodgingBusiness() {
+        String sparql = "    SELECT DISTINCT ?pred {\n" +
+                "        ?subject a     <http://schema.org/LodgingBusiness>;\n" +
+                "                 ?pred ?object.\n" +
+                "        FILTER(!isBlank(?object) && isLiteral(?object))\n" +
+                "    }\n" +
+                "    GROUP BY ?pred\n";
+
+        int count = runQueryAndCount(sparql);
+        // Due to null values
+        assertEquals(1, count);
+    }
+
+    @Test
+    public void testOneLJElimination() {
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                "\n" +
+                "SELECT *\n" +
+                "WHERE {\n" +
+                "  ?r a schema:Accommodation .\n" +
+                "  OPTIONAL { \n" +
+                "   ?r schema:containedInPlace ?h .\n" +
+                "   OPTIONAL { \n" +
+                "     ?h schema:name ?n . \n" +
+                "     FILTER (lang(?n) = 'en')\n" +
+                "    }\n" +
+                "  }\n" +
+                "}\n";
+
+        String sql = reformulateIntoNativeQuery(sparql);
+        // The non-simplifiable LJs are those between the accommodations and the lodging businesses (2 sources)
+        // due to the absence of FKs
+        assertEquals(2, StringUtils.countMatches(sql, "LEFT OUTER JOIN"));
+    }
+
+    @Test
+    public void testMergeLJs() {
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                "\n" +
+                "SELECT *\n" +
+                "WHERE {\n" +
+                "  ?r a schema:Accommodation ;\n" +
+                "       schema:containedInPlace ?h .\n" +
+                "  OPTIONAL { \n" +
+                "    ?h schema:name ?en . \n" +
+                "    FILTER (lang(?en) = 'en')\n" +
+                "  }\n" +
+                "  OPTIONAL { \n" +
+                "    ?h schema:name ?it . \n" +
+                "    FILTER (lang(?it) = 'it')\n" +
+                "  }\n" +
+                "}\n";
+
+        String sql = reformulateIntoNativeQuery(sparql);
+        // The non-simplifiable LJs are those between the accommodations and the lodging businesses (2 sources)
+        // due to the absence of FKs
+        assertEquals(2, StringUtils.countMatches(sql, "LEFT OUTER JOIN"));
+    }
+
+    @Test
+    public void testGroupByWithCount() {
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "    SELECT DISTINCT ?subject {\n" +
+                "        ?subject a     <http://schema.org/LodgingBusiness>;\n" +
+                "                 ?pred ?object.\n" +
+                "        FILTER(!isBlank(?object) && isLiteral(?object))" +
+                "        { SELECT (COUNT(*) as ?cnt) { ?s a <http://schema.org/LodgingBusiness>; ?p ?o. FILTER(!isBlank(?o) && isLiteral(?o)). } GROUP BY ?p LIMIT 10 }" +
+                "       \n" +
+                "    }\n";
+
+        int count = runQueryAndCount(sparql);
+        // Due to null values
+        assertEquals(1, count);
+    }
+
+    @Test
+    public void testValuesOnIRI1() {
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                "PREFIX data: <http://destination.example.org/data/>\n" +
+                "\n" +
+                "SELECT (?h AS ?v)\n" +
+                "WHERE {\n" +
+                "  ?h a schema:LodgingBusiness .\n" +
+                "  OPTIONAL { \n" +
+                "    ?h schema:name ?en . \n" +
+                "    FILTER (lang(?en) = 'en')\n" +
+                "  }\n" +
+                "  OPTIONAL { \n" +
+                "    ?h schema:name ?it . \n" +
+                "    FILTER (lang(?it) = 'it')\n" +
+                "  }\n" +
+                "  VALUES ?h { \n" +
+                "   <http://destination.example.org/data/source1/hospitality/aaa> \n " +
+                "   <http://destination.example.org/data/source1/hospitality/bbb> \n" +
+                "  } \n" +
+                "}\n";
+
+        int count = runQueryAndCount(sparql);
+        assertEquals(1, count);
+
+        String sql = reformulateIntoNativeQuery(sparql);
+        assertEquals(0, StringUtils.countMatches(sql, "LEFT OUTER JOIN"));
+        assertEquals(0, StringUtils.countMatches(sql, "REPLACE"));
+    }
+
+    @Test
+    public void testValuesOnIRI2() {
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX : <http://destination.example.org/ontology/dest#>\n" +
+                "\n" +
+                "SELECT (?h AS ?v)\n" +
+                "WHERE {\n" +
+                "  ?h a :Municipality .\n" +
+                "  OPTIONAL { \n" +
+                "    ?h schema:name ?en . \n" +
+                "    FILTER (lang(?en) = 'en')\n" +
+                "  }\n" +
+                "  OPTIONAL { \n" +
+                "    ?h schema:name ?it . \n" +
+                "    FILTER (lang(?it) = 'it')\n" +
+                "  }\n" +
+                "  VALUES ?h { \n" +
+                "   <http://destination.example.org/data/municipality/ESTSTE> \n " +
+                "   <http://destination.example.org/data/municipality/EEPST> \n" +
+                "  } \n" +
+                "}\n";
+
+        int count = runQueryAndCount(sparql);
+        assertEquals(1, count);
+
+        String sql = reformulateIntoNativeQuery(sparql);
+        assertEquals(0, StringUtils.countMatches(sql, "REPLACE"));
+    }
+
 }

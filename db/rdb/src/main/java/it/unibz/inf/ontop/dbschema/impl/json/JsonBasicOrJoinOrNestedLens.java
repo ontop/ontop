@@ -36,8 +36,9 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
 
     protected JsonBasicOrJoinOrNestedLens(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
                                           @Nullable OtherFunctionalDependencies otherFunctionalDependencies,
-                                          @Nullable ForeignKeys foreignKeys, @Nullable NonNullConstraints nonNullConstraints) {
-        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints);
+                                          @Nullable ForeignKeys foreignKeys, @Nullable NonNullConstraints nonNullConstraints,
+                                          @Nullable IRISafeConstraints iriSafeConstraints) {
+        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints, iriSafeConstraints);
     }
 
     protected String normalizeAttributeName(String attributeName, QuotedIDFactory quotedIdFactory) {

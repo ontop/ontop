@@ -9,14 +9,16 @@
 # JRE BUILD STAGE using 'jlink' to build a compact JRE with the only modules required by Ontop
 # - based on Eclipse Temurin JRE 11 (on Ubuntu 22.04 LTS 'jammy', for both amd64 and arm64)
 # - run './build-image.sh -d' to detect required Java modules to be used with '--add-modules'
-#   (note: jdk.management.agent must be added manually for JMX to work)
+#   then manually add the following modules (for JMX and SSL/TLS to work properly)
+#   jdk.management.agent,jdk.crypto.cryptoki,jdk.crypto.ec
 # - pass --build-arg ONTOP_JRE_MODULES=<comma-separated-list> to override the set of modules,
 #   or use "ALL-MODULE-PATH" as value to include *all* JRE modules (34M image size increase)
 FROM eclipse-temurin:11-jammy AS jre-builder
 ARG ONTOP_JRE_MODULES=\
 "java.base,java.compiler,java.desktop,java.instrument,java.management.rmi,"\
 "java.naming,java.prefs,java.scripting,java.security.jgss,java.sql,"\
-"jdk.httpserver,jdk.jfr,jdk.management,jdk.management.agent,jdk.unsupported"
+"jdk.httpserver,jdk.jfr,jdk.management,jdk.management.agent,jdk.unsupported,"\
+"jdk.crypto.cryptoki,jdk.crypto.ec"
 RUN ${JAVA_HOME}/bin/jlink \
     --add-modules "${ONTOP_JRE_MODULES}" \
     --strip-debug \
@@ -33,7 +35,7 @@ RUN ${JAVA_HOME}/bin/jlink \
 # - may switch to Alpine Linux once supported: https://github.com/adoptium/containers/issues/158
 FROM ubuntu:jammy AS ontop-base-image
 ENV JAVA_HOME="/opt/java/openjdk"
-ENV PATH="${JAVA_HOME}/bin:${PATH}"
+ENV PATH="${JAVA_HOME}/bin:/opt/ontop:${PATH}"
 COPY --from=jre-builder /jre ${JAVA_HOME}
 WORKDIR /opt/ontop
 RUN apt-get update && \
@@ -64,11 +66,11 @@ FROM --platform=${BUILDPLATFORM} maven:3-eclipse-temurin-11 AS ontop-builder
 WORKDIR /build
 COPY . ./
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn clean package -Pcli -Dassembly.cli.format=dir && \
+    mvn clean package -Passet-cli -Dmaven.test.skip -Dassembly.cli.format=dir && \
     mv build/distribution/target/ontop-cli-*/ ontop-docker && \
     cp client/docker/entrypoint.sh client/docker/healthcheck.sh ontop-docker && \
     cd ontop-docker && \
-    rm -rf ontop.bat ontop ontop-completion.sh jdbc logback.xml log/logback-debug.xml
+    rm -rf ontop.bat ontop-completion.sh jdbc logback.xml log/logback-debug.xml
 
 # ALTERNATIVE FINAL STAGE that uses pre-built binaries from ${ONTOP_CLI_BINDIR}
 # - stage used by build-image.sh and more convenient for developers, as it integrates with regular

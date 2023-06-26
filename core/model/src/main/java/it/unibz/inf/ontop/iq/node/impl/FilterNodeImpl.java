@@ -8,7 +8,10 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
@@ -17,14 +20,12 @@ import it.unibz.inf.ontop.iq.node.normalization.FilterNormalizer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -36,20 +37,19 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     private static final String FILTER_NODE_STR = "FILTER";
 
-    private final ConstructionNodeTools constructionNodeTools;
+    private final IQTreeTools iqTreeTools;
     private final CoreUtilsFactory coreUtilsFactory;
     private final FilterNormalizer normalizer;
 
     @AssistedInject
     private FilterNodeImpl(@Assisted ImmutableExpression filterCondition, TermNullabilityEvaluator nullabilityEvaluator,
                            TermFactory termFactory, TypeFactory typeFactory, SubstitutionFactory substitutionFactory,
-                           ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                            IntermediateQueryFactory iqFactory,
-                           ConstructionNodeTools constructionNodeTools, ConditionSimplifier conditionSimplifier,
+                           IQTreeTools iqTreeTools, ConditionSimplifier conditionSimplifier,
                            CoreUtilsFactory coreUtilsFactory, FilterNormalizer normalizer, JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
         super(Optional.of(filterCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier);
-        this.constructionNodeTools = constructionNodeTools;
+                substitutionFactory, variableNullabilityTools, conditionSimplifier);
+        this.iqTreeTools = iqTreeTools;
         this.coreUtilsFactory = coreUtilsFactory;
         this.normalizer = normalizer;
     }
@@ -124,18 +124,13 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
             IQTree filterLevelTree = conditionSimplificationResults.getOptionalExpression()
                     .map(e -> e.equals(getFilterCondition()) ? this : iqFactory.createFilterNode(e))
-                    .map(filterNode -> (IQTree) iqFactory.createUnaryIQTree(filterNode, newChild))
+                    .<IQTree>map(filterNode -> iqFactory.createUnaryIQTree(filterNode, newChild))
                     .orElse(newChild);
 
-            return Optional.of(conditionSimplificationResults.getSubstitution())
-                    .filter(s -> !s.isEmpty())
-                    .map(s -> (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)s)
-                    .map(s -> iqFactory.createConstructionNode(child.getVariables(), s))
-                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, filterLevelTree))
-                    .orElse(filterLevelTree);
-
-
-        } catch (UnsatisfiableConditionException e) {
+            return iqTreeTools.createConstructionNodeTreeIfNontrivial(
+                    filterLevelTree, conditionSimplificationResults.getSubstitution(), child::getVariables);
+        }
+        catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(child.getVariables());
         }
 
@@ -162,7 +157,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
+    public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
         return child.getPossibleVariableDefinitions();
     }
 
@@ -179,8 +174,13 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
-        return computeNotInternallyRequiredVariables(ImmutableList.of(child));
+    public FunctionalDependencies inferFunctionalDependencies(IQTree child, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
+        return child.inferFunctionalDependencies();
+    }
+
+    @Override
+    public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
+        return applyFilterToVariableNonRequirement(child.getVariableNonRequirement());
     }
 
     @Override
@@ -224,12 +224,12 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public IQTree applyDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
 
-        ImmutableExpression unoptimizedExpression = descendingSubstitution.applyToBooleanExpression(getFilterCondition());
+        ImmutableExpression unoptimizedExpression = descendingSubstitution.apply(getFilterCondition());
 
-        ImmutableSet<Variable> newlyProjectedVariables = constructionNodeTools
+        ImmutableSet<Variable> newlyProjectedVariables = iqTreeTools
                 .computeNewProjectedVariables(descendingSubstitution, child.getVariables());
 
         VariableNullability simplifiedFutureChildVariableNullability = coreUtilsFactory.createSimplifiedVariableNullability(
@@ -246,43 +246,38 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(constraint,
                     expressionAndSubstitution, extendedVariableNullability);
 
-            ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
-                    ((ImmutableSubstitution<VariableOrGroundTerm>)descendingSubstitution)
-                            .composeWith2(expressionAndSubstitution.getSubstitution());
+            Substitution<? extends VariableOrGroundTerm> downSubstitution =
+                    substitutionFactory.onVariableOrGroundTerms().compose(descendingSubstitution, expressionAndSubstitution.getSubstitution());
 
             IQTree newChild = child.applyDescendingSubstitution(downSubstitution, downConstraint, variableGenerator);
             IQTree filterLevelTree = expressionAndSubstitution.getOptionalExpression()
                     .map(iqFactory::createFilterNode)
-                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newChild))
+                    .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, newChild))
                     .orElse(newChild);
-            return expressionAndSubstitution.getSubstitution().isEmpty()
-                    ? filterLevelTree
-                    : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(newlyProjectedVariables,
-                                    (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)
-                                            expressionAndSubstitution.getSubstitution()),
-                            filterLevelTree);
-        } catch (UnsatisfiableConditionException e) {
+
+            return iqTreeTools.createConstructionNodeTreeIfNontrivial(
+                    filterLevelTree, expressionAndSubstitution.getSubstitution(), () -> newlyProjectedVariables);
+        }
+        catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(newlyProjectedVariables);
         }
     }
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child,
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child,
             VariableGenerator variableGenerator) {
-        FilterNode newFilterNode = iqFactory.createFilterNode(
-                descendingSubstitution.applyToBooleanExpression(getFilterCondition()));
+        FilterNode newFilterNode = iqFactory.createFilterNode(descendingSubstitution.apply(getFilterCondition()));
 
         return iqFactory.createUnaryIQTree(newFilterNode,
                 child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache) {
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
 
-        ImmutableExpression newCondition = renamingSubstitution.applyToBooleanExpression(getFilterCondition());
+        ImmutableExpression newCondition = renamingSubstitution.apply(getFilterCondition());
 
         FilterNode newFilterNode = newCondition.equals(getFilterCondition())
                 ? this

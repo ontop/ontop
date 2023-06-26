@@ -31,7 +31,7 @@ CREATE TABLE "source1_hospitality" (
 insert into "source1_hospitality" (h_id, name_en, name_it, name_de, h_type, m_id) values ('aaa', 'Hotel 1', 'ee', 'eee', 'Camping', '212');
 
 CREATE TABLE "source1_rooms" (
-                               r_id varchar(100) NOT NULL,
+                               r_id varchar(100) primary key NOT NULL,
                                name_en text NOT NULL,
                                name_de text NOT NULL,
                                name_it text NOT NULL,
@@ -40,13 +40,13 @@ CREATE TABLE "source1_rooms" (
                                capacity integer NULL,
                                description_de text NULL,
                                description_it text NULL,
-                               h_id text NOT NULL
+                               h_id text NULL
 );
 
 CREATE TABLE "source2_hotels" (
                                 id varchar(100) primary key NOT NULL,
                                 english text NOT NULL,
-                                italian text NULL,
+                                italian text NOT NULL,
                                 german text NOT NULL,
                                 htype integer NULL,
                                 lat float NOT NULL,
@@ -57,8 +57,8 @@ CREATE TABLE "source2_hotels" (
 );
 
 CREATE TABLE "source2_accommodation" (
-                                       id varchar(100) NOT NULL,
-                                       english_title text NOT NULL,
+                                       id varchar(100) primary key NOT NULL,
+                                       english_title text NULL,
                                        german_title text NOT NULL,
                                        italian_title text NOT NULL,
                                        acco_type integer NOT NULL,

@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.Optional;
 
@@ -33,7 +33,7 @@ public interface IntermediateQueryFactory {
     ConstructionNode createConstructionNode(ImmutableSet<Variable> projectedVariables);
 
     ConstructionNode createConstructionNode(ImmutableSet<Variable> projectedVariables,
-                                            ImmutableSubstitution<ImmutableTerm> substitution);
+                                            Substitution<? extends ImmutableTerm> substitution);
 
     UnionNode createUnionNode(ImmutableSet<Variable> projectedVariables);
 
@@ -84,7 +84,7 @@ public interface IntermediateQueryFactory {
     OrderByNode.OrderComparator createOrderComparator(NonGroundTerm term, boolean isAscending);
 
     AggregationNode createAggregationNode(ImmutableSet<Variable> groupingVariables,
-                                          ImmutableSubstitution<ImmutableFunctionalTerm> substitution);
+                                          Substitution<ImmutableFunctionalTerm> substitution);
 
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child);
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, IQTreeCache treeCache);

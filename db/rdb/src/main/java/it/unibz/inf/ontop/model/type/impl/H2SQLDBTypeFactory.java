@@ -14,7 +14,7 @@ import static it.unibz.inf.ontop.model.type.DBTermType.Category.DECIMAL;
 public class H2SQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     protected static final String GEOMETRY_STR = "GEOMETRY";
-    private static final String DEFAULT_DECIMAL_STR = "DECIMAL(20, 6)";
+    public static final String DEFAULT_DECIMAL_STR = "DECIMAL(20, 6)";
     private final DatabaseInfoSupplier databaseInfoSupplier;
 
 

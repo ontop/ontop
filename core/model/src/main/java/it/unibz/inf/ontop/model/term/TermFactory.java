@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.substitution.ProtoSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
@@ -111,7 +111,7 @@ public interface TermFactory {
 	ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(ImmutableTerm liftableTerm);
 	ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(
 			ImmutableTerm liftableTerm,
-			ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap);
+			Substitution<ImmutableFunctionalTerm> subTermSubstitution);
 
 
 
@@ -130,7 +130,7 @@ public interface TermFactory {
 
 	/**
 	 * To be used when parsing the mapping and when an equality is found.
-	 * Is expected to replaced later by a proper equality (may be strict or not)
+	 * Is expected to be replaced later by a proper equality (can be strict or not)
 	 */
 	ImmutableExpression getNotYetTypedEquality(ImmutableTerm t1, ImmutableTerm t2);
 
@@ -513,10 +513,10 @@ public interface TermFactory {
 	 *
 	 * See the SubstitutionFactory for richer substitutions
 	 */
-	<T extends ImmutableTerm> ProtoSubstitution<T> getProtoSubstitution(ImmutableMap<Variable, T> map);
+	<T extends ImmutableTerm> Substitution<T> getSubstitution(ImmutableMap<Variable, T> map);
 
 	/**
-	 * TODO: find a better name
+	 * TODO: find a better name
 	 *
 	 */
 	ImmutableFunctionalTerm getBinaryNumericLexicalFunctionalTerm(String dbNumericOperationName,
@@ -583,6 +583,8 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getDBMin(ImmutableTerm subTerm, DBTermType dbType);
     ImmutableFunctionalTerm getDBMax(ImmutableTerm subTerm, DBTermType dbType);
+
+	ImmutableFunctionalTerm getDBSample(ImmutableTerm subTerm, DBTermType dbType);
 
 	ImmutableFunctionalTerm getDBGroupConcat(ImmutableTerm subTerm, String separator, boolean isDistinct);
 

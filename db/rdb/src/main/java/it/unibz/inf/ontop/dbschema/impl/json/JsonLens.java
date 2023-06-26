@@ -15,20 +15,31 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.IRISafenessDeclarationFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @JsonDeserialize(using = JsonLens.JSONLensDeserializer.class)
 public abstract class JsonLens extends JsonOpenObject {
@@ -47,14 +58,19 @@ public abstract class JsonLens extends JsonOpenObject {
     @Nullable
     public final NonNullConstraints nonNullConstraints;
 
+    @Nullable
+    public final IRISafeConstraints iriSafeConstraints;
+
     public JsonLens(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
                     @Nullable OtherFunctionalDependencies otherFunctionalDependencies, @Nullable ForeignKeys foreignKeys,
-                    @Nullable NonNullConstraints nonNullConstraints) {
+                    @Nullable NonNullConstraints nonNullConstraints,
+                    @Nullable IRISafeConstraints iriSafeConstraints) {
         this.name = name;
         this.uniqueConstraints = uniqueConstraints;
         this.otherFunctionalDependencies = otherFunctionalDependencies;
         this.foreignKeys = foreignKeys;
         this.nonNullConstraints = nonNullConstraints;
+        this.iriSafeConstraints = iriSafeConstraints;
     }
 
     public abstract Lens createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
@@ -63,6 +79,14 @@ public abstract class JsonLens extends JsonOpenObject {
     public abstract void insertIntegrityConstraints(Lens relation,
                                                     ImmutableList<NamedRelationDefinition> baseRelations,
                                                     MetadataLookup metadataLookup, DBParameters dbParameters) throws MetadataExtractionException;
+
+    /**
+     * Propagates unique constraints of this lens to its parents, if possible. Returns true if at least one constraint was propagated.
+     */
+    public boolean propagateUniqueConstraintsUp(Lens relation, ImmutableList<NamedRelationDefinition> parents, QuotedIDFactory idFactory) throws MetadataExtractionException {
+        //Does nothing by default, but is implemented by JsonBasicLens. May also be implemented by other lenses under certain conditions.
+        return false;
+    }
 
     /**
      * May be incomplete, but must not produce any false positive.
@@ -104,6 +128,54 @@ public abstract class JsonLens extends JsonOpenObject {
         return builder;
     }
 
+    protected IQTree addIRISafeConstraints(IQTree iqTreeBeforeIRISafeConstraints, DBParameters dbParameters) {
+        if (iriSafeConstraints == null || iriSafeConstraints.added.isEmpty())
+            return iqTreeBeforeIRISafeConstraints;
+
+        ImmutableSet<Variable> initialProjectedVariables = iqTreeBeforeIRISafeConstraints.getVariables();
+
+        QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
+        RawQuotedIDFactory rawQuotedIqFactory = new RawQuotedIDFactory(quotedIdFactory);
+
+        ImmutableSet<Variable> iriSafeVariables = iriSafeConstraints.added.stream()
+                .map(quotedIdFactory::createAttributeID)
+                .map(a -> initialProjectedVariables.stream()
+                        .filter(v -> rawQuotedIqFactory.createAttributeID(v.getName()).equals(a))
+                        .findAny())
+                .flatMap(Optional::stream)
+                .collect(ImmutableCollectors.toSet());
+
+        if (iriSafeVariables.isEmpty())
+            // TODO: issue a warning
+            return iqTreeBeforeIRISafeConstraints;
+
+        CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
+        VariableGenerator variableGenerator = coreSingletons.getCoreUtilsFactory()
+                .createVariableGenerator(iqTreeBeforeIRISafeConstraints.getKnownVariables());
+
+        TermFactory termFactory = coreSingletons.getTermFactory();
+        IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
+        SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
+
+
+        InjectiveSubstitution<Variable> renaming = iriSafeVariables.stream()
+                .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
+
+        IRISafenessDeclarationFunctionSymbol iriSafenessDeclarationFunctionSymbol = coreSingletons.getDBFunctionsymbolFactory()
+                .getIRISafenessDeclaration();
+
+        Substitution<ImmutableTerm> substitution = iriSafeVariables.stream()
+                .collect(substitutionFactory.toSubstitution(
+                        v -> termFactory.getImmutableFunctionalTerm(iriSafenessDeclarationFunctionSymbol, renaming.get(v))));
+
+        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(initialProjectedVariables, substitution);
+
+        return iqFactory.createUnaryIQTree(
+                newConstructionNode,
+                iqTreeBeforeIRISafeConstraints.applyFreshRenaming(renaming))
+                .normalizeForOptimization(variableGenerator);
+    }
+
 
     protected static class UniqueConstraints extends JsonOpenObject {
         @Nonnull
@@ -133,7 +205,7 @@ public abstract class JsonLens extends JsonOpenObject {
         }
 
         /*
-         * Ovverride equals method to ensure we can check for object equality
+         * Override equals method to ensure we can check for object equality
          */
         @Override
         public boolean equals(Object obj) {
@@ -151,7 +223,7 @@ public abstract class JsonLens extends JsonOpenObject {
         }
 
         /*
-         * Ovverride hashCode method to ensure we can check for object equality
+         * Override hashCode method to ensure we can check for object equality
          */
         @Override
         public int hashCode() {
@@ -182,7 +254,7 @@ public abstract class JsonLens extends JsonOpenObject {
         }
 
         /*
-         * Ovverride equals method to ensure we can check for object equality
+         * Override equals method to ensure we can check for object equality
          */
         @Override
         public boolean equals(Object obj) {
@@ -201,7 +273,7 @@ public abstract class JsonLens extends JsonOpenObject {
         }
 
         /*
-         * Ovverride hashCode method to ensure we can check for object equality
+         * Override hashCode method to ensure we can check for object equality
          */
         @Override
         public int hashCode() {
@@ -306,6 +378,9 @@ public abstract class JsonLens extends JsonOpenObject {
                 case "FlattenedViewDefinition":
                     instanceClass = JsonFlattenLens.class;
                     break;
+                case "UnionLens":
+                    instanceClass = JsonUnionLens.class;
+                    break;
                 default:
                     // TODO: throw proper exception
                     throw new RuntimeException("Unsupported type of lens: " + type);
@@ -320,6 +395,16 @@ public abstract class JsonLens extends JsonOpenObject {
 
         @JsonCreator
         public NonNullConstraints(@JsonProperty("added") List<String> added) {
+            this.added = added;
+        }
+    }
+
+    protected static class IRISafeConstraints extends JsonOpenObject {
+        @Nonnull
+        public final List<String> added;
+
+        @JsonCreator
+        public IRISafeConstraints(@JsonProperty("added") List<String> added) {
             this.added = added;
         }
     }

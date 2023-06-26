@@ -107,4 +107,16 @@ public class PrefixManagerTest {
 		String uri2 = "http://example.com/resource/?repository=repo&uri=http://www.movieontology.org/2009/10/01/movieontology.owl/China-24951";
 		assertEquals(":?repository=repo&uri=http://www.movieontology.org/2009/10/01/movieontology.owl/China-24951", pm.getShortForm(uri2));
 	}
+	
+	@Test
+	public void testPrefixOrders(){
+		//		:		http://example.org/voc#
+		//		ex:		http://example.org/
+		PrefixManager pm = SPECIFICATION_FACTORY.createPrefixManager(ImmutableMap.of(
+				":", "http://example.org/voc#",
+				"ex:", "http://example.org/"));
+
+		String uri1 = "http://example.org/voc#Student";
+		assertEquals(":Student", pm.getShortForm(uri1));
+	}
 }

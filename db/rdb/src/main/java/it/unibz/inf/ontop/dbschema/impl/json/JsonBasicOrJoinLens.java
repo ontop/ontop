@@ -21,7 +21,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.sqlparser.ExpressionParser;
 import it.unibz.inf.ontop.spec.sqlparser.JSqlParserTools;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpressionAttributes;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -51,9 +51,10 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
     protected JsonBasicOrJoinLens(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
                                   @Nullable OtherFunctionalDependencies otherFunctionalDependencies,
                                   @Nullable ForeignKeys foreignKeys, @Nullable NonNullConstraints nonNullConstraints,
-                                  @Nonnull Columns columns, @Nonnull String filterExpression) {
-        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints);
-        this.columns = columns;
+                                  @Nullable IRISafeConstraints iriSafeConstraints,
+                                  @Nullable Columns columns, @Nonnull String filterExpression) {
+        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints, iriSafeConstraints);
+        this.columns = columns == null ? new Columns(new ArrayList<>(), new ArrayList<>()) : columns;
         this.filterExpression = filterExpression;
     }
 
@@ -138,14 +139,10 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         RAExpressionAttributes parentAttributeMap = extractParentAttributeMap(parentDefinitions, idFactory);
 
-        ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
-        for (AddColumns a : columns.added) {
-            Variable v = getVariable(a.name, idFactory, termFactory);
-            ImmutableTerm value = extractExpression(a, parentAttributeMap, idFactory, coreSingletons);
-            substitutionMapBuilder.put(v, value);
-        }
-        ImmutableMap<Variable, ImmutableTerm> substitutionMap = substitutionMapBuilder.build();
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(substitutionMap);
+        Substitution<ImmutableTerm> substitution = substitutionFactory.getSubstitutionThrowsExceptions(
+                columns.added,
+                a -> getVariable(a.name, idFactory, termFactory),
+                a -> extractExpression(a, parentAttributeMap, idFactory, coreSingletons));
 
         ConstructionSubstitutionNormalizer substitutionNormalizer = dbParameters.getCoreSingletons()
                 .getConstructionSubstitutionNormalizer();
@@ -175,7 +172,9 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
                 .map(f -> normalization.updateChild(iqFactory.createUnaryIQTree(f, parentTree), variableGenerator))
                 .orElse(normalization.updateChild(parentTree, variableGenerator));
 
-        IQTree iqTree = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
+        IQTree iqTreeBeforeIRISafeConstraints = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
+
+        IQTree iqTree = addIRISafeConstraints(iqTreeBeforeIRISafeConstraints, dbParameters);
 
         AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
         DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);
@@ -284,7 +283,7 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
             ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
             net.sf.jsqlparser.expression.Expression exp;
             String sqlQuery = "SELECT " + column.expression + " FROM fakeTable";
-            Select statement = JSqlParserTools.parse(sqlQuery);
+            Select statement = JSqlParserTools.parse(sqlQuery, !quotedIdFactory.supportsSquareBracketQuotation());
             SelectItem si = ((PlainSelect) statement.getSelectBody()).getSelectItems().get(0);
             exp = ((SelectExpressionItem) si).getExpression();
             return parser.parseTerm(exp, parentAttributeMap);
@@ -303,7 +302,7 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
         try {
             String sqlQuery = "SELECT * FROM fakeTable WHERE " + filterExpression;
             ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
-            Select statement = JSqlParserTools.parse(sqlQuery);
+            Select statement = JSqlParserTools.parse(sqlQuery, !quotedIdFactory.supportsSquareBracketQuotation());
             PlainSelect plainSelect = (PlainSelect) statement.getSelectBody();
             return plainSelect.getWhere() == null
                     ? ImmutableList.of()

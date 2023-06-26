@@ -7,14 +7,15 @@ import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 
 import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static it.unibz.inf.ontop.model.type.impl.SparkSQLDBTypeFactory.DECIMAL_38_10_STR;
 
 /**
  *  SPARK-SQL 3.0.1 functions description available at : https://spark.apache.org/docs/3.0.1/api/sql/
@@ -65,16 +66,24 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
     @Override
     protected String getUUIDNameInDialect() {
-        return String.format("uuid()");
+        return String.format("uuid");
+    }
+
+    /**
+     * ORDER BY is required in the OVER clause
+     */
+    @Override
+    protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
+        return "ROW_NUMBER() OVER (ORDER BY (SELECT NULL))";
     }
 
     @Override
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
                                        Function<ImmutableTerm, String> termConverter,
                                        TermFactory termFactory) {
-        return String.format("(INSTR(%s,%s) > 0)",
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(0)));
+        return String.format("(INSTR(%s, %s) > 0)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
     }
 
     @Override
@@ -83,7 +92,7 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
         String str = termConverter.apply(terms.get(0));
         String before = termConverter.apply(terms.get(1));
 
-        return String.format("LEFT(%s,POSITION(%s,%s)-1)", str, before, str);
+        return String.format("LEFT(%s,INSTR(%s,%s)-1)", str, str, before);
     }
 
     @Override
@@ -94,8 +103,8 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
         // sign return 1 if positive number, 0 if 0, and -1 if negative number
         // it will return everything after the value if it is present or it will return an empty string if it is not present
-        return String.format("SUBSTRING(%s,POSITION(%s,%s) + LENGTH(%s), SIGN(POSITION(%s,%s)) * LENGTH(%s))",
-                str, after, str, after, after, str, str);
+        return String.format("SUBSTRING(%s,INSTR(%s,%s) + LENGTH(%s), SIGN(INSTR(%s,%s)) * LENGTH(%s))",
+                str, str, after, after, str, after, str);
     }
 
     @Override
@@ -157,7 +166,7 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("FLOOR((BIGINT(TO_TIMESTAMP(%s)) - BIGINT(TO_TIMESTAMP(%s)))/3600)",
+        return String.format("FLOOR((BIGINT(%s) - BIGINT(%s))/3600)",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }
@@ -165,7 +174,7 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("FLOOR((BIGINT(TO_TIMESTAMP(%s)) - BIGINT(TO_TIMESTAMP(%s)))/60)",
+        return String.format("FLOOR((BIGINT(%s) - BIGINT(%s))/60)",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }
@@ -173,7 +182,7 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("FLOOR((BIGINT(TO_TIMESTAMP(%s)) - BIGINT(TO_TIMESTAMP(%s))))",
+        return String.format("FLOOR((BIGINT(%s) - BIGINT(%s)))",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }
@@ -184,9 +193,117 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("FLOOR(UNIX_MILLIS(TO_TIMESTAMP(%s)) - UNIX_MILLIS(TO_TIMESTAMP(%s)))",
+        return String.format("FLOOR(UNIX_MILLIS(%s) - UNIX_MILLIS(%s))",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
+    }
+
+    /**
+     * Experienced with Databricks
+     */
+    @Override
+    protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
+        return new OneDigitDBIsTrueFunctionSymbolImpl(dbBooleanType);
+    }
+
+    /**
+     * Experienced with Databricks
+     */
+    @Override
+    protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
+        return new OneDigitBooleanNormFunctionSymbolImpl(booleanType, dbStringType);
+    }
+
+    /**
+     The JSON_TYPEOF function is not supported by SPARK. For now, we use a work-around instead, where we check if the
+     JSON_ARRAY_LENGTH function can be called on the element.
+     This is not perfectly robust, though. E.g. the string "[1, 2, 3]" would be interpreted as an array.
+     */
+    @Override
+    protected DBBooleanFunctionSymbol createIsArray(DBTermType dbType) {
+        return new DBBooleanFunctionSymbolWithSerializerImpl(
+                "JSON_IS_ARRAY",
+                ImmutableList.of(dbType),
+                dbBooleanType,
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "(JSON_ARRAY_LENGTH(%s) IS NOT NULL)",
+                        termConverter.apply(terms.get(0))
+                ));
+    }
+
+    /**
+     * XSD CAST functions
+     */
+    @Override
+    protected String serializeCheckAndConvertDouble(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s NOT RLIKE " + numericPattern +
+                        " THEN NULL ELSE CAST(%1$s AS DOUBLE) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertFloat(ImmutableList<? extends ImmutableTerm> terms,
+                                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s NOT RLIKE " + numericPattern + " THEN NULL " +
+                        "WHEN (CAST(%1$s AS FLOAT) NOT BETWEEN -3.40E38 AND -1.18E-38 AND " +
+                        "CAST(%1$s AS FLOAT) NOT BETWEEN 1.18E-38 AND 3.40E38 AND CAST(%1$s AS FLOAT) != 0) THEN NULL " +
+                        "ELSE CAST(%1$s AS FLOAT) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s NOT RLIKE " + numericNonFPPattern + " THEN NULL " +
+                        "ELSE CAST(%1$s AS "+ DECIMAL_38_10_STR +") END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDateFromString(ImmutableList<? extends ImmutableTerm> terms,
+                                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN (%1$s NOT RLIKE " + datePattern1 + " AND " +
+                        "%1$s NOT RLIKE " + datePattern2 +" AND " +
+                        "%1$s NOT RLIKE " + datePattern3 +" AND " +
+                        "%1$s NOT RLIKE " + datePattern4 +" ) " +
+                        " THEN NULL ELSE CAST(%1$s AS DATE) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertIntegerFromBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s='1' THEN 1 " +
+                        "WHEN UPPER(%1$s) LIKE 'TRUE' THEN 1 " +
+                        "WHEN %1$s='0' THEN 0 " +
+                        "WHEN UPPER(%1$s) LIKE 'FALSE' THEN 0 " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("(CASE WHEN CAST(%1$s AS "+ DECIMAL_38_10_STR +") = 0 THEN 'false' " +
+                        "WHEN %1$s = '' THEN 'false' " +
+                        "WHEN %1$s = 'NaN' THEN 'false' " +
+                        "ELSE 'true' " +
+                        "END)",
+                term);
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBSample(DBTermType termType) {
+        return new DBSampleFunctionSymbolImpl(termType, "FIRST");
     }
 }
 

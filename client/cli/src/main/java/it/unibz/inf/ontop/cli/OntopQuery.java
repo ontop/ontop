@@ -52,6 +52,15 @@ public class OntopQuery extends OntopMappingOntologyRelatedCommand {
         if (owlFile != null)
             configurationBuilder.ontologyFile(owlFile);
 
+        if (factFile != null)
+            configurationBuilder.factsFile(factFile);
+
+        if (factFormat != null)
+            configurationBuilder.factFormat(factFormat.getExtension());
+
+        if (factsBaseIRI != null)
+            configurationBuilder.factsBaseIRI(factsBaseIRI);
+
         if (propertiesFile != null) {
             configurationBuilder.propertyFile(propertiesFile);
         }

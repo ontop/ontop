@@ -125,7 +125,7 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractDockerRDF4
         return "<http://www.example.org/test#"+s+">";
     }
 
-    private String readQueryFile(String queryFile) throws IOException {
+    protected String readQueryFile(String queryFile) throws IOException {
         URL path = AbstractDistinctInAggregateTest.class.getResource(queryFile);
         try {
             Path filePath = Paths.get(path.toURI());

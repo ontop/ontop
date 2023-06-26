@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
@@ -39,7 +40,8 @@ public class TypingNullsInUnionDialectExtraNormalizer extends AbstractTypingNull
                 .map(IQTree::getRootNode)
                 .filter(c -> c instanceof ConstructionNode)
                 .map(c -> (ConstructionNode) c)
-                .flatMap(this::extractNullVariables)
+                .map(this::extractNullVariables)
+                .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toSet());
 
         if (nullVariables.isEmpty())

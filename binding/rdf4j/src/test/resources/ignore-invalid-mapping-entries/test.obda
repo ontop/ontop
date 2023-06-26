@@ -1,0 +1,36 @@
+[PrefixDeclaration]
+:		http://www.ontop-vkg.com/ignore-invalid-test#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+quest:		http://obda.org/quest#
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-dogs
+target		:animals/{name} a :Animal; a :Dog; :name {name}; :age {age}; :breed {breed} .
+source		SELECT name, age, breed FROM dogs;
+
+mappingId	MAPID-cats
+target		:animals/{name} a :Animal; a :Cat; :name {name}; :age {age}; :breed {breed} .
+source		SELECT name, age, breed FROM cats;
+
+mappingId	MAPID-turtles
+target		:animals/{name} a :Animal; a :Turtle; :name {name}; :age {age}; :breed {breed} .
+source		SELECT name, age, breed FROM turtles;
+
+mappingId	MAPID-rabbits1
+target		:animals/{name} a :Animal; a :Rabbit; :name {name}; :age {age} .
+source		SELECT name, age FROM rabbits;
+
+mappingId	MAPID-rabbits2
+target		:animals/{name} a :Animal; a :Rabbit; :breed {breed} .
+source		SELECT name, breed FROM rabbits;
+
+mappingId	MAPID-birds
+target		:animals/{name} a :Animal; a :Bird; .
+source		SELECT name FROM birds;
+]]
+

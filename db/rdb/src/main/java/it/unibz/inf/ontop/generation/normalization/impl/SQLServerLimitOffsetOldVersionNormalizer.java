@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeExtendedTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -29,17 +30,20 @@ public class SQLServerLimitOffsetOldVersionNormalizer extends DefaultRecursiveIQ
     private final TermFactory termFactory;
     private final DatabaseInfoSupplier databaseInfoSupplier;
     private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     protected SQLServerLimitOffsetOldVersionNormalizer(IntermediateQueryFactory iqFactory, TermFactory termFactory,
                                                        SubstitutionFactory substitutionFactory, DatabaseInfoSupplier databaseInfoSupplier,
-                                                       DBFunctionSymbolFactory dbFunctionSymbolFactory, CoreSingletons coreSingletons) {
+                                                       DBFunctionSymbolFactory dbFunctionSymbolFactory, CoreSingletons coreSingletons,
+                                                       IQTreeTools iqTreeTools) {
         super(coreSingletons);
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.databaseInfoSupplier = databaseInfoSupplier;
         this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -60,31 +64,25 @@ public class SQLServerLimitOffsetOldVersionNormalizer extends DefaultRecursiveIQ
 
         // Add fresh variable which will include row number
         Variable freshVariable = variableGenerator.generateNewVariable();
-        ImmutableSet<Variable> projectedVariables = ImmutableSet.<Variable>builder()
-                .addAll(child.getVariables())
-                .addAll(ImmutableSet.of(freshVariable))
-                .build();
 
         // CASE 1: No OrderBy, ORDER BY (SELECT NULL)
         // CASE 2: OrderBy present, ORDER BY (comparators)
-        ImmutableFunctionalTerm orderSubTerm = getOrderBySubTerm(child);
-
         ConstructionNode newConstruction = iqFactory.createConstructionNode(
-                projectedVariables,
-                substitutionFactory.getSubstitution(freshVariable, orderSubTerm));
+                iqTreeTools.getChildrenVariables(child, freshVariable),
+                substitutionFactory.getSubstitution(freshVariable, getOrderBySubTerm(child)));
 
         ImmutableExpression expression = getNewFilterExpression(sliceNode, freshVariable);
         FilterNode newFilter = iqFactory.createFilterNode(expression);
 
         // Drop ORDER BY node since it will now be part of the orderBy subTerm
         IQTree newChild;
-                if (child.getRootNode() instanceof OrderByNode) {
-                    newChild = child.getChildren().get(0);
-                } else if (!child.getChildren().isEmpty() && child.getChildren().get(0).getRootNode() instanceof OrderByNode) {
-                    newChild = iqFactory.createUnaryIQTree((ConstructionNode) child.getRootNode(), child.getChildren().get(0).getChildren().get(0));
-                } else {
-                    newChild = child;
-                }
+        if (child.getRootNode() instanceof OrderByNode) {
+            newChild = child.getChildren().get(0);
+        } else if (!child.getChildren().isEmpty() && child.getChildren().get(0).getRootNode() instanceof OrderByNode) {
+            newChild = iqFactory.createUnaryIQTree((ConstructionNode) child.getRootNode(), child.getChildren().get(0).getChildren().get(0));
+        } else {
+            newChild = child;
+        }
 
         IQTree newTree = iqFactory.createUnaryIQTree(newFilter,
                 iqFactory.createUnaryIQTree(newConstruction, newChild));

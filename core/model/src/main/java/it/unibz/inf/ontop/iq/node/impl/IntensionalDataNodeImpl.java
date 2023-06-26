@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -18,8 +20,9 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -29,13 +32,15 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     private static final String INTENSIONAL_DATA_NODE_STR = "INTENSIONAL";
 
     private final AtomFactory atomFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     @AssistedInject
     private IntensionalDataNodeImpl(@Assisted DataAtom<AtomPredicate> atom,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
-                                    CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
+                                    CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory, SubstitutionFactory substitutionFactory) {
         super(atom, iqTreeTools, iqFactory, coreUtilsFactory);
         this.atomFactory = atomFactory;
+        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
@@ -73,7 +78,7 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
         return applyDescendingSubstitutionWithoutOptimizing(freshRenamingSubstitution);
     }
 
@@ -89,6 +94,11 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
         return ImmutableSet.of(getVariables());
+    }
+
+    @Override
+    public FunctionalDependencies inferFunctionalDependencies() {
+        return FunctionalDependencies.empty();
     }
 
     @Override
@@ -115,14 +125,14 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
         return applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution);
     }
 
     private IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         DataAtom<AtomPredicate> atom = getProjectionAtom();
-        DataAtom<AtomPredicate> newAtom = atomFactory.getDataAtom(atom.getPredicate(), descendingSubstitution.applyToArguments(atom.getArguments()));
+        DataAtom<AtomPredicate> newAtom = atomFactory.getDataAtom(atom.getPredicate(), substitutionFactory.onVariableOrGroundTerms().applyToTerms(descendingSubstitution, atom.getArguments()));
         return newAtom(newAtom);
     }
 
@@ -130,7 +140,7 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
      * All the variables are required, because an intensional data node cannot be sparse.
      */
     @Override
-    public synchronized ImmutableSet<Variable> getNotInternallyRequiredVariables() {
-        return ImmutableSet.of();
+    public synchronized VariableNonRequirement getVariableNonRequirement() {
+        return VariableNonRequirement.empty();
     }
 }

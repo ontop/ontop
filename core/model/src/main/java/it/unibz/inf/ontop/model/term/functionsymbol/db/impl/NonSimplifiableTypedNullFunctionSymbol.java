@@ -12,7 +12,7 @@ public class NonSimplifiableTypedNullFunctionSymbol extends AbstractTypedDBFunct
     /**
      * May differ from the target type (e.g. INTEGER for SERIAL)
      */
-    private final DBTermType castingType;
+    protected final DBTermType castingType;
 
     protected NonSimplifiableTypedNullFunctionSymbol(DBTermType targetType) {
         super("NULL-" + targetType, ImmutableList.of(), targetType);

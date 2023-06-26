@@ -11,10 +11,10 @@ import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonVariableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -22,8 +22,10 @@ import java.util.Optional;
 @Singleton
 public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
 
+    private final TermFactory termFactory;
     @Inject
-    private BasicSingleTermTypeExtractor() {
+    private BasicSingleTermTypeExtractor(TermFactory termFactory) {
+        this.termFactory = termFactory;
     }
 
     @Override
@@ -39,11 +41,34 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
 
     private Optional<TermType> extractType(NonVariableTerm nonVariableTerm, IQTree subTree) {
         return nonVariableTerm.inferType()
+                .or(() -> inferByInjectingSubTermType(nonVariableTerm, subTree))
                 .flatMap(i -> i.getTermType()
-                        .map(Optional::of)
-                        // Continues on a type of a variable defined in the sub-tree
-                        .orElseGet(() -> i.getRedirectionVariable()
+                        .or(() -> i.getRedirectionVariable()
                                 .flatMap(v -> extractTypeFromVariable(v, subTree))));
+    }
+
+    private Optional<TermTypeInference> inferByInjectingSubTermType(NonVariableTerm nonVariableTerm,
+                                                                    IQTree subTree) {
+        if (!((nonVariableTerm instanceof ImmutableFunctionalTerm)
+                && ((ImmutableFunctionalTerm) nonVariableTerm).getFunctionSymbol().canDeriveTypeFromInputTypes()))
+            return Optional.empty();
+
+        ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) nonVariableTerm;
+        ImmutableList<? extends ImmutableTerm> terms = functionalTerm.getTerms();
+
+        ImmutableList<? extends ImmutableTerm> newTerms = functionalTerm.getTerms().stream()
+                .map(t -> extractSingleTermType(t, subTree)
+                        .filter(tp -> tp instanceof DBTermType)
+                        // Casts it to its own type as a way to convey the type
+                        .<ImmutableTerm>map(tp -> termFactory.getDBCastFunctionalTerm((DBTermType) tp, t))
+                        .orElse(t))
+                .collect(ImmutableCollectors.toList());
+
+        if (terms.equals(newTerms))
+            return Optional.empty();
+
+        return termFactory.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), newTerms)
+                .inferType();
     }
 
 
@@ -116,7 +141,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         }
 
         protected Optional<TermType> visitExtendedProjection(ExtendedProjectionNode rootNode, IQTree child) {
-            return typeExtractor.extractSingleTermType(rootNode.getSubstitution().applyToVariable(variable), child);
+            return typeExtractor.extractSingleTermType(rootNode.getSubstitution().apply(variable), child);
         }
 
         @Override
@@ -127,13 +152,12 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         @Override
         public Optional<TermType> visitFlatten(FlattenNode flattenNode, IQTree child) {
             if (variable.equals(flattenNode.getOutputVariable())) {
-                return flattenNode.inferOutputType(
-                        typeExtractor.extractSingleTermType(
-                                flattenNode.getFlattenedVariable(),
-                                child
-                        ));
+                /* We prefer to rely on the data type provided in the lens rather than the inferred one,
+                   because it is more accurate than what we can obtain from the JDBC.
+                 */
+                return flattenNode.inferOutputType(Optional.of(flattenNode.getFlattenedType()));
             }
-            if(flattenNode.getIndexVariable().isPresent() && variable.equals(flattenNode.getIndexVariable().get())) {
+            if (flattenNode.getIndexVariable().isPresent() && variable.equals(flattenNode.getIndexVariable().get())) {
                 return flattenNode.getIndexVariableType();
             }
             return child.acceptVisitor(this);
@@ -199,8 +223,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         public Optional<TermType> visitUnion(UnionNode rootNode, ImmutableList<IQTree> children) {
             ImmutableSet<TermType> termTypes = children.stream()
                     .map(c -> c.acceptVisitor(this))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
+                    .flatMap(Optional::stream)
                     .collect(ImmutableCollectors.toSet());
 
             // Picks arbitrarily one of them

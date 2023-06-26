@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.docker.lightweight.mssql;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.docker.lightweight.MSSQLLightweightTest;
 import org.junit.jupiter.api.AfterAll;
@@ -28,14 +29,14 @@ public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunction
     }
 
     @Override
-    protected ImmutableList<String> getAbsExpectedValues() {
-        return ImmutableList.of("\"8.600000\"^^xsd:decimal", "\"5.750000\"^^xsd:decimal", "\"6.800000\"^^xsd:decimal",
+    protected ImmutableSet<String> getAbsExpectedValues() {
+        return ImmutableSet.of("\"8.600000\"^^xsd:decimal", "\"5.750000\"^^xsd:decimal", "\"6.800000\"^^xsd:decimal",
         "\"1.500000\"^^xsd:decimal");
     }
 
     @Override
-    protected ImmutableList<String> getRoundExpectedValues() {
-        return ImmutableList.of("\"0E-19, 43.0000000000000000000\"^^xsd:string",
+    protected ImmutableSet<String> getRoundExpectedValues() {
+        return ImmutableSet.of("\"0E-19, 43.0000000000000000000\"^^xsd:string",
                 "\"0E-19, 23.0000000000000000000\"^^xsd:string",
                 "\"0E-19, 34.0000000000000000000\"^^xsd:string",
                 "\"0E-19, 10.0000000000000000000\"^^xsd:string");

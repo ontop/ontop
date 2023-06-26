@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
@@ -14,6 +15,7 @@ import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import org.apache.commons.rdf.api.Graph;
 
 import javax.annotation.Nonnull;
@@ -70,11 +72,13 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
                 Optional::empty,
                 Optional::empty,
                 Optional::empty,
+                Optional::empty,
                 Optional::empty
                 );
     }
 
     OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
+                                        FactsSupplier factsSupplier,
                                                   Supplier<Optional<? extends PreProcessedMapping<? extends PreProcessedTriplesMap>>> ppMappingSupplier,
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
@@ -88,6 +92,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
 
         Optional<Ontology> optionalOntology = ontologySupplier.get();
+        ImmutableSet<RDFFact> optionalFacts = factsSupplier.get().orElse(ImmutableSet.of());
 
         /*
          * Pre-processed mapping
@@ -112,8 +117,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
 
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping<? extends PreProcessedTriplesMap> ppMapping = optionalPPMapping.get();
-
-            return extractor.extract(specInputBuilder.build(), ppMapping, optionalOntology);
+            return extractor.extract(specInputBuilder.build(), ppMapping, optionalOntology, optionalFacts);
         }
 
         /*
@@ -123,7 +127,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         if (optionalMappingFile.isPresent()) {
             specInputBuilder.addMappingFile(optionalMappingFile.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalOntology);
+            return extractor.extract(specInputBuilder.build(), optionalOntology, optionalFacts);
         }
 
         /*
@@ -133,7 +137,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         if (optionalMappingReader.isPresent()) {
             specInputBuilder.addMappingReader(optionalMappingReader.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalOntology);
+            return extractor.extract(specInputBuilder.build(), optionalOntology, optionalFacts);
         }
 
         /*
@@ -143,7 +147,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         if (optionalMappingGraph.isPresent()) {
             specInputBuilder.addMappingGraph(optionalMappingGraph.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalOntology);
+            return extractor.extract(specInputBuilder.build(), optionalOntology, optionalFacts);
         }
 
         throw new MissingInputMappingException();
@@ -155,6 +159,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
                 Stream.of(new OntopMappingModule(this)));
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     static class OntopMappingOptions {
 
         final OntopKGQueryOptions queryOptions;
@@ -173,10 +178,10 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         }
     }
 
-    static class DefaultOntopMappingBuilderFragment<B extends OntopMappingConfiguration.Builder<B>>
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    protected static abstract class DefaultOntopMappingBuilderFragment<B extends OntopMappingConfiguration.Builder<B>>
             implements OntopMappingBuilderFragment<B> {
 
-        private final B builder;
         private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
         private Optional<Boolean> inferDefaultDatatype =  Optional.empty();
         private Optional<TMappingExclusionConfig> excludeFromTMappings = Optional.empty();
@@ -185,32 +190,30 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
 
         private Optional<Reader> sparqlRulesReader = Optional.empty();
 
-        DefaultOntopMappingBuilderFragment(B builder, Runnable declareDBMetadataCB) {
-            this.builder = builder;
-        }
+        protected abstract B self();
 
         @Override
         public B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config) {
             this.excludeFromTMappings = Optional.of(config);
-            return builder;
+            return self();
         }
 
         @Override
         public B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology) {
             this.queryingAnnotationsInOntology = Optional.of(queryingAnnotationsInOntology);
-            return builder;
+            return self();
         }
 
         @Override
         public B enableDefaultDatatypeInference(boolean inferDefaultDatatype) {
             this.inferDefaultDatatype = Optional.of(inferDefaultDatatype);
-            return builder;
+            return self();
         }
 
         @Override
         public B sparqlRulesFile(@Nonnull File file) {
             this.sparqlRulesFile = Optional.of(file);
-            return builder;
+            return self();
         }
 
         @Override
@@ -221,24 +224,23 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         @Override
         public B sparqlRulesReader(@Nonnull Reader reader) {
             this.sparqlRulesReader = Optional.of(reader);
-            return builder;
+            return self();
         }
 
-        final OntopMappingOptions generateMappingOptions(OntopKGQueryOptions queryOptions) {
+        protected final OntopMappingOptions generateMappingOptions(OntopKGQueryOptions queryOptions) {
             return new OntopMappingOptions(excludeFromTMappings, sparqlRulesFile, sparqlRulesReader, queryOptions);
         }
 
-        Properties generateProperties() {
+        protected Properties generateProperties() {
             Properties properties = new Properties();
             queryingAnnotationsInOntology.ifPresent(b -> properties.put(OntopMappingSettings.QUERY_ONTOLOGY_ANNOTATIONS, b));
             inferDefaultDatatype.ifPresent(b -> properties.put(OntopMappingSettings.INFER_DEFAULT_DATATYPE, b));
 
             return properties;
         }
-
     }
 
-    static abstract class OntopMappingBuilderMixin<B extends OntopMappingConfiguration.Builder<B>>
+    protected static abstract class OntopMappingBuilderMixin<B extends OntopMappingConfiguration.Builder<B>>
         extends OntopKGQueryBuilderMixin<B>
         implements OntopMappingConfiguration.Builder<B> {
 
@@ -248,9 +250,12 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         private boolean areLensesDefined;
 
         OntopMappingBuilderMixin() {
-            B builder = (B) this;
-            this.mappingBuilderFragment = new DefaultOntopMappingBuilderFragment<>(builder,
-                    this::declareDBMetadataDefined);
+            this.mappingBuilderFragment = new DefaultOntopMappingBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopMappingBuilderMixin.this.self();
+                }
+            };
             this.isMappingDefined = false;
             this.isDBMetadataDefined = false;
         }
@@ -285,15 +290,15 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
             return mappingBuilderFragment.sparqlRulesReader(reader);
         }
 
-        final OntopMappingOptions generateMappingOptions() {
+        protected final OntopMappingOptions generateMappingOptions() {
             return generateMappingOptions(generateOBDAOptions());
         }
 
-        final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions) {
+        protected final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions) {
             return generateMappingOptions(generateKGQueryOptions(obdaOptions));
         }
 
-        final OntopMappingOptions generateMappingOptions(OntopKGQueryOptions queryOptions) {
+        protected final OntopMappingOptions generateMappingOptions(OntopKGQueryOptions queryOptions) {
             return mappingBuilderFragment.generateMappingOptions(queryOptions);
         }
 
@@ -306,14 +311,14 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
             return properties;
         }
 
-        final void declareDBMetadataDefined() {
+        protected final void declareDBMetadataDefined() {
             if (isOBDASpecificationAssigned()) {
                 throw new InvalidOntopConfigurationException("The OBDA specification has already been assigned");
             }
             isDBMetadataDefined = true;
         }
 
-        final void declareLensesDefined() {
+        protected final void declareLensesDefined() {
             if (isOBDASpecificationAssigned()) {
                 throw new InvalidOntopConfigurationException("The OBDA specification has already been assigned");
             }
@@ -321,7 +326,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         }
 
         @Override
-        void declareOBDASpecificationAssigned() {
+        protected void declareOBDASpecificationAssigned() {
             super.declareOBDASpecificationAssigned();
 
             if (isDBMetadataDefined) {
@@ -356,8 +361,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
 
     }
 
-    public static class BuilderImpl<B extends OntopMappingConfiguration.Builder<B>>
-            extends OntopMappingBuilderMixin<B> {
+    public static class BuilderImpl extends OntopMappingBuilderMixin<BuilderImpl> {
 
         @Override
         public OntopMappingConfiguration build() {
@@ -368,6 +372,10 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
 
             return new OntopMappingConfigurationImpl(settings, options);
         }
-    }
 
+        @Override
+        protected BuilderImpl self() {
+            return this;
+        }
+    }
 }

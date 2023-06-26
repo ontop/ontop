@@ -6,38 +6,75 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-protege</artifactId>
-        <version>5.0.1-SNAPSHOT</version>
+        <version>5.1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-protege-plugin</artifactId>
     <description>Ontop OBDA plugin for protégé</description>
-    <url>http://ontop.inf.unibz.it/</url>
 
     <organization>
-        <name>KRDB Research Centre for Knowledge and Data, Free University of Bozen-Bolzano</name>
+        <name>KRDB Research Centre for Knowledge and Data, Free University of Bozen-Bolzano</name> <!-- this is used in generated plugin metadata -->
         <url>http://www.inf.unibz.it/krdb/</url>
     </organization>
 
     <properties>
-        <guava.version>18.0</guava.version> <!-- Protégé version -->
-        <owlapi.version>4.5.20</owlapi.version> <!-- Protégé version -->
-        <h2.version>2.1.214</h2.version> <!-- testing -->
+        <!-- Dependency versions: overrides of root pom.xml to match protégé required versions -->
+        <guava.version>18.0</guava.version>
+        <owlapi.version>4.5.24</owlapi.version>
+
+        <!-- Build-related properties -->
         <symbolic.name>it.unibz.inf.ontop.protege</symbolic.name>
         <finalName>${symbolic.name}-${project.version}</finalName>
         <filter.main.resources>true</filter.main.resources>
-        <skipTests>true</skipTests>
-        <bundle.protege.phase>package</bundle.protege.phase>
+        <skipTests>true</skipTests> <!-- TODO: re-enable -->
     </properties>
 
-    <dependencies>
-        
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-protege-dependencies</artifactId>
-            <classifier>shaded</classifier>
-            <version>${project.version}</version>
-        </dependency>
+    <profiles>
+        <!-- ontop-protege-dependencies only added as dependency if ontop-protege-plugin is going to be generated
+             (have to replicate for each profile enabling the plugin, might fix by not requiring the 'shaded' classifier) -->
+        <profile>
+            <id>plugin</id>
+            <dependencies>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>ontop-protege-dependencies</artifactId>
+                    <classifier>shaded</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>asset-plugin</id>
+            <dependencies>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>ontop-protege-dependencies</artifactId>
+                    <classifier>shaded</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>asset-protege</id>
+            <dependencies>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>ontop-protege-dependencies</artifactId>
+                    <classifier>shaded</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>release</id>
+            <dependencies>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>ontop-protege-dependencies</artifactId>
+                    <classifier>shaded</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 
+    <dependencies>
         <!-- owlapi used in Protege -->
         <dependency>
             <groupId>net.sourceforge.owlapi</groupId>
@@ -49,9 +86,8 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>6.0.0</version>
         </dependency>
-        
+
         <!-- dependencies available from Protege: begin -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -71,12 +107,6 @@
         <!-- dependencies available from Protege: end -->
 
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
         </dependency>
@@ -93,6 +123,7 @@
         <dependency>
             <groupId>edu.stanford.protege</groupId>
             <artifactId>protege-editor-core</artifactId>
+            <type>bundle</type>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -104,6 +135,7 @@
         <dependency>
             <groupId>edu.stanford.protege</groupId>
             <artifactId>protege-editor-owl</artifactId>
+            <type>bundle</type>
             <scope>provided</scope>
         </dependency>
 
@@ -120,13 +152,18 @@
             <groupId>com.ibm.icu</groupId>
             <artifactId>icu4j</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>failureaccess</artifactId>
         </dependency>
-        
-        <!-- testing -->
+
+        <!-- Testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -137,6 +174,70 @@
 
     <build>
         <plugins>
+            <!-- Check that it.unibz.inf.ontop:ontop-protege-dependencies:jar:shaded points to a JAR (as occurs with 'mvn package'
+                 or later phase) and not to a target/classes folder (as occurs with 'mvn compile'), as int the latter the compiler
+                 plugin will fail due to relocated classes not being available. The check is done as follows:
+                 - use maven-dependency-plugin:properties to add properties groupId:artifactId:type:classifier = <location on disk>
+                 - use maven-enforcer-plugin to check value of it.unibz.inf.ontop:ontop-protege-dependencies:jar:shaded property,
+                   failing with an informative error message (better than confusing compiler errors) if not pointing to a JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>${maven-dependency-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>check-dependency-jar-is-available</id>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                        <phase>${plugin.phase-prefix}process-resources</phase> <!-- right before compile phase -->
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven-enforcer-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>check-dependency-jar-is-available</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <phase>${plugin.phase-prefix}process-resources</phase> <!-- right before compile phase -->
+                        <configuration>
+                            <rules>
+                                <requireProperty>
+                                    <property>it.unibz.inf.ontop:ontop-protege-dependencies:jar:shaded</property>
+                                    <message>Unexpected error: cannot resolve dependency it.unibz.inf.ontop:ontop-protege-dependencies:jar:shaded</message>
+                                    <regex>.*\.jar$</regex>
+                                    <regexMessage><![CDATA[
+#
+#  Missing shaded Ontop dependencies:  ontop-protege-dependencies-${project.version}-shaded.jar
+#
+#  How to fix:
+#  - in a multi-module build, please run 'mvn package -P<profile>' (or later target phase) instead of 'mvn compile -P<profile>' (*).
+#  - if compiling ontop-protege-plugin separately, ensure that artifact ${project.groupId}:ontop-protege-dependencies:jar:${project.version}:shaded
+#    (beware of 'shaded' classifier) is either installed in your local '~/.m2/repository' or is available in Maven Central with that version
+#
+#  (*) To enable compiling the ontop-protege-plugin, profile 'plugin' must be enabled (directly via '-Pplugin', or indirectly using a profile
+#  depending on it: 'asset-plugin' building the OSGI plugin bundle; 'asset-protege' building the ZIP/tar.gz Protégé bundles; or `release`).
+#  In a multi-module build, ontop-protege-dependencies-${project.version}-shaded.jar is only generated when running 'mvn package ...' or a
+#  later target lifecycle phase (maven-shade-plugin can run only in that phase), therefore earlier phases will not have access to this JAR.
+#  This issue cannot be solved while keeping at the same time the ontop-protege-plugin part of the ontop multi-module project hierarchy,
+#  hence users should get used to always use 'mvn package -Pplugin' when working with the ontop-protege-plugin.
+#
+#  (note: ignore any [Help 1] note and link from Maven CLI, as it will not help dealing with this issue)
+#
+                                    ]]></regexMessage>
+                                </requireProperty>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Generate OSGI artifact if enabled -->
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -145,7 +246,7 @@
                 <executions>
                     <execution>
                         <id>attach-protege-bundle</id>
-                        <phase>${bundle.protege.phase}</phase>
+                        <phase>${asset-plugin.phase-prefix}package</phase>
                         <goals>
                             <goal>bundle</goal>
                         </goals>
@@ -183,7 +284,7 @@
                                 <Bundle-Description>${project.description}</Bundle-Description>
                                 <Bundle-Vendor>${project.organization.name}</Bundle-Vendor>
                                 <Implementation-Version>${project.version}</Implementation-Version>
-                                <Update-Url>https://github.com/ontop/ontop/raw/master/ontop-protege/update.properties</Update-Url>
+                                <Update-Url>https://raw.githubusercontent.com/ontop/ontop/master/protege/plugin/update.properties</Update-Url>
 
                                 <Export-Package>
                                     <!-- No need to export any package -->
@@ -191,6 +292,8 @@
 
                                 <Import-Package>
                                 	!javax.servlet.*,
+                                    !javax.jms.*,
+                                    !javax.mail.*,
                                     javax.*,
                                     com.google.common.*;version="[18.0,19)",
                                     org.osgi.framework;version="[1.8,2)",

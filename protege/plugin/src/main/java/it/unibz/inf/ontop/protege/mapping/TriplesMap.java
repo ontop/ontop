@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.protege.mapping;
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.shaded.com.google.common.collect.Maps;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -9,10 +9,10 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class TriplesMap {
@@ -103,15 +103,11 @@ public class TriplesMap {
                 ? predicate.getObject(projectionAtom.getArguments())
                 : predicate.getProperty(projectionAtom.getArguments());
 
-        Map.Entry<Variable, ImmutableTerm> newEntry = Maps.immutableEntry(
-                predicateVariable,
-                factory.getConstantIRI(newIri));  // we build a ground term for the IRI
+        Substitution<ImmutableTerm> newSub = a.getSubstitution().builder()
+                .transformOrRetain(ImmutableMap.of(predicateVariable, newIri)::get, (t, i) -> factory.getConstantIRI(i))
+                .build();
 
-        return factory.getTargetAtom(
-                projectionAtom,
-                a.getSubstitution().getImmutableMap().entrySet().stream()
-                        .map(e -> e.getKey().equals(predicateVariable) ? newEntry : e)
-                        .collect(ImmutableCollectors.toMap()));
+        return factory.getTargetAtom(projectionAtom, newSub);
     }
 
     public boolean containsIri(IRI iri) {

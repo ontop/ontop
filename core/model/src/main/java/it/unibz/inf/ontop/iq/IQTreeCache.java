@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq;
 
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 
 /**
  *
@@ -31,5 +32,5 @@ public interface IQTreeCache {
 
     IQTreeCache declareDistinctRemoval(boolean noEffect);
 
-    IQTreeCache applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution);
+    IQTreeCache applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 }

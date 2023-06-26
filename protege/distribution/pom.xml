@@ -6,35 +6,31 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-protege</artifactId>
-        <version>5.0.1-SNAPSHOT</version>
+        <version>5.1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-protege-distribution</artifactId>
     <description>Builds the distribution files for quest and the core apis.</description>
 
     <properties>
+        <!-- Build-related properties -->
         <maven.deploy.skip>true</maven.deploy.skip>
         <assembly.appendAssemblyId>false</assembly.appendAssemblyId>
         <assembly.attach>false</assembly.attach>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-protege-plugin</artifactId>
-                <version>${project.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>*</artifactId>
-                        <groupId>*</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
+        <dependency>
+            <!-- just for sorting this module after ontop-protege-plugin -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-protege-plugin</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>*</artifactId>
+                    <groupId>*</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-owlapi</artifactId>
@@ -47,81 +43,154 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>__auto_download_protege_from_url__</id>
+            <activation>
+                <property>
+                    <name>protege.bnd.source</name>
+                    <value>!repository</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.googlecode.maven-download-plugin</groupId>
+                        <artifactId>download-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unpack-protege-platform-independent</id>
+                                <phase>${asset-protege.phase-prefix}prepare-package</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                                <configuration>
+                                    <url>${protege.bnd.url-plat-ind}</url>
+                                    <unpack>true</unpack>
+                                    <outputDirectory>${project.build.directory}/unpack/protege-desktop-platform-independent/</outputDirectory>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>unpack-protege-macos</id>
+                                <phase>${asset-protege.phase-prefix}prepare-package</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                                <configuration>
+                                    <url>${protege.bnd.url-macos}</url>
+                                    <unpack>true</unpack>
+                                    <outputDirectory>${project.build.directory}/unpack/protege-desktop-macos/</outputDirectory>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>unpack-protege-win</id>
+                                <phase>${asset-protege.phase-prefix}prepare-package</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                                <configuration>
+                                    <url>${protege.bnd.url-win}</url>
+                                    <unpack>true</unpack>
+                                    <outputDirectory>${project.build.directory}/unpack/protege-desktop-win/</outputDirectory>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>unpack-protege-linux</id>
+                                <phase>${asset-protege.phase-prefix}prepare-package</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                                <configuration>
+                                    <url>${protege.bnd.url-linux}</url>
+                                    <unpack>true</unpack>
+                                    <outputDirectory>${project.build.directory}/unpack/protege-desktop-linux/</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>__auto_download_protege_from_repository__</id>
+            <activation>
+                <property>
+                    <name>protege.bnd.source</name>
+                    <value>repository</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unpack-protege</id>
+                                <phase>${asset-protege.phase-prefix}prepare-package</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>edu.stanford.protege</groupId>
+                                            <artifactId>protege-desktop</artifactId>
+                                            <version>${protege.bnd.version}</version>
+                                            <classifier>platform-independent</classifier>
+                                            <type>zip</type>
+                                            <outputDirectory>${project.build.directory}/unpack/protege-desktop-platform-independent/</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>edu.stanford.protege</groupId>
+                                            <artifactId>protege-desktop</artifactId>
+                                            <version>${protege.bnd.version}</version>
+                                            <classifier>os-x</classifier>
+                                            <type>zip</type>
+                                            <outputDirectory>${project.build.directory}/unpack/protege-desktop-macos/</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>edu.stanford.protege</groupId>
+                                            <artifactId>protege-desktop</artifactId>
+                                            <version>${protege.bnd.version}</version>
+                                            <classifier>win</classifier>
+                                            <type>zip</type>
+                                            <outputDirectory>${project.build.directory}/unpack/protege-desktop-win/</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>edu.stanford.protege</groupId>
+                                            <artifactId>protege-desktop</artifactId>
+                                            <version>${protege.bnd.version}</version>
+                                            <classifier>linux</classifier>
+                                            <type>tar.gz</type>
+                                            <outputDirectory>${project.build.directory}/unpack/protege-desktop-linux/</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>${license-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>add-third-party</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>add-third-party</goal>
-                        </goals>
-                        <configuration>
-                            <skipAddThirdParty>${thirdparty.skip}</skipAddThirdParty>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>unpack-protege</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${assembly.protege.skip}</skip>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>edu.stanford.protege</groupId>
-                                    <artifactId>protege-desktop</artifactId>
-                                    <version>${protege.version}</version>
-                                    <classifier>platform-independent</classifier>
-                                    <type>zip</type>
-                                    <outputDirectory>${project.build.directory}/unpack/protege-desktop-platform-independent/</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>edu.stanford.protege</groupId>
-                                    <artifactId>protege-desktop</artifactId>
-                                    <version>${protege.version}</version>
-                                    <classifier>os-x</classifier>
-                                    <type>zip</type>
-                                    <outputDirectory>${project.build.directory}/unpack/protege-desktop-macos/</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>edu.stanford.protege</groupId>
-                                    <artifactId>protege-desktop</artifactId>
-                                    <version>${protege.version}</version>
-                                    <classifier>win</classifier>
-                                    <type>zip</type>
-                                    <outputDirectory>${project.build.directory}/unpack/protege-desktop-win/</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>edu.stanford.protege</groupId>
-                                    <artifactId>protege-desktop</artifactId>
-                                    <version>${protege.version}</version>
-                                    <classifier>linux</classifier>
-                                    <type>tar.gz</type>
-                                    <outputDirectory>${project.build.directory}/unpack/protege-desktop-linux/</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>copy-protege-plugin</id>
-                        <phase>prepare-package</phase>
+                        <!-- We enable this plugin only when just -Passet-plugin is enabled, as this step is fast and ensures
+                             that plugin and Protégé bundles are placed in the same 'protege/distribution' directory and that
+                             the plugin file there has the correct name without the '-bundle' classifier in it -->
+                        <phase>${asset-plugin.phase-prefix}prepare-package</phase>
                         <goals>
                             <goal>copy</goal>
                         </goals>
                         <configuration>
-                            <skip>${assembly.protege.skip}</skip>
                             <outputDirectory>${project.build.directory}/</outputDirectory>
                             <artifactItems>
                                 <artifactItem>
@@ -142,12 +211,11 @@
                 <executions>
                     <execution>
                         <id>attach-protege-bundle-platform-independent</id>
-                        <phase>package</phase>
+                        <phase>${asset-protege.phase-prefix}package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <skipAssembly>${assembly.protege.skip}</skipAssembly>
                             <descriptors>
                                 <descriptor>src/assembly/ontop-protege-bundle-platform-independent.xml</descriptor>
                             </descriptors>
@@ -156,12 +224,11 @@
                     </execution>
                     <execution>
                         <id>attach-protege-bundle-win</id>
-                        <phase>package</phase>
+                        <phase>${asset-protege.phase-prefix}package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <skipAssembly>${assembly.protege.skip}</skipAssembly>
                             <descriptors>
                                 <descriptor>src/assembly/ontop-protege-bundle-win.xml</descriptor>
                             </descriptors>
@@ -170,12 +237,11 @@
                     </execution>
                     <execution>
                         <id>attach-protege-bundle-linux</id>
-                        <phase>package</phase>
+                        <phase>${asset-protege.phase-prefix}package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <skipAssembly>${assembly.protege.skip}</skipAssembly>
                             <descriptors>
                                 <descriptor>src/assembly/ontop-protege-bundle-linux.xml</descriptor>
                             </descriptors>
@@ -184,12 +250,11 @@
                     </execution>
                     <execution>
                         <id>attach-protege-bundle-macos</id>
-                        <phase>package</phase>
+                        <phase>${asset-protege.phase-prefix}package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <skipAssembly>${assembly.protege.skip}</skipAssembly>
                             <descriptors>
                                 <descriptor>src/assembly/ontop-protege-bundle-macos.xml</descriptor>
                             </descriptors>
@@ -200,26 +265,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>protege</id>
-            <dependencies>
-                <dependency>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>ontop-protege-plugin</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>release</id>
-            <dependencies>
-                <dependency>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>ontop-protege-plugin</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
 
 </project>

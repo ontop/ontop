@@ -4,7 +4,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 /**
  * Head node an IntermediateQuery
@@ -17,7 +17,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 public interface ConstructionNode extends ExtendedProjectionNode {
 
     @Override
-    ImmutableSubstitution<ImmutableTerm> getSubstitution();
+    Substitution<ImmutableTerm> getSubstitution();
 
     @Override
     ConstructionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)

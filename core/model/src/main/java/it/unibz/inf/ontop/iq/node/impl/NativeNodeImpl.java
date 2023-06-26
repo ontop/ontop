@@ -15,6 +15,8 @@ import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -22,8 +24,8 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Objects;
@@ -135,13 +137,13 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
         throw new UnsupportedOperationException("NativeNode does not support renaming (too late)");
     }
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             VariableGenerator variableGenerator) {
         throw new UnsupportedOperationException("NativeNode does not support descending substitutions (too late)");
     }
@@ -181,9 +183,17 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
         return ImmutableSet.of();
     }
 
+    /**
+     * Dummy implementation (considered too late for inferring it)
+     */
     @Override
-    public ImmutableSet<Variable> getNotInternallyRequiredVariables() {
-        return getVariables();
+    public FunctionalDependencies inferFunctionalDependencies() {
+        return FunctionalDependencies.empty();
+    }
+
+    @Override
+    public VariableNonRequirement getVariableNonRequirement() {
+        return VariableNonRequirement.of(getVariables());
     }
 
     @Override

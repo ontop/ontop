@@ -59,7 +59,7 @@ public class LeftJoinProfSQLServerTest extends AbstractLeftJoinProfTest {
     @Disabled
     @Test
     @Override
-    public void testGroupConcat3() throws Exception {
+    public void testGroupConcat3() {
         super.testGroupConcat3();
     }
 
@@ -69,7 +69,7 @@ public class LeftJoinProfSQLServerTest extends AbstractLeftJoinProfTest {
     @Disabled
     @Test
     @Override
-    public void testGroupConcat5() throws Exception {
+    public void testGroupConcat5() {
         super.testGroupConcat5();
     }
 

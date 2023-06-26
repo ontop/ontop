@@ -6,13 +6,17 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -41,13 +45,16 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     protected final IQTreeTools iqTreeTools;
     protected final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     protected AbstractCompositeIQTree(N rootNode, ImmutableList<IQTree> children,
                                       IQTreeCache treeCache, IQTreeTools iqTreeTools,
-                                      IntermediateQueryFactory iqFactory, TermFactory termFactory) {
+                                      IntermediateQueryFactory iqFactory, TermFactory termFactory,
+                                      SubstitutionFactory substitutionFactory) {
         this.iqTreeTools = iqTreeTools;
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
         if (children.isEmpty())
             throw new IllegalArgumentException("A composite IQ must have at least one child");
         this.rootNode = rootNode;
@@ -135,24 +142,27 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         return toString().hashCode();
     }
 
-    protected Optional<ImmutableSubstitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution)
+    protected Optional<Substitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution(
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution)
             throws IQTreeTools.UnsatisfiableDescendingSubstitutionException {
         return iqTreeTools.normalizeDescendingSubstitution(this, descendingSubstitution);
     }
 
     @Override
     public IQTree applyDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
+
+        ImmutableSet<Variable> variables = getVariables();
+
         try {
-            Optional<ImmutableSubstitution<? extends VariableOrGroundTerm>> normalizedSubstitution =
+            Optional<Substitution<? extends VariableOrGroundTerm>> normalizedSubstitution =
                     normalizeDescendingSubstitution(descendingSubstitution);
 
             Optional<ImmutableExpression> newConstraint = normalizeConstraint(constraint, descendingSubstitution);
 
             return normalizedSubstitution
-                    .flatMap(this::extractFreshRenaming)
+                    .flatMap(s -> iqTreeTools.extractFreshRenaming(s, variables))
                     // Fresh renaming
                     .map(s -> applyFreshRenaming(s, true))
                     .map(t -> newConstraint
@@ -164,24 +174,24 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
                             .orElseGet(() -> newConstraint
                                     .map(c -> propagateDownConstraint(c, variableGenerator))
                                     .orElse(this)));
-
-        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
-            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
+        }
+        catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
+            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, variables));
         }
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
         return applyFreshRenaming(freshRenamingSubstitution, false);
     }
 
     private Optional<ImmutableExpression> normalizeConstraint(Optional<ImmutableExpression> constraint,
-                                                              ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+                                                              Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         if (!constraint.isPresent())
             return constraint;
 
         ImmutableSet<Variable> newVariables = getVariables().stream()
-                .map(descendingSubstitution::applyToVariable)
+                .map(v -> substitutionFactory.onVariableOrGroundTerms().apply(descendingSubstitution, v))
                 .filter(t -> t instanceof Variable)
                 .map(t -> (Variable)t)
                 .collect(ImmutableCollectors.toSet());
@@ -190,15 +200,10 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
                 .filter(e -> e.getVariableStream().anyMatch(newVariables::contains)));
     }
 
-    protected abstract IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution, boolean alreadyNormalized);
+    protected abstract IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution, boolean alreadyNormalized);
 
-    protected abstract IQTree applyRegularDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+    protected abstract IQTree applyRegularDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                                  Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator);
-
-    private Optional<InjectiveVar2VarSubstitution> extractFreshRenaming(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-        return iqTreeTools.extractFreshRenaming(descendingSubstitution, getVariables());
-    }
 
     @Override
     public final void validate() throws InvalidIntermediateQueryException {
@@ -235,9 +240,9 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     }
 
     @Override
-    public synchronized ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions() {
+    public synchronized ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions() {
         // Non-final
-        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions = treeCache.getPossibleVariableDefinitions();
+        ImmutableSet<Substitution<NonVariableTerm>> possibleVariableDefinitions = treeCache.getPossibleVariableDefinitions();
         if (possibleVariableDefinitions == null) {
             possibleVariableDefinitions = computePossibleVariableDefinitions();
             treeCache.setPossibleVariableDefinitions(possibleVariableDefinitions);
@@ -245,7 +250,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         return possibleVariableDefinitions;
     }
 
-    protected abstract ImmutableSet<ImmutableSubstitution<NonVariableTerm>> computePossibleVariableDefinitions();
+    protected abstract ImmutableSet<Substitution<NonVariableTerm>> computePossibleVariableDefinitions();
 
     @Override
     public synchronized ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
@@ -261,18 +266,31 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     protected abstract ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints();
 
     @Override
-    public synchronized ImmutableSet<Variable> getNotInternallyRequiredVariables() {
+    public synchronized FunctionalDependencies inferFunctionalDependencies() {
         // Non-final
-        ImmutableSet<Variable> notInternallyRequiredVariables = treeCache.getNotInternallyRequiredVariables();
+        FunctionalDependencies dependencies = treeCache.getFunctionalDependencies();
+        if (dependencies == null) {
+            dependencies = computeFunctionalDependencies();
+            treeCache.setFunctionalDependencies(dependencies);
+        }
+        return dependencies;
+    }
+
+    protected abstract FunctionalDependencies computeFunctionalDependencies();
+
+    @Override
+    public synchronized VariableNonRequirement getVariableNonRequirement() {
+        // Non-final
+        VariableNonRequirement notInternallyRequiredVariables = treeCache.getVariableNonRequirement();
         if (notInternallyRequiredVariables != null)
             return notInternallyRequiredVariables;
 
-        notInternallyRequiredVariables = computeNotInternallyRequiredVariables();
-        treeCache.setNotInternallyRequiredVariables(notInternallyRequiredVariables);
+        notInternallyRequiredVariables = computeVariableNonRequirement();
+        treeCache.setVariableNonRequirement(notInternallyRequiredVariables);
         return notInternallyRequiredVariables;
     }
 
-    protected abstract ImmutableSet<Variable> computeNotInternallyRequiredVariables();
+    protected abstract VariableNonRequirement computeVariableNonRequirement();
 
 
     @Override
