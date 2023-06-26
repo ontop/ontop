@@ -80,6 +80,9 @@ public class PreventDistinctOptimizerImpl implements PreventDistinctOptimizer {
             if(substitutionBuilder.build().isEmpty())
                 return originalTree;
             var substitution = substitutionBuilder.build();
+            if(!substitution.values().stream()
+                    .allMatch(this::isDeterministic))
+                throw new IllegalArgumentException("Unable to push non-supported terms below DISTINCT, because they include a non-deterministic function.");
 
 
             //Check if all variables used by these terms have a functional dependency pointing to them.
@@ -117,6 +120,16 @@ public class PreventDistinctOptimizerImpl implements PreventDistinctOptimizer {
             return iqFactory.createUnaryIQTree(topConstruction, newSubtree);
         }
 
+        private boolean isDeterministic(ImmutableTerm term) {
+            if(!(term instanceof ImmutableFunctionalTerm))
+                return true;
+            var f = (ImmutableFunctionalTerm) term;
+            if(!f.getFunctionSymbol().isDeterministic())
+                return false;
+            return f.getTerms().stream()
+                            .allMatch(this::isDeterministic);
+        }
+
         private boolean shouldPreventDistinct(ImmutableTerm term) {
             var type = term.inferType();
             return type.flatMap(TermTypeInference::getTermType)
@@ -142,9 +155,6 @@ public class PreventDistinctOptimizerImpl implements PreventDistinctOptimizer {
                             .mapToObj(i -> f.getFunctionSymbol().getExpectedBaseType(i))
                             .filter(t -> t instanceof DBTermType)
                             .anyMatch(t -> ((DBTermType) t).isPreventDistinctRecommended())) {
-                if(!f.getFunctionSymbol().isDeterministic()) {
-                    throw new IllegalArgumentException(String.format("Pushing a term used inside the non-deterministic function %s below the DISTINCT is not supported.", term));
-                }
                 var variable = variableGenerator.generateNewVariable("pushPreventDistinct");
                 substitutionBuilder.put(variable, term);
                 return variable;
@@ -153,9 +163,6 @@ public class PreventDistinctOptimizerImpl implements PreventDistinctOptimizer {
             var childTerms = f.getTerms().stream()
                     .map(t -> splitByPreventDistinctType(t, substitutionBuilder))
                     .collect(ImmutableCollectors.toList());
-            if(!childTerms.equals(f.getTerms()) && !f.getFunctionSymbol().isDeterministic()) {
-                throw new IllegalArgumentException(String.format("Pushing a term used inside the non-deterministic function %s below the DISTINCT is not supported.", term));
-            }
             return termFactory.getImmutableFunctionalTerm(
                     f.getFunctionSymbol(),
                     childTerms
