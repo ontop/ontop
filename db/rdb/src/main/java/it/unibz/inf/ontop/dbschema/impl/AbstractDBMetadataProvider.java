@@ -406,7 +406,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             ForeignKeyConstraint.Builder builder = null;
             String constraintId = null;
             while (rs.next()) {
-                RelationID extractedId = getRelationID(rs, "FKTABLE_CAT", "FKTABLE_SCHEM","FKTABLE_SCHEM");
+                RelationID extractedId = getRelationID(rs, "FKTABLE_CAT", "FKTABLE_SCHEM","FKTABLE_NAME");
                 checkSameRelationID(extractedId, id, "getImportedKeys");
                 RelationID pkId = getRelationID(rs, "PKTABLE_CAT", "PKTABLE_SCHEM","PKTABLE_NAME");
 
