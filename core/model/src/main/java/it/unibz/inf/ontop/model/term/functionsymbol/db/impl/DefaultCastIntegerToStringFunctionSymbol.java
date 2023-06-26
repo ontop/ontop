@@ -4,9 +4,11 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.StringConstantDecomposer;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -28,6 +30,13 @@ public class DefaultCastIntegerToStringFunctionSymbol extends DefaultSimpleDBCas
     }
 
     @Override
+    protected boolean checkValueValidityForDecomposition(String value) {
+        // We eliminate the problematic pattern
+        return (!pattern.matcher(value).matches())
+                && super.checkValueValidityForDecomposition(value);
+    }
+
+    @Override
     protected IncrementalEvaluation evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
                                                                         NonNullConstant otherTerm, TermFactory termFactory,
                                                                         VariableNullability variableNullability) {
@@ -41,4 +50,6 @@ public class DefaultCastIntegerToStringFunctionSymbol extends DefaultSimpleDBCas
 
         return perform2ndStepEvaluationStrictEqWithConstant(terms, otherValue, termFactory, variableNullability);
     }
+
+
 }

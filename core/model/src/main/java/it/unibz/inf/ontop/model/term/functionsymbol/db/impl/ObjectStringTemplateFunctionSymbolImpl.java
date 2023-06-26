@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.StringConstantDecomposer;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractEncodeURIorIRIFunctionSymbol.IRISafeEnDecoder;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -18,6 +19,7 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -453,6 +455,26 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             return IncrementalEvaluation.declareIsFalse();
 
         return super.evaluateStrictEqWithNonNullConstant(terms, otherTerm, termFactory, variableNullability);
+    }
+
+    @Override
+    public Optional<StringConstantDecomposer> getDecomposer(ImmutableList<? extends ImmutableTerm> terms,
+                                                            TermFactory termFactory, VariableNullability variableNullability) {
+
+        if (isInjective(terms, variableNullability, termFactory)) {
+            Pattern pattern = getPattern();
+            return Optional.of( cst -> {
+                Matcher matcher = pattern.matcher(cst.getValue());
+                if (matcher.find()) {
+                    return Optional.of(IntStream.range(0, getArity())
+                            .mapToObj(i -> termFactory.getDBStringConstant(
+                                    R2RMLIRISafeEncoder.decode(matcher.group(i + 1))))
+                            .collect(ImmutableCollectors.toList()));
+                }
+                return Optional.empty();
+            });
+        }
+        return Optional.empty();
     }
 
     @Override
