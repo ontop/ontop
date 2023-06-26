@@ -3209,6 +3209,395 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
+    @Test
+    public void testMergeLJs15() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(4), ImmutableList.of(A, B, C, D));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 2, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, E, 1, C));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, F, 2, D));
+
+        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
+
+        IQTree subLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                TERM_FACTORY.getStrictEquality(A, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, E))),
+                dataNode1, dataNode2);
+
+        BinaryNonCommutativeIQTree topLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getStrictEquality(TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, F), A)
+                ),
+                subLJTree,
+                dataNode3);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, topLJTree));
+
+        ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, F, 1, C,2, D));
+
+        IQTree newLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getStrictEquality(A, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, F))),
+                dataNode1, newRightDataNode);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, newLJTree));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testMergeLJs16() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(4), ImmutableList.of(A, B, C, D));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 2, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, E, 1, C));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, F, 2, D));
+
+        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
+
+        IQTree subLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getStrictEquality(A, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, E))),
+                dataNode1, dataNode2);
+
+        BinaryNonCommutativeIQTree topLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getStrictEquality(A, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, F))
+                ),
+                subLJTree,
+                dataNode3);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, topLJTree));
+
+        ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, F, 1, C,2, D));
+
+        IQTree newLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getStrictEquality(A, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, F))),
+                dataNode1, newRightDataNode);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, newLJTree));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testMergeLJs17() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(4), ImmutableList.of(A, B, C, D));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 2, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, E, 1, C));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, F, 2, D));
+
+        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
+
+        IQTree subLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getStrictEquality(TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, A), E)),
+                dataNode1, dataNode2);
+
+        BinaryNonCommutativeIQTree topLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getStrictEquality(TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, A), F)
+                ),
+                subLJTree,
+                dataNode3);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, topLJTree));
+
+        ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, F, 1, C,2, D));
+
+        IQTree newLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getStrictEquality(TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, A), F)),
+                dataNode1, newRightDataNode);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, newLJTree));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testMergeLJs18() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(4), ImmutableList.of(A, B, C, D));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 2, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, E, 1, C));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, F, 2, D));
+
+        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
+        DBTermType booleanType = TYPE_FACTORY.getDBTypeFactory().getDBBooleanType();
+
+        ImmutableFunctionalTerm leftCast = TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, A);
+
+        IQTree subLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getStrictEquality(leftCast, TERM_FACTORY.getDBCastFunctionalTerm(booleanType, stringType, E))),
+                dataNode1, dataNode2);
+
+        BinaryNonCommutativeIQTree topLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getStrictEquality(leftCast, TERM_FACTORY.getDBCastFunctionalTerm(booleanType, stringType, F))
+                ),
+                subLJTree,
+                dataNode3);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, topLJTree));
+
+        ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, F, 1, C,2, D));
+
+        IQTree newLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getStrictEquality(leftCast, TERM_FACTORY.getDBCastFunctionalTerm(booleanType, stringType, F))),
+                dataNode1, newRightDataNode);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, newLJTree));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testMergeLJs19() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(4), ImmutableList.of(A, B, C, D));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 2, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, ONE_STR, 1, C));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, ONE_STR, 2, D));
+
+        ImmutableExpression condition = TERM_FACTORY.getStrictEquality(A, ONE_STR);
+
+        IQTree subLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                       condition),
+                dataNode1, dataNode2);
+
+        BinaryNonCommutativeIQTree topLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(condition),
+                subLJTree,
+                dataNode3);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, topLJTree));
+
+        ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, ONE_STR, 1, CF0,2, DF1));
+
+        IQTree newLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(),
+                dataNode1, newRightDataNode);
+
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        C, TERM_FACTORY.getIfElseNull(condition, CF0),
+                        D, TERM_FACTORY.getIfElseNull(condition, DF1)));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(newConstructionNode, newLJTree));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+
+    @Ignore("TODO: support it (it introduces an implicit constraint that currently block the optimization")
+    @Test
+    public void testMergeLJs20() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(4), ImmutableList.of(A, B, C, D));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 2, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, E, 1, C));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, F, 1, G,2, D));
+
+        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
+
+        IQTree subLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getConjunction(
+                                TERM_FACTORY.getStrictEquality(A, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, E)),
+                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, C))
+                                )),
+                dataNode1, dataNode2);
+
+        BinaryNonCommutativeIQTree topLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getConjunction(
+                                TERM_FACTORY.getStrictEquality(A, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, F)),
+                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, G))
+                        )),
+                subLJTree,
+                dataNode3);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, topLJTree));
+
+        ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, F, 1, C,2, D));
+
+        IQTree newLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                TERM_FACTORY.getConjunction(
+                        TERM_FACTORY.getStrictEquality(A, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, F)),
+                        TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, C)))),
+                dataNode1, newRightDataNode);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, newLJTree));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testMergeLJs21() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(4), ImmutableList.of(A, B, C, D));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 2, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE3, ImmutableMap.of(0, E, 1, C));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE3, ImmutableMap.of(0, F, 1, G,2, D));
+
+        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
+
+        IQTree subLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getConjunction(
+                                TERM_FACTORY.getStrictEquality(A, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, E)),
+                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, C))
+                        )),
+                dataNode1, dataNode2);
+
+        BinaryNonCommutativeIQTree topLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getConjunction(
+                                TERM_FACTORY.getStrictEquality(A, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, F)),
+                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, G))
+                        )),
+                subLJTree,
+                dataNode3);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, topLJTree));
+
+        ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE3, ImmutableMap.of(0, F, 1, C,2, D));
+
+        IQTree newLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getConjunction(
+                                TERM_FACTORY.getStrictEquality(A, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, F)),
+                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, C)))),
+                dataNode1, newRightDataNode);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, newLJTree));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Ignore("TODO: support composite UC inference after transformation in ConstructionNode, to get that query optimized")
+    @Test
+    public void testMergeLJs22() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(4), ImmutableList.of(A, B, C, D));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 2, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE3, ImmutableMap.of(0, E, 1, C));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE3, ImmutableMap.of(0, F, 1, G,2, D));
+
+        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
+
+        IQTree subLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getConjunction(
+                                TERM_FACTORY.getStrictEquality(A, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, E)),
+                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, C)),
+                                TERM_FACTORY.getDBNumericInequality(InequalityLabel.LT, C, TWO)
+                        )),
+                dataNode1, dataNode2);
+
+        BinaryNonCommutativeIQTree topLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getConjunction(
+                                TERM_FACTORY.getStrictEquality(A, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, F)),
+                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, G))
+                        )),
+                subLJTree,
+                dataNode3);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, topLJTree));
+
+        ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE3, ImmutableMap.of(0, F, 1, C,2, D));
+
+        IQTree newLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getConjunction(
+                                TERM_FACTORY.getStrictEquality(A, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, F)),
+                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, C)))),
+                dataNode1, newRightDataNode);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, newLJTree));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testMergeLJs23() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(4), ImmutableList.of(A, B, C, D));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 2, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, E, 1, C));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, F, 2, D));
+
+        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
+        DBTermType booleanType = TYPE_FACTORY.getDBTypeFactory().getDBBooleanType();
+
+        ImmutableFunctionalTerm leftCast = TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, A);
+
+        IQTree subLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                TERM_FACTORY.getConjunction(
+                        TERM_FACTORY.getStrictEquality(leftCast, TERM_FACTORY.getDBCastFunctionalTerm(booleanType, stringType, E)),
+                        TERM_FACTORY.getDBNumericInequality(InequalityLabel.LT, C, TWO))),
+                dataNode1, dataNode2);
+
+        BinaryNonCommutativeIQTree topLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getStrictEquality(leftCast, TERM_FACTORY.getDBCastFunctionalTerm(booleanType, stringType, F))
+                ),
+                subLJTree,
+                dataNode3);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, topLJTree));
+
+        ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, F, 1, CF2,2, D));
+
+        IQTree newLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getStrictEquality(leftCast, TERM_FACTORY.getDBCastFunctionalTerm(booleanType, stringType, F))),
+                dataNode1, newRightDataNode);
+
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(C,
+                        TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBNumericInequality(InequalityLabel.LT, CF2, TWO), CF2)));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(newConstructionNode, newLJTree));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
     /**
      * FK is only one direction (no cycle)
      */
