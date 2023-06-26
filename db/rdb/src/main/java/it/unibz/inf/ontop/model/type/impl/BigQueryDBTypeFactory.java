@@ -21,6 +21,7 @@ public class BigQueryDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     protected static final String GEOGRAPHY_STR = "GEOGRAPHY";
     protected static final String JSON_STR = "JSON";
+    protected static final String RECORD_STR = "RECORD";
     protected static final String BYTES_STR = "BYTES";
 
     protected static final String ARRAY_STR = "ARRAY<T>";
@@ -94,7 +95,19 @@ public class BigQueryDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(BYTES_STR, bytesType);
 
         map.put(GEOGRAPHY_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(GEOGRAPHY_STR, rootAncestry, xsdString));
-        map.put(JSON_STR, new JsonDBTermTypeImpl(JSON_STR, rootAncestry));
+        map.put(JSON_STR, new JsonDBTermTypeImpl(JSON_STR, rootAncestry) {
+            @Override
+            public boolean isPreventDistinctRecommended() {
+                return true;
+            }
+        });
+        //TODO: once the STRUCT db-type is fully implemented, this part can be updated.
+        map.put(RECORD_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(RECORD_STR, rootAncestry, xsdString) {
+            @Override
+            public boolean isPreventDistinctRecommended() {
+                return true;
+            }
+        });
 
         map.remove(DOUBLE_PREC_STR);
         map.remove(VARCHAR_STR);
