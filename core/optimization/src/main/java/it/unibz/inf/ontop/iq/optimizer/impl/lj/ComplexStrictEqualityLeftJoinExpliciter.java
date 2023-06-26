@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.AbstractCollection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -126,6 +127,9 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
                         .collect(substitutionFactory.toSubstitution()));
     }
 
+    /**
+     * NB: excludes equalities to constants
+     */
     private boolean isDecomposibleStrictEquality(ImmutableExpression expression, ImmutableSet<Variable> leftVariables,
                                                  ImmutableSet<Variable> rightSpecificVariables) {
         if  (!(expression.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol))
@@ -140,6 +144,8 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
                 .collect(ImmutableCollectors.toList());
 
         return subTermVariables.stream()
+                .noneMatch(AbstractCollection::isEmpty)
+                && subTermVariables.stream()
                 .anyMatch(leftVariables::containsAll)
                 && subTermVariables.stream()
                 .anyMatch(rightSpecificVariables::containsAll);
