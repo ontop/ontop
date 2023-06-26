@@ -40,7 +40,7 @@ public class PreventDistinctTest {
     private final static FunctionSymbol UNARY_FUNCTION;
     private final static FunctionSymbol BINARY_FUNCTION;
 
-    private final static Variable PUSH_PREVENT_DISTINCT_0;
+    private final static Variable PUSH_PREVENT_DISTINCT;
 
     static {
         OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
@@ -54,7 +54,7 @@ public class PreventDistinctTest {
         UNARY_FUNCTION = makeFunctionSymbol("UNARY", ImmutableList.of(ALLOW_DISTINCT_TYPE), ALLOW_DISTINCT_TYPE);
         BINARY_FUNCTION = makeFunctionSymbol("BINARY", ImmutableList.of(PREVENT_DISTINCT_TYPE, PREVENT_DISTINCT_TYPE), ALLOW_DISTINCT_TYPE);
 
-        PUSH_PREVENT_DISTINCT_0 = TERM_FACTORY.getVariable("pushPreventDistinctf0");
+        PUSH_PREVENT_DISTINCT = TERM_FACTORY.getVariable("pushPreventDistinct");
     }
 
     @Test
@@ -121,12 +121,12 @@ public class PreventDistinctTest {
                 IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, X), SUBSTITUTION_FACTORY.getSubstitution(X,
                         TERM_FACTORY.getImmutableFunctionalTerm(
                                 UNARY_FUNCTION,
-                                PUSH_PREVENT_DISTINCT_0
+                                PUSH_PREVENT_DISTINCT
                         ))),
                 IQ_FACTORY.createUnaryIQTree(
                         IQ_FACTORY.createDistinctNode(),
                         IQ_FACTORY.createUnaryIQTree(
-                                IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, PUSH_PREVENT_DISTINCT_0), SUBSTITUTION_FACTORY.getSubstitution(PUSH_PREVENT_DISTINCT_0, TERM_FACTORY.getImmutableFunctionalTerm(
+                                IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, PUSH_PREVENT_DISTINCT), SUBSTITUTION_FACTORY.getSubstitution(PUSH_PREVENT_DISTINCT, TERM_FACTORY.getImmutableFunctionalTerm(
                                         SANITIZE_FUNCTION,
                                         B
                                 ))),

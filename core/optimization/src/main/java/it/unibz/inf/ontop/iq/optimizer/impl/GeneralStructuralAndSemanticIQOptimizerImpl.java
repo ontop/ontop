@@ -88,7 +88,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         LOGGER.debug("New query after simplifying the order by node:\n{}\n", optimizedQuery);
 
         // Called a second time in case the order of nodes was changed during previous optimization steps.
-        IQ resultingQuery = preventDistinctOptimizer.optimize(liftedQuery);
+        IQ resultingQuery = preventDistinctOptimizer.optimize(optimizedQuery);
         LOGGER.debug("Query tree after preventing DISTINCT for non-supported data types, second pass:\n{}\n", resultingQuery);
 
         return resultingQuery;
