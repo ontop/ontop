@@ -100,6 +100,45 @@ public class PreventDistinctTest {
     }
 
     @Test
+    public void testPreventDistinctMoreVariables() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, X, A, Y);
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(T1_AR2, ImmutableMap.of(0, A, 1, B));
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
+        Substitution<ImmutableTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X,
+                TERM_FACTORY.getImmutableFunctionalTerm(SANITIZE_FUNCTION, B),
+                Y, A);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, X, Y), substitution);
+
+        UnaryIQTree tree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createUnaryIQTree(
+                        distinctNode,
+                        dataNode
+                ));
+
+        IQ initialQuery = IQ_FACTORY.createIQ(
+                projectionAtom,
+                tree);
+
+        IQTree expectedResult = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, X, Y), SUBSTITUTION_FACTORY.getSubstitution(Y, A)),
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createDistinctNode(),
+                        IQ_FACTORY.createUnaryIQTree(
+                                IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, X), SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getImmutableFunctionalTerm(
+                                        SANITIZE_FUNCTION,
+                                        B
+                                ))),
+                                dataNode
+                        )
+                )
+        );
+
+        optimizeAndCompare(initialQuery, IQ_FACTORY.createIQ(projectionAtom, expectedResult));
+    }
+
+    @Test
     public void testPreventDistinctIndirect() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, A);
 
