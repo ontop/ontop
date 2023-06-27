@@ -39,8 +39,10 @@ public class PreventDistinctTest {
     private final static FunctionSymbol SANITIZE_FUNCTION;
     private final static FunctionSymbol UNARY_FUNCTION;
     private final static FunctionSymbol BINARY_FUNCTION;
+    private final static FunctionSymbol UNSAFE_BINARY_FUNCTION;
 
     private final static Variable PUSH_PREVENT_DISTINCT;
+    private final static Variable PUSH_PREVENT_DISTINCT2;
 
     static {
         OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
@@ -52,9 +54,11 @@ public class PreventDistinctTest {
         SANITIZE_FUNCTION = makeFunctionSymbol("SANITIZE", ImmutableList.of(PREVENT_DISTINCT_TYPE), ALLOW_DISTINCT_TYPE);
         KEEP_PREVENT_FUNCTION = makeFunctionSymbol("KEEP_PREVENT", ImmutableList.of(PREVENT_DISTINCT_TYPE), PREVENT_DISTINCT_TYPE);
         UNARY_FUNCTION = makeFunctionSymbol("UNARY", ImmutableList.of(ALLOW_DISTINCT_TYPE), ALLOW_DISTINCT_TYPE);
-        BINARY_FUNCTION = makeFunctionSymbol("BINARY", ImmutableList.of(PREVENT_DISTINCT_TYPE, PREVENT_DISTINCT_TYPE), ALLOW_DISTINCT_TYPE);
+        BINARY_FUNCTION = makeFunctionSymbol("BINARY", ImmutableList.of(ALLOW_DISTINCT_TYPE, ALLOW_DISTINCT_TYPE), ALLOW_DISTINCT_TYPE);
+        UNSAFE_BINARY_FUNCTION = makeFunctionSymbol("UNSAFE_BINARY", ImmutableList.of(PREVENT_DISTINCT_TYPE, PREVENT_DISTINCT_TYPE), ALLOW_DISTINCT_TYPE);
 
-        PUSH_PREVENT_DISTINCT = TERM_FACTORY.getVariable("pushPreventDistinct");
+        PUSH_PREVENT_DISTINCT = TERM_FACTORY.getVariable("f0");
+        PUSH_PREVENT_DISTINCT2 = TERM_FACTORY.getVariable("f1");
     }
 
     @Test
@@ -102,8 +106,8 @@ public class PreventDistinctTest {
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(T1_AR2, ImmutableMap.of(0, A, 1, B));
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         Substitution<ImmutableTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X,
-                TERM_FACTORY.getImmutableFunctionalTerm(UNARY_FUNCTION,
-                        TERM_FACTORY.getImmutableFunctionalTerm(SANITIZE_FUNCTION, B)));
+                        TERM_FACTORY.getImmutableFunctionalTerm(UNARY_FUNCTION,
+                            TERM_FACTORY.getImmutableFunctionalTerm(SANITIZE_FUNCTION, B)));
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, X), substitution);
 
         UnaryIQTree tree = IQ_FACTORY.createUnaryIQTree(
@@ -145,7 +149,7 @@ public class PreventDistinctTest {
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(T1_AR2, ImmutableMap.of(0, A, 1, B));
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         Substitution<ImmutableTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X,
-                TERM_FACTORY.getImmutableFunctionalTerm(BINARY_FUNCTION,
+                TERM_FACTORY.getImmutableFunctionalTerm(UNSAFE_BINARY_FUNCTION,
                         TERM_FACTORY.getImmutableFunctionalTerm(KEEP_PREVENT_FUNCTION, B),
                         TERM_FACTORY.getImmutableFunctionalTerm(KEEP_PREVENT_FUNCTION, B)));
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, X), substitution);
@@ -167,10 +171,60 @@ public class PreventDistinctTest {
                         IQ_FACTORY.createDistinctNode(),
                         IQ_FACTORY.createUnaryIQTree(
                                 IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, X), SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getImmutableFunctionalTerm(
-                                        BINARY_FUNCTION,
+                                        UNSAFE_BINARY_FUNCTION,
                                         TERM_FACTORY.getImmutableFunctionalTerm(KEEP_PREVENT_FUNCTION, B),
                                         TERM_FACTORY.getImmutableFunctionalTerm(KEEP_PREVENT_FUNCTION, B)
                                 ))),
+                                dataNode
+                        )
+                )
+        );
+
+        optimizeAndCompare(initialQuery, IQ_FACTORY.createIQ(projectionAtom, expectedResult));
+    }
+
+    @Test
+    public void testPreventMultipleDifferent() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, A);
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(T1_AR2, ImmutableMap.of(0, A, 1, B));
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
+        Substitution<ImmutableTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X,
+                TERM_FACTORY.getImmutableFunctionalTerm(BINARY_FUNCTION,
+                        TERM_FACTORY.getImmutableFunctionalTerm(SANITIZE_FUNCTION, B),
+                        TERM_FACTORY.getImmutableFunctionalTerm(SANITIZE_FUNCTION, B)));
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, X), substitution);
+
+        UnaryIQTree tree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createUnaryIQTree(
+                        distinctNode,
+                        dataNode
+                ));
+
+        IQ initialQuery = IQ_FACTORY.createIQ(
+                projectionAtom,
+                tree);
+
+        IQTree expectedResult = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, X), SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getImmutableFunctionalTerm(
+                        BINARY_FUNCTION,
+                        PUSH_PREVENT_DISTINCT,
+                        PUSH_PREVENT_DISTINCT2
+                ))),
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createDistinctNode(),
+                        IQ_FACTORY.createUnaryIQTree(
+                                IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, PUSH_PREVENT_DISTINCT, PUSH_PREVENT_DISTINCT2), SUBSTITUTION_FACTORY.getSubstitution(
+                                        PUSH_PREVENT_DISTINCT, TERM_FACTORY.getImmutableFunctionalTerm(
+                                            SANITIZE_FUNCTION,
+                                            B
+                                        ),
+                                        PUSH_PREVENT_DISTINCT2, TERM_FACTORY.getImmutableFunctionalTerm(
+                                                SANITIZE_FUNCTION,
+                                                B
+                                        )
+                                )),
                                 dataNode
                         )
                 )

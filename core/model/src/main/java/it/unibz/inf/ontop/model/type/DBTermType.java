@@ -47,7 +47,7 @@ public interface DBTermType extends TermType {
     Optional<Boolean> isValidLexicalValue(String lexicalValue);
 
     /**
-     * Indicates if enforcing DISTINCT over columns of this type is recommended. If not, Ontop will try to push expressions
+     * Indicates if preventing to enforce DISTINCT over columns of this type is recommended. If so, Ontop will try to push expressions
      * of this type below the DISTINCT.
      */
     boolean isPreventDistinctRecommended();
