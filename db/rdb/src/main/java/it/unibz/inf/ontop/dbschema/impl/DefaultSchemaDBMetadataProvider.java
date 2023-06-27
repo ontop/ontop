@@ -38,7 +38,6 @@ public abstract class DefaultSchemaDBMetadataProvider extends AbstractDBMetadata
         super(connection, idFactoryProvider, coreSingletons);
         try {
             String[] defaultRelationComponents = defaultsFactory.getDefaultRelationIdComponents(connection);
-            System.out.println(Arrays.toString(defaultRelationComponents));
             if (defaultRelationComponents == null || defaultRelationComponents.length < SCHEMA_INDEX + 1
                     || defaultRelationComponents[SCHEMA_INDEX] == null)
                 throw new MetadataExtractionException("Unable to obtain the default schema: make sure the connection URL is complete " + Arrays.toString(defaultRelationComponents));
