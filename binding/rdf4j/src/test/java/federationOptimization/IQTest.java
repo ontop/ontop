@@ -30,14 +30,14 @@ import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.LegacyVariableGenerator;
 import org.apache.commons.rdf.api.RDF;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.semanticweb.owlapi.model.OWLException;
 
 import java.util.ArrayList;
@@ -48,6 +48,7 @@ import java.util.logging.Logger;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.GT;
 
+@Category(ObdfTest.class)
 public class IQTest {
 
     public static final IntermediateQueryFactory IQ_FACTORY;
@@ -215,13 +216,13 @@ public class IQTest {
 
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));//(ImmutableSet.of(X, A));
 
-        ImmutableSubstitution<ImmutableTerm> xSubstitution11 = SUBSTITUTION_FACTORY.getSubstitution(A, ONE);
+        Substitution<ImmutableTerm> xSubstitution11 = SUBSTITUTION_FACTORY.getSubstitution(A, ONE);
         ConstructionNode constructionNode11 = IQ_FACTORY.createConstructionNode(unionNode1.getVariables(), xSubstitution11);
         UnaryIQTree child11 = IQ_FACTORY.createUnaryIQTree(
                 constructionNode11,
                 dataNode1);
 
-        ImmutableSubstitution<ImmutableTerm> xSubstitution12 = SUBSTITUTION_FACTORY.getSubstitution(A, TWO);
+        Substitution<ImmutableTerm> xSubstitution12 = SUBSTITUTION_FACTORY.getSubstitution(A, TWO);
         ConstructionNode constructionNode12 = IQ_FACTORY.createConstructionNode(unionNode1.getVariables(),
                 xSubstitution12);
         UnaryIQTree child12 = IQ_FACTORY.createUnaryIQTree(
@@ -242,7 +243,7 @@ public class IQTest {
 
         UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, C));
 
-        ImmutableSubstitution<ImmutableTerm> xSubstitution21 = SUBSTITUTION_FACTORY.getSubstitution(A, ONE);
+        Substitution<ImmutableTerm> xSubstitution21 = SUBSTITUTION_FACTORY.getSubstitution(A, ONE);
 
         ConstructionNode constructionNode21 = IQ_FACTORY.createConstructionNode(unionNode2.getVariables(), xSubstitution21);
 
@@ -250,7 +251,7 @@ public class IQTest {
                 constructionNode21,
                 dataNode3);
 
-        ImmutableSubstitution<ImmutableTerm> xSubstitution22 = SUBSTITUTION_FACTORY.getSubstitution(A, TWO);
+        Substitution<ImmutableTerm> xSubstitution22 = SUBSTITUTION_FACTORY.getSubstitution(A, TWO);
 
         ConstructionNode constructionNode22 = IQ_FACTORY.createConstructionNode(unionNode2.getVariables(),
                 xSubstitution22);

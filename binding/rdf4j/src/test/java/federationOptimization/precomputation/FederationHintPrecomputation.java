@@ -1,5 +1,6 @@
 package federationOptimization.precomputation;
 
+import federationOptimization.ObdfTest;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -13,6 +14,7 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.util.TablesNamesFinder;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -24,7 +26,7 @@ import java.util.stream.Collectors;
 //import net.sf.jsqlparser.statement.Statement;
 //import net.sf.jsqlparser.statement.Statement;
 
-
+@Category(ObdfTest.class)
 public class FederationHintPrecomputation {
 
 

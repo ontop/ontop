@@ -2,11 +2,13 @@ package federationOptimization;
 
 import federationOptimization.precomputation.RedundancyRelation;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
 
+@Category(ObdfTest.class)
 public class TestTeiid {
 
     public String checkRedundancy(Statement stmt, String relation1, String relation2) throws Exception{

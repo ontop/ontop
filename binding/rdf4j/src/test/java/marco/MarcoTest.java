@@ -1,6 +1,7 @@
 package marco;
 
 import com.google.common.collect.Lists;
+import federationOptimization.ObdfTest;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -15,6 +16,7 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.util.TablesNamesFinder;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,6 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@Category(ObdfTest.class)
 public class MarcoTest {
 
     private static final String PROPERTY = "src/test/resources/compareIRI/boot-multiple-inheritance.properties";

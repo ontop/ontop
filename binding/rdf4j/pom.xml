@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -12,12 +13,10 @@
     <artifactId>ontop-rdf4j</artifactId>
     <description>This is the rdf4j API implementation based on Ontop</description>
 
-    <repositories>
-        <repository>
-            <id>dremio-free</id>
-            <url>https://maven.dremio.com/free/</url>
-        </repository>
-    </repositories>
+    <properties>
+        <!-- Exclude unit tests marked with @Category(ObdfTest.class) by default -->
+        <excludedGroups>federationOptimization.ObdfTest</excludedGroups>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -114,10 +113,10 @@
             <artifactId>jsonld-java</artifactId>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.eclipse.rdf4j</groupId>-->
-<!--            <artifactId>rdf4j-util</artifactId>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.eclipse.rdf4j</groupId>-->
+        <!--            <artifactId>rdf4j-util</artifactId>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-model</artifactId>
@@ -174,38 +173,11 @@
         </dependency>
 
         <!-- added by Zhenzhen -->
-        <!-- Teiid -->
         <dependency>
             <groupId>org.teiid</groupId>
             <artifactId>teiid</artifactId>
             <classifier>jdbc</classifier>
-            <version>15.0.1</version>
-        </dependency>
-
-        <!-- Dremio -->
-        <dependency>
-            <groupId>com.dremio.distribution</groupId>
-            <artifactId>dremio-jdbc-driver</artifactId>
-            <version>24.0.0-202302100528110223-3a169b7c</version>
-        </dependency>
-
-        <!-- Denodo -->
-        <dependency>
-            <groupId>com.denodo</groupId>
-            <artifactId>denodo</artifactId>
-            <version>8.0</version>
-			<!--            <scope>system</scope>
-			<systemPath>/Users/zet/connectedJar/denodo-vdp-jdbcdriver.jar</systemPath>-->
-        </dependency>
-
-        <!-- PostgreSQL -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>it.unibz.inf.ontop</groupId>
-            <artifactId>ontop-owlapi</artifactId>
+            <version>16.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -213,6 +185,52 @@
             <artifactId>ontop-owlapi</artifactId>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>obdf</id>
+
+            <properties>
+                <!-- Enable all unit tests, included those marked with @Category(ObdfTest.class) -->
+                <excludedGroups/>
+            </properties>
+
+            <repositories>
+                <!-- Extra repositories for Dremio (public) and Denodo (private, need editing ~/.m2/settings.xml) -->
+                <repository>
+                    <id>dremio-free</id>
+                    <url>https://maven.dremio.com/free/</url>
+                </repository>
+                <repository>
+                    <id>ontop-3rd-party-maven-repo-private</id>
+                    <url>https://gitlab.inf.unibz.it/api/v4/projects/5722/packages/maven</url>
+                </repository>
+            </repositories>
+
+            <dependencies>
+                <!-- additional JDBC drivers for tests using Dremio, Denodo and PostgreSQL -->
+                <dependency>
+                    <groupId>com.dremio.distribution</groupId>
+                    <artifactId>dremio-jdbc-driver</artifactId>
+                    <version>24.0.0-202302100528110223-3a169b7c</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.denodo</groupId>
+                    <artifactId>denodo</artifactId>
+                    <version>8.0</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.postgresql</groupId>
+                    <artifactId>postgresql</artifactId>
+                    <version>42.5.4</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 
 </project>

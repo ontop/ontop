@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.text.StringEscapeUtils;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
+@Category(ObdfTest.class)
 public class TreeParsingMapping {
 
     /**

@@ -8,6 +8,7 @@ import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,6 +17,7 @@ import java.sql.Connection;
 
 import static java.util.stream.Collectors.joining;
 
+@Category(ObdfTest.class)
 public class LensesTest {
 
     private final static String OWL_FILE = "src/test/resources/lenses-test/vkg.owl";

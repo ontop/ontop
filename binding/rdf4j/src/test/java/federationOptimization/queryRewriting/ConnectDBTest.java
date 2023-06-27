@@ -1,11 +1,14 @@
 package federationOptimization.queryRewriting;
 
+import federationOptimization.ObdfTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.teiid.client.plan.PlanNode;
 import org.teiid.jdbc.TeiidStatement;
 
 import java.sql.*;
 
+@Category(ObdfTest.class)
 public class ConnectDBTest {
 
     @Test

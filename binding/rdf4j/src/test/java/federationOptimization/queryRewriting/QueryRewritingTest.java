@@ -1,11 +1,14 @@
 package federationOptimization.queryRewriting;
 
+import federationOptimization.ObdfTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
+@Category(ObdfTest.class)
 public class QueryRewritingTest {
 
     private static final String owlFile = "src/test/resources/federation-test/dremio/bsbm-ontology.owl";

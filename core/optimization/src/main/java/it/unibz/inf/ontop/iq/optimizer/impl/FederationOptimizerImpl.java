@@ -23,7 +23,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 import java.io.BufferedReader;
@@ -688,15 +688,15 @@ public class FederationOptimizerImpl implements FederationOptimizer {
             Set<Variable> cn1_vars_1 = cn1.getVariables();
             Set<Variable> cn2_vars_2 = cn2.getVariables();
 
-            ImmutableMap<Variable, ImmutableTerm> subs1 = cn1.getSubstitution().getImmutableMap();
-            ImmutableMap<Variable, ImmutableTerm> subs2 = cn2.getSubstitution().getImmutableMap();
+            Substitution<ImmutableTerm> subs1 = cn1.getSubstitution();
+            Substitution<ImmutableTerm> subs2 = cn2.getSubstitution();
 
             Map<Variable, Variable> replace_1 = new HashMap<Variable, Variable>();
             Map<Variable, Variable> replace_2 = new HashMap<Variable, Variable>();
 
             if(!subs1.isEmpty()){
-                for(Variable v: subs1.keySet()){
-                    if(!subs1.get(v).getVariableStream().findFirst().isEmpty()){
+                for(Variable v: subs1.getDomain()){
+                    if(subs1.get(v).getVariableStream().findFirst().isPresent()){
                         Variable v_original = subs1.get(v).getVariableStream().findFirst().get();
                         replace_1.put(v_original, v);
                     }
@@ -704,8 +704,8 @@ public class FederationOptimizerImpl implements FederationOptimizer {
             }
 
             if(!subs2.isEmpty()){
-                for(Variable v: subs2.keySet()){
-                    if(!subs2.get(v).getVariableStream().findFirst().isEmpty()){
+                for(Variable v: subs2.getDomain()){
+                    if(subs2.get(v).getVariableStream().findFirst().isPresent()){
                         Variable v_original = subs2.get(v).getVariableStream().findFirst().get();
                         replace_2.put(v_original, v);
                     }
@@ -1260,7 +1260,7 @@ public class FederationOptimizerImpl implements FederationOptimizer {
         //创建 construction node 并且判断是否有construction node :
         boolean cn_b = false;
         Set<Variable> vars_cn = new HashSet<Variable>();
-        List<ImmutableSubstitution<ImmutableTerm>> substitution_cn = new ArrayList<ImmutableSubstitution<ImmutableTerm>>();
+        List<Substitution<ImmutableTerm>> substitution_cn = new ArrayList<Substitution<ImmutableTerm>>();
         ConstructionNode cn_new = null;
         if(de_left.cn != null){
             cn_b = true;
@@ -1289,9 +1289,9 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                 if(substitution_cn.size() == 1){
                     cn_new = IQ_FACTORY.createConstructionNode(ImmutableSet.copyOf(vars_cn), substitution_cn.get(0));
                 } else {
-                    ImmutableSubstitution<ImmutableTerm> subs_merge = substitution_cn.get(0);
+                    Substitution<ImmutableTerm> subs_merge = substitution_cn.get(0);
                     for(int i=1; i<substitution_cn.size(); i++){
-                        subs_merge = subs_merge.composeWith(substitution_cn.get(i));
+                        subs_merge = subs_merge.compose(substitution_cn.get(i));
                     }
                     cn_new = IQ_FACTORY.createConstructionNode(ImmutableSet.copyOf(vars_cn), subs_merge);
                 }
@@ -2094,7 +2094,7 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                                     ConstructionNode cn_ij = null;
                                     boolean cn_node = false;
                                     Set<Variable> cn_vars = new HashSet<Variable>();
-                                    List<ImmutableSubstitution<ImmutableTerm>> cn_subs = new ArrayList<ImmutableSubstitution<ImmutableTerm>>();
+                                    List<Substitution<ImmutableTerm>> cn_subs = new ArrayList<Substitution<ImmutableTerm>>();
                                     if(JOL_left.dataElement.get(i).cn != null){
                                         cn_node = true;
                                         cn_vars.addAll(JOL_left.dataElement.get(i).cn.getVariables());
@@ -2115,7 +2115,7 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                                         } else if(cn_subs.size() == 1){
                                             cn_ij = IQ_FACTORY.createConstructionNode(ImmutableSet.copyOf(cn_vars), cn_subs.get(0));
                                         } else {
-                                            cn_ij = IQ_FACTORY.createConstructionNode(ImmutableSet.copyOf(cn_vars), cn_subs.get(0).composeWith(cn_subs.get(1)));
+                                            cn_ij = IQ_FACTORY.createConstructionNode(ImmutableSet.copyOf(cn_vars), cn_subs.get(0).compose(cn_subs.get(1)));
                                         }
                                     }
 
