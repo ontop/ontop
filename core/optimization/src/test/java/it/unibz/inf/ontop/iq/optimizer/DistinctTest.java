@@ -484,6 +484,24 @@ public class DistinctTest {
         normalizeAndCompare(initialTree, constructionTree, projectionAtom);
     }
 
+    @Test
+    public void testDistinctJoin7() {
+
+        var projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR4_PREDICATE, A, B, C, D);
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR2, ImmutableMap.of(0, A, 1, B));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE2_AR2, ImmutableMap.of(0, C));
+        var dataNode3 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE3_AR2, ImmutableMap.of(0, D));
+
+        var joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getDBNumericInequality(InequalityLabel.LT, B, TWO)),
+                ImmutableList.of(dataNode1, dataNode2, dataNode3));
+
+        var initialTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(), joinTree);
+
+        normalizeAndCompare(initialTree, joinTree, projectionAtom);
+    }
+
     private static void normalizeAndCompare(IQTree initialTree, IQTree expectedTree, DistinctVariableOnlyDataAtom projectionAtom) {
         normalizeAndCompare(
                 IQ_FACTORY.createIQ(projectionAtom, initialTree),
