@@ -25,25 +25,16 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 public class FederationOptimizerImpl implements FederationOptimizer {
-//    public OntopSQLOWLAPIConfiguration configuration;
 
-    private static final String owlFile = "src/test/resources/federation-test/dremio/bsbm-ontology.owl";
-    private static final String obdaFile = "src/test/resources/federation-test/dremio/bsbm-mappings-hom-het.obda";
-    private static final String propertyFile = "src/test/resources/federation-test/dremio/system-het.properties";
-    private static final String hintFile = "src/test/resources/federation-test/dremio/hint-full.txt";
-    private static final String labFile = "src/test/resources/federation-test/dremio/SourceLab.txt";
-    private static final String sourceFile = "src/test/resources/federation-test/dremio/SourceFile.txt";
-    private static final String effLabel = "src/test/resources/federation-test/dremio/hom-effLabel.txt";
-    private static final String constraintFile = "src/test/resources/federation-test/dremio/constraints.fed.txt";
-    private static final String lenseFile = "src/test/resources/federation-test/dremio/lenses.fed.json";
-    private static final String queryFile = "src/test/resources/federation-test/SPARQL/01.SPARQL";
-
+    private boolean enabled;
     public ArrayList<Set<String>> hints;
     public HashMap<String, String> hint_matv;
     public static HashMap<String, String> labMap;
@@ -57,78 +48,87 @@ public class FederationOptimizerImpl implements FederationOptimizer {
     public static QuotedIDFactory idFactory;
     public static DBTypeFactory dbTypeFactory;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FederationOptimizerImpl.class);
+
     @Inject
     public FederationOptimizerImpl(IntermediateQueryFactory iqFactory,
                                    AtomFactory atomFactory,
                                    TermFactory termFactory,
                                    CoreSingletons coreSingletons) {
-        try {
+        enabled = Boolean.parseBoolean(System.getenv().getOrDefault("ONTOP_OBDF_OPTIMIZATION_ENABLED", "false"));
+        if (enabled) {
+            try {
 
-            IQ_FACTORY = iqFactory;
-            ATOM_FACTORY = atomFactory;
-            TERM_FACTORY = termFactory;
-            CORE_SINGLETONS = coreSingletons;
-            dbTypeFactory = CORE_SINGLETONS.getTypeFactory().getDBTypeFactory();
-            idFactory = new SQLStandardQuotedIDFactory();
+                IQ_FACTORY = iqFactory;
+                ATOM_FACTORY = atomFactory;
+                TERM_FACTORY = termFactory;
+                CORE_SINGLETONS = coreSingletons;
+                dbTypeFactory = CORE_SINGLETONS.getTypeFactory().getDBTypeFactory();
+                idFactory = new SQLStandardQuotedIDFactory();
 
-            hints = new ArrayList<Set<String>>();
-            hint_matv = new HashMap<String, String>();
-            labMap = new HashMap<String, String>();
-            sourceMap = new HashMap<String, String>();
+                hints = new ArrayList<Set<String>>();
+                hint_matv = new HashMap<String, String>();
+                labMap = new HashMap<String, String>();
+                sourceMap = new HashMap<String, String>();
 
-            Set<String> str_redundancy = new HashSet<String>();
-            Set<String> equ_redundancy = new HashSet<String>();
-            Set<String> emptyJoin = new HashSet<String>();
-            Set<String> matViews = new HashSet<String>();
-            hints.add(str_redundancy);
-            hints.add(equ_redundancy);
-            hints.add(emptyJoin);
-            hints.add(matViews);
+                Set<String> str_redundancy = new HashSet<String>();
+                Set<String> equ_redundancy = new HashSet<String>();
+                Set<String> emptyJoin = new HashSet<String>();
+                Set<String> matViews = new HashSet<String>();
+                hints.add(str_redundancy);
+                hints.add(equ_redundancy);
+                hints.add(emptyJoin);
+                hints.add(matViews);
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile)));
-            String line = null;
-            while((line=br.readLine()) != null ){
-                String[] arr = line.split("-");
-                sourceMap.put(arr[0], arr[1]);
-            }
-            br.close();
-
-            BufferedReader br_new = new BufferedReader(new InputStreamReader(new FileInputStream(effLabel)));
-            while((line=br_new.readLine()) != null ){
-                String[] arr = line.split("-");
-                labMap.put(arr[0], arr[1]);
-            }
-            br_new.close();
-
-            BufferedReader br_hint = new BufferedReader(new InputStreamReader(new FileInputStream(hintFile)));
-            while((line=br_hint.readLine()) != null){
-                String[] arr = line.split(":");
-                if(arr[0].startsWith("empty_federated_join")){
-                    hints.get(2).add(arr[1]);
-                } else if(arr[0].startsWith("strict_redundancy")){
-                    hints.get(0).add(arr[1]);
-                } else if(arr[0].startsWith("equivalent_redundancy")){
-                    hints.get(1).add(arr[1]);
-                } else {
-                    String[] h_matv = arr[1].split("<-");
-                    hint_matv.put(h_matv[1], h_matv[0]);
+                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(System.getenv().get("ONTOP_OBDF_SOURCE_FILE"))));
+                String line = null;
+                while ((line = br.readLine()) != null) {
+                    String[] arr = line.split("-");
+                    sourceMap.put(arr[0], arr[1]);
                 }
-            }
-            br_hint.close();
+                br.close();
 
-        } catch (Exception e){
-            e.printStackTrace();
+                BufferedReader br_new = new BufferedReader(new InputStreamReader(new FileInputStream(System.getenv().get("ONTOP_OBDF_EFF_LABEL_FILE"))));
+                while ((line = br_new.readLine()) != null) {
+                    String[] arr = line.split("-");
+                    labMap.put(arr[0], arr[1]);
+                }
+                br_new.close();
+
+                BufferedReader br_hint = new BufferedReader(new InputStreamReader(new FileInputStream(System.getenv().get("ONTOP_OBDF_HINT_FILE"))));
+                while ((line = br_hint.readLine()) != null) {
+                    String[] arr = line.split(":");
+                    if (arr[0].startsWith("empty_federated_join")) {
+                        hints.get(2).add(arr[1]);
+                    } else if (arr[0].startsWith("strict_redundancy")) {
+                        hints.get(0).add(arr[1]);
+                    } else if (arr[0].startsWith("equivalent_redundancy")) {
+                        hints.get(1).add(arr[1]);
+                    } else {
+                        String[] h_matv = arr[1].split("<-");
+                        hint_matv.put(h_matv[1], h_matv[0]);
+                    }
+                }
+                br_hint.close();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        return;
     }
 
     @Override
     public IQ optimize(IQ query) {
+        if (!enabled) {
+            return query;
+        }
+        LOGGER.debug("My optimized query input:\n{}\n", query);
         IQTree iqTree = query.getTree();
         IQTree iqTreeOptimized = rewriteIQTree(iqTree);
         try {
             DistinctVariableOnlyDataAtom project_original = query.getProjectionAtom();
             IQ iqOptimized = IQTreeToIQ(project_original, iqTreeOptimized);
+            LOGGER.debug("My optimized query output:\n{}\n", iqOptimized);
             return iqOptimized;
         } catch (Exception e){
             e.printStackTrace();

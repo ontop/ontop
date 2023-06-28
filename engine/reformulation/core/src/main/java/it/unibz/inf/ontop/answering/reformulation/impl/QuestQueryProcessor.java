@@ -121,14 +121,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 					return plannedQuery;
 				}
 
-				IQ federationOptimizedQuery;
-				if (Boolean.parseBoolean(System.getenv().getOrDefault("ONTOP_ENABLE_FEDERATION_OPTIMIZATIONS", "false"))) {
-					LOGGER.debug("My optimized query input:\n{}\n", plannedQuery);
-					federationOptimizedQuery = federationOptimizer.optimize(plannedQuery);
-					LOGGER.debug("My optimized query output:\n{}\n", federationOptimizedQuery);
-				} else {
-					federationOptimizedQuery = plannedQuery;
-				}
+				IQ	federationOptimizedQuery = federationOptimizer.optimize(plannedQuery);
 
 				IQ executableQuery = generateExecutableQuery(federationOptimizedQuery);
 				queryCache.put(inputQuery, executableQuery);
