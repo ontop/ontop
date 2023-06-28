@@ -203,7 +203,7 @@
         <semargl.version>0.7</semargl.version>
         <thymeleaf.version>3.0.15.RELEASE</thymeleaf.version>
         <tomcat-embed-core.version>9.0.76</tomcat-embed-core.version>
-        <log4j2.version>2.19.0</log4j2.version>
+        <log4j2.version>2.20.0</log4j2.version>
 
         <!-- JDK version -->
         <jdk.version>11</jdk.version>
