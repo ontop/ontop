@@ -6,13 +6,14 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
-import static it.unibz.inf.ontop.DependencyTestDBMetadata.PK_TABLE1_AR2;
+import static it.unibz.inf.ontop.DependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static junit.framework.TestCase.assertEquals;
 
@@ -331,6 +332,174 @@ public class DistinctTest {
                         ImmutableList.of(newSubTree1, newValuesNode)));
 
         normalizeAndCompare(initialTree, expectedTree, projectionAtom);
+    }
+
+    @Test
+    public void testDistinctJoin1() {
+
+        var projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR4_PREDICATE, A, B, C, D);
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR2, ImmutableMap.of(0, A, 1, B));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE2_AR2, ImmutableMap.of(0, C));
+        var dataNode3 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE3_AR2, ImmutableMap.of(0, D));
+
+        var joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2, dataNode3));
+
+        var initialTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(), joinTree);
+
+        normalizeAndCompare(initialTree, joinTree, projectionAtom);
+    }
+
+    @Test
+    public void testDistinctJoin2() {
+
+        var projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR5_PREDICATE, A, B, C, D, E);
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR2, ImmutableMap.of(0, A, 1, B));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE2_AR2, ImmutableMap.of(0, C));
+        var dataNode3 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE3_AR2, ImmutableMap.of(0, D));
+
+        var joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2, dataNode3));
+
+        var constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(E,
+                        TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(C, D))));
+
+        var constructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree);
+
+        var initialTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(), constructionTree);
+
+        normalizeAndCompare(initialTree, constructionTree, projectionAtom);
+    }
+
+    @Test
+    public void testDistinctJoin3() {
+
+        var projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR4_PREDICATE, A, B, C, E);
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR2, ImmutableMap.of(0, A, 1, B));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE2_AR2, ImmutableMap.of(0, C));
+        var dataNode3 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE3_AR2, ImmutableMap.of(0, D));
+
+        var joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2, dataNode3));
+
+        var constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(E,
+                        TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(C, D))));
+
+        var constructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree);
+
+        var initialTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(), constructionTree);
+
+        normalizeAndCompare(initialTree, constructionTree, projectionAtom);
+    }
+
+    @Test
+    public void testDistinctJoin4() {
+
+        var projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR4_PREDICATE, A, B, C, E);
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR2, ImmutableMap.of(0, A, 1, B));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE2_AR2, ImmutableMap.of(0, C));
+        var dataNode3 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE3_AR2, ImmutableMap.of(0, D));
+
+        var joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2, dataNode3));
+
+        var constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(E,
+                        TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(C, B))));
+
+        var constructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree);
+
+        var initialTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(), constructionTree);
+
+        var newDataNode3 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE3_AR2, ImmutableMap.of());
+
+        var newJoinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2, newDataNode3));
+
+        var expectedTree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createDistinctNode(),
+                        newJoinTree));
+
+        normalizeAndCompare(initialTree, expectedTree, projectionAtom);
+    }
+
+    @Test
+    public void testDistinctJoin5() {
+
+        var projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR4_PREDICATE, A, C, D, E);
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR2, ImmutableMap.of(0, A, 1, B));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE2_AR2, ImmutableMap.of(0, C));
+        var dataNode3 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE3_AR2, ImmutableMap.of(0, D));
+
+        var joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2, dataNode3));
+
+        var constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(E,
+                        TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(C, B))));
+
+        var constructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree);
+
+        var initialTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(), constructionTree);
+
+        normalizeAndCompare(initialTree, constructionTree, projectionAtom);
+    }
+
+    @Test
+    public void testDistinctJoin6() {
+
+        var projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR4_PREDICATE, A, C, D, E);
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR2, ImmutableMap.of(0, A, 1, B));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE2_AR2, ImmutableMap.of(0, C));
+        var dataNode3 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE3_AR2, ImmutableMap.of(0, D));
+
+        var joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getDBNumericInequality(InequalityLabel.LT, B, TWO)),
+                ImmutableList.of(dataNode1, dataNode2, dataNode3));
+
+        var constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(E,
+                        TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(C, D))));
+
+        var constructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree);
+
+        var initialTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(), constructionTree);
+
+        normalizeAndCompare(initialTree, constructionTree, projectionAtom);
+    }
+
+    @Test
+    public void testDistinctJoin7() {
+
+        var projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR4_PREDICATE, A, B, C, D);
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR2, ImmutableMap.of(0, A, 1, B));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE2_AR2, ImmutableMap.of(0, C));
+        var dataNode3 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE3_AR2, ImmutableMap.of(0, D));
+
+        var joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getDBNumericInequality(InequalityLabel.LT, B, TWO)),
+                ImmutableList.of(dataNode1, dataNode2, dataNode3));
+
+        var initialTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(), joinTree);
+
+        normalizeAndCompare(initialTree, joinTree, projectionAtom);
     }
 
     private static void normalizeAndCompare(IQTree initialTree, IQTree expectedTree, DistinctVariableOnlyDataAtom projectionAtom) {
