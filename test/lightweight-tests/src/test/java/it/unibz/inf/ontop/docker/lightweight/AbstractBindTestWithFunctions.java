@@ -852,7 +852,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
         String query = "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT (?discount AS ?v) WHERE \n"
                 + "{  ?x ns:discount ?discount .\n"
-                //+ "   FILTER ( datatype(?discount) = xsd:decimal)\n"
+                + "   FILTER ( datatype(?discount) = xsd:decimal)\n"
                 + "   }  ";
 
         executeAndCompareValues(query, getDatatypeExpectedValues());

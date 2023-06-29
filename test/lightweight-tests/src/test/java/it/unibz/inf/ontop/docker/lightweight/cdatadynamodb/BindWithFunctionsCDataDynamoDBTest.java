@@ -34,6 +34,20 @@ public class BindWithFunctionsCDataDynamoDBTest extends AbstractBindTestWithFunc
     }
 
     @Test
+    @Override
+    //In CDataDynamoDB all numbers have type double.
+    public void testDatatype() {
+
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (?discount AS ?v) WHERE \n"
+                + "{  ?x ns:discount ?discount .\n"
+                + "   FILTER ( datatype(?discount) = xsd:double)\n"
+                + "   }  ";
+
+        executeAndCompareValues(query, getDatatypeExpectedValues());
+    }
+
+    @Test
     @Disabled("UUID is not yet supported")
     @Override
     public void testUuid() {
