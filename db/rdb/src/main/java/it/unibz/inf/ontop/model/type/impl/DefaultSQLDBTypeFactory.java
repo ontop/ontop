@@ -195,6 +195,10 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                 .findFirst();
     }
 
+    private DBTermType getGenericDBTermType(GenericDBTermType genericBaseType, ImmutableList<DBTermType> argumentTypes) {
+        return genericBaseType.createFromGenericTypes(argumentTypes);
+    }
+
     private DBTermType createNewTermType(String typeString) {
         Optional<DBTermType> type = createNewGenericType(typeString);
         return type.orElseGet(() -> new NonStringNonNumberNonBooleanNonDatetimeDBTermType(typeString, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(),
@@ -352,8 +356,17 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
 
     @Override
     public DBTermType getDBArrayType() {
+        return getDBArrayType(getAbstractRootDBType());
+    }
+
+    @Override
+    public DBTermType getDBArrayType(DBTermType baseType) {
         if(supportsArrayType()){
-            return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.ARRAY));
+            var genericType = genericAbstractTypes.stream()
+                    .filter(type -> type.getName().equals(defaultTypeCodeMap.get(DefaultTypeCode.ARRAY)))
+                    .findFirst()
+                    .orElseThrow(() -> new UnsupportedDBTypeException("DBType Array not supported for this DBMS"));
+            return getGenericDBTermType(genericType, ImmutableList.of(baseType));
         }
         throw new UnsupportedDBTypeException("DBType Array not supported for this DBMS");
     }

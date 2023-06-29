@@ -76,6 +76,14 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
                 .collect(ImmutableCollectors.toList())));
     }
 
+    @Override
+    public ImmutableSet<ImmutableSet<Variable>> getDeterminantsOf(Variable variable) {
+        return dependencies.stream()
+                .filter(d -> d.dependents.contains(variable))
+                .map(FunctionalDependency::getDeterminants)
+                .collect(ImmutableCollectors.toSet());
+    }
+
     /**
      * Completes the list of functional dependencies by applying the following actions:
      *     - Infer transitive dependencies

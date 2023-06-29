@@ -26,6 +26,8 @@ public interface FunctionalDependencies {
 
     boolean contains(ImmutableSet<Variable> determinants, ImmutableSet<Variable> dependents);
 
+    ImmutableSet<ImmutableSet<Variable>> getDeterminantsOf(Variable variable);
+
     static FunctionalDependencies of(ImmutableSet<Variable>... dependencies) {
         if(dependencies.length % 2 != 0)
             throw new IllegalArgumentException("FunctionalDependency must be built of 2n ImmutableSets.");

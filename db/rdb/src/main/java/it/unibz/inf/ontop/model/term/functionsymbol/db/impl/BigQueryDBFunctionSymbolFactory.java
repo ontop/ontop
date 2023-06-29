@@ -18,6 +18,9 @@ public class BigQueryDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for BigQuery";
 
     private static final String REGEXP_CONTAINS_STR = "REGEXP_CONTAINS";
+    private static final String TO_JSON = "TO_JSON";
+    private static final String JSON_VALUE = "JSON_VALUE";
+    private static final String JSON_VALUE_ARRAY = "JSON_VALUE_ARRAY";
     private DBBooleanFunctionSymbol regexpContains;
 
     @Inject
@@ -41,7 +44,26 @@ public class BigQueryDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
         table.remove(REGEXP_LIKE_STR, 3);
         DBBooleanFunctionSymbol regexpContains = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_CONTAINS_STR, 2, dbBooleanType,
                 abstractRootDBType);
+        DBFunctionSymbol toJson = new DefaultSQLSimpleTypedDBFunctionSymbol(TO_JSON, 1, typeFactory.getDBTypeFactory().getDBJsonType(), true, abstractRootDBType);
+        DBFunctionSymbol jsonValue = new DefaultSQLSimpleTypedDBFunctionSymbol(JSON_VALUE, 2, typeFactory.getDBTypeFactory().getDBStringType(), false, abstractRootDBType) {
+            @Override
+            protected boolean mayReturnNullWithoutNullArguments() {
+                return true;
+            }
+        };
+        DBFunctionSymbol jsonValueArray = new DefaultSQLSimpleTypedDBFunctionSymbol(
+                JSON_VALUE_ARRAY, 2,
+                typeFactory.getDBTypeFactory().getDBArrayType(typeFactory.getDBTypeFactory().getDBStringType()),
+                false, abstractRootDBType) {
+            @Override
+            protected boolean mayReturnNullWithoutNullArguments() {
+                return true;
+            }
+        };
         table.put(REGEXP_CONTAINS_STR, 2, regexpContains);
+        table.put(TO_JSON, 1, toJson);
+        table.put(JSON_VALUE, 2, jsonValue);
+        table.put(JSON_VALUE_ARRAY, 2, jsonValueArray);
 
         return ImmutableTable.copyOf(table);
     }
