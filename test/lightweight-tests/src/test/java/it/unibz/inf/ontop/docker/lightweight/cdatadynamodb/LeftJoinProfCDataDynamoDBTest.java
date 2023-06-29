@@ -75,5 +75,30 @@ public class LeftJoinProfCDataDynamoDBTest extends AbstractLeftJoinProfTest {
         return   ImmutableList.of("\"10.333333333333334\"^^xsd:decimal","\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal");
     }
 
+    @Override
+    protected ImmutableList<String> getExpectedValuesAvgStudents3() {
+        return ImmutableList.of("\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer", "\"10.333333333333334\"^^xsd:decimal", "\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal");
+    }
 
+
+    @Override
+    protected boolean supportsIntegrityConstraints() {
+        return false;
+    }
+
+    @Override
+    protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
+        return ImmutableList.of("\"15.500000000000000000\"^^xsd:double", "\"16.000000000000000000\"^^xsd:double", "\"19.250000000000000000\"^^xsd:double");
+    }
+
+    @Override
+    protected ImmutableList<String> getExpectedValuesMultitypedSum1() {
+        return ImmutableList.of("\"31\"^^xsd:double", "\"32\"^^xsd:double", "\"115.5\"^^xsd:double");
+    }
+
+    protected ImmutableList<String> getExpectedValuesDuration1() {
+        return ImmutableList.of("\"0\"^^xsd:double", "\"0\"^^xsd:double", "\"0\"^^xsd:double", "\"0\"^^xsd:double",
+                "\"0\"^^xsd:double", "\"18\"^^xsd:double", "\"20\"^^xsd:double", "\"84.5\"^^xsd:double");
+    }
 }

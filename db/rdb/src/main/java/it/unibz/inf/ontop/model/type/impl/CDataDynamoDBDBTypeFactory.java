@@ -10,14 +10,13 @@ import java.util.Map;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.DECIMAL;
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.FLOAT_DOUBLE;
-import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.SAME_TYPE_NO_CONSTANT;
 
 public class CDataDynamoDBDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String BYTEA_STR = "BYTEA";
     private static final String DEFAULT_DECIMAL_STR = "DECIMAL(38, 18)";
     public static final String UUID_STR = "UUID";
-    public static final String DOUBLE_STR = "UUID";
+    public static final String DOUBLE_STR = "DOUBLE";
 
 
     protected CDataDynamoDBDBTypeFactory(Map<String, DBTermType> typeMap, ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap) {
@@ -84,31 +83,26 @@ public class CDataDynamoDBDBTypeFactory extends DefaultSQLDBTypeFactory {
 
 
 
-    //TODO-SCAFFOLD change any of these flags, if applicable
     @Override
     public boolean supportsDBGeometryType() {
         return false;
     }
 
-    //TODO-SCAFFOLD change any of these flags, if applicable
     @Override
     public boolean supportsDBGeographyType() {
         return false;
     }
 
-    //TODO-SCAFFOLD change any of these flags, if applicable
     @Override
     public boolean supportsDBDistanceSphere() {
         return false;
     }
 
-    //TODO-SCAFFOLD change any of these flags, if applicable
     @Override
     public boolean supportsJson() {
         return false;
     }
 
-    //TODO-SCAFFOLD change any of these flags, if applicable
     @Override
     public boolean supportsArrayType() {
         return false;
