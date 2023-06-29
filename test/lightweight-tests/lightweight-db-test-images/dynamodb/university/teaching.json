@@ -1,0 +1,42 @@
+[
+    {
+        "course_id": {
+            "S": "LinearAlgebra"
+        }, 
+        "prof_id": {
+            "N": "1"
+        }
+    },
+    {
+        "course_id": {
+            "S": "DiscreteMathematics"
+        }, 
+        "prof_id": {
+            "N": "1"
+        }
+    },
+    {
+        "course_id": {
+            "S": "AdvancedDatabases"
+        }, 
+        "prof_id": {
+            "N": "3"
+        }
+    },
+    {
+        "course_id": {
+            "S": "ScientificWriting"
+        }, 
+        "prof_id": {
+            "N": "8"
+        }
+    },
+    {
+        "course_id": {
+            "S": "OperatingSystems"
+        }, 
+        "prof_id": {
+            "N": "1"
+        }
+    }
+]
