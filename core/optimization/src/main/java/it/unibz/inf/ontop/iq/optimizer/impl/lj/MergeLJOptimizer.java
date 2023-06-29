@@ -117,7 +117,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
             LeftJoinNormalization normalization = ljConditionExpliciter.makeComplexEqualitiesImplicit(
                     newLeftChild, newRightChild, rootNode.getOptionalFilterCondition(), variableGenerator);
 
-            if (!tolerateLJConditionLifting(normalization.ljCondition, newLeftChild, newRightChild))
+            if (!tolerateLJConditionLifting(normalization.ljCondition, normalization.leftChild, normalization.rightChild))
                 return buildUnoptimizedLJTree(tree, leftChild, rightChild, newLeftChild, newRightChild, rootNode);
 
             ImmutableSet<Variable> rightSpecificVariables = Sets.difference(normalization.rightChild.getVariables(),
