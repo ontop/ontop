@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionS
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 
 
 import java.util.HashMap;
@@ -107,6 +108,14 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     @Override
     protected DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType) {
         return super.createDateTimeDenormFunctionSymbol(timestampType);
+    }
+
+    @Override
+    protected DBTermType inferOutputTypeMathOperator(String dbMathOperatorName, DBTermType arg1Type, DBTermType arg2Type) {
+        if (dbMathOperatorName.equals(SPARQL.NUMERIC_DIVIDE))
+            return dbDecimalType;
+
+        return super.inferOutputTypeMathOperator(dbMathOperatorName, arg1Type, arg2Type);
     }
 
     @Override
