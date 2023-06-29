@@ -56,6 +56,11 @@ public class ArrayDBTermType extends DBTermTypeImpl implements GenericDBTermType
     }
 
     @Override
+    public GenericDBTermType createFromGenericTypes(ImmutableList<DBTermType> types) {
+        return new ArrayDBTermType(String.format("ARRAY[%s]", types.get(0).getCastName()), getAncestry(), Optional.of(types.get(0)), parsingFunction);
+    }
+
+    @Override
     public ImmutableList<DBTermType> getGenericArguments() {
         return ImmutableList.of(this.itemType.get());
     }

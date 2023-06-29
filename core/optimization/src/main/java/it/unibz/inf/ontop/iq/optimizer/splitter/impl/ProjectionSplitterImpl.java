@@ -73,7 +73,7 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
         /*
          * NB: the presence of a subSubstitution implies the need to project new variables.
          */
-        IQTree newSubTree = initialSubTree.getVariables().equals(newSubTreeVariables)
+        IQTree newSubTree = initialSubTree.getVariables().containsAll(newSubTreeVariables)
                 ? initialSubTree
                 : iqFactory.createUnaryIQTree(
                     decomposition.getSubSubstitution()
