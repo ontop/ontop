@@ -46,7 +46,7 @@ public class RDFLiteralConstantImpl extends AbstractNonNullConstant implements R
 	protected RDFLiteralConstantImpl(@Nonnull String value, @Nonnull RDFDatatype type) {
 		this.value = value;
 		this.termType = type;
-		String suffix = type.getIRI().equals(XSD.STRING) ? "" : "^^" + type.toString();
+		String suffix = type.getIRI().equals(XSD.STRING) ? "" : "^^" + type;
 		this.string = "\"" + value + "\"" + suffix;
 	}
 
@@ -69,11 +69,6 @@ public class RDFLiteralConstantImpl extends AbstractNonNullConstant implements R
 	}
 
 	@Override
-	public boolean isGround() {
-		return true;
-	}
-
-	@Override
 	public Stream<Variable> getVariableStream() {
 		return Stream.of();
 	}
@@ -92,7 +87,7 @@ public class RDFLiteralConstantImpl extends AbstractNonNullConstant implements R
 					: IncrementalEvaluation.declareIsFalse();
 		}
 		else if (otherTerm instanceof Constant)
-			return ((Constant) otherTerm).isNull()
+			return otherTerm.isNull()
 				? IncrementalEvaluation.declareIsNull()
 				: IncrementalEvaluation.declareIsFalse();
 		else

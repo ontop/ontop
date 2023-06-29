@@ -2,8 +2,6 @@ package it.unibz.inf.ontop.model.template;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.OntopModelTestingTools;
-import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.TemplateParser;
 import org.junit.Test;
 

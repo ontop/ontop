@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.si.repository.impl.Interval;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndex;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import junit.framework.TestCase;
 
 import java.util.List;

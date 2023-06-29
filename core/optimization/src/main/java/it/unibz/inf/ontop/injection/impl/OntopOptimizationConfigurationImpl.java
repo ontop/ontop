@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
@@ -48,22 +47,6 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
     protected static class DefaultOntopOptimizationBuilderFragment<B extends OntopOptimizationConfiguration.Builder<B>>
             implements OntopOptimizationBuilderFragment<B> {
 
-        private final B builder;
-
-        /**
-         * For sub-classes ONLY!
-         */
-        protected DefaultOntopOptimizationBuilderFragment() {
-            builder = (B) this;
-        }
-
-        /**
-         * When not inheriting
-         */
-        protected DefaultOntopOptimizationBuilderFragment(B builder) {
-            this.builder = builder;
-        }
-
         protected Properties generateProperties() {
             return new Properties();
         }
@@ -72,7 +55,6 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
                 OntopModelConfigurationOptions modelOptions) {
             return new OntopOptimizationOptions(modelOptions);
         }
-
     }
 
     protected static abstract class AbstractOntopOptimizationBuilderMixin<B extends OntopOptimizationConfiguration.Builder<B>>
@@ -82,9 +64,16 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
         private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
 
         protected AbstractOntopOptimizationBuilderMixin() {
-            optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>((B)this);
-            modelBuilderFragment= new DefaultOntopModelBuilderFragment<>((B) this);
+            optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>();
+            modelBuilderFragment= new DefaultOntopModelBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return AbstractOntopOptimizationBuilderMixin.this.self();
+                }
+            };
         }
+
+        protected abstract B self();
 
         protected Properties generateProperties() {
             // Properties from OntopModelBuilderFragmentImpl
@@ -122,8 +111,7 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
     }
 
 
-    public final static class BuilderImpl<B extends OntopOptimizationConfiguration.Builder<B>>
-            extends AbstractOntopOptimizationBuilderMixin<B> {
+    public final static class BuilderImpl extends AbstractOntopOptimizationBuilderMixin<BuilderImpl> {
 
         @Override
         public OntopOptimizationConfiguration build() {
@@ -133,6 +121,11 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
             OntopOptimizationSettings settings = new OntopOptimizationSettingsImpl(properties);
 
             return new OntopOptimizationConfigurationImpl(settings, options);
+        }
+
+        @Override
+        protected BuilderImpl self() {
+            return this;
         }
     }
 }

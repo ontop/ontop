@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -43,22 +42,19 @@ public class TeiidDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @Override
     protected String getRelationCatalog(RelationID id) {
-        String catalog = id.getComponents().toString();
         return null;
     }
 
     @Override
     protected String getRelationSchema(RelationID id) {
-        String rs = id.getComponents().subList(1, id.getComponents().size()).reverse().stream()
+        return id.getComponents().subList(1, id.getComponents().size()).reverse().stream()
                 .map(QuotedID::getName) // IMPORTANT: no quotation marks!
                 .collect(Collectors.joining("."));
-        return rs;
     }
 
     @Override
     protected String getRelationName(RelationID id) {
-        String rn = id.getComponents().get(TABLE_INDEX).getName();
-        return rn;
+        return id.getComponents().get(TABLE_INDEX).getName();
     }
 
 }

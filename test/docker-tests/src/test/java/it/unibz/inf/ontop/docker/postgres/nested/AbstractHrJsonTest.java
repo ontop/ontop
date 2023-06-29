@@ -2,21 +2,13 @@ package it.unibz.inf.ontop.docker.postgres.nested;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractHrJsonTest extends AbstractVirtualModeTest {
 
-    Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Test
     public void testFullNames() throws Exception {

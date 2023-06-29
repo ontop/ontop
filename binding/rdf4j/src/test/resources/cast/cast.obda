@@ -1,0 +1,48 @@
+[PrefixDeclaration]
+ex: http://example.org/
+rdfs: http://www.w3.org/2000/01/rdf-schema#
+rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+
+[MappingDeclaration] @collection [[
+
+mappingId   ratings
+target      ex:{id} a ex:Individual ; ex:string_label {rating_string} .
+source      SELECT id, rating_string FROM ratings
+
+mappingId   ratings_float
+target      ex:{id} a ex:Individual ; ex:float_label {rating_float} .
+source      SELECT id, rating_float FROM ratings_float
+
+mappingId   ratings_double
+target      ex:{id} a ex:Individual ; ex:double_label {rating_double} .
+source      SELECT id, rating_double FROM ratings_double
+
+mappingId   ratings_decimal
+target      ex:{id} a ex:Individual ; ex:decimal_label {rating_decimal} .
+source      SELECT id, rating_decimal FROM ratings_decimal
+
+mappingId   ratings_integer
+target      ex:{id} a ex:Individual ; ex:integer_label {rating_integer} .
+source      SELECT id, rating_integer FROM ratings_integer
+
+mappingId   ratings_boolean
+target      ex:{id} a ex:Individual ; ex:boolean_label {rating_boolean} .
+source      SELECT id, rating_boolean FROM ratings_boolean
+
+mappingId   ratings_date
+target      ex:{id} a ex:Individual ; ex:date_label {finaldate} .
+source      SELECT id, finaldate FROM dates
+
+mappingId   ratings_datetime
+target      ex:{id} a ex:Individual ; ex:datetime_label {finaldatetime} .
+source      SELECT id, finaldatetime FROM datetimes
+
+mappingId   ratings_date_string
+target      ex:{id} a ex:Individual ; ex:datestring_label {finaldate} .
+source      SELECT id, finaldate FROM dates_string
+
+mappingId   ratings_datetime_string
+target      ex:{id} a ex:Individual ; ex:datetimestring_label {finaldatetime} .
+source      SELECT id, finaldatetime FROM datetimes_string
+
+]]

@@ -76,7 +76,7 @@ if [ "${ONTOP_DB_USER_FILE+x}" ]; then
   if [ "${ONTOP_DB_USER+x}" ]; then
     echo "ERROR: environment variables ONTOP_DB_USER and ONTOP_DB_USER_FILE are conflicting. Please choose one of the two." && exit 1
   fi
-  set -- "$@" "--db-user=$(< "${ONTOP_DB_USER_FILE}")"
+  set -- "$@" "--db-user=$(cat "${ONTOP_DB_USER_FILE}")"
 fi
 
 if [ "${ONTOP_DB_PASSWORD+x}" ]; then
@@ -87,7 +87,7 @@ if [ "${ONTOP_DB_PASSWORD_FILE+x}" ]; then
   if [ "${ONTOP_DB_PASSWORD+x}" ]; then
     echo "ERROR: environment variables ONTOP_DB_PASSWORD and ONTOP_DB_PASSWORD_FILE are conflicting. Please choose one of the two." && exit 1
   fi
-  set -- "$@" "--db-password=$(< "${ONTOP_DB_PASSWORD_FILE}")"
+  set -- "$@" "--db-password=$(cat "${ONTOP_DB_PASSWORD_FILE}")"
 fi
 
 if [ "${ONTOP_DB_URL+x}" ]; then
@@ -98,7 +98,7 @@ if [ "${ONTOP_DB_URL_FILE+x}" ]; then
   if [ "${ONTOP_DB_URL+x}" ]; then
     echo "ERROR: environment variables ONTOP_DB_URL and ONTOP_DB_URL_FILE are conflicting. Please choose one of the two." && exit 1
   fi
-  set -- "$@" "--db-url=$(< "${ONTOP_DB_URL_FILE}")"
+  set -- "$@" "--db-url=$(cat "${ONTOP_DB_URL_FILE}")"
 fi
 
 if [ "${ONTOP_DB_DRIVER+x}" ]; then
@@ -125,6 +125,19 @@ fi
 if [ "${ONTOP_LENSES_FILE+x}" ]; then
   set -- "$@" "--lenses=${ONTOP_LENSES_FILE}"
 fi
+
+if [ "${ONTOP_FACTS_FILE+x}" ]; then
+  set -- "$@" "--facts=${ONTOP_FACTS_FILE}"
+fi
+
+if [ "${ONTOP_FACTS_FORMAT+x}" ]; then
+  set -- "$@" "--facts-format=${ONTOP_FACTS_FORMAT}"
+fi
+
+if [ "${ONTOP_FACTS_BASE_IRI+x}" ]; then
+  set -- "$@" "--facts-base-iri=${ONTOP_FACTS_BASE_IRI}"
+fi
+
 
 if [ "${ONTOP_SPARQL_RULES_FILE+x}" ]; then
   set -- "$@" "--sparql-rules=${ONTOP_SPARQL_RULES_FILE}"

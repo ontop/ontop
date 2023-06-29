@@ -61,11 +61,6 @@ public class BNodeConstantImpl extends AbstractNonNullConstant implements BNode 
 	}
 
 	@Override
-	public boolean isGround() {
-		return true;
-	}
-
-	@Override
 	public Stream<Variable> getVariableStream() {
 		return Stream.of();
 	}
@@ -73,7 +68,7 @@ public class BNodeConstantImpl extends AbstractNonNullConstant implements BNode 
 	@Override
 	public IncrementalEvaluation evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
 		if (otherTerm instanceof Constant) {
-			if (((Constant) otherTerm).isNull())
+			if (otherTerm.isNull())
 				return IncrementalEvaluation.declareIsNull();
 			return equals(otherTerm)
 					? IncrementalEvaluation.declareIsTrue()

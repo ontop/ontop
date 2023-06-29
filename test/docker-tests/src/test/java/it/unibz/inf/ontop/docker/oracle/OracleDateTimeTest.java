@@ -2,9 +2,7 @@ package it.unibz.inf.ontop.docker.oracle;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -13,7 +11,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,13 +24,11 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 
 	private static final Logger log = LoggerFactory.getLogger(OracleDateTimeTest.class);
 
-	private static OntopOWLEngine REASONER;
-	private static OntopOWLConnection CONNECTION;
+	private static EngineConnection CONNECTION;
 
 	@BeforeClass
-	public static void before() throws OWLOntologyCreationException {
-		REASONER = createReasoner(owlfile, obdafile, propertyfile);
-		CONNECTION = REASONER.getConnection();
+	public static void before() {
+		CONNECTION = createReasoner(owlfile, obdafile, propertyfile);
 	}
 
 	@Override
@@ -44,7 +39,6 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 	@AfterClass
 	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.close();
 	}
 
 

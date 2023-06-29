@@ -134,10 +134,8 @@ public class OntopMaterializerTest {
 			try (Statement st = conn.createStatement()) {
 				st.executeUpdate(s);
 				conn.commit();
-			} catch (SQLException e) {
-				e.printStackTrace();
 			}
-		} catch (SQLException | IOException e){
+		} catch (SQLException | IOException e) {
 			e.printStackTrace();
 		}
 	}

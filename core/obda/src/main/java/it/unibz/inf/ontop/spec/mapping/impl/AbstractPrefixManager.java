@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.spec.mapping.impl;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -37,7 +36,7 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 		Comparator<Map.Entry<String, String>> comparator =
 				Map.Entry.<String, String>comparingByValue()
 						.reversed()
-						.thenComparing(Map.Entry.comparingByKey());;
+						.thenComparing(Map.Entry.comparingByKey());
 		return map.entrySet().stream()
 				.sorted(comparator)
 				.collect(ImmutableCollectors.toList());

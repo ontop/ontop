@@ -6,9 +6,6 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.NotYetTypedEqualityFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.TermType;
-
-import javax.annotation.Nonnull;
 
 public class NotYetTypedEqualityFunctionSymbolImpl extends BooleanFunctionSymbolImpl implements NotYetTypedEqualityFunctionSymbol {
 

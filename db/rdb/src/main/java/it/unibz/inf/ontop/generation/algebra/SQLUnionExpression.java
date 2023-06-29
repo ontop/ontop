@@ -8,5 +8,5 @@ public interface SQLUnionExpression extends SQLExpression {
 
     ImmutableSet<Variable> getProjectedVariables();
 
-    ImmutableList<? extends SQLExpression> getSubExpressions();
+    ImmutableList<SQLExpression> getSubExpressions();
 }

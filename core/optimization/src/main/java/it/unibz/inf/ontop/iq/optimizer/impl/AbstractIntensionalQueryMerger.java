@@ -10,13 +10,12 @@ import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -84,20 +83,14 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
          *
          */
         private IQTree replaceIntensionalData(IntensionalDataNode dataNode, IQ definition) {
-            InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
+            InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
                     variableGenerator, definition.getTree().getKnownVariables());
 
-            IQ renamedIQ;
-            if (renamingSubstitution.isEmpty()) {
-                renamedIQ = definition;
-            } else {
-                QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
-                renamedIQ = queryRenamer.transform(definition);
-            }
+            IQ renamedIQ = transformerFactory.createRenamer(renamingSubstitution).transform(definition);
 
-            ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution = extractSubstitution(
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution = extractSubstitution(
                     atomFactory.getDistinctVariableOnlyDataAtom(renamedIQ.getProjectionAtom().getPredicate(),
-                    renamingSubstitution.applyToVariableArguments(renamedIQ.getProjectionAtom().getArguments())),
+                            substitutionFactory.apply(renamingSubstitution, renamedIQ.getProjectionAtom().getArguments())),
                     dataNode.getProjectionAtom());
 
             return renamedIQ.getTree()
@@ -105,13 +98,10 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
                     .normalizeForOptimization(variableGenerator);
         }
 
-        private ImmutableSubstitution<VariableOrGroundTerm> extractSubstitution(DistinctVariableOnlyDataAtom sourceAtom,
-                                                                                DataAtom targetAtom) {
+        private Substitution<? extends VariableOrGroundTerm> extractSubstitution(DistinctVariableOnlyDataAtom sourceAtom,
+                                                                                 DataAtom<AtomPredicate> targetAtom) {
             if (!sourceAtom.getPredicate().equals(targetAtom.getPredicate())) {
                 throw new IllegalStateException("Incompatible predicates");
-            }
-            else if (sourceAtom.getEffectiveArity() != targetAtom.getEffectiveArity()) {
-                throw new IllegalStateException("Different arities");
             }
 
             return substitutionFactory.getSubstitution(sourceAtom.getArguments(), targetAtom.getArguments());

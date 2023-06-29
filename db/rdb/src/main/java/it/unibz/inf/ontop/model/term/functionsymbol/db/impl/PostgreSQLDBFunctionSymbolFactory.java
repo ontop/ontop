@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
 
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
-import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.*;
 import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
 
 public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
@@ -160,15 +158,11 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     private String serializePath(ImmutableList<String> path) {
-        return "\'{"+
-                path.stream()
-                        .collect(Collectors.joining(","))
-                +"}\'";
+        return "'{" + String.join(",", path) + "}'";
     }
 
     private String printPath(ImmutableList<String> path) {
-        return path.stream()
-                        .collect(Collectors.joining("."));
+        return String.join(".", path);
     }
 
     @Override
@@ -284,7 +278,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                                 typeOfFunctionString,
                                 termConverter.apply(terms.get(0)),
                                 types.stream()
-                                        .map(t -> "\'"+ t+ "\'")
+                                        .map(t -> "'" + t+ "'")
                                         .collect(Collectors.joining(","))
                         ));
     }
@@ -520,4 +514,90 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                         termConverter.apply(terms.get(1)),
                         termConverter.apply(terms.get(2)))));
     }
+
+    /**
+     * CAST functions
+     */
+    // NOTE: Special handling for NaN
+    @Override
+    protected String serializeCheckAndConvertBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("(CASE WHEN CAST(%1$s AS DECIMAL) = 0 THEN 'false' " +
+                        "WHEN %1$s = '' THEN 'false' " +
+                        "WHEN CAST(%1$s AS DECIMAL) = 'NaN'::NUMERIC THEN 'false' " +
+                        "ELSE 'true' " +
+                        "END)",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDouble(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s !~ " + numericPattern +
+                        " THEN NULL ELSE CAST(%1$s AS DOUBLE PRECISION) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertFloat(ImmutableList<? extends ImmutableTerm> terms,
+                                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s !~ " + numericPattern + " THEN NULL " +
+                        "WHEN (CAST(%1$s AS FLOAT) NOT BETWEEN -3.40E38 AND -1.18E-38 AND " +
+                        "CAST(%1$s AS FLOAT) NOT BETWEEN 1.18E-38 AND 3.40E38 AND CAST(%1$s AS FLOAT) != 0) THEN NULL " +
+                        "ELSE CAST(%1$s AS FLOAT) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertFloatFromBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CASE WHEN %s THEN 1 ELSE 0 END",
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDecimalFromBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s='1' THEN 1.0 " +
+                        "WHEN %1$s THEN 1.0 " +
+                        "WHEN %1$s='0' THEN 0.0 " +
+                        "WHEN NOT %1$s THEN 0.0 " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertInteger(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s ~ '^-?([0-9]+[.]?[0-9]*|[.][0-9]+)$' THEN " +
+                        "CAST(FLOOR(ABS(CAST(%1$s AS DECIMAL))) * SIGN(CAST(%1$s AS DECIMAL)) AS INTEGER) " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDateFromDateTime(ImmutableList<? extends ImmutableTerm> terms,
+                                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATE(%s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDateFromString(ImmutableList<? extends ImmutableTerm> terms,
+                                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN (%1$s !~ " + datePattern1 + " AND " +
+                        "%1$s !~ " + datePattern2 +" AND " +
+                        "%1$s !~ " + datePattern3 +" AND " +
+                        "%1$s !~ " + datePattern4 +" ) " +
+                        " THEN NULL ELSE DATE(%1$s) END",
+                term);
+    }
+
 }

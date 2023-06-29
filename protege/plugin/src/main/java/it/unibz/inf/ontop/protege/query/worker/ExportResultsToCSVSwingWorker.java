@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.protege.query.worker;
 
-import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
 import org.slf4j.Logger;
@@ -38,7 +37,7 @@ public class ExportResultsToCSVSwingWorker extends SwingWorkerWithCompletionPerc
     protected Void doInBackground() throws Exception {
         start("initializing...");
 
-        @SuppressWarnings({ "unchecked", "rawtypes" })
+        @SuppressWarnings({"rawtypes" })
         Vector<Vector> data = tableModel.getDataVector();
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
@@ -71,7 +70,7 @@ public class ExportResultsToCSVSwingWorker extends SwingWorkerWithCompletionPerc
         catch (CancellationException | InterruptedException ignore) {
         }
         catch (ExecutionException e) {
-            DialogUtils.showErrorDialog(parent, DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, (DataSource)null);
+            DialogUtils.showErrorDialog(parent, DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, null);
         }
     }
 }

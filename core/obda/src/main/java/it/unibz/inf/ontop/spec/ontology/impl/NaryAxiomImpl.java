@@ -43,8 +43,8 @@ public class NaryAxiomImpl<T> implements NaryAxiom<T> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof NaryAxiomImpl<?>) {
-			NaryAxiomImpl<T> other = (NaryAxiomImpl<T>)obj;
+		if (obj instanceof NaryAxiomImpl) {
+			NaryAxiomImpl<?> other = (NaryAxiomImpl<?>)obj;
 			return components.equals(other.components);
 		}
 		return false;

@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -14,7 +13,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingSameAsInverseRewriter;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -74,14 +73,10 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
                 rdfAtomPredicate.updateSPO(variables, newSubject, rdfAtomPredicate.getProperty(variables), newObject));
 
         // swap subjects and objects
-        InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
-                ImmutableMap.of(
-                        originalSubject, newObject,
-                        originalObject, newSubject));
-
-        QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
+        InjectiveSubstitution<Variable> renamingSubstitution =
+                substitutionFactory.getSubstitution(originalSubject, newObject, originalObject, newSubject).injective();
 
         return assertion.copyOf(iqFactory.createIQ(newProjectionAtom,
-                queryRenamer.transform(assertion.getQuery()).getTree()));
+                transformerFactory.createRenamer(renamingSubstitution).transform(assertion.getQuery()).getTree()));
     }
 }

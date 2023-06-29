@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFTermType;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.si.SemanticIndexException;
 import it.unibz.inf.ontop.si.impl.LoadingConfiguration;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
@@ -177,7 +176,7 @@ public class SemanticIndexRepository {
         private final Connection conn;
         private final Map<ImmutableList<RDFTermType>, PreparedStatement> stmMap;
 
-        BatchProcessor(Connection conn) throws SQLException {
+        BatchProcessor(Connection conn) {
             this.conn = conn;
             stmMap = new HashMap<>();
         }

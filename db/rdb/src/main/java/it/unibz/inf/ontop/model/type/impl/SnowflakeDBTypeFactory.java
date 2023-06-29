@@ -1,11 +1,15 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.type.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.*;
 
@@ -29,9 +33,25 @@ public class SnowflakeDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String TIMESTAMP_NO_TZ_STR = "TIMESTAMP_NTZ";
     public static final String TIMESTAMPNTZ_STR = "TIMESTAMPNTZ";
 
+    protected static final String ARRAY_STR = "ARRAY";
+
     @AssistedInject
     private SnowflakeDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
-        super(createSnowflakeTypeMap(rootTermType, typeFactory), createSnowflakeCodeMap());
+        super(createSnowflakeTypeMap(rootTermType, typeFactory), createSnowflakeCodeMap(), createGenericAbstractTypeMap(rootTermType, typeFactory));
+    }
+
+    private static ImmutableList<GenericDBTermType> createGenericAbstractTypeMap(TermType rootTermType, TypeFactory typeFactory) {
+        TermTypeAncestry rootAncestry = rootTermType.getAncestry();
+
+        GenericDBTermType abstractArrayType = new ArrayDBTermType(ARRAY_STR, rootAncestry, s -> {
+            if(s.equals(ARRAY_STR))
+                return Optional.of(typeFactory.getDBTypeFactory().getDBStringType());
+            return Optional.empty();
+        });
+
+        List<GenericDBTermType> list = new ArrayList<>();
+        list.add(abstractArrayType);
+        return ImmutableList.copyOf(list);
     }
 
     private static Map<String, DBTermType> createSnowflakeTypeMap(TermType rootTermType, TypeFactory typeFactory) {

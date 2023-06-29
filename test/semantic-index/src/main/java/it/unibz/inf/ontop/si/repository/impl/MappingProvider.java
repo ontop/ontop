@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 public class MappingProvider {
 
-    public static ImmutableList<String> MAPPING_VARIBLES = ImmutableList.of("X", "Y");
+    public static final ImmutableList<String> MAPPING_VARIBLES = ImmutableList.of("X", "Y");
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MappingProvider.class);
     private final TermFactory termFactory;

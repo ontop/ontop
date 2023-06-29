@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;

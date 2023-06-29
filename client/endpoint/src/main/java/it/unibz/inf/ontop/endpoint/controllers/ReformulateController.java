@@ -21,7 +21,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 @ConditionalOnExpression("${dev:false}")
 public class ReformulateController {
 
-    private OntopVirtualRepository repository;
+    private final OntopVirtualRepository repository;
 
     @Autowired
     public ReformulateController(OntopVirtualRepository repository) {

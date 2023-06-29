@@ -1,0 +1,10 @@
+[PrefixDeclaration]
+: http://example.org/
+rdfs: http://www.w3.org/2000/01/rdf-schema#
+rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+
+[MappingDeclaration]` @collection [[
+mappingId	mapTest
+target		:data/{id} a :Test ; :value1 {value1} ; :value2 {value2} ; :value3 {value3} .
+source		select id, value1, value2, value3 from test
+]]

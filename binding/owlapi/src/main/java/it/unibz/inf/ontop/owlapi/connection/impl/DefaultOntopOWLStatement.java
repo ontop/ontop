@@ -35,7 +35,7 @@ import java.security.SecureRandom;
  *
  */
 public class DefaultOntopOWLStatement implements OntopOWLStatement {
-	private OntopStatement st;
+	private final OntopStatement st;
 	private final KGQueryFactory kgQueryFactory;
 
 	public DefaultOntopOWLStatement(OntopStatement st, KGQueryFactory kgQueryFactory) {
@@ -209,7 +209,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	/**
 	 * In contexts where we don't know the precise type
 	 */
-	private KGQuery parseQueryString(String queryString) throws OntopOWLException {
+	private KGQuery<?> parseQueryString(String queryString) throws OntopOWLException {
 		try {
 			return kgQueryFactory.createSPARQLQuery(queryString);
 		} catch (OntopInvalidKGQueryException | OntopUnsupportedKGQueryException e) {

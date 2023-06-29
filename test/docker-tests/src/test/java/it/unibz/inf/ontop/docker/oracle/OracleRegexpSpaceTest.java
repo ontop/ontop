@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.docker.oracle;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -12,7 +10,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import static org.junit.Assert.*;
 
@@ -27,13 +24,11 @@ public class OracleRegexpSpaceTest extends AbstractVirtualModeTest {
 	static final String obdaFile = "/oracle/regex/oracle-regexp.obda";
 	static final String propertyFile = "/oracle/regex/oracle-regexp.properties";
 
-	private static OntopOWLEngine REASONER;
-	private static OntopOWLConnection CONNECTION;
+	private static EngineConnection CONNECTION;
 
 	@BeforeClass
-	public static void before() throws OWLOntologyCreationException {
-		REASONER = createReasoner(owlFile, obdaFile, propertyFile);
-		CONNECTION = REASONER.getConnection();
+	public static void before()  {
+		CONNECTION = createReasoner(owlFile, obdaFile, propertyFile);
 	}
 
 	@Override
@@ -44,7 +39,6 @@ public class OracleRegexpSpaceTest extends AbstractVirtualModeTest {
 	@AfterClass
 	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.close();
 	}
 
 
@@ -70,24 +64,11 @@ public class OracleRegexpSpaceTest extends AbstractVirtualModeTest {
 	 */
 	@Test
 	public void testSparql2OracleRegexWhere() throws Exception {
-		OWLStatement st = null;
-		try {
-			st = createStatement();
-
-			
-			
+		try (OWLStatement st = createStatement()) {
 			String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country WHERE {?country a :CountryWithSpace . } ORDER BY ?country LIMIT 1";
 			String countryName = runTest(st, query, true);
 			System.out.println(countryName);
 			assertEquals(countryName, "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom>");
-		
-		
-			
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			if (st != null)
-				st.close();
 		}
 	}
 	
@@ -98,12 +79,7 @@ public class OracleRegexpSpaceTest extends AbstractVirtualModeTest {
 	 */
 	@Test
 	public void testSparql2OracleRegexNoWhere() throws Exception {
-		OWLStatement st = null;
-		try {
-			st = createStatement();
-
-			
-			
+		try (OWLStatement st = createStatement()) {
 			String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country ?pos WHERE {" +
 					"?country a :CountriesWithSpaceNoWhere . " +
 					"?country :position ?pos . " +
@@ -113,14 +89,8 @@ public class OracleRegexpSpaceTest extends AbstractVirtualModeTest {
 			String countryName = runTest(st, query, true);
 			System.out.println(countryName);
 			assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom>", countryName);
-		
-		
-			
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			if (st != null)
-				st.close();
+
+
 		}
 	}
 
@@ -130,10 +100,7 @@ public class OracleRegexpSpaceTest extends AbstractVirtualModeTest {
 	 */
 	@Test
 	public void testSparql2OracleRegexNoWhereNoSubquery() throws Exception {
-		OWLStatement st = null;
-		try {
-			st = createStatement();
-			
+		try (OWLStatement st = createStatement()) {
 			String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
 					"SELECT ?country ?pos WHERE {" +
 					"  ?country a :CountriesWithSpaceNoWhereNoSubquery . " +
@@ -145,11 +112,6 @@ public class OracleRegexpSpaceTest extends AbstractVirtualModeTest {
 			System.out.println(countryName);
 			assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom>", countryName);
 
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			if (st != null)
-				st.close();
 		}
 	}
 

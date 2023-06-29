@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.model.atom.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.*;

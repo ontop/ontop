@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
@@ -44,10 +44,10 @@ public interface VariableNullability {
      */
     ImmutableSet<ImmutableSet<Variable>> getNullableGroups();
 
-    VariableNullability update(ImmutableSubstitution<? extends ImmutableTerm> substitution,
+    VariableNullability update(Substitution<? extends ImmutableTerm> substitution,
                                ImmutableSet<Variable> projectedVariables);
 
-    VariableNullability applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution);
+    VariableNullability applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution);
 
     /**
      * Returns a new VariableNullability.

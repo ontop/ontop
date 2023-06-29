@@ -1,12 +1,16 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.*;
 
@@ -22,11 +26,13 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String SHORT_STR = "SHORT";
     protected static final String LONG_STR = "LONG";
     protected static final String STRING_STR = "STRING";
-    private static final String DECIMAL_38_10_STR = "DECIMAL(38, 10)";
+    public static final String DECIMAL_38_10_STR = "DECIMAL(38, 10)";
+    private static final String ARRAY_STR = "ARRAY<T>";
 
     @AssistedInject
     protected SparkSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
-        super(createSparkSQLTypeMap(rootTermType, typeFactory), createSparkSQLCodeMap());
+        super(createSparkSQLTypeMap(rootTermType, typeFactory), createSparkSQLCodeMap(),
+                createGenericAbstractTypeMap(rootTermType, typeFactory));
     }
 
     private static Map<String, DBTermType> createSparkSQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {
@@ -70,7 +76,39 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DefaultTypeCode.STRING, STRING_STR);
         map.put(DefaultTypeCode.HEXBINARY,BINARY_STR);
         map.put(DefaultTypeCode.DECIMAL, DECIMAL_38_10_STR);
+        map.put(DefaultTypeCode.ARRAY, ARRAY_STR);
         return ImmutableMap.copyOf(map);
+    }
+
+    private static ImmutableList<GenericDBTermType> createGenericAbstractTypeMap(TermType rootTermType, TypeFactory typeFactory) {
+        TermTypeAncestry rootAncestry = rootTermType.getAncestry();
+
+        GenericDBTermType abstractArrayType = new ArrayDBTermType(ARRAY_STR, rootAncestry, s -> {
+            if(s.equals("ARRAY"))
+                return Optional.of(typeFactory.getDBTypeFactory().getDBStringType());
+            if(!s.startsWith("ARRAY<") || !s.endsWith(">")) {
+                return Optional.empty();
+            }
+            String contents = s.substring(6, s.length() - 1);
+
+            int depth = 0;
+            for(int i = 0; i < contents.length(); i++) {
+                if(contents.charAt(i) == '<')
+                    depth += 1;
+                else if(contents.charAt(i) == '>')
+                    depth -= 1;
+                else if(contents.charAt(i) == ',' && depth == 0)
+                    return Optional.empty();
+            }
+            if(depth != 0)
+                return Optional.empty();
+
+            return Optional.of(typeFactory.getDBTypeFactory().getDBTermType(contents));
+        });
+
+        List<GenericDBTermType> list = new ArrayList<>();
+        list.add(abstractArrayType);
+        return ImmutableList.copyOf(list);
     }
 
     @Override

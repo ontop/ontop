@@ -28,6 +28,8 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRISafenessDeclarationFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -79,6 +81,14 @@ public abstract class JsonLens extends JsonOpenObject {
                                                     MetadataLookup metadataLookup, DBParameters dbParameters) throws MetadataExtractionException;
 
     /**
+     * Propagates unique constraints of this lens to its parents, if possible. Returns true if at least one constraint was propagated.
+     */
+    public boolean propagateUniqueConstraintsUp(Lens relation, ImmutableList<NamedRelationDefinition> parents, QuotedIDFactory idFactory) throws MetadataExtractionException {
+        //Does nothing by default, but is implemented by JsonBasicLens. May also be implemented by other lenses under certain conditions.
+        return false;
+    }
+
+    /**
      * May be incomplete, but must not produce any false positive.
      *
      * Returns the attributes for which it can be proved that the projection over them includes the results
@@ -89,7 +99,7 @@ public abstract class JsonLens extends JsonOpenObject {
     public abstract ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(
             Lens lens, ImmutableList<Attribute> parentAttributes);
 
-    protected RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters) throws MetadataExtractionException {
+    protected RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters)  {
         SingleTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
         QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
 
@@ -132,8 +142,7 @@ public abstract class JsonLens extends JsonOpenObject {
                 .map(a -> initialProjectedVariables.stream()
                         .filter(v -> rawQuotedIqFactory.createAttributeID(v.getName()).equals(a))
                         .findAny())
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .collect(ImmutableCollectors.toSet());
 
         if (iriSafeVariables.isEmpty())
@@ -144,30 +153,26 @@ public abstract class JsonLens extends JsonOpenObject {
         VariableGenerator variableGenerator = coreSingletons.getCoreUtilsFactory()
                 .createVariableGenerator(iqTreeBeforeIRISafeConstraints.getKnownVariables());
 
-        ImmutableMap<Variable, Variable> renamingMap = iriSafeVariables.stream()
-                .collect(ImmutableCollectors.toMap(
-                        v -> v,
-                        variableGenerator::generateNewVariableFromVar));
-
-        IRISafenessDeclarationFunctionSymbol iriSafenessDeclarationFunctionSymbol = coreSingletons.getDBFunctionsymbolFactory()
-                .getIRISafenessDeclaration();
-
         TermFactory termFactory = coreSingletons.getTermFactory();
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
 
-        ImmutableMap<Variable, ImmutableTerm> substitutionMap = iriSafeVariables.stream()
-                .collect(ImmutableCollectors.toMap(
-                        v -> v,
-                        v -> termFactory.getImmutableFunctionalTerm(iriSafenessDeclarationFunctionSymbol, renamingMap.get(v))));
 
-        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(initialProjectedVariables,
-                substitutionFactory.getSubstitution(substitutionMap));
+        InjectiveSubstitution<Variable> renaming = iriSafeVariables.stream()
+                .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
+
+        IRISafenessDeclarationFunctionSymbol iriSafenessDeclarationFunctionSymbol = coreSingletons.getDBFunctionsymbolFactory()
+                .getIRISafenessDeclaration();
+
+        Substitution<ImmutableTerm> substitution = iriSafeVariables.stream()
+                .collect(substitutionFactory.toSubstitution(
+                        v -> termFactory.getImmutableFunctionalTerm(iriSafenessDeclarationFunctionSymbol, renaming.get(v))));
+
+        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(initialProjectedVariables, substitution);
 
         return iqFactory.createUnaryIQTree(
                 newConstructionNode,
-                iqTreeBeforeIRISafeConstraints.applyFreshRenaming(
-                        substitutionFactory.getInjectiveVar2VarSubstitution(renamingMap)))
+                iqTreeBeforeIRISafeConstraints.applyFreshRenaming(renaming))
                 .normalizeForOptimization(variableGenerator);
     }
 
@@ -200,7 +205,7 @@ public abstract class JsonLens extends JsonOpenObject {
         }
 
         /*
-         * Ovverride equals method to ensure we can check for object equality
+         * Override equals method to ensure we can check for object equality
          */
         @Override
         public boolean equals(Object obj) {
@@ -218,7 +223,7 @@ public abstract class JsonLens extends JsonOpenObject {
         }
 
         /*
-         * Ovverride hashCode method to ensure we can check for object equality
+         * Override hashCode method to ensure we can check for object equality
          */
         @Override
         public int hashCode() {
@@ -249,7 +254,7 @@ public abstract class JsonLens extends JsonOpenObject {
         }
 
         /*
-         * Ovverride equals method to ensure we can check for object equality
+         * Override equals method to ensure we can check for object equality
          */
         @Override
         public boolean equals(Object obj) {
@@ -268,7 +273,7 @@ public abstract class JsonLens extends JsonOpenObject {
         }
 
         /*
-         * Ovverride hashCode method to ensure we can check for object equality
+         * Override hashCode method to ensure we can check for object equality
          */
         @Override
         public int hashCode() {
@@ -372,6 +377,9 @@ public abstract class JsonLens extends JsonOpenObject {
                 // Deprecated
                 case "FlattenedViewDefinition":
                     instanceClass = JsonFlattenLens.class;
+                    break;
+                case "UnionLens":
+                    instanceClass = JsonUnionLens.class;
                     break;
                 default:
                     // TODO: throw proper exception

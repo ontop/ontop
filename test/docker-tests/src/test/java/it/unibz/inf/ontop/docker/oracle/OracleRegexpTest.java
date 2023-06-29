@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.docker.oracle;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -12,7 +10,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import static org.junit.Assert.*;
 
@@ -27,13 +24,11 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 	static final String obdafile = "/oracle/regex/oracle-regexp.obda";
 	static final String propertyfile = "/oracle/regex/oracle-regexp.properties";
 
-	private static OntopOWLEngine REASONER;
-	private static OntopOWLConnection CONNECTION;
+	private static EngineConnection CONNECTION;
 
 	@BeforeClass
-	public static void before() throws OWLOntologyCreationException {
-		REASONER = createReasoner(owlfile, obdafile, propertyfile);
-		CONNECTION = REASONER.getConnection();
+	public static void before() {
+		CONNECTION = createReasoner(owlfile, obdafile, propertyfile);
 	}
 
 	@Override
@@ -44,7 +39,6 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 	@AfterClass
 	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.close();
 	}
 
 
@@ -71,7 +65,6 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 	 */
 	@Test
 	public void testSparql2OracleRegex() throws Exception {
-		try {
 
 			String[] queries = {
 					"'E[a-z]*t'", 
@@ -96,9 +89,6 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 				String countryName = runTest(query, false);
 				assertEquals(countryName, "");
 			}
-		} catch (Exception e) {
-			throw e;
-		}
 	}
 
 }

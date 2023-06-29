@@ -2,14 +2,11 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 /**
  * Test to check if the sql parser supports regex correctly when written with mysql syntax. 
@@ -17,17 +14,15 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
  */
 public class RegexMySQLTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "/mysql/regex/stockBolzanoAddress.owl";
-	static final String obdafile = "/mysql/regex/stockexchangeRegexMySQL.obda";
-	static final String propertiesfile = "/mysql/regex/stockexchangeRegexMySQL.properties";
+	private static final String owlfile = "/mysql/regex/stockBolzanoAddress.owl";
+	private static final String obdafile = "/mysql/regex/stockexchangeRegexMySQL.obda";
+	private static final String propertiesfile = "/mysql/regex/stockexchangeRegexMySQL.properties";
 
-	private static OntopOWLEngine REASONER;
-	private static OntopOWLConnection CONNECTION;
+	private static EngineConnection CONNECTION;
 
 	@BeforeClass
-	public static void before() throws OWLOntologyCreationException {
-		REASONER = createReasoner(owlfile, obdafile, propertiesfile);
-		CONNECTION = REASONER.getConnection();
+	public static void before() {
+		CONNECTION = createReasoner(owlfile, obdafile, propertiesfile);
 	}
 
 	@Override
@@ -38,7 +33,6 @@ public class RegexMySQLTest extends AbstractVirtualModeTest {
 	@AfterClass
 	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.close();
 	}
 
 	/**
@@ -62,11 +56,4 @@ public class RegexMySQLTest extends AbstractVirtualModeTest {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :PhysicalPerson}";
 		countResults(1, query);
 	}
-	
-
-	
-	
-	
-
-		
 }

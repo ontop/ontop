@@ -22,14 +22,11 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class LeftJoinTestVirtual extends AbstractVirtualModeTest {
 
@@ -37,19 +34,21 @@ public class LeftJoinTestVirtual extends AbstractVirtualModeTest {
 	private static final String obdafile = "/mysql/person/person.obda";
 	private static final String propertiesfile = "/mysql/person/person.properties";
 
-	private static OntopOWLEngine REASONER;
-	private static OntopOWLConnection CONNECTION;
+	private static EngineConnection CONNECTION;
 
 	@BeforeClass
-	public static void before() throws OWLOntologyCreationException {
-		REASONER = createReasoner(owlfile, obdafile, propertiesfile);
-		CONNECTION = REASONER.getConnection();
+	public static void before() {
+		CONNECTION = createReasoner(owlfile, obdafile, propertiesfile);
 	}
 
 	@AfterClass
 	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.close();
+	}
+
+	@Override
+	protected OntopOWLStatement createStatement() throws OWLException {
+		return CONNECTION.createStatement();
 	}
 
 
@@ -66,10 +65,5 @@ public class LeftJoinTestVirtual extends AbstractVirtualModeTest {
 		countResults(4, query3);
 		countResults( 4, query4);
 		countResults(4, query5);
-	}
-
-	@Override
-	protected OntopOWLStatement createStatement() throws OWLException {
-		return CONNECTION.createStatement();
 	}
 }

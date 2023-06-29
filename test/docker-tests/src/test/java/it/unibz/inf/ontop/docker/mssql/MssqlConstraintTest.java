@@ -22,8 +22,6 @@ package it.unibz.inf.ontop.docker.mssql;
 
 import it.unibz.inf.ontop.docker.AbstractConstraintTest;
 
-import java.util.Properties;
-
 public class MssqlConstraintTest extends AbstractConstraintTest {
 
 	private static final String propertyFile = "/mssql/dbconstraints-mssql.properties";

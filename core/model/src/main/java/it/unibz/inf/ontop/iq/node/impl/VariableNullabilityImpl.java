@@ -7,9 +7,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -19,7 +17,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -153,8 +150,7 @@ public class VariableNullabilityImpl implements VariableNullability {
 
         ImmutableSet<ImmutableSet<Variable>> newNullableGroups = IntStream.range(0, groupCount.get())
                 .mapToObj(i -> i < groupList.size()
-                        ? Sets.union(groupList.get(i), ImmutableSet.copyOf(newVariableMultimap.get(i)))
-                            .immutableCopy()
+                        ? Sets.union(groupList.get(i), ImmutableSet.copyOf(newVariableMultimap.get(i))).immutableCopy()
                         : ImmutableSet.copyOf(newVariableMultimap.get(i)))
                 .collect(ImmutableCollectors.toSet());
 
@@ -162,7 +158,7 @@ public class VariableNullabilityImpl implements VariableNullability {
     }
 
     @Override
-    public VariableNullability update(ImmutableSubstitution<? extends ImmutableTerm> substitution,
+    public VariableNullability update(Substitution<? extends ImmutableTerm> substitution,
                                       ImmutableSet<Variable> newScope) {
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
                 Sets.union(substitution.getDomain(), getNullableVariables()).immutableCopy());
@@ -170,15 +166,11 @@ public class VariableNullabilityImpl implements VariableNullability {
     }
 
     @Override
-    public VariableNullability applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        ImmutableSet<Variable> newScope = scope.stream()
-                .map(freshRenamingSubstitution::applyToVariable)
-                .collect(ImmutableCollectors.toSet());
+    public VariableNullability applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
+        ImmutableSet<Variable> newScope = substitutionFactory.apply(freshRenamingSubstitution, scope);
 
         ImmutableSet<ImmutableSet<Variable>> newNullableGroups = nullableGroups.stream()
-                .map(g -> g.stream()
-                        .map(freshRenamingSubstitution::applyToVariable)
-                        .collect(ImmutableCollectors.toSet()))
+                .map(s -> substitutionFactory.apply(freshRenamingSubstitution, s))
                 .collect(ImmutableCollectors.toSet());
 
         return coreUtilsFactory.createVariableNullability(newNullableGroups, newScope);
@@ -203,7 +195,7 @@ public class VariableNullabilityImpl implements VariableNullability {
         return coreUtilsFactory.createVariableNullability(newNullableGroups, newScope);
     }
 
-    private VariableNullability update(ImmutableSubstitution<? extends ImmutableTerm> substitution,
+    private VariableNullability update(Substitution<?> substitution,
                                        ImmutableSet<Variable> newScope,
                                        VariableGenerator variableGenerator) {
         /*
@@ -211,7 +203,7 @@ public class VariableNullabilityImpl implements VariableNullability {
          */
         VariableNullability nullabilityBeforeProjectingOut = splitSubstitution(substitution, variableGenerator)
                 .reduce( this,
-                        (n, s) -> updateVariableNullability(s, n),
+                        this::updateVariableNullability,
                         (n1, n2) -> {
                             throw new MinorOntopInternalBugException("vns are not expected to be combined");
                         });
@@ -231,53 +223,24 @@ public class VariableNullabilityImpl implements VariableNullability {
     /*
      * TODO: explain
      */
-    private Stream<ImmutableSubstitution<? extends ImmutableTerm>> splitSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, VariableGenerator variableGenerator) {
+    private Stream<Substitution<? extends ImmutableTerm>> splitSubstitution(
+            Substitution<? extends ImmutableTerm> substitution, VariableGenerator variableGenerator) {
 
-        ImmutableMultimap<Variable, Integer> functionSubTermMultimap = substitution.getImmutableMap().entrySet().stream()
-                .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
-                .flatMap(e -> {
-                    ImmutableList<? extends ImmutableTerm> subTerms = ((ImmutableFunctionalTerm) e.getValue()).getTerms();
-                    return IntStream.range(0, subTerms.size())
-                            .filter(i -> subTerms.get(i) instanceof ImmutableFunctionalTerm)
-                            .mapToObj(i -> Maps.immutableEntry(e.getKey(), i));
-                })
-                .collect(ImmutableCollectors.toMultimap());
+        ImmutableMap<Variable, SplitImmutableFunctionalTerm> subTermNames = substitution.builder()
+                .restrictRangeTo(ImmutableFunctionalTerm.class)
+                .toMap((v, t) -> new SplitImmutableFunctionalTerm(t, variableGenerator));
 
-        if (functionSubTermMultimap.isEmpty())
+        if (subTermNames.values().stream().allMatch(SplitImmutableFunctionalTerm::isEmpty))
             return Stream.of(substitution);
 
-        ImmutableTable<Variable, Integer, Variable> subTermNames = functionSubTermMultimap.entries().stream()
-                .map(e -> Tables.immutableCell(e.getKey(), e.getValue(), variableGenerator.generateNewVariable()))
-                .collect(ImmutableCollectors.toTable());
+        Substitution<ImmutableTerm> parentSubstitution = substitution.builder()
+                .<ImmutableTerm>restrictRangeTo(ImmutableFunctionalTerm.class)
+                .transformOrRetain(subTermNames::get, (t, split) -> split.getSplitTerm())
+                .build();
 
-        ImmutableMap<Variable, ImmutableTerm> parentSubstitutionMap = substitution.getImmutableMap().entrySet().stream()
-                .map(e ->
-                        Optional.of(functionSubTermMultimap.get(e.getKey()))
-                                .filter(indexes -> !indexes.isEmpty())
-                                .map(indexes -> {
-                                    Variable v = e.getKey();
-                                    ImmutableFunctionalTerm def = (ImmutableFunctionalTerm) substitution.get(v);
-                                    ImmutableList<ImmutableTerm> newArgs = IntStream.range(0, def.getArity())
-                                            .mapToObj(i -> Optional.ofNullable((ImmutableTerm) subTermNames.get(v, i))
-                                                    .orElseGet(() -> def.getTerm(i)))
-                                            .collect(ImmutableCollectors.toList());
-
-                                    ImmutableTerm newDef = termFactory.getImmutableFunctionalTerm(
-                                            def.getFunctionSymbol(), newArgs);
-                                    return Maps.immutableEntry(v, newDef);
-                                })
-                                .orElse((Map.Entry<Variable, ImmutableTerm>)e))
-                .collect(ImmutableCollectors.toMap());
-
-        ImmutableSubstitution<ImmutableTerm> parentSubstitution = substitutionFactory.getSubstitution(parentSubstitutionMap);
-
-
-        ImmutableSubstitution<ImmutableTerm> childSubstitution = substitutionFactory.getSubstitution(
-                subTermNames.cellSet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                Table.Cell::getValue,
-                                c -> ((ImmutableFunctionalTerm) substitution.get(c.getRowKey())).getTerm(c.getColumnKey()))));
+        Substitution<ImmutableTerm> childSubstitution = subTermNames.values().stream()
+                        .map(SplitImmutableFunctionalTerm::getSubstitution)
+                        .reduce(substitutionFactory.getSubstitution(), substitutionFactory::union);
 
         return Stream.concat(
                 // Recursive
@@ -285,33 +248,60 @@ public class VariableNullabilityImpl implements VariableNullability {
                 Stream.of(parentSubstitution));
     }
 
+    private final class SplitImmutableFunctionalTerm {
+        final ImmutableFunctionalTerm term;
+        final ArgumentSubstitution<ImmutableTerm> map;
 
-    private VariableNullabilityImpl updateVariableNullability(
-            ImmutableSubstitution<? extends ImmutableTerm> nonNestedSubstitution, VariableNullabilityImpl childNullability) {
+        SplitImmutableFunctionalTerm(ImmutableFunctionalTerm term, VariableGenerator variableGenerator) {
+            this.term = term;
+
+            ImmutableMap<Integer, Variable> m = IntStream.range(0, term.getArity())
+                    .filter(i -> term.getTerm(i) instanceof ImmutableFunctionalTerm)
+                    .mapToObj(i -> Maps.immutableEntry(i, variableGenerator.generateNewVariable()))
+                    .collect(ImmutableCollectors.toMap());
+
+            this.map = new ArgumentSubstitution<>(m, Optional::ofNullable);
+        }
+
+        ImmutableFunctionalTerm getSplitTerm() {
+            if (map.isEmpty())
+                return term;
+
+            return termFactory.getImmutableFunctionalTerm(term.getFunctionSymbol(), map.replaceTerms(term.getTerms()));
+        }
+
+        Substitution<ImmutableTerm> getSubstitution() {
+            return map.getSubstitution(substitutionFactory, term.getTerms());
+        }
+
+        boolean isEmpty() {
+            return map.isEmpty();
+        }
+    }
+
+
+    private VariableNullabilityImpl updateVariableNullability(VariableNullabilityImpl childNullability,
+            Substitution<? extends ImmutableTerm> nonNestedSubstitution) {
 
         // TODO: find a better name
-        ImmutableMap<Variable, Variable> nullabilityBindings = nonNestedSubstitution.getImmutableMap().entrySet().stream()
-                .flatMap(e -> evaluateTermNullability(e.getValue(), childNullability, e.getKey())
-                        .map(Stream::of)
-                        .orElseGet(Stream::empty))
-                .collect(ImmutableCollectors.toMap());
+        ImmutableMap<Variable, Variable> nullabilityBindings = nonNestedSubstitution.builder()
+                .toMapIgnoreOptional((v, t) -> evaluateTermNullability(t, childNullability, v));
 
         ImmutableSet<Variable> newScope = Sets.union(childNullability.scope, nonNestedSubstitution.getDomain()).immutableCopy();
 
         return childNullability.appendNewVariables(nullabilityBindings, newScope);
     }
 
-    private Optional<Map.Entry<Variable, Variable>> evaluateTermNullability(
-            ImmutableTerm term, VariableNullability childNullability, Variable key) {
+    private Optional<Variable> evaluateTermNullability(ImmutableTerm term, VariableNullability childNullability, Variable key) {
+
         if (term instanceof Constant) {
             return term.isNull()
-                    ? Optional.of(Maps.immutableEntry(key, key))
+                    ? Optional.of(key)
                     : Optional.empty();
         }
         else if (term instanceof Variable)
             return Optional.of((Variable) term)
-                    .filter(childNullability::isPossiblyNullable)
-                    .map(v -> Maps.immutableEntry(key, v));
+                    .filter(childNullability::isPossiblyNullable);
         else {
             ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
             FunctionSymbol.FunctionalTermNullability results = functionalTerm.getFunctionSymbol().evaluateNullability(
@@ -319,9 +309,7 @@ public class VariableNullabilityImpl implements VariableNullability {
                     childNullability, termFactory);
 
             return results.isNullable()
-                    ? Optional.of(results.getBoundVariable()
-                    .map(v -> Maps.immutableEntry(key, v))
-                    .orElseGet(() -> Maps.immutableEntry(key, key)))
+                    ? Optional.of(results.getBoundVariable().orElse(key))
                     : Optional.empty();
         }
     }
@@ -340,8 +328,14 @@ public class VariableNullabilityImpl implements VariableNullability {
 
     @Override
     public boolean canPossiblyBeNullSeparately(ImmutableList<? extends ImmutableTerm> terms) {
+
+        ImmutableSet<Variable> variables = terms.stream()
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable) t)
+                .collect(ImmutableCollectors.toSet());
+
         if (terms.stream().allMatch(t -> t instanceof Variable)) {
-            return canPossiblyBeNullSeparately(ImmutableSet.copyOf((ImmutableList<Variable>) terms));
+            return canPossiblyBeNullSeparately(variables);
         }
 
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
@@ -350,22 +344,16 @@ public class VariableNullabilityImpl implements VariableNullability {
                         getNullableVariables().stream())
                         .collect(ImmutableCollectors.toSet()));
 
-        ImmutableSubstitution<? extends ImmutableTerm> substitution = substitutionFactory.getSubstitution(
-                terms.stream()
-                        .filter(t -> t instanceof NonVariableTerm)
-                        .collect(ImmutableCollectors.toMap(
-                                t -> variableGenerator.generateNewVariable(),
-                                t -> t)));
+        Substitution<?> substitution = terms.stream()
+                .filter(t -> t instanceof NonVariableTerm)
+                .collect(substitutionFactory.toSubstitution(
+                        t -> variableGenerator.generateNewVariable(),
+                        t -> t));
 
         VariableNullability newVariableNullability = update(substitution, substitution.getDomain(), variableGenerator);
 
-        ImmutableSet<Variable> variables = Sets.union(
-                terms.stream()
-                        .filter(t -> t instanceof Variable)
-                        .map(t -> (Variable) t)
-                        .collect(Collectors.toSet()),
-                substitution.getDomain()).immutableCopy();
+        ImmutableSet<Variable> newVariables = Sets.union(variables, substitution.getDomain()).immutableCopy();
 
-        return newVariableNullability.canPossiblyBeNullSeparately(variables);
+        return newVariableNullability.canPossiblyBeNullSeparately(newVariables);
     }
 }

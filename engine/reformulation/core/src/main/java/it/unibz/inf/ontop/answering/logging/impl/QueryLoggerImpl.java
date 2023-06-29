@@ -76,7 +76,6 @@ public class QueryLoggerImpl implements QueryLogger {
 
     private static final DateFormat  DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
     private static final Logger REGULAR_LOGGER = LoggerFactory.getLogger(QueryLoggerImpl.class);
-    ;
 
 
     private final UUID queryId;
@@ -170,7 +169,7 @@ public class QueryLoggerImpl implements QueryLogger {
             } catch (IOException ex) {
                 REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + ex);
             }
-            outputStream.println(stringWriter.toString());
+            outputStream.println(stringWriter);
         }
 
         if (isMergingEnabled) {
@@ -288,7 +287,7 @@ public class QueryLoggerImpl implements QueryLogger {
                 REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
                 return;
             }
-            outputStream.println(stringWriter.toString());
+            outputStream.println(stringWriter);
         }
     }
 
@@ -323,7 +322,7 @@ public class QueryLoggerImpl implements QueryLogger {
             } catch (IOException e) {
                 REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
             }
-            outputStream.println(stringWriter.toString());
+            outputStream.println(stringWriter);
         }
 
         if (isMergingEnabled) {
@@ -427,7 +426,7 @@ public class QueryLoggerImpl implements QueryLogger {
         } catch (IOException ex) {
             REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + ex);
         }
-        outputStream.println(stringWriter.toString());
+        outputStream.println(stringWriter);
     }
 
     protected String serializeTimestamp(long time) {
@@ -456,6 +455,6 @@ public class QueryLoggerImpl implements QueryLogger {
         } catch (IOException e) {
             REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
         }
-        outputStream.println(stringWriter.toString());
+        outputStream.println(stringWriter);
     }
 }

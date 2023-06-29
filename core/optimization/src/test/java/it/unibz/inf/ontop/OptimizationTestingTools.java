@@ -2,6 +2,8 @@ package it.unibz.inf.ontop;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
@@ -24,6 +26,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.LegacyVariableGenerator;
 import org.apache.commons.rdf.api.RDF;
 
+import java.util.Map;
 import java.util.Properties;
 import java.util.stream.IntStream;
 
@@ -57,6 +60,8 @@ public class OptimizationTestingTools {
     public static final Variable W;
     public static final Variable Z;
     public static final Variable A;
+    public static final Variable AGGV;
+    public static final Variable AGGVF0;
     public static final Variable AF0;
     public static final Variable AF1;
     public static final Variable B;
@@ -64,9 +69,17 @@ public class OptimizationTestingTools {
     public static final Variable BF1;
     public static final Variable C;
     public static final Variable CF0;
+    public static final Variable CF1;
+    public static final Variable CF2;
     public static final Variable D;
+    public static final Variable DF0;
+    public static final Variable DF1;
+    public static final Variable DF2;
+    public static final Variable DF3;
     public static final Variable E;
+    public static final Variable EF1;
     public static final Variable F;
+    public static final Variable FF3;
     public static final Variable F0;
     public static final Variable F0F1;
     public static final Variable F1;
@@ -133,6 +146,8 @@ public class OptimizationTestingTools {
         W = TERM_FACTORY.getVariable("w");
         Z = TERM_FACTORY.getVariable("z");
         A = TERM_FACTORY.getVariable("a");
+        AGGV = TERM_FACTORY.getVariable("aggv");
+        AGGVF0 = TERM_FACTORY.getVariable("aggvf0");
         AF0 = TERM_FACTORY.getVariable("af0");
         AF1 = TERM_FACTORY.getVariable("af1");
         B = TERM_FACTORY.getVariable("b");
@@ -140,9 +155,17 @@ public class OptimizationTestingTools {
         BF1 = TERM_FACTORY.getVariable("bf1");
         C = TERM_FACTORY.getVariable("c");
         CF0 = TERM_FACTORY.getVariable("cf0");
+        CF1 = TERM_FACTORY.getVariable("cf1");
+        CF2 = TERM_FACTORY.getVariable("cf2");
         D = TERM_FACTORY.getVariable("d");
+        DF0 = TERM_FACTORY.getVariable("df0");
+        DF1 = TERM_FACTORY.getVariable("df1");
+        DF2 = TERM_FACTORY.getVariable("df2");
+        DF3 = TERM_FACTORY.getVariable("df3");
         E = TERM_FACTORY.getVariable("e");
+        EF1 = TERM_FACTORY.getVariable("ef1");
         F = TERM_FACTORY.getVariable("f");
+        FF3 = TERM_FACTORY.getVariable("ff3");
         F6 = TERM_FACTORY.getVariable("f6");
         F0 = TERM_FACTORY.getVariable("f0");
         F0F1 = TERM_FACTORY.getVariable("f0f1");
@@ -210,6 +233,16 @@ public class OptimizationTestingTools {
             UniqueConstraint.builder(tableDef, "uc_" + tableNumber)
                     .addDeterminant(1)
                     .build();
+            return tableDef;
+        }
+
+        public NamedRelationDefinition createRelationWithFD(int tableNumber, int arity, boolean canNull) {
+            DBTermType stringDBType = getDBTypeFactory().getDBStringType();
+            NamedRelationDefinition tableDef = createRelation(tableNumber, arity, stringDBType, "FD_", canNull);
+            FunctionalDependency.defaultBuilder(tableDef)
+                            .addDeterminant(1)
+                            .addDependent(2)
+                            .build();
             return tableDef;
         }
 

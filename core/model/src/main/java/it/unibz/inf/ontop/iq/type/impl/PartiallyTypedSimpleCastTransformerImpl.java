@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
-import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.iq.type.PartiallyTypedSimpleCastTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;

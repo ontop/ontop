@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableSortedSet;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.Optional;
 
@@ -20,7 +20,7 @@ public interface SelectFromWhereWithModifiers extends SQLExpression {
 
     ImmutableSortedSet<Variable> getProjectedVariables();
 
-    ImmutableSubstitution<? extends ImmutableTerm> getSubstitution();
+    Substitution<? extends ImmutableTerm> getSubstitution();
 
     SQLExpression getFromSQLExpression();
 

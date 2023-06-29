@@ -8,21 +8,18 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
 @OracleLightweightTest
 public class LeftJoinProfOracleTest extends AbstractLeftJoinProfTest {
 
     private static final String PROPERTIES_FILE = "/prof/oracle/prof-oracle.properties";
 
     @BeforeAll
-    public static void before() throws IOException, SQLException {
+    public static void before() {
         initOBDA(OBDA_FILE, OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll
-    public static void after() throws SQLException {
+    public static void after() {
         release();
     }
 
@@ -100,5 +97,13 @@ public class LeftJoinProfOracleTest extends AbstractLeftJoinProfTest {
     @Override
     protected ImmutableList<String> getExpectedAggregationMappingProfStudentCountPropertyResults() {
         return ImmutableList.of("\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal", "\"31\"^^xsd:decimal");
+    }
+
+    @Override
+    protected ImmutableList<ImmutableList<String>> getExpectedValuesSample() {
+        return ImmutableList.of(
+                ImmutableList.of("\"11\"^^xsd:decimal", "\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal"),
+                ImmutableList.of("\"10\"^^xsd:decimal", "\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal")
+        );
     }
 }

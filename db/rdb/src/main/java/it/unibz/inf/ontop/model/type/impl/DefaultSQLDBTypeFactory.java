@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -81,6 +82,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     // MUTABLE
     private final Map<String, DBTermType> sqlTypeMap;
     private final ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap;
+    private final ImmutableList<GenericDBTermType> genericAbstractTypes;
 
     @AssistedInject
     private DefaultSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
@@ -89,10 +91,17 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
 
     protected DefaultSQLDBTypeFactory(Map<String, DBTermType> typeMap,
                                       ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap) {
+        this(typeMap, defaultTypeCodeMap, ImmutableList.of());
+    }
+
+    protected DefaultSQLDBTypeFactory(Map<String, DBTermType> typeMap,
+                                      ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap,
+                                      ImmutableList<GenericDBTermType> genericAbstractTypes) {
         sqlTypeMap = typeMap;
         this.defaultTypeCodeMap = defaultTypeCodeMap;
         // TODO: get it from the settings
         this.defaultStrictEqSupport = SAME_TYPE_NO_CONSTANT;
+        this.genericAbstractTypes = genericAbstractTypes;
     }
 
     /**
@@ -146,7 +155,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new NumberDBTermType(DOUBLE_STR, rootTermType.getAncestry(), xsdDouble, FLOAT_DOUBLE),
                     new NumberDBTermType(DOUBLE_PREC_STR, rootTermType.getAncestry(), xsdDouble, FLOAT_DOUBLE),
                     new BooleanDBTermType(BOOLEAN_STR, rootTermType.getAncestry(), xsdBoolean),
-                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(DATE_STR, rootAncestry, typeFactory.getDatatype(XSD.DATE)),
+                    new DateDBTermType(DATE_STR, rootAncestry, typeFactory.getDatatype(XSD.DATE)),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME)),
                     new DatetimeDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype())
                 )
@@ -175,16 +184,40 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
         return map;
     }
 
+    /**
+     * Search the first generic datatype that can be parsed from this type signature.
+     * This way, generic types can be implemented differently for different data-types.
+     */
+    private Optional<DBTermType> createNewGenericType(String typeString) {
+        return genericAbstractTypes.stream()
+                .flatMap(type -> type.createFromSignature(typeString).stream()
+                        .map(t -> (DBTermType)t))
+                .findFirst();
+    }
+
+    private DBTermType getGenericDBTermType(GenericDBTermType genericBaseType, ImmutableList<DBTermType> argumentTypes) {
+        return genericBaseType.createFromGenericTypes(argumentTypes);
+    }
+
+    private DBTermType createNewTermType(String typeString) {
+        Optional<DBTermType> type = createNewGenericType(typeString);
+        return type.orElseGet(() -> new NonStringNonNumberNonBooleanNonDatetimeDBTermType(typeString, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(),
+                defaultStrictEqSupport));
+    }
+
     @Override
     public DBTermType getDBTermType(String typeName) {
         String typeString = preprocessTypeName(typeName);
 
         /*
          * Creates a new term type if not known
+         * We can't use Map.computeIfAbsent(...) here, because that may cause a ConcurrentModificationException.
          */
-        return sqlTypeMap.computeIfAbsent(typeString,
-                s -> new NonStringNonNumberNonBooleanNonDatetimeDBTermType(s, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(),
-                        defaultStrictEqSupport));
+        if(sqlTypeMap.containsKey(typeString))
+            return sqlTypeMap.get(typeString);
+        DBTermType newType = this.createNewTermType(typeString);
+        sqlTypeMap.put(typeString, newType);
+        return newType;
     }
 
     @Override
@@ -193,10 +226,13 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
 
         /*
          * Creates a new term type if not known
+         * We can't use Map.computeIfAbsent(...) here, because that may cause a ConcurrentModificationException.
          */
-        return sqlTypeMap.computeIfAbsent(typeString,
-                s -> new NonStringNonNumberNonBooleanNonDatetimeDBTermType(s, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(),
-                        defaultStrictEqSupport));
+        if(sqlTypeMap.containsKey(typeString))
+            return sqlTypeMap.get(typeString);
+        DBTermType newType = this.createNewTermType(typeString);
+        sqlTypeMap.put(typeString, newType);
+        return newType;
     }
 
     @Override
@@ -320,8 +356,17 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
 
     @Override
     public DBTermType getDBArrayType() {
+        return getDBArrayType(getAbstractRootDBType());
+    }
+
+    @Override
+    public DBTermType getDBArrayType(DBTermType baseType) {
         if(supportsArrayType()){
-            return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.ARRAY));
+            var genericType = genericAbstractTypes.stream()
+                    .filter(type -> type.getName().equals(defaultTypeCodeMap.get(DefaultTypeCode.ARRAY)))
+                    .findFirst()
+                    .orElseThrow(() -> new UnsupportedDBTypeException("DBType Array not supported for this DBMS"));
+            return getGenericDBTermType(genericType, ImmutableList.of(baseType));
         }
         throw new UnsupportedDBTypeException("DBType Array not supported for this DBMS");
     }

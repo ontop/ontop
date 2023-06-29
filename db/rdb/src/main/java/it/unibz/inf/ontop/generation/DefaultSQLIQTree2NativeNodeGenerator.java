@@ -73,9 +73,7 @@ public class DefaultSQLIQTree2NativeNodeGenerator implements IQTree2NativeNodeGe
         return uniqueTermTypeExtractor.extractSingleTermType(v, tree)
                 .filter(t -> t instanceof DBTermType)
                 .map(t -> (DBTermType) t)
-                .map(Optional::of)
-                .orElseGet(() -> tolerateUnknownTypes ?
-                        Optional.of(abstractRootDBType) : Optional.empty())
+                .or(() -> tolerateUnknownTypes ? Optional.of(abstractRootDBType) : Optional.empty())
                 .orElseThrow(() -> new MinorOntopInternalBugException(
                         "Was expecting a unique and known DB term type to be extracted " +
                                 "for the SQL variable " + v));

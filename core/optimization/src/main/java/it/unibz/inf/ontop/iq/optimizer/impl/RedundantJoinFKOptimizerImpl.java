@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.optimizer.RedundantJoinFKOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -128,9 +127,8 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
 
             for (Map.Entry<RelationDefinition, Collection<ExtensionalDataNode>> entry: dataNodeMap.entrySet()) {
                 redundantNodes.addAll(entry.getKey().getForeignKeys().stream()
-                        .flatMap(fk -> Optional.ofNullable(dataNodeMap.get(fk.getReferencedRelation()))
-                                .map(Collection::stream)
-                                .orElseGet(Stream::empty)
+                        .flatMap(fk -> Optional.ofNullable(dataNodeMap.get(fk.getReferencedRelation())).stream()
+                                .flatMap(Collection::stream)
                                 .filter(targetNode -> isJustHavingFKArguments(fk, targetNode))
                                 .filter(targetNode -> entry.getValue().stream()
                                                 .anyMatch(s -> (!redundantNodes.contains(s))

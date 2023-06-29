@@ -2,15 +2,12 @@ package it.unibz.inf.ontop.docker.mssql;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.AbstractLeftJoinProfTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 
 public class LeftJoinProfMssqlTest extends AbstractLeftJoinProfTest {
@@ -19,13 +16,11 @@ public class LeftJoinProfMssqlTest extends AbstractLeftJoinProfTest {
     private static final String OBDA_FILE = "/redundant_join/redundant_join_fk_test.obda";
     private static final String PROPERTY_FILE = "/mssql/redundant_join_fk_test.properties";
 
-    private static OntopOWLEngine REASONER;
-    private static OntopOWLConnection CONNECTION;
+    private static EngineConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
-        REASONER = createReasoner(OWL_FILE, OBDA_FILE, PROPERTY_FILE);
-        CONNECTION = REASONER.getConnection();
+    public static void before()  {
+        CONNECTION = createReasoner(OWL_FILE, OBDA_FILE, PROPERTY_FILE);
     }
 
     @Override
@@ -36,7 +31,6 @@ public class LeftJoinProfMssqlTest extends AbstractLeftJoinProfTest {
     @AfterClass
     public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.close();
     }
 
     @Override

@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.spec.mapping.impl;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;

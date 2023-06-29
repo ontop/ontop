@@ -94,7 +94,7 @@ public class EmptyEntitiesCheckAction extends ProtegeAction {
 
 		OBDAModel obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
 
-		SwingWorker<String, EmptyEntityInfo> worker = new SwingWorker<String, EmptyEntityInfo>() {
+		SwingWorker<String, EmptyEntityInfo> worker = new SwingWorker<>() {
 
 			@Override
 			protected String doInBackground() {
@@ -139,14 +139,11 @@ public class EmptyEntitiesCheckAction extends ProtegeAction {
 			protected void done() {
 				try {
 					summaryLabel.setText(get());
-				}
-				catch (CancellationException e) {
+				} catch (CancellationException e) {
 					/* NO-OP */
-				}
-				catch (InterruptedException e) {
+				} catch (InterruptedException e) {
 					summaryLabel.setText("An error occurred: " + e.getMessage());
-				}
-				catch (ExecutionException e) {
+				} catch (ExecutionException e) {
 					dialog.dispose();
 					DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + "error.", LOGGER, e, obdaModel.getDataSource());
 				}

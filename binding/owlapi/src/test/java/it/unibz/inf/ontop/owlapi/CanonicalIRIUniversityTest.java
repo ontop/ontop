@@ -11,7 +11,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
-import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
 
 import java.sql.Connection;

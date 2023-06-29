@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 

@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.type.ConcreteNumericRDFDatatype;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
-import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;

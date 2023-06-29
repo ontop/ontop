@@ -39,7 +39,7 @@ public class TMappingExclusionConfigTest {
     }
 
     @Test
-    public void testBadFile() throws Exception {
+    public void testBadFile() {
         assertThrows(IllegalArgumentException.class, () -> TMappingExclusionConfig.parseFile("src/test/resources/tmappingExclusionConf/bad.conf"));
     }
 }

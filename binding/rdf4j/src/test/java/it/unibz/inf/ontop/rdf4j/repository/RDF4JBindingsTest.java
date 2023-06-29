@@ -17,7 +17,6 @@ package it.unibz.inf.ontop.rdf4j.repository;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 
-import org.eclipse.rdf4j.model.impl.SimpleIRI;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -35,12 +34,12 @@ import static org.junit.Assert.*;
 
 public class RDF4JBindingsTest {
 
-    static String owlfile = "src/test/resources/userconstraints/uc.owl";
-    static String obdafile = "src/test/resources/userconstraints/uc.obda";
-    static String r2rmlfile = "src/test/resources/userconstraints/uc.ttl";
+    private static final String owlfile = "src/test/resources/userconstraints/uc.owl";
+    private static final String obdafile = "src/test/resources/userconstraints/uc.obda";
+    private static final String r2rmlfile = "src/test/resources/userconstraints/uc.ttl";
 
-    static String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
-    static String uc_create = "src/test/resources/userconstraints/create.sql";
+    private static final String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
+    private static final String uc_create = "src/test/resources/userconstraints/create.sql";
 
     private Connection sqlConnection;
     private RepositoryConnection conn;
@@ -86,20 +85,18 @@ public class RDF4JBindingsTest {
     @After
     public void tearDown() throws Exception {
         if (!sqlConnection.isClosed()) {
-            java.sql.Statement s = sqlConnection.createStatement();
-            try {
+            try (java.sql.Statement s = sqlConnection.createStatement()) {
                 s.execute("DROP ALL OBJECTS DELETE FILES");
             } catch (SQLException sqle) {
                 System.out.println("Table not found, not dropping");
             } finally {
-                s.close();
                 sqlConnection.close();
             }
         }
     }
 
     @Test
-    public void testSelectBindings() throws Exception {
+    public void testSelectBindings() {
         String queryString
                 = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> "
                 + "SELECT * WHERE {?x :hasVal1 ?v1.}";
@@ -119,7 +116,7 @@ public class RDF4JBindingsTest {
     }
 
     @Test
-    public void testSelectNoBindings() throws Exception {
+    public void testSelectNoBindings() {
         String queryString
                 = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> "
                 + "SELECT * WHERE {?x :hasVal1 ?v1.}";
@@ -138,7 +135,7 @@ public class RDF4JBindingsTest {
     }
 
     @Test
-    public void testConstructBindings() throws Exception {
+    public void testConstructBindings() {
         String queryString
                 = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> "
                 + "CONSTRUCT {?x :hasVal1 ?v1 .} WHERE {?x :hasVal1 ?v1 .}";
@@ -158,7 +155,7 @@ public class RDF4JBindingsTest {
     }
 
     @Test
-    public void testConstructNoBindings() throws Exception {
+    public void testConstructNoBindings() {
         String queryString
                 = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> "
                 + "CONSTRUCT {?x :hasVal1 ?v1 .} WHERE {?x :hasVal1 ?v1 .}";
@@ -176,7 +173,7 @@ public class RDF4JBindingsTest {
     }
     
     @Test
-    public void testAskBindings() throws Exception {
+    public void testAskBindings() {
         String queryString
                 = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> "
                 + "ASK WHERE {?x :hasVal1 ?v1 .}";
@@ -189,7 +186,7 @@ public class RDF4JBindingsTest {
     }
 
     @Test
-    public void testAskNoBindings() throws Exception {
+    public void testAskNoBindings() {
         String queryString
                 = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> "
                 + "ASK WHERE {?x :hasVal1 ?v1 .}";

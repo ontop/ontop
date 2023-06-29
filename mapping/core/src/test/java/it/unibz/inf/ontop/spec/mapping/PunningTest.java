@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.template.Template;

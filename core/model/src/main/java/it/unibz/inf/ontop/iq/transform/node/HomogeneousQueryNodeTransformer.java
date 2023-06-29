@@ -1,39 +1,37 @@
 package it.unibz.inf.ontop.iq.transform.node;
 
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 
 /**
  * TODO: explain
  */
-public interface HomogeneousQueryNodeTransformer<T1 extends QueryNodeTransformationException,
-        T2 extends QueryNodeTransformationException> {
+public interface HomogeneousQueryNodeTransformer {
 
-    FilterNode transform(FilterNode filterNode) throws T1, T2;
+    FilterNode transform(FilterNode filterNode);
 
-    ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) throws T1, T2;
+    ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode);
 
-    LeftJoinNode transform(LeftJoinNode leftJoinNode) throws T1, T2;
+    LeftJoinNode transform(LeftJoinNode leftJoinNode);
 
-    UnionNode transform(UnionNode unionNode) throws T1, T2;
+    UnionNode transform(UnionNode unionNode);
 
-    IntensionalDataNode transform(IntensionalDataNode intensionalDataNode) throws T1, T2;
+    IntensionalDataNode transform(IntensionalDataNode intensionalDataNode);
 
-    InnerJoinNode transform(InnerJoinNode innerJoinNode) throws T1, T2;
+    InnerJoinNode transform(InnerJoinNode innerJoinNode);
 
-    ConstructionNode transform(ConstructionNode constructionNode) throws T1, T2;
+    ConstructionNode transform(ConstructionNode constructionNode);
 
-    AggregationNode transform(AggregationNode aggregationNode) throws T1, T2;
+    AggregationNode transform(AggregationNode aggregationNode);
 
-    FlattenNode transform(FlattenNode flattenNode) throws T1, T2;
+    FlattenNode transform(FlattenNode flattenNode);
 
     EmptyNode transform(EmptyNode emptyNode);
 
     TrueNode transform(TrueNode trueNode);
 
-    ValuesNode transform(ValuesNode valuesNode) throws T1, T2;
+    ValuesNode transform(ValuesNode valuesNode);
 
-    DistinctNode transform(DistinctNode distinctNode) throws T1, T2;
-    SliceNode transform(SliceNode sliceNode) throws T1, T2;
-    OrderByNode transform(OrderByNode orderByNode) throws T1, T2;
+    DistinctNode transform(DistinctNode distinctNode);
+    SliceNode transform(SliceNode sliceNode);
+    OrderByNode transform(OrderByNode orderByNode);
 }

@@ -17,7 +17,6 @@ import org.junit.Test;
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.TABLE1_AR2;
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.TABLE3_AR1;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.OptimizationTestingTools.TWO_STR;
 import static it.unibz.inf.ontop.iq.IsDistinctTest.NULLABLE_UC_TABLE1_AR1;
 import static it.unibz.inf.ontop.iq.IsDistinctTest.NULLABLE_UC_TABLE2_AR2;
 import static junit.framework.TestCase.assertTrue;

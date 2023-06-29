@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.Optional;
 
 public abstract class AbstractGeofIntegerFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {

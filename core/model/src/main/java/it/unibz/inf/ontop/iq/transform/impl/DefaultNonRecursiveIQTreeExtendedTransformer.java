@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 
 /**
  * To be extended by overloading the methods of interest.

@@ -7,12 +7,9 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
@@ -37,8 +34,7 @@ public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
     }
 
     protected AbstractDataAtomImpl(P predicate, VariableOrGroundTerm... variableOrGroundTerms) {
-        this.predicate = predicate;
-        this.arguments = ImmutableList.copyOf(variableOrGroundTerms);
+        this(predicate, ImmutableList.copyOf(variableOrGroundTerms));
     }
 
     @Override
@@ -62,16 +58,6 @@ public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
     }
 
     @Override
-    public boolean containsGroundTerms() {
-        for (ImmutableTerm term : getArguments()) {
-            if (term.isGround()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
     public VariableOrGroundTerm getTerm(int index) {
         return arguments.get(index);
     }
@@ -81,13 +67,6 @@ public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
         return arguments.stream()
                 .flatMap(ImmutableTerm::getVariableStream)
                 .collect(ImmutableCollectors.toSet());
-    }
-
-    protected static boolean hasDuplicates(DataAtom atom) {
-        ImmutableList<? extends VariableOrGroundTerm> termList = atom.getArguments();
-        Set<VariableOrGroundTerm> termSet = new HashSet<>(termList);
-
-        return termSet.size() < termList.size();
     }
 
     /**
@@ -118,11 +97,10 @@ public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
             sb.append(predicate.toString());
             sb.append("(");
 
-            List<String> argumentStrings = arguments.stream()
-                    .map(VariableOrGroundTerm::toString)
-                    .collect(Collectors.toList());
+            Stream<String> argumentStrings = arguments.stream()
+                    .map(VariableOrGroundTerm::toString);
 
-            sb.append(String.join(",", argumentStrings));
+            sb.append(argumentStrings.collect(Collectors.joining(", ")));
             sb.append(")");
             string = sb.toString();
         }

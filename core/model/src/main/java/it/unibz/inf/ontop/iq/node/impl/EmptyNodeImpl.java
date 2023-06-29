@@ -8,17 +8,19 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Objects;
@@ -28,17 +30,17 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     private static final String PREFIX = "EMPTY ";
     private final ImmutableSet<Variable> projectedVariables;
-    private final ConstructionNodeTools constructionNodeTools;
     private final CoreUtilsFactory coreUtilsFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     @AssistedInject
     private EmptyNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
-                          IQTreeTools iqTreeTools, ConstructionNodeTools constructionNodeTools,
-                          IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory) {
+                          IQTreeTools iqTreeTools,
+                          IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
         super(iqTreeTools, iqFactory);
         this.projectedVariables = projectedVariables;
-        this.constructionNodeTools = constructionNodeTools;
         this.coreUtilsFactory = coreUtilsFactory;
+        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
@@ -83,10 +85,8 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        ImmutableSet<Variable> newVariables = projectedVariables.stream()
-                .map(freshRenamingSubstitution::applyToVariable)
-                .collect(ImmutableCollectors.toSet());
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
+        ImmutableSet<Variable> newVariables = substitutionFactory.apply(freshRenamingSubstitution, projectedVariables);
 
         return newVariables.equals(projectedVariables)
                 ? this
@@ -95,9 +95,9 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
         return iqFactory.createEmptyNode(
-                constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables));
+                iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables));
     }
 
     @Override
@@ -130,8 +130,13 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getNotInternallyRequiredVariables() {
-        return getVariables();
+    public FunctionalDependencies inferFunctionalDependencies() {
+        return FunctionalDependencies.empty();
+    }
+
+    @Override
+    public VariableNonRequirement getVariableNonRequirement() {
+        return VariableNonRequirement.of(getVariables());
     }
 
     @Override

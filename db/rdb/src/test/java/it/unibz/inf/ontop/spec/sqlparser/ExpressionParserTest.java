@@ -1284,7 +1284,7 @@ public class ExpressionParserTest {
         Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBRegexpReplace4(), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
                 TERM_FACTORY.getDBStringConstant("i"),
-                TERM_FACTORY.getDBStringConstant("")), translation);
+                TERM_FACTORY.getDBStringConstant("")), translation.get(0));
     }
 
     @Test

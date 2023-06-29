@@ -5,26 +5,18 @@ import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.iq.type.impl.AbstractExpressionTransformer;
-import it.unibz.inf.ontop.iq.type.impl.PartiallyTypedSimpleCastTransformerImpl;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.term.impl.NonGroundExpressionImpl;
-import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 /**

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.Optional;
 
@@ -19,7 +19,7 @@ public interface OrderByNode extends QueryModifierNode {
 
     ImmutableList<OrderComparator> getComparators();
 
-    Optional<OrderByNode> applySubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution);
+    Optional<OrderByNode> applySubstitution(Substitution<? extends ImmutableTerm> substitution);
 
     interface OrderComparator {
 

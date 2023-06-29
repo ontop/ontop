@@ -41,7 +41,6 @@ import java.sql.DriverManager;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /***
  * Test same as using h2 simple database on wellbores

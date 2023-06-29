@@ -24,7 +24,7 @@ public class KGQueryFactoryImpl implements KGQueryFactory {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
         if (parsedQuery instanceof ParsedTupleQuery)
-            return rdf4jFactory.createSelectQuery(queryString, parsedQuery, new MapBindingSet());
+            return rdf4jFactory.createSelectQuery(queryString, (ParsedTupleQuery)parsedQuery, new MapBindingSet());
         else
             throw new OntopInvalidKGQueryException("Not a valid SELECT query: " + queryString);
     }
@@ -34,7 +34,7 @@ public class KGQueryFactoryImpl implements KGQueryFactory {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
         if (parsedQuery instanceof ParsedBooleanQuery)
-            return rdf4jFactory.createAskQuery(queryString, parsedQuery, new MapBindingSet());
+            return rdf4jFactory.createAskQuery(queryString, (ParsedBooleanQuery)parsedQuery, new MapBindingSet());
         else
             throw new OntopInvalidKGQueryException("Not a valid ASK query: " + queryString);
     }
@@ -44,7 +44,7 @@ public class KGQueryFactoryImpl implements KGQueryFactory {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
         if ((parsedQuery instanceof ParsedGraphQuery) && !(parsedQuery instanceof ParsedDescribeQuery))
-            return rdf4jFactory.createConstructQuery(queryString, parsedQuery, new MapBindingSet());
+            return rdf4jFactory.createConstructQuery(queryString, (ParsedGraphQuery)parsedQuery, new MapBindingSet());
         else
             throw new OntopInvalidKGQueryException("Not a valid CONSTRUCT query: " + queryString);
     }
@@ -54,7 +54,7 @@ public class KGQueryFactoryImpl implements KGQueryFactory {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
         if (parsedQuery instanceof ParsedDescribeQuery)
-            return rdf4jFactory.createDescribeQuery(queryString, parsedQuery, new MapBindingSet());
+            return rdf4jFactory.createDescribeQuery(queryString, (ParsedDescribeQuery)parsedQuery, new MapBindingSet());
         else
             throw new OntopInvalidKGQueryException("Not a valid DESCRIBE query: " + queryString);
     }
@@ -67,18 +67,18 @@ public class KGQueryFactoryImpl implements KGQueryFactory {
     }
 
     @Override
-    public SPARQLQuery createSPARQLQuery(String queryString)
+    public SPARQLQuery<?> createSPARQLQuery(String queryString)
             throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
         if (parsedQuery instanceof ParsedTupleQuery)
-            return rdf4jFactory.createSelectQuery(queryString, parsedQuery, new MapBindingSet());
+            return rdf4jFactory.createSelectQuery(queryString, (ParsedTupleQuery)parsedQuery, new MapBindingSet());
         else if (parsedQuery instanceof ParsedBooleanQuery)
-            return rdf4jFactory.createAskQuery(queryString, parsedQuery, new MapBindingSet());
+            return rdf4jFactory.createAskQuery(queryString, (ParsedBooleanQuery)parsedQuery, new MapBindingSet());
         else if (parsedQuery instanceof ParsedDescribeQuery)
-            return rdf4jFactory.createDescribeQuery(queryString, parsedQuery, new MapBindingSet());
+            return rdf4jFactory.createDescribeQuery(queryString, (ParsedDescribeQuery)parsedQuery, new MapBindingSet());
         else if (parsedQuery instanceof ParsedGraphQuery)
-            return rdf4jFactory.createConstructQuery(queryString, parsedQuery, new MapBindingSet());
+            return rdf4jFactory.createConstructQuery(queryString, (ParsedGraphQuery)parsedQuery, new MapBindingSet());
         else
             throw new OntopUnsupportedKGQueryException("Unsupported query: " + queryString);
     }
@@ -89,9 +89,9 @@ public class KGQueryFactoryImpl implements KGQueryFactory {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
         if (parsedQuery instanceof ParsedDescribeQuery)
-            return rdf4jFactory.createDescribeQuery(queryString, parsedQuery, new MapBindingSet());
+            return rdf4jFactory.createDescribeQuery(queryString, (ParsedDescribeQuery)parsedQuery, new MapBindingSet());
         else if (parsedQuery instanceof ParsedGraphQuery)
-            return rdf4jFactory.createConstructQuery(queryString, parsedQuery, new MapBindingSet());
+            return rdf4jFactory.createConstructQuery(queryString, (ParsedGraphQuery)parsedQuery, new MapBindingSet());
         else
             throw new OntopUnsupportedKGQueryException("Unsupported query: " + queryString);
     }

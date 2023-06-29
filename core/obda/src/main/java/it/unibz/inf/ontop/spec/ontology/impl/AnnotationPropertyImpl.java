@@ -36,7 +36,7 @@ import org.apache.commons.rdf.api.IRI;
 
 public class AnnotationPropertyImpl implements AnnotationProperty {
 
-	private IRI iri;
+	private final IRI iri;
 
 	AnnotationPropertyImpl(IRI iri) {
 		this.iri = iri;

@@ -41,7 +41,7 @@ import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndCla
 public class S_Indexes_NewDAGTest extends TestCase {
 	
 
-	Logger log = LoggerFactory.getLogger(S_Indexes_NewDAGTest.class);
+	private final Logger log = LoggerFactory.getLogger(S_Indexes_NewDAGTest.class);
 
 	public S_Indexes_NewDAGTest (String name){
 		super(name);
@@ -117,7 +117,7 @@ public class S_Indexes_NewDAGTest extends TestCase {
 			for(ObjectPropertyExpression parent: Graphs.successorListOf(namedOP, vertex.getKey())){
 				result = contains(engine.getRange(parent), new SemanticIndexRange(index));
 				if (!result)
-					return result;
+					return false;
 			}
 		}
 		SimpleDirectedGraph<DataPropertyExpression, DefaultEdge> namedDP
@@ -128,7 +128,7 @@ public class S_Indexes_NewDAGTest extends TestCase {
 			for(DataPropertyExpression parent: Graphs.successorListOf(namedDP, vertex.getKey())){
 				result = contains(engine.getRange(parent), new SemanticIndexRange(index));
 				if (!result)
-					return result;
+					return false;
 			}
 		}
 		SimpleDirectedGraph<ClassExpression, DefaultEdge> namedCL
@@ -139,10 +139,10 @@ public class S_Indexes_NewDAGTest extends TestCase {
 			for(ClassExpression parent: Graphs.successorListOf(namedCL, vertex.getKey())) {
 				result = contains(engine.getRange((OClass)parent), new SemanticIndexRange(index));
 				if (!result)
-					return result;
+					return false;
 			}			
 		}
 		
-		return result;
+		return true;
 	}
 }

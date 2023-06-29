@@ -29,24 +29,26 @@ import org.eclipse.rdf4j.query.Query;
 import org.eclipse.rdf4j.query.impl.MapBindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
+import java.security.SecureRandom;
+
 /**
  * TODO: get rid of the query string and keeps the bindings separated from the ParsedQuery
  */
-public abstract class AbstractOntopQuery implements Query {
+public abstract class AbstractOntopQuery<Q extends ParsedQuery> implements Query {
 
     /**
      * TODO: remove the query string (when having a proper support of bindings)
      */
     private final String queryString;
-    private final ParsedQuery initialParsedQuery;
+    private final Q initialParsedQuery;
     private final String baseIRI;
     protected final OntopConnection conn;
     private final ImmutableMultimap<String, String> httpHeaders;
     protected int queryTimeout;
-    protected MapBindingSet bindings = new MapBindingSet();
+    protected final MapBindingSet bindings = new MapBindingSet();
 
     protected AbstractOntopQuery(String queryString, String baseIRI,
-                                 ParsedQuery initialParsedQuery, OntopConnection conn,
+                                 Q initialParsedQuery, OntopConnection conn,
                                  ImmutableMultimap<String, String> httpHeaders, OntopSystemSettings settings) {
         this.queryString = queryString;
         this.baseIRI = baseIRI;
@@ -121,13 +123,20 @@ public abstract class AbstractOntopQuery implements Query {
         return getMaxQueryTime();
     }
 
-    //all code below is copy-pasted from org.eclipse.rdf4j.repository.sparql.query.SPARQLOperation
+
     protected String getQueryString() {
         return queryString;
     }
 
-    protected ParsedQuery getParsedQuery() {
+    protected Q getParsedQuery() {
         return initialParsedQuery;
+    }
+
+    protected byte[] generateSalt() {
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[20];
+        random.nextBytes(salt);
+        return salt;
     }
 
     protected ImmutableMultimap<String, String> getHttpHeaders() {

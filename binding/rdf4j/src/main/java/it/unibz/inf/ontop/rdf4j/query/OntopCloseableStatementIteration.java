@@ -11,20 +11,16 @@ import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 
-import java.security.SecureRandom;
-
 public class OntopCloseableStatementIteration extends AbstractCloseableIteration<Statement, QueryEvaluationException> {
 
     private final OntopCloseableIterator<RDFFact, OntopConnectionException> iterator;
     private final ValueFactory valueFactory;
-    private final SecureRandom secureRandom;
     private final byte[] salt;
 
-    public OntopCloseableStatementIteration(OntopCloseableIterator<RDFFact, OntopConnectionException> iterator) {
+    public OntopCloseableStatementIteration(OntopCloseableIterator<RDFFact, OntopConnectionException> iterator, byte[] salt) {
         this.iterator = iterator;
         this.valueFactory = SimpleValueFactory.getInstance();
-        this.secureRandom = new SecureRandom();
-        this.salt = initByteSalt();
+        this.salt = salt;
     }
 
     @Override
@@ -64,11 +60,5 @@ public class OntopCloseableStatementIteration extends AbstractCloseableIteration
                 RDF4JHelper.getResource(rdfFact.getSubject(), salt),
                 valueFactory.createIRI(rdfFact.getProperty().getIRI().getIRIString()),
                 RDF4JHelper.getValue(rdfFact.getObject(), salt));
-    }
-
-    private byte[] initByteSalt() {
-        byte[] salt = new byte[20];
-        secureRandom.nextBytes(salt);
-        return salt;
     }
 }

@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
@@ -127,10 +126,27 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     private IRISafenessDeclarationFunctionSymbol iriSafenessDeclarationFunctionSymbol;
 
-    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsScalarMap;
-    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsBooleanMap;
-    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsNumberMap;
-    private Map<DBTermType, DBBooleanFunctionSymbol> isArrayMap;
+    private final Map<DBTermType, DBBooleanFunctionSymbol> jsonIsScalarMap;
+    private final Map<DBTermType, DBBooleanFunctionSymbol> jsonIsBooleanMap;
+    private final Map<DBTermType, DBBooleanFunctionSymbol> jsonIsNumberMap;
+    private final Map<DBTermType, DBBooleanFunctionSymbol> isArrayMap;
+
+    private DBFunctionSymbol checkAndConvertBooleanFunctionSymbol;
+    private DBFunctionSymbol checkAndConvertBooleanFromStringFunctionSymbol;
+    private DBFunctionSymbol checkAndConvertDoubleFunctionSymbol;
+    private DBFunctionSymbol checkAndConvertFloatFunctionSymbol;
+    private DBFunctionSymbol checkAndConvertFloatFromBooleanFunctionSymbol;
+    private DBFunctionSymbol checkAndConvertFloatFromDoubleFunctionSymbol;
+    private DBFunctionSymbol checkAndConvertFloatFromNonFPNumericFunctionSymbol;
+    private DBFunctionSymbol checkAndConvertDecimalFunctionSymbol;
+    private DBFunctionSymbol checkAndConvertDecimalFromBooleanFunctionSymbol;
+    private DBFunctionSymbol checkAndConvertIntegerFunctionSymbol;
+    private DBFunctionSymbol checkAndConvertIntegerFromBooleanFunctionSymbol;
+    private DBFunctionSymbol checkAndConvertStringFromDecimalFunctionSymbol;
+    private DBFunctionSymbol checkAndConvertDateTimeFromDateFunctionSymbol;
+    private DBFunctionSymbol checkAndConvertDateTimeFromStringFunctionSymbol;
+    private DBFunctionSymbol checkAndConvertDateFromDateTimeFunctionSymbol;
+    private DBFunctionSymbol checkAndConvertDateFromStringFunctionSymbol;
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
@@ -259,6 +275,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final DBTermType dbBooleanType;
     private final DBTermType dbIntegerType;
     private final DBTermType dbDecimalType;
+    private final DBTermType dbDoubleType;
+    private final DBTermType dbDateTimestampType;
+    private final DBTermType dbDateType;
 
     /**
      * Name (in the DB dialect), arity -> not predefined untyped DBFunctionSymbol
@@ -285,6 +304,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     private final Map<DBTermType, DBFunctionSymbol> minMap;
     private final Map<DBTermType, DBFunctionSymbol> maxMap;
+    private final Map<DBTermType, DBFunctionSymbol> sampleMap;
 
     // NB: Multi-threading safety is NOT a concern here
     // (we don't create fresh bnode templates for a SPARQL query)
@@ -302,6 +322,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.dbIntegerType = dbTypeFactory.getDBLargeIntegerType();
         this.dbDecimalType = dbTypeFactory.getDBDecimalType();
+        this.dbDoubleType = dbTypeFactory.getDBDoubleType();
+        this.dbDateTimestampType = dbTypeFactory.getDBDateTimestampType();
+        this.dbDateType = dbTypeFactory.getDBDateType();
 
         // NB: in terms of design, we prefer avoiding using tables as they are not thread-safe
         this.binaryMathTable = HashBasedTable.create();
@@ -347,6 +370,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         this.minMap = new ConcurrentHashMap<>();
         this.maxMap = new ConcurrentHashMap<>();
+        this.sampleMap = new ConcurrentHashMap<>();
 
         this.typeNullMap = new ConcurrentHashMap<>();
 
@@ -423,6 +447,23 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         rowNumberFct = createDBRowNumber();
         rowNumberWithOrderByFct = createDBRowNumberWithOrderBy();
         iriSafenessDeclarationFunctionSymbol = new IRISafenessDeclarationFunctionSymbolImpl(rootDBType);
+
+        checkAndConvertDateFromDateTimeFunctionSymbol = createCheckAndConvertDateFromDateTimeFunctionSymbol();
+        checkAndConvertDateFromStringFunctionSymbol = createCheckAndConvertDateFromStringFunctionSymbol();
+        checkAndConvertBooleanFunctionSymbol = createCheckAndConvertBooleanFunctionSymbol();
+        checkAndConvertBooleanFromStringFunctionSymbol = createCheckAndConvertBooleanFromStringFunctionSymbol();
+        checkAndConvertIntegerFunctionSymbol = createCheckAndConvertIntegerFunctionSymbol();
+        checkAndConvertIntegerFromBooleanFunctionSymbol = createCheckAndConvertIntegerFromBooleanFunctionSymbol();
+        checkAndConvertDecimalFunctionSymbol = createCheckAndConvertDecimalFunctionSymbol();
+        checkAndConvertDecimalFromBooleanFunctionSymbol = createCheckAndConvertDecimalFromBooleanFunctionSymbol();
+        checkAndConvertDoubleFunctionSymbol = createCheckAndConvertDoubleFunctionSymbol();
+        checkAndConvertFloatFunctionSymbol = createCheckAndConvertFloatFunctionSymbol();
+        checkAndConvertFloatFromBooleanFunctionSymbol = createCheckAndConvertFloatFromBooleanFunctionSymbol();
+        checkAndConvertFloatFromDoubleFunctionSymbol = createCheckAndConvertFloatFromDoubleFunctionSymbol();
+        checkAndConvertFloatFromNonFPNumericFunctionSymbol = createCheckAndConvertFloatFromNonFPNumericFunctionSymbol();
+        checkAndConvertStringFromDecimalFunctionSymbol = createCheckAndConvertStringFromDecimalFunctionSymbol();
+        checkAndConvertDateTimeFromDateFunctionSymbol = createCheckAndConvertDateTimeFromDateFunctionSymbol();
+        checkAndConvertDateTimeFromStringFunctionSymbol = createCheckAndConvertDateTimeFromStringFunctionSymbol();
     }
 
     protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createNormalizationMap() {
@@ -950,12 +991,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBFunctionSymbol getExtractFunctionSymbol(String component) {
-        return extractFunctionSymbolsMap.computeIfAbsent(component, c -> createExtractFunctionSymbol(c));
+        return extractFunctionSymbolsMap.computeIfAbsent(component, this::createExtractFunctionSymbol);
     }
 
     @Override
     public DBFunctionSymbol getCurrentDateTimeSymbol(String type) {
-        return currentDateTimeFunctionSymbolsMap.computeIfAbsent(type, c -> createCurrentDateTimeFunctionSymbol(c));
+        return currentDateTimeFunctionSymbolsMap.computeIfAbsent(type, this::createCurrentDateTimeFunctionSymbol);
     }
 
     /**
@@ -1059,14 +1100,17 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBFunctionSymbol getDBMin(DBTermType dbType) {
-        return minMap
-                .computeIfAbsent(dbType, t -> createDBMin(t));
+        return minMap.computeIfAbsent(dbType, this::createDBMin);
     }
 
     @Override
     public DBFunctionSymbol getDBMax(DBTermType dbType) {
-        return maxMap
-                .computeIfAbsent(dbType, t -> createDBMax(t));
+        return maxMap.computeIfAbsent(dbType, this::createDBMax);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSample(DBTermType dbType) {
+        return sampleMap.computeIfAbsent(dbType, this::createDBSample);
     }
 
     @Override
@@ -1115,11 +1159,66 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return iriSafenessDeclarationFunctionSymbol;
     }
 
+    @Override
+    public DBFunctionSymbol checkAndConvertBoolean() { return checkAndConvertBooleanFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol checkAndConvertBooleanFromString() { return checkAndConvertBooleanFromStringFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol checkAndConvertDouble() { return checkAndConvertDoubleFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol checkAndConvertFloat() { return checkAndConvertFloatFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol checkAndConvertFloatFromBoolean() { return checkAndConvertFloatFromBooleanFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol checkAndConvertFloatFromDouble() { return checkAndConvertFloatFromDoubleFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol checkAndConvertFloatFromNonFPNumeric() { return checkAndConvertFloatFromNonFPNumericFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol checkAndConvertDecimal() { return checkAndConvertDecimalFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol checkAndConvertDecimalFromBoolean() { return checkAndConvertDecimalFromBooleanFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol checkAndConvertInteger() { return checkAndConvertIntegerFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol checkAndConvertIntegerFromBoolean() { return checkAndConvertIntegerFromBooleanFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol checkAndConvertStringFromDecimal() { return checkAndConvertStringFromDecimalFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol checkAndConvertDateTimeFromDate() { return checkAndConvertDateTimeFromDateFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol checkAndConvertDateTimeFromString() { return checkAndConvertDateTimeFromStringFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol checkAndConvertDateFromDatetime() { return checkAndConvertDateFromDateTimeFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol checkAndConvertDateFromString() { return checkAndConvertDateFromStringFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol getDBArrayAccess() {
+        throw new UnsupportedOperationException("Array support unavailable for this DBMS");
+    }
+
     protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBSum(DBTermType termType, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBAvg(DBTermType termType, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBMin(DBTermType termType);
     protected abstract DBFunctionSymbol createDBMax(DBTermType termType);
+
+    protected abstract DBFunctionSymbol createDBSample(DBTermType termType);
 
     protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
         return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
@@ -1256,7 +1355,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     protected DBFunctionSymbol createDayFromDatetimeFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_DAY_FROM_DATE", rootDBType, dbIntegerType, false,
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_DAY_FROM_DATETIME", rootDBType, dbIntegerType, false,
                 this::serializeDayFromDatetime);
     }
 
@@ -1312,7 +1411,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected DBFunctionSymbol createDBRowNumberWithOrderBy() {
         return new UnaryDBFunctionSymbolWithSerializerImpl("ROW_NUMBER_WITH_ORDERBY", rootDBType, dbIntegerType, true,
-                (t, c, f) -> serializeDBRowNumberWithOrderBy(t, c, f));
+                this::serializeDBRowNumberWithOrderBy);
     }
 
 
@@ -1565,6 +1664,155 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected DBBooleanFunctionSymbol createJsonIsScalar(DBTermType dbType) {
         throw new UnsupportedOperationException("Unsupported JSON-like datatype: " + dbType.getName());
+    }
+
+    /**
+     * SPARQL XSD cast functions
+     */
+    protected abstract String serializeCheckAndConvertBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                              Function<ImmutableTerm, String> termConverter,
+                                                              TermFactory termFactory);
+
+    protected abstract String serializeCheckAndConvertBooleanFromString(ImmutableList<? extends ImmutableTerm> terms,
+                                                                        Function<ImmutableTerm, String> termConverter,
+                                                                        TermFactory termFactory);
+
+    protected abstract String serializeCheckAndConvertDouble(ImmutableList<? extends ImmutableTerm> terms,
+                                                             Function<ImmutableTerm, String> termConverter,
+                                                             TermFactory termFactory);
+
+    protected abstract String serializeCheckAndConvertFloat(ImmutableList<? extends ImmutableTerm> terms,
+                                                            Function<ImmutableTerm, String> termConverter,
+                                                            TermFactory termFactory);
+
+    protected abstract String serializeCheckAndConvertFloatFromBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                                       Function<ImmutableTerm, String> termConverter,
+                                                                       TermFactory termFactory);
+
+    protected abstract String serializeCheckAndConvertFloatFromDouble(ImmutableList<? extends ImmutableTerm> terms,
+                                                                      Function<ImmutableTerm, String> termConverter,
+                                                                      TermFactory termFactory);
+
+    protected abstract String serializeCheckAndConvertFloatFromNonFPNumeric(ImmutableList<? extends ImmutableTerm> terms,
+                                                                            Function<ImmutableTerm, String> termConverter,
+                                                                            TermFactory termFactory);
+
+    protected abstract String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
+                                                              Function<ImmutableTerm, String> termConverter,
+                                                              TermFactory termFactory);
+
+    protected abstract String serializeCheckAndConvertDecimalFromBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                                         Function<ImmutableTerm, String> termConverter,
+                                                                         TermFactory termFactory);
+
+    protected abstract String serializeCheckAndConvertInteger(ImmutableList<? extends ImmutableTerm> terms,
+                                                              Function<ImmutableTerm, String> termConverter,
+                                                              TermFactory termFactory);
+
+    protected abstract String serializeCheckAndConvertIntegerFromBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                                         Function<ImmutableTerm, String> termConverter,
+                                                                         TermFactory termFactory);
+
+    protected abstract String serializeCheckAndConvertStringFromDecimal(ImmutableList<? extends ImmutableTerm> terms,
+                                                                        Function<ImmutableTerm, String> termConverter,
+                                                                        TermFactory termFactory);
+
+    protected abstract String serializeCheckAndConvertDateTimeFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                                       Function<ImmutableTerm, String> termConverter,
+                                                                       TermFactory termFactory);
+
+    protected abstract String serializeCheckAndConvertDateTimeFromString(ImmutableList<? extends ImmutableTerm> terms,
+                                                                         Function<ImmutableTerm, String> termConverter,
+                                                                         TermFactory termFactory);
+
+    protected abstract String serializeCheckAndConvertDateFromDateTime(ImmutableList<? extends ImmutableTerm> terms,
+                                                                       Function<ImmutableTerm, String> termConverter,
+                                                                       TermFactory termFactory);
+
+    protected abstract String serializeCheckAndConvertDateFromString(ImmutableList<? extends ImmutableTerm> terms,
+                                                                     Function<ImmutableTerm, String> termConverter,
+                                                                     TermFactory termFactory);
+
+    protected DBFunctionSymbol createCheckAndConvertBooleanFunctionSymbol() {
+        return new UnaryCastDBFunctionSymbolWithSerializerImpl("DB_CHECK_AND_CONVERT_BOOLEAN", rootDBType, dbBooleanType, false,
+                this::serializeCheckAndConvertBoolean);
+    }
+
+    protected DBFunctionSymbol createCheckAndConvertBooleanFromStringFunctionSymbol() {
+        return new UnaryCastDBFunctionSymbolWithSerializerImpl("DB_CHECK_AND_CONVERT_BOOLEAN_FROM_STRING", dbStringType, dbBooleanType, false,
+                this::serializeCheckAndConvertBooleanFromString);
+    }
+
+    protected DBFunctionSymbol createCheckAndConvertDoubleFunctionSymbol() {
+        return new UnaryCastDBFunctionSymbolWithSerializerImpl("DB_CHECK_AND_CONVERT_DOUBLE", rootDBType, dbDoubleType, false,
+                this::serializeCheckAndConvertDouble);
+    }
+
+    protected DBFunctionSymbol createCheckAndConvertFloatFunctionSymbol() {
+        return new UnaryCastDBFunctionSymbolWithSerializerImpl("DB_CHECK_AND_CONVERT_FLOAT", rootDBType, dbDoubleType, false,
+                this::serializeCheckAndConvertFloat);
+    }
+
+    protected DBFunctionSymbol createCheckAndConvertFloatFromBooleanFunctionSymbol() {
+        return new UnaryCastDBFunctionSymbolWithSerializerImpl("DB_CHECK_AND_CONVERT_FLOAT_FROM_BOOLEAN", dbBooleanType, dbDoubleType, false,
+                this::serializeCheckAndConvertFloatFromBoolean);
+    }
+
+    protected DBFunctionSymbol createCheckAndConvertFloatFromDoubleFunctionSymbol() {
+        return new UnaryCastDBFunctionSymbolWithSerializerImpl("DB_CHECK_AND_CONVERT_FLOAT_FROM_DOUBLE", dbDoubleType, dbDoubleType, false,
+                this::serializeCheckAndConvertFloatFromDouble);
+    }
+
+    protected DBFunctionSymbol createCheckAndConvertFloatFromNonFPNumericFunctionSymbol() {
+        return new UnaryCastDBFunctionSymbolWithSerializerImpl("DB_CHECK_AND_CONVERT_FLOAT_FROM_NONFPNUMERIC", rootDBType, dbDoubleType, false,
+                this::serializeCheckAndConvertFloatFromNonFPNumeric);
+    }
+
+    protected DBFunctionSymbol createCheckAndConvertDecimalFunctionSymbol() {
+        return new UnaryCastDBFunctionSymbolWithSerializerImpl("DB_CHECK_AND_CONVERT_DECIMAL", rootDBType, dbDecimalType, false,
+                this::serializeCheckAndConvertDecimal);
+    }
+
+    protected DBFunctionSymbol createCheckAndConvertDecimalFromBooleanFunctionSymbol() {
+        return new UnaryCastDBFunctionSymbolWithSerializerImpl("DB_CHECK_AND_CONVERT_DECIMAL_FROM_BOOLEAN", dbBooleanType, dbDecimalType, false,
+                this::serializeCheckAndConvertDecimalFromBoolean);
+    }
+
+    protected DBFunctionSymbol createCheckAndConvertIntegerFunctionSymbol() {
+        return new UnaryCastDBFunctionSymbolWithSerializerImpl("DB_CHECK_AND_CONVERT_INTEGER", rootDBType, dbIntegerType, false,
+                this::serializeCheckAndConvertInteger);
+    }
+
+    protected DBFunctionSymbol createCheckAndConvertIntegerFromBooleanFunctionSymbol() {
+        return new UnaryCastDBFunctionSymbolWithSerializerImpl("DB_CHECK_AND_CONVERT_INTEGER_FROM_BOOLEAN", dbBooleanType, dbIntegerType, false,
+                this::serializeCheckAndConvertIntegerFromBoolean);
+    }
+
+    protected DBFunctionSymbol createCheckAndConvertStringFromDecimalFunctionSymbol() {
+        return new UnaryCastDBFunctionSymbolWithSerializerImpl("DB_CHECK_AND_CONVERT_STRING_FROM_DECIMAL", dbDecimalType, dbStringType, false,
+                this::serializeCheckAndConvertStringFromDecimal);
+    }
+
+    protected DBFunctionSymbol createCheckAndConvertDateTimeFromDateFunctionSymbol() {
+        return new UnaryCastDBFunctionSymbolWithSerializerImpl("DB_CHECK_AND_CONVERT_DATETIME_FROM_DATE", dbDateType,
+                dbDateTimestampType, false,
+                this::serializeCheckAndConvertDateTimeFromDate);
+    }
+
+    protected DBFunctionSymbol createCheckAndConvertDateTimeFromStringFunctionSymbol() {
+        return new UnaryCastDBFunctionSymbolWithSerializerImpl("DB_CHECK_AND_CONVERT_DATETIME_FROM_STRING", dbStringType,
+                dbDateTimestampType, false,
+                this::serializeCheckAndConvertDateTimeFromString);
+    }
+
+    protected DBFunctionSymbol createCheckAndConvertDateFromDateTimeFunctionSymbol() {
+        return new UnaryCastDBFunctionSymbolWithSerializerImpl("DB_DATE_FROM_DATETIME", dbDateTimestampType, dbDateType, false,
+                this::serializeCheckAndConvertDateFromDateTime);
+    }
+
+    protected DBFunctionSymbol createCheckAndConvertDateFromStringFunctionSymbol() {
+        return new UnaryCastDBFunctionSymbolWithSerializerImpl("DB_DATE_FROM_STRING", dbStringType, dbDateType, false,
+                this::serializeCheckAndConvertDateFromString);
     }
 
     /**

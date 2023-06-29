@@ -113,7 +113,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
         }
 
         OntologyImpl.ImmutableOntologyVocabularyCategoryImpl<T> getImmutableCopy() {
-            return new OntologyImpl.ImmutableOntologyVocabularyCategoryImpl<T>(ImmutableMap.copyOf(map), NOT_FOUND);
+            return new OntologyImpl.ImmutableOntologyVocabularyCategoryImpl<>(ImmutableMap.copyOf(map), NOT_FOUND);
         }
     }
 
@@ -617,7 +617,8 @@ public class OntologyBuilderImpl implements OntologyBuilder {
          * @throws InconsistentOntologyException
          */
 
-        void addDisjointness(T... es) throws InconsistentOntologyException {
+        @SafeVarargs
+        final void addDisjointness(T... es) throws InconsistentOntologyException {
             ImmutableList.Builder<T> sb = new ImmutableList.Builder<>();
             int numberOfTop = 0;
             for (T e : es) {
@@ -646,5 +647,5 @@ public class OntologyBuilderImpl implements OntologyBuilder {
             else // many tops
                 throw new InconsistentOntologyException();
         }
-    };
+    }
 }

@@ -154,7 +154,7 @@ public class TeiidTest {
         System.out.println(schema);
         while(rs.hasNext()) {
             OWLBindingSet bindingSet = rs.next();
-            List<String> ans = new ArrayList<String>();
+            List<String> ans = new ArrayList<>();
             for(String var: schema){
                 ans.add(bindingSet.getOWLObject(var).toString());
             }
@@ -176,12 +176,12 @@ public class TeiidTest {
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                         "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n" +
                         "select ?x  {?x rdf:type  :Student. ?x foaf:firstName ?y. filter regex(?y, \"a\", \"i\")}";
-        String sql="";
+
         IQ executableQuery = st.getExecutableQuery(query);
 
         System.out.println(executableQuery.toString());
 
-        sql = Optional.of(executableQuery.getTree())
+        String sql = Optional.of(executableQuery.getTree())
                 .filter(t -> t instanceof UnaryIQTree)
                 .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
                 .filter(n -> n instanceof NativeNode)

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 /**
  * Accessible through Guice (recommended) or through MappingCoreSingletons.
@@ -18,5 +18,5 @@ public interface TargetAtomFactory {
      * Used for Datalog conversion.
      * Please consider the other methods
      */
-    TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, ImmutableSubstitution<ImmutableTerm> substitution);
+    TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, Substitution<ImmutableTerm> substitution);
 }

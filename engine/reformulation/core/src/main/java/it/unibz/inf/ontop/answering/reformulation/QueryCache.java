@@ -10,9 +10,9 @@ import it.unibz.inf.ontop.iq.IQ;
  *
  */
 public interface QueryCache {
-    IQ get(KGQuery inputQuery);
+    IQ get(KGQuery<?> inputQuery);
 
-    void put(KGQuery inputQuery, IQ executableQuery);
+    void put(KGQuery<?> inputQuery, IQ executableQuery);
 
     void clear();
 }

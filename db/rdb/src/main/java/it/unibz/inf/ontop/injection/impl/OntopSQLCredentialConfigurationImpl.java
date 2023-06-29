@@ -48,30 +48,28 @@ public class OntopSQLCredentialConfigurationImpl extends OntopSQLCoreConfigurati
         }
     }
 
-    protected static class DefaultOntopSQLCredentialBuilderFragment<B extends OntopSQLCredentialConfiguration.Builder<B>> implements
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    protected abstract static class DefaultOntopSQLCredentialBuilderFragment<B extends OntopSQLCredentialConfiguration.Builder<B>> implements
             OntopSQLCredentialConfiguration.OntopSQLCredentialBuilderFragment<B> {
 
-        private final B builder;
         private Optional<String> jdbcUser = Optional.empty();
         private Optional<String> jbdcPassword = Optional.empty();
 
-        DefaultOntopSQLCredentialBuilderFragment(B builder) {
-            this.builder = builder;
-        }
+        protected abstract B self();
 
         @Override
         public B jdbcUser(String username) {
             this.jdbcUser = Optional.of(username);
-            return builder;
+            return self();
         }
 
         @Override
         public B jdbcPassword(String password) {
             this.jbdcPassword = Optional.of(password);
-            return builder;
+            return self();
         }
 
-        Properties generateProperties() {
+        protected Properties generateProperties() {
             Properties properties = new Properties();
             jdbcUser.ifPresent(s -> properties.setProperty(OntopSQLCredentialSettings.JDBC_USER, s));
             jbdcPassword.ifPresent(s -> properties.setProperty(OntopSQLCredentialSettings.JDBC_PASSWORD, s));
@@ -79,10 +77,9 @@ public class OntopSQLCredentialConfigurationImpl extends OntopSQLCoreConfigurati
             return properties;
         }
 
-        final OntopSQLCredentialOptions generateSQLCredentialOptions(OntopSQLCoreOptions sqlCoreOptions) {
+        protected final OntopSQLCredentialOptions generateSQLCredentialOptions(OntopSQLCoreOptions sqlCoreOptions) {
             return new OntopSQLCredentialOptions(sqlCoreOptions);
         }
-
     }
 
     protected abstract static class OntopSQLCredentialBuilderMixin<B extends OntopSQLCredentialConfiguration.Builder<B>>
@@ -92,7 +89,12 @@ public class OntopSQLCredentialConfigurationImpl extends OntopSQLCoreConfigurati
         private final DefaultOntopSQLCredentialBuilderFragment<B> sqlBuilderFragment;
 
         protected OntopSQLCredentialBuilderMixin() {
-            sqlBuilderFragment = new DefaultOntopSQLCredentialBuilderFragment<>((B)this);
+            sqlBuilderFragment = new DefaultOntopSQLCredentialBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopSQLCredentialBuilderMixin.this.self();
+                }
+            };
         }
 
         @Override
@@ -112,13 +114,12 @@ public class OntopSQLCredentialConfigurationImpl extends OntopSQLCoreConfigurati
             return properties;
         }
 
-        OntopSQLCredentialOptions generateSQLCredentialOptions() {
+        protected final OntopSQLCredentialOptions generateSQLCredentialOptions() {
             return sqlBuilderFragment.generateSQLCredentialOptions(generateSQLCoreOptions());
         }
     }
 
-    public static class BuilderImpl<B extends OntopSQLCredentialConfiguration.Builder<B>>
-            extends OntopSQLCredentialBuilderMixin<B> {
+    public static class BuilderImpl extends OntopSQLCredentialBuilderMixin<BuilderImpl> {
 
         @Override
         public OntopSQLCredentialConfiguration build() {
@@ -126,6 +127,11 @@ public class OntopSQLCredentialConfigurationImpl extends OntopSQLCoreConfigurati
             OntopSQLCredentialOptions options = generateSQLCredentialOptions();
 
             return new OntopSQLCredentialConfigurationImpl(settings, options);
+        }
+
+        @Override
+        protected BuilderImpl self() {
+            return this;
         }
     }
 

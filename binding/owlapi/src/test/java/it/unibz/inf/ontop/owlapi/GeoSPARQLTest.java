@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.h2gis.functions.factory.H2GISFunctions;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLIndividual;
@@ -428,8 +427,7 @@ public class GeoSPARQLTest {
             assertTrue(rs.hasNext());
             final OWLBindingSet bindingSet = rs.next();
             OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
-            String retval = ind1.toString();
-            return retval;
+            return ind1.toString();
         }
     }
 
@@ -1420,8 +1418,7 @@ public class GeoSPARQLTest {
     private boolean runQueryAndReturnBooleanX(String query) throws Exception {
         try (OWLStatement st = conn.createStatement()) {
             BooleanOWLResultSet rs = st.executeAskQuery(query);
-            boolean retval = rs.getValue();
-            return retval;
+            return rs.getValue();
         }
     }
 

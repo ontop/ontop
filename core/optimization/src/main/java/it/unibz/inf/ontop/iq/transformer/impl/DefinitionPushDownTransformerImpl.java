@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -11,18 +10,18 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVisitingTransformer
         implements DefinitionPushDownTransformer {
@@ -32,26 +31,28 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
 
+    private final IQTreeTools iqTreeTools;
+
     @AssistedInject
     protected DefinitionPushDownTransformerImpl(@Assisted DefinitionPushDownRequest request,
                                                 IntermediateQueryFactory iqFactory,
                                                 OptimizerFactory optimizerFactory,
                                                 SubstitutionFactory substitutionFactory,
-                                                TermFactory termFactory) {
+                                                TermFactory termFactory,
+                                                IQTreeTools iqTreeTools) {
         super(iqFactory);
         this.request = request;
         this.optimizerFactory = optimizerFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
     public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
-        ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
+        Substitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
 
-        ImmutableSet<Variable> newProjectedVariables = Sets.union(
-                tree.getVariables(),
-                ImmutableSet.of(request.getNewVariable())).immutableCopy();
+        ImmutableSet<Variable> newProjectedVariables = iqTreeTools.getChildrenVariables(tree,  request.getNewVariable());
 
         DefinitionPushDownRequest newRequest = request.newRequest(rootNode.getSubstitution());
         if (newRequest.equals(request))
@@ -74,11 +75,11 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
                 });
 
         return optionalLocalDefinition
-                .flatMap(d -> initialSubstitution.union(
-                        substitutionFactory.getSubstitution(newRequest.getNewVariable(), d)))
-                .map(s -> iqFactory.createConstructionNode(newProjectedVariables, s))
                 // Stops the definition to the new construction node
-                .map(c -> iqFactory.createUnaryIQTree(c, child))
+                .map(d -> iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(newProjectedVariables,
+                                substitutionFactory.union(initialSubstitution, substitutionFactory.getSubstitution(newRequest.getNewVariable(), d))),
+                        child))
                 // Otherwise, continues
                 .orElseGet(() -> iqFactory.createUnaryIQTree(
                         iqFactory.createConstructionNode(newProjectedVariables, initialSubstitution),
@@ -182,7 +183,7 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
         Variable newVariable = request.getNewVariable();
 
         ConstructionNode constructionNode = iqFactory.createConstructionNode(
-                Sets.union(tree.getVariables(), ImmutableSet.of(newVariable)).immutableCopy(),
+                iqTreeTools.getChildrenVariables(tree, newVariable),
                 substitutionFactory.getSubstitution(newVariable,
                         termFactory.getIfElseNull(
                                 request.getCondition(),

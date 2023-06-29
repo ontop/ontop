@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TermType;
 import org.apache.commons.rdf.api.IRI;

@@ -8,8 +8,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static org.junit.Assert.assertEquals;
-
 public class RDF4JR2RMLConstantLangTagTest extends AbstractRDF4JTest {
 
     @BeforeClass

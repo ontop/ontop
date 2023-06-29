@@ -115,7 +115,7 @@ public class LocalJDBCConnectionUtils {
         }
 
         @Override
-        public boolean isClosed() throws SQLException {
+        public boolean isClosed()  {
             return isClosed;
         }
 
@@ -280,7 +280,7 @@ public class LocalJDBCConnectionUtils {
                 getConnection().setClientInfo(name, value);
             } catch (SQLClientInfoException e) {
                 throw e;
-            } catch (SQLException e) {
+            } catch (SQLException ignored) {
             }
         }
 
@@ -290,7 +290,7 @@ public class LocalJDBCConnectionUtils {
                 getConnection().setClientInfo(properties);
             } catch (SQLClientInfoException e) {
                 throw e;
-            } catch (SQLException e) {
+            } catch (SQLException ignored) {
             }
         }
 

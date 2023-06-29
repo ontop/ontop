@@ -18,13 +18,11 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Singleton
 public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
 
     private final TermFactory termFactory;
-
     @Inject
     private BasicSingleTermTypeExtractor(TermFactory termFactory) {
         this.termFactory = termFactory;
@@ -120,9 +118,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         @Override
         public Optional<TermType> visitValues(ValuesNode valuesNode) {
             ImmutableSet<TermType> termTypes = valuesNode.getValueStream(variable)
-                    .flatMap(c -> c.getOptionalType()
-                            .map(Stream::of)
-                            .orElseGet(Stream::empty))
+                    .flatMap(c -> c.getOptionalType().stream())
                     .collect(ImmutableCollectors.toSet());
 
             return termTypes.stream()
@@ -145,7 +141,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         }
 
         protected Optional<TermType> visitExtendedProjection(ExtendedProjectionNode rootNode, IQTree child) {
-            return typeExtractor.extractSingleTermType(rootNode.getSubstitution().applyToVariable(variable), child);
+            return typeExtractor.extractSingleTermType(rootNode.getSubstitution().apply(variable), child);
         }
 
         @Override
@@ -156,13 +152,12 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         @Override
         public Optional<TermType> visitFlatten(FlattenNode flattenNode, IQTree child) {
             if (variable.equals(flattenNode.getOutputVariable())) {
-                return flattenNode.inferOutputType(
-                        typeExtractor.extractSingleTermType(
-                                flattenNode.getFlattenedVariable(),
-                                child
-                        ));
+                /* We prefer to rely on the data type provided in the lens rather than the inferred one,
+                   because it is more accurate than what we can obtain from the JDBC.
+                 */
+                return flattenNode.inferOutputType(Optional.of(flattenNode.getFlattenedType()));
             }
-            if(flattenNode.getIndexVariable().isPresent() && variable.equals(flattenNode.getIndexVariable().get())) {
+            if (flattenNode.getIndexVariable().isPresent() && variable.equals(flattenNode.getIndexVariable().get())) {
                 return flattenNode.getIndexVariableType();
             }
             return child.acceptVisitor(this);
@@ -228,8 +223,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         public Optional<TermType> visitUnion(UnionNode rootNode, ImmutableList<IQTree> children) {
             ImmutableSet<TermType> termTypes = children.stream()
                     .map(c -> c.acceptVisitor(this))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
+                    .flatMap(Optional::stream)
                     .collect(ImmutableCollectors.toSet());
 
             // Picks arbitrarily one of them

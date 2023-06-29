@@ -2,10 +2,10 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.GenericDBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import org.apache.commons.rdf.api.IRI;
 
@@ -302,6 +302,7 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBMin(DBTermType dbType);
     DBFunctionSymbol getDBMax(DBTermType dbType);
+    DBFunctionSymbol getDBSample(DBTermType dbType);
 
     DBFunctionSymbol getNullIgnoringDBGroupConcat(boolean isDistinct);
 
@@ -368,7 +369,27 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBJsonIsBoolean(DBTermType dbType);
     DBBooleanFunctionSymbol getDBJsonIsScalar(DBTermType dbType);
     DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType);
+    DBFunctionSymbol getDBArrayAccess();
 
     IRISafenessDeclarationFunctionSymbol getIRISafenessDeclaration();
+
+    // RDF XSD Cast
+
+    DBFunctionSymbol checkAndConvertBoolean();
+    DBFunctionSymbol checkAndConvertBooleanFromString();
+    DBFunctionSymbol checkAndConvertDouble();
+    DBFunctionSymbol checkAndConvertFloat();
+    DBFunctionSymbol checkAndConvertFloatFromBoolean();
+    DBFunctionSymbol checkAndConvertFloatFromDouble();
+    DBFunctionSymbol checkAndConvertFloatFromNonFPNumeric();
+    DBFunctionSymbol checkAndConvertDecimal();
+    DBFunctionSymbol checkAndConvertDecimalFromBoolean();
+    DBFunctionSymbol checkAndConvertInteger();
+    DBFunctionSymbol checkAndConvertIntegerFromBoolean();
+    DBFunctionSymbol checkAndConvertStringFromDecimal();
+    DBFunctionSymbol checkAndConvertDateTimeFromDate();
+    DBFunctionSymbol checkAndConvertDateTimeFromString();
+    DBFunctionSymbol checkAndConvertDateFromDatetime();
+    DBFunctionSymbol checkAndConvertDateFromString();
 
 }

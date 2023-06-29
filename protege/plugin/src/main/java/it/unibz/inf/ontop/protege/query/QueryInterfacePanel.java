@@ -313,7 +313,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 	private OntopQuerySwingWorker<Void, String[]> getSelectQueryWorker(OntopProtegeReasoner ontop) {
 		DefaultTableModel tableModel = resetTableModel(new String[0]);
 
-		return new OntopQuerySwingWorker<Void, String[]>(ontop, queryTextPane.getText(), getParent(),
+		return new OntopQuerySwingWorker<>(ontop, queryTextPane.getText(), getParent(),
 				"Execute SELECT Query", executeButton, stopButton, executionInfoLabel) {
 
 			@Override
@@ -347,7 +347,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 	private OntopQuerySwingWorker<Void, String> getGraphQueryWorker(OntopProtegeReasoner ontop) {
 		DefaultTableModel tableModel = resetTableModel(new String[] { "RDF triples" });
-		return new OntopQuerySwingWorker<Void, String>(ontop, queryTextPane.getText(), getParent(),
+		return new OntopQuerySwingWorker<>(ontop, queryTextPane.getText(), getParent(),
 				"Execute CONSTRUCT/DESCRIBE Query", executeButton, stopButton, executionInfoLabel) {
 
 			@Override
@@ -367,7 +367,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 			@Override
 			protected void process(java.util.List<String> chunks) {
-				chunks.forEach(c -> tableModel.addRow(new String[] { c }));
+				chunks.forEach(c -> tableModel.addRow(new String[]{c}));
 			}
 
 			@Override
@@ -380,8 +380,8 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 	private OntopQuerySwingWorker<Boolean, Void> getAskQueryWorker(OntopProtegeReasoner ontop) {
 		resetTableModel(new String[0]);
 
-		return new OntopQuerySwingWorker<Boolean, Void>(ontop, queryTextPane.getText(), getParent(),
-						"Execute ASK Query", executeButton, stopButton, executionInfoLabel) {
+		return new OntopQuerySwingWorker<>(ontop, queryTextPane.getText(), getParent(),
+				"Execute ASK Query", executeButton, stopButton, executionInfoLabel) {
 			@Override
 			protected Boolean runQuery(OntopOWLStatement statement, String query) throws Exception {
 				return statement.executeAskQuery(query).getValue();
@@ -423,7 +423,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 	}
 
 	private OntopQuerySwingWorker<String, Void> getViewIqWorker(OntopProtegeReasoner ontop) {
-		return new OntopQuerySwingWorker<String, Void>(ontop, queryTextPane.getText(), getParent(), "Rewriting query") {
+		return new OntopQuerySwingWorker<>(ontop, queryTextPane.getText(), getParent(), "Rewriting query") {
 			@Override
 			protected String runQuery(OntopOWLStatement statement, String query) throws Exception {
 				return statement.getRewritingRendering(query);
@@ -442,7 +442,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 	}
 
 	private OntopQuerySwingWorker<String, Void> getViewSqlWorker(OntopProtegeReasoner ontop) {
-		return new OntopQuerySwingWorker<String, Void>(ontop, queryTextPane.getText(), getParent(), "Rewriting query") {
+		return new OntopQuerySwingWorker<>(ontop, queryTextPane.getText(), getParent(), "Rewriting query") {
 
 			@Override
 			protected String runQuery(OntopOWLStatement statement, String query) throws Exception {
@@ -458,7 +458,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 	}
 
 	private OntopQuerySwingWorker<Long, Void> getCountResultsWorker(OntopProtegeReasoner ontop) {
-		return new OntopQuerySwingWorker<Long, Void>(ontop, queryTextPane.getText(), getParent(), "Counting results") {
+		return new OntopQuerySwingWorker<>(ontop, queryTextPane.getText(), getParent(), "Counting results") {
 
 			@Override
 			protected Long runQuery(OntopOWLStatement statement, String query) throws Exception {
@@ -467,7 +467,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 			@Override
 			protected void onCompletion(Long result, String sqlQuery) {
-				showStatus(formatStatus(elapsedTimeMillis(),"The number of results: <b>" + result + "</b>."), sqlQuery);
+				showStatus(formatStatus(elapsedTimeMillis(), "The number of results: <b>" + result + "</b>."), sqlQuery);
 			}
 		};
 	}

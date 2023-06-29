@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -66,7 +65,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
                 injector = injectorSupplier.get();
             }
             else {
-                Set<Class> moduleClasses = new HashSet<>();
+                Set<Class<? extends Module>> moduleClasses = new HashSet<>();
 
                 // Only keeps the first instance of a module class
                 ImmutableList<Module> modules = buildGuiceModules()
@@ -81,7 +80,6 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
 
     /**
      * To be overloaded
-     *
      */
     protected Stream<Module> buildGuiceModules() {
         return Stream.of(new OntopModelModule(this));
@@ -135,27 +133,14 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
         }
     }
 
-    protected static class DefaultOntopModelBuilderFragment<B extends Builder<B>> implements OntopModelBuilderFragment<B> {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    protected abstract static class DefaultOntopModelBuilderFragment<B extends Builder<B>> implements OntopModelBuilderFragment<B> {
 
-        private final B builder;
         private Optional<Boolean> testMode = Optional.empty();
 
-        /**
-         * To be called when NOT INHERITING
-         */
-        protected DefaultOntopModelBuilderFragment(B builder) {
-            this.builder = builder;
-        }
-
-        /**
-         * To be called ONLY by the local BuilderImpl static class
-         */
-        private DefaultOntopModelBuilderFragment() {
-            this.builder = (B) this;
-        }
-
-
         private Optional<Properties> inputProperties = Optional.empty();
+
+        protected abstract B self();
 
         /**
          * Have precedence over other parameters
@@ -163,7 +148,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
         @Override
         public final B properties(@Nonnull Properties properties) {
             this.inputProperties = Optional.of(properties);
-            return builder;
+            return self();
         }
 
         @Override
@@ -179,7 +164,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
         @Override
         public B enableTestMode() {
             testMode = Optional.of(true);
-            return builder;
+            return self();
         }
 
         /**
@@ -206,16 +191,20 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
      * Builder
      *
      */
-    public final static class BuilderImpl<B extends Builder<B>> extends DefaultOntopModelBuilderFragment<B>
-            implements Builder<B> {
+    public final static class BuilderImpl extends DefaultOntopModelBuilderFragment<BuilderImpl> implements Builder<BuilderImpl> {
 
         @Override
-        public final OntopModelConfiguration build() {
+        public OntopModelConfiguration build() {
             Properties p = generateProperties();
 
             return new OntopModelConfigurationImpl(
                     new OntopModelSettingsImpl(p),
                     generateModelOptions());
+        }
+
+        @Override
+        protected BuilderImpl self() {
+            return this;
         }
     }
 

@@ -9,18 +9,17 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency> {
@@ -28,16 +27,16 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
     private final OptimizationState noSolutionState;
     protected final IntermediateQueryFactory iqFactory;
     protected final TermFactory termFactory;
-    protected final ImmutableUnificationTools unificationTools;
     protected final SubstitutionFactory substitutionFactory;
     private final ConstructionSubstitutionNormalizer substitutionNormalizer;
+    protected final IQTreeTools iqTreeTools;
 
-    public AbstractSelfJoinSimplifier(CoreSingletons coreSingletons) {
+    public AbstractSelfJoinSimplifier(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
         this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
-        this.unificationTools = coreSingletons.getUnificationTools();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
+        this.iqTreeTools = iqTreeTools;
         this.noSolutionState = new OptimizationState(ImmutableSet.of(), ImmutableList.of(), substitutionFactory.getSubstitution());
     }
 
@@ -80,9 +79,9 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         }
 
         // NB: may return an unifier with no entry
-        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalUnifier = unifySubstitutions(
-                optimizationStates.stream()
-                        .map(s -> s.substitution));
+        Optional<Substitution<VariableOrGroundTerm>> optionalUnifier = optimizationStates.stream()
+                        .map(s -> s.substitution)
+                        .collect(substitutionFactory.onVariableOrGroundTerms().toUnifier());
 
         /*
          * Second empty case: incompatible unifications between relations
@@ -90,7 +89,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         if (!optionalUnifier.isPresent()) {
             return Optional.of(iqFactory.createEmptyNode(projectedVariables));
         }
-        ImmutableSubstitution<VariableOrGroundTerm> unifier = optionalUnifier.get();
+        Substitution<VariableOrGroundTerm> unifier = optionalUnifier.get();
 
         ImmutableList<IQTree> optimizedExtensionalDataNodes = optimizationStates.stream()
                 .flatMap(s -> s.extensionalDataNodes.stream())
@@ -121,18 +120,17 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
     protected abstract boolean hasConstraint(ExtensionalDataNode node);
 
     private IQTree buildNewTree(ImmutableList<IQTree> children, Optional<ImmutableExpression> expression,
-                                ImmutableSubstitution<VariableOrGroundTerm> unifier,
+                                Substitution<VariableOrGroundTerm> unifier,
                                 ImmutableSet<Variable> projectedVariables,
                                 VariableGenerator variableGenerator) {
 
         ImmutableList<IQTree> newChildren = unifier.isEmpty()
                 ? children
                 : children.stream()
-                .map(t -> t.applyDescendingSubstitution(unifier, Optional.empty(), variableGenerator))
-                .collect(ImmutableCollectors.toList());
+                    .map(t -> t.applyDescendingSubstitution(unifier, Optional.empty(), variableGenerator))
+                    .collect(ImmutableCollectors.toList());
 
-        Optional<ImmutableExpression> newExpression = expression
-                .map(unifier::applyToBooleanExpression);
+        Optional<ImmutableExpression> newExpression = expression.map(unifier::apply);
 
         IQTree newTree;
         switch (newChildren.size()) {
@@ -141,28 +139,24 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
             case 1:
                 IQTree child = newChildren.iterator().next();
                 newTree = newExpression
-                        .map(e -> (IQTree) iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), child))
+                        .<IQTree>map(e ->iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), child))
                         .orElse(child);
                 break;
             default:
                 newTree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(newExpression), newChildren);
         }
 
-        ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization = substitutionNormalizer
-                .normalizeSubstitution((ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)unifier,
-                        projectedVariables);
+        ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
+                substitutionNormalizer.normalizeSubstitution(unifier, projectedVariables);
         IQTree normalizedNewTree = normalization.updateChild(newTree, variableGenerator);
 
-        ImmutableSubstitution<ImmutableTerm> normalizedTopSubstitution = normalization.getNormalizedSubstitution();
+        Substitution<ImmutableTerm> normalizedTopSubstitution = normalization.getNormalizedSubstitution();
 
         return normalizedTopSubstitution.isEmpty()
-                ? normalizedNewTree.getVariables().size() == projectedVariables.size()
-                    ? normalizedNewTree
-                    // Makes sure no additional variables is projected
-                    : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(projectedVariables), normalizedNewTree)
+                ? iqTreeTools.createConstructionNodeTreeIfNontrivial(normalizedNewTree, projectedVariables)
                 : iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(projectedVariables, normalizedTopSubstitution),
-                normalizedNewTree);
+                        iqFactory.createConstructionNode(projectedVariables, normalizedTopSubstitution),
+                        normalizedNewTree);
     }
 
 
@@ -196,8 +190,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         ImmutableMap<ImmutableList<Optional<VariableOrGroundTerm>>, Collection<ExtensionalDataNode>> map = state.extensionalDataNodes.stream()
                 .collect(ImmutableCollectors.toMultimap(
                         n -> ucIndexes.stream()
-                                .map(i -> Optional.ofNullable(n.getArgumentMap().get(i))
-                                        .map(t -> (VariableOrGroundTerm) t))
+                                .map(i -> Optional.<VariableOrGroundTerm>ofNullable(n.getArgumentMap().get(i)))
                                 .collect(ImmutableCollectors.toList()),
                         n -> n)).asMap();
 
@@ -218,17 +211,17 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         if (simplifications.stream().anyMatch(s -> !s.isPresent()))
             return noSolutionState;
 
-        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalUnifier = unifySubstitutions(
-                Stream.concat(
+        Optional<Substitution<VariableOrGroundTerm>> optionalUnifier = Stream.concat(
                         simplifications.stream()
                                 .map(Optional::get)
                                 .map(s -> s.substitution),
-                        Stream.of(state.substitution)));
+                        Stream.of(state.substitution))
+                .collect(substitutionFactory.onVariableOrGroundTerms().toUnifier());
 
         if (!optionalUnifier.isPresent()) {
             return noSolutionState;
         }
-        ImmutableSubstitution<VariableOrGroundTerm> unifier = optionalUnifier.get();
+        Substitution<VariableOrGroundTerm> unifier = optionalUnifier.get();
 
         ImmutableSet<ImmutableExpression> newExpressions = Stream.concat(
                 state.newExpressions.stream(),
@@ -244,62 +237,18 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                         map.entrySet().stream()
                                 .filter(e -> e.getKey().stream().anyMatch(o -> !o.isPresent()) || e.getValue().size() < 2)
                                 .flatMap(e -> e.getValue().stream()))
-                .map(n -> applySubstitution(unifier, n))
+                .map(n -> iqFactory.createExtensionalDataNode(
+                        n.getRelationDefinition(),
+                        substitutionFactory.onVariableOrGroundTerms().applyToTerms(unifier, n.getArgumentMap())))
                 .collect(ImmutableCollectors.toList());
 
         return new OptimizationState(newExpressions, newDataNodes, unifier);
-    }
-
-    private ExtensionalDataNode applySubstitution(ImmutableSubstitution<VariableOrGroundTerm> substitution,
-                                                  ExtensionalDataNode dataNode) {
-        return iqFactory.createExtensionalDataNode(
-                dataNode.getRelationDefinition(),
-                substitution.applyToArgumentMap(dataNode.getArgumentMap()));
     }
 
     protected abstract Optional<DeterminantGroupEvaluation> evaluateDeterminantGroup(ImmutableList<VariableOrGroundTerm> determinants,
                                                                                      Collection<ExtensionalDataNode> dataNodes,
                                                                                      C constraint);
 
-    protected Optional<ImmutableUnificationTools.ArgumentMapUnification> unifyDataNodes(
-            Stream<ExtensionalDataNode> dataNodes,
-            Function<ExtensionalDataNode, ImmutableMap<Integer, ? extends VariableOrGroundTerm>> argumentMapSelector) {
-         return dataNodes
-                .reduce(null,
-                        (o, n) -> o == null
-                                ? Optional.of(new ImmutableUnificationTools.ArgumentMapUnification(
-                                argumentMapSelector.apply(n),
-                                substitutionFactory.getSubstitution()))
-                                : o.flatMap(u -> unify(u, argumentMapSelector.apply(n))),
-                        (m1, m2) -> {
-                            throw new MinorOntopInternalBugException("Was not expected to be runned in //");
-                        });
-    }
-
-    private Optional<ImmutableUnificationTools.ArgumentMapUnification> unify(
-            ImmutableUnificationTools.ArgumentMapUnification previousUnification,
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap) {
-
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> updatedArgumentMap =
-                previousUnification.substitution.applyToArgumentMap(argumentMap);
-
-        return unificationTools.computeArgumentMapMGU(previousUnification.argumentMap, updatedArgumentMap)
-                .flatMap(u -> previousUnification.substitution.isEmpty()
-                        ? Optional.of(u)
-                        : unificationTools.computeAtomMGUS(previousUnification.substitution, u.substitution)
-                        .map(s -> new ImmutableUnificationTools.ArgumentMapUnification(u.argumentMap, s)));
-    }
-
-
-    private Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifySubstitutions(
-            Stream<ImmutableSubstitution<VariableOrGroundTerm>> substitutions) {
-        return substitutions
-                .reduce(Optional.of(substitutionFactory.getSubstitution()),
-                        (o, s) -> o.flatMap(s1 -> unificationTools.computeAtomMGUS(s1, s)),
-                        (s1, s2) -> {
-                            throw new MinorOntopInternalBugException("No //");
-                        });
-    }
 
     /**
      * TODO: we don't need to remove the functional terms for the determinants
@@ -317,7 +266,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
             ImmutableMap<GroundFunctionalTerm, Variable> groundFunctionalTermMap = groundFunctionalTerms.stream()
                     .collect(ImmutableCollectors.toMap(
                             t -> t,
-                            t -> termFactory.getVariable("v" + UUID.randomUUID().toString())
+                            t -> termFactory.getVariable("v" + UUID.randomUUID())
                     ));
 
             ImmutableList<ExtensionalDataNode> newDataNodes = dataNodes.stream()
@@ -340,7 +289,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         ImmutableMap<Integer, VariableOrGroundTerm> newArgumentMap = dataNode.getArgumentMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
-                        e -> Optional.ofNullable((VariableOrGroundTerm) groundFunctionalTermMap.get(e.getValue()))
+                        e -> Optional.<VariableOrGroundTerm>ofNullable(groundFunctionalTermMap.get(e.getValue()))
                                 .orElseGet(e::getValue)));
         return iqFactory.createExtensionalDataNode(dataNode.getRelationDefinition(), newArgumentMap);
     }
@@ -351,11 +300,11 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
     protected static class OptimizationState {
         public final ImmutableSet<ImmutableExpression> newExpressions;
         public final Collection<ExtensionalDataNode> extensionalDataNodes;
-        public final ImmutableSubstitution<VariableOrGroundTerm> substitution;
+        public final Substitution<VariableOrGroundTerm> substitution;
 
         protected OptimizationState(ImmutableSet<ImmutableExpression> newExpressions,
                                   Collection<ExtensionalDataNode> extensionalDataNodes,
-                                  ImmutableSubstitution<VariableOrGroundTerm> substitution) {
+                                  Substitution<VariableOrGroundTerm> substitution) {
             this.newExpressions = newExpressions;
             this.extensionalDataNodes = extensionalDataNodes;
             this.substitution = substitution;
@@ -365,10 +314,10 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
     protected static class DeterminantGroupEvaluation {
         public final ImmutableSet<ImmutableExpression> expressions;
         public final ImmutableList<ExtensionalDataNode> dataNodes;
-        public final ImmutableSubstitution<VariableOrGroundTerm> substitution;
+        public final Substitution<VariableOrGroundTerm> substitution;
 
         protected DeterminantGroupEvaluation(ImmutableSet<ImmutableExpression> expressions, ImmutableList<ExtensionalDataNode> dataNodes,
-                                             ImmutableSubstitution<VariableOrGroundTerm> substitution) {
+                                             Substitution<VariableOrGroundTerm> substitution) {
             this.expressions = expressions;
             this.dataNodes = dataNodes;
             this.substitution = substitution;

@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.optimizer.SelfJoinUCIQOptimizer;
@@ -84,8 +85,8 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
     protected static class SelfJoinUCSimplifier extends AbstractSelfJoinSimplifier<UniqueConstraint> {
 
         @Inject
-        protected SelfJoinUCSimplifier(CoreSingletons coreSingletons) {
-            super(coreSingletons);
+        protected SelfJoinUCSimplifier(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
+            super(coreSingletons, iqTreeTools);
         }
 
         @Override
@@ -127,14 +128,15 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
                             normalization.equalities.stream())
                     .collect(ImmutableCollectors.toSet());
 
-            return unifyDataNodes(normalization.dataNodes.stream(), ExtensionalDataNode::getArgumentMap)
+            return normalization.dataNodes.stream().map(ExtensionalDataNode::getArgumentMap)
+                    .collect(substitutionFactory.onVariableOrGroundTerms().toArgumentMapUnifier())
                     .map(u -> new DeterminantGroupEvaluation(
                             expressions,
                             ImmutableList.of(
                                     iqFactory.createExtensionalDataNode(
                                             dataNodes.iterator().next().getRelationDefinition(),
-                                            u.argumentMap)),
-                            u.substitution));
+                                            u.getArgumentMap())),
+                            u.getSubstitution()));
         }
     }
 

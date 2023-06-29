@@ -1,0 +1,170 @@
+{
+  "relations": [
+    {
+      "name": [ "lenses", "company_data" ],
+      "baseRelation": [ "company_data" ],
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "uc",
+            "determinants": [ "id" ]
+          }
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_dates_mid"],
+      "baseRelation": ["lenses", "company_data"],
+      "flattenedColumn": {
+        "name": "days",
+        "datatype": "string"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "invoice_date",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_income_mid"],
+      "baseRelation": ["lenses", "company_data"],
+      "flattenedColumn": {
+        "name": "income",
+        "datatype": "string"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "period_income",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_workers_mid"],
+      "baseRelation": ["lenses", "company_data"],
+      "flattenedColumn": {
+        "name": "workers",
+        "datatype": "string"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "worker_list",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_workers_mid2"],
+      "baseRelation": ["lenses","flattened_workers_mid"],
+      "flattenedColumn": {
+        "name": "worker_list",
+        "datatype": "string"
+      },
+      "columns": {
+        "kept": [
+          "id",
+          "index"
+        ],
+        "new": "name"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_managers"],
+      "baseRelation": ["lenses", "company_data"],
+      "flattenedColumn": {
+        "name": "managers",
+        "datatype": "string"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "manager",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","managers"],
+      "baseRelation": ["lenses","flattened_managers"],
+      "columns": {
+        "added": [
+          {
+            "name": "firstname",
+            "expression": "CAST(GET_JSON_OBJECT(manager, '$.firstName') AS string)"
+          },
+          {
+            "name": "lastname",
+            "expression": "CAST(GET_JSON_OBJECT(manager, '$.lastName') AS string)"
+          },
+          {
+            "name": "age",
+            "expression": "CAST(GET_JSON_OBJECT(manager, '$.age') AS integer)"
+          }
+        ],
+        "hidden": [
+          "manager"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_dates"],
+      "baseRelation": ["lenses","flattened_dates_mid"],
+      "columns": {
+        "added": [
+          {
+            "name": "invoice_date",
+            "expression": "CAST(invoice_date AS timestamp)"
+          }
+        ],
+        "hidden": [
+          "invoice_date"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_income"],
+      "baseRelation": ["lenses","flattened_income_mid"],
+      "columns": {
+        "added": [
+          {
+            "name": "period_income",
+            "expression": "CAST(period_income AS integer)"
+          }
+        ],
+        "hidden": [
+          "period_income"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_workers"],
+      "baseRelation": ["lenses","flattened_workers_mid2"],
+      "columns": {
+        "added": [
+          {
+            "name": "name",
+            "expression": "CAST(name AS string)"
+          }
+        ],
+        "hidden": [
+          "name"
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}
+

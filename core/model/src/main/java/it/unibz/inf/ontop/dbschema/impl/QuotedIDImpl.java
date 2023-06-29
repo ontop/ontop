@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
-
 /*
  * #%L
  * ontop-obdalib-core
@@ -21,14 +20,11 @@ package it.unibz.inf.ontop.dbschema.impl;
  * #L%
  */
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import it.unibz.inf.ontop.dbschema.QuotedID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
-
+import javax.annotation.Nullable;
+import java.util.Objects;
 
 /**
  * Database identifier used for schema names, table names and aliases
@@ -39,8 +35,7 @@ import java.io.IOException;
  * @author Roman Kontchakov
  *
  */
-
-
+@NonNullByDefault
 public class QuotedIDImpl implements QuotedID {
 
     private final String id;
@@ -51,16 +46,13 @@ public class QuotedIDImpl implements QuotedID {
     /**
      * (used only in QuotedIDFactory implementations)
      *
-     * @param id can be null
-     * @param quoteString cannot be null (the empty string stands for no quotation, as in getIdentifierQuoteString)
+     * @param id cannot be null
+     * @param quoteString the empty string stands for no quotation, as in getIdentifierQuoteString
+     * @param caseSensitive specifies whether the ID is case-sensitive
      */
-    QuotedIDImpl(@Nonnull String id, String quoteString) {
-        this(id, quoteString, true);
-    }
-
-    QuotedIDImpl(@Nonnull String id, String quoteString, boolean caseSensitive) {
-        this.id = id;
-        this.quoteString = quoteString;
+    QuotedIDImpl(String id, String quoteString, boolean caseSensitive) {
+        this.id = Objects.requireNonNull(id);
+        this.quoteString = Objects.requireNonNull(quoteString);
         this.caseSensitive = caseSensitive;
         // increases collisions but makes it possible to have case-insensitive ids (for MySQL)
         this.hashCode = id.toLowerCase().hashCode();
@@ -71,8 +63,6 @@ public class QuotedIDImpl implements QuotedID {
      *
      * @return identifier without quotation marks (for comparison etc.)
      */
-
-    @Nonnull
     @Override
     public String getName() {
         return id;
@@ -83,8 +73,6 @@ public class QuotedIDImpl implements QuotedID {
      *
      * @return identifier possibly in quotes
      */
-
-    @Nonnull
     @Override
     public String getSQLRendering() {
         return quoteString + id + quoteString;
@@ -98,9 +86,8 @@ public class QuotedIDImpl implements QuotedID {
     /**
      * compares two identifiers ignoring quotation
      */
-
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj)
             return true;
 
@@ -122,12 +109,5 @@ public class QuotedIDImpl implements QuotedID {
     @Override
     public int hashCode() {
         return hashCode;
-    }
-
-    public static class QuotedIDSerializer extends JsonSerializer<QuotedID> {
-        @Override
-        public void serialize(QuotedID value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-            gen.writeString(value.getSQLRendering());
-        }
     }
 }

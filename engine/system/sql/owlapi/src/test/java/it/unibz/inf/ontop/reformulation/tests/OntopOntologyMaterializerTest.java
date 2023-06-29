@@ -49,12 +49,11 @@ public class OntopOntologyMaterializerTest extends TestCase {
 
 
 	private String readSQLFile(String file) throws IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(new File(file)));
+		BufferedReader reader = new BufferedReader(new FileReader(file));
 		StringBuilder bf = new StringBuilder();
-		String line = reader.readLine();
-		while (line != null) {
-			bf.append(line + "\n");
-			line = reader.readLine();
+		String line;
+		while ((line = reader.readLine()) != null) {
+			bf.append(line).append("\n");
 		}
 		return bf.toString();
 	}

@@ -133,13 +133,11 @@ public class QuestDatatypeTestUtils {
 			baseURI = url.toExternalForm();
 		}
 
-		InputStream in = url.openStream();
-
-		try {
+		try (InputStream in = url.openStream()) {
 			final ValueFactory vf = con.getRepository().getValueFactory();
 			RDFParser rdfParser = Rio.createParser(RDFFormat.TURTLE, vf);
 			ParserConfig config = rdfParser.getParserConfig();
-			// To emulate DatatypeHandling.IGNORE 
+			// To emulate DatatypeHandling.IGNORE
 			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
 			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
 			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
@@ -155,22 +153,16 @@ public class QuestDatatypeTestUtils {
 
 			try {
 				rdfParser.parse(in, baseURI);
-			}
-			catch (RDFHandlerException e) {
-					con.rollback();
+			} catch (RDFHandlerException e) {
+				con.rollback();
 				// RDFInserter only throws wrapped RepositoryExceptions
-				throw (RepositoryException)e.getCause();
-			}
-			catch (RuntimeException e) {
-					con.rollback();
+				throw (RepositoryException) e.getCause();
+			} catch (RuntimeException e) {
+				con.rollback();
 				throw e;
-			}
-			finally {
+			} finally {
 				con.commit();
 			}
-		}
-		finally {
-			in.close();
 		}
 	}
 }

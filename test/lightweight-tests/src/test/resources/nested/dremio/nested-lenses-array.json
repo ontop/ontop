@@ -1,0 +1,186 @@
+{
+  "relations": [
+    {
+      "name": [ "lenses", "company_data_arrays" ],
+      "baseRelation": ["company_data_arrays" ],
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "uc",
+            "determinants": [ "id" ]
+          }
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_dates_mid"],
+      "baseRelation": ["lenses", "company_data_arrays"],
+      "flattenedColumn": {
+        "name": "days",
+        "datatype": "list"
+      },
+      "columns": {
+        "kept": [
+          "id",
+          "income",
+          "workers",
+          "managers"
+        ],
+        "new": "invoice_date"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_income_mid"],
+      "baseRelation": ["lenses","date_as_identifier"],
+      "flattenedColumn": {
+        "name": "income",
+        "datatype": "list"
+      },
+      "columns": {
+        "kept": [
+          "id",
+          "invoice_date"
+        ],
+        "new": "period_income"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_workers_mid"],
+      "baseRelation": ["lenses","date_as_identifier"],
+      "flattenedColumn": {
+        "name": "workers",
+        "datatype": "list"
+      },
+      "columns": {
+        "kept": [
+          "id",
+          "invoice_date"
+        ],
+        "new": "worker_list"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_workers_mid2"],
+      "baseRelation": ["lenses","flattened_workers_mid"],
+      "flattenedColumn": {
+        "name": "worker_list",
+        "datatype": "list"
+      },
+      "columns": {
+        "kept": [
+          "id",
+          "invoice_date"
+        ],
+        "new": "name"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_managers"],
+      "baseRelation": ["lenses","date_as_identifier"],
+      "flattenedColumn": {
+        "name": "managers",
+        "datatype": "list"
+      },
+      "columns": {
+        "kept": [
+          "id",
+          "invoice_date"
+        ],
+        "new": "manager"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","managers"],
+      "baseRelation": ["lenses","flattened_managers"],
+      "columns": {
+        "added": [
+          {
+            "name": "firstname",
+            "expression": "CAST(manager['firstName'] AS varchar)"
+          },
+          {
+            "name": "lastname",
+            "expression": "CAST(manager['lastName'] AS varchar)"
+          },
+          {
+            "name": "age",
+            "expression": "CAST(manager['age'] AS integer)"
+          }
+        ],
+        "hidden": [
+          "manager"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","date_as_identifier"],
+      "baseRelation": ["lenses","flattened_dates_mid"],
+      "columns": {
+        "added": [
+          {
+            "name": "invoice_date",
+            "expression": "CAST(invoice_date AS timestamp)"
+          }
+        ],
+        "hidden": [
+          "invoice_date"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_dates"],
+      "baseRelation": ["lenses","date_as_identifier"],
+      "columns": {
+        "added": [
+        ],
+        "hidden": [
+          "income",
+          "workers",
+          "managers"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_income"],
+      "baseRelation": ["lenses","flattened_income_mid"],
+      "columns": {
+        "added": [
+          {
+            "name": "period_income",
+            "expression": "CAST(period_income AS integer)"
+          }
+        ],
+        "hidden": [
+          "period_income"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_workers"],
+      "baseRelation": ["lenses","flattened_workers_mid2"],
+      "columns": {
+        "added": [
+          {
+            "name": "name",
+            "expression": "CAST(name AS varchar)"
+          }
+        ],
+        "hidden": [
+          "name"
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}
+

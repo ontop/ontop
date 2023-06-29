@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPTriplesMapProvenance;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 
 import java.util.Optional;
 import java.util.stream.Collectors;

@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.substitution.Substitution;
 import org.apache.commons.rdf.api.IRI;
 
 import java.io.BufferedReader;
@@ -29,6 +30,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -125,15 +127,14 @@ public class TestConnectionManager implements Closeable {
                 .map(Optional::get)
                 .flatMap(query -> Optional.of(query.getTree().getRootNode())
                         .filter(r -> r instanceof ConstructionNode)
-                        .map(r -> (ConstructionNode)r)
-                        .map(r -> r.getSubstitution().getImmutableMap().values().stream())
-                        .orElseGet(Stream::empty))
-                .filter(t -> t instanceof ImmutableFunctionalTerm)
-                .map(t -> (ImmutableFunctionalTerm) t)
+                        .map(r -> (ConstructionNode) r)
+                        .map(ConstructionNode::getSubstitution)
+                        .map(s -> s.restrictRangeTo(ImmutableFunctionalTerm.class))
+                        .map(Substitution::getRangeSet).stream()
+                        .flatMap(Collection::stream))
                 .flatMap(t-> t.inferType()
                         .flatMap(TermTypeInference::getTermType)
-                        .map(Stream::of)
-                        .orElseGet(Stream::empty))
+                        .stream())
                 .filter(t -> t instanceof RDFDatatype)
                 .map(t -> (RDFDatatype)t)
                 .map(RDFDatatype::getIRI)

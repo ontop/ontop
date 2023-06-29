@@ -30,8 +30,8 @@ public class ImmutableCQ<P extends AtomPredicate> {
     @Override
     public boolean equals(Object other) {
         return (other instanceof ImmutableCQ)
-                && atoms.equals(((ImmutableCQ)other).atoms)
-                && answerVariables.equals(((ImmutableCQ)other).answerVariables);
+                && atoms.equals(((ImmutableCQ<?>)other).atoms)
+                && answerVariables.equals(((ImmutableCQ<?>)other).answerVariables);
     }
 
     @Override

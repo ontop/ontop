@@ -109,7 +109,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 	}
 
 	protected Repository createRepository()  {
-		OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration.Builder<?> configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFileURL)
 				.enableTestMode()
 				.nativeOntopMappingFile(obdaFileURL);
@@ -123,7 +123,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
+	protected void tearDown() {
 		if (dataRep != null) {
 			dataRep.shutDown();
 			dataRep = null;
@@ -150,7 +150,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 
 	}
 
-	private void compareResultSize(TupleQueryResult queryResult, ResultSetInfo expectedResult) throws Exception {
+	private void compareResultSize(TupleQueryResult queryResult, ResultSetInfo expectedResult) {
 		int queryResultSize = countTuple(queryResult);
 		int expectedResultSize = (Integer) attributeValue(expectedResult, "counter");
 		if (queryResultSize != expectedResultSize) {
@@ -171,7 +171,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 		}
 	}
 
-	private void compareThrownException(Exception ex, ResultSetInfo expectedResult) throws Exception {
+	private void compareThrownException(Exception ex, ResultSetInfo expectedResult)  {
 		String thrownException = ex.getClass().getName();
 		String expectedThrownException = (String) attributeValue(expectedResult, "thrownException");
 		if (!thrownException.equals(expectedThrownException)) {

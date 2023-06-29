@@ -38,7 +38,7 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPA
     protected final ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                            TermFactory termFactory, VariableNullability variableNullability) {
         if ((!tolerateNulls()
-                && newTerms.stream().anyMatch(t -> (t instanceof Constant) && t.isNull())))
+                && newTerms.stream().anyMatch(ImmutableTerm::isNull)))
             return termFactory.getNullConstant();
 
         if (newTerms.stream()

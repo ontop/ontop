@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonGroundFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;

@@ -48,7 +48,8 @@ public class OntopPropertiesPanel extends JPanel implements OBDAModelManagerList
             ObjectMapper objectMapper = new ObjectMapper();
             map = objectMapper.readValue(
                     OntopPropertiesPanel.class.getResource("/property_description.json"),
-                    new TypeReference<Map<String, JsonPropertyDescription>>(){});
+                    new TypeReference<>() {
+                    });
         }
         catch (IOException e) {
             LOGGER.error("Unable to open the property_description.json file: " + e);

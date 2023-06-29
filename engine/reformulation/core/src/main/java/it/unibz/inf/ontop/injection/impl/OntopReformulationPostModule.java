@@ -6,7 +6,6 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
-import it.unibz.inf.ontop.query.translation.KGQueryTranslator;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.DummyRewriter;
@@ -18,7 +17,6 @@ import it.unibz.inf.ontop.injection.TranslationFactory;
  * POST-module: to be loaded after that all the dependencies of concrete implementations have been defined
  *
  */
-@SuppressWarnings("unchecked")
 public class OntopReformulationPostModule extends OntopAbstractModule {
 
     private final OntopReformulationSettings settings;
@@ -31,7 +29,8 @@ public class OntopReformulationPostModule extends OntopAbstractModule {
     @Override
     protected void configure() {
         if (settings.isExistentialReasoningEnabled()) {
-            bind(QueryRewriter.class).to(getImplementation(ExistentialQueryRewriter.class));
+            bindFromSettings(ExistentialQueryRewriter.class);
+            bind(QueryRewriter.class).to(ExistentialQueryRewriter.class);
         }
         else {
             bind(QueryRewriter.class).to(DummyRewriter.class);

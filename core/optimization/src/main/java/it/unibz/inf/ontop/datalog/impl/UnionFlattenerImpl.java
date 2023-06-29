@@ -46,8 +46,7 @@ public class UnionFlattenerImpl implements UnionFlattener {
                         iqFactory.createUnionNode(rootCn.getVariables()),
                         transformedChild.getChildren().stream()
                                 .map(t -> iqFactory.createUnaryIQTree(rootCn, t))
-                                .collect(ImmutableCollectors.toList())
-                );
+                                .collect(ImmutableCollectors.toList()));
             }
             // if the child is a construction node, merge it
             if (transformedChildRoot instanceof ConstructionNode) {

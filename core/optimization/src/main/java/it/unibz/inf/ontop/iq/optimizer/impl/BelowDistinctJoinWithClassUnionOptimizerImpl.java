@@ -62,8 +62,7 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
                     .flatMap(c -> c.getChildren().stream())
                     .flatMap(c -> Optional.of(c)
                             .flatMap(this::extractExtensionalNode)
-                            .map(Stream::of)
-                            .orElseGet(Stream::empty))
+                            .stream())
                     .anyMatch(c -> otherChildren.stream()
                             .flatMap(t -> t.acceptVisitor(requiredExtensionalDataNodeExtractor))
                             .anyMatch(o -> isDetectedAsRedundant(c, o)));

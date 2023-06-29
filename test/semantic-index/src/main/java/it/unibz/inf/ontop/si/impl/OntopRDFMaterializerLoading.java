@@ -50,22 +50,21 @@ public class OntopRDFMaterializerLoading {
 
                 Connection connection = repo.createConnection();
                 int count = repo.insertData(connection,
-                        new Iterator<RDFFact>() {
+                        new Iterator<>() {
                             @Override
                             public boolean hasNext() {
                                 try {
                                     return graphResultSet.hasNext();
-                                }
-                                catch (OntopConnectionException | OntopQueryAnsweringException e) {
+                                } catch (OntopConnectionException | OntopQueryAnsweringException e) {
                                     throw new RuntimeException(e);
                                 }
                             }
+
                             @Override
                             public RDFFact next() {
                                 try {
                                     return graphResultSet.next();
-                                }
-                                catch (OntopQueryAnsweringException | OntopConnectionException e) {
+                                } catch (OntopQueryAnsweringException | OntopConnectionException e) {
                                     throw new RuntimeException(e);
                                 }
                             }

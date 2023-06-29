@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class SumSPARQLFunctionSymbolImpl extends SumLikeSPARQLAggregationFunctionSymbolImpl implements SPARQLAggregationFunctionSymbol {
 
     protected SumSPARQLFunctionSymbolImpl(boolean isDistinct, RDFTermType rootRdfTermType) {

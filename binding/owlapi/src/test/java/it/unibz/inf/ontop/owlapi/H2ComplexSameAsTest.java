@@ -88,28 +88,22 @@ public class H2ComplexSameAsTest {
 				.enableTestMode()
 				.build();
 
-		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
-		// Now we are ready for querying
-		OWLConnection conn = reasoner.getConnection();
-
-		try (OWLStatement st = conn.createStatement()) {
+		try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
+			 OWLConnection conn = reasoner.getConnection();
+			 OWLStatement st = conn.createStatement()) {
 			ArrayList<String> retVal = new ArrayList<>();
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
-			while(rs.hasNext()) {
+			while (rs.hasNext()) {
 				final OWLBindingSet bindingSet = rs.next();
 				for (String s : rs.getSignature()) {
-                    OWLObject binding = bindingSet.getOWLObject(s);
+					OWLObject binding = bindingSet.getOWLObject(s);
 					String rendering = ToStringRenderer.getInstance().render(binding);
 					retVal.add(rendering);
 					log.debug((s + ":  " + rendering));
 				}
 			}
 			return retVal;
-		}
-		finally {
-			conn.close();
-			reasoner.close();
 		}
 	}
 

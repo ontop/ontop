@@ -27,7 +27,8 @@ public class BootstrapTest extends AbstractBootstrapTest {
     @Test
     public void testBootstrap() throws Exception {
         bootstrap(propertyFile, baseIRI, owlOutputFile, obdaOutputFile);
-        OWLStatement st = loadGeneratedFiles(owlOutputFile, obdaOutputFile, propertyFile);
-        st.executeSelectQuery("SELECT * WHERE { ?x <http://h2-bootstrap-test/course-registration#ref-COURSE_ID> ?y }");
+        try (OWLStatement st = loadGeneratedFiles(owlOutputFile, obdaOutputFile, propertyFile)) {
+            st.executeSelectQuery("SELECT * WHERE { ?x <http://h2-bootstrap-test/course-registration#ref-COURSE_ID> ?y }");
+        }
     }
 }

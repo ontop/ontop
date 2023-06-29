@@ -22,7 +22,7 @@ public abstract class AbstractFactExtractor implements FactExtractor {
         // TODO: consider other facts
         return ontology
                 .map(o -> Stream.concat(
-                        selectABox(o),
+                        selectABox(o, settings.isOntologyAnnotationQueryingEnabled()),
                         extractTBox(o.tbox()))
                         .collect(ImmutableCollectors.toSet()))
                 .orElseGet(ImmutableSet::of);
@@ -30,8 +30,8 @@ public abstract class AbstractFactExtractor implements FactExtractor {
 
     protected abstract Stream<RDFFact> extractTBox(ClassifiedTBox tbox);
 
-    protected Stream<RDFFact> selectABox(Ontology ontology) {
-        if (settings.isOntologyAnnotationQueryingEnabled())
+    protected Stream<RDFFact> selectABox(Ontology ontology, boolean queryAnnotation) {
+        if (queryAnnotation)
             return ontology.abox().stream();
 
         OntologyVocabularyCategory<AnnotationProperty> annotationProperties = ontology.annotationProperties();

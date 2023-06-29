@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq.transform.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -11,13 +10,12 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Map;
 import java.util.Optional;
 
 
@@ -98,24 +96,20 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
 
         @Override
         public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
-            ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
+            Substitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
 
-            ImmutableMap<Variable, FunctionalTermSimplification> updatedEntryMap = initialSubstitution.getFragment(ImmutableFunctionalTerm.class).getImmutableMap().entrySet().stream()
-                    .filter(e -> nonNullVariables.contains(e.getKey()))
-                    .collect(ImmutableCollectors.toMap(
-                            Map.Entry::getKey,
-                            e -> e.getValue().simplifyAsGuaranteedToBeNonNull()
-                    ));
+            ImmutableMap<Variable, FunctionalTermSimplification> updatedEntryMap = initialSubstitution.builder()
+                    .restrictDomainTo(nonNullVariables)
+                    .restrictRangeTo(ImmutableFunctionalTerm.class)
+                    .toMap((v, t) -> t.simplifyAsGuaranteedToBeNonNull());
 
-            ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = initialSubstitution.getImmutableMap().entrySet().stream()
-                    .map(e -> Optional.ofNullable(updatedEntryMap.get(e.getKey()))
-                            .map(s -> Maps.immutableEntry(e.getKey(), s.getSimplifiedTerm()))
-                            .orElse(e))
-                    .collect(ImmutableCollectors.toMap());
+            Substitution<ImmutableTerm> newSubstitution = initialSubstitution.builder()
+                    .transformOrRetain(updatedEntryMap::get, (t, u) -> u.getSimplifiedTerm())
+                    .build();
 
-            ConstructionNode newConstructionNode = initialSubstitution.getImmutableMap().equals(newSubstitutionMap)
+            ConstructionNode newConstructionNode = initialSubstitution.equals(newSubstitution)
                     ? rootNode
-                    : iqFactory.createConstructionNode(rootNode.getVariables(), substitutionFactory.getSubstitution(newSubstitutionMap));
+                    : iqFactory.createConstructionNode(rootNode.getVariables(), newSubstitution);
 
             ImmutableSet<Variable> simplifiableChildVariables = Sets.union(
                     Sets.difference(rootNode.getVariables(), initialSubstitution.getDomain()),

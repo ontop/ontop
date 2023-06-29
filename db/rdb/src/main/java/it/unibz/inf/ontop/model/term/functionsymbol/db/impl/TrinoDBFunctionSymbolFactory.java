@@ -7,16 +7,11 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
-import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
-import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.*;
-import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
+import static it.unibz.inf.ontop.model.type.impl.TrinoDBTypeFactory.DEFAULT_DECIMAL_STR;
 import static it.unibz.inf.ontop.model.type.impl.SnowflakeDBTypeFactory.TIMESTAMP_LOCAL_TZ_STR;
 import static it.unibz.inf.ontop.model.type.impl.SnowflakeDBTypeFactory.TIMESTAMP_NO_TZ_STR;
 
@@ -225,4 +220,99 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         return dbRight;
     }
 
+    /**
+     * XSD CAST functions
+     */
+    @Override
+    protected String serializeCheckAndConvertFloatFromNonFPNumeric(ImmutableList<? extends ImmutableTerm> terms,
+                                                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN (CAST(%1$s AS REAL) NOT BETWEEN -3.40E38 AND -1.18E-38 AND " +
+                        "CAST(%1$s AS REAL) NOT BETWEEN 1.18E-38 AND 3.40E38 AND CAST(%1$s AS REAL) != 0) THEN NULL " +
+                        "ELSE CAST(%1$s AS REAL) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDouble(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN NOT REGEXP_LIKE(%1$s, " + numericPattern + ")" +
+                        " THEN NULL ELSE CAST(%1$s AS DOUBLE) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertFloat(ImmutableList<? extends ImmutableTerm> terms,
+                                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN NOT REGEXP_LIKE(%1$s, " + numericPattern + ") THEN NULL " +
+                        "WHEN (CAST(%1$s AS REAL) NOT BETWEEN -3.40E38 AND -1.18E-38 AND " +
+                        "CAST(%1$s AS REAL) NOT BETWEEN 1.18E-38 AND 3.40E38 AND CAST(%1$s AS REAL) != 0) THEN NULL " +
+                        "ELSE CAST(%1$s AS REAL) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN REGEXP_LIKE(%1$s, " + numericNonFPPattern + ") THEN " +
+                        "CAST(%1$s AS " + DEFAULT_DECIMAL_STR + ") " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertInteger(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN REGEXP_LIKE(%1$s, "+ numericPattern +") THEN " +
+                        "CAST(FLOOR(ABS(CAST(%1$s AS " + DEFAULT_DECIMAL_STR + "))) * SIGN(CAST(%1$s AS DECIMAL)) AS INTEGER) " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertIntegerFromBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s='1' THEN 1 " +
+                        "WHEN UPPER(%1$s) LIKE 'TRUE' THEN 1 " +
+                        "WHEN %1$s='0' THEN 0 " +
+                        "WHEN UPPER(%1$s) LIKE 'FALSE' THEN 0 " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("(CASE WHEN CAST(%1$s AS " + DEFAULT_DECIMAL_STR + ") = 0 THEN 'false' " +
+                        "WHEN %1$s = '' THEN 'false' " +
+                        "ELSE 'true' " +
+                        "END)",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDateFromString(ImmutableList<? extends ImmutableTerm> terms,
+                                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN (REGEXP_LIKE(%1$s, " + datePattern1 + ") AND " +
+                        "REGEXP_LIKE(%1$s, " + datePattern2 +") AND " +
+                        "REGEXP_LIKE(%1$s, " + datePattern3 +") AND " +
+                        "REGEXP_LIKE(%1$s, " + datePattern4 +") ) " +
+                        " THEN NULL ELSE CAST(%1$s AS DATE) END",
+                term);
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBSample(DBTermType termType) {
+        return new DBSampleFunctionSymbolImpl(termType, "ARBITRARY");
+    }
 }

@@ -47,7 +47,7 @@ public abstract class OntopTestCase extends TestCase {
             return optionalRepository.get();
 
 
-        OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder<?> configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFileURL)
                 .enableTestMode()
                 .nativeOntopMappingFile(obdaFileURL);

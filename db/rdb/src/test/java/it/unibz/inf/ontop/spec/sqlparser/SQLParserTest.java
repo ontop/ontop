@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import net.sf.jsqlparser.JSQLParserException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -237,9 +238,8 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT DISTINCT name FROM student");
 	}
 
-	// @Test
-	// the SQL is not valid
-	// yet JSQLParser accepts it in the form of SELECT name FROM student
+	@Test
+	@Ignore // the SQL is not valid, yet JSQLParser accepts it in the form of SELECT name FROM student
 	public void test_1_3_2() throws Exception {
 		RAExpression re = parse("SELECT ALL name FROM student");
 	}
@@ -650,6 +650,8 @@ public class SQLParserTest {
 	}
 
 	// TODO: check the intention
+	@Test
+	@Ignore
 	public void test_5_11() throws Exception {
 		RAExpression re = parse("SELECT id, name, score FROM student JOIN grade USING (id)");
 		assertEquals(2, re.getDataAtoms().size());

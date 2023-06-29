@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -326,10 +325,8 @@ public class RedundantSelfJoinTest {
                         dataNode3)));
 
         ExtensionalDataNode dataNode5 = createExtensionalDataNode(TABLE1, ImmutableList.of(M, N, O));
-        ExtensionalDataNode dataNode6 = createExtensionalDataNode(TABLE2, ImmutableList.of(M, N, O));
 
-        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
-                IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode, dataNode5, dataNode6));
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, dataNode5);
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }
@@ -668,12 +665,12 @@ public class RedundantSelfJoinTest {
 
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(O,
-                        TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBIsNotNull(F0), N)));
-        LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(M, N));
+                        TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBIsNotNull(F0), M)));
+        LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(N, M));
         ConstructionNode rightConstruction = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(F0, N),
+                ImmutableSet.of(F0, M),
                 SUBSTITUTION_FACTORY.getSubstitution(F0, TERM_FACTORY.getProvenanceSpecialConstant()));
-        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE1, ImmutableList.of(N, N, N));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE1, ImmutableList.of(M, M, M));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(newConstructionNode,

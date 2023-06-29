@@ -42,6 +42,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 
 public class RDF4JMaterializerCmdTest extends TestCase {
@@ -98,7 +99,7 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 				49, 5, configuration);
 	}
 
-	private static OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> createConfigurationBuilder() {
+	private static OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder<?>> createConfigurationBuilder() {
 
 		String obdaFileName =  RDF4JMaterializerCmdTest.class.getResource("/mysql/materializer/MaterializeTest.obda").toString();
 		String propertyFileName =  RDF4JMaterializerCmdTest.class.getResource("/mysql/materializer/MaterializeTest.properties").toString();
@@ -126,7 +127,7 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 							  OntopSystemConfiguration configuration) throws IOException, OBDASpecificationException {
 		// output
 		File out = new File(filePath);
-		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out), "UTF-8"))) {
+		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out), StandardCharsets.UTF_8))) {
 			String outfile = out.getAbsolutePath();
 			System.out.println(outfile);
 
@@ -156,7 +157,7 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 		File out = new File(filePath);
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
-		try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(out)), "UTF-8"))) {
+		try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(out)), StandardCharsets.UTF_8))) {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLOntology ontology = manager.createOntology(IRI.create(out));
 			manager = ontology.getOWLOntologyManager();

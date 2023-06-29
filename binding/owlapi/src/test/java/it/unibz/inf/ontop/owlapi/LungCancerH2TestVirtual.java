@@ -32,9 +32,6 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import junit.framework.TestCase;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 
 /***
@@ -81,10 +78,6 @@ public class LungCancerH2TestVirtual extends TestCase {
 				.jdbcPassword(password)
 				.enableTestMode()
 				.build();
-		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
-
-		// Now we are ready for querying
-		OWLConnection conn = reasoner.getConnection();
 
 		String query1 = "PREFIX : <http://example.org/> SELECT * WHERE { ?x :hasNeoplasm <http://example.org/db1/neoplasm/1> }";
 		String query2 = "PREFIX : <http://example.org/> SELECT * WHERE { <http://example.org/db1/1> :hasNeoplasm ?y }";
@@ -101,28 +94,26 @@ public class LungCancerH2TestVirtual extends TestCase {
 		
 		
 		String query = "PREFIX : <http://example.org/> SELECT * WHERE { ?y :hasStage <http://example.org/stages/limi> }";
-		
-		try (OWLStatement st = conn.createStatement()) {
+
+		try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
+			 OWLConnection conn = reasoner.getConnection();
+			 OWLStatement st = conn.createStatement()) {
 			executeQueryAssertResults(query, st, 1);
-			
+
 //			executeQueryAssertResults(query3, st, 1);
 //			executeQueryAssertResults(query4, st, 2);
 //			executeQueryAssertResults(query1, st, 2);
 //			executeQueryAssertResults(query2, st, 1);
-//			
-//			
+//
+//
 //			executeGraphQueryAssertResults(query5, st, 8);
 //			executeGraphQueryAssertResults(query6, st, 34);
 //			executeGraphQueryAssertResults(query7, st, 4);
 //			executeGraphQueryAssertResults(query8, st, 16);
 //			executeGraphQueryAssertResults(query9, st, 9);
-			 // NOTE CHECK THE CONTENT OF THIS QUERY, it seems to return the correct number of results but incorrect content, compare to the SELECT version which is correct
-			
+			// NOTE CHECK THE CONTENT OF THIS QUERY, it seems to return the correct number of results but incorrect content, compare to the SELECT version which is correct
 
-		}
-		finally {
-			conn.close();
-			reasoner.close();
+
 		}
 	}
 	

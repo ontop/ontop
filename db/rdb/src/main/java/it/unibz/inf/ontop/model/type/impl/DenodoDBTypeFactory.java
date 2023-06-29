@@ -4,13 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.Map;
-
-import static it.unibz.inf.ontop.model.type.DBTermType.Category.FLOAT_DOUBLE;
-import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
-import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.WITH_ALL;
 
 public class DenodoDBTypeFactory extends DefaultSQLDBTypeFactory {
 

@@ -3,13 +3,12 @@ package it.unibz.inf.ontop.iq.node.normalization;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.Optional;
 
@@ -31,7 +30,7 @@ public interface ConditionSimplifier {
 
 
     interface ExpressionAndSubstitution {
-        ImmutableSubstitution<VariableOrGroundTerm> getSubstitution();
+        Substitution<VariableOrGroundTerm> getSubstitution();
 
         Optional<ImmutableExpression> getOptionalExpression();
     }

@@ -26,7 +26,7 @@ public interface KGQueryFactory {
     // Generic types
     //-----------------
 
-    SPARQLQuery createSPARQLQuery(String queryString) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException;
+    SPARQLQuery<?> createSPARQLQuery(String queryString) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException;
 
     GraphSPARQLQuery createGraphQuery(String queryString) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException;
 

@@ -23,8 +23,6 @@ package it.unibz.inf.ontop.si.dag;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;

@@ -1,11 +1,9 @@
 package it.unibz.inf.ontop.owlapi;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import org.junit.*;
 
 import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

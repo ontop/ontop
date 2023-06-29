@@ -2,19 +2,23 @@ package it.unibz.inf.ontop.generation.serializer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SQLOrderComparator;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
+import it.unibz.inf.ontop.generation.algebra.impl.SelectFromWhereWithModifiersImpl;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.StringUtils;
 
 import java.util.Map;
@@ -30,8 +34,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
     @Inject
     private SparkSQLSelectFromWhereSerializer(TermFactory termFactory) {
-        super(new DefaultSQLTermSerializer(termFactory)
-        {
+        super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String serializeStringConstant(String constant) {
                 // parent method + doubles backslashes
@@ -89,7 +92,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
             private String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions,
                                             ImmutableMap<Variable, QualifiedAttributeID> columnIDs,
                                             ImmutableMap<Variable, QuotedID> variableAliases,
-                                            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+                                            Substitution<? extends ImmutableTerm> substitution) {
                 if (sortConditions.isEmpty())
                     return "";
 
@@ -109,7 +112,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
             private String serializeOrderByTerm(ImmutableTerm term,
                                                 ImmutableMap<Variable, QualifiedAttributeID> columnIDs,
                                                 ImmutableMap<Variable, QuotedID> variableAliases,
-                                                ImmutableSubstitution<? extends ImmutableTerm> substitution)
+                                                Substitution<? extends ImmutableTerm> substitution)
                     throws SQLSerializationException {
 
                 if (term instanceof Constant) {
@@ -123,18 +126,43 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 }
                 else {
                     // use the project expression alias instead of processing the expression itself
-                    for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
-                        if (entry.getValue().equals(term)) {
-                            return variableAliases.get(entry.getKey()).getSQLRendering();
-                        }
-                    }
-                    throw new SQLSerializationException(String.format("Term %s does not occur in the substitution %s", term, substitution));
+                    return substitution.getPreImage(t -> t.equals(term))
+                            .stream()
+                            .findFirst()
+                            .map(v -> variableAliases.get(v).getSQLRendering())
+                            .orElseThrow(() -> new SQLSerializationException(
+                                    String.format("Term %s does not occur in the substitution %s", term, substitution)));
                 }
             }
 
             @Override
             protected String formatBinaryJoin(String operatorString, QuerySerialization left, QuerySerialization right, String onString) {
                 return String.format("(%s\n %s \n%s %s)", left.getString(), operatorString, right.getString(), onString);
+            }
+
+            @Override
+            protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
+                //We express the flatten call as a `SELECT *, EXPLODE_OUTER({array}) FROM child.
+
+                //EXPLODE only works on ARRAY<T> types, so we first transform the JSON-array into an ARRAY<STRING> if it is not already one
+                var expression = flattenedType.getCategory() == DBTermType.Category.ARRAY
+                        ? allColumnIDs.get(flattenedVar).getSQLRendering()
+                        : String.format("FROM_JSON(%s, 'ARRAY<STRING>')", allColumnIDs.get(flattenedVar).getSQLRendering());
+
+                //If an index is required, we use POSEXPLODE instead of EXPLODE
+                String flattenCall;
+                String aliasFormat;
+                if(indexVar.isPresent()) {
+                    flattenCall = String.format("POSEXPLODE_OUTER(%s)", expression);
+                    aliasFormat = String.format("(%s, %s)",
+                            allColumnIDs.get(indexVar.get()).getSQLRendering(),
+                            allColumnIDs.get(outputVar).getSQLRendering());
+                } else {
+                    flattenCall = String.format("EXPLODE_OUTER(%s)", expression);
+                    aliasFormat = String.format("%s",
+                            allColumnIDs.get(outputVar).getSQLRendering());
+                }
+                return serializeFlattenAsFunction(flattenedVar, allColumnIDs, subQuerySerialization, flattenCall, aliasFormat);
             }
         });
     }

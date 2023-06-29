@@ -1,36 +1,29 @@
 package it.unibz.inf.ontop.iq.impl;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.impl.ConstructionNodeTools;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @Singleton
 public class IQTreeTools {
 
-    private final TermFactory termFactory;
-    private final ConstructionNodeTools constructionNodeTools;
-    private final SubstitutionFactory substitutionFactory;
+    private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    private IQTreeTools(TermFactory termFactory, ConstructionNodeTools constructionNodeTools,
-                        SubstitutionFactory substitutionFactory) {
-        this.termFactory = termFactory;
-        this.constructionNodeTools = constructionNodeTools;
-        this.substitutionFactory = substitutionFactory;
+    private IQTreeTools(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
     }
 
     /**
@@ -39,18 +32,16 @@ public class IQTreeTools {
      * If a "null" variable is propagated down, throws an UnsatisfiableDescendingSubstitutionException.
      *
      */
-    public Optional<ImmutableSubstitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution(
-            IQTree tree, ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution)
+    public Optional<Substitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution(
+            IQTree tree, Substitution<? extends VariableOrGroundTerm> descendingSubstitution)
             throws UnsatisfiableDescendingSubstitutionException {
 
-        ImmutableSubstitution<? extends VariableOrGroundTerm> reducedSubstitution = descendingSubstitution
-                .filter(tree.getVariables()::contains);
+        Substitution<? extends VariableOrGroundTerm> reducedSubstitution = descendingSubstitution.restrictDomainTo(tree.getVariables());
 
         if (reducedSubstitution.isEmpty())
             return Optional.empty();
 
-        if (reducedSubstitution.getImmutableMap().values().stream().anyMatch(value ->
-                value.equals(termFactory.getNullConstant()))) {
+        if (reducedSubstitution.rangeAnyMatch(ImmutableTerm::isNull)) {
             throw new UnsatisfiableDescendingSubstitutionException();
         }
 
@@ -58,30 +49,54 @@ public class IQTreeTools {
     }
 
     public ImmutableSet<Variable> computeNewProjectedVariables(
-            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution,
+            Substitution<? extends ImmutableTerm> descendingSubstitution,
             ImmutableSet<Variable> projectedVariables) {
-        return constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables);
+
+        ImmutableSet<Variable> newVariables = descendingSubstitution.restrictDomainTo(projectedVariables).getRangeVariables();
+
+        return Sets.union(newVariables, Sets.difference(projectedVariables, descendingSubstitution.getDomain())).immutableCopy();
+    }
+
+    public IQTree createConstructionNodeTreeIfNontrivial(IQTree child, Substitution<?> substitution, Supplier<ImmutableSet<Variable>> projectedVariables) {
+        return substitution.isEmpty()
+                ? child
+                : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(projectedVariables.get(), substitution), child);
+    }
+
+    public IQTree createConstructionNodeTreeIfNontrivial(IQTree child, ImmutableSet<Variable> variables) {
+        return child.getVariables().equals(variables)
+                ? child
+                : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(variables), child);
+    }
+
+    public ImmutableSet<Variable> getChildrenVariables(ImmutableList<IQTree> children) {
+         return children.stream()
+                .flatMap(c -> c.getVariables().stream())
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    public ImmutableSet<Variable> getChildrenVariables(IQTree leftChild, IQTree rightChild) {
+        return Sets.union(leftChild.getVariables(), rightChild.getVariables()).immutableCopy();
+    }
+
+    public ImmutableSet<Variable> getChildrenVariables(IQTree child, Variable newVariable) {
+        return Sets.union(child.getVariables(), ImmutableSet.of(newVariable)).immutableCopy();
     }
 
     /**
-     * If the substitution is an fresh renaming, returns it as an injective substitution
+     * If the substitution is a fresh renaming, returns it as an injective substitution
      */
-    public Optional<InjectiveVar2VarSubstitution> extractFreshRenaming(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            ImmutableSet<Variable> projectedVariables) {
-        ImmutableSubstitution<Variable> var2VarFragment = descendingSubstitution.getFragment(Variable.class);
-        ImmutableMap<Variable, Variable> var2VarMap = var2VarFragment.getImmutableMap();
+    public Optional<InjectiveSubstitution<Variable>> extractFreshRenaming(Substitution<? extends ImmutableTerm> descendingSubstitution,
+                                                                          ImmutableSet<Variable> projectedVariables) {
 
-        int size = descendingSubstitution.getImmutableMap().size();
-        if (var2VarMap.size() != size)
+        Substitution<Variable> var2VarFragment = descendingSubstitution.restrictRangeTo(Variable.class);
+        int size = descendingSubstitution.getDomain().size();
+
+        if (var2VarFragment.getDomain().size() != size
+                || Sets.difference(var2VarFragment.getRangeSet(), projectedVariables).size() != size)
             return Optional.empty();
 
-        ImmutableSet<Variable> coDomain = var2VarMap.values().stream()
-                .filter(v -> !projectedVariables.contains(v))
-                .collect(ImmutableCollectors.toSet());
-        return (coDomain.size() == size)
-                ? Optional.of(substitutionFactory.getInjectiveVar2VarSubstitution(var2VarMap))
-                : Optional.empty();
+        return Optional.of(var2VarFragment.injective());
     }
 
 

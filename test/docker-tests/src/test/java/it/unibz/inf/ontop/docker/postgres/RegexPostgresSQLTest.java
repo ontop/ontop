@@ -1,14 +1,11 @@
 package it.unibz.inf.ontop.docker.postgres;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 /**
  * Test to check if the sql parser supports regex correctly when written with postgres syntax. 
@@ -16,18 +13,15 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
  */
 public class RegexPostgresSQLTest extends AbstractVirtualModeTest {
 
+	private static final String owlfile = "/pgsql/regex/stockBolzanoAddress.owl";
+	private static final String obdafile = "/pgsql/regex/stockexchangeRegex.obda";
+	private static final String propertiesfile = "/pgsql/regex/stockexchangeRegex.properties";
 
-	static final String owlfile = "/pgsql/regex/stockBolzanoAddress.owl";
-	static final String obdafile = "/pgsql/regex/stockexchangeRegex.obda";
-	static final String propertiesfile = "/pgsql/regex/stockexchangeRegex.properties";
-
-	private static OntopOWLEngine REASONER;
-	private static OntopOWLConnection CONNECTION;
+	private static EngineConnection CONNECTION;
 
 	@BeforeClass
-	public static void before() throws OWLOntologyCreationException {
-		REASONER = createReasoner(owlfile, obdafile, propertiesfile);
-		CONNECTION = REASONER.getConnection();
+	public static void before() {
+		CONNECTION = createReasoner(owlfile, obdafile, propertiesfile);
 	}
 
 	@Override
@@ -38,7 +32,6 @@ public class RegexPostgresSQLTest extends AbstractVirtualModeTest {
 	@AfterClass
 	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.close();
 	}
 
 	/**

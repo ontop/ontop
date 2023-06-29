@@ -11,13 +11,11 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhereConverter {
@@ -92,14 +90,15 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                 .map(n -> ((UnaryIQTree) firstNonSliceDistinctConstructionOrderByAggregationTree).getChild())
                 .orElse(firstNonSliceDistinctConstructionOrderByAggregationTree);
 
-        ImmutableSubstitution<ImmutableTerm> substitution = constructionNode
+        Substitution<ImmutableTerm> substitution = constructionNode
                 .map(c -> aggregationNode
                         .map(AggregationNode::getSubstitution)
-                        .map(s2 -> s2.composeWith(c.getSubstitution()).filter(c.getVariables()::contains))
+                        .map(s2 -> s2.compose(c.getSubstitution())
+                                .restrictDomainTo(c.getVariables()))
                         .orElseGet(c::getSubstitution))
                 .orElseGet(() -> aggregationNode
                         .map(AggregationNode::getSubstitution)
-                        .map(s -> (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)s)
+                        .map(substitutionFactory::<ImmutableTerm>covariantCast)
                         .orElseGet(substitutionFactory::getSubstitution));
 
         SQLExpression fromExpression = convertIntoFromExpression(childTree);
@@ -137,7 +136,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                         .map(AggregationNode::getSubstitution)
                         .map(s -> cs.stream()
                                 .map(c -> sqlAlgebraFactory.createSQLOrderComparator(
-                                        (NonConstantTerm) s.apply(c.getTerm()),
+                                        substitutionFactory.onNonConstantTerms().applyToTerm(s, c.getTerm()),
                                         c.isAscending()))
                                 .collect(ImmutableCollectors.toList()))
                         .orElseGet(() -> cs.stream()
@@ -183,11 +182,11 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                     extensionalDataNode.getArgumentMap());
         }
         else if (rootNode instanceof InnerJoinNode){
-            List<SQLExpression> joinedExpressions = tree.getChildren().stream()
+            ImmutableList<SQLExpression> joinedExpressions = tree.getChildren().stream()
                     .map(this::convertIntoFromExpression)
-                    .collect(Collectors.toList());
+                    .collect(ImmutableCollectors.toList());
 
-            return sqlAlgebraFactory.createSQLNaryJoinExpression(ImmutableList.copyOf(joinedExpressions));
+            return sqlAlgebraFactory.createSQLNaryJoinExpression(joinedExpressions);
         }
         else if (rootNode instanceof LeftJoinNode){
             LeftJoinNode leftJoinNode = (LeftJoinNode) rootNode;

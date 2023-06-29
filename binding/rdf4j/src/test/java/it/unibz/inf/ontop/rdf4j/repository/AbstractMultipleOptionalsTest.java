@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.rdf4j.repository;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**

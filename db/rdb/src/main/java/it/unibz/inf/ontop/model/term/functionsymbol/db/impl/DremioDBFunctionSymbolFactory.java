@@ -11,15 +11,11 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.function.Function;
-
-import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.INTEGER_STR;
-import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.SERIAL_STR;
 
 
 public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
@@ -176,4 +172,68 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         throw new UnsupportedOperationException(NOT_YET_SUPPORTED_MSG);
     }
+
+    /**
+     * XSD CAST functions
+     */
+    @Override
+    protected String serializeCheckAndConvertDouble(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN NOT REGEXP_LIKE(%1$s, " + numericPattern + ")" +
+                        " THEN NULL ELSE CAST(%1$s AS DOUBLE) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertFloat(ImmutableList<? extends ImmutableTerm> terms,
+                                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN NOT REGEXP_LIKE(%1$s, " + numericPattern + ") THEN NULL " +
+                        "WHEN (CAST(%1$s AS FLOAT) NOT BETWEEN -3.40E38 AND -1.18E-38 AND " +
+                        "CAST(%1$s AS FLOAT) NOT BETWEEN 1.18E-38 AND 3.40E38 AND CAST(%1$s AS FLOAT) != 0) THEN NULL " +
+                        "ELSE CAST(%1$s AS FLOAT) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN REGEXP_LIKE(%1$s, " + numericNonFPPattern + ") THEN " +
+                        "CAST(%1$s AS DECIMAL(60,30)) " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertInteger(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN REGEXP_LIKE(%1$s, "+ numericPattern +") THEN " +
+                        "CAST(FLOOR(ABS(CAST(%1$s AS DECIMAL(30,15)))) * SIGN(CAST(%1$s AS DECIMAL)) AS INTEGER) " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertIntegerFromBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s='1' THEN 1 " +
+                        "WHEN UPPER(%1$s) LIKE 'TRUE' THEN 1 " +
+                        "WHEN %1$s='0' THEN 0 " +
+                        "WHEN UPPER(%1$s) LIKE 'FALSE' THEN 0 " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBArrayAccess() {
+        return new DremioArrayAccessDBFunctionSymbol(dbTypeFactory.getAbstractRootDBType());
+    }
+
 }

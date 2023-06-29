@@ -80,9 +80,8 @@ public class Equivalences<T> implements Iterable<T> {
 	
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof Equivalences<?>) {
-			@SuppressWarnings("unchecked")
-			Equivalences<T> other = (Equivalences<T>)o;
+		if (o instanceof Equivalences) {
+			Equivalences<?> other = (Equivalences<?>)o;
 			return this.members.equals(other.members);
 		}
 		return false;

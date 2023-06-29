@@ -21,102 +21,109 @@ package it.unibz.inf.ontop.docker.service;
  */
 
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
-import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
-import junit.framework.TestCase;
 import org.eclipse.rdf4j.common.io.IOUtil;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Test class using StockExchange scenario in MySQL
  */
-public class QuestSPARQLRewriterTest extends TestCase {
+public class QuestSPARQLRewriterTest extends AbstractVirtualModeTest {
 	
 	private static final String ROOT_LOCATION = "/testcases-docker/virtual-mode/stockexchange/simplecq/";
 	private static final String OWL_FILE_LOCATION = ROOT_LOCATION + "stockexchange.owl";
 	private static final String OBDA_FILE_LOCATION = ROOT_LOCATION + "stockexchange-mysql.obda";
 	private static final String PROPERTY_FILE_LOCATION = ROOT_LOCATION + "stockexchange-mysql.properties";
 
-	private OntopOWLEngine reasoner;
 
-	@Override
-	protected void setUp() throws Exception {
-		try {
-			final URL owlFileUrl = QuestSPARQLRewriterTest.class.getResource(OWL_FILE_LOCATION);
-			final URL obdaFileUrl = QuestSPARQLRewriterTest.class.getResource(OBDA_FILE_LOCATION);
-			final URL propertyFileUrl = QuestSPARQLRewriterTest.class.getResource(PROPERTY_FILE_LOCATION);
-			OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-					.ontologyFile(owlFileUrl)
-					.nativeOntopMappingFile(obdaFileUrl.toString())
-					.propertyFile(propertyFileUrl.toString())
-					.build();
+	private static EngineConnection CONNECTION;
 
-			reasoner = new SimpleOntopOWLEngine(configuration);
-
-		} catch (Exception exc) {
-			reasoner.close();
-		}
+	@BeforeClass
+	public static void before() {
+		CONNECTION = createReasoner(OWL_FILE_LOCATION, OBDA_FILE_LOCATION, PROPERTY_FILE_LOCATION);
 	}
 
+	@Override
+	protected OntopOWLStatement createStatement() throws OWLException {
+		return CONNECTION.createStatement();
+	}
+
+	@AfterClass
+	public static void after() throws Exception {
+		CONNECTION.close();
+	}
+
+	@Test
 	public void testQueryStockTraders() {
 		final String query = readQueryFile("stocktraders.rq");
 		expandAndDisplayOutput("Query stock traders", query);
 	}
 
+	@Test
 	public void testQueryAddressID() {
 		final String query = readQueryFile("addresses-id.rq");
 		expandAndDisplayOutput("Query address ID", query);
 	}
 
+	@Test
 	public void testQueryAddress() {
 		final String query = readQueryFile("addresses.rq");
 		expandAndDisplayOutput("Query address", query);
 	}
 
+	@Test
 	public void testQueryPersonAddresses() {
 		final String query = readQueryFile("person-addresses.rq");
 		expandAndDisplayOutput("Query person addresses", query);
 	}
 
+	@Test
 	public void testQueryBrokersWorkForLegalPhysical() {
 		final String query = readQueryFile("brokers-workfor-legal-physical.rq");
 		expandAndDisplayOutput("Query brokers work for legal physical", query);
 	}
 
+	@Test
 	public void testQueryBrokersWorkForLegal() {
 		final String query = readQueryFile("brokers-workfor-legal.rq");
 		expandAndDisplayOutput("Query brokers work for legal", query);
 	}
 
+	@Test
 	public void testQueryBrokersWorkForPhysical() {
 		final String query = readQueryFile("brokers-workfor-physical.rq");
 		expandAndDisplayOutput("Query brokers work for physical", query);
 	}
 
+	@Test
 	public void testQueryBrokersWorkForThemselves() {
 		final String query = readQueryFile("brokers-workfor-themselves.rq");
 		expandAndDisplayOutput("Query brokers work for themselves", query);
 	}
 
+	@Test
 	public void testQueryTransactionOfferStock() {
 		final String query = readQueryFile("transaction-offer-stock.rq");
 		expandAndDisplayOutput("Query transaction offer stock", query);
 	}
 
+	@Test
 	public void testQueryTransactionStockType() {
 		final String query = readQueryFile("transaction-stock-type.rq");
 		expandAndDisplayOutput("Query transaction stock type", query);
 	}
 
+	@Test
 	public void testQueryTransactionFinancialInstrument() {
 		final String query = readQueryFile("transactions-finantialinstrument.rq"); // typo!
 		expandAndDisplayOutput("Query transaction financial instrument", query);
@@ -124,33 +131,29 @@ public class QuestSPARQLRewriterTest extends TestCase {
 
 	private void expandAndDisplayOutput(String title, String sparqlInput) {
 		String sparqlOutput = getSPARQLRewriting(sparqlInput);
-		StringBuilder sb = new StringBuilder();
-		sb.append("\n\n" + title);
-		sb.append("\n====================================================================================\n");
-		sb.append(sparqlInput);
-		sb.append("\n------------------------------------------------------------------------------------\n");
-		sb.append(sparqlOutput);
-		sb.append("\n====================================================================================\n");
-		System.out.println(sb.toString());
+		String sb = "\n\n" + title +
+				"\n====================================================================================\n" +
+				sparqlInput +
+				"\n------------------------------------------------------------------------------------\n" +
+				sparqlOutput +
+				"\n====================================================================================\n";
+		System.out.println(sb);
 	}
 
 	private String getSPARQLRewriting(String sparqlInput) {
-		String sparqlOutput;
-		try (OntopOWLConnection connection = reasoner.getConnection();
-			 OntopOWLStatement statement = connection.createStatement()) {
-
-			sparqlOutput = statement.getRewritingRendering(sparqlInput);
-		} catch (OWLException e) {
-			sparqlOutput = "NULL";
+		try (OntopOWLStatement statement = createStatement()) {
+			return statement.getRewritingRendering(sparqlInput);
 		}
-		return sparqlOutput;
+		catch (OWLException e) {
+			return "NULL";
+		}
 	}
 
 	private String readQueryFile(String queryFile) {
 		String queryFileLocation = ROOT_LOCATION + queryFile;
 		URL queryFileUrl = QuestSPARQLRewriterTest.class.getResource(queryFileLocation);
 		try (InputStream stream = queryFileUrl.openStream()) {
-			return IOUtil.readString(new InputStreamReader(stream, "UTF-8"));
+			return IOUtil.readString(new InputStreamReader(stream, StandardCharsets.UTF_8));
 		} catch (IOException e) { 
 			throw new RuntimeException("Cannot read input file");
 		}

@@ -6,6 +6,7 @@ import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.spec.mapping.exception.R2RMLSerializationException;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.MappingSerializer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.RDF;
@@ -18,7 +19,6 @@ import org.eclipse.rdf4j.rio.WriterConfig;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 
 import java.io.*;
-import java.util.HashSet;
 
 
 public class R2RMLMappingSerializer implements MappingSerializer {
@@ -41,9 +41,10 @@ public class R2RMLMappingSerializer implements MappingSerializer {
     public void write(File file, SQLPPMapping ppMapping) throws IOException {
 
         // If there are duplicate mapping IDs in obda file, r2rml conversion is invalid
-        if (!(ppMapping.getTripleMaps().stream()
-                .map(t -> t.getId())
-                .allMatch(new HashSet<>()::add)))
+        if (ppMapping.getTripleMaps().stream()
+                .map(SQLPPTriplesMap::getId)
+                .distinct()
+                .count() < ppMapping.getTripleMaps().size())
             throw new R2RMLSerializationException("Duplicate mapping IDs found in obda file");
 
         try (FileOutputStream fos = new FileOutputStream(file)) {

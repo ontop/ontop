@@ -1,18 +1,14 @@
 package it.unibz.inf.ontop.spec.mapping.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-import java.util.stream.IntStream;
 
 public class TargetAtomFactoryImpl implements TargetAtomFactory {
 
@@ -37,12 +33,15 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
                 (pred instanceof Variable) && !pred.equals(subject) ? (Variable) pred : p,
                 (object instanceof Variable) && !object.equals(subject) && !object.equals(pred) ? (Variable) object : o);
 
-        return getTargetAtom(projectionAtom, ImmutableList.of(subject, pred, object));
+        Substitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
+                projectionAtom.getArguments(),
+                ImmutableList.of(subject, pred, object));
+
+        return new TargetAtomImpl(projectionAtom, substitution);
     }
 
     @Override
-    public TargetAtom getQuadTargetAtom(ImmutableTerm subject, ImmutableTerm pred, ImmutableTerm
-            object, ImmutableTerm graph) {
+    public TargetAtom getQuadTargetAtom(ImmutableTerm subject, ImmutableTerm pred, ImmutableTerm object, ImmutableTerm graph) {
         DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctQuadAtom(
                 (subject instanceof Variable) ? (Variable) subject : s,
                 (pred instanceof Variable) && !pred.equals(subject) ? (Variable) pred : p,
@@ -51,16 +50,15 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
                 (graph instanceof Variable) && !graph.equals(subject) && !graph.equals(pred)
                         && !graph.equals(object) ? (Variable) graph : g);
 
-        return getTargetAtom(projectionAtom, ImmutableList.of(subject, pred, object, graph));
-    }
+        Substitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
+                projectionAtom.getArguments(),
+                ImmutableList.of(subject, pred, object, graph));
 
-    private TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, ImmutableList<ImmutableTerm> initialTerms) {
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(projectionAtom.getArguments(), initialTerms);
         return new TargetAtomImpl(projectionAtom, substitution);
     }
 
     @Override
-    public TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, ImmutableSubstitution<ImmutableTerm> substitution) {
+    public TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, Substitution<ImmutableTerm> substitution) {
         return new TargetAtomImpl(projectionAtom, substitution);
     }
 }

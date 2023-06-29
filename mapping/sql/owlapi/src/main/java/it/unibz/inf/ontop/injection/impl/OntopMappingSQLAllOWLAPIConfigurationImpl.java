@@ -1,10 +1,12 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllSettings;
 import it.unibz.inf.ontop.spec.OBDASpecification;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -27,11 +29,16 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
 
     @Override
     protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
-        return loadSpecification(mappingOWLConfiguration::loadOntology);
+        return loadSpecification(mappingOWLConfiguration::loadOntology, mappingOWLConfiguration::loadInputFacts);
     }
     @Override
     public Optional<OWLOntology> loadInputOntology() throws OWLOntologyCreationException {
         return mappingOWLConfiguration.loadInputOntology();
+    }
+
+    @Override
+    public Optional<ImmutableSet<RDFFact>> loadInputFacts() throws OBDASpecificationException {
+        return mappingOWLConfiguration.loadInputFacts();
     }
 
     static class OntopMappingSQLAllOWLAPIOptions {
@@ -45,7 +52,7 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
         }
     }
 
-    static abstract class OntopMappingSQLAllOWLAPIBuilderMixin<B extends OntopMappingSQLAllOWLAPIConfiguration.Builder<B>>
+    protected static abstract class OntopMappingSQLAllOWLAPIBuilderMixin<B extends OntopMappingSQLAllOWLAPIConfiguration.Builder<B>>
             extends OntopMappingSQLAllBuilderMixin<B>
             implements OntopMappingSQLAllOWLAPIConfiguration.Builder<B> {
 
@@ -53,10 +60,17 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
         private boolean isOntologyDefined = false;
 
         OntopMappingSQLAllOWLAPIBuilderMixin() {
-            B builder = (B) this;
-            ontologyBuilderFragment = new OntopMappingOntologyBuilders.StandardMappingOntologyBuilderFragment<>(builder,
-                    this::declareOntologyDefined
-            );
+            ontologyBuilderFragment = new OntopMappingOntologyBuilders.StandardMappingOntologyBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopMappingSQLAllOWLAPIBuilderMixin.this.self();
+                }
+
+                @Override
+                protected void declareOntologyDefined() {
+                    OntopMappingSQLAllOWLAPIBuilderMixin.this.declareOntologyDefined();
+                }
+            };
         }
 
         @Override
@@ -84,7 +98,37 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
             return ontologyBuilderFragment.xmlCatalogFile(file);
         }
 
-        void declareOntologyDefined() {
+        @Override
+        public B factsFile(@Nonnull String urlOrPath) {
+            return ontologyBuilderFragment.factsFile(urlOrPath);
+        }
+
+        @Override
+        public B factFormat(@Nonnull String factFormat) {
+            return ontologyBuilderFragment.factFormat(factFormat);
+        }
+
+        @Override
+        public B factsBaseIRI(@Nonnull String factsBaseIRI) {
+            return ontologyBuilderFragment.factsBaseIRI(factsBaseIRI);
+        }
+
+        @Override
+        public B factsFile(@Nonnull URL url) {
+            return ontologyBuilderFragment.factsFile(url);
+        }
+
+        @Override
+        public B factsFile(@Nonnull File owlFile) {
+            return ontologyBuilderFragment.factsFile(owlFile);
+        }
+
+        @Override
+        public B factsReader(@Nonnull Reader reader) {
+            return ontologyBuilderFragment.factsReader(reader);
+        }
+
+        protected final void declareOntologyDefined() {
             if (isOBDASpecificationAssigned())
                 throw new InvalidOntopConfigurationException("The OBDA specification has already been assigned");
             if (isOntologyDefined) {
@@ -93,7 +137,7 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
             isOntologyDefined = true;
         }
 
-        final OntopMappingSQLAllOWLAPIOptions generateSQLAllOWLAPIOptions() {
+        protected final OntopMappingSQLAllOWLAPIOptions generateSQLAllOWLAPIOptions() {
             OntopMappingSQLAllOptions sqlOptions = generateMappingSQLAllOptions();
 
             OntopMappingOntologyBuilders.OntopMappingOntologyOptions mappingOntologyOptions =
@@ -104,8 +148,7 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
         }
     }
 
-    public static class BuilderImpl<B extends OntopMappingSQLAllOWLAPIConfiguration.Builder<B>>
-            extends OntopMappingSQLAllOWLAPIBuilderMixin<B> {
+    public static class BuilderImpl extends OntopMappingSQLAllOWLAPIBuilderMixin<BuilderImpl> {
 
         @Override
         public OntopMappingSQLAllOWLAPIConfiguration build() {
@@ -113,6 +156,10 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
             OntopMappingSQLAllOWLAPIOptions options = generateSQLAllOWLAPIOptions();
             return new OntopMappingSQLAllOWLAPIConfigurationImpl(settings, options);
         }
-    }
 
+        @Override
+        protected BuilderImpl self() {
+            return this;
+        }
+    }
 }

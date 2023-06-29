@@ -34,7 +34,7 @@ public abstract class QuestVirtualScenarioParent extends QuestScenarioParent {
 	
 	@Override
 	protected Repository createRepository() {
-		OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration.Builder<?> configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFileURL)
 				.enableTestMode()
 				.nativeOntopMappingFile(obdaFileURL);

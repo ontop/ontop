@@ -6,7 +6,7 @@ import org.eclipse.rdf4j.query.BindingSet;
 
 import java.util.Optional;
 
-public interface PredefinedQuery<Q extends RDF4JQuery> {
+public interface PredefinedQuery<Q extends RDF4JQuery<?>> {
 
     Q getInputQuery();
 

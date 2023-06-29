@@ -20,23 +20,20 @@ public class SQLPPMappingFactoryImpl implements SQLPPMappingFactory {
         this.settings = settings;
     }
 
-    private Constructor[] findConstructors(Class genericClass) {
+    private Constructor<? extends SQLPPMapping> findConstructor(Class<SQLPPMapping> genericClass) {
         String implementationName = settings.getProperty(genericClass.getCanonicalName())
                 //TODO: find a better exception
                 .orElseThrow(() -> new RuntimeException("No implementation declared for " +
                         genericClass.getCanonicalName()));
 
         try {
-            Class implementationClass = Class.forName(implementationName);
-            return implementationClass.getConstructors();
-        } catch (ClassNotFoundException e) {
+            Class<? extends SQLPPMapping> implementationClass = Class.forName(implementationName).asSubclass(genericClass);
+            return implementationClass.getConstructor(ImmutableList.class, PrefixManager.class);
+        }
+        catch (ClassNotFoundException | NoSuchMethodException e) {
             // TODO: find a better exception
             throw new RuntimeException(e.getMessage());
         }
-    }
-
-    private Constructor findFirstConstructor(Class genericClass) {
-        return findConstructors(genericClass)[0];
     }
 
     /**
@@ -49,8 +46,8 @@ public class SQLPPMappingFactoryImpl implements SQLPPMappingFactory {
             /**
              * Instantiation
              */
-            Constructor constructor = findFirstConstructor(SQLPPMapping.class);
-            return (SQLPPMapping) constructor.newInstance(ppMappingAxioms, prefixManager);
+            Constructor<? extends SQLPPMapping> constructor = findConstructor(SQLPPMapping.class);
+            return  constructor.newInstance(ppMappingAxioms, prefixManager);
             /**
              * Exception management
              */

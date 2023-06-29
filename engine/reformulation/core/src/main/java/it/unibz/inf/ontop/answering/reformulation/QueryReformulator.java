@@ -12,12 +12,12 @@ import it.unibz.inf.ontop.iq.IQ;
  */
 public interface QueryReformulator {
 
-    IQ reformulateIntoNativeQuery(KGQuery inputQuery, QueryLogger queryLogger) throws OntopReformulationException;
+    IQ reformulateIntoNativeQuery(KGQuery<?> inputQuery, QueryLogger queryLogger) throws OntopReformulationException;
 
     /**
      * For analysis purposes
      */
-    String getRewritingRendering(KGQuery query) throws OntopReformulationException;
+    String getRewritingRendering(KGQuery<?> query) throws OntopReformulationException;
 
     KGQueryFactory getInputQueryFactory();
 

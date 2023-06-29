@@ -35,6 +35,8 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 
 import com.google.common.collect.ImmutableSet;
 
+import javax.annotation.Nonnull;
+
 /**
  * Reasoning over the TBox using the ontology graph
  * 
@@ -128,6 +130,7 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 			this.graph = graph;
 		}
 
+		@Nonnull
 		@Override
 		public Iterator<Equivalences<T>> iterator() {
 			Set<Equivalences<T>> result = new LinkedHashSet<>();
@@ -141,7 +144,7 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 		@Override
 		public Equivalences<T> getVertex(T desc) {
 			// search for cycles
-			StrongConnectivityInspector<T, DefaultEdge> inspector = new StrongConnectivityInspector<T, DefaultEdge>(graph);
+			StrongConnectivityInspector<T, DefaultEdge> inspector = new StrongConnectivityInspector<>(graph);
 
 			// each set contains vertices which together form a strongly
 			// connected component within the given graph
@@ -162,7 +165,7 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 								return new Equivalences<Description>(equivalences);
 							}
 						*/
-						return new Equivalences<T>(ImmutableSet.copyOf(equivalenceSet), equivalenceSet.iterator().next(), false);
+						return new Equivalences<>(ImmutableSet.copyOf(equivalenceSet), equivalenceSet.iterator().next(), false);
 					}
 				}
 			}
@@ -183,7 +186,7 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 
 		@Override
 		public ImmutableSet<Equivalences<T>> getDirectSub(Equivalences<T> v) {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 
 			// I want to consider also the children of the equivalent nodes
 			for (T n : v) {
@@ -226,9 +229,9 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 		@Override
 		public ImmutableSet<Equivalences<T>> getSub(Equivalences<T> v) {
 			
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
-			BreadthFirstIterator<T, DefaultEdge> iterator = new BreadthFirstIterator<T, DefaultEdge>(
-								new EdgeReversedGraph<T, DefaultEdge>(graph), v.getRepresentative());
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
+			BreadthFirstIterator<T, DefaultEdge> iterator = new BreadthFirstIterator<>(
+					new EdgeReversedGraph<>(graph), v.getRepresentative());
 
 			while (iterator.hasNext()) {
 				T node = iterator.next();
@@ -241,7 +244,7 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 							result.add(new Equivalences<Description>(sources));
 						}
 					} */
-				result.add(new Equivalences<T>(ImmutableSet.of(node)));
+				result.add(new Equivalences<>(ImmutableSet.of(node)));
 			}
 			// add each of them to the result
 			return ImmutableSet.copyOf(result);
@@ -249,7 +252,7 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 
 		@Override
 		public ImmutableSet<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 
 
 			// I want to consider also the parents of the equivalent nodes
@@ -292,8 +295,8 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 		@Override
 		public ImmutableSet<Equivalences<T>> getSuper(Equivalences<T> v) {
 			
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
-			BreadthFirstIterator<T, DefaultEdge> iterator = new BreadthFirstIterator<T, DefaultEdge>(graph, v.getRepresentative());
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
+			BreadthFirstIterator<T, DefaultEdge> iterator = new BreadthFirstIterator<>(graph, v.getRepresentative());
 
 			while (iterator.hasNext()) {
 				T node = iterator.next();
@@ -306,7 +309,7 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 							result.add(new Equivalences<Description>(sources));
 						}
 					} */
-				result.add(new Equivalences<T>(ImmutableSet.of(node)));
+				result.add(new Equivalences<>(ImmutableSet.of(node)));
 			}
 			// add each of them to the result
 			return ImmutableSet.copyOf(result);

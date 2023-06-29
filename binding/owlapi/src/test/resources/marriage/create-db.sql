@@ -1,7 +1,7 @@
 CREATE TABLE "person" (
 "id" INT NOT NULL PRIMARY KEY,
-"first_name" VARCHAR(40),
-"last_name" VARCHAR(40),
+"first_name" VARCHAR(40) NULL,
+"last_name" VARCHAR(40) NOT NULL,
 "spouse" INT
 );
 

@@ -50,30 +50,28 @@ public class OntopSQLCoreConfigurationImpl extends OntopModelConfigurationImpl
         }
     }
 
-    protected static class DefaultOntopSQLCoreBuilderFragment<B extends OntopSQLCoreConfiguration.Builder<B>> implements
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    protected abstract static class DefaultOntopSQLCoreBuilderFragment<B extends OntopSQLCoreConfiguration.Builder<B>> implements
             OntopSQLCoreBuilderFragment<B> {
 
-        private final B builder;
         private Optional<String> jdbcUrl = Optional.empty();
         private Optional<String> jdbcDriver = Optional.empty();
 
-        DefaultOntopSQLCoreBuilderFragment(B builder) {
-            this.builder = builder;
-        }
+        protected abstract B self();
 
         @Override
         public B jdbcUrl(String jdbcUrl) {
             this.jdbcUrl = Optional.of(jdbcUrl);
-            return builder;
+            return self();
         }
 
         @Override
         public B jdbcDriver(String jdbcDriver) {
             this.jdbcDriver = Optional.of(jdbcDriver);
-            return builder;
+            return self();
         }
 
-        Properties generateProperties() {
+        protected Properties generateProperties() {
             Properties properties = new Properties();
 
             jdbcUrl.ifPresent(s -> properties.setProperty(OntopSQLCoreSettings.JDBC_URL, s));
@@ -82,7 +80,7 @@ public class OntopSQLCoreConfigurationImpl extends OntopModelConfigurationImpl
             return properties;
         }
 
-        final OntopSQLCoreOptions generateSQLCoreOptions(OntopModelConfigurationOptions modelOptions) {
+        protected final OntopSQLCoreOptions generateSQLCoreOptions(OntopModelConfigurationOptions modelOptions) {
             return new OntopSQLCoreOptions(modelOptions);
         }
 
@@ -95,9 +93,21 @@ public class OntopSQLCoreConfigurationImpl extends OntopModelConfigurationImpl
         private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
 
         protected OntopSQLCoreBuilderMixin() {
-            sqlBuilderFragment = new DefaultOntopSQLCoreBuilderFragment<>((B)this);
-            modelBuilderFragment = new DefaultOntopModelBuilderFragment<>((B) this);
+            sqlBuilderFragment = new DefaultOntopSQLCoreBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopSQLCoreBuilderMixin.this.self();
+                }
+            };
+            modelBuilderFragment = new DefaultOntopModelBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopSQLCoreBuilderMixin.this.self();
+                }
+            };
         }
+
+        protected abstract B self();
 
         @Override
         public B jdbcUrl(String jdbcUrl) {
@@ -115,7 +125,7 @@ public class OntopSQLCoreConfigurationImpl extends OntopModelConfigurationImpl
             return properties;
         }
 
-        OntopSQLCoreOptions generateSQLCoreOptions() {
+        protected final OntopSQLCoreOptions generateSQLCoreOptions() {
             return sqlBuilderFragment.generateSQLCoreOptions(modelBuilderFragment.generateModelOptions());
         }
 
@@ -140,7 +150,7 @@ public class OntopSQLCoreConfigurationImpl extends OntopModelConfigurationImpl
         }
     }
 
-    public static class BuilderImpl<B extends OntopSQLCoreConfiguration.Builder<B>> extends OntopSQLCoreBuilderMixin<B> {
+    public static class BuilderImpl extends OntopSQLCoreBuilderMixin<BuilderImpl> {
 
         @Override
         public OntopSQLCoreConfiguration build() {
@@ -149,6 +159,11 @@ public class OntopSQLCoreConfigurationImpl extends OntopModelConfigurationImpl
             OntopSQLCoreOptions options = generateSQLCoreOptions();
 
             return new OntopSQLCoreConfigurationImpl(settings, options);
+        }
+
+        @Override
+        protected BuilderImpl self() {
+            return this;
         }
     }
 

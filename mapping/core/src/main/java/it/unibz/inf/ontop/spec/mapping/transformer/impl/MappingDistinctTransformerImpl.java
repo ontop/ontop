@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;

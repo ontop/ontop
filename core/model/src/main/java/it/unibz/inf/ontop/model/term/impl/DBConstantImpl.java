@@ -26,11 +26,6 @@ public class DBConstantImpl extends AbstractNonNullConstant implements DBConstan
     }
 
     @Override
-    public boolean isGround() {
-        return true;
-    }
-
-    @Override
     public Stream<Variable> getVariableStream() {
         return Stream.empty();
     }

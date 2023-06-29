@@ -4,7 +4,6 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -15,7 +14,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
@@ -73,14 +72,14 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                 NativeNode nativeNode = position.getDatabaseQuery(dbParameters);
                 try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(nativeNode.getNativeQueryString())) {
                     while (rs.next()) {
-                        ImmutableMap.Builder<Variable, ImmutableTerm> builder = ImmutableMap.builder();
-                        for (Variable variable : nativeNode.getVariables()) { // exceptions, no streams
-                            String column = nativeNode.getColumnNames().get(variable).getName();
-                            builder.put(variable,
-                                    termFactory.getDBConstant(rs.getString(column),
-                                            nativeNode.getTypeMap().get(variable)));
-                        }
-                        resultBuilder.add(position.createExpansion(builder.build()));
+                        Substitution<ImmutableTerm> sub = substitutionFactory.getSubstitutionThrowsExceptions(
+                                nativeNode.getVariables(),
+                                v -> v,
+                                v -> termFactory.getDBConstant(
+                                        rs.getString(nativeNode.getColumnNames().get(v).getName()),
+                                        nativeNode.getTypeMap().get(v)));
+
+                        resultBuilder.add(position.createExpansion(sub));
                     }
                 }
             }
@@ -101,19 +100,15 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
             this.topVariable = topVariable;
         }
 
-        ImmutableTerm getTemplate() {
-            return assertion.getTopSubstitution().get(topVariable);
-        }
-
         NativeNode getDatabaseQuery(DBParameters dbParameters) {
 
             IQTree topChildNotNull = termFactory.getDBIsNotNull(assertion.getTopChild().getVariables().stream())
                     .map(iqFactory::createFilterNode)
-                    .map(n -> (IQTree)iqFactory.createUnaryIQTree(n, assertion.getTopChild()))
+                    .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, assertion.getTopChild()))
                     .orElse(assertion.getTopChild());
 
             IQTree constructionTree = iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
-                    getTemplate().getVariableStream().collect(ImmutableCollectors.toSet()),
+                    assertion.getTopSubstitution().get(topVariable).getVariableStream().collect(ImmutableCollectors.toSet()),
                     substitutionFactory.getSubstitution()),
                     topChildNotNull);
 
@@ -123,21 +118,22 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
             return nativeNodeGenerator.generate(transformedTree, dbParameters, true);
         }
 
-        MappingAssertion createExpansion(ImmutableMap<Variable, ImmutableTerm> values) {
-            ImmutableTerm instantiatedTemplate = substitutionFactory.getSubstitution(values)
-                    .apply(getTemplate());
-            ImmutableSubstitution<ImmutableTerm> instantiatedSub = assertion.getTopSubstitution()
-                    .composeWith(substitutionFactory.getSubstitution(topVariable, instantiatedTemplate));
+        MappingAssertion createExpansion(Substitution<ImmutableTerm> values) {
 
-            IQTree filterTree = iqFactory.createUnaryIQTree(iqFactory.createFilterNode(
-                            termFactory.getConjunction(values.entrySet().stream()
-                                    .map(e -> termFactory.getNotYetTypedEquality(e.getKey(), e.getValue()))
+            Substitution<ImmutableTerm> instantiatedSub = assertion.getTopSubstitution().builder()
+                    .transformOrRetain(ImmutableMap.of(topVariable, values)::get, (t, sub) -> sub.applyToTerm(t))
+                    .build();
+
+            IQTree filterTree = iqFactory.createUnaryIQTree(
+                    iqFactory.createFilterNode(
+                            termFactory.getConjunction(values.builder()
+                                    .toStream(termFactory::getNotYetTypedEquality)
                                     .collect(ImmutableCollectors.toList()))),
-                            assertion.getTopChild());
+                    assertion.getTopChild());
 
-            IQTree tree = iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
-                            instantiatedSub.getDomain(), instantiatedSub),
-                            filterTree);
+            IQTree tree = iqFactory.createUnaryIQTree(
+                    iqFactory.createConstructionNode(instantiatedSub.getDomain(), instantiatedSub),
+                    filterTree);
 
             return assertion.copyOf(tree, iqFactory);
         }

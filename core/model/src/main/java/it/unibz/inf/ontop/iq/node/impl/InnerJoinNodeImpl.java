@@ -1,35 +1,35 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.*;
+import com.google.common.io.Files;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
-import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.AbstractCollection;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
 
     private static final String JOIN_NODE_STR = "JOIN";
-    private final ConstructionNodeTools constructionNodeTools;
+    private final IQTreeTools iqTreeTools;
     private final InnerJoinNormalizer normalizer;
 
     @AssistedInject
@@ -46,13 +46,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                 TermNullabilityEvaluator nullabilityEvaluator,
                                 TermFactory termFactory, TypeFactory typeFactory,
                                 IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
-                                ConstructionNodeTools constructionNodeTools,
-                                ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
+                                IQTreeTools iqTreeTools,
                                 JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier,
                                 InnerJoinNormalizer normalizer) {
         super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier);
-        this.constructionNodeTools = constructionNodeTools;
+                substitutionFactory, variableNullabilityTools, conditionSimplifier);
+        this.iqTreeTools = iqTreeTools;
         this.normalizer = normalizer;
     }
 
@@ -61,21 +60,19 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               TermNullabilityEvaluator nullabilityEvaluator,
                               TermFactory termFactory, TypeFactory typeFactory,
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
-                              ConstructionNodeTools constructionNodeTools,
-                              ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
+                              IQTreeTools iqTreeTools,
                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
         this(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, iqFactory,
-                substitutionFactory, constructionNodeTools, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier, normalizer);
+                substitutionFactory, iqTreeTools, variableNullabilityTools, conditionSimplifier, normalizer);
     }
 
     @AssistedInject
     private InnerJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
                               TypeFactory typeFactory, IntermediateQueryFactory iqFactory,
-                              SubstitutionFactory substitutionFactory, ConstructionNodeTools constructionNodeTools,
-                              ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
+                              SubstitutionFactory substitutionFactory, IQTreeTools iqTreeTools,
                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
         this(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, iqFactory,
-                substitutionFactory, constructionNodeTools, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier, normalizer);
+                substitutionFactory, iqTreeTools, variableNullabilityTools, conditionSimplifier, normalizer);
     }
 
     @Override
@@ -90,31 +87,29 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(ImmutableList<IQTree> children) {
+    public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(ImmutableList<IQTree> children) {
         return children.stream()
                 .map(IQTree::getPossibleVariableDefinitions)
                 .filter(s -> !s.isEmpty())
                 .reduce(ImmutableSet.of(), this::combineVarDefs);
     }
 
-    private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> combineVarDefs(
-            ImmutableSet<ImmutableSubstitution<NonVariableTerm>> s1,
-            ImmutableSet<ImmutableSubstitution<NonVariableTerm>> s2) {
+    private ImmutableSet<Substitution<NonVariableTerm>> combineVarDefs(
+            ImmutableSet<Substitution<NonVariableTerm>> s1,
+            ImmutableSet<Substitution<NonVariableTerm>> s2) {
+
+         // substitutionFactory.compose takes the first definition of a common variable.
+         // It behaves like a union except that is robust to "non-identical" definitions.
+         // If normalized, two definitions for the same variables are expected to be compatible.
+         //
+         // If not normalized, the definitions may be incompatible, but that's fine
+         // since they will not produce any result.
+
         return s1.isEmpty()
                 ? s2
                 : s1.stream()
                     .flatMap(d1 -> s2.stream()
-                        /*
-                         * Takes the first definition of a common variable.
-                         *
-                         * Behaves like an union except that is robust to "non-identical" definitions.
-                         * If normalized, two definitions for the same variables are expected to be compatible.
-                         *
-                         * If not normalized, the definitions may be incompatible, but that's fine
-                         * since they will not produce any result.
-                         *
-                         */
-                        .map(d2 -> d2.composeWith2(d1)))
+                        .map(d2 -> substitutionFactory.onNonVariableTerms().compose(d2, d1)))
                     .collect(ImmutableCollectors.toSet());
     }
 
@@ -150,15 +145,15 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+    public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
                                               VariableGenerator variableGenerator) {
 
         Optional<ImmutableExpression> unoptimizedExpression = getOptionalFilterCondition()
-                .map(descendingSubstitution::applyToBooleanExpression);
+                .map(descendingSubstitution::apply);
 
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
-                constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
+                iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
 
         VariableNullability extendedVariableNullability = constraint
                 .map(c -> simplifiedChildFutureVariableNullability.extendToExternalVariables(c.getVariableStream()))
@@ -171,9 +166,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(constraint,
                     expressionAndSubstitution, extendedVariableNullability);
 
-            ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
-                    ((ImmutableSubstitution<VariableOrGroundTerm>)descendingSubstitution)
-                            .composeWith2(expressionAndSubstitution.getSubstitution());
+            Substitution<? extends VariableOrGroundTerm> downSubstitution =
+                    substitutionFactory.onVariableOrGroundTerms().compose(descendingSubstitution, expressionAndSubstitution.getSubstitution());
 
             ImmutableList<IQTree> newChildren = children.stream()
                     .map(c -> c.applyDescendingSubstitution(downSubstitution, downConstraint, variableGenerator))
@@ -182,27 +176,23 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             IQTree joinTree = iqFactory.createNaryIQTree(
                     iqFactory.createInnerJoinNode(expressionAndSubstitution.getOptionalExpression()),
                     newChildren);
-            return expressionAndSubstitution.getSubstitution().isEmpty()
-                    ? joinTree
-                    : iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(
-                            constructionNodeTools.computeNewProjectedVariables(descendingSubstitution,
-                                    getProjectedVariables(children)),
-                            (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)
-                                    expressionAndSubstitution.getSubstitution()),
-                    joinTree);
-        } catch (UnsatisfiableConditionException e) {
-            return iqFactory.createEmptyNode(computeNewlyProjectedVariables(descendingSubstitution, children));
+
+            return iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, expressionAndSubstitution.getSubstitution(),
+                    () -> iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
+        }
+        catch (UnsatisfiableConditionException e) {
+            return iqFactory.createEmptyNode(
+                    iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
         }
     }
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
             VariableGenerator variableGenerator) {
 
         InnerJoinNode newJoinNode = getOptionalFilterCondition()
-                .map(descendingSubstitution::applyToBooleanExpression)
+                .map(descendingSubstitution::apply)
                 .map(iqFactory::createInnerJoinNode)
                 .orElseGet(iqFactory::createInnerJoinNode);
 
@@ -214,14 +204,14 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, ImmutableList<IQTree> children,
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, ImmutableList<IQTree> children,
                                      IQTreeCache treeCache) {
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(c -> c.applyFreshRenaming(renamingSubstitution))
                 .collect(ImmutableCollectors.toList());
 
         Optional<ImmutableExpression> newCondition = getOptionalFilterCondition()
-                .map(renamingSubstitution::applyToBooleanExpression);
+                .map(renamingSubstitution::apply);
 
         InnerJoinNode newJoinNode = newCondition.equals(getOptionalFilterCondition())
                 ? this
@@ -312,8 +302,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     /**
-     * For unique constraints to emerge from an inner join, children must provide unique constraints
-     * and being naturally joined over some of such constraints.
+     * For unique constraints to emerge from an inner join, children must provide unique constraints.
      */
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(ImmutableList<IQTree> children) {
@@ -331,12 +320,29 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         if (constraintMap.values().stream().anyMatch(AbstractCollection::isEmpty))
             return ImmutableSet.of();
 
+        ImmutableSet<ImmutableSet<Variable>> naturalJoinConstraints = extractConstraintsOverNaturalJoins(children,
+                childrenSet, constraintMap);
+
+        ImmutableSet<ImmutableSet<Variable>> combinedConstraints = extractCombinedConstraints(constraintMap.values(),
+                getVariableNullability(children));
+
+        return removeRedundantConstraints(Sets.union(naturalJoinConstraints, combinedConstraints));
+
+    }
+
+    /**
+     * Naturally joined over some of children constraints.
+     * TODO: see if still needed
+     */
+    private ImmutableSet<ImmutableSet<Variable>> extractConstraintsOverNaturalJoins(ImmutableList<IQTree> children,
+                                                                                    ImmutableSet<IQTree> childrenSet,
+                                                                                    ImmutableMap<IQTree, ImmutableSet<ImmutableSet<Variable>>> childConstraintMap) {
         // Non-saturated
         ImmutableMultimap<IQTree, IQTree> directDependencyMap = IntStream.range(0, children.size() - 1)
                 .boxed()
                 .flatMap(i -> IntStream.range(i +1, children.size())
                         .boxed()
-                        .flatMap(j -> extractFunctionalDependencies(children.get(i), children.get(j), constraintMap)))
+                        .flatMap(j -> extractFunctionalDependencies(children.get(i), children.get(j), childConstraintMap)))
                 .collect(ImmutableCollectors.toMultimap());
 
         Multimap<IQTree, IQTree> saturatedDependencyMap = saturateDependencies(directDependencyMap);
@@ -344,13 +350,70 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         return saturatedDependencyMap.asMap().entrySet().stream()
                 .filter(e -> e.getValue().containsAll(Sets.difference(childrenSet, ImmutableSet.of(e.getKey())).immutableCopy()))
                 .map(Map.Entry::getKey)
-                .flatMap(child -> constraintMap.get(child).stream())
+                .flatMap(child -> childConstraintMap.get(child).stream())
                 .collect(ImmutableCollectors.toSet());
     }
 
+    private ImmutableSet<ImmutableSet<Variable>> extractCombinedConstraints(
+            ImmutableCollection<ImmutableSet<ImmutableSet<Variable>>> childConstraints,
+            VariableNullability variableNullability) {
+        ImmutableList<ImmutableSet<ImmutableSet<Variable>>> nonNullableConstraints = childConstraints.stream()
+                .map(cs -> cs.stream()
+                        .filter(c -> c.stream().noneMatch(variableNullability::isPossiblyNullable))
+                        .collect(ImmutableCollectors.toSet()))
+                .collect(ImmutableCollectors.toList());
+
+        if (nonNullableConstraints.isEmpty() || nonNullableConstraints.stream().anyMatch(AbstractCollection::isEmpty))
+            return ImmutableSet.of();
+        
+        return computeCartesianProduct(nonNullableConstraints, 0);
+    }
+
+    private ImmutableSet<ImmutableSet<Variable>> computeCartesianProduct(ImmutableList<ImmutableSet<ImmutableSet<Variable>>> nonNullableConstraints,
+                                                             int index) {
+        int arity = nonNullableConstraints.size();
+        if (index == (arity -1))
+            return nonNullableConstraints.get(index);
+
+        ImmutableSet<ImmutableSet<Variable>> followingCartesianProduct = computeCartesianProduct(nonNullableConstraints, index + 1);
+
+        return nonNullableConstraints.get(index).stream()
+                .flatMap(c -> followingCartesianProduct.stream()
+                        .map(c1 -> Sets.union(c, c1).immutableCopy()))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private ImmutableSet<ImmutableSet<Variable>> removeRedundantConstraints(Set<ImmutableSet<Variable>> allConstraints) {
+        Set<ImmutableSet<Variable>> mergedConstraints = allConstraints.stream()
+                .sorted(Comparator.comparingInt(AbstractCollection::size))
+                .reduce(Sets.newHashSet(),
+                        (cs, c1) -> {
+                            if (cs.stream().noneMatch(c1::containsAll))
+                                cs.add(c1);
+                            return cs;
+                        }
+                        ,
+                        (c1, c2) -> {
+                            throw new MinorOntopInternalBugException("No merging");
+                        });
+
+        return ImmutableSet.copyOf(mergedConstraints);
+    }
+
+    /*
+    We can simply collect all FDs from the children.
+     */
     @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(ImmutableList<IQTree> children) {
-        return super.computeNotInternallyRequiredVariables(children);
+    public FunctionalDependencies inferFunctionalDependencies(ImmutableList<IQTree> children, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
+        return children.stream()
+                .flatMap(child -> child.inferFunctionalDependencies().stream())
+                .collect(FunctionalDependencies.toFunctionalDependencies());
+    }
+
+
+    @Override
+    public VariableNonRequirement computeVariableNonRequirement(ImmutableList<IQTree> children) {
+        return super.computeVariableNonRequirement(children);
     }
 
     private Stream<Map.Entry<IQTree, IQTree>> extractFunctionalDependencies(
@@ -409,8 +472,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     .filter(s -> !s.isEmpty())
                     .map(s -> children.stream()
                             .map(child -> child.applyDescendingSubstitution(s, downConstraint, variableGenerator))
-                            .collect(ImmutableCollectors.toList())
-                    )
+                            .collect(ImmutableCollectors.toList()))
                     .orElseGet(() -> downConstraint
                             .map(s -> children.stream()
                                     .map(child -> child.propagateDownConstraint(s, variableGenerator))
@@ -420,30 +482,25 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             InnerJoinNode newJoin = conditionSimplificationResults.getOptionalExpression().equals(getOptionalFilterCondition())
                     ? this
                     : conditionSimplificationResults.getOptionalExpression()
-                    .map(iqFactory::createInnerJoinNode)
-                    .orElseGet(iqFactory::createInnerJoinNode);
+                        .map(iqFactory::createInnerJoinNode)
+                        .orElseGet(iqFactory::createInnerJoinNode);
 
             NaryIQTree joinTree = iqFactory.createNaryIQTree(newJoin, newChildren);
 
-            return Optional.of(conditionSimplificationResults.getSubstitution())
-                    .filter(s -> !s.isEmpty())
-                    .map(s -> iqFactory.createConstructionNode(children.stream()
+            return iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, conditionSimplificationResults.getSubstitution(),
+                    () -> children.stream()
                             .flatMap(c -> c.getVariables().stream())
-                            .collect(ImmutableCollectors.toSet()),
-                            (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)s))
-                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, joinTree))
-                    .orElse(joinTree);
-
-        } catch (UnsatisfiableConditionException e) {
+                            .collect(ImmutableCollectors.toSet()));
+        }
+        catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(getProjectedVariables(children));
         }
     }
 
     private IQTree liftUnionChild(int childIndex, NaryIQTree newUnionChild, ImmutableList<IQTree> initialChildren,
                                   VariableGenerator variableGenerator) {
-        UnionNode newUnionNode = iqFactory.createUnionNode(initialChildren.stream()
-                .flatMap(c -> c.getVariables().stream())
-                .collect(ImmutableCollectors.toSet()));
+
+        UnionNode newUnionNode = iqFactory.createUnionNode(iqTreeTools.getChildrenVariables(initialChildren));
 
         return iqFactory.createNaryIQTree(newUnionNode,
                 newUnionChild.getChildren().stream()
@@ -461,12 +518,4 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                         .collect(ImmutableCollectors.toList()));
     }
 
-    private ImmutableSet<Variable> computeNewlyProjectedVariables(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            ImmutableList<IQTree> children) {
-        ImmutableSet<Variable> formerProjectedVariables = getProjectedVariables(children);
-
-        return constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, formerProjectedVariables);
-    }
-
- }
+}

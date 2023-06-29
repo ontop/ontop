@@ -1,23 +1,5 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
-import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.node.FilterNode;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.Variable;
-import org.junit.Test;
-
-import java.sql.Types;
-
-import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static org.junit.Assert.assertTrue;
-
 public class NRAJoinOptimizerTest {
 ////    private static final DBMetadata DB_METADATA;
 //    private static final RelationPredicate TABLE1_PREDICATE;

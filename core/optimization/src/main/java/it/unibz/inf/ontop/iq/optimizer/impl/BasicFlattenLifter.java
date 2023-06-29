@@ -35,8 +35,7 @@ public class BasicFlattenLifter implements FlattenLifter {
         TreeTransformer treeTransformer = new TreeTransformer(iqFactory);
         return iqFactory.createIQ(
                 query.getProjectionAtom(),
-                query.getTree().acceptTransformer(treeTransformer)
-        );
+                query.getTree().acceptTransformer(treeTransformer));
     }
 
     private static class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -194,14 +193,10 @@ public class BasicFlattenLifter implements FlattenLifter {
         private ConstructionNode updateConstructionNode(ConstructionNode cn, Iterator<FlattenNode> it) {
             if (it.hasNext()) {
                 FlattenNode fn = it.next();
-                ImmutableSet<Variable> definedVars = fn.getLocallyDefinedVariables();
-                // among variables projected by the cn, delete the ones defined by the fn, and add the flattened variable
-                ImmutableSet<Variable> projectedVars =
-                        Stream.concat(
-                                cn.getVariables().stream()
-                                        .filter(v -> !definedVars.contains(v)),
-                                Stream.of(fn.getFlattenedVariable())
-                        ).collect(ImmutableCollectors.toSet());
+                ImmutableSet<Variable> projectedVars = Sets.union(
+                                Sets.difference(cn.getVariables(), fn.getLocallyDefinedVariables()),
+                                ImmutableSet.of(fn.getFlattenedVariable()))
+                        .immutableCopy();
 
                 ConstructionNode updatedCn = iqFactory.createConstructionNode(projectedVars, cn.getSubstitution());
                 return updateConstructionNode(updatedCn, it);
@@ -222,10 +217,10 @@ public class BasicFlattenLifter implements FlattenLifter {
                 if (flattenNode.getLocallyDefinedVariables().stream()
                         .anyMatch(blockingVars::contains)) {
                     splitFlattenSequence.appendNonLiftable(flattenNode);
-                    blockingVars = ImmutableSet.<Variable>builder()
-                            .add(flattenNode.getFlattenedVariable())
-                            .addAll(blockingVars)
-                            .build();
+                    blockingVars = Sets.union(
+                                    ImmutableSet.of(flattenNode.getFlattenedVariable()),
+                                    blockingVars)
+                            .immutableCopy();
                 } else {
                     splitFlattenSequence.appendLiftable(flattenNode);
                 }
@@ -238,8 +233,7 @@ public class BasicFlattenLifter implements FlattenLifter {
             if (it.hasNext()) {
                 return iqFactory.createUnaryIQTree(
                         it.next(),
-                        buildUnaryTree(it, subtree)
-                );
+                        buildUnaryTree(it, subtree));
             }
             return subtree;
         }
@@ -260,8 +254,7 @@ public class BasicFlattenLifter implements FlattenLifter {
                 if (tree.getRootNode().equals(node)) {
                     return discardRootFlattenNodes(
                             ((UnaryIQTree) tree).getChild(),
-                            it
-                    );
+                            it);
                 }
                 throw new FlattenLifterException("Node " + node + " is expected top be the root of " + tree);
             }
@@ -306,8 +299,8 @@ public class BasicFlattenLifter implements FlattenLifter {
     }
 
     private static class SplitFlattenSequence {
-        private List<FlattenNode> liftableFlatten;
-        private List<FlattenNode> nonLiftableFlatten;
+        private final List<FlattenNode> liftableFlatten;
+        private final List<FlattenNode> nonLiftableFlatten;
 
         public SplitFlattenSequence() {
             this.liftableFlatten = new LinkedList<>();

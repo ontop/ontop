@@ -33,7 +33,7 @@ import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndCla
 
 public class S_HierarchyNewDAGTest extends TestCase {
 
-	Logger log = LoggerFactory.getLogger(S_HierarchyNewDAGTest.class);
+	private final Logger log = LoggerFactory.getLogger(S_HierarchyNewDAGTest.class);
 
 	public S_HierarchyNewDAGTest(String name){
 		super(name);

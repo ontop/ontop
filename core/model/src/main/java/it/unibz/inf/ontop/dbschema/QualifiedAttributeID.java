@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
+import java.util.Objects;
+
 /**
  * Database identifier used for possibly qualified column names
  * <p>
@@ -61,8 +63,7 @@ public class QualifiedAttributeID {
 		if (obj instanceof QualifiedAttributeID) {
 			QualifiedAttributeID other = (QualifiedAttributeID)obj;
 			return (this.attribute.equals(other.attribute) && 
-					((this.relation == other.relation) || 
-							((this.relation != null) && this.relation.equals(other.relation))));
+					(Objects.equals(this.relation, other.relation)));
 		}
 		return false;
 	}

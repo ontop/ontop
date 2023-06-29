@@ -45,7 +45,7 @@ public class ObjectSomeValuesFromImpl implements ObjectSomeValuesFrom {
 
 	ObjectSomeValuesFromImpl(ObjectPropertyExpression property) {
 		this.property = property;
-		this.string =  new StringBuilder().append("E").append(property.toString()).toString();
+		this.string = "E" + property;
 	}
 
 	@Override

@@ -6,22 +6,20 @@ import it.unibz.inf.ontop.docker.AbstractDistinctInAggregateTest;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class DistinctInAggregateMssqlTest extends AbstractDistinctInAggregateTest {
 
-    private static String propertiesFile = "/mssql/university.properties";
+    private static final String propertiesFile = "/mssql/university.properties";
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
-        REASONER = createReasoner(owlFile, obdaFile, propertiesFile);
-        CONNECTION = REASONER.getConnection();
+    public static void before() {
+        CONNECTION = createReasoner(owlFile, obdaFile, propertiesFile);
     }
 
     @Test
     @Ignore("STRING_AGG(DISTINCT) is not supported by MSSQL")
     @Override
-    public void testGroupConcatDistinct() throws Exception {
+    public void testGroupConcatDistinct() {
     }
 
     @Override

@@ -1,29 +1,20 @@
 package it.unibz.inf.ontop.model.term.impl;
 
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Optional;
 
 public class FunctionalTermDecompositionImpl implements ImmutableFunctionalTerm.FunctionalTermDecomposition {
 
     private final ImmutableTerm liftableTerm;
-    @Nullable
-    private final ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap;
+    private final Substitution<ImmutableFunctionalTerm> substitution;
 
     protected FunctionalTermDecompositionImpl(ImmutableTerm injectiveTerm,
-                                              @Nonnull ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap) {
+                                              @Nonnull Substitution<ImmutableFunctionalTerm> substitution) {
         this.liftableTerm = injectiveTerm;
-        this.subTermSubstitutionMap = subTermSubstitutionMap;
-    }
-
-    protected FunctionalTermDecompositionImpl(ImmutableTerm liftableTerm) {
-        this.liftableTerm = liftableTerm;
-        this.subTermSubstitutionMap = null;
+        this.substitution = substitution;
     }
 
     @Override
@@ -32,7 +23,7 @@ public class FunctionalTermDecompositionImpl implements ImmutableFunctionalTerm.
     }
 
     @Override
-    public Optional<ImmutableMap<Variable, ImmutableFunctionalTerm>> getSubTermSubstitutionMap() {
-        return Optional.ofNullable(subTermSubstitutionMap);
+    public Substitution<ImmutableFunctionalTerm> getSubstitution() {
+        return substitution;
     }
 }

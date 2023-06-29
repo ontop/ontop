@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.spec.dbschema.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.MetadataProvider;
 import it.unibz.inf.ontop.dbschema.impl.DelegatingMetadataProvider;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -34,7 +33,7 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
 
     ImplicitDBConstraintsProvider(MetadataProvider provider,
                                   ImmutableList<DatabaseRelationDescriptor> uniqueConstraints,
-                                  ImmutableList<Map.Entry<DatabaseRelationDescriptor, DatabaseRelationDescriptor>> foreignKeys) throws MetadataExtractionException {
+                                  ImmutableList<Map.Entry<DatabaseRelationDescriptor, DatabaseRelationDescriptor>> foreignKeys) {
         super(provider);
 
         this.uniqueConstraints = uniqueConstraints.stream()
@@ -74,7 +73,7 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
                     referencedRelation = metadataLookup.getRelation(fkc.getValue().tableId);
                 }
                 catch (MetadataExtractionException e) {
-                    LOGGER.warn("Cannot find table {} for user-supplied FK {} -> {}", fkc.getValue().tableId, fkc.getKey().toString(), fkc.getKey().toString());
+                    LOGGER.warn("Cannot find table {} for user-supplied FK {} -> {}", fkc.getValue().tableId, fkc.getKey(), fkc.getKey());
                     continue;
                 }
                 String name = getTableName(relation) + "_USER_FK_" + getTableName(referencedRelation) + "_" + counter++;

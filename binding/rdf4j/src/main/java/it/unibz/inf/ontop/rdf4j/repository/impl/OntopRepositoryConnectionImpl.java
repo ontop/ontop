@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.rdf4j.repository.impl;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.NativeNode;
@@ -34,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.net.URL;
@@ -43,15 +41,15 @@ import java.util.*;
 public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection {
 
     private static final String READ_ONLY_MESSAGE = "Ontop is a read-only system";
-    private static Logger LOGGER = LoggerFactory.getLogger(OntopRepositoryConnectionImpl.class);
-    private OntopRepository repository;
-    private OntopConnection ontopConnection;
+    private static final Logger LOGGER = LoggerFactory.getLogger(OntopRepositoryConnectionImpl.class);
+    private final OntopRepository repository;
+    private final OntopConnection ontopConnection;
     private final RDF4JQueryFactory inputQueryFactory;
     private final OntopSystemSettings settings;
     private boolean isOpen;
     private boolean isActive;
-    private RDFParser rdfParser;
-    private Map<String, String> namespaces;
+    private final RDFParser rdfParser;
+    private final Map<String, String> namespaces;
 
 
     OntopRepositoryConnectionImpl(OntopRepository rep, OntopConnection connection,
@@ -81,28 +79,27 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
 
     @Override
     public void add(File file, String baseIRI, RDFFormat dataFormat, Resource... contexts)
-            throws IOException, RDFParseException, RepositoryException {
+            throws RepositoryException {
         throw new RepositoryException(READ_ONLY_MESSAGE);
     }
 
     @Override
-    public void add(URL url, String baseIRI, RDFFormat dataFormat,
-                    Resource... contexts) throws IOException,
-            RDFParseException, RepositoryException {
+    public void add(URL url, String baseIRI, RDFFormat dataFormat, Resource... contexts) 
+            throws RepositoryException {
         throw new RepositoryException(READ_ONLY_MESSAGE);
     }
 
     @Override
     public void add(InputStream in, String baseIRI,
                     RDFFormat dataFormat, Resource... contexts)
-            throws IOException, RDFParseException, RepositoryException {
+            throws RepositoryException {
         throw new RepositoryException(READ_ONLY_MESSAGE);
     }
 
     @Override
     public void add(Reader reader, String baseIRI,
                     RDFFormat dataFormat, Resource... contexts)
-            throws IOException, RDFParseException, RepositoryException {
+            throws RepositoryException {
         throw new RepositoryException(READ_ONLY_MESSAGE);
     }
 
@@ -190,8 +187,8 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
         //Gets all resources that are used as content identifiers.
         //Care should be taken that the returned RepositoryResult
         //is closed to free any resources that it keeps hold of.
-        List<Resource> contexts = new LinkedList<Resource>();
-        return new RepositoryResult<Resource>(new CloseableIteratorIteration<Resource, RepositoryException>(contexts.iterator()));
+        List<Resource> contexts = new LinkedList<>();
+        return new RepositoryResult<>(new CloseableIteratorIteration<>(contexts.iterator()));
     }
 
     @Override
@@ -205,15 +202,14 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
             throws RepositoryException {
         //Gets all declared namespaces as a RepositoryResult of Namespace objects.
         //Each Namespace object consists of a prefix and a namespace name.
-        Set<Namespace> namespSet = new HashSet<Namespace>();
+        Set<Namespace> namespSet = new HashSet<>();
         Map<String, String> namesp = namespaces;
         Set<String> keys = namesp.keySet();
         for (String key : keys) {
             //convert into namespace objects
             namespSet.add(new SimpleNamespace(key, namesp.get(key)));
         }
-        return new RepositoryResult<Namespace>(new CloseableIteratorIteration<Namespace, RepositoryException>(
-                namespSet.iterator()));
+        return new RepositoryResult<>(new CloseableIteratorIteration<>(namespSet.iterator()));
     }
 
     @Override
@@ -281,12 +277,8 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
                                 boolean includeInferred, Resource... contexts) throws RepositoryException {
         //Checks whether the repository contains statements with a specific subject,
         //predicate and/or object, optionally in the specified contexts.
-        RepositoryResult<Statement> stIter = getStatements(subj, pred,
-                obj, includeInferred, contexts);
-        try {
+        try (RepositoryResult<Statement> stIter = getStatements(subj, pred, obj, includeInferred, contexts)) {
             return stIter.hasNext();
-        } finally {
-            stIter.close();
         }
     }
 
@@ -336,11 +328,8 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
         if (ql != QueryLanguage.SPARQL)
             throw new MalformedQueryException("SPARQL query expected!");
 
-        String safeBaseIRI = baseIRI == null
-                ? null
-                : baseIRI.isEmpty() ? null : baseIRI;
-
-        ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
+        String safeBaseIRI = getSafeBaseIri(baseIRI);
+        ParsedBooleanQuery q = (ParsedBooleanQuery) QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
         return new OntopBooleanQuery(queryString, q, safeBaseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
     }
 
@@ -367,13 +356,9 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
         if (ql != QueryLanguage.SPARQL)
             throw new MalformedQueryException("SPARQL query expected!");
 
-        String safeBaseIRI = baseIRI == null
-                ? null
-                : baseIRI.isEmpty() ? null : baseIRI;
-
-        ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
+        String safeBaseIRI = getSafeBaseIri(baseIRI);
+        ParsedGraphQuery q = (ParsedGraphQuery) QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
         return new OntopGraphQuery(queryString, q, safeBaseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
-
     }
 
     @Override
@@ -411,12 +396,13 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
         ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, baseIRI);
         LOGGER.debug(String.format("Parsing time: %d ms", System.currentTimeMillis() - beforeParsing));
 
+        // TODO: why no getSafeBaseIri?
         if (q instanceof ParsedTupleQuery)
-            return new OntopTupleQuery(queryString, q, baseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
+            return new OntopTupleQuery(queryString, (ParsedTupleQuery) q, baseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
         else if (q instanceof ParsedBooleanQuery)
-            return new OntopBooleanQuery(queryString, q, baseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
+            return new OntopBooleanQuery(queryString, (ParsedBooleanQuery) q, baseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
         else if (q instanceof ParsedGraphQuery)
-            return new OntopGraphQuery(queryString, q, baseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
+            return new OntopGraphQuery(queryString, (ParsedGraphQuery) q, baseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
         else
             throw new MalformedQueryException("Unrecognized query type. " + queryString);
     }
@@ -445,12 +431,15 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
         if (ql != QueryLanguage.SPARQL)
             throw new MalformedQueryException("SPARQL query expected!");
 
-        String safeBaseIRI = baseIRI == null
+        String safeBaseIRI = getSafeBaseIri(baseIRI);
+        ParsedTupleQuery q = (ParsedTupleQuery) QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
+        return new OntopTupleQuery(queryString, q, safeBaseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
+    }
+
+    private static String getSafeBaseIri(String baseIRI) {
+        return baseIRI == null
                 ? null
                 : baseIRI.isEmpty() ? null : baseIRI;
-        ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
-
-        return new OntopTupleQuery(queryString, q, safeBaseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
     }
 
     @Override

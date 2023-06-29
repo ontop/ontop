@@ -51,7 +51,7 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
         if (cardinalityModeObject instanceof String) {
             try {
                 return CardinalityPreservationMode.valueOf((String)cardinalityModeObject);
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException ignored) {
             }
         }
         else if (cardinalityModeObject instanceof CardinalityPreservationMode)
@@ -67,12 +67,12 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
         if (value instanceof Boolean)
             return (Boolean) value;
         else if (value instanceof String)
-            return Boolean.valueOf((String) value);
+            return Boolean.parseBoolean((String) value);
         else
             throw new InvalidOntopConfigurationException("Invalid value for " + key + ": is " + value);
     }
 
-    protected static Properties loadDefaultPropertiesFromFile(Class localClass, String fileName) {
+    protected static Properties loadDefaultPropertiesFromFile(Class<?> localClass, String fileName) {
         try (InputStream in = localClass.getResourceAsStream(fileName)) {
             if (in == null)
                 throw new RuntimeException("Configuration " + fileName + " not found.");

@@ -13,19 +13,19 @@ import java.util.Optional;
 public class SQLFlattenExpressionImpl implements SQLFlattenExpression {
 
     private final SQLExpression subExpression;
-    private final Variable flattenendVar;
+    private final Variable flattenedVar;
     private final Variable outputVar;
     private final Optional<Variable> indexVar;
     private final DBTermType flattenedType;
 
     @AssistedInject
     private SQLFlattenExpressionImpl(@Assisted SQLExpression subExpression,
-                                     @Assisted("flattenedVar") Variable flattenendVar,
+                                     @Assisted("flattenedVar") Variable flattenedVar,
                                      @Assisted("outputVar") Variable outputVar,
                                      @Assisted Optional<Variable> indexVar,
                                      @Assisted DBTermType flattenedType) {
         this.subExpression = subExpression;
-        this.flattenendVar = flattenendVar;
+        this.flattenedVar = flattenedVar;
         this.outputVar = outputVar;
         this.indexVar = indexVar;
         this.flattenedType = flattenedType;
@@ -43,7 +43,7 @@ public class SQLFlattenExpressionImpl implements SQLFlattenExpression {
     }
 
     public Variable getFlattenedVar() {
-        return flattenendVar;
+        return flattenedVar;
     }
 
     public Variable getOutputVar() {

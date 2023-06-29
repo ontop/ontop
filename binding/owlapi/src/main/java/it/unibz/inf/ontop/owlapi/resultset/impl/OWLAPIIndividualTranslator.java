@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.owlapi.resultset.impl;
 
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.spec.ontology.*;
 import org.semanticweb.owlapi.model.*;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;

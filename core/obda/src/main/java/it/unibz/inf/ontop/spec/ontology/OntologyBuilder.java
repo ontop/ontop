@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.spec.ontology;
 
-import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.RDFConstant;
 import it.unibz.inf.ontop.model.term.RDFLiteralConstant;

@@ -71,7 +71,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	}
 
 	@Override
-	public IQ reformulateIntoNativeQuery(KGQuery inputQuery, QueryLogger queryLogger)
+	public IQ reformulateIntoNativeQuery(KGQuery<?> inputQuery, QueryLogger queryLogger)
 			throws OntopReformulationException {
 
 		long beginning = System.currentTimeMillis();
@@ -158,7 +158,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	 * Returns the final rewriting of the given query
 	 */
 	@Override
-	public String getRewritingRendering(KGQuery query) throws OntopReformulationException {
+	public String getRewritingRendering(KGQuery<?> query) throws OntopReformulationException {
 		LOGGER.debug("SPARQL query:\n{}\n", query.getOriginalString());
 
 		try {

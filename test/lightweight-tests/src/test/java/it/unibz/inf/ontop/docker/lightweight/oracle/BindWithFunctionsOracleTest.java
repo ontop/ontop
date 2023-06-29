@@ -10,9 +10,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
  *
@@ -24,12 +21,12 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     private static final String PROPERTIES_FILE = "/books/oracle/books-oracle.properties";
 
     @BeforeAll
-    public static void before() throws IOException, SQLException {
+    public static void before() {
         initOBDA("/books/oracle/books-oracle.obda", OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll
-    public static void after() throws SQLException {
+    public static void after() {
         release();
     }
 

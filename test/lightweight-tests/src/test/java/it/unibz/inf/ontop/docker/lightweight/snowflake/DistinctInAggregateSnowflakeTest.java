@@ -6,11 +6,6 @@ import it.unibz.inf.ontop.docker.lightweight.AbstractDistinctInAggregateTest;
 import it.unibz.inf.ontop.docker.lightweight.SnowflakeLightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.sql.SQLException;
 
 @SnowflakeLightweightTest
 public class DistinctInAggregateSnowflakeTest extends AbstractDistinctInAggregateTest {
@@ -18,12 +13,12 @@ public class DistinctInAggregateSnowflakeTest extends AbstractDistinctInAggregat
     private static final String PROPERTIES_FILE = "/university/university-snowflake.properties";
 
     @BeforeAll
-    public static void before() throws IOException, SQLException {
+    public static void before() {
         initOBDA("/university/university-snowflake.obda", OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll
-    public static void after() throws SQLException {
+    public static void after()  {
         release();
     }
 

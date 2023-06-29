@@ -35,11 +35,7 @@ public class RDFFactImpl implements RDFFact {
      * Triple
      */
     private RDFFactImpl(ObjectConstant subject, IRIConstant property, RDFConstant object) {
-        this.subject = subject;
-        this.property = property;
-        this.object = object;
-        this.graph = null;
-        this.classOrProperty = extractClassOrProperty(property, object);
+        this(subject, property, object, null);
     }
 
     public static RDFFact createQuadFact(ObjectConstant subject, IRIConstant property, RDFConstant object, ObjectConstant graph) {

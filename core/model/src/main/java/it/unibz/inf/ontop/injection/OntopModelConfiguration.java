@@ -32,8 +32,8 @@ public interface OntopModelConfiguration {
     /**
      * Default builder
      */
-    static Builder defaultBuilder() {
-        return new OntopModelConfigurationImpl.BuilderImpl<>();
+    static Builder<?> defaultBuilder() {
+        return new OntopModelConfigurationImpl.BuilderImpl();
     }
 
     /**

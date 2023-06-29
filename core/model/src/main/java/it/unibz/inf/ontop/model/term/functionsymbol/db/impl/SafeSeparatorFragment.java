@@ -113,7 +113,7 @@ public class SafeSeparatorFragment {
             return true;
 
         if (subTemplate1.firstPlaceholderIndex == -1 && subTemplate2.firstPlaceholderIndex == -1)
-            return equal;
+            return false;
 
         int prefix = Math.min(subTemplate1.getPrefixLength(), subTemplate2.getPrefixLength());
         if (!subTemplate1.fragment.substring(0, prefix).equals(subTemplate2.fragment.substring(0, prefix)))

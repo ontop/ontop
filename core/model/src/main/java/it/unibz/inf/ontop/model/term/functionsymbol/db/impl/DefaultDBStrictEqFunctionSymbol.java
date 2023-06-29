@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
  * {@code --> } that is, downgrading to a non-strict equality?
  */
 public class DefaultDBStrictEqFunctionSymbol extends AbstractDBStrictEqNeqFunctionSymbol implements DBStrictEqFunctionSymbol {
-    private static String OPERATOR = " = ";
-    private static String CONNECTOR = " AND ";
+    private static final String OPERATOR = " = ";
+    private static final String CONNECTOR = " AND ";
 
     protected DefaultDBStrictEqFunctionSymbol(int arity, TermType rootTermType, DBTermType dbBooleanTermType) {
         super("STRICT_EQ", arity, true, rootTermType, dbBooleanTermType);
@@ -33,7 +33,7 @@ public class DefaultDBStrictEqFunctionSymbol extends AbstractDBStrictEqNeqFuncti
 
         return terms.stream()
                 .skip(1)
-                .map(termConverter::apply)
+                .map(termConverter)
                 .map(s -> prefix + s)
                 .collect(Collectors.joining(CONNECTOR));
     }

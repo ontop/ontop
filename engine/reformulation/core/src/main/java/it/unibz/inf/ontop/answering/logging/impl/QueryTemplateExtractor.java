@@ -31,7 +31,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 
 /**
@@ -76,7 +75,6 @@ public class QueryTemplateExtractor {
      */
     protected static class QueryTemplateTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        private final CoreSingletons coreSingletons;
         private final VariableGenerator variableGenerator;
 
         // Mutable
@@ -90,7 +88,6 @@ public class QueryTemplateExtractor {
         protected QueryTemplateTransformer(CoreSingletons coreSingletons, ImmutableSet<Variable> knownVariables,
                                            OntopModelSettings settings) {
             super(coreSingletons);
-            this.coreSingletons = coreSingletons;
             atomFactory = coreSingletons.getAtomFactory();
             this.settings = settings;
             this.variableGenerator = coreSingletons.getCoreUtilsFactory()
@@ -121,11 +118,10 @@ public class QueryTemplateExtractor {
 
                 ImmutableMap<Integer, GroundTerm> groundTermIndex = indexes.stream()
                         .flatMap(i -> Optional.of(arguments.get(i))
-                                .filter(ImmutableTerm::isGround)
+                                .filter(t -> t instanceof GroundTerm)
                                 .map(t -> (GroundTerm) t)
                                 .map(t -> Maps.immutableEntry(i, t))
-                                .map(Stream::of)
-                                .orElseGet(Stream::empty))
+                                .stream())
                         .collect(ImmutableCollectors.toMap());
 
                 if (groundTermIndex.isEmpty())
@@ -218,9 +214,8 @@ public class QueryTemplateExtractor {
 
                         ImmutableList<? extends ImmutableTerm> initialTerms = subFunctionalTerm.getTerms();
                         ImmutableList<ImmutableTerm> newTerms = initialTerms.stream()
-                                .map(t -> t.isGround()
-                                        ? parameterMap.computeIfAbsent(
-                                        (GroundTerm) t, g -> variableGenerator.generateNewVariable())
+                                .map(t -> t instanceof GroundTerm
+                                        ? parameterMap.computeIfAbsent((GroundTerm) t, g -> variableGenerator.generateNewVariable())
                                         : t)
                                 .collect(ImmutableCollectors.toList());
 

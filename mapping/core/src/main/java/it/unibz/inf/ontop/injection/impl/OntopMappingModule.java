@@ -6,13 +6,10 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.spec.fact.FactExtractor;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
-import it.unibz.inf.ontop.spec.mapping.transformer.QueryUnionSplitter;
-import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
-import it.unibz.inf.ontop.spec.mapping.transformer.MappingTransformer;
 import it.unibz.inf.ontop.spec.rule.RuleExecutor;
 import it.unibz.inf.ontop.spec.rule.RuleExtractor;
 

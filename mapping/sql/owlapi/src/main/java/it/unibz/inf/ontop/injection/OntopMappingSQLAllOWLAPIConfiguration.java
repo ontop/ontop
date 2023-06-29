@@ -6,8 +6,8 @@ import it.unibz.inf.ontop.injection.impl.OntopMappingSQLAllOWLAPIConfigurationIm
 public interface OntopMappingSQLAllOWLAPIConfiguration extends OntopMappingSQLOWLAPIConfiguration,
         OntopMappingSQLAllConfiguration {
 
-    static Builder<? extends Builder<?>> defaultBuilder() {
-        return new OntopMappingSQLAllOWLAPIConfigurationImpl.BuilderImpl<>();
+    static Builder<?> defaultBuilder() {
+        return new OntopMappingSQLAllOWLAPIConfigurationImpl.BuilderImpl();
     }
 
     interface Builder<B extends Builder<B>> extends OntopMappingSQLOWLAPIConfiguration.Builder<B>,
@@ -16,5 +16,4 @@ public interface OntopMappingSQLAllOWLAPIConfiguration extends OntopMappingSQLOW
         @Override
         OntopMappingSQLAllOWLAPIConfiguration build();
     }
-
 }

@@ -48,7 +48,7 @@ public class GabowSCC<V, E>
     private final DirectedGraph<V, E> graph;
 
     // stores the vertices
-    private Deque<VertexNumber<V>> stack = new ArrayDeque<VertexNumber<V>>();
+    private Deque<VertexNumber<V>> stack = new ArrayDeque<>();
     
     // the result of the computation, cached for future calls
     private List<Equivalences<V>> stronglyConnectedSets;
@@ -57,7 +57,7 @@ public class GabowSCC<V, E>
     private Map<V, VertexNumber<V>> vertexToVertexNumber;
     
     //store the numbers
-    private Deque<Integer> B = new ArrayDeque<Integer>();
+    private Deque<Integer> B = new ArrayDeque<>();
     
     //number of vertexes
     private int c; 
@@ -145,7 +145,7 @@ public class GabowSCC<V, E>
         vertexToVertexNumber = new HashMap<>(c);
 
         for (V vertex : graph.vertexSet()) {
-            vertexToVertexNumber.put(vertex, new VertexNumber<V>(vertex, 0));            
+            vertexToVertexNumber.put(vertex, new VertexNumber<>(vertex));
         }
         
         stack = new ArrayDeque<>(c);
@@ -186,7 +186,7 @@ public class GabowSCC<V, E>
                  L.add(r.getVertex()); 
                  r.setNumber(c);
              } 
-             stronglyConnectedSets.add(new Equivalences<V>(L.build())); 
+             stronglyConnectedSets.add(new Equivalences<>(L.build()));
          } 
     }
 
@@ -195,12 +195,12 @@ public class GabowSCC<V, E>
     
     private static final class VertexNumber<V>
     {
-    	V vertex;
+    	final V vertex;
     	int number;
     	
-    	private VertexNumber(V vertex, int number) {
+    	private VertexNumber(V vertex) {
     		this.vertex = vertex;
-    		this.number = number;
+    		this.number = 0;
     	}
 
     	int getNumber() {

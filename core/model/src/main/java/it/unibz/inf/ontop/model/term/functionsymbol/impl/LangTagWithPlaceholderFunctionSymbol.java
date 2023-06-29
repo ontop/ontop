@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.model.type.MetaRDFTermType;
  */
 public class LangTagWithPlaceholderFunctionSymbol extends AbstractLangTagLikeFunctionSymbol {
 
-    public static String PLACEHOLDER = "not-a-literal";
+    public static final String PLACEHOLDER = "not-a-literal";
 
     protected LangTagWithPlaceholderFunctionSymbol(MetaRDFTermType metaRDFTermType, DBTermType dbStringType) {
         super("LANG_TAG_WITH_PLACEHOLDER", metaRDFTermType, dbStringType);

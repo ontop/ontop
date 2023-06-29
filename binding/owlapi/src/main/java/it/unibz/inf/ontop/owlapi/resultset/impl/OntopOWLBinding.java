@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBinding;
-import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
 
@@ -30,7 +29,7 @@ public class OntopOWLBinding implements OWLBinding {
 
     // TODO(xiao): how about null??
     @Override
-    public OWLObject getValue() throws OWLException {
+    public OWLObject getValue() {
         return translate(ontopBinding.getValue());
     }
 

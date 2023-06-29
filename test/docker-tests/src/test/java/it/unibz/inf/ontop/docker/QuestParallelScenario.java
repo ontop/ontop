@@ -81,7 +81,7 @@ public abstract class QuestParallelScenario {
 
 	protected abstract Repository createRepository() throws Exception;
 
-	protected void tearDown() throws Exception {
+	protected void tearDown() {
 		if (dataRep != null) {
 			dataRep.shutDown();
 			dataRep = null;
@@ -203,7 +203,7 @@ public abstract class QuestParallelScenario {
 
     public class ThreadExceptionHandler implements Thread.UncaughtExceptionHandler {
 
-        private Map<QuestThread, Throwable> exceptions = new ConcurrentHashMap<>();
+        private final Map<QuestThread, Throwable> exceptions = new ConcurrentHashMap<>();
 
         public void uncaughtException(Thread th, Throwable ex) {
             exceptions.put((QuestThread) th, ex);

@@ -463,9 +463,6 @@ public class OWLAPITranslatorOWL2QL {
 
                 builder.addObjectPropertyAssertion(ope, c1, c2);
             }
-            catch (TranslationException e) {
-                log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
-            }
             catch (InconsistentOntologyException e) {
                 log.warn(INCONSISTENT_ONTOLOGY, ax);
                 throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
@@ -628,9 +625,6 @@ public class OWLAPITranslatorOWL2QL {
             catch (InconsistentOntologyException e) {
                 log.warn(INCONSISTENT_ONTOLOGY, ax);
                 throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
-            }
-            catch (TranslationException e) {
-                log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
             }
         }
 
@@ -830,11 +824,7 @@ public class OWLAPITranslatorOWL2QL {
                     }
                 }
                 else {
-                    Map<OWLClassExpression, ObjectSomeValuesFrom> entry = auxiliaryClassProperties.get(owlOPE);
-                    if (entry == null) {
-                        entry = new HashMap<>();
-                        auxiliaryClassProperties.put(owlOPE, entry);
-                    }
+                    Map<OWLClassExpression, ObjectSomeValuesFrom> entry = auxiliaryClassProperties.computeIfAbsent(owlOPE, k -> new HashMap<>());
                     ObjectSomeValuesFrom existsSA = entry.get(owlCE);
                     if (existsSA == null) {
                         // no replacement found for this exists R.A, creating a new one
@@ -1009,7 +999,7 @@ public class OWLAPITranslatorOWL2QL {
         return RDFFact.createTripleFact(c, rdfType, termFactory.getConstantIRI(concept.getIRI()));
     }
 
-    public RDFFact translate(OWLObjectPropertyAssertionAxiom ax, OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties) throws TranslationException {
+    public RDFFact translate(OWLObjectPropertyAssertionAxiom ax, OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties) {
         ObjectConstant c1 = getIndividual(ax.getSubject());
         ObjectConstant c2 = getIndividual(ax.getObject());
 
@@ -1017,7 +1007,7 @@ public class OWLAPITranslatorOWL2QL {
         return RDFFact.createTripleFact(c1, termFactory.getConstantIRI(ope.getIRI()), c2);
     }
 
-    public RDFFact translate(OWLDataPropertyAssertionAxiom ax, OntologyVocabularyCategory<DataPropertyExpression> dataProperties) throws TranslationException {
+    public RDFFact translate(OWLDataPropertyAssertionAxiom ax, OntologyVocabularyCategory<DataPropertyExpression> dataProperties) {
         ObjectConstant c1 = getIndividual(ax.getSubject());
         RDFLiteralConstant c2 = getValueOfLiteral(ax.getObject());
 
@@ -1077,7 +1067,7 @@ public class OWLAPITranslatorOWL2QL {
 
 
 
-    private ObjectConstant getIndividual(OWLIndividual ind) throws TranslationException {
+    private ObjectConstant getIndividual(OWLIndividual ind) {
         if (ind.isAnonymous())
             return termFactory.getConstantBNode(((OWLAnonymousIndividual)ind).getID().getID());
 

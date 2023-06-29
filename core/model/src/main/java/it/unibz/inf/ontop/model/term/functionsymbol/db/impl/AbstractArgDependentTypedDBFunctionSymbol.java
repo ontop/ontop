@@ -31,9 +31,7 @@ public abstract class AbstractArgDependentTypedDBFunctionSymbol extends Function
                 .map(t -> (t instanceof Variable)
                         ? Optional.of(TermTypeInference.declareRedirectionToVariable((Variable) t))
                         : t.inferType())
-                .flatMap(o -> o
-                        .map(Stream::of)
-                        .orElseGet(Stream::empty))
+                .flatMap(Optional::stream)
                 .collect(ImmutableCollectors.toList());
 
         // Gives a preference to type inferences that determine the type (over the ones that redirect it to a variable)

@@ -22,14 +22,12 @@ package it.unibz.inf.ontop.si.dag;
 
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 
+import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -127,6 +125,7 @@ public class TestClassifiedTBoxImpl_Named implements ClassifiedTBox {
 			this.reasonerDAG = reasonerDAG;
 		}
 		
+		@Nonnull
 		@Override
 		public Iterator<Equivalences<T>> iterator() {
 			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
