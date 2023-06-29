@@ -33,7 +33,7 @@ public class PreventDistinctProjectionSplitterImpl extends ProjectionSplitterImp
         super(iqFactory, substitutionFactory, distinctNormalizer);
         this.decomposer = coreUtilsFactory.createProjectionDecomposer(
             t -> !shouldSplit(t),
-            n -> true //TODO-Damian is this correct?
+            n -> true
         );
         this.iqFactory = iqFactory;
     }
