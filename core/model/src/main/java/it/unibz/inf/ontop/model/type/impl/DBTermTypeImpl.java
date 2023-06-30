@@ -43,4 +43,9 @@ public abstract class DBTermTypeImpl extends TermTypeImpl implements DBTermType 
     public Optional<Boolean> isValidLexicalValue(String lexicalValue) {
         return lexicalSpace.includes(lexicalValue);
     }
+
+    @Override
+    public boolean isPreventDistinctRecommended() {
+        return false;
+    }
 }

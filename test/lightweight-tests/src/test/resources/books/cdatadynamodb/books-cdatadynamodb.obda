@@ -1,0 +1,11 @@
+[PrefixDeclaration]
+dc:  http://purl.org/dc/elements/1.1/
+:   http://example.org/book
+ns:  http://example.org/ns#
+
+
+[MappingDeclaration] @collection [[
+mappingId	mapping1
+target	:{id} a :Book ; dc:title {title}@en ; ns:price {price} ; ns:discount {discount} ; ns:pubYear {publication_date}; dc:description {description}@en .
+source	SELECT id, title, price, discount, CAST(publication_date AS TIMESTAMP) as publication_date, description, lang FROM "CData"."AmazonDynamoDB"."ontop-test" WHERE lang = 'en'
+]]

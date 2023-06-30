@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.iq.optimizer.splitter.ProjectionSplitter;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
@@ -93,7 +94,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         IQ liftedIQ = functionLifter.optimize(rdfTypeLiftedIQ);
         LOGGER.debug("After lifting the post-processable function symbols:\n{}\n", liftedIQ);
 
-        PostProcessingProjectionSplitter.PostProcessingSplit split = projectionSplitter.split(liftedIQ, avoidPostProcessing);
+        ProjectionSplitter.ProjectionSplit split = projectionSplitter.split(liftedIQ, avoidPostProcessing);
 
         IQTree normalizedSubTree = normalizeSubTree(split.getSubTree(), split.getVariableGenerator());
         // Late detection of emptiness
@@ -103,7 +104,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
         NativeNode nativeNode = generateNativeNode(normalizedSubTree, tolerateUnknownTypes);
 
-        UnaryIQTree newTree = iqFactory.createUnaryIQTree(split.getPostProcessingConstructionNode(), nativeNode);
+        UnaryIQTree newTree = iqFactory.createUnaryIQTree(split.getConstructionNode(), nativeNode);
 
         return iqFactory.createIQ(query.getProjectionAtom(), newTree);
     }

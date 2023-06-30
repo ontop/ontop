@@ -1,0 +1,48 @@
+[PrefixDeclaration]
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+:		http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#
+xml:		http://www.w3.org/XML/1998/namespace
+quest:		http://obda.org/quest#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-professor
+target		:professor/{prof_id} a :Professor . 
+source		SELECT prof_id, last_name FROM "CData"."AmazonDynamoDB".professors;
+
+mappingId	MAPID-fname
+target		:professor/{prof_id} :firstName {first_name} .
+source		SELECT prof_id, first_name FROM "CData"."AmazonDynamoDB".professors;
+
+mappingId	MAPID-lname
+target		:professor/{prof_id} :lastName {last_name} .
+source		SELECT prof_id, last_name FROM "CData"."AmazonDynamoDB".professors;
+
+mappingId	MAPID-nickname
+target		:professor/{prof_id} :nickname {nickname} .
+source		SELECT prof_id, nickname FROM "CData"."AmazonDynamoDB".professors;
+
+mappingId	MAPID-teaches
+target		:professor/{prof_id} :teaches :course/{course_id} . 
+source		SELECT prof_id, course_id FROM "CData"."AmazonDynamoDB".teaching;
+
+mappingId	MAPID-teachesAt
+target		:professor/{prof_id} :teachesAt :university/Bolzano .
+source		SELECT prof_id FROM "CData"."AmazonDynamoDB".teaching;
+
+mappingId	MAPID-teacherID
+target		:professor/{prof_id} :teacherID {prof_id} .
+source		SELECT prof_id FROM "CData"."AmazonDynamoDB".teaching;
+
+mappingId	MAPID-course
+target		:course/{course_id} a :Course ; :duration {duration} ; :nbStudents {nb_students} .
+source		SELECT * FROM "CData"."AmazonDynamoDB".course;
+
+mappingId	MAPID-prof-student-count
+target		:professor/{prof_id} :nbStudents {count} .
+source		SELECT t.prof_id, sum(c.nb_students) AS count FROM "CData"."AmazonDynamoDB".teaching t, "CData"."AmazonDynamoDB".course c WHERE t.course_id = c.course_id GROUP BY prof_id
+
+]]
+

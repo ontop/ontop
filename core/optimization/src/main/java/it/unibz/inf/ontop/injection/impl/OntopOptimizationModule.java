@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.optimizer.*;
+import it.unibz.inf.ontop.iq.optimizer.splitter.PreventDistinctProjectionSplitter;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transformer.*;
@@ -56,6 +57,8 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(FilterLifter.class);
         bindFromSettings(BooleanExpressionPushDownOptimizer.class);
         bindFromSettings(FederationOptimizer.class);
+        bindFromSettings(PreventDistinctOptimizer.class);
+        bindFromSettings(PreventDistinctProjectionSplitter.class);
 
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
 

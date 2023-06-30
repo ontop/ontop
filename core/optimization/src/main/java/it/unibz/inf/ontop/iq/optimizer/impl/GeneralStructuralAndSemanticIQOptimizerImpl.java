@@ -21,6 +21,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     private final LensUnfolder lensUnfolder;
     private final AggregationSplitter aggregationSplitter;
     private final FlattenLifter flattenLifter;
+    private final PreventDistinctOptimizer preventDistinctOptimizer;
 
     @Inject
     private GeneralStructuralAndSemanticIQOptimizerImpl(UnionAndBindingLiftOptimizer bindingLiftOptimizer,
@@ -29,7 +30,8 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
                                                         AggregationSimplifier aggregationSimplifier,
                                                         LensUnfolder lensUnfolder,
                                                         AggregationSplitter aggregationSplitter,
-                                                        FlattenLifter flattenLifter) {
+                                                        FlattenLifter flattenLifter,
+                                                        PreventDistinctOptimizer preventDistinctOptimizer) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
         this.orderBySimplifier = orderBySimplifier;
@@ -37,6 +39,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         this.lensUnfolder = lensUnfolder;
         this.aggregationSplitter = aggregationSplitter;
         this.flattenLifter = flattenLifter;
+        this.preventDistinctOptimizer = preventDistinctOptimizer;
     }
 
     @Override
@@ -46,7 +49,11 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
 
         LOGGER.debug("New lifted query:\n{}\n", liftedQuery);
 
-        IQ current = liftedQuery;
+        // Push expressions into a distinct below where possible if they have a data type that is not supported for distinct.
+        IQ pushedIntoDistinct = preventDistinctOptimizer.optimize(liftedQuery);
+        LOGGER.debug("Query tree after preventing DISTINCT for non-supported data types:\n{}\n", pushedIntoDistinct);
+
+        IQ current = pushedIntoDistinct;
         do {
 
             long beginningJoinLike = System.currentTimeMillis();
@@ -80,6 +87,10 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         IQ optimizedQuery = orderBySimplifier.optimize(queryAfterAggregationSplitting);
         LOGGER.debug("New query after simplifying the order by node:\n{}\n", optimizedQuery);
 
-        return optimizedQuery;
+        // Called a second time in case the order of nodes was changed during previous optimization steps.
+        IQ resultingQuery = preventDistinctOptimizer.optimize(optimizedQuery);
+        LOGGER.debug("Query tree after preventing DISTINCT for non-supported data types, second pass:\n{}\n", resultingQuery);
+
+        return resultingQuery;
     }
 }
