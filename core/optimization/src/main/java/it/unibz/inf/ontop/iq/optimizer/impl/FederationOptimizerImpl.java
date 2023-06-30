@@ -138,16 +138,14 @@ public class FederationOptimizerImpl implements FederationOptimizer {
 
     public IQTree rewriteIQTree(IQTree iqt){
         //check the possibility of applying the hints in advance
-        System.out.println("the IQ tree before hint-based optimization:");
-        System.out.println(iqt);
+        LOGGER.debug("the IQ tree before hint-based optimization:\n{}\n", iqt);
         if(hints.get(0).size()>0){
             iqt = removeStrictRedundancy(iqt);
         }
         if(hints.get(1).size()>0){
             iqt = removeEquivalentRedundancy(iqt);
         }
-        System.out.println("the IQ tree after removing redundancy:");
-        System.out.println(iqt);
+        LOGGER.debug("the IQ tree after removing redundancy:\n{}\n", iqt);
         if(hints.get(2).size()>0){
             iqt = rewriteInnerJoin(iqt);
             iqt = rewriteLeftJoin(iqt);
@@ -155,10 +153,7 @@ public class FederationOptimizerImpl implements FederationOptimizer {
         if(hint_matv.size()>0){
             iqt = rewriteInnerJoinBasedOnMatV(iqt);
         }
-
-        System.out.println("the IQ tree after hint-based optimization:");
-        System.out.println(iqt);
-
+        LOGGER.debug("the IQ tree after hint-based optimization:\n{}\n", iqt);
         return iqt;
     }
 
@@ -1025,7 +1020,7 @@ public class FederationOptimizerImpl implements FederationOptimizer {
         if(sourceMap.containsKey(normalForm)){
             normalForm = sourceMap.get(normalForm)+"."+normalForm;
         } else {
-            System.out.println("missing source information of relations in VDB");
+            LOGGER.debug("missing source information of relations in VDB");
         }
 
         return normalForm;
