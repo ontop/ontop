@@ -49,7 +49,9 @@ if [ "${REVISION:+x}" ]; then
 fi
 
 # Handle -h or --help command line options
-if [[ "$@" = *--help ]] || [[ "$@" = *-h ]]; then cat <<EOF
+for arg in "$@"; do
+    if [ "$arg" = "--help" ] || [ "$arg" = "-h" ]; then
+        cat <<EOF
 Usage: $0 [options]
 
 Builds and/or pushes the Ontop Docker image, using Docker buildx.
@@ -86,19 +88,19 @@ Examples:
     ./build-image.sh -C -n -x            Build multi-platform image entirely within Docker,
                                          without cache for further reproducibility, pushing
                                          the image to the official Ontop Docker repository
-
 EOF
 exit 0
-fi
+    fi
+done
 
 # Parse script options, updating corresponding build variables
-while getopts cCnt:pxb:dq option
+while getopts cCnt:pxb:l:dq option
 do
     case "${option}" in
         c) CLEANARG="clean";;
         C) TARGET="ontop-image-from-sources";;
         n) NOCACHEARG="--no-cache";;
-        t) [[ "${OPTARG}" =~ ^[^:]+[:][^:]+$ ]] || OPTARG=${OPTARG}:${TAG}
+        t) [[ "${OPTARG}" =~ ^([^:]+|[^:/]+[:][0-9]+/[^:]+)[:][^:]+$ ]] || OPTARG=${OPTARG}:${TAG}
            TAGARGS="${TAGARGS}"" -t ${OPTARG}";;
         p) PUSH=1;;
         x) CROSS_BUILD=1; PUSH=1;;
@@ -106,6 +108,7 @@ do
         l) LABELARGS=${LABELARGS}" --label "${OPTARG};;
         d) JDEPS=1;;
         q) QUIETARG="-q";;
+        *) echo "Invalid option $option, call with --help to list supported options"; exit 1;;
     esac
 done
 
@@ -113,11 +116,13 @@ done
 if [ -z "${TAGARGS}" ]; then
     TAGARGS="-t ${NAME}:${TAG} -t ${NAME}:latest"
 fi
-NAMETAGS=`echo "${TAGARGS}" | sed -E 's/ -t / /g' | sed -E 's/^ //'`
+NAMETAGS=$( echo "${TAGARGS}" | sed -E 's/ -t / /g' | sed -E 's/^ //' )
 
 # Helper function to log timestamped message (output suppressed if option -q is supplied)
-function log {
-    [ -z "$QUIETARG" ] && echo -e "[$(date "+%Y-%m-%d %H:%M:%S")] $1" || true
+log() {
+    if [ -z "$QUIETARG" ]; then
+        echo -e "[$(date "+%Y-%m-%d %H:%M:%S")] $1"
+    fi
 }
 
 # Compile outside Docker (if -C not used or -d used), integrating with local Maven build workflow
@@ -150,6 +155,7 @@ if [ "${JDEPS}" ]; then
 fi
 
 # Build via Docker 'buildx', differentiating "simple" (local platform only) vs "cross" (linux/amd64 + linux/arm64) build
+# shellcheck disable=SC2086
 if [ "${CROSS_BUILD}" != "false" ]; then
     # When cross-building, the generated multi-platform image cannot be stored locally but need to be pushed to a Docker repository
     log "Building & pushing multi-platform image ${NAMETAGS}"
