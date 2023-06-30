@@ -146,8 +146,9 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     }
     @Override
     protected boolean isUniqueConstraintDisabled(RelationID id, String uniqueConstraintId) {
-        return isConstraintDisabled(id, uniqueConstraintId);
+        return isUniqueIndexDisabled(id, uniqueConstraintId);
     }
+    @Override
     protected boolean isForeignKeyDisabled(RelationID id, String foreignKeyId) {
         return isConstraintDisabled(id, foreignKeyId);
     }
@@ -186,6 +187,36 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         }
         catch (SQLException e) {
             throw new MinorOntopInternalBugException("Error retrieving constraint " + constraintId + " in " + id + " info: " + e.getMessage());
+        }
+    }
+
+    private boolean isUniqueIndexDisabled(RelationID id, String indexId) {
+        /*
+            OWNER VARCHAR2(128) NOT NULL Owner of the index
+            INDEX_NAME VARCHAR2(128) NOT NULL Name of the index
+            TABLE_NAME VARCHAR2(128) NOT NULL Name of the indexed object
+            UNIQUENESS VARCHAR2(9) Indicates whether the index is unique (UNIQUE) or nonunique (NONUNIQUE)
+            STATUS VARCHAR2(8) Indicates whether a non-partitioned index is VALID or UNUSABLE
+     */
+        try (PreparedStatement stmt = connection.prepareStatement(
+                "SELECT status\n" +
+                        "FROM all_indexes\n" +
+                        "WHERE index_name = :1\n" +
+                        "  AND table_name = :2\n" +
+                        "  AND owner = :3")) {
+            stmt.setString(1, indexId);
+            stmt.setString(2, getRelationName(id));
+            stmt.setString(3, getRelationSchema(id));
+            stmt.closeOnCompletion();
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                String status = rs.getString("status");
+                return !"VALID".equals(status);
+            }
+            throw new MinorOntopInternalBugException("Unique index " + indexId + " in " + id + " not found");
+        }
+        catch (SQLException e) {
+            throw new MinorOntopInternalBugException("Error retrieving unique index " + indexId + " in " + id + " info: " + e.getMessage());
         }
     }
 }
