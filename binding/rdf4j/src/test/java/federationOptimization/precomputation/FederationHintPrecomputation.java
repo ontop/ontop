@@ -387,7 +387,13 @@ public class FederationHintPrecomputation {
                             || !differentSourceCheck(tables1, tables2)){
                         continue;
                     }
-                    EmptyFederatedJoin candidate = new EmptyFederatedJoin(as1.sourceSQL, as2.sourceSQL, as1.attribute+"="+as2.attribute);
+                    EmptyFederatedJoin candidate = null;  //下面是为了固定输出，所增加的部分
+                    int diff = as1.sourceSQL.compareTo(as2.sourceSQL);
+                    if(diff >= 0){
+                        candidate = new EmptyFederatedJoin(as1.sourceSQL, as2.sourceSQL, as1.attribute+"="+as2.attribute);
+                    } else {
+                        candidate = new EmptyFederatedJoin(as2.sourceSQL, as1.sourceSQL, as2.attribute+"="+as1.attribute);
+                    }
                     if(!candidateDuplicationCheck(candidate, candidateHints.emptyFJs)){
                         candidateHints.emptyFJs.add(candidate);
                         if(as1.position.equals("subject") || as2.position.equals("subject")){
@@ -423,7 +429,13 @@ public class FederationHintPrecomputation {
                     } else if(cm2.sourceSQL.contains(" from ")){
                         sql2 = "SELECT "+cm2.attribute+" "+cm2.sourceSQL.substring(cm2.sourceSQL.indexOf(" from "));
                     }
-                    Redundancy candidate = new Redundancy(sql1, sql2, null);
+                    Redundancy candidate = null; //新添加的部分，确保输出的唯一性；
+                    int diff = sql1.compareTo(sql2);
+                    if(diff >= 0){
+                        candidate = new Redundancy(sql1, sql2, null);
+                    } else {
+                        candidate = new Redundancy(sql2, sql1, null);
+                    }
                     if(!candidateDuplicationCheck(candidate, candidateHints.redundancy)){
                         candidateHints.redundancy.add(candidate);
                     }

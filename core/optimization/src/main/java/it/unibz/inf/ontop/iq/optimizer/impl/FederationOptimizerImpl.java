@@ -654,7 +654,7 @@ public class FederationOptimizerImpl implements FederationOptimizer {
     }
 
     public boolean checkEquivalentRedundancyDataElement(IQTree ele_1, IQTree ele_2){
-        //DataNode 可能包含Filetr, Construction
+        //DataNode 可能包含Filter, Construction
         //
         boolean res = false;
 
@@ -1768,6 +1768,33 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                     }
                     if(b){
                         List<DataElement> de_right = new ArrayList<DataElement>();
+
+                        FilterNode fn_right = right_part.get(j).dataElement.get(0).fn;
+                        if(fn_right != null) { //new added condition
+                            if(fn_right.getFilterCondition().getFunctionSymbol().getName().startsWith("IS_NOT_NULL")){
+                                fn_right = null;
+                            } else if (fn_right.getFilterCondition().getFunctionSymbol().getName().startsWith("AND")){
+                                ImmutableExpression ie = fn_right.getFilterCondition();
+                                List<ImmutableTerm> terms = new ArrayList<ImmutableTerm>();
+                                terms.addAll(ie.getTerms());
+                                List<ImmutableExpression> terms_new = new ArrayList<ImmutableExpression>();
+                                boolean have_null = false;
+                                for(ImmutableTerm it: terms){
+                                    if(! it.toString().startsWith("IS_NOT_NULL")){
+                                        terms_new.add((ImmutableExpression)it);
+                                    } else {
+                                        have_null = true;
+                                    }
+                                }
+
+                                if(have_null){
+                                    fn_right = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(ImmutableList.copyOf(terms_new)));
+
+                                }
+                            }
+                        }
+                        right_part.get(j).dataElement.get(0).fn = fn_right;  // 新添加的
+
                         de_right.add(right_part.get(j).dataElement.get(0));
                         IQTree node_SJ = mergeDataTreesSJ(left_part.get(i).dataElement.get(ind_i), de_right);
 
