@@ -224,6 +224,13 @@
                     <!--<scope>test</scope>-->
                 </dependency>
                 <dependency>
+                    <groupId>org.teiid</groupId>
+                    <artifactId>teiid</artifactId>
+                    <classifier>jdbc</classifier>
+                    <version>16.0.0</version>
+                    <!--<scope>test</scope>-->
+                </dependency>
+                <dependency>
                     <groupId>org.postgresql</groupId>
                     <artifactId>postgresql</artifactId>
                     <version>42.5.4</version>
