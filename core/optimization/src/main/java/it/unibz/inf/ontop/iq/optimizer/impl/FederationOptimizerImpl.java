@@ -1787,9 +1787,15 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                                     }
                                 }
 
+                                //添加判断terms_new是否是一个空集合，是否具有一个元素，多个元素
                                 if(have_null){
-                                    fn_right = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(ImmutableList.copyOf(terms_new)));
-
+                                    if(terms_new.size() > 1){
+                                        fn_right = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(ImmutableList.copyOf(terms_new)));
+                                    } else if(terms_new.size() == 1){
+                                        fn_right = IQ_FACTORY.createFilterNode(terms_new.get(0));
+                                    } else if(terms_new.size() == 0){
+                                        fn_right = null;
+                                    }
                                 }
                             }
                         }

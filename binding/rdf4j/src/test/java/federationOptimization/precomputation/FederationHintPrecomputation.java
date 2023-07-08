@@ -551,7 +551,8 @@ public class FederationHintPrecomputation {
                 ResultSetMetaData rsmd = rs.getMetaData();
                 int column_count = rsmd.getColumnCount();
 
-                if(!rs.next()){
+                if(!rs.isBeforeFirst()){
+                    //if(!rs.next()){ //this check will make materialized views miss one row
                     computedHints.emptyFJs.add(candidate);
                     System.out.println("checking result: empty");
                 } else {
