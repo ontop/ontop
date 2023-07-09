@@ -67,3 +67,10 @@ CREATE TABLE "source2_accommodation" (
                                        italian_description text NULL,
                                        hotel text NOT NULL
 );
+
+CREATE TABLE "source3_measurement_types" (
+                                           name text primary key NOT NULL,
+                                           unit text NOT NULL,
+                                           description text NULL,
+                                           "statisticalType" text NULL
+);

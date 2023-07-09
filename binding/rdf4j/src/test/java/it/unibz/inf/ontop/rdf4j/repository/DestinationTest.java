@@ -306,4 +306,16 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(0, StringUtils.countMatches(sql, "REPLACE"));
     }
 
+    @Test
+    public void testObservableProperties() {
+        String sparql = "PREFIX sosa: <http://www.w3.org/ns/sosa/>\n" +
+                "SELECT * WHERE {\n" +
+                " ?sub a sosa:ObservableProperty .\n" +
+                "}\n";
+
+        String sql = reformulateIntoNativeQuery(sparql);
+        assertEquals(0, StringUtils.countMatches(sql, "DISTINCT"));
+        assertEquals(0, StringUtils.countMatches(sql, "UNION"));
+    }
+
 }
