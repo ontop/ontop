@@ -126,6 +126,9 @@ public class DBRegexMatchAsLikeFunctionSymbolImpl extends AbstractTypedDBFunctio
         if(token.endsWith("*") || token.endsWith("+") || token.endsWith("?")) {
             throw new MinorOntopInternalBugException("Multiplicity modifiers are only allowed after the '.' wildcard when translating a RegEx to a LIKE comparison.");
         }
+        if(token.startsWith("[") && token.endsWith("]")) {
+            return token;
+        }
         if(token.startsWith("(") || token.endsWith(")")) {
             throw new MinorOntopInternalBugException("Round parentheses are not allowed when translating a RegEx to a LIKE comparison.");
         }

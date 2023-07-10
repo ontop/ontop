@@ -59,13 +59,6 @@ public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunction
         super.testHashSHA384();
     }
 
-    @Test
-    @Disabled("TODO: support regex")
-    @Override
-    public void testIRI7() {
-        super.testIRI7();
-    }
-
     @Disabled("Current MS SQL Server handling does not allow operation between DATE and DATETIME, db example has only DATE")
     @Test
     @Override

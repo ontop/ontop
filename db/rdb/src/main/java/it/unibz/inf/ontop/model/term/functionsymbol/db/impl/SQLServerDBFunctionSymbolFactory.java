@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.SQLServerDBTypeFactory;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -270,6 +271,10 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     public DBFunctionSymbol getDBRegexpReplace4() {
         throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+    }
+
+    protected DBFunctionSymbol createDBIriStringResolver(IRI baseIRI) {
+        return new SQLServerDBIriStringResolverFunctionSymbolImpl(baseIRI, typeFactory.getDBTypeFactory().getAbstractRootDBType(), dbStringType);
     }
 
     /**
