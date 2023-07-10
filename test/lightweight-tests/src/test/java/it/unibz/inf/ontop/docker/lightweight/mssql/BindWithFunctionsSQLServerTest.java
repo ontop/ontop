@@ -42,12 +42,6 @@ public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunction
                 "\"0E-19, 10.0000000000000000000\"^^xsd:string");
     }
 
-    @Disabled("not supported?")
-    @Test
-    public void testREGEX() {
-        super.testREGEX();
-    }
-
     @Disabled("not supported")
     @Test
     public void testREPLACE() {

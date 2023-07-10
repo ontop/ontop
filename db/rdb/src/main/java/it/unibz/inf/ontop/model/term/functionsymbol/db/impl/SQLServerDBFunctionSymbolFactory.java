@@ -32,6 +32,8 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
 
     // Created in init()
     private DBFunctionSymbol substr2FunctionSymbol;
+    private DBBooleanFunctionSymbol regexpLike2;
+    private DBBooleanFunctionSymbol regexpLike3;
 
     @Inject
     private SQLServerDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -46,6 +48,9 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         // Non-regular
         substr2FunctionSymbol = new DBFunctionSymbolWithSerializerImpl(SUBSTR_STR + "2",
                 ImmutableList.of(abstractRootDBType, abstractRootDBType), dbStringType, false, this::serializeSubString2);
+
+        regexpLike2 = new DBRegexMatchAsLikeFunctionSymbolImpl(REGEXP_LIKE_STR + "2", dbStringType, dbBooleanType, 2);
+        regexpLike3 = new DBRegexMatchAsLikeFunctionSymbolImpl(REGEXP_LIKE_STR + "3", dbStringType, dbBooleanType, 3);
     }
 
     /**
@@ -116,6 +121,8 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         // Removals not replaced by regular function symbols
         table.remove(SUBSTRING_STR, 2);
         table.remove(SUBSTR_STR, 2);
+        table.remove(REGEXP_LIKE_STR, 2);
+        table.remove(REGEXP_LIKE_STR, 3);
 
         return ImmutableTable.copyOf(table);
     }
@@ -143,22 +150,6 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
         return "ROW_NUMBER() OVER (ORDER BY (SELECT NULL))";
-    }
-
-    /**
-     * TODO: update
-     */
-    @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
-        return super.getDBRegexpMatches2();
-    }
-
-    /**
-     * TODO: update
-     */
-    @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
-        return super.getDBRegexpMatches3();
     }
 
     @Override
@@ -363,6 +354,17 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     public DBFunctionSymbol getDBSubString2() {
         return substr2FunctionSymbol;
     }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
+        return regexpLike2;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
+        return regexpLike3;
+    }
+
 
     @Override
     protected DBFunctionSymbol createDBAvg(DBTermType inputType, boolean isDistinct) {
