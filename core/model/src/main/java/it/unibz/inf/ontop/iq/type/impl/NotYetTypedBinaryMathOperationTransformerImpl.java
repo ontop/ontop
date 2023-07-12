@@ -82,7 +82,7 @@ public class NotYetTypedBinaryMathOperationTransformerImpl implements NotYetType
                         term2);
             }
             else
-                return termFactory.getDBNonStrictDefaultEquality(term1, term2);
+                return termFactory.getImmutableFunctionalTerm(functionSymbol, term1, term2);
         }
     }
 
