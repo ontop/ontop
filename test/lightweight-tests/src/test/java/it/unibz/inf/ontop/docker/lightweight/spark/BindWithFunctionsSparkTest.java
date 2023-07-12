@@ -106,4 +106,9 @@ public class BindWithFunctionsSparkTest extends AbstractBindTestWithFunctions {
     @Disabled("Duration functions currently not supported for Spark SQL")
     @Test
     public void testSecondsBetweenMappingInput() { super.testSecondsBetweenMappingInput(); }
+
+    @Override
+    protected ImmutableSet<String> getDivisionOutputTypeExpectedResults() {
+        return ImmutableSet.of("\"3.3333333333333335\"^^xsd:decimal");
+    }
 }
