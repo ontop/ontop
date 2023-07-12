@@ -55,6 +55,8 @@ public class NotYetTypedBinaryMathOperationTransformerImpl implements NotYetType
             if (newTerms.size() != 2)
                 throw new MinorOntopInternalBugException("Was expecting untyped math operations to be binary");
 
+            DefaultUntypedDBMathBinaryOperator operator = (DefaultUntypedDBMathBinaryOperator)functionSymbol;
+
             ImmutableTerm term1 = newTerms.get(0);
             ImmutableTerm term2 = newTerms.get(1);
 
@@ -75,7 +77,7 @@ public class NotYetTypedBinaryMathOperationTransformerImpl implements NotYetType
                 DBTermType type2 = types.get(1);
 
                 return termFactory.getDBBinaryNumericFunctionalTerm(
-                        functionSymbol.getName().substring(7), //Strip "UNTYPED" from function symbol name.
+                        operator.getMathOperatorString(),
                         type1,
                         type2,
                         term1,

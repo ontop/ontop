@@ -22,10 +22,12 @@ import java.util.function.Function;
 public class DefaultUntypedDBMathBinaryOperator extends FunctionSymbolImpl implements DBMathBinaryOperator {
 
     private final String template;
+    private final String operatorString;
 
     protected DefaultUntypedDBMathBinaryOperator(String operatorString, DBTermType rootDBTermType) {
         super("UNTYPED" + operatorString, ImmutableList.of(rootDBTermType, rootDBTermType));
         this.template = "(%s " + operatorString + " %s)";
+        this.operatorString = operatorString;
     }
 
     @Override
@@ -65,5 +67,10 @@ public class DefaultUntypedDBMathBinaryOperator extends FunctionSymbolImpl imple
     @Override
     public boolean isPreferringToBePostProcessedOverBeingBlocked() {
         return false;
+    }
+
+    @Override
+    public String getMathOperatorString() {
+        return operatorString;
     }
 }
