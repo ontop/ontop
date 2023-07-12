@@ -22,11 +22,17 @@ import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
+public class MinOrMaxOrSampleSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
         implements SPARQLAggregationFunctionSymbol {
 
+    public enum MinMaxSampleType {
+        MIN,
+        MAX,
+        SAMPLE
+    }
+
     private final TypeFactory typeFactory;
-    private final boolean isMax;
+    private final MinMaxSampleType type;
     private final RDFDatatype abstractNumericType;
     private final RDFDatatype dateTimeType;
     private final ObjectRDFType bnodeType;
@@ -34,19 +40,24 @@ public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
     private final String defaultAggVariableName;
     private final InequalityLabel inequalityLabel;
 
-    protected MinOrMaxSPARQLFunctionSymbolImpl(TypeFactory typeFactory, boolean isMax) {
-        this(isMax ? "SP_MAX" : "SP_MIN", isMax ? SPARQL.MAX : SPARQL.MIN, typeFactory, isMax);
+    protected MinOrMaxOrSampleSPARQLFunctionSymbolImpl(TypeFactory typeFactory, MinMaxSampleType type) {
+        this(
+                type == MinMaxSampleType.MAX ? "SP_MAX" : (type == MinMaxSampleType.MIN ? "SP_MIN" : "SP_SAMPLE"),
+                type == MinMaxSampleType.MAX ? SPARQL.MAX : (type == MinMaxSampleType.MIN ? SPARQL.MIN : SPARQL.SAMPLE),
+                typeFactory,
+                type
+        );
     }
-    protected MinOrMaxSPARQLFunctionSymbolImpl(String name, String officialName, TypeFactory typeFactory, boolean isMax) {
+    protected MinOrMaxOrSampleSPARQLFunctionSymbolImpl(String name, String officialName, TypeFactory typeFactory, MinMaxSampleType type) {
         super(name, officialName, ImmutableList.of(typeFactory.getAbstractRDFTermType()));
         this.typeFactory = typeFactory;
-        this.isMax = isMax;
+        this.type = type;
         this.abstractNumericType = typeFactory.getAbstractOntopNumericDatatype();
         this.dateTimeType = typeFactory.getXsdDatetimeDatatype();
         this.bnodeType = typeFactory.getBlankNodeType();
         this.iriType = typeFactory.getIRITermType();
-        this.defaultAggVariableName = isMax ? "max1" : "min1";
-        this.inequalityLabel = isMax ? InequalityLabel.GT : InequalityLabel.LT;
+        this.defaultAggVariableName = type == MinMaxSampleType.MAX ? "max1" : (type == MinMaxSampleType.MIN ? "min1" : "sample1");
+        this.inequalityLabel = type == MinMaxSampleType.MAX ? InequalityLabel.GT : InequalityLabel.LT;
     }
 
     @Override
@@ -145,9 +156,12 @@ public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
 
     private ImmutableFunctionalTerm createAggregate(RDFTermType rdfType, ImmutableTerm dbSubTerm, TermFactory termFactory) {
         DBTermType dbType = rdfType.getClosestDBType(typeFactory.getDBTypeFactory());
-        return isMax
+        return type == MinMaxSampleType.MAX
                 ? termFactory.getDBMax(dbSubTerm, dbType)
-                : termFactory.getDBMin(dbSubTerm, dbType);
+                : (type == MinMaxSampleType.MIN
+                    ? termFactory.getDBMin(dbSubTerm, dbType)
+                    : termFactory.getDBSample(dbSubTerm, dbType)
+                );
     }
 
     private AggregationSimplification decomposeMultityped(ImmutableTerm subTerm, ImmutableSet<RDFTermType> subTermPossibleTypes,

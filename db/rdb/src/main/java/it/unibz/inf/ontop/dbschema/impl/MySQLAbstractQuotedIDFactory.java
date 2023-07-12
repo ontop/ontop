@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
-
 /*
  * #%L
  * ontop-obdalib-core
@@ -21,10 +20,10 @@ package it.unibz.inf.ontop.dbschema.impl;
  * #L%
  */
 
-
 import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory.IDFactoryType;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
 
 /**
@@ -50,28 +49,20 @@ import java.util.Objects;
  * string literals must be enclosed within single quotation marks.
  *
  * @author Roman Kontchakov
- *
  */
+@NonNullByDefault
+public abstract class MySQLAbstractQuotedIDFactory extends AbstractBacktickQuotedIDFactory {
 
-public abstract class MySQLAbstractQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
-	private static final String MY_SQL_QUOTATION_STRING = "`";
-
-	protected QuotedID createFromString(@Nonnull String s, boolean caseSensitive) {
+	protected final QuotedID createFromString(String s, boolean caseSensitive) {
 		Objects.requireNonNull(s);
 
-		if (s.startsWith(MY_SQL_QUOTATION_STRING) && s.endsWith(MY_SQL_QUOTATION_STRING))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, caseSensitive);
+		if (s.startsWith(BACKTICK_QUOTATION_STRING) && s.endsWith(BACKTICK_QUOTATION_STRING))
+			return new QuotedIDImpl(s.substring(1, s.length() - 1), BACKTICK_QUOTATION_STRING, caseSensitive);
 
 		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, caseSensitive);
+			return new QuotedIDImpl(s.substring(1, s.length() - 1), BACKTICK_QUOTATION_STRING, caseSensitive);
 
 		return new QuotedIDImpl(s, NO_QUOTATION, caseSensitive);
 	}
-
-
-	@Override
-	public String getIDQuotationString() {
-		return MY_SQL_QUOTATION_STRING;
-	}	
 }

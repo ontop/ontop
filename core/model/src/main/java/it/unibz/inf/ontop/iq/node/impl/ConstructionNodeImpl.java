@@ -14,6 +14,8 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
@@ -26,10 +28,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.VariableGeneratorImpl;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -326,12 +325,83 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .filter(projectedVariables::containsAll);
     }
 
+    @Override
+    public FunctionalDependencies inferFunctionalDependencies(IQTree child, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
+        var childFDs = child.inferFunctionalDependencies();
+        var nullability = getVariableNullability(child);
+        return Stream.concat(childFDs.stream(), newDependenciesFromSubstitution(nullability))
+                .flatMap(e -> translateFunctionalDependency(e.getKey(), e.getValue(), child))
+                .collect(FunctionalDependencies.toFunctionalDependencies())
+                .concat(FunctionalDependencies.fromUniqueConstraints(uniqueConstraints, variables));
+    }
+
+
+    /**
+     * Computes the functional dependencies that can be taken from substitutions. E.g. x = F(a) ==> a -> x
+     */
+    private Stream<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> newDependenciesFromSubstitution(VariableNullability nullability) {
+        var variableToSubstitution = substitution.stream()
+                .filter(e -> isDeterministic(e.getValue()))
+                .map(e -> Maps.immutableEntry(
+                        e.getValue().getVariableStream().collect(ImmutableCollectors.toSet()),
+                        ImmutableSet.of(e.getKey())
+                ))
+                .filter(e -> !e.getKey().isEmpty());
+        var substitutionToVariable = substitution.stream()
+                .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
+                .filter(e -> isAtomicConstraint((ImmutableFunctionalTerm) e.getValue(), ((ImmutableFunctionalTerm) e.getValue()).getVariables(), nullability))
+                .map(e -> Maps.immutableEntry(
+                        ImmutableSet.of(e.getKey()),
+                        e.getValue().getVariableStream().collect(ImmutableCollectors.toSet())
+                ))
+                .filter(e -> !e.getValue().isEmpty());
+        var renamingDependencies = getSubstitution().builder()
+                .restrictRangeTo(Variable.class)
+                .build()
+                .stream()
+                .map(entry -> Maps.immutableEntry(ImmutableSet.of(entry.getKey()), ImmutableSet.of(entry.getValue())));
+        return Streams.concat(variableToSubstitution, substitutionToVariable, renamingDependencies);
+    }
+
+    private Stream<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> translateFunctionalDependency(ImmutableSet<Variable> determinants, ImmutableSet<Variable> dependents, IQTree child) {
+        //Dependents of new FD are all projected previous dependents + new variables that only use dependent variables in their substitution (with deterministic functions).
+        var keptDependents = Sets.intersection(dependents, projectedVariables);
+        var newDependents = substitution.stream()
+                .filter(s -> dependents.containsAll(s.getValue().getVariableStream().collect(ImmutableCollectors.toSet()))
+                        && this.isDeterministic(s.getValue()))
+                .map(s -> s.getKey());
+        var allDependents = Stream.concat(keptDependents.stream(), newDependents)
+                .collect(ImmutableCollectors.toSet());
+        if(allDependents.isEmpty())
+            return Stream.of();
+
+
+        Stream<ImmutableSet<Variable>> preservedDeterminants = projectedVariables.containsAll(determinants) ? Stream.of(determinants) : Stream.of();
+        var nullability = getVariableNullability(child);
+        var newDeterminants = extractTransformedUniqueConstraint(determinants, nullability);
+        var allDeterminants = Streams.concat(preservedDeterminants, newDeterminants);
+
+        return allDeterminants
+                .map(determinant -> Maps.immutableEntry(determinant, Sets.difference(allDependents, determinant).immutableCopy()))
+                .filter(e -> !e.getValue().isEmpty());
+    }
+
+    private boolean isDeterministic(ImmutableTerm term) {
+        if(!(term instanceof ImmutableFunctionalTerm))
+            return true;
+        ImmutableFunctionalTerm f = (ImmutableFunctionalTerm) term;
+        if(!f.getFunctionSymbol().isDeterministic())
+            return false;
+        return f.getTerms().stream()
+                .allMatch(this::isDeterministic);
+    }
+
     /**
      * For a construction node, none of the projected variables is required.
      */
     @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
-        return getVariables();
+    public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
+        return VariableNonRequirement.of(getVariables());
     }
 
     @Override

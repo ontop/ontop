@@ -1,0 +1,57 @@
+[
+    {
+        "course_id": {
+            "S": "LinearAlgebra"
+        },
+        "nb_students": {
+            "N": "10"
+        },
+        "duration": {
+            "N": "24.5"
+        }
+    },
+    {
+        "course_id": {
+            "S": "DiscreteMathematics"
+        },
+        "nb_students": {
+            "N": "11"
+        },
+        "duration": {
+            "N": "30"
+        }
+    },
+    {
+        "course_id": {
+            "S": "AdvancedDatabases"
+        },
+        "nb_students": {
+            "N": "12"
+        },
+        "duration": {
+            "N": "20"
+        }
+    },
+    {
+        "course_id": {
+            "S": "ScientificWriting"
+        },
+        "nb_students": {
+            "N": "13"
+        },
+        "duration": {
+            "N": "18"
+        }
+    },
+    {
+        "course_id": {
+            "S": "OperatingSystems"
+        },
+        "nb_students": {
+            "N": "10"
+        },
+        "duration": {
+            "N": "30"
+        }
+    }
+]

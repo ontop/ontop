@@ -1,8 +1,21 @@
 {
   "relations": [
     {
+      "name": [ "lenses", "company_data_arrays" ],
+      "baseRelation": ["company_data_arrays" ],
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "uc",
+            "determinants": [ "id" ]
+          }
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
       "name": ["lenses","flattened_dates_mid"],
-      "baseRelation": ["company_data_arrays"],
+      "baseRelation": ["lenses", "company_data_arrays"],
       "flattenedColumn": {
         "name": "days",
         "datatype": "list"

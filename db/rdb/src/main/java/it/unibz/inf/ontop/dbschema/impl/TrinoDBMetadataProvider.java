@@ -26,11 +26,6 @@ public class TrinoDBMetadataProvider extends DefaultSchemaCatalogDBMetadataProvi
         // If you write a database name, it must be the same as the database you are connected to.
     }
 
-    @Override
-    protected ResultSet getRelationIDsResultSet() throws SQLException {
-        return super.getRelationIDsResultSet();
-    }
-
     private static final ImmutableList<String> IGNORED_SCHEMAS = ImmutableList.of("information_schema");
     private static final ImmutableList<String> IGNORED_CATALOGS = ImmutableList.of( "system");
 

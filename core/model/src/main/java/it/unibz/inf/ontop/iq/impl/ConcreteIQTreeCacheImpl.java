@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -7,6 +8,8 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.ConcreteIQTreeCache;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -32,13 +35,16 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     private ImmutableSet<Variable> variables;
 
     @Nullable
-    private ImmutableSet<Variable> notInternallyRequiredVariables;
+    private VariableNonRequirement variableNonRequirement;
 
     @Nullable
     private ImmutableSet<Substitution<NonVariableTerm>> possibleVariableDefinitions;
 
     @Nullable
     private ImmutableSet<ImmutableSet<Variable>> uniqueConstraints;
+
+    @Nullable
+    private FunctionalDependencies functionalDependencies;
 
     @Nullable
     private Boolean isDistinct;
@@ -63,9 +69,10 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     protected ConcreteIQTreeCacheImpl(CoreSingletons coreSingletons, boolean isNormalizedForOptimization,
                                       boolean areDistinctAlreadyRemoved, @Nullable VariableNullability variableNullability,
                                       @Nullable ImmutableSet<Variable> variables,
-                                      @Nullable ImmutableSet<Variable> notInternallyRequiredVariables,
+                                      @Nullable VariableNonRequirement variableNonRequirement,
                                       @Nullable ImmutableSet<Substitution<NonVariableTerm>> possibleVariableDefinitions,
                                       @Nullable ImmutableSet<ImmutableSet<Variable>> uniqueConstraints,
+                                      @Nullable FunctionalDependencies functionalDependencies,
                                       @Nullable Boolean isDistinct) {
         this.isNormalizedForOptimization = isNormalizedForOptimization;
         this.areDistinctAlreadyRemoved = areDistinctAlreadyRemoved;
@@ -73,9 +80,10 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.variableNullability = variableNullability;
         this.variables = variables;
-        this.notInternallyRequiredVariables = notInternallyRequiredVariables;
+        this.variableNonRequirement = variableNonRequirement;
         this.possibleVariableDefinitions = possibleVariableDefinitions;
         this.uniqueConstraints = uniqueConstraints;
+        this.functionalDependencies = functionalDependencies;
         this.isDistinct = isDistinct;
     }
 
@@ -97,8 +105,8 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
 
     @Nullable
     @Override
-    public ImmutableSet<Variable> getNotInternallyRequiredVariables() {
-        return notInternallyRequiredVariables;
+    public VariableNonRequirement getVariableNonRequirement() {
+        return variableNonRequirement;
     }
 
     @Override
@@ -120,6 +128,12 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
 
     @Nullable
     @Override
+    public FunctionalDependencies getFunctionalDependencies() {
+        return functionalDependencies;
+    }
+
+    @Nullable
+    @Override
     public Boolean isDistinct() {
         return isDistinct;
     }
@@ -129,15 +143,14 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
         this.variables = variables;
     }
 
-    @Override
-    public void setNotInternallyRequiredVariables(@Nonnull ImmutableSet<Variable> notInternallyRequiredVariables) {
-        this.notInternallyRequiredVariables = notInternallyRequiredVariables;
+    public void setVariableNonRequirement(@Nonnull VariableNonRequirement variableNonRequirement) {
+        this.variableNonRequirement = variableNonRequirement;
     }
 
     @Override
     public IQTreeCache declareAsNormalizedForOptimizationWithoutEffect() {
         return new ConcreteIQTreeCacheImpl(coreSingletons, true, areDistinctAlreadyRemoved,
-                variableNullability, variables, notInternallyRequiredVariables, possibleVariableDefinitions, uniqueConstraints, isDistinct);
+                variableNullability, variables, variableNonRequirement, possibleVariableDefinitions, uniqueConstraints, functionalDependencies, isDistinct);
     }
 
     /**
@@ -146,7 +159,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     @Override
     public IQTreeCache declareAsNormalizedForOptimizationWithEffect() {
         return new ConcreteIQTreeCacheImpl(coreSingletons, true, areDistinctAlreadyRemoved,
-                null, null, null, null, null, null);
+                null, null, null, null, null, null, null);
     }
 
     /**
@@ -155,7 +168,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     @Override
     public IQTreeCache declareConstraintPushedDownWithEffect() {
         return new ConcreteIQTreeCacheImpl(coreSingletons, false, areDistinctAlreadyRemoved,
-                null, variables, null, null, null, null);
+                null, variables, null, null, null, null, null);
     }
 
     /**
@@ -166,9 +179,9 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     public IQTreeCache declareDistinctRemoval(boolean noEffect) {
         return noEffect
                 ? new ConcreteIQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, true,
-                variableNullability, variables, notInternallyRequiredVariables, possibleVariableDefinitions, uniqueConstraints, isDistinct)
+                variableNullability, variables, variableNonRequirement, possibleVariableDefinitions, uniqueConstraints, functionalDependencies, isDistinct)
                 : new ConcreteIQTreeCacheImpl(coreSingletons, false, true,
-                variableNullability, variables, null, possibleVariableDefinitions, null, null);
+                variableNullability, variables, null, possibleVariableDefinitions, null, null, null);
     }
 
     @Override
@@ -193,6 +206,13 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     }
 
     @Override
+    public void setFunctionalDependencies(@Nonnull FunctionalDependencies functionalDependencies) {
+        if (this.functionalDependencies != null)
+            throw new IllegalStateException("Functional dependencies already present. Only call this method once");
+        this.functionalDependencies = functionalDependencies;
+    }
+
+    @Override
     public void setIsDistinct(@Nonnull Boolean isDistinct) {
         if (this.isDistinct != null)
             throw new IllegalStateException("Distinct information is already present. Only call this method once");
@@ -212,9 +232,9 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
                 ? null
                 : substitutionFactory.apply(renamingSubstitution, variables);
 
-        ImmutableSet<Variable> newNotInternallyRequiredVariables = notInternallyRequiredVariables == null
+        VariableNonRequirement newNotInternallyRequiredVariables = variableNonRequirement == null
                 ? null
-                : substitutionFactory.apply(renamingSubstitution, notInternallyRequiredVariables);
+                : variableNonRequirement.rename(renamingSubstitution, substitutionFactory);
 
         ImmutableSet<Substitution<NonVariableTerm>> newPossibleDefinitions = possibleVariableDefinitions == null
                 ? null
@@ -228,8 +248,13 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
                     .map(s -> substitutionFactory.apply(renamingSubstitution, s))
                     .collect(ImmutableCollectors.toSet());
 
+
+        FunctionalDependencies newFunctionalDependencies = functionalDependencies == null
+                ? null
+                : functionalDependencies.rename(renamingSubstitution, substitutionFactory);
+
         return new ConcreteIQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, areDistinctAlreadyRemoved,
                 newVariableNullability, newVariables, newNotInternallyRequiredVariables, newPossibleDefinitions,
-                newUniqueConstraints, isDistinct);
+                newUniqueConstraints, newFunctionalDependencies, isDistinct);
     }
 }

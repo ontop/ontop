@@ -15,6 +15,8 @@ import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -181,9 +183,17 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
         return ImmutableSet.of();
     }
 
+    /**
+     * Dummy implementation (considered too late for inferring it)
+     */
     @Override
-    public ImmutableSet<Variable> getNotInternallyRequiredVariables() {
-        return getVariables();
+    public FunctionalDependencies inferFunctionalDependencies() {
+        return FunctionalDependencies.empty();
+    }
+
+    @Override
+    public VariableNonRequirement getVariableNonRequirement() {
+        return VariableNonRequirement.of(getVariables());
     }
 
     @Override

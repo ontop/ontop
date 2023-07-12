@@ -2,32 +2,39 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
+import com.google.inject.*;
+import com.google.inject.name.Names;
 import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory;
 import it.unibz.inf.ontop.evaluator.ExpressionNormalizer;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.*;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
+import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.iq.type.PartiallyTypedSimpleCastTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.RDF;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
+import java.util.Optional;
 
+@NonNullByDefault
 public class OntopModelModule extends OntopAbstractModule {
 
     protected OntopModelModule(OntopModelConfiguration configuration) {
@@ -85,7 +92,7 @@ public class OntopModelModule extends OntopAbstractModule {
         Module dbTypeFactoryModule = buildFactory(ImmutableList.of(DBTypeFactory.class), DBTypeFactory.Factory.class);
         install(dbTypeFactoryModule);
 
-        Module iqFactoryModule = buildFactory(ImmutableList.of(
+        Module iqFactoryModule = buildFactory(IntermediateQueryFactory.class,
                 ConstructionNode.class,
                 UnionNode.class,
                 InnerJoinNode.class,
@@ -107,14 +114,37 @@ public class OntopModelModule extends OntopAbstractModule {
                 BinaryNonCommutativeIQTree.class,
                 NaryIQTree.class,
                 IQ.class,
-                IQTreeCache.class
-                ),
-                IntermediateQueryFactory.class);
+                IQTreeCache.class);
         install(iqFactoryModule);
 
         Module queryTransformerModule = buildFactory(ImmutableList.of(
-                QueryRenamer.class),
+                        QueryRenamer.class),
                 QueryTransformerFactory.class);
         install(queryTransformerModule);
+
+        String idFactoryType = QuotedIDFactory.getIDFactoryType(SQLStandardQuotedIDFactory.class);
+        bindFromSettings(Key.get(QuotedIDFactory.class, Names.named(idFactoryType)), SQLStandardQuotedIDFactory.class);
+
+        bind(QuotedIDFactory.Supplier.class).toInstance(new QuotedIDFactory.Supplier() {
+
+            /*
+             * Note: injecting an Injector is seen as an anti-pattern, but here it seems there are no alternatives since
+             * we don't know in advance which idFactoryTypes are going to be asked (they may come from a file). This
+             * also prevents using the factory building & injection support of Guice.
+             */
+            @Inject
+            private Injector injector;
+
+            @Override
+            public Optional<QuotedIDFactory> get(String idFactoryType) {
+                try {
+                    return Optional.of(injector.getInstance(Key.get(QuotedIDFactory.class, Names.named(idFactoryType))));
+                } catch (ConfigurationException ex) {
+                    return Optional.empty();
+                }
+            }
+
+        });
     }
+
 }

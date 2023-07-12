@@ -25,10 +25,12 @@ package it.unibz.inf.ontop.dbschema.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory.IDFactoryType;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
+import java.util.function.UnaryOperator;
 
 /**
  * Creates QuotedIdentifiers following the rules of SQL standard:<br>
@@ -60,25 +62,24 @@ import java.util.Objects;
  *
  *
  * @author Roman Kontchakov
- *
  */
-
+@IDFactoryType("STANDARD")
+@NonNullByDefault
 public class SQLStandardQuotedIDFactory implements QuotedIDFactory {
 
 	public static final String QUOTATION_STRING = "\"";
+
 	public static final String NO_QUOTATION = "";
 
 	@Override
-	public QuotedID createAttributeID(@Nonnull String s) {
-		Objects.requireNonNull(s);
+	public QuotedID createAttributeID(String s) {
 		return createFromString(s);
 	}
 
 	@Override
-	public RelationID createRelationID(@Nonnull String tableId) {
+	public RelationID createRelationID(String tableId) {
 		return new RelationIDImpl(ImmutableList.of(createFromString(tableId)));
 	}
-
 
 	@Override
 	public RelationID createRelationID(String... components) {
@@ -91,13 +92,17 @@ public class SQLStandardQuotedIDFactory implements QuotedIDFactory {
 		return new RelationIDImpl(builder.build());
 	}
 	
-	protected QuotedID createFromString(@Nonnull String s) {
+	protected QuotedID createFromString(String s) {
+		return createFromString(s, QUOTATION_STRING, String::toUpperCase, NO_QUOTATION, true);
+	}
+
+	protected final QuotedID createFromString(String s, String quotationString, UnaryOperator<String> fold, String defaultQuotationString, boolean caseSensitive) {
 		Objects.requireNonNull(s);
 
-		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING);
+		if (s.startsWith(quotationString) && s.endsWith(quotationString))
+			return new QuotedIDImpl(s.substring(1, s.length() - 1), quotationString, caseSensitive);
 
-		return new QuotedIDImpl(s.toUpperCase(), NO_QUOTATION);
+		return new QuotedIDImpl(fold.apply(s), defaultQuotationString, caseSensitive);
 	}
 	
 	@Override
@@ -109,4 +114,5 @@ public class SQLStandardQuotedIDFactory implements QuotedIDFactory {
 	public boolean supportsSquareBracketQuotation() {
 		return false;
 	}
+
 }

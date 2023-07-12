@@ -22,6 +22,10 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String UNIQUEIDENTIFIER_STR = "UNIQUEIDENTIFIER";
     public static final String DEFAULT_DECIMAL_STR = "DECIMAL(38, 19)";
 
+    public static final String INT_IDENTITY_STR = "INT IDENTITY";
+    public static final String PHONE_STR = "PHONE";
+    public static final String NAME_STR = "NAME";
+
 
     @AssistedInject
     private SQLServerDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
@@ -33,6 +37,12 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         // Overloads NVARCHAR to insert the precision
         StringDBTermType nvarcharType = new StringDBTermType(NVARCHAR_STR, "NVARCHAR(max)", rootAncestry,
+                typeFactory.getXsdStringDatatype());
+
+        StringDBTermType phoneType = new StringDBTermType(PHONE_STR, rootAncestry,
+                typeFactory.getXsdStringDatatype());
+
+        StringDBTermType nameType = new StringDBTermType(NAME_STR, rootAncestry,
                 typeFactory.getXsdStringDatatype());
 
         // Non-standard (not part of the R2RML standard).
@@ -62,6 +72,9 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DATETIMEOFFSET_STR, dateTimeOffset);
         map.put(UNIQUEIDENTIFIER_STR, uniqueIdType);
         map.put(DEFAULT_DECIMAL_STR, defaultDecimalType);
+        map.put(INT_IDENTITY_STR, map.get(INT_STR));
+        map.put(PHONE_STR, phoneType);
+        map.put(NAME_STR, nameType);
         return map;
     }
 

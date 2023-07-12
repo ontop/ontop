@@ -12,6 +12,8 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.AggregationNormalizer;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -325,12 +327,28 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                   .collect(ImmutableCollectors.toSet());
     }
 
+    @Override
+    public FunctionalDependencies inferFunctionalDependencies(IQTree child, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
+        var childFDs = child.inferFunctionalDependencies();
+
+        //Return all of the child's functional dependencies that are included entirely inside the grouping variables.
+        return childFDs.stream()
+                .filter(e -> groupingVariables.containsAll(e.getKey()))
+                .filter(e -> e.getValue().stream()
+                        .anyMatch(groupingVariables::contains))
+                .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().stream()
+                        .filter(groupingVariables::contains)
+                        .collect(ImmutableCollectors.toSet())))
+                .collect(FunctionalDependencies.toFunctionalDependencies())
+                .concat(FunctionalDependencies.fromUniqueConstraints(uniqueConstraints, variables));
+    }
+
     /**
      * Out of the projected variables, only the grouping variables are required
      */
     @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
-        return substitution.getDomain();
+    public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
+        return VariableNonRequirement.of(substitution.getDomain());
     }
 
     @Override

@@ -1,0 +1,102 @@
+[
+    {
+        "prof_id": {
+            "N": "1"
+        },
+        "first_name": {
+            "S": "Roger"
+        },
+        "last_name": {
+            "S": "Smith"
+        },
+        "nickname": {
+            "S": "Rog"
+        }
+    },
+    {
+        "prof_id": {
+            "N": "2"
+        },
+        "first_name": {
+            "S": "Frank"
+        },
+        "last_name": {
+            "S": "Pitt"
+        },
+        "nickname": {
+            "S": "Frankie"
+        }
+    },
+    {
+        "prof_id": {
+            "N": "3"
+        },
+        "first_name": {
+            "S": "John"
+        },
+        "last_name": {
+            "S": "Depp"
+        },
+        "nickname": {
+            "S": "Johnny"
+        }
+    },
+    {
+        "prof_id": {
+            "N": "4"
+        },
+        "first_name": {
+            "S": "Michael"
+        },
+        "last_name": {
+            "S": "Jackson"
+        },
+        "nickname": {
+            "S": "King of Pop"
+        }
+    },
+    {
+        "prof_id": {
+            "N": "5"
+        },
+        "first_name": {
+            "S": "Diego"
+        },
+        "last_name": {
+            "S": "Gamper"
+        }
+    },
+    {
+        "prof_id": {
+            "N": "6"
+        },
+        "first_name": {
+            "S": "Johann"
+        },
+        "last_name": {
+            "S": "Helmer"
+        }
+    },
+    {
+        "prof_id": {
+            "N": "7"
+        },
+        "first_name": {
+            "S": "Barbara"
+        },
+        "last_name": {
+            "S": "Dodero"
+        }
+    },
+    {
+        "prof_id": {
+            "N": "8"
+        },
+        "first_name": {
+            "S": "Mary"
+        },
+        "last_name": {
+            "S": "Poppins"
+        }
+    }
+]

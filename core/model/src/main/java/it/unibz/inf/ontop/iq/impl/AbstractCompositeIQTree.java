@@ -6,6 +6,8 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -14,6 +16,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -263,18 +266,31 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     protected abstract ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints();
 
     @Override
-    public synchronized ImmutableSet<Variable> getNotInternallyRequiredVariables() {
+    public synchronized FunctionalDependencies inferFunctionalDependencies() {
         // Non-final
-        ImmutableSet<Variable> notInternallyRequiredVariables = treeCache.getNotInternallyRequiredVariables();
+        FunctionalDependencies dependencies = treeCache.getFunctionalDependencies();
+        if (dependencies == null) {
+            dependencies = computeFunctionalDependencies();
+            treeCache.setFunctionalDependencies(dependencies);
+        }
+        return dependencies;
+    }
+
+    protected abstract FunctionalDependencies computeFunctionalDependencies();
+
+    @Override
+    public synchronized VariableNonRequirement getVariableNonRequirement() {
+        // Non-final
+        VariableNonRequirement notInternallyRequiredVariables = treeCache.getVariableNonRequirement();
         if (notInternallyRequiredVariables != null)
             return notInternallyRequiredVariables;
 
-        notInternallyRequiredVariables = computeNotInternallyRequiredVariables();
-        treeCache.setNotInternallyRequiredVariables(notInternallyRequiredVariables);
+        notInternallyRequiredVariables = computeVariableNonRequirement();
+        treeCache.setVariableNonRequirement(notInternallyRequiredVariables);
         return notInternallyRequiredVariables;
     }
 
-    protected abstract ImmutableSet<Variable> computeNotInternallyRequiredVariables();
+    protected abstract VariableNonRequirement computeVariableNonRequirement();
 
 
     @Override

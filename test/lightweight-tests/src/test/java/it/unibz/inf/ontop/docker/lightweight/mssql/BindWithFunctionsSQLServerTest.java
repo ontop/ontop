@@ -42,12 +42,6 @@ public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunction
                 "\"0E-19, 10.0000000000000000000\"^^xsd:string");
     }
 
-    @Disabled("not supported?")
-    @Test
-    public void testREGEX() {
-        super.testREGEX();
-    }
-
     @Disabled("not supported")
     @Test
     public void testREPLACE() {
@@ -63,13 +57,6 @@ public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunction
     @Test
     public void testHashSHA384() {
         super.testHashSHA384();
-    }
-
-    @Test
-    @Disabled("TODO: support regex")
-    @Override
-    public void testIRI7() {
-        super.testIRI7();
     }
 
     @Disabled("Current MS SQL Server handling does not allow operation between DATE and DATETIME, db example has only DATE")

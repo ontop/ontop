@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.docker.lightweight;
 
 import com.google.common.collect.ImmutableMultiset;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,19 @@ public abstract class AbstractNestedDataTest extends AbstractDockerRDF4JTest {
     protected static final String OWL_FILE = null;
 
     Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
+    @Test
+    public void testUniqueConstraintsPreserved() {
+        String query = "PREFIX : <http://nested.example.org/>" +
+                "\n" +
+                "SELECT  ?v " +
+                "WHERE {" +
+                "?v :income ?i . \n" +
+                "}";
+
+        String ontopSQLtranslation = reformulate(query);
+        Assertions.assertFalse(supportsPositionVariable() && ontopSQLtranslation.toUpperCase().contains("DISTINCT"), "UniqueConstraints not preserved.");
+    }
 
     @Test
     public void testFlattenWithPosition() throws Exception {
@@ -169,5 +183,7 @@ public abstract class AbstractNestedDataTest extends AbstractDockerRDF4JTest {
     protected int getSPOExpectedCount() {
         return 89;
     }
+
+    protected boolean supportsPositionVariable() { return true; }
 
 }

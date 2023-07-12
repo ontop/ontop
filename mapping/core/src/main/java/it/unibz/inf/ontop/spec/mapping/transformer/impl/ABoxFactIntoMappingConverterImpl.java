@@ -70,11 +70,12 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                 projectedVariableGenerator.generateNewVariable());
         tripleAtomPredicate = (RDFAtomPredicate) tripleAtom.getPredicate();
 
-        quadAtom = atomFactory.getDistinctTripleAtom(
+        quadAtom = atomFactory.getDistinctQuadAtom(
+                projectedVariableGenerator.generateNewVariable(),
                 projectedVariableGenerator.generateNewVariable(),
                 projectedVariableGenerator.generateNewVariable(),
                 projectedVariableGenerator.generateNewVariable());
-        quadAtomPredicate = (RDFAtomPredicate) tripleAtom.getPredicate();
+        quadAtomPredicate = (RDFAtomPredicate) quadAtom.getPredicate();
 
     }
 

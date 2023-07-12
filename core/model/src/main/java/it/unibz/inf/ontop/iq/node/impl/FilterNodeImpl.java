@@ -10,6 +10,8 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
@@ -172,8 +174,13 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
-        return computeNotInternallyRequiredVariables(ImmutableList.of(child));
+    public FunctionalDependencies inferFunctionalDependencies(IQTree child, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
+        return child.inferFunctionalDependencies();
+    }
+
+    @Override
+    public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
+        return applyFilterToVariableNonRequirement(child.getVariableNonRequirement());
     }
 
     @Override

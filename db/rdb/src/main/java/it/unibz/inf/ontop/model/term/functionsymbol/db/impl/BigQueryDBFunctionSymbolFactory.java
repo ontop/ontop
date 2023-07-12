@@ -18,6 +18,9 @@ public class BigQueryDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for BigQuery";
 
     private static final String REGEXP_CONTAINS_STR = "REGEXP_CONTAINS";
+    private static final String TO_JSON = "TO_JSON";
+    private static final String JSON_VALUE = "JSON_VALUE";
+    private static final String JSON_VALUE_ARRAY = "JSON_VALUE_ARRAY";
     private DBBooleanFunctionSymbol regexpContains;
 
     @Inject
@@ -41,7 +44,26 @@ public class BigQueryDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
         table.remove(REGEXP_LIKE_STR, 3);
         DBBooleanFunctionSymbol regexpContains = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_CONTAINS_STR, 2, dbBooleanType,
                 abstractRootDBType);
+        DBFunctionSymbol toJson = new DefaultSQLSimpleTypedDBFunctionSymbol(TO_JSON, 1, typeFactory.getDBTypeFactory().getDBJsonType(), true, abstractRootDBType);
+        DBFunctionSymbol jsonValue = new DefaultSQLSimpleTypedDBFunctionSymbol(JSON_VALUE, 2, typeFactory.getDBTypeFactory().getDBStringType(), false, abstractRootDBType) {
+            @Override
+            protected boolean mayReturnNullWithoutNullArguments() {
+                return true;
+            }
+        };
+        DBFunctionSymbol jsonValueArray = new DefaultSQLSimpleTypedDBFunctionSymbol(
+                JSON_VALUE_ARRAY, 2,
+                typeFactory.getDBTypeFactory().getDBArrayType(typeFactory.getDBTypeFactory().getDBStringType()),
+                false, abstractRootDBType) {
+            @Override
+            protected boolean mayReturnNullWithoutNullArguments() {
+                return true;
+            }
+        };
         table.put(REGEXP_CONTAINS_STR, 2, regexpContains);
+        table.put(TO_JSON, 1, toJson);
+        table.put(JSON_VALUE, 2, jsonValue);
+        table.put(JSON_VALUE_ARRAY, 2, jsonValueArray);
 
         return ImmutableTable.copyOf(table);
     }
@@ -246,52 +268,7 @@ public class BigQueryDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     }
 
     @Override
-    protected String serializeDecade(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("CAST(FLOOR(EXTRACT(YEAR FROM %s) / 10.00000) AS INTEGER)", termConverter.apply(terms.get(0)));
-    }
-
-    @Override
-    protected String serializeCentury(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("CAST(CEIL(EXTRACT(YEAR FROM %s) / 100.00000) AS INTEGER)", termConverter.apply(terms.get(0)));
-    }
-
-    @Override
-    protected String serializeMillennium(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("CAST(CEIL(EXTRACT(YEAR FROM %s) / 1000.00000) AS INTEGER)", termConverter.apply(terms.get(0)));
-    }
-
-    @Override
-    protected String serializeWeek(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("EXTRACT(ISOWEEK FROM %s)", termConverter.apply(terms.get(0)));
-    }
-
-    @Override
-    protected String serializeMilliseconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("(EXTRACT(SECOND FROM %s) * 1000 + EXTRACT(MILLISECOND FROM %s))", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
-    }
-
-    @Override
-    protected String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("(EXTRACT(SECOND FROM %s) * 1000000 + EXTRACT(MILLISECOND FROM %s) * 1000 + EXTRACT(MICROSECOND FROM %s))", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
-    }
-
-    @Override
-    protected String serializeDateTrunc(ImmutableList<? extends ImmutableTerm> terms,
-                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String template = String.format(" WHEN %s LIKE '%%s' THEN TIMESTAMP_TRUNC(%s, %%s)", termConverter.apply(terms.get(1)), termConverter.apply(terms.get(0)));
-        ImmutableList<String> possibleParts = ImmutableList.of("year", "quarter", "month", "day", "week", "hour", "minute", "second", "millisecond", "microsecond");
-        StringBuilder serializationBuilder = new StringBuilder("CASE");
-        possibleParts.stream()
-                .forEach(part -> serializationBuilder.append(String.format(template, part, part)));
-        serializationBuilder.append(" ELSE NULL END");
-        return serializationBuilder.toString();
-    }
-
-    @Override
-    public DBFunctionSymbol getDBDateTrunc(String datePart) {
-        if(ImmutableSet.of("microseconds", "milliseconds", "decade", "century", "millennium").contains(datePart.toLowerCase())) {
-            throw new IllegalArgumentException(String.format("BigQuery does not support DATE_TRUNC on %s.", datePart));
-        }
-        return super.getDBDateTrunc(datePart);
+    protected DBFunctionSymbol createDBSample(DBTermType termType) {
+        return new DBSampleFunctionSymbolImpl(termType, "ANY_VALUE");
     }
 }

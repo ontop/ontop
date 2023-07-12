@@ -10,6 +10,8 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -47,7 +49,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
     // LAZY
     @Nullable
-    private ImmutableSet<Variable> notInternallyRequiredVariables;
+    private VariableNonRequirement variableNonRequirement;
 
     // LAZY
     @Nullable
@@ -229,23 +231,61 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
                 .collect(ImmutableCollectors.toSet()));
     }
 
+    @Override
+    public synchronized FunctionalDependencies inferFunctionalDependencies() {
+        return relationDefinition.getOtherFunctionalDependencies().stream()
+                .map(this::convertFunctionalDependency)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(FunctionalDependencies.toFunctionalDependencies())
+                .concat(FunctionalDependencies.fromUniqueConstraints(inferUniqueConstraints(), variables));
+    }
+
+    private Optional<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> convertFunctionalDependency(FunctionalDependency functionalDependency) {
+        ImmutableList<Optional<? extends VariableOrGroundTerm>> determinants = functionalDependency.getDeterminants().stream()
+                .map(a -> Optional.ofNullable(argumentMap.get(a.getIndex() - 1)))
+                .collect(ImmutableCollectors.toList());
+
+        ImmutableList<Optional<? extends VariableOrGroundTerm>> dependents = functionalDependency.getDependents().stream()
+                .map(a -> Optional.ofNullable(argumentMap.get(a.getIndex() - 1)))
+                .collect(ImmutableCollectors.toList());
+
+        if (!determinants.stream().allMatch(Optional::isPresent) || !dependents.stream().anyMatch(Optional::isPresent))
+            return Optional.empty();
+
+        return Optional.of(Maps.immutableEntry(
+                    determinants.stream()
+                            .map(Optional::get)
+                            .filter(t -> t instanceof Variable)
+                            .map(v -> (Variable)v)
+                            .collect(ImmutableCollectors.toSet()),
+                    dependents.stream()
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .filter(t -> t instanceof Variable)
+                            .map(v -> (Variable)v)
+                            .collect(ImmutableCollectors.toSet())
+                ));
+    }
+
     /**
      * Only co-occuring variables are required.
      */
     @Override
-    public synchronized ImmutableSet<Variable> getNotInternallyRequiredVariables() {
-        if (notInternallyRequiredVariables == null) {
+    public synchronized VariableNonRequirement getVariableNonRequirement() {
+        if (variableNonRequirement == null) {
             ImmutableMultiset<Variable> multiset = argumentMap.values().stream()
                     .filter(t -> t instanceof Variable)
                     .map(t -> (Variable)t)
                     .collect(ImmutableCollectors.toMultiset());
 
-            notInternallyRequiredVariables = multiset.entrySet().stream()
-                    .filter(e -> e.getCount() == 1)
-                    .map(Multiset.Entry::getElement)
-                    .collect(ImmutableCollectors.toSet());
+            variableNonRequirement = VariableNonRequirement.of(
+                    multiset.entrySet().stream()
+                            .filter(e -> e.getCount() == 1)
+                            .map(Multiset.Entry::getElement)
+                            .collect(ImmutableCollectors.toSet()));
         }
-        return notInternallyRequiredVariables;
+        return variableNonRequirement;
     }
 
     @Override

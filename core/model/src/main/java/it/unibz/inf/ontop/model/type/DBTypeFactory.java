@@ -41,6 +41,7 @@ public interface DBTypeFactory {
     DBTermType getDBHexBinaryType();
 
     DBTermType getDBArrayType();
+    DBTermType getDBArrayType(DBTermType baseType);
 
     /**
      * Default JSON datatype.

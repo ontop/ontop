@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -135,7 +137,12 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getNotInternallyRequiredVariables() {
-        return ImmutableSet.of();
+    public FunctionalDependencies inferFunctionalDependencies() {
+        return FunctionalDependencies.empty();
+    }
+
+    @Override
+    public VariableNonRequirement getVariableNonRequirement() {
+        return VariableNonRequirement.empty();
     }
 }

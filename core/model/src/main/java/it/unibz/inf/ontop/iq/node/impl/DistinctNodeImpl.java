@@ -10,6 +10,8 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -106,12 +108,17 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
                 ImmutableSet.of(child.getVariables())).immutableCopy();
     }
 
+    @Override
+    public FunctionalDependencies inferFunctionalDependencies(IQTree child, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
+        return child.inferFunctionalDependencies();
+    }
+
     /**
      * TODO: implement it more seriously, by consider functional dependencies between variables
      */
     @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
-        return ImmutableSet.of();
+    public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
+        return VariableNonRequirement.empty();
     }
 
     @Override

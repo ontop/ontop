@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.impl.FactsException;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLNamedObject;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -35,6 +36,15 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
                 OntopSQLOWLAPIConfiguration.defaultBuilder()
                         .ontologyFile(owlFile)
                         .enableOntologyAnnotationQuerying(enableAnnotations);
+
+        if(factFile != null)
+            builder.factsFile(factFile);
+
+        if(factFormat != null)
+            builder.factFormat(factFormat.getExtension());
+
+        if (factsBaseIRI != null)
+            builder.factsBaseIRI(factsBaseIRI);
 
         if (propertiesFile != null)
             builder.propertyFile(propertiesFile);
@@ -82,6 +92,15 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
         catch (Exception ex) {
             System.out.format("ERROR: OntopOWL reasoner cannot be initialized\n");
             ex.printStackTrace();
+            System.exit(1);
+        }
+
+        try {
+            config.loadInputFacts();
+        }
+        catch (OBDASpecificationException e) {
+            System.out.format("ERROR: There is a problem loading the fact file: %s\n", factFile);
+            e.printStackTrace();
             System.exit(1);
         }
 

@@ -11,8 +11,11 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -28,15 +31,18 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
     private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
+    private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
 
     @Inject
     protected CardinalitySensitiveJoinTransferLJOptimizer(RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
                                                           RightProvenanceNormalizer rightProvenanceNormalizer,
+                                                          JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                                           CoreSingletons coreSingletons) {
         this.requiredDataNodeExtractor = requiredDataNodeExtractor;
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
         this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
+        this.variableNullabilityTools = variableNullabilityTools;
     }
 
     @Override
@@ -47,7 +53,7 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
                 query.getVariableGenerator(),
                 requiredDataNodeExtractor,
                 rightProvenanceNormalizer,
-                coreSingletons);
+                coreSingletons, variableNullabilityTools);
 
         IQTree newTree = initialTree.acceptTransformer(transformer);
 
@@ -57,12 +63,14 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
     }
 
     protected static class Transformer extends AbstractJoinTransferLJTransformer {
+        private final TermFactory termFactory;
 
         protected Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
                               VariableGenerator variableGenerator, RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
                               RightProvenanceNormalizer rightProvenanceNormalizer,
-                              CoreSingletons coreSingletons) {
-            super(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor, rightProvenanceNormalizer, coreSingletons);
+                              CoreSingletons coreSingletons, JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
+            super(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor, rightProvenanceNormalizer, variableNullabilityTools, coreSingletons);
+            this.termFactory = coreSingletons.getTermFactory();
         }
 
 
@@ -105,8 +113,18 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
         @Override
         protected IQTree transformBySearchingFromScratch(IQTree tree) {
             Transformer newTransformer = new Transformer(tree::getVariableNullability, variableGenerator, requiredDataNodeExtractor,
-                    rightProvenanceNormalizer, coreSingletons);
+                    rightProvenanceNormalizer, coreSingletons, variableNullabilityTools);
             return tree.acceptTransformer(newTransformer);
+        }
+
+        @Override
+        protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition) {
+            Supplier<VariableNullability> variableNullabilitySupplier =
+                    () -> computeRightChildVariableNullability(rightChild, ljCondition);
+
+            Transformer newTransformer = new Transformer(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor,
+                    rightProvenanceNormalizer, coreSingletons, variableNullabilityTools);
+            return rightChild.acceptTransformer(newTransformer);
         }
     }
 

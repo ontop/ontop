@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
@@ -12,6 +14,8 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.FlattenNormalizer;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -98,7 +102,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public Optional<TermType> getIndexVariableType() {
-        return Optional.empty();
+        return Optional.of(termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType());
     }
 
     @Override
@@ -204,14 +208,28 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 .collect(ImmutableCollectors.toSet());
     }
 
+    @Override
+    public FunctionalDependencies inferFunctionalDependencies(IQTree child, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
+        var childFDs = child.inferFunctionalDependencies();
+        if(indexVariable.isEmpty())
+            return childFDs;
+        var index = indexVariable.get();
+        //if FD A -> B exists, and B contains the flattened field, then there is a FD (A, index) -> output.
+        return childFDs.stream()
+                .filter(fd -> fd.getValue().contains(flattenedVariable))
+                .map(fd -> Maps.immutableEntry(Sets.union(fd.getKey(), ImmutableSet.of(index)).immutableCopy(), ImmutableSet.of(outputVariable)))
+                .collect(FunctionalDependencies.toFunctionalDependencies())
+                .concat(childFDs)
+                .concat(FunctionalDependencies.fromUniqueConstraints(uniqueConstraints, variables));
+    }
+
     /**
      * Only the flattened variable is required
      */
     @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
-        return child.getNotInternallyRequiredVariables().stream()
-                .filter(v -> !v.equals(flattenedVariable))
-                .collect(ImmutableCollectors.toSet());
+    public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
+        return child.getVariableNonRequirement()
+                .filter((v, conds) -> !v.equals(flattenedVariable));
     }
 
     @Override

@@ -254,10 +254,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new CountSPARQLFunctionSymbolImpl(abstractRDFType, xsdInteger, false),
                 new CountSPARQLFunctionSymbolImpl(xsdInteger, false),
                 new SumSPARQLFunctionSymbolImpl(false, abstractRDFType),
-                new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, false),
-                new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, true),
+                new MinOrMaxOrSampleSPARQLFunctionSymbolImpl(typeFactory, MinOrMaxOrSampleSPARQLFunctionSymbolImpl.MinMaxSampleType.MIN),
+                new MinOrMaxOrSampleSPARQLFunctionSymbolImpl(typeFactory, MinOrMaxOrSampleSPARQLFunctionSymbolImpl.MinMaxSampleType.MAX),
                 new AvgSPARQLFunctionSymbolImpl(abstractRDFType, false),
-                new MinBasedSampleSPARQLFunctionSymbol(typeFactory),
+                new MinOrMaxOrSampleSPARQLFunctionSymbolImpl(typeFactory, MinOrMaxOrSampleSPARQLFunctionSymbolImpl.MinMaxSampleType.SAMPLE),
                 /*
                  * Geo SF relation Functions
                  */
@@ -461,11 +461,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new CountSPARQLFunctionSymbolImpl(xsdInteger, true),
                 new SumSPARQLFunctionSymbolImpl(true, abstractRDFType),
                 // Distinct can be safely ignored
-                new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, false),
+                new MinOrMaxOrSampleSPARQLFunctionSymbolImpl(typeFactory, MinOrMaxOrSampleSPARQLFunctionSymbolImpl.MinMaxSampleType.MIN),
                 // Distinct can be safely ignored
-                new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, true),
+                new MinOrMaxOrSampleSPARQLFunctionSymbolImpl(typeFactory, MinOrMaxOrSampleSPARQLFunctionSymbolImpl.MinMaxSampleType.MIN),
                 // Distinct can be safely ignored
-                new MinBasedSampleSPARQLFunctionSymbol(typeFactory),
+                new MinOrMaxOrSampleSPARQLFunctionSymbolImpl(typeFactory, MinOrMaxOrSampleSPARQLFunctionSymbolImpl.MinMaxSampleType.SAMPLE),
                 new AvgSPARQLFunctionSymbolImpl(abstractRDFType, true)
         );
 

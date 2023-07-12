@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.dbschema.UniqueConstraint;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
@@ -12,6 +11,8 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -25,7 +26,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -380,6 +380,49 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 ).collect(ImmutableCollectors.toSet());
     }
 
+    @Override
+    public FunctionalDependencies inferFunctionalDependencies(ImmutableList<IQTree> children, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
+        int childrenCount = children.size();
+        if (childrenCount < 2)
+            throw new InvalidIntermediateQueryException("At least 2 children are expected for a union");
+
+        IQTree firstChild = children.get(0);
+        // Partitions the fds based on if they are fully disjoint or not. Guaranteed to have two entries: true and false (but they may be empty)
+        ImmutableMap<Boolean, ImmutableList<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>>> fdsPartitionedByDisjointness = firstChild.inferFunctionalDependencies().stream()
+                .filter(fd -> children.stream()
+                        .skip(1)
+                        .allMatch(c -> c.inferFunctionalDependencies().contains(fd.getKey(), fd.getValue())))
+                .collect(ImmutableCollectors.partitioningBy(uc -> areDisjoint(children, uc.getKey())));
+
+        if(fdsPartitionedByDisjointness.get(false).isEmpty())
+            return fdsPartitionedByDisjointness.get(true)
+                    .stream()
+                    .collect(FunctionalDependencies.toFunctionalDependencies());
+
+        // By definition not parts of the non-disjoint UCs
+        var disjointVariables = firstChild.getVariables().stream()
+                .filter(v -> areDisjoint(children, ImmutableSet.of(v)))
+                .filter(v -> fdsPartitionedByDisjointness.get(true).stream().noneMatch(entry -> entry.getKey().size() == 1 && entry.getKey().stream().findFirst().get().equals(v)))
+                .collect(ImmutableCollectors.toSet());
+
+        return Stream.concat(
+                fdsPartitionedByDisjointness.get(true).stream(),
+                fdsPartitionedByDisjointness.get(false).stream()
+                        .flatMap(fd -> disjointVariables.stream()
+                                .map(v -> appendDeterminant(fd, v)))
+        ).collect(FunctionalDependencies.toFunctionalDependencies());
+    }
+
+    private Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>> appendDeterminant(Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>> fd, Variable v) {
+        return Maps.immutableEntry(
+                Stream.concat(
+                    fd.getKey().stream(),
+                    Stream.of(v)).collect(ImmutableCollectors.toSet()
+                ),
+                Sets.difference(fd.getValue(), ImmutableSet.of(v)).immutableCopy()
+        );
+    }
+
     private ImmutableSet<Variable> appendVariable(ImmutableSet<Variable> uc, Variable v) {
         return Stream.concat(
                 uc.stream(),
@@ -397,8 +440,8 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
      * All the variables of a union could be projected out
      */
     @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(ImmutableList<IQTree> children) {
-        return getVariables();
+    public VariableNonRequirement computeVariableNonRequirement(ImmutableList<IQTree> children) {
+        return VariableNonRequirement.of(getVariables());
     }
 
     @Override

@@ -28,6 +28,9 @@ public class DependencyTestDBMetadata {
 
     public static final RelationDefinition PK_TABLE7_AR4;
 
+    public static final RelationDefinition FD_TABLE1_AR2;
+    public static final RelationDefinition FD_TABLE2_AR2;
+
     static {
         OptimizationTestingTools.OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
         PK_TABLE1_AR1 = builder.createRelationWithPK(1, 1);
@@ -51,5 +54,8 @@ public class DependencyTestDBMetadata {
         PK_TABLE6_AR3 = builder.createRelationWithPK(6, 3);
 
         PK_TABLE7_AR4 = builder.createRelationWithPK(7, 4);
+
+        FD_TABLE1_AR2 = builder.createRelationWithFD(1, 2, false);
+        FD_TABLE2_AR2 = builder.createRelationWithFD(2, 2, false);
     }
 }

@@ -21,6 +21,18 @@ public interface OntopMappingOntologyConfiguration extends OntopMappingConfigura
         B ontologyFile(@Nonnull File owlFile);
 
         B ontologyReader(@Nonnull Reader reader);
+
+        B factsFile(@Nonnull URL url);
+
+        B factsFile(@Nonnull File owlFile);
+
+        B factsReader(@Nonnull Reader reader);
+
+        B factsFile(@Nonnull String urlOrPath);
+
+        B factFormat(@Nonnull String format);
+
+        B factsBaseIRI(@Nonnull String factsBaseIRI);
     }
 
     interface Builder<B extends Builder<B>> extends OntopMappingOntologyBuilderFragment<B>,

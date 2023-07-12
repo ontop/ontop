@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.iq;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -21,7 +23,7 @@ public interface ConcreteIQTreeCache extends IQTreeCache {
     ImmutableSet<Variable> getVariables();
 
     @Nullable
-    ImmutableSet<Variable> getNotInternallyRequiredVariables();
+    VariableNonRequirement getVariableNonRequirement();
 
     @Nullable
     VariableNullability getVariableNullability();
@@ -31,6 +33,9 @@ public interface ConcreteIQTreeCache extends IQTreeCache {
 
     @Nullable
     ImmutableSet<ImmutableSet<Variable>> getUniqueConstraints();
+
+    @Nullable
+    FunctionalDependencies getFunctionalDependencies();
 
     @Nullable
     Boolean isDistinct();
@@ -43,7 +48,7 @@ public interface ConcreteIQTreeCache extends IQTreeCache {
     /**
      * Can only be set ONCE!
      */
-    void setNotInternallyRequiredVariables(@Nonnull ImmutableSet<Variable> notInternallyRequiredVariables);
+    void setVariableNonRequirement(@Nonnull VariableNonRequirement notInternallyRequiredVariables);
 
     /**
      * Can only be set ONCE!
@@ -59,6 +64,11 @@ public interface ConcreteIQTreeCache extends IQTreeCache {
      * Can only be set ONCE!
      */
     void setUniqueConstraints(@Nonnull ImmutableSet<ImmutableSet<Variable>> uniqueConstraints);
+
+    /**
+     * Can only be set ONCE!
+     */
+    void setFunctionalDependencies(@Nonnull FunctionalDependencies functionalDependencies);
 
     /**
      * Can only be set ONCE!

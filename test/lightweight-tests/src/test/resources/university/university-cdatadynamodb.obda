@@ -1,0 +1,12 @@
+[PrefixDeclaration]
+:		http://www.example.org/test#
+
+[MappingDeclaration] @collection [[
+mappingId	course
+target		:{course_id} a :Course ; :numberOfStudents "{nb_students}"^^xsd:integer ; :duration "{duration}"^^xsd:decimal .
+source		select course_id, nb_students, duration from "CData"."AmazonDynamoDB"."course"
+
+mappingId	teaches
+target		:{prof_id} a :Professor ; :teaches :{course_id} .
+source		select prof_id, course_id from "CData"."AmazonDynamoDB"."teaching"
+]]

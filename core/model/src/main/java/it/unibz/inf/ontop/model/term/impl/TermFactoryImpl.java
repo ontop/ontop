@@ -604,6 +604,11 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMax(dbType), subTerm);
 	}
 
+	@Override
+	public ImmutableFunctionalTerm getDBSample(ImmutableTerm subTerm, DBTermType dbType) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSample(dbType), subTerm);
+	}
+
     @Override
     public ImmutableFunctionalTerm getDBGroupConcat(ImmutableTerm subTerm, String separator, boolean isDistinct) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getNullIgnoringDBGroupConcat(isDistinct), subTerm,

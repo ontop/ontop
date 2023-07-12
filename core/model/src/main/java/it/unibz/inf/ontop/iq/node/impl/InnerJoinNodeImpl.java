@@ -1,9 +1,11 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.*;
+import com.google.common.io.Files;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
@@ -12,6 +14,8 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -25,9 +29,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.AbstractCollection;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -300,8 +302,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     /**
-     * For unique constraints to emerge from an inner join, children must provide unique constraints
-     * and being naturally joined over some of such constraints.
+     * For unique constraints to emerge from an inner join, children must provide unique constraints.
      */
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(ImmutableList<IQTree> children) {
@@ -319,12 +320,29 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         if (constraintMap.values().stream().anyMatch(AbstractCollection::isEmpty))
             return ImmutableSet.of();
 
+        ImmutableSet<ImmutableSet<Variable>> naturalJoinConstraints = extractConstraintsOverNaturalJoins(children,
+                childrenSet, constraintMap);
+
+        ImmutableSet<ImmutableSet<Variable>> combinedConstraints = extractCombinedConstraints(constraintMap.values(),
+                getVariableNullability(children));
+
+        return removeRedundantConstraints(Sets.union(naturalJoinConstraints, combinedConstraints));
+
+    }
+
+    /**
+     * Naturally joined over some of children constraints.
+     * TODO: see if still needed
+     */
+    private ImmutableSet<ImmutableSet<Variable>> extractConstraintsOverNaturalJoins(ImmutableList<IQTree> children,
+                                                                                    ImmutableSet<IQTree> childrenSet,
+                                                                                    ImmutableMap<IQTree, ImmutableSet<ImmutableSet<Variable>>> childConstraintMap) {
         // Non-saturated
         ImmutableMultimap<IQTree, IQTree> directDependencyMap = IntStream.range(0, children.size() - 1)
                 .boxed()
                 .flatMap(i -> IntStream.range(i +1, children.size())
                         .boxed()
-                        .flatMap(j -> extractFunctionalDependencies(children.get(i), children.get(j), constraintMap)))
+                        .flatMap(j -> extractFunctionalDependencies(children.get(i), children.get(j), childConstraintMap)))
                 .collect(ImmutableCollectors.toMultimap());
 
         Multimap<IQTree, IQTree> saturatedDependencyMap = saturateDependencies(directDependencyMap);
@@ -332,13 +350,70 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         return saturatedDependencyMap.asMap().entrySet().stream()
                 .filter(e -> e.getValue().containsAll(Sets.difference(childrenSet, ImmutableSet.of(e.getKey())).immutableCopy()))
                 .map(Map.Entry::getKey)
-                .flatMap(child -> constraintMap.get(child).stream())
+                .flatMap(child -> childConstraintMap.get(child).stream())
                 .collect(ImmutableCollectors.toSet());
     }
 
+    private ImmutableSet<ImmutableSet<Variable>> extractCombinedConstraints(
+            ImmutableCollection<ImmutableSet<ImmutableSet<Variable>>> childConstraints,
+            VariableNullability variableNullability) {
+        ImmutableList<ImmutableSet<ImmutableSet<Variable>>> nonNullableConstraints = childConstraints.stream()
+                .map(cs -> cs.stream()
+                        .filter(c -> c.stream().noneMatch(variableNullability::isPossiblyNullable))
+                        .collect(ImmutableCollectors.toSet()))
+                .collect(ImmutableCollectors.toList());
+
+        if (nonNullableConstraints.isEmpty() || nonNullableConstraints.stream().anyMatch(AbstractCollection::isEmpty))
+            return ImmutableSet.of();
+        
+        return computeCartesianProduct(nonNullableConstraints, 0);
+    }
+
+    private ImmutableSet<ImmutableSet<Variable>> computeCartesianProduct(ImmutableList<ImmutableSet<ImmutableSet<Variable>>> nonNullableConstraints,
+                                                             int index) {
+        int arity = nonNullableConstraints.size();
+        if (index == (arity -1))
+            return nonNullableConstraints.get(index);
+
+        ImmutableSet<ImmutableSet<Variable>> followingCartesianProduct = computeCartesianProduct(nonNullableConstraints, index + 1);
+
+        return nonNullableConstraints.get(index).stream()
+                .flatMap(c -> followingCartesianProduct.stream()
+                        .map(c1 -> Sets.union(c, c1).immutableCopy()))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private ImmutableSet<ImmutableSet<Variable>> removeRedundantConstraints(Set<ImmutableSet<Variable>> allConstraints) {
+        Set<ImmutableSet<Variable>> mergedConstraints = allConstraints.stream()
+                .sorted(Comparator.comparingInt(AbstractCollection::size))
+                .reduce(Sets.newHashSet(),
+                        (cs, c1) -> {
+                            if (cs.stream().noneMatch(c1::containsAll))
+                                cs.add(c1);
+                            return cs;
+                        }
+                        ,
+                        (c1, c2) -> {
+                            throw new MinorOntopInternalBugException("No merging");
+                        });
+
+        return ImmutableSet.copyOf(mergedConstraints);
+    }
+
+    /*
+    We can simply collect all FDs from the children.
+     */
     @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(ImmutableList<IQTree> children) {
-        return super.computeNotInternallyRequiredVariables(children);
+    public FunctionalDependencies inferFunctionalDependencies(ImmutableList<IQTree> children, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
+        return children.stream()
+                .flatMap(child -> child.inferFunctionalDependencies().stream())
+                .collect(FunctionalDependencies.toFunctionalDependencies());
+    }
+
+
+    @Override
+    public VariableNonRequirement computeVariableNonRequirement(ImmutableList<IQTree> children) {
+        return super.computeVariableNonRequirement(children);
     }
 
     private Stream<Map.Entry<IQTree, IQTree>> extractFunctionalDependencies(
