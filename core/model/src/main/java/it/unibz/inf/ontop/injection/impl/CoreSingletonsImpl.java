@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
+import it.unibz.inf.ontop.iq.type.NotYetTypedBinaryMathOperationTransformer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.iq.type.PartiallyTypedSimpleCastTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
@@ -35,6 +36,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
     private final ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer;
     private final QueryTransformerFactory queryTransformerFactory;
     private final NotYetTypedEqualityTransformer notYetTypedEqualityTransformer;
+    private final NotYetTypedBinaryMathOperationTransformer notYetTypedBinaryMathOperationTransformer;
     private final PartiallyTypedSimpleCastTransformer partiallyTypedSimpleCastTransformer;
     private final DatabaseInfoSupplier databaseInfoSupplier;
 
@@ -49,6 +51,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
                                ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer,
                                QueryTransformerFactory queryTransformerFactory,
                                NotYetTypedEqualityTransformer notYetTypedEqualityTransformer,
+                               NotYetTypedBinaryMathOperationTransformer notYetTypedBinaryMathOperationTransformer,
                                PartiallyTypedSimpleCastTransformer partiallyTypedSimpleCastTransformer,
                                DatabaseInfoSupplier databaseInfoSupplier) {
         this.termFactory = termFactory;
@@ -64,6 +67,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
         this.constructionSubstitutionNormalizer = constructionSubstitutionNormalizer;
         this.queryTransformerFactory = queryTransformerFactory;
         this.notYetTypedEqualityTransformer = notYetTypedEqualityTransformer;
+        this.notYetTypedBinaryMathOperationTransformer = notYetTypedBinaryMathOperationTransformer;
         this.partiallyTypedSimpleCastTransformer = partiallyTypedSimpleCastTransformer;
         this.databaseInfoSupplier = databaseInfoSupplier;
     }
@@ -131,6 +135,11 @@ public class CoreSingletonsImpl implements CoreSingletons {
     @Override
     public NotYetTypedEqualityTransformer getNotYetTypedEqualityTransformer() {
         return notYetTypedEqualityTransformer;
+    }
+
+    @Override
+    public NotYetTypedBinaryMathOperationTransformer getNotYetTypedBinaryMathOperationTransformer() {
+        return notYetTypedBinaryMathOperationTransformer;
     }
 
     @Override

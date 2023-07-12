@@ -71,4 +71,9 @@ public class BindWithFunctionsMariaDBTest extends AbstractBindTestWithFunctions 
         return ImmutableList.of("\"0.5000000000000000000000000000000000\"^^xsd:float");
     }
 
+    @Override
+    protected ImmutableSet<String> getDivisionOutputTypeExpectedResults() {
+        return ImmutableSet.of("\"3.3333\"^^xsd:decimal");
+    }
+
 }

@@ -8,4 +8,8 @@ ns:  http://example.org/ns#
 mappingId	mapping1
 target	:{id} a :Book ; dc:title {title}@en ; ns:price {price} ; ns:discount {discount} ; ns:pubYear {publication_date} ; dc:description {description}@en .
 source	SELECT id, title, price, discount, publication_date, description, lang FROM books.books WHERE lang = 'en'
+
+mappingId	divisionTest
+target	dc:divisionResult dc:value {value} .
+source	SELECT (10 / 3) as value
 ]]

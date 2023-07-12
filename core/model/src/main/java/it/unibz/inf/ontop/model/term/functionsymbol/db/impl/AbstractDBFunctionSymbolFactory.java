@@ -209,7 +209,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Table<DBTermType, DBTermType, DBTypeConversionFunctionSymbol> otherSimpleCastTable;
 
+    // Output type
     private final Table<String, DBTermType, DBMathBinaryOperator> binaryMathTable;
+    private final Table<String, ImmutableList<DBTermType>, DBMathBinaryOperator> binaryMathTableWithInputType;
+
     private final Map<String, DBMathBinaryOperator> untypedBinaryMathMap;
 
     /**
@@ -328,6 +331,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         // NB: in terms of design, we prefer avoiding using tables as they are not thread-safe
         this.binaryMathTable = HashBasedTable.create();
+        this.binaryMathTableWithInputType = HashBasedTable.create();
         this.untypedFunctionTable = HashBasedTable.create();
         this.notPredefinedBooleanFunctionTable = HashBasedTable.create();
 
@@ -888,6 +892,23 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBMathBinaryOperator getDBMathBinaryOperator(String dbMathOperatorName, DBTermType arg1Type, DBTermType arg2Type) {
+        ImmutableList<DBTermType> types = ImmutableList.of(arg1Type, arg2Type);
+
+        // Mutable tables are not thread-safe
+        synchronized (binaryMathTableWithInputType) {
+            DBMathBinaryOperator existingOperator = binaryMathTableWithInputType.get(dbMathOperatorName, types);
+            if (existingOperator != null) {
+                return existingOperator;
+            }
+
+            DBMathBinaryOperator newOperator = createDBBinaryMathOperator(dbMathOperatorName, arg1Type, arg2Type);
+            binaryMathTableWithInputType.put(dbMathOperatorName, types, newOperator);
+            return newOperator;
+        }
+    }
+
+    @Override
     public DBMathBinaryOperator getUntypedDBMathBinaryOperator(String dbMathOperatorName) {
         DBMathBinaryOperator existingOperator = untypedBinaryMathMap.get(dbMathOperatorName);
         if (existingOperator != null) {
@@ -1276,6 +1297,25 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 return createSubtractOperator(dbNumericType);
             default:
                 throw new UnsupportedOperationException("The math operator " + dbMathOperatorName + " is not supported");
+        }
+    }
+
+    protected DBMathBinaryOperator createDBBinaryMathOperator(String dbMathOperatorName, DBTermType arg1Type, DBTermType arg2Type)
+            throws UnsupportedOperationException {
+        DBTermType inferOutputType = inferOutputTypeMathOperator(dbMathOperatorName, arg1Type, arg2Type);
+        return createDBBinaryMathOperator(dbMathOperatorName, inferOutputType);
+    }
+
+    protected DBTermType inferOutputTypeMathOperator(String dbMathOperatorName, DBTermType arg1Type, DBTermType arg2Type) {
+        if (arg1Type.getCategory().equals(arg2Type.getCategory()))
+            return arg1Type;
+        switch (arg1Type.getCategory()) {
+            case INTEGER:
+                return arg2Type;
+            case FLOAT_DOUBLE:
+                return arg2Type.getCategory() == DBTermType.Category.INTEGER ? arg1Type : arg2Type;
+            default:
+                return arg1Type;
         }
     }
 

@@ -169,4 +169,9 @@ public class BindWithFunctionsBigQueryTest extends AbstractBindTestWithFunctions
     public void testDaysBetweenDateMappingInput() {
         super.testDaysBetweenDateMappingInput();
     }
+
+    @Override
+    protected ImmutableSet<String> getDivisionOutputTypeExpectedResults() {
+        return ImmutableSet.of("\"3.3333333333333335\"^^xsd:decimal");
+    }
 }

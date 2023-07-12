@@ -471,6 +471,14 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getDBBinaryNumericFunctionalTerm(String dbNumericOperationName, DBTermType argumentType1, DBTermType argumentType2,
+																	ImmutableTerm dbTerm1, ImmutableTerm dbTerm2) {
+		return getImmutableFunctionalTerm(
+				dbFunctionSymbolFactory.getDBMathBinaryOperator(dbNumericOperationName, argumentType1, argumentType2),
+				dbTerm1, dbTerm2);
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getUnaryLatelyTypedFunctionalTerm(ImmutableTerm lexicalTerm,
 																	 ImmutableTerm inputRDFTypeTerm, DBTermType targetType,
 																	 java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
