@@ -289,4 +289,37 @@ public class SnowflakeDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     protected DBFunctionSymbol createDBSample(DBTermType termType) {
         return new DBSampleFunctionSymbolImpl(termType, "ANY_VALUE");
     }
+
+    @Override
+    protected String serializeDecade(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("FLOOR(EXTRACT(YEAR FROM %s) / 10.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCentury(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CEIL(EXTRACT(YEAR FROM %s) / 100.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMillennium(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CEIL(EXTRACT(YEAR FROM %s) / 1000.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMilliseconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(SECOND FROM %s) * 1000", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(SECOND FROM %s) * 1000000", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    public DBFunctionSymbol getDBDateTrunc(String datePart) {
+        if(ImmutableSet.of("microseconds", "milliseconds", "decade", "century", "millennium").contains(datePart.toLowerCase())) {
+            throw new IllegalArgumentException(String.format("Snowflake does not support DATE_TRUNC on %s.", datePart));
+        }
+        return super.getDBDateTrunc(datePart);
+    }
 }
