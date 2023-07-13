@@ -212,18 +212,19 @@ if [ "${ONTOP_CONFIGURE_JMX-false}" != "false" ]; then
 fi
 
 if [ "${ONTOP_WAIT_FOR}" ]; then
-  echo "INFO: waiting for availability of TCP ports ${ONTOP_WAIT_FOR}${ONTOP_WAIT_TIMEOUT+" (max ${ONTOP_WAIT_TIMEOUT}s)"}"
+  echo "INFO: waiting for dependencies ${ONTOP_WAIT_FOR}${ONTOP_WAIT_TIMEOUT+" (max ${ONTOP_WAIT_TIMEOUT}s)"}"
   TS=$(date +%s)
-  for HOST_PORT in ${ONTOP_WAIT_FOR}; do
-    HOST=${HOST_PORT%%:*}
-    PORT=${HOST_PORT#*:}
+  for WAIT_TARGET in ${ONTOP_WAIT_FOR}; do
+    HOST=${WAIT_TARGET%%:*}
+    PORT=${WAIT_TARGET#*:}
     while true; do
       ELAPSED=$(( $(date +%s) - TS ))
-      if nc -w1 -z ${HOST} ${PORT}; then
-        echo "INFO: port ${HOST_PORT} available after ${ELAPSED}s"
+      [ "$HOST" = "$WAIT_TARGET" ] && WAIT_CMD="test -f $WAIT_TARGET" || WAIT_CMD="nc -w1 -z ${HOST} ${PORT}"
+      if $WAIT_CMD 2> /dev/null; then
+        echo "INFO: ${WAIT_TARGET} available after ${ELAPSED}s"
         break
       elif [ "${ONTOP_WAIT_TIMEOUT}" ] && [ ${ELAPSED} -gt ${ONTOP_WAIT_TIMEOUT} ]; then
-        echo "ERROR: port ${HOST_PORT} not available within required ${ONTOP_WAIT_TIMEOUT}s"
+        echo "ERROR: ${WAIT_TARGET} not available within required ${ONTOP_WAIT_TIMEOUT}s"
         exit 1
       else
         sleep 1
