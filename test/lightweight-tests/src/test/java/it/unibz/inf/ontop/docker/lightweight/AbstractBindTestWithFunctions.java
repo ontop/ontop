@@ -482,9 +482,9 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
 
         String query = "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "PREFIX dc:  <http://purl.org/dc/elements/1.1/>"
-                + "PREFIX  fn: <https://w3id.org/obda/functions#>\n"
+                + "PREFIX  obdaf: <https://w3id.org/obda/functions#>\n"
                 + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT (fn:dateTrunc(?date, \"year\") AS ?v) WHERE \n"
+                + "SELECT (obdaf:dateTrunc(?date, \"year\") AS ?v) WHERE \n"
                 + "{  "
                 + "   ?x ns:pubYear ?date .\n"
                 + "} ORDER BY ?date";
@@ -503,9 +503,9 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     public void testDateTruncFailsNonConstant() {
         String query = "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "PREFIX dc:  <http://purl.org/dc/elements/1.1/>"
-                + "PREFIX  fn: <https://w3id.org/obda/functions#>\n"
+                + "PREFIX  obdaf: <https://w3id.org/obda/functions#>\n"
                 + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT (fn:dateTrunc(?date, ?type) AS ?v) WHERE \n"
+                + "SELECT (obdaf:dateTrunc(?date, ?type) AS ?v) WHERE \n"
                 + "{  "
                 + " ?x dc:title ?type. "
                 + "   ?x ns:pubYear ?date .\n"
@@ -518,9 +518,9 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     @Test
     public void testDateTruncFailsNotSupported() {
         String query = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "PREFIX  fn: <https://w3id.org/obda/functions#>\n"
+                + "PREFIX  obdaf: <https://w3id.org/obda/functions#>\n"
                 + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT (fn:dateTrunc(?date, \"yeare\") AS ?v) WHERE \n"
+                + "SELECT (obdaf:dateTrunc(?date, \"yeare\") AS ?v) WHERE \n"
                 + "{  "
                 + "   ?x ns:pubYear ?date .\n"
                 + "} ORDER BY ?date";
@@ -539,12 +539,12 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     public void testDateTruncGroupBy() {
 
         String query = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "PREFIX  fn: <https://w3id.org/obda/functions#>\n"
+                + "PREFIX  obdaf: <https://w3id.org/obda/functions#>\n"
                 + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
                 + "SELECT (CONCAT(STR(?y), \": \", STR(COUNT(*))) as ?v) WHERE \n"
                 + "{  "
                 + "   ?x ns:pubYear ?date .\n"
-                + "   BIND(fn:dateTrunc(?date, \"decade\") AS ?y)"
+                + "   BIND(obdaf:dateTrunc(?date, \"decade\") AS ?y)"
                 + "} GROUP BY ?y ORDER BY ?y";
 
         executeAndCompareValuesAny(query, ImmutableList.of(
@@ -562,16 +562,16 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     public void testExtraDateExtractions() {
 
         String query = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "PREFIX  fn: <https://w3id.org/obda/functions#>\n"
+                + "PREFIX  obdaf: <https://w3id.org/obda/functions#>\n"
                 + "SELECT ?v WHERE \n"
                 + "{  ?x ns:pubYear ?year .\n"
-                + "   BIND (fn:millennium-from-dateTime(?year) AS ?v1)\n"
-                + "   BIND (fn:century-from-dateTime(?year) AS ?v2)\n"
-                + "   BIND (fn:decade-from-dateTime(?year) AS ?v3)\n"
-                + "   BIND (fn:quarter-from-dateTime(?year) AS ?v4)\n"
-                + "   BIND (fn:week-from-dateTime(?year) AS ?v5)\n"
-                + "   BIND (fn:milliseconds-from-dateTime(?year) AS ?v6)\n"
-                + "   BIND (fn:microseconds-from-dateTime(?year) AS ?v7)\n"
+                + "   BIND (obdaf:millennium-from-dateTime(?year) AS ?v1)\n"
+                + "   BIND (obdaf:century-from-dateTime(?year) AS ?v2)\n"
+                + "   BIND (obdaf:decade-from-dateTime(?year) AS ?v3)\n"
+                + "   BIND (obdaf:quarter-from-dateTime(?year) AS ?v4)\n"
+                + "   BIND (obdaf:week-from-dateTime(?year) AS ?v5)\n"
+                + "   BIND (obdaf:milliseconds-from-dateTime(?year) AS ?v6)\n"
+                + "   BIND (obdaf:microseconds-from-dateTime(?year) AS ?v7)\n"
                 + "   BIND (CONCAT(STR(?v1), \" \", STR(?v2), \" \", STR(?v3), \" \", STR(?v4), \" \", STR(?v5), \" \", STR(?v6), \" \", STR(?v7)) AS ?v)\n"
                 + "}";
 

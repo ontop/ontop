@@ -57,13 +57,15 @@ public class DateTruncSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPA
                                                ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
                                                ImmutableTerm returnedTypeTerm) {
         if(!(subLexicalTerms.get(1) instanceof Constant)) {
-            throw new IllegalArgumentException("Date-Part parameter must be a constant.");
+            //TODO - create more specialized exception to throw here.
+            throw new RuntimeException("Only constants are supported as Date-Part parameter.");
         }
         var constant = (Constant)subLexicalTerms.get(1);
         var value = constant.getValue();
         if(!Arrays.stream(supportedDateParts)
                 .anyMatch(part -> part.equalsIgnoreCase(value))) {
-            throw new IllegalArgumentException(String.format("Date-Part %s is not supported.", value));
+            //TODO - create more specialized exception to throw here.
+            throw new RuntimeException(String.format("Date-Part %s is not supported.", value));
         }
 
         return termFactory.getConversion2RDFLexical(
