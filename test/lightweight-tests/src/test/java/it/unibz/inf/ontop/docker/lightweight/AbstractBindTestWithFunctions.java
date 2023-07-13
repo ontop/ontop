@@ -512,7 +512,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "} ORDER BY ?date";
 
         var error = assertThrows(QueryEvaluationException.class, () -> this.runQuery(query));
-        assertEquals("it.unibz.inf.ontop.exception.OntopReformulationException: java.lang.IllegalArgumentException: Date-Part parameter must be a constant.", error.getMessage());
+        assertEquals("it.unibz.inf.ontop.exception.OntopReformulationException: java.lang.RuntimeException: Date-Part parameter must be a constant.", error.getMessage());
     }
 
     @Test
@@ -526,7 +526,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "} ORDER BY ?date";
 
         var error = assertThrows(QueryEvaluationException.class, () -> this.runQuery(query));
-        assertEquals("it.unibz.inf.ontop.exception.OntopReformulationException: java.lang.IllegalArgumentException: Date-Part yeare is not supported.", error.getMessage());
+        assertEquals("it.unibz.inf.ontop.exception.OntopReformulationException: java.lang.RuntimeException: Date-Part yeare is not supported.", error.getMessage());
     }
 
     protected ImmutableSet<String> toAlternativeTimeZone(ImmutableSet<String> results) {
