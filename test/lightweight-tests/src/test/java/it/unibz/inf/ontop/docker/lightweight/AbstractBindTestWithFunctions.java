@@ -512,7 +512,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "} ORDER BY ?date";
 
         var error = assertThrows(QueryEvaluationException.class, () -> this.runQuery(query));
-        assertEquals("it.unibz.inf.ontop.exception.OntopReformulationException: java.lang.RuntimeException: Date-Part parameter must be a constant.", error.getMessage());
+        assertEquals("it.unibz.inf.ontop.exception.OntopReformulationException: java.lang.RuntimeException: Only constants are supported as Date-Part parameter.", error.getMessage());
     }
 
     @Test
