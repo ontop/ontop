@@ -1491,4 +1491,14 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
         assertEquals(10, runQueryAndCount(query));
     }
 
+    @Test
+    public void testDivisionOutputType() {
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\nSELECT ?v WHERE { dc:divisionResult dc:value ?v } ";
+        executeAndCompareValues(query, getDivisionOutputTypeExpectedResults());
+    }
+
+    protected ImmutableSet<String> getDivisionOutputTypeExpectedResults() {
+        return ImmutableSet.of("\"3\"^^xsd:integer");
+    }
+
 }

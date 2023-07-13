@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
+import it.unibz.inf.ontop.iq.type.NotYetTypedBinaryMathOperationTransformer;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
@@ -31,6 +32,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final NotYetTypedEqualityTransformer mappingEqualityTransformer;
+    private final NotYetTypedBinaryMathOperationTransformer mappingBinaryMathOperationTransformer;
     private final IQTree2NativeNodeGenerator nativeNodeGenerator;
     private final OntopSQLCredentialSettings settings;
 
@@ -39,12 +41,14 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                                     IntermediateQueryFactory iqFactory,
                                     TermFactory termFactory,
                                     NotYetTypedEqualityTransformer mappingEqualityTransformer,
+                                    NotYetTypedBinaryMathOperationTransformer mappingBinaryMathOperationTransformer,
                                     IQTree2NativeNodeGenerator nativeNodeGenerator,
                                     OntopSQLCredentialSettings settings) {
         this.substitutionFactory = substitutionFactory;
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.mappingEqualityTransformer = mappingEqualityTransformer;
+        this.mappingBinaryMathOperationTransformer = mappingBinaryMathOperationTransformer;
         this.nativeNodeGenerator = nativeNodeGenerator;
         this.settings = settings;
     }
@@ -115,7 +119,8 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
             IQTree tree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(), constructionTree);
 
             IQTree transformedTree = mappingEqualityTransformer.transform(tree);
-            return nativeNodeGenerator.generate(transformedTree, dbParameters, true);
+            IQTree binaryMathOperationTransformedTree = mappingBinaryMathOperationTransformer.transform(transformedTree);
+            return nativeNodeGenerator.generate(binaryMathOperationTransformedTree, dbParameters, true);
         }
 
         MappingAssertion createExpansion(Substitution<ImmutableTerm> values) {

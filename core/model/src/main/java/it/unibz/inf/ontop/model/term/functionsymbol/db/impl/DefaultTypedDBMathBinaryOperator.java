@@ -14,12 +14,14 @@ import java.util.function.Function;
 public class DefaultTypedDBMathBinaryOperator extends FunctionSymbolImpl implements DBMathBinaryOperator {
 
     private final String template;
+    private final String operatorString;
     private final DBTermType dbNumericType;
 
     protected DefaultTypedDBMathBinaryOperator(String operatorString, DBTermType dbNumericType) {
         super(dbNumericType.toString() + operatorString, ImmutableList.of(dbNumericType, dbNumericType));
         this.template = "(%s " + operatorString + " %s)";
         this.dbNumericType = dbNumericType;
+        this.operatorString = operatorString;
     }
 
     @Override
@@ -62,5 +64,10 @@ public class DefaultTypedDBMathBinaryOperator extends FunctionSymbolImpl impleme
     @Override
     public boolean isPreferringToBePostProcessedOverBeingBlocked() {
         return false;
+    }
+
+    @Override
+    public String getMathOperatorString() {
+        return operatorString;
     }
 }

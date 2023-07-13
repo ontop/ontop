@@ -6,16 +6,19 @@ import it.unibz.inf.ontop.dbschema.LensNormalizer;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.type.NotYetTypedBinaryMathOperationTransformer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 
 public class LensNormalizerImpl implements LensNormalizer {
 
     private final NotYetTypedEqualityTransformer equalityTransformer;
+    private final NotYetTypedBinaryMathOperationTransformer binaryMathOperationTransformer;
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    protected LensNormalizerImpl(NotYetTypedEqualityTransformer equalityTransformer, IntermediateQueryFactory iqFactory) {
+    protected LensNormalizerImpl(NotYetTypedEqualityTransformer equalityTransformer, NotYetTypedBinaryMathOperationTransformer binaryMathOperationTransformer, IntermediateQueryFactory iqFactory) {
         this.equalityTransformer = equalityTransformer;
+        this.binaryMathOperationTransformer = binaryMathOperationTransformer;
         this.iqFactory = iqFactory;
     }
 
@@ -31,11 +34,12 @@ public class LensNormalizerImpl implements LensNormalizer {
     protected IQ normalizeIQ(IQ iq) {
         IQ normalizedIQ = iq.normalizeForOptimization();
         IQTree newTree = equalityTransformer.transform(normalizedIQ.getTree());
+        IQTree finalTree = binaryMathOperationTransformer.transform(newTree);
 
         // TODO: add new optimization
 
-        return (newTree == normalizedIQ.getTree())
+        return (finalTree == normalizedIQ.getTree())
                 ? normalizedIQ
-                : iqFactory.createIQ(iq.getProjectionAtom(), newTree);
+                : iqFactory.createIQ(iq.getProjectionAtom(), finalTree);
     }
 }

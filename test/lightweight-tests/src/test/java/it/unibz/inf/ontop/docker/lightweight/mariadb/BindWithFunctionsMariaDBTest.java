@@ -74,6 +74,11 @@ public class BindWithFunctionsMariaDBTest extends AbstractBindTestWithFunctions 
     }
 
     @Override
+    protected ImmutableSet<String> getDivisionOutputTypeExpectedResults() {
+        return ImmutableSet.of("\"3.3333\"^^xsd:decimal");
+    }
+
+    @Override
     protected ImmutableSet<String> getExtraDateExtractionsExpectedValues() {
         return ImmutableSet.of("\"3 21 201 2 23 52000.0000 52000000\"^^xsd:string", "\"3 21 201 4 49 0.0000 0\"^^xsd:string",
                 "\"3 21 201 3 39 6000.0000 6000000\"^^xsd:string", "\"2 20 197 4 45 0.0000 0\"^^xsd:string");

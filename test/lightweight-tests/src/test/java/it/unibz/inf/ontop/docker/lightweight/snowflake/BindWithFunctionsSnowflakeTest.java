@@ -86,6 +86,11 @@ public class BindWithFunctionsSnowflakeTest extends AbstractBindTestWithFunction
         super.testSecondsBetweenMappingInput();
     }
 
+    @Override
+    protected ImmutableSet<String> getDivisionOutputTypeExpectedResults() {
+        return ImmutableSet.of("\"3.333333\"^^xsd:decimal");
+    }
+
     @Disabled("Currently Snowflake does not support DATE_TRUNC for the type `DECADE`")
     @Test
     @Override

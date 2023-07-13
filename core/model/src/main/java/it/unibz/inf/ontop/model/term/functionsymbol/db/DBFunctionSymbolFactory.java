@@ -222,6 +222,8 @@ public interface DBFunctionSymbolFactory {
 
     DBMathBinaryOperator getDBMathBinaryOperator(String dbMathOperatorName, DBTermType dbNumericType);
 
+    DBMathBinaryOperator getDBMathBinaryOperator(String dbMathOperatorName, DBTermType arg1Type, DBTermType arg2Type);
+
     /**
      * Please use getDBMathBinaryOperator(...) if you know the type
      */
