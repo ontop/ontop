@@ -86,6 +86,15 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
     }
 
     @Override
+    public IQTree transformFlatten(IQTree tree, FlattenNode node, IQTree child) {
+        IQTree newChild = transform(child);
+
+        return (newChild.equals(child))
+                ? tree
+                : coreSingletons.getIQFactory().createUnaryIQTree(node, newChild);
+    }
+
+    @Override
     public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(this::transform)
