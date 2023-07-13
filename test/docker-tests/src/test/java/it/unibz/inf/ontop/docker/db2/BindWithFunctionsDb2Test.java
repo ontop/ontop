@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.docker.db2;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
 import org.junit.BeforeClass;
 import org.junit.Ignore;

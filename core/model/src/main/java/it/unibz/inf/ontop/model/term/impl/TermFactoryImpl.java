@@ -1345,4 +1345,41 @@ public class TermFactoryImpl implements TermFactory {
 	public ImmutableExpression getDBIsArray(DBTermType dbType, ImmutableTerm arg) {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBIsArray(dbType), arg);
 	}
+
+
+
+	@Override
+	public ImmutableFunctionalTerm getDBWeek(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBWeek(), dbDatetimeTerm);
+	}
+	@Override
+	public ImmutableFunctionalTerm getDBQuarter(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBQuarter(), dbDatetimeTerm);
+	}
+	@Override
+	public ImmutableFunctionalTerm getDBDecade(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDecade(), dbDatetimeTerm);
+	}
+	@Override
+	public ImmutableFunctionalTerm getDBCentury(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCentury(), dbDatetimeTerm);
+	}
+	@Override
+	public ImmutableFunctionalTerm getDBMillennium(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMillennium(), dbDatetimeTerm);
+	}
+	@Override
+	public ImmutableFunctionalTerm getDBMilliseconds(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMilliseconds(), dbDatetimeTerm);
+	}
+	@Override
+	public ImmutableFunctionalTerm getDBMicroseconds(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMicroseconds(), dbDatetimeTerm);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBDateTrunc(ImmutableTerm dbDatetimeTerm, ImmutableTerm datePartTerm, String datePart) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDateTrunc(datePart), dbDatetimeTerm, datePartTerm);
+	}
+
 }

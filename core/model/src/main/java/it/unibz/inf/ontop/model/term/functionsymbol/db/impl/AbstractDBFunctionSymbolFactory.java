@@ -85,6 +85,23 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBFunctionSymbol minutesFunctionSymbol;
     // Created in init()
     private DBFunctionSymbol secondsFunctionSymbol;
+    //Created in init
+    private DBFunctionSymbol weekFunctionSymbol;
+    //Created in init
+    private DBFunctionSymbol quarterFunctionSymbol;
+    //Created in init
+    private DBFunctionSymbol decadeFunctionSymbol;
+    //Created in init
+    private DBFunctionSymbol centuryFunctionSymbol;
+    //Created in init
+    private DBFunctionSymbol millenniumFunctionSymbol;
+    //Created in init
+    private DBFunctionSymbol millisecondsFunctionSymbol;
+    //Created in init
+    private DBFunctionSymbol microsecondsFunctionSymbol;
+    //Created in init
+    private DBFunctionSymbol dateTruncFunctionSymbol;
+    //Created in init
     // Created in init()
     private DBFunctionSymbol tzFunctionSymbol;
 
@@ -433,6 +450,14 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         hoursFunctionSymbol = createHoursFunctionSymbol();
         minutesFunctionSymbol = createMinutesFunctionSymbol();
         secondsFunctionSymbol = createSecondsFunctionSymbol();
+        weekFunctionSymbol = createWeekFunctionSymbol();
+        quarterFunctionSymbol = createQuarterFunctionSymbol();
+        decadeFunctionSymbol = createDecadeFunctionSymbol();
+        centuryFunctionSymbol = createCenturyFunctionSymbol();
+        millenniumFunctionSymbol = createMillenniumFunctionSymbol();
+        millisecondsFunctionSymbol = createMillisecondsFunctionSymbol();
+        microsecondsFunctionSymbol = createMicrosecondsFunctionSymbol();
+        dateTruncFunctionSymbol = createDateTruncFunctionSymbol();
         tzFunctionSymbol = createTzFunctionSymbol();
 
         weeksBetweenFromDateTimeFunctionSymbol = createWeeksBetweenFromDateTimeFunctionSymbol();
@@ -996,6 +1021,46 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBFunctionSymbol getDBWeek() {
+        return weekFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBQuarter() {
+        return quarterFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBCentury() {
+        return centuryFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBDecade() {
+        return decadeFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBMillennium() {
+        return millenniumFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBMilliseconds() {
+        return millisecondsFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBMicroseconds() {
+        return microsecondsFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBDateTrunc(String datePart) {
+        return dateTruncFunctionSymbol;
+    }
+
+    @Override
     public DBFunctionSymbol getDBMinutes() {
         return minutesFunctionSymbol;
     }
@@ -1414,6 +1479,51 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 this::serializeMinutes);
     }
 
+    protected DBFunctionSymbol createWeekFunctionSymbol() {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_WEEK", rootDBType, dbIntegerType, false,
+                this::serializeWeek);
+    }
+
+    protected DBFunctionSymbol createQuarterFunctionSymbol() {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_QUARTER", rootDBType, dbIntegerType, false,
+                this::serializeQuarter);
+    }
+
+    protected DBFunctionSymbol createDecadeFunctionSymbol() {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_DECADE", rootDBType, dbIntegerType, false,
+                this::serializeDecade);
+    }
+
+    protected DBFunctionSymbol createCenturyFunctionSymbol() {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_CENTURY", rootDBType, dbIntegerType, false,
+                this::serializeCentury);
+    }
+
+    protected DBFunctionSymbol createMillenniumFunctionSymbol() {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_MILLENNIUM", rootDBType, dbIntegerType, false,
+                this::serializeMillennium);
+    }
+
+    protected DBFunctionSymbol createMillisecondsFunctionSymbol() {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_MILLISECONDS", rootDBType, dbDecimalType, false,
+                this::serializeMilliseconds);
+    }
+
+    protected DBFunctionSymbol createMicrosecondsFunctionSymbol() {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_MICROSECONDS", rootDBType, dbIntegerType, false,
+                this::serializeMicroseconds);
+    }
+
+    protected DBFunctionSymbol createDateTruncFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_DATE_TRUNC", ImmutableList.of(dbStringType, dbDateType), dbDateType, false,
+                this::serializeDateTrunc) {
+            @Override
+            protected boolean mayReturnNullWithoutNullArguments() {
+                return false;
+            }
+        };
+    }
+
     protected DBFunctionSymbol createSecondsFunctionSymbol() {
         return new UnaryDBFunctionSymbolWithSerializerImpl("DB_SECONDS", rootDBType, dbDecimalType, false,
                 this::serializeSeconds);
@@ -1592,6 +1702,38 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract String serializeSeconds(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter,
                                             TermFactory termFactory);
+
+    protected abstract String serializeWeek(ImmutableList<? extends ImmutableTerm> terms,
+                                               Function<ImmutableTerm, String> termConverter,
+                                               TermFactory termFactory);
+
+    protected abstract String serializeQuarter(ImmutableList<? extends ImmutableTerm> terms,
+                                               Function<ImmutableTerm, String> termConverter,
+                                               TermFactory termFactory);
+
+    protected abstract String serializeDecade(ImmutableList<? extends ImmutableTerm> terms,
+                                               Function<ImmutableTerm, String> termConverter,
+                                               TermFactory termFactory);
+
+    protected abstract String serializeCentury(ImmutableList<? extends ImmutableTerm> terms,
+                                               Function<ImmutableTerm, String> termConverter,
+                                               TermFactory termFactory);
+
+    protected abstract String serializeMillennium(ImmutableList<? extends ImmutableTerm> terms,
+                                               Function<ImmutableTerm, String> termConverter,
+                                               TermFactory termFactory);
+
+    protected abstract String serializeMilliseconds(ImmutableList<? extends ImmutableTerm> terms,
+                                               Function<ImmutableTerm, String> termConverter,
+                                               TermFactory termFactory);
+
+    protected abstract String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms,
+                                               Function<ImmutableTerm, String> termConverter,
+                                               TermFactory termFactory);
+
+    protected abstract String serializeDateTrunc(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter,
+                                                    TermFactory termFactory);
 
     protected abstract String serializeTz(ImmutableList<? extends ImmutableTerm> terms,
                                                Function<ImmutableTerm, String> termConverter,

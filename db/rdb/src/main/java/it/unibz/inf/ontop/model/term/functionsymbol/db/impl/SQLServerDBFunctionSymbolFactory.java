@@ -252,7 +252,7 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
 
     @Override
     protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
-        return new SQLServerDBIsTrueFunctionSymbolImpl(dbBooleanType);
+        return new EqualsTrueDBIsTrueFunctionSymbolImpl(dbBooleanType);
     }
 
     @Override
@@ -629,5 +629,69 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
                         "ISJSON(%s, ARRAY) = 1",
                         termConverter.apply(terms.get(0))
                 ));
+    }
+
+    @Override
+    protected String serializeWeek(ImmutableList<? extends ImmutableTerm> terms,
+                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATEPART(ISO_WEEK, %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeQuarter(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATEPART(QUARTER, %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDecade(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("FLOOR(DATEPART(YEAR, %s) / 10.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCentury(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CEILING(DATEPART(YEAR, %s) / 100.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMillennium(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CEILING(DATEPART(YEAR, %s) / 1000.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMilliseconds(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(DATEPART(SECOND, %s) * 1000 + DATEPART(MILLISECOND, %s))",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(DATEPART(SECOND, %s) * 1000000 + DATEPART(MILLISECOND, %s) * 1000 + DATEPART(MICROSECOND, %s))",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDateTrunc(ImmutableList<? extends ImmutableTerm> terms,
+                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String template = String.format(" WHEN %s LIKE '%%s' THEN DATETRUNC(%%s, %s)", termConverter.apply(terms.get(1)), termConverter.apply(terms.get(0)));
+        ImmutableList<String> possibleParts = ImmutableList.of("year", "quarter", "month", "day", "week", "hour", "minute", "second", "millisecond", "microsecond");
+        StringBuilder serializationBuilder = new StringBuilder("CASE");
+        possibleParts.stream()
+                .forEach(part -> serializationBuilder.append(String.format(template, part, part)));
+        serializationBuilder.append(" ELSE NULL END");
+        return serializationBuilder.toString();
+    }
+
+    @Override
+    public DBFunctionSymbol getDBDateTrunc(String datePart) {
+        if(ImmutableSet.of("microseconds", "milliseconds", "decade", "century", "millennium").contains(datePart.toLowerCase())) {
+            throw new IllegalArgumentException(String.format("SQL Server does not support DATE_TRUNC on %s.", datePart));
+        }
+        return super.getDBDateTrunc(datePart);
     }
 }

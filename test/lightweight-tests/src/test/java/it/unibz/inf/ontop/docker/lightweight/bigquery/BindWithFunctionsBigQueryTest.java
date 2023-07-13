@@ -174,4 +174,16 @@ public class BindWithFunctionsBigQueryTest extends AbstractBindTestWithFunctions
     protected ImmutableSet<String> getDivisionOutputTypeExpectedResults() {
         return ImmutableSet.of("\"3.3333333333333335\"^^xsd:decimal");
     }
+
+    @Disabled("Currently Trino does not support DATE_TRUNC for the type `DECADE`")
+    @Test
+    @Override
+    public void testDateTruncGroupBy() {
+        super.testDateTruncGroupBy();
+    }
+
+    @Override
+    protected ImmutableSet<String> getSimpleDateTrunkExpectedValues() {
+        return ImmutableSet.of("\"1970-01-01T00:00:00+00:00\"^^xsd:dateTime", "\"2011-01-01T00:00:00+00:00\"^^xsd:dateTime", "\"2014-01-01T00:00:00+00:00\"^^xsd:dateTime", "\"2015-01-01T00:00:00+00:00\"^^xsd:dateTime");
+    }
 }

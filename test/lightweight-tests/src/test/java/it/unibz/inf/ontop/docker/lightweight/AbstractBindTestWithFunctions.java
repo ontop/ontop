@@ -3,11 +3,16 @@ package it.unibz.inf.ontop.docker.lightweight;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.junit.jupiter.api.*;
+
+import java.util.stream.Collectors;
 
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 /***
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
@@ -470,6 +475,112 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
 
         executeAndCompareValues(query, ImmutableSet.of("\"2014\"^^xsd:integer", "\"2011\"^^xsd:integer",
                 "\"2015\"^^xsd:integer", "\"1970\"^^xsd:integer"));
+    }
+
+    @Test
+    public void testSimpleDateTrunc() {
+
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "PREFIX dc:  <http://purl.org/dc/elements/1.1/>"
+                + "PREFIX  obdaf: <https://w3id.org/obda/functions#>\n"
+                + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT (obdaf:dateTrunc(?date, \"year\") AS ?v) WHERE \n"
+                + "{  "
+                + "   ?x ns:pubYear ?date .\n"
+                + "} ORDER BY ?date";
+
+        executeAndCompareValuesAny(query, ImmutableList.of(
+                getSimpleDateTrunkExpectedValues(),
+                toAlternativeTimeZone(getSimpleDateTrunkExpectedValues())
+        ));
+    }
+
+    protected ImmutableSet<String> getSimpleDateTrunkExpectedValues() {
+        return ImmutableSet.of("\"1970-01-01T00:00:00+01:00\"^^xsd:dateTime", "\"2011-01-01T00:00:00+01:00\"^^xsd:dateTime", "\"2014-01-01T00:00:00+01:00\"^^xsd:dateTime", "\"2015-01-01T00:00:00+01:00\"^^xsd:dateTime");
+    }
+
+    @Test
+    public void testDateTruncFailsNonConstant() {
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "PREFIX dc:  <http://purl.org/dc/elements/1.1/>"
+                + "PREFIX  obdaf: <https://w3id.org/obda/functions#>\n"
+                + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT (obdaf:dateTrunc(?date, ?type) AS ?v) WHERE \n"
+                + "{  "
+                + " ?x dc:title ?type. "
+                + "   ?x ns:pubYear ?date .\n"
+                + "} ORDER BY ?date";
+
+        var error = assertThrows(QueryEvaluationException.class, () -> this.runQuery(query));
+        assertEquals("it.unibz.inf.ontop.exception.OntopReformulationException: java.lang.RuntimeException: Only constants are supported as Date-Part parameter.", error.getMessage());
+    }
+
+    @Test
+    public void testDateTruncFailsNotSupported() {
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "PREFIX  obdaf: <https://w3id.org/obda/functions#>\n"
+                + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT (obdaf:dateTrunc(?date, \"yeare\") AS ?v) WHERE \n"
+                + "{  "
+                + "   ?x ns:pubYear ?date .\n"
+                + "} ORDER BY ?date";
+
+        var error = assertThrows(QueryEvaluationException.class, () -> this.runQuery(query));
+        assertEquals("it.unibz.inf.ontop.exception.OntopReformulationException: java.lang.RuntimeException: Date-Part yeare is not supported.", error.getMessage());
+    }
+
+    protected ImmutableSet<String> toAlternativeTimeZone(ImmutableSet<String> results) {
+        return results.stream()
+                .map(r -> r.replace("+01", "+00"))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    @Test
+    public void testDateTruncGroupBy() {
+
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "PREFIX  obdaf: <https://w3id.org/obda/functions#>\n"
+                + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT (CONCAT(STR(?y), \": \", STR(COUNT(*))) as ?v) WHERE \n"
+                + "{  "
+                + "   ?x ns:pubYear ?date .\n"
+                + "   BIND(obdaf:dateTrunc(?date, \"decade\") AS ?y)"
+                + "} GROUP BY ?y ORDER BY ?y";
+
+        executeAndCompareValuesAny(query, ImmutableList.of(
+                getDateTruncGroupByExpectedValues(),
+                toAlternativeTimeZone(getDateTruncGroupByExpectedValues())
+        ));
+    }
+
+    protected ImmutableSet<String> getDateTruncGroupByExpectedValues() {
+        return ImmutableSet.of("\"1970-01-01T00:00:00+01:00: 1\"^^xsd:string", "\"2010-01-01T00:00:00+01:00: 3\"^^xsd:string");
+    }
+
+
+    @Test
+    public void testExtraDateExtractions() {
+
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "PREFIX  obdaf: <https://w3id.org/obda/functions#>\n"
+                + "SELECT ?v WHERE \n"
+                + "{  ?x ns:pubYear ?year .\n"
+                + "   BIND (obdaf:millennium-from-dateTime(?year) AS ?v1)\n"
+                + "   BIND (obdaf:century-from-dateTime(?year) AS ?v2)\n"
+                + "   BIND (obdaf:decade-from-dateTime(?year) AS ?v3)\n"
+                + "   BIND (obdaf:quarter-from-dateTime(?year) AS ?v4)\n"
+                + "   BIND (obdaf:week-from-dateTime(?year) AS ?v5)\n"
+                + "   BIND (obdaf:milliseconds-from-dateTime(?year) AS ?v6)\n"
+                + "   BIND (obdaf:microseconds-from-dateTime(?year) AS ?v7)\n"
+                + "   BIND (CONCAT(STR(?v1), \" \", STR(?v2), \" \", STR(?v3), \" \", STR(?v4), \" \", STR(?v5), \" \", STR(?v6), \" \", STR(?v7)) AS ?v)\n"
+                + "}";
+
+        executeAndCompareValues(query, getExtraDateExtractionsExpectedValues());
+    }
+
+    protected ImmutableSet<String> getExtraDateExtractionsExpectedValues() {
+        return ImmutableSet.of("\"3 21 201 2 23 52000 52000000\"^^xsd:string", "\"3 21 201 4 49 0 0\"^^xsd:string",
+                "\"3 21 201 3 39 6000 6000000\"^^xsd:string", "\"2 20 197 4 45 0 0\"^^xsd:string");
     }
 
     @Test

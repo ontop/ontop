@@ -646,4 +646,17 @@ public interface TermFactory {
 	ImmutableExpression getDBJsonIsNumber(DBTermType dbType, ImmutableTerm arg);
 	ImmutableExpression getDBJsonIsScalar(DBTermType dbType, ImmutableTerm arg);
 	ImmutableExpression getDBIsArray(DBTermType dbType, ImmutableTerm arg);
+
+
+	// Ontop-defined functions
+
+	ImmutableFunctionalTerm getDBWeek(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBQuarter(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBDecade(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBCentury(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBMillennium(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBMilliseconds(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBMicroseconds(ImmutableTerm dbDatetimeTerm);
+
+	ImmutableFunctionalTerm getDBDateTrunc(ImmutableTerm dbDatetimeTerm, ImmutableTerm datePartTerm, String datePart);
 }
