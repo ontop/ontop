@@ -273,7 +273,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
      * TODO: consider producing composite constraints?
      *
      */
-    private Stream<ImmutableSet<Variable>> extractTransformedUniqueConstraint(ImmutableSet<Variable> childConstraint,
+    private Stream<ImmutableSet<Variable>> extractTransformedUniqueConstraintOld(ImmutableSet<Variable> childConstraint,
                                                                               VariableNullability variableNullability) {
         Stream<ImmutableSet<Variable>> atomicConstraints = substitution.builder()
                 .restrictRangeTo(ImmutableFunctionalTerm.class)
@@ -285,6 +285,84 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         Stream<ImmutableSet<Variable>> duplicatedConstraints = extractDuplicatedConstraints(childConstraint);
 
         return Stream.concat(atomicConstraints, duplicatedConstraints);
+    }
+
+    private Stream<ImmutableSet<Variable>> extractTransformedUniqueConstraint(ImmutableSet<Variable> childConstraint,
+                                                                                    VariableNullability variableNullability) {
+        var determinedByMap = getDeterminedByMap(variableNullability);
+        return getNewRepresentations(childConstraint, determinedByMap).stream();
+    }
+
+    /**
+     * For each projected variable, computes the set of variables that uniquely determine it. This can happen by
+     * (i) Variable is just kept in projection                                              Set(x) -> x
+     * (ii) Variable is constructed using a function injective on a set of other variables  Y -> x where x = f(X), Y subset of X such that f is injective on Y
+     */
+    private ImmutableMap<Variable, ImmutableSet<Variable>> getDeterminedByMap(VariableNullability variableNullability) {
+        return projectedVariables.stream()
+                .collect(ImmutableCollectors.toMap(
+                        v -> v,
+                        v -> getDeterminedBy(Optional.ofNullable(substitution.get(v)).orElse(v), variableNullability)
+                ));
+    }
+
+    private ImmutableSet<Variable> getDeterminedBy(ImmutableTerm term, VariableNullability variableNullability) {
+        if(term instanceof Variable)
+            return ImmutableSet.of((Variable)term);
+        if(!(term instanceof ImmutableFunctionalTerm))
+            return ImmutableSet.of();
+        ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
+
+        VariableGenerator uselessVariableGenerator = new VariableGeneratorImpl(ImmutableSet.of(), termFactory);
+        Optional<FunctionalTermDecomposition> analysis = functionalTerm.analyzeInjectivity(ImmutableSet.of(), variableNullability, uselessVariableGenerator);
+        return analysis
+                .map(t -> t.getLiftableTerm().getVariableStream())
+                .orElse(Stream.of())
+                .filter(v -> term.getVariableStream().anyMatch(v2 -> v2.equals(v)))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    /**
+     * Finds all possible new representations of a previously holding UC after substitution.
+     * This requires us to find, for each variable in the original UC, a projected variable that is determined by it.
+     */
+    private ImmutableSet<ImmutableSet<Variable>> getNewRepresentations(ImmutableSet<Variable> previousUC, ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap) {
+        ImmutableSet.Builder<ImmutableSet<Variable>> builder = ImmutableSet.builder();
+
+        //TODO-Damian: optimization: do not allow adding a variable such that the total number of determinants does not increase
+        //TODO-Damian: remove duplicates
+
+
+        List<ImmutableList<Variable>> setsToCheck = projectedVariables.stream()
+                .map(ImmutableList::of)
+                .collect(Collectors.toList());
+
+        while(!setsToCheck.isEmpty()) {
+            var next = setsToCheck.remove(0);
+            if(includesAll(next, previousUC, determinedByMap)) {
+                builder.add(next.stream().collect(ImmutableCollectors.toSet()));
+                continue;
+            }
+            setsToCheck.addAll(
+                    projectedVariables.stream()
+                            .filter(v -> !next.contains(v) && v.getName().compareTo(next.get(next.size() - 1).getName()) < 0)
+                            .map(v -> Stream.concat(next.stream(), Stream.of(v)).collect(ImmutableCollectors.toList()))
+                            .collect(Collectors.toSet())
+            );
+        }
+        var result = builder.build();
+
+        return result.stream()
+                .filter(uc -> result.stream()
+                        .noneMatch(uc2 -> uc.containsAll(uc2) && !uc.equals(uc2)))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private boolean includesAll(ImmutableList<Variable> variables, ImmutableSet<Variable> target, ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap) {
+        return variables.stream()
+                .map(determinedByMap::get)
+                .reduce(ImmutableSet.of(), (result, item) -> Sets.union(result, item).immutableCopy(), (set1, set2) -> Sets.union(set1, set2).immutableCopy())
+                .containsAll(target);
     }
 
     private boolean isAtomicConstraint(ImmutableFunctionalTerm functionalTerm, ImmutableSet<Variable> childConstraint,

@@ -27,11 +27,14 @@ public class UniqueConstraintInferenceTest {
     private final ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(PK_TABLE1_AR3, ImmutableList.of(A, B, C));
 
     private static final NamedRelationDefinition COMPOSITE_PK_REL;
+    private static final NamedRelationDefinition COMPOSITE_PK_REL_3;
 
     static {
         OptimizationTestingTools.OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
         COMPOSITE_PK_REL = builder.createRelation("table", 2, TYPE_FACTORY.getDBTypeFactory().getDBStringType(), false);
+        COMPOSITE_PK_REL_3 = builder.createRelation("table3", 3, TYPE_FACTORY.getDBTypeFactory().getDBStringType(), false);
         UniqueConstraint.primaryKeyOf(COMPOSITE_PK_REL.getAttribute(1), COMPOSITE_PK_REL.getAttribute(2));
+        UniqueConstraint.primaryKeyOf(COMPOSITE_PK_REL_3.getAttribute(1), COMPOSITE_PK_REL_3.getAttribute(2));
     }
 
 
@@ -90,6 +93,62 @@ public class UniqueConstraintInferenceTest {
                         SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_NOT_INJECTIVE_2, ImmutableList.of(A, B)))),
                 IQ_FACTORY.createExtensionalDataNode(COMPOSITE_PK_REL, ImmutableMap.of(0, A, 1, B)));
         assertEquals(ImmutableSet.of(), tree.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testConstructionCompositeUniqueConstraint1() {
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, Y),
+                        SUBSTITUTION_FACTORY.getSubstitution(
+                                X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, A)),
+                                Y, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(B, B)
+                        ))
+                ),
+                IQ_FACTORY.createExtensionalDataNode(COMPOSITE_PK_REL, ImmutableMap.of(0, A, 1, B)));
+        assertEquals(ImmutableSet.of(ImmutableSet.of(X, Y)), tree.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testConstructionCompositeUniqueConstraint2() {
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, Y),
+                        SUBSTITUTION_FACTORY.getSubstitution(
+                                X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, A)),
+                                Y, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, B)
+                                ))
+                ),
+                IQ_FACTORY.createExtensionalDataNode(COMPOSITE_PK_REL, ImmutableMap.of(0, A, 1, B)));
+        assertEquals(ImmutableSet.of(ImmutableSet.of(Y)), tree.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testConstructionCompositeUniqueConstraint3() {
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, Y),
+                        SUBSTITUTION_FACTORY.getSubstitution(
+                                X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, B)),
+                                Y, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(B, B)
+                                ))
+                ),
+                IQ_FACTORY.createExtensionalDataNode(COMPOSITE_PK_REL, ImmutableMap.of(0, A, 1, B)));
+        assertEquals(ImmutableSet.of(ImmutableSet.of(X)), tree.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testConstructionCompositeUniqueConstraint4() {
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, Y),
+                        SUBSTITUTION_FACTORY.getSubstitution(
+                                X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, C)),
+                                Y, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(B, C)
+                                ))
+                ),
+                IQ_FACTORY.createExtensionalDataNode(COMPOSITE_PK_REL_3, ImmutableMap.of(0, A, 1, B, 2, C)));
+        assertEquals(ImmutableSet.of(ImmutableSet.of(X, Y)), tree.inferUniqueConstraints());
     }
 
     @Test

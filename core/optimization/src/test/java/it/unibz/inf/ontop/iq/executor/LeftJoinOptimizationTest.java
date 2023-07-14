@@ -3533,19 +3533,25 @@ public class LeftJoinOptimizationTest {
                 subLJTree,
                 dataNode3);
 
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        ConstructionNode initialConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
-        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, topLJTree));
+        ConstructionNode expectedConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(C, TERM_FACTORY.getIfElseNull(
+                        TERM_FACTORY.getDBNumericInequality(InequalityLabel.LT, G, TWO),
+                        G
+                )));
 
-        ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE3, ImmutableMap.of(0, F, 1, C,2, D));
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(initialConstructionNode, topLJTree));
+
+        ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE3, ImmutableMap.of(0, F, 1, G,2, D));
 
         IQTree newLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(
                         TERM_FACTORY.getConjunction(
                                 TERM_FACTORY.getStrictEquality(A, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, F)),
-                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, C)))),
+                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBCastFunctionalTerm(integerType, stringType, G)))),
                 dataNode1, newRightDataNode);
 
-        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, newLJTree));
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(expectedConstructionNode, newLJTree));
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }
