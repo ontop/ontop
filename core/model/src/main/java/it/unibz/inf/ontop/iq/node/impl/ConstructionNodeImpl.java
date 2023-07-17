@@ -330,7 +330,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         ImmutableSet.Builder<ImmutableSet<Variable>> builder = ImmutableSet.builder();
 
         //TODO-Damian: optimization: do not allow adding a variable such that the total number of determinants does not increase
-        //TODO-Damian: remove duplicates
 
 
         List<ImmutableList<Variable>> setsToCheck = projectedVariables.stream()
