@@ -12,7 +12,10 @@ ENV DEBIAN_FRONTEND noninteractive
 
 
 RUN mkdir -p /tmp/sql_scripts/
+USER root
 RUN mkdir -p /usr/work/
+RUN chown mssql /usr/work
+USER mssql
 WORKDIR /usr/work
 
 COPY sql/*.sql /tmp/sql_scripts/
