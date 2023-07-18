@@ -45,7 +45,7 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
     @Nullable
     private MetadataLookup mergedMetadataLookupForFK;
 
-    private final boolean ignoreInvalidMappingEntries;
+    private final boolean ignoreInvalidLensEntries;
 
     @AssistedInject
     protected LensMetadataProviderImpl(@Assisted MetadataProvider parentMetadataProvider,
@@ -88,7 +88,7 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
         // Depends on this provider for supporting views of level >1
         this.dependencyCacheMetadataLookup = new CachingMetadataLookupWithDependencies(this);
 
-        ignoreInvalidMappingEntries = ((OntopOBDASettings)coreSingletons.getSettings()).ignoreInvalidMappingEntries();
+        ignoreInvalidLensEntries = ((OntopOBDASettings)coreSingletons.getSettings()).ignoreInvalidLensEntries();
     }
 
     /**
@@ -121,7 +121,7 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
                     cachedLenses.put(id, jsonLens.createViewDefinition(getDBParameters(), dependencyCacheMetadataLookup.getCachingMetadataLookupFor(id)));
                 return cachedLenses.get(id);
             } catch (IllegalArgumentException | MetadataExtractionException e) {
-                if(!ignoreInvalidMappingEntries)
+                if(!ignoreInvalidLensEntries)
                     throw e;
                 cachedLenses.put(id, new DatabaseTableDefinition(ImmutableList.of(id), new RelationDefinition.AttributeListBuilder() {
 
@@ -195,7 +195,7 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
             try {
                 parentMetadataProvider.insertIntegrityConstraints(relation, metadataLookupForFK);
             } catch (IllegalArgumentException | MetadataExtractionException e) {
-                if(!ignoreInvalidMappingEntries)
+                if(!ignoreInvalidLensEntries)
                     throw e;
             }
         }

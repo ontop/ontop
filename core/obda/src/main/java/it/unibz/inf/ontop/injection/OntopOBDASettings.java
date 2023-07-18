@@ -15,6 +15,7 @@ public interface OntopOBDASettings extends OntopModelSettings {
      * ignored instead.
      */
     boolean ignoreInvalidMappingEntries();
+    boolean ignoreInvalidLensEntries();
 
     //--------------------------
     // Keys
@@ -23,4 +24,5 @@ public interface OntopOBDASettings extends OntopModelSettings {
     String  SAME_AS = "ontop.sameAs";
     String ALLOW_RETRIEVING_BLACK_BOX_VIEW_METADATA_FROM_DB = "ontop.allowRetrievingBlackBoxViewMetadataFromDB";
     String IGNORE_INVALID_MAPPING_ENTRIES = "ontop.ignoreInvalidMappingEntries";
+    String IGNORE_INVALID_LENS_ENTRIES = "ontop.ignoreInvalidLensEntries";
 }
