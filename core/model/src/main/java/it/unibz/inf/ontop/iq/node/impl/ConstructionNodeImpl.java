@@ -255,9 +255,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .collect(ImmutableCollectors.toSet());
 
         VariableNullability variableNullability = getVariableNullability(child);
+        ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap = getDeterminedByMap(variableNullability);
 
         ImmutableSet<ImmutableSet<Variable>> transformedConstraints = childConstraints.stream()
-                .flatMap(childConstraint -> extractTransformedUniqueConstraint(childConstraint, variableNullability))
+                .flatMap(childConstraint -> extractTransformedUniqueConstraint(childConstraint, determinedByMap))
                 .collect(ImmutableCollectors.toSet());
 
         return transformedConstraints.isEmpty()
@@ -288,8 +289,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     private Stream<ImmutableSet<Variable>> extractTransformedUniqueConstraint(ImmutableSet<Variable> childConstraint,
-                                                                                    VariableNullability variableNullability) {
-        var determinedByMap = getDeterminedByMap(variableNullability);
+                                                                              ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap) {
         return getNewRepresentations(childConstraint, determinedByMap).stream();
     }
 
@@ -329,9 +329,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     private ImmutableSet<ImmutableSet<Variable>> getNewRepresentations(ImmutableSet<Variable> previousUC, ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap) {
         ImmutableSet.Builder<ImmutableSet<Variable>> builder = ImmutableSet.builder();
 
-        //TODO-Damian: optimization: do not allow adding a variable such that the total number of determinants does not increase
-
-
         List<ImmutableList<Variable>> setsToCheck = projectedVariables.stream()
                 .map(ImmutableList::of)
                 .collect(Collectors.toList());
@@ -344,7 +341,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
             }
             setsToCheck.addAll(
                     projectedVariables.stream()
-                            .filter(v -> !next.contains(v) && v.getName().compareTo(next.get(next.size() - 1).getName()) < 0)
+                            .filter(v -> v.getName().compareTo(next.get(next.size() - 1).getName()) > 0) //Only test variables in alphabetical order
+                            .filter(v -> !includesAll(next, determinedByMap.get(v), determinedByMap)) //Skip variables that do not add new determinants
                             .map(v -> Stream.concat(next.stream(), Stream.of(v)).collect(ImmutableCollectors.toList()))
                             .collect(Collectors.toSet())
             );
@@ -406,8 +404,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     public FunctionalDependencies inferFunctionalDependencies(IQTree child, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
         var childFDs = child.inferFunctionalDependencies();
         var nullability = getVariableNullability(child);
+        ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap = getDeterminedByMap(nullability);
         return Stream.concat(childFDs.stream(), newDependenciesFromSubstitution(nullability))
-                .flatMap(e -> translateFunctionalDependency(e.getKey(), e.getValue(), child))
+                .flatMap(e -> translateFunctionalDependency(e.getKey(), e.getValue(), determinedByMap))
                 .collect(FunctionalDependencies.toFunctionalDependencies())
                 .concat(FunctionalDependencies.fromUniqueConstraints(uniqueConstraints, variables));
     }
@@ -440,7 +439,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         return Streams.concat(variableToSubstitution, substitutionToVariable, renamingDependencies);
     }
 
-    private Stream<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> translateFunctionalDependency(ImmutableSet<Variable> determinants, ImmutableSet<Variable> dependents, IQTree child) {
+    private Stream<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> translateFunctionalDependency(ImmutableSet<Variable> determinants,
+                                                                                                            ImmutableSet<Variable> dependents,
+                                                                                                            ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap) {
         //Dependents of new FD are all projected previous dependents + new variables that only use dependent variables in their substitution (with deterministic functions).
         var keptDependents = Sets.intersection(dependents, projectedVariables);
         var newDependents = substitution.stream()
@@ -454,8 +455,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
 
         Stream<ImmutableSet<Variable>> preservedDeterminants = projectedVariables.containsAll(determinants) ? Stream.of(determinants) : Stream.of();
-        var nullability = getVariableNullability(child);
-        var newDeterminants = extractTransformedUniqueConstraint(determinants, nullability);
+        var newDeterminants = extractTransformedUniqueConstraint(determinants, determinedByMap);
         var allDeterminants = Streams.concat(preservedDeterminants, newDeterminants);
 
         return allDeterminants
