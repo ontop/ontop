@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection;
 
+import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedBinaryMathOperationTransformer;
@@ -31,6 +32,8 @@ public interface CoreSingletons {
     AtomFactory getAtomFactory();
 
     SubstitutionFactory getSubstitutionFactory();
+
+    HomomorphismFactory getHomomorphismFactory();
 
     IntermediateQueryFactory getIQFactory();
 

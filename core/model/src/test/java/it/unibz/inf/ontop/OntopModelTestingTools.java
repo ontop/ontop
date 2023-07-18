@@ -2,6 +2,7 @@ package it.unibz.inf.ontop;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -29,6 +30,7 @@ public class OntopModelTestingTools {
     public static final TermFactory TERM_FACTORY;
     public static final AtomFactory ATOM_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
+    public static final HomomorphismFactory HOMOMORPHISM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
     public static final NoNullValueEnforcer NO_NULL_VALUE_ENFORCER;
     public static final RDF RDF_FACTORY;
@@ -45,6 +47,7 @@ public class OntopModelTestingTools {
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
+        HOMOMORPHISM_FACTORY = injector.getInstance(HomomorphismFactory.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         RDF_FACTORY = injector.getInstance(RDF.class);

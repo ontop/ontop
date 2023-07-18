@@ -2,9 +2,8 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.constraints.ImmutableHomomorphism;
-import it.unibz.inf.ontop.constraints.ImmutableHomomorphismIterator;
-import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
+import it.unibz.inf.ontop.constraints.Homomorphism;
+import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.tools.impl.IQ2CQ;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
@@ -20,7 +19,7 @@ import java.util.stream.Stream;
 
 public class TMappingEntry {
 
-    public static Collector<TMappingRule, TMappingEntry, ImmutableList<TMappingRule>> toTMappingEntry(ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc, CoreSingletons coreSingletons) {
+    public static Collector<TMappingRule, TMappingEntry, ImmutableList<TMappingRule>> toTMappingEntry(ImmutableCQContainmentCheck<RelationPredicate> cqc, CoreSingletons coreSingletons) {
         return Collector.of(
                 () -> new TMappingEntry(cqc, coreSingletons), // Supplier
                 TMappingEntry::add, // Accumulator
@@ -30,11 +29,11 @@ public class TMappingEntry {
     }
 
     private final List<TMappingRule> rules = new ArrayList<>();
-    private final ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc;
+    private final ImmutableCQContainmentCheck<RelationPredicate> cqc;
     private final TermFactory termFactory;
     private final CoreSingletons coreSingletons;
 
-    public TMappingEntry(ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc, CoreSingletons coreSingletons) {
+    public TMappingEntry(ImmutableCQContainmentCheck<RelationPredicate> cqc, CoreSingletons coreSingletons) {
         this.cqc = cqc;
         this.termFactory = coreSingletons.getTermFactory();
         this.coreSingletons = coreSingletons;
@@ -95,9 +94,9 @@ public class TMappingEntry {
 
             boolean couldIgnore = false;
 
-            Optional<ImmutableHomomorphism> to = getHomomorphismIterator(current, assertion)
-                            .filter(ImmutableHomomorphismIterator::hasNext)
-                            .map(ImmutableHomomorphismIterator::next);
+            Optional<Homomorphism> to = getHomomorphismIterator(current, assertion)
+                            .filter(Iterator::hasNext)
+                            .map(Iterator::next);
 
             if (to.isPresent()) {
                 if (current.getConditions().isEmpty() ||
@@ -118,9 +117,9 @@ public class TMappingEntry {
                 }
             }
 
-            Optional<ImmutableHomomorphism> from = getHomomorphismIterator(assertion, current)
-                            .filter(ImmutableHomomorphismIterator::hasNext)
-                            .map(ImmutableHomomorphismIterator::next);
+            Optional<Homomorphism> from = getHomomorphismIterator(assertion, current)
+                            .filter(Iterator::hasNext)
+                            .map(Iterator::next);
 
             if (from.isPresent()) {
                 if (assertion.getConditions().isEmpty() ||
@@ -179,14 +178,15 @@ public class TMappingEntry {
         rules.add(assertion);
     }
 
-    private Optional<ImmutableHomomorphismIterator<RelationPredicate>> getHomomorphismIterator(TMappingRule from, TMappingRule to) {
-        ImmutableHomomorphism.Builder builder = ImmutableHomomorphism.builder();
-        for (int i = 0; i < from.getHeadTerms().size(); i++)
-            if (!builder.extend(from.getHeadTerms().get(i), to.getHeadTerms().get(i)).isValid())
+    private Optional<Iterator<Homomorphism>> getHomomorphismIterator(TMappingRule from, TMappingRule to) {
+        Homomorphism.Builder builder = coreSingletons.getHomomorphismFactory().getHomomorphismBuilder();
+        if (!builder.extend(from.getHeadTerms(), to.getHeadTerms()).isValid())
                 return Optional.empty();
 
-        ImmutableHomomorphism h = builder.build();
-        return Optional.of(cqc.homomorphismIterator(h, IQ2CQ.toDataAtoms(from.getDatabaseAtoms(), coreSingletons),
-                IQ2CQ.toDataAtoms(to.getDatabaseAtoms(), coreSingletons)));
+        Homomorphism h = builder.build();
+        return Optional.of(coreSingletons.getHomomorphismFactory().getHomomorphismIterator(
+                h,
+                IQ2CQ.toDataAtoms(from.getDatabaseAtoms(), coreSingletons),
+                cqc.chaseAllAtoms(IQ2CQ.toDataAtoms(to.getDatabaseAtoms(), coreSingletons))));
     }
 }

@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.stream.Stream;
 
-public abstract class BasicLinearInclusionDependenciesImpl<P extends AtomPredicate> implements LinearInclusionDependencies<P> {
+public abstract class AbstractLinearInclusionDependencies<P extends AtomPredicate> implements LinearInclusionDependencies<P> {
 
     /**
      * Chases a given atom with the linear inclusions dependencies

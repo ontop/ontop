@@ -23,8 +23,9 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
+import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.constraints.ImmutableCQ;
-import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
+import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -61,7 +62,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
 	private TreeWitnessRewriterReasoner reasoner;
-	private ImmutableCQContainmentCheckUnderLIDs<RDFAtomPredicate> containmentCheckUnderLIDs;
+	private ImmutableCQContainmentCheck<RDFAtomPredicate> containmentCheckUnderLIDs;
 
     private final SubstitutionFactory substitutionFactory;
     private final IQTreeTools iqTreeTools;
@@ -70,10 +71,10 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private TreeWitnessRewriter(AtomFactory atomFactory,
 								TermFactory termFactory,
                                 IntermediateQueryFactory iqFactory,
-								CoreUtilsFactory coreUtilsFactory,
                                 SubstitutionFactory substitutionFactory,
+                                HomomorphismFactory homomorphismFactory,
                                 IQTreeTools iqTreeTools) {
-        super(iqFactory, atomFactory, termFactory, coreUtilsFactory);
+        super(iqFactory, atomFactory, termFactory, homomorphismFactory);
 
         this.substitutionFactory = substitutionFactory;
         this.iqTreeTools = iqTreeTools;
@@ -86,7 +87,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		this.reasoner = new TreeWitnessRewriterReasoner(classifiedTBox);
 		super.setTBox(classifiedTBox);
 
-        containmentCheckUnderLIDs = new ImmutableCQContainmentCheckUnderLIDs<>(getSigma());
+        containmentCheckUnderLIDs = homomorphismFactory.getCQContainmentCheck(getSigma());
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;

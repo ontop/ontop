@@ -21,10 +21,6 @@ package it.unibz.inf.ontop.constraints;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.constraints.impl.BasicLinearInclusionDependenciesImpl;
-import it.unibz.inf.ontop.constraints.impl.LinearInclusionDependenciesImpl;
-import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
-import it.unibz.inf.ontop.constraints.impl.ImmutableCQSyntacticContainmentCheck;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.apache.commons.rdf.api.IRI;
@@ -110,7 +106,8 @@ public class CQCUtilitiesTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(n, propertyS, o),
                 ATOM_FACTORY.getIntensionalTripleAtom(o, propertyT, m)));
 
-		ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqcu = new ImmutableCQContainmentCheckUnderLIDs<>(LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY).build());
+		ImmutableCQContainmentCheck<AtomPredicate> cqcu = HOMOMORPHISM_FACTORY.getCQContainmentCheck(
+                HOMOMORPHISM_FACTORY.getLinearInclusionDependenciesBuilder().build());
 
 		assertTrue(cqcu.isContainedIn(q6, q5));
 		assertTrue(cqcu.isContainedIn(q5, q6));
@@ -143,7 +140,7 @@ public class CQCUtilitiesTest {
         ImmutableCQ<AtomPredicate> q3 = new ImmutableCQ<>(ImmutableList.of(x), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
 
-        ImmutableCQSyntacticContainmentCheck<AtomPredicate> cqc = new ImmutableCQSyntacticContainmentCheck<>();
+        ImmutableCQContainmentCheck<AtomPredicate> cqc = HOMOMORPHISM_FACTORY.getCQSyntacticContainmentCheck();
 
 		assertTrue(cqc.isContainedIn(q1, q2));
 		assertTrue(cqc.isContainedIn(q1, q3));
@@ -168,7 +165,7 @@ public class CQCUtilitiesTest {
         ImmutableCQ<AtomPredicate> q3 = new ImmutableCQ<>(ImmutableList.of(x), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
 
-        ImmutableCQSyntacticContainmentCheck<AtomPredicate> cqc = new ImmutableCQSyntacticContainmentCheck<>();
+        ImmutableCQContainmentCheck<AtomPredicate> cqc = HOMOMORPHISM_FACTORY.getCQSyntacticContainmentCheck();
 
         // q1 is redundant whenever q2 or q3 are present
 
@@ -205,13 +202,13 @@ public class CQCUtilitiesTest {
         ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(y), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
-        BasicLinearInclusionDependenciesImpl<AtomPredicate> dependencies =
-                LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY)
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                HOMOMORPHISM_FACTORY.getLinearInclusionDependenciesBuilder()
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classC),
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
                         .build();
 
-        ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc = new ImmutableCQContainmentCheckUnderLIDs<>(dependencies);
+        ImmutableCQContainmentCheck<AtomPredicate> cqc = HOMOMORPHISM_FACTORY.getCQContainmentCheck(dependencies);
 
         assertTrue(cqc.isContainedIn(q1, q2));
         assertFalse(cqc.isContainedIn(q2, q1));
@@ -227,13 +224,13 @@ public class CQCUtilitiesTest {
         ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(y), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(y, propertyR, z)));
 
-        BasicLinearInclusionDependenciesImpl<AtomPredicate> dependencies =
-                LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY)
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                HOMOMORPHISM_FACTORY.getLinearInclusionDependenciesBuilder()
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, propertyR, t),
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
                         .build();
 
-        ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc = new ImmutableCQContainmentCheckUnderLIDs<>(dependencies);
+        ImmutableCQContainmentCheck<AtomPredicate> cqc = HOMOMORPHISM_FACTORY.getCQContainmentCheck(dependencies);
 
         assertTrue(cqc.isContainedIn(q1, q2));
         assertFalse(cqc.isContainedIn(q2, q1));
@@ -249,13 +246,13 @@ public class CQCUtilitiesTest {
         ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(y), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(z, propertyR, y)));
 
-        BasicLinearInclusionDependenciesImpl<AtomPredicate> dependencies =
-                LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY)
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                HOMOMORPHISM_FACTORY.getLinearInclusionDependenciesBuilder()
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(t, propertyR, s),
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
                         .build();
 
-        ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc = new ImmutableCQContainmentCheckUnderLIDs<>(dependencies);
+        ImmutableCQContainmentCheck<AtomPredicate> cqc = HOMOMORPHISM_FACTORY.getCQContainmentCheck(dependencies);
 
         assertTrue(cqc.isContainedIn(q1, q2));
         assertFalse(cqc.isContainedIn(q2, q1));
@@ -271,13 +268,13 @@ public class CQCUtilitiesTest {
         ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(z), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(z, classA)));
 
-        BasicLinearInclusionDependenciesImpl<AtomPredicate> dependencies =
-                LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY)
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                HOMOMORPHISM_FACTORY.getLinearInclusionDependenciesBuilder()
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classA),
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, propertyR, t))
                         .build();
 
-        ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc = new ImmutableCQContainmentCheckUnderLIDs<>(dependencies);
+        ImmutableCQContainmentCheck<AtomPredicate> cqc = HOMOMORPHISM_FACTORY.getCQContainmentCheck(dependencies);
 
         assertTrue(cqc.isContainedIn(q1, q2));
         assertFalse(cqc.isContainedIn(q2, q1));
@@ -293,13 +290,13 @@ public class CQCUtilitiesTest {
         ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(z), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(z, classA)));
 
-        BasicLinearInclusionDependenciesImpl<AtomPredicate> dependencies =
-                LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY)
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                HOMOMORPHISM_FACTORY.getLinearInclusionDependenciesBuilder()
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classA),
                                 ATOM_FACTORY.getIntensionalTripleAtom(t, propertyR, s))
                         .build();
 
-        ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc = new ImmutableCQContainmentCheckUnderLIDs<>(dependencies);
+        ImmutableCQContainmentCheck<AtomPredicate> cqc = HOMOMORPHISM_FACTORY.getCQContainmentCheck(dependencies);
 
         assertTrue(cqc.isContainedIn(q1, q2));
         assertFalse(cqc.isContainedIn(q2, q1));
@@ -315,8 +312,8 @@ public class CQCUtilitiesTest {
         ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(y), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
-        BasicLinearInclusionDependenciesImpl<AtomPredicate> dependencies =
-                LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY)
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                HOMOMORPHISM_FACTORY.getLinearInclusionDependenciesBuilder()
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classB),
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classC),
@@ -325,7 +322,7 @@ public class CQCUtilitiesTest {
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
                         .build();
 
-        ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc = new ImmutableCQContainmentCheckUnderLIDs<>(dependencies);
+        ImmutableCQContainmentCheck<AtomPredicate> cqc = HOMOMORPHISM_FACTORY.getCQContainmentCheck(dependencies);
 
         assertTrue(cqc.isContainedIn(q1, q2));
         assertFalse(cqc.isContainedIn(q2, q1));
@@ -341,8 +338,8 @@ public class CQCUtilitiesTest {
         ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(y), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
-        BasicLinearInclusionDependenciesImpl<AtomPredicate> dependencies =
-                LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY)
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                HOMOMORPHISM_FACTORY.getLinearInclusionDependenciesBuilder()
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, propertyR, t),
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classC),
@@ -351,7 +348,7 @@ public class CQCUtilitiesTest {
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
                         .build();
 
-        ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc = new ImmutableCQContainmentCheckUnderLIDs<>(dependencies);
+        ImmutableCQContainmentCheck<AtomPredicate> cqc = HOMOMORPHISM_FACTORY.getCQContainmentCheck(dependencies);
 
         assertTrue(cqc.isContainedIn(q1, q2));
         assertFalse(cqc.isContainedIn(q2, q1));
@@ -367,8 +364,8 @@ public class CQCUtilitiesTest {
         ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(y), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
-        BasicLinearInclusionDependenciesImpl<AtomPredicate> dependencies =
-                LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY)
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                HOMOMORPHISM_FACTORY.getLinearInclusionDependenciesBuilder()
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(t, propertyR, s),
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classC),
@@ -377,7 +374,7 @@ public class CQCUtilitiesTest {
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
                         .build();
 
-        ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc = new ImmutableCQContainmentCheckUnderLIDs<>(dependencies);
+        ImmutableCQContainmentCheck<AtomPredicate> cqc = HOMOMORPHISM_FACTORY.getCQContainmentCheck(dependencies);
 
         assertTrue(cqc.isContainedIn(q1, q2));
         assertFalse(cqc.isContainedIn(q2, q1));
@@ -393,13 +390,13 @@ public class CQCUtilitiesTest {
         ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(s, t), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
-        BasicLinearInclusionDependenciesImpl<AtomPredicate> dependencies =
-                LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY)
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                HOMOMORPHISM_FACTORY.getLinearInclusionDependenciesBuilder()
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyS, o),
                                 ATOM_FACTORY.getIntensionalTripleAtom(n, propertyR, o))
                         .build();
 
-        ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc = new ImmutableCQContainmentCheckUnderLIDs<>(dependencies);
+        ImmutableCQContainmentCheck<AtomPredicate> cqc = HOMOMORPHISM_FACTORY.getCQContainmentCheck(dependencies);
 
         assertTrue(cqc.isContainedIn(q1, q2));
         assertFalse(cqc.isContainedIn(q2, q1));
@@ -415,8 +412,8 @@ public class CQCUtilitiesTest {
         ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(s, t), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
-        BasicLinearInclusionDependenciesImpl<AtomPredicate> dependencies =
-                LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY)
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                HOMOMORPHISM_FACTORY.getLinearInclusionDependenciesBuilder()
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyT, o),
                                 ATOM_FACTORY.getIntensionalTripleAtom(n, propertyR, o))
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyS, o),
@@ -425,7 +422,7 @@ public class CQCUtilitiesTest {
                                 ATOM_FACTORY.getIntensionalTripleAtom(n, propertyR, o))
                         .build();
 
-        ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc = new ImmutableCQContainmentCheckUnderLIDs<>(dependencies);
+        ImmutableCQContainmentCheck<AtomPredicate> cqc = HOMOMORPHISM_FACTORY.getCQContainmentCheck(dependencies);
 
         assertTrue(cqc.isContainedIn(q1, q2));
         assertFalse(cqc.isContainedIn(q2, q1));
@@ -441,8 +438,8 @@ public class CQCUtilitiesTest {
         ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(s, t), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
-        BasicLinearInclusionDependenciesImpl<AtomPredicate> dependencies =
-                LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY)
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                HOMOMORPHISM_FACTORY.getLinearInclusionDependenciesBuilder()
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(o, propertyT, n),
                                 ATOM_FACTORY.getIntensionalTripleAtom(n, propertyR, o))
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyS, o),
@@ -451,7 +448,7 @@ public class CQCUtilitiesTest {
                                 ATOM_FACTORY.getIntensionalTripleAtom(n, propertyR, o))
                         .build();
 
-        ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc = new ImmutableCQContainmentCheckUnderLIDs<>(dependencies);
+        ImmutableCQContainmentCheck<AtomPredicate> cqc = HOMOMORPHISM_FACTORY.getCQContainmentCheck(dependencies);
 
         assertTrue(cqc.isContainedIn(q1, q2));
         assertFalse(cqc.isContainedIn(q2, q1));
@@ -467,8 +464,8 @@ public class CQCUtilitiesTest {
         ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(s, t), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
-        BasicLinearInclusionDependenciesImpl<AtomPredicate> dependencies =
-                LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY)
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                HOMOMORPHISM_FACTORY.getLinearInclusionDependenciesBuilder()
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyT, o),
                                 ATOM_FACTORY.getIntensionalTripleAtom(o, propertyR, n))
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(o, propertyS, n),
@@ -477,7 +474,7 @@ public class CQCUtilitiesTest {
                                 ATOM_FACTORY.getIntensionalTripleAtom(o, propertyR, n))
                         .build();
 
-        ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc = new ImmutableCQContainmentCheckUnderLIDs<>(dependencies);
+        ImmutableCQContainmentCheck<AtomPredicate> cqc = HOMOMORPHISM_FACTORY.getCQContainmentCheck(dependencies);
 
         assertTrue(cqc.isContainedIn(q1, q2));
         assertFalse(cqc.isContainedIn(q2, q1));

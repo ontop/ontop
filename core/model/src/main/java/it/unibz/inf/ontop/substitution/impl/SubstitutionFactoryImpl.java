@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
-    final TermFactory termFactory;
+    private final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
     private final ImmutableTermsSubstitutionOperations immutableTermsSubstitutionOperations;
 

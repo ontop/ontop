@@ -23,14 +23,12 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.constraints.impl.DBLinearInclusionDependenciesImpl;
-import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
+import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.IRIConstant;
@@ -44,7 +42,6 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingSaturator;
 import it.unibz.inf.ontop.spec.mapping.transformer.QueryUnionSplitter;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
@@ -57,13 +54,11 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
 	// TODO: the implementation of EXCLUDE ignores equivalent classes / properties
 
     private final TMappingExclusionConfig tMappingExclusionConfig;
-	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
     private final QueryUnionSplitter unionSplitter;
     private final UnionFlattener unionNormalizer;
     private final MappingCQCOptimizer mappingCqcOptimizer;
     private final UnionBasedQueryMerger queryMerger;
-    private final CoreUtilsFactory coreUtilsFactory;
     private final CoreSingletons coreSingletons;
 
     @Inject
@@ -74,22 +69,20 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                                   UnionBasedQueryMerger queryMerger,
                                   CoreSingletons coreSingletons) {
         this.tMappingExclusionConfig = tMappingExclusionConfig;
-		this.atomFactory = coreSingletons.getAtomFactory();
 		this.termFactory = coreSingletons.getTermFactory();
         this.unionSplitter = unionSplitter;
         this.unionNormalizer = unionNormalizer;
         this.mappingCqcOptimizer = mappingCqcOptimizer;
         this.queryMerger = queryMerger;
-        this.coreUtilsFactory = coreSingletons.getCoreUtilsFactory();
         this.coreSingletons = coreSingletons;
     }
 
     @Override
     public ImmutableList<MappingAssertion> saturate(ImmutableList<MappingAssertion> mapping, ClassifiedTBox reasoner) {
 
-        ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc =
-                new ImmutableCQContainmentCheckUnderLIDs<>(
-                        new DBLinearInclusionDependenciesImpl(coreUtilsFactory, atomFactory));
+        ImmutableCQContainmentCheck<RelationPredicate> cqc =
+                coreSingletons.getHomomorphismFactory().getCQContainmentCheck(
+                        coreSingletons.getHomomorphismFactory().getDBLinearInclusionDependencies());
 
 	    // index mapping assertions by the predicate type
         //     same IRI can be a class name and a property name
@@ -152,7 +145,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                                                      EquivalencesDAG<T> dag,
                                                      ImmutableMap<MappingAssertionIndex, Collection<TMappingRule>> original,
                                                      Function<T, TMappingRuleHeadConstructor> constructor,
-                                                     ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc) {
+                                                     ImmutableCQContainmentCheck<RelationPredicate> cqc) {
 
 	    IRIConstant iri = constructor.apply(node.getRepresentative()).getIri();
 

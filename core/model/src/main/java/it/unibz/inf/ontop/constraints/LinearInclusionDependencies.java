@@ -27,4 +27,16 @@ public interface LinearInclusionDependencies<P extends AtomPredicate> {
      */
 
     ImmutableSet<DataAtom<P>> chaseAllAtoms(ImmutableCollection<DataAtom<P>> atoms);
+
+    /**
+     *
+     * @param <P>
+     */
+
+    interface Builder<P extends AtomPredicate> {
+
+        Builder<P> add(DataAtom<P> head, DataAtom<P> body);
+
+        LinearInclusionDependencies<P> build();
+    }
 }

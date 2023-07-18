@@ -16,13 +16,12 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class DBLinearInclusionDependenciesImpl extends BasicLinearInclusionDependenciesImpl<RelationPredicate> {
+public class DBLinearInclusionDependenciesImpl extends AbstractLinearInclusionDependencies<RelationPredicate> {
 
     private final AtomFactory atomFactory;
     private final VariableGenerator variableGenerator;
 
-    public DBLinearInclusionDependenciesImpl(CoreUtilsFactory coreUtilsFactory,
-                                              AtomFactory atomFactory) {
+    DBLinearInclusionDependenciesImpl(CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
         this.atomFactory = atomFactory;
         this.variableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
     }
