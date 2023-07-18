@@ -1,15 +1,14 @@
 package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collector;
 
 /**
  * Represents intersections of classes or properties as 
- *     all the sub-classes (resp., sub-properties).
+ *     all the subclasses (resp., sub-properties).
  * 
  * Such a representation makes containment checks fast.
  * 
@@ -22,8 +21,6 @@ public class DownwardSaturatedImmutableSet<T> {
 
 	/**
 	 * downward-saturated set
-	 * 		(contains all sub-class or sub-properties) 
-	 * 
 	 * null represents the maximal element -- top
 	 * the empty set is the minimal element -- bottom
 	 */
@@ -31,6 +28,14 @@ public class DownwardSaturatedImmutableSet<T> {
 
 	private DownwardSaturatedImmutableSet(ImmutableSet<T> elements) {
 		this.elements = elements;
+	}
+
+	public boolean isTop() {
+		return elements == null;
+	}
+
+	public boolean isBottom() {
+		return elements != null && elements.isEmpty();
 	}
 
 	/**
@@ -42,65 +47,47 @@ public class DownwardSaturatedImmutableSet<T> {
 	 */
 	
 	public boolean subsumes(T e) {
-		// top contains everything
-		return (elements == null) || elements.contains(e);
+		return isTop() || elements.contains(e);
 	}
-	
-	/**
-	 * returns the intersection with a class / property
-	 * 
-	 * IMPORTANT: the class / property is given by the DOWNWARD-SATURATED SET
-	 *              (in other words, by the result of EquivalencesDAG.getSubRepresentatives
-	 * 
-	 * @param e a non-empty downward saturated set for class / property
-	 */
-	
-	private DownwardSaturatedImmutableSet<T> intersectionWith(ImmutableSet<T> e) {
 
-		ImmutableSet<T> result;
-		if (elements != null) {
-			Set<T> set = new HashSet<>(elements);
-			set.retainAll(e);
-			result = ImmutableSet.copyOf(set);
-		}
-		else
-			result = e; // we have top, the intersection is sub
-
-		return result.isEmpty()
-				? bottom()
-				: new DownwardSaturatedImmutableSet<>(result);
-	}
-	
 	/**
-	 * intersection of two intersections
+	 * intersection of two downward saturated sets
 	 *
 	 * @param i1
 	 * @param i2
 	 */
 	
 	public static <T> DownwardSaturatedImmutableSet<T> intersectionOf(DownwardSaturatedImmutableSet<T> i1, DownwardSaturatedImmutableSet<T> i2) {
-		if (i1.elements == null) // i1 is top
+		if (i1.isTop())
 			return i2;
 
-		return i1.elements.isEmpty()
-				? i1   // i1 is bottom
-				: i2.intersectionWith(i1.elements);
+		if (i2.isTop())
+			return i1;
+
+		Sets.SetView<T> result = Sets.intersection(i1.elements, i2.elements);
+		if (result.isEmpty())
+			return bottom();
+
+		return new DownwardSaturatedImmutableSet<>(result.immutableCopy());
 	}
 
 	public static <T> DownwardSaturatedImmutableSet<T> create(ImmutableSet<T> e) {
-		return e.isEmpty() ? bottom() : new DownwardSaturatedImmutableSet<>(e);
+		return new DownwardSaturatedImmutableSet<>(e);
 	}
 
-	private static final DownwardSaturatedImmutableSet TOP = new DownwardSaturatedImmutableSet<>(null);
+	public static <T> DownwardSaturatedImmutableSet<T> top() {
+		return TOP;
+	}
+
+	public static <T> DownwardSaturatedImmutableSet<T> bottom() {
+		return BOTTOM;
+	}
+
 	private static final DownwardSaturatedImmutableSet BOTTOM = new DownwardSaturatedImmutableSet<>(ImmutableSet.of());
-
-	public static <T> DownwardSaturatedImmutableSet<T> top() { return TOP; }
-	public static <T> DownwardSaturatedImmutableSet<T> bottom() { return BOTTOM; }
-
-	public boolean isBottom() { return elements != null && elements.isEmpty(); }
+	private static final DownwardSaturatedImmutableSet TOP = new DownwardSaturatedImmutableSet<>(null);
 
 	private final static class Accumulator<T> {
-		private DownwardSaturatedImmutableSet<T> r = DownwardSaturatedImmutableSet.top();
+		private DownwardSaturatedImmutableSet<T> r = top();
 
 		Accumulator<T> intersectWith(DownwardSaturatedImmutableSet<T> i) { r = intersectionOf(r, i); return this; }
 		Accumulator<T> intersectWith(Accumulator<T> a) { r = intersectionOf(r, a.r); return this; }
@@ -121,7 +108,7 @@ public class DownwardSaturatedImmutableSet<T> {
 
 	@Override
 	public String toString() {
-		return ((elements == null) ? "TOP" : elements.toString());
+		return isTop() ? "TOP" : elements.toString();
 	}
 
 	@Override
