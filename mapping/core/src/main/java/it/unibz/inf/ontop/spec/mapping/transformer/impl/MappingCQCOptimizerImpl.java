@@ -70,8 +70,8 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                             .collect(ImmutableCollectors.toSet())
                             .containsAll(answerVariables)) {
 
-                        if (cqContainmentCheck.isContainedIn(new ImmutableCQ<>(answerVariables,
-                                        IQ2CQ.toDataAtoms(subChildren, coreSingletons)),
+                        if (cqContainmentCheck.isContainedIn(
+                                new ImmutableCQ<>(answerVariables, IQ2CQ.toDataAtoms(subChildren, coreSingletons)),
                                 new ImmutableCQ<>(answerVariables, IQ2CQ.toDataAtoms(children, coreSingletons)))) {
                             //System.out.println("CQC-REMOVED: " + children.get(currentIndex) + " FROM " + children);
                             log.debug("CQC-REMOVED: " + children.get(currentIndex) + " FROM " + children);

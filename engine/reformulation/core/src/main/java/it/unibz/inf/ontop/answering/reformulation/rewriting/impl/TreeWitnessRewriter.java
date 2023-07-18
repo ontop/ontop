@@ -345,7 +345,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 .map(a -> iqFactory.createIntensionalDataNode((DataAtom<AtomPredicate>)(DataAtom)a))
                 .collect(ImmutableCollectors.toList());
 
-        Substitution<? extends ImmutableTerm> substitution = substitutionFactory.getSubstitution(vars, cq.getAnswerVariables());
+        Substitution<?> substitution = substitutionFactory.getSubstitution(vars, cq.getAnswerVariables());
         if (substitution.isEmpty())
             return body;
 
@@ -379,7 +379,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                     @Override
                     protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
                         ImmutableList<DataAtom<RDFAtomPredicate>> bgp = triplePatterns.stream()
-                                .map(c -> (DataAtom<RDFAtomPredicate>)(DataAtom)((IntensionalDataNode)c.getRootNode()).getProjectionAtom())
+                                .map(IntensionalDataNode::getProjectionAtom)
+                                .map(a -> (DataAtom<RDFAtomPredicate>)(DataAtom)a)
                                 .collect(ImmutableCollectors.toList());
 
                         List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(new ImmutableCQ<>(avs, bgp));
