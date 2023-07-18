@@ -24,10 +24,11 @@ public class IgnoreInvalidMappingEntriesTest extends AbstractRDF4JTest {
     private static final String OBDA_FILE = "/ignore-invalid-mapping-entries/test.obda";
     private static final String SQL_SCRIPT = "/ignore-invalid-mapping-entries/test.sql";
     private static final String PROPERTY_FILE = "/ignore-invalid-mapping-entries/ignore-invalid.properties";
+    private static final String LENS_FILE = "/ignore-invalid-mapping-entries/lenses.json";
 
     @BeforeClass
     public static void before() throws IOException, SQLException {
-        initOBDA(SQL_SCRIPT, OBDA_FILE, null, PROPERTY_FILE, null);
+        initOBDA(SQL_SCRIPT, OBDA_FILE, null, PROPERTY_FILE, LENS_FILE);
     }
 
     @AfterClass
@@ -71,6 +72,27 @@ public class IgnoreInvalidMappingEntriesTest extends AbstractRDF4JTest {
                 "SELECT  ?v \n" +
                 "WHERE {\n" +
                 " ?v a :Bird . \n" +
+                "}";
+        assertEquals(0, runQueryAndCount(query));
+    }
+
+    @Test
+    public void testAccessNonExistentLensColumn() {
+        String query = "PREFIX : <http://www.ontop-vkg.com/ignore-invalid-test#>\n" +
+                "SELECT  ?v \n" +
+                "WHERE {\n" +
+                " ?d a :Dog1 . \n" +
+                " ?d :colour ?v . \n" +
+                "}";
+        assertEquals(0, runQueryAndCount(query));
+    }
+
+    @Test
+    public void testAccessInvalidLens() {
+        String query = "PREFIX : <http://www.ontop-vkg.com/ignore-invalid-test#>\n" +
+                "SELECT  ?v \n" +
+                "WHERE {\n" +
+                " ?v a :Dog2 . \n" +
                 "}";
         assertEquals(0, runQueryAndCount(query));
     }

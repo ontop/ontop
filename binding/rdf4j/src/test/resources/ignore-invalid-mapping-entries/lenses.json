@@ -1,0 +1,32 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"", "\"valid\""],
+      "baseRelation": ["\"dogs\""],
+      "columns": {
+        "added":  [
+          {
+            "name": "\"new_breed\"",
+            "expression": "CONCAT(\"breed\",'!')"
+          }
+        ],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"invalid\""],
+      "baseRelation": ["\"inv\""],
+      "columns": {
+        "added":  [
+          {
+            "name": "\"new_breed\"",
+            "expression": "CONCAT(\"breed\",'!')"
+          }
+        ],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    }
+  ]
+}
