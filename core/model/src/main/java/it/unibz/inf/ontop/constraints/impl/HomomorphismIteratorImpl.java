@@ -3,15 +3,12 @@ package it.unibz.inf.ontop.constraints.impl;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.constraints.Homomorphism;
-import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 
 import java.util.*;
 
 public class HomomorphismIteratorImpl<P extends AtomPredicate> implements Iterator<Homomorphism> {
-    private final HomomorphismFactory factory;
-
     private final ListIterator<DataAtom<P>> iterator;
     private final Deque<State> stack; // the current state is at the top
 
@@ -20,8 +17,7 @@ public class HomomorphismIteratorImpl<P extends AtomPredicate> implements Iterat
 
     private final ImmutableCollection<DataAtom<P>> to;
 
-    public HomomorphismIteratorImpl(HomomorphismFactory factory, Homomorphism baseHomomorphism, ImmutableList<DataAtom<P>> from, ImmutableCollection<DataAtom<P>> to) {
-        this.factory = factory;
+    public HomomorphismIteratorImpl(Homomorphism baseHomomorphism, ImmutableList<DataAtom<P>> from, ImmutableCollection<DataAtom<P>> to) {
         this.iterator = from.listIterator();
         this.stack = new ArrayDeque<>(from.size());
         this.to = to;

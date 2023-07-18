@@ -126,8 +126,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
         }
 
         CQ(ImmutableSet<DataAtom<RDFAtomPredicate>> atoms) {
-            this.equalities = ImmutableMap.of();
-            this.atoms = atoms;
+            this(ImmutableMap.of(), atoms);
         }
 
         CQ join(CQ cq) {

@@ -30,7 +30,7 @@ public class HomomorphismFactoryImpl implements HomomorphismFactory {
 
     @Override
     public <P extends AtomPredicate> Iterator<Homomorphism> getHomomorphismIterator(Homomorphism baseHomomorphism, ImmutableList<DataAtom<P>> from, ImmutableCollection<DataAtom<P>> to) {
-        return new HomomorphismIteratorImpl<>(this, baseHomomorphism, from, to);
+        return new HomomorphismIteratorImpl<>(baseHomomorphism, from, to);
     }
 
     @Override
