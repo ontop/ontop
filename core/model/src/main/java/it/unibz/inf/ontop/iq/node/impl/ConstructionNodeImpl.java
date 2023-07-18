@@ -270,24 +270,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
     /**
      * TODO: consider variable equality?
-     *
-     * TODO: consider producing composite constraints?
-     *
      */
-    private Stream<ImmutableSet<Variable>> extractTransformedUniqueConstraintOld(ImmutableSet<Variable> childConstraint,
-                                                                              VariableNullability variableNullability) {
-        Stream<ImmutableSet<Variable>> atomicConstraints = substitution.builder()
-                .restrictRangeTo(ImmutableFunctionalTerm.class)
-                .restrictRange(t -> isAtomicConstraint(t, childConstraint, variableNullability))
-                .build()
-                .getDomain().stream()
-                .map(ImmutableSet::of);
-
-        Stream<ImmutableSet<Variable>> duplicatedConstraints = extractDuplicatedConstraints(childConstraint);
-
-        return Stream.concat(atomicConstraints, duplicatedConstraints);
-    }
-
     private Stream<ImmutableSet<Variable>> extractTransformedUniqueConstraint(ImmutableSet<Variable> childConstraint,
                                                                               ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap) {
         return getNewRepresentations(childConstraint, determinedByMap).stream();
