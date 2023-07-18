@@ -341,7 +341,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     private boolean includesAll(ImmutableList<Variable> variables, ImmutableSet<Variable> target, ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap) {
         return variables.stream()
                 .map(determinedByMap::get)
-                .reduce(ImmutableSet.of(), (result, item) -> Sets.union(result, item).immutableCopy(), (set1, set2) -> Sets.union(set1, set2).immutableCopy())
+                .reduce(Set.of(), (result, item) -> Sets.union(result, item), (set1, set2) -> Sets.union(set1, set2))
                 .containsAll(target);
     }
 
