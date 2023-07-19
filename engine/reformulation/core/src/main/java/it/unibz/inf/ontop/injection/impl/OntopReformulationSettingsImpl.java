@@ -121,4 +121,12 @@ public class OntopReformulationSettingsImpl extends OntopKGQuerySettingsImpl imp
         }
         return httpHeaderNamesToLog;
     }
+
+    /**
+     * If false, user information is not extracted.
+     */
+    @Override
+    public boolean isAuthorizationEnabled() {
+        return getRequiredBoolean(AUTHORIZATION);
+    }
 }

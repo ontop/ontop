@@ -15,6 +15,7 @@ public interface OntopReformulationSettings extends OntopKGQuerySettings {
     boolean areInvalidTriplesExcludedFromResultSet();
 
     boolean isQueryLoggingEnabled();
+
     boolean isQueryTemplateExtractionEnabled();
     boolean isSparqlQueryIncludedIntoQueryLog();
     boolean isReformulatedQueryIncludedIntoQueryLog();
@@ -24,6 +25,8 @@ public interface OntopReformulationSettings extends OntopKGQuerySettings {
     boolean areQueryLoggingDecompositionAndMergingMutuallyExclusive();
 
     ImmutableSet<String> getHttpHeaderNamesToLog();
+
+    boolean isAuthorizationEnabled();
 
     long getQueryCacheMaxSize();
 
@@ -56,4 +59,6 @@ public interface OntopReformulationSettings extends OntopKGQuerySettings {
     String QUERY_TEMPLATE_EXTRACTION = "ontop.queryLogging.extractQueryTemplate";
     String QUERY_LOGGING_DECOMPOSITION = "ontop.queryLogging.decomposition";
     String QUERY_LOGGING_DECOMPOSITION_AND_MERGING_EXCLUSIVE = "ontop.queryLogging.decompositionAndMergingMutuallyExclusive";
+
+    String AUTHORIZATION = "ontop.authorization";
 }
