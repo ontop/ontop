@@ -32,5 +32,13 @@ source		SELECT name, breed FROM rabbits;
 mappingId	MAPID-birds
 target		:animals/{name} a :Animal; a :Bird; .
 source		SELECT name FROM birds;
+
+mappingId	MAPID-dog1
+target		:animals/{name} a :Animal; a :Dog1; :colour {colour} .
+source		SELECT name, colour FROM \"lenses\".\"valid\";
+
+mappingId	MAPID-dog2
+target		:animals/{name} a :Animal; a :Dog2 .
+source		SELECT name FROM \"lenses\".\"invalid\";
 ]]
 
