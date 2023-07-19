@@ -376,6 +376,14 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 abstractRootDBType);
         builder.put(ST_MAKEPOINT, 2, makepointSymbol);
 
+        DBFunctionSymbol ontopUserSymbol = new OntopUserFunctionSymbolImpl(dbBooleanType);
+        builder.put(OntopUserFunctionSymbolImpl.ONTOP_USER, 0, ontopUserSymbol);
+
+        DBFunctionSymbol ontopContainsRoleOrGroupFunctionSymbol = new OntopContainsRoleOrGroupFunctionSymbol(dbStringType,
+                dbBooleanType);
+        builder.put(OntopContainsRoleOrGroupFunctionSymbol.ONTOP_CONTAINS_ROLE_OR_GROUP, 1,
+                ontopContainsRoleOrGroupFunctionSymbol);
+
         return builder.build();
     }
 
@@ -1182,6 +1190,17 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBFunctionSymbol getDBGetSRID() {
         return getRegularDBFunctionSymbol(ST_SRID, 1);
+    }
+
+    @Override
+    public DBFunctionSymbol getOntopUser() {
+        return getRegularDBFunctionSymbol(OntopUserFunctionSymbolImpl.ONTOP_USER, 0);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getOntopContainsRoleOrGroup() {
+        return (DBBooleanFunctionSymbol)
+                getRegularDBFunctionSymbol(OntopContainsRoleOrGroupFunctionSymbol.ONTOP_CONTAINS_ROLE_OR_GROUP, 1);
     }
 
     @Override

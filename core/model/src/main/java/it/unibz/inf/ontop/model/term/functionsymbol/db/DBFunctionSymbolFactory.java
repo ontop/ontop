@@ -403,4 +403,7 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBMicroseconds();
 
     DBFunctionSymbol getDBDateTrunc(String datePart);
+
+    DBFunctionSymbol getOntopUser();
+    DBBooleanFunctionSymbol getOntopContainsRoleOrGroup();
 }
