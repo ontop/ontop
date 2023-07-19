@@ -69,7 +69,7 @@
   },
   "ontop.ignoreInvalidLensEntries": {
     "type": "Boolean",
-    "description": "Since 5.1.0. Default value: `false`. If `true`, lens entries that result in an error will be ignored instead of failing the initialization procedure."
+    "description": "Since 5.1.0. Default value: `false`. If `true`, lens entries that result in an error will be created as empty instead of failing the initialization procedure. Expected to be used together with `ontop.ignoreInvalidMappingEntries`."
   },
   "ontop.enableValuesNode": {
     "type": "Boolean",
