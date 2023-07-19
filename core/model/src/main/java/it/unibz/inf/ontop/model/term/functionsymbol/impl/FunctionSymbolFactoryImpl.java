@@ -54,6 +54,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final DBTermType dbStringType;
     private final SPARQLFunctionSymbol iriNoBaseFunctionSymbol;
 
+    private final FunctionSymbol identityFunctionSymbol;
+
     /**
      * Created in init()
      */
@@ -105,6 +107,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.iriNoBaseFunctionSymbol = new IriSPARQLFunctionSymbolImpl(typeFactory.getAbstractRDFTermType(),
                 typeFactory.getXsdStringDatatype(), typeFactory.getIRITermType());
         this.extractLexicalTermFunctionSymbol = new ExtractLexicalTermFunctionSymbolImpl(typeFactory.getAbstractRDFTermType(), dbStringType);
+        this.identityFunctionSymbol = new IdentityFunctionSymbol(dbTypeFactory.getAbstractRootDBType());
     }
 
     @Inject
@@ -693,6 +696,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public FunctionSymbol getExtractLexicalTermFromRDFTerm() {
         return extractLexicalTermFunctionSymbol;
+    }
+
+    @Override
+    public FunctionSymbol getIdentity() {
+        return identityFunctionSymbol;
     }
 
 }

@@ -1382,4 +1382,9 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDateTrunc(datePart), dbDatetimeTerm, datePartTerm);
 	}
 
+    @Override
+    public ImmutableFunctionalTerm getIdentityFunctionalTerm(ImmutableTerm term) {
+		return getImmutableFunctionalTerm(functionSymbolFactory.getIdentity(), term);
+    }
+
 }
