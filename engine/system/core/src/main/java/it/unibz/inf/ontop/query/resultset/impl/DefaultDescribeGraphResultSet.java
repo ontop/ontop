@@ -1,11 +1,9 @@
 package it.unibz.inf.ontop.query.resultset.impl;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.UnmodifiableIterator;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.answering.connection.impl.Evaluator;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
+import it.unibz.inf.ontop.answering.reformulation.QueryContext;
 import it.unibz.inf.ontop.query.ConstructQuery;
 import it.unibz.inf.ontop.query.DescribeQuery;
 import it.unibz.inf.ontop.query.SelectQuery;
@@ -23,6 +21,7 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
 
     public DefaultDescribeGraphResultSet(DescribeQuery describeQuery, QueryLogger queryLogger,
                                          QueryLogger.Factory queryLoggerFactory,
+                                         QueryContext queryContext,
                                          Evaluator<TupleResultSet, SelectQuery> selectQueryEvaluator,
                                          Evaluator<GraphResultSet, ConstructQuery> constructQueryEvaluator,
                                          OntopConnectionCloseable statementClosingCB)
@@ -30,20 +29,21 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
             OntopResultConversionException {
 
         ImmutableSet<IRI> resourcesToDescribe = extractDescribeResources(describeQuery, queryLogger, queryLoggerFactory,
-                selectQueryEvaluator);
+                queryContext, selectQueryEvaluator);
 
         this.iterator = new ResultSetIterator(describeQuery.computeConstructQueries(resourcesToDescribe),
-                queryLogger, queryLoggerFactory, constructQueryEvaluator, statementClosingCB);
+                queryLogger, queryLoggerFactory, queryContext, constructQueryEvaluator, statementClosingCB);
 
     }
 
     private static ImmutableSet<IRI> extractDescribeResources(DescribeQuery inputQuery,
                                                               QueryLogger queryLogger, QueryLogger.Factory queryLoggerFactory,
+                                                              QueryContext queryContext,
                                                               Evaluator<TupleResultSet, SelectQuery> selectQueryEvaluator)
             throws OntopQueryEvaluationException, OntopConnectionException,
             OntopReformulationException, OntopResultConversionException {
         QueryLogger selectQueryLogger = queryLoggerFactory.create(ImmutableMultimap.of());
-        try (TupleResultSet resultSet = selectQueryEvaluator.evaluate(inputQuery.getSelectQuery(), selectQueryLogger)) {
+        try (TupleResultSet resultSet = selectQueryEvaluator.evaluate(inputQuery.getSelectQuery(), queryContext, selectQueryLogger)) {
             queryLogger.declareResultSetUnblockedAndSerialize();
 
             ImmutableSet.Builder<IRI> iriSetBuilder = ImmutableSet.builder();
@@ -90,6 +90,7 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
         private final OntopConnectionCloseable statementClosingCB;
         private final QueryLogger queryLogger;
         private final QueryLogger.Factory queryLoggerFactory;
+        private final QueryContext queryContext;
         private final Evaluator<GraphResultSet, ConstructQuery> constructQueryEvaluator;
         private long rowCount;
 
@@ -98,10 +99,12 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
 
         public ResultSetIterator(ImmutableCollection<ConstructQuery> constructQueries,
                                  QueryLogger queryLogger, QueryLogger.Factory queryLoggerFactory,
+                                 QueryContext queryContext,
                                  Evaluator<GraphResultSet, ConstructQuery> constructQueryEvaluator,
                                  OntopConnectionCloseable statementClosingCB) {
 
             this.constructQueryIterator = constructQueries.iterator();
+            this.queryContext = queryContext;
             this.statementClosingCB = statementClosingCB;
             this.currentGraphResultSetIterator = null;
             this.queryLogger = queryLogger;
@@ -117,7 +120,8 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
                     if (constructQueryIterator.hasNext()) {
                         QueryLogger constructQueryLogger = queryLoggerFactory.create(ImmutableMultimap.of());
                         try {
-                            GraphResultSet graphResultSet = constructQueryEvaluator.evaluate(constructQueryIterator.next(), constructQueryLogger);
+                            GraphResultSet graphResultSet = constructQueryEvaluator.evaluate(constructQueryIterator.next(),
+                                    queryContext, constructQueryLogger);
                             currentGraphResultSetIterator = graphResultSet.iterator();
                         } catch (OntopQueryEvaluationException e) {
                             throw new LateQueryEvaluationExceptionWhenDescribing(e);

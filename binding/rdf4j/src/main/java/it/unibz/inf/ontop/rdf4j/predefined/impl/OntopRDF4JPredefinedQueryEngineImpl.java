@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
+import it.unibz.inf.ontop.answering.reformulation.QueryContext;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.query.ConstructTemplate;
 import it.unibz.inf.ontop.query.RDF4JQuery;
@@ -59,6 +60,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     private final ImmutableMap<String, PredefinedTupleQuery> tupleQueries;
     private final QueryReformulator queryReformulator;
     private final QueryLogger.Factory queryLoggerFactory;
+    private final QueryContext.Factory queryContextFactory;
     private final Cache<ImmutableMap<String, String>, IQ> referenceQueryCache;
     private final ReferenceValueReplacer valueReplacer;
     private final DocumentLoader documentLoader;
@@ -75,7 +77,8 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         this.queryReformulator = ontopEngine.getQueryReformulator();
 
         Injector injector = configuration.getInjector();
-        queryLoggerFactory = injector.getInstance(QueryLogger.Factory.class);
+        queryLoggerFactory = queryReformulator.getQueryLoggerFactory();
+        queryContextFactory = queryReformulator.getQueryContextFactory();
         valueReplacer = injector.getInstance(ReferenceValueReplacer.class);
 
         // TODO: think about the dimensions
@@ -306,12 +309,13 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
 
         // TODO: shall we consider some HTTP headers?
         QueryLogger tmpQueryLogger = queryLoggerFactory.create(ImmutableMultimap.of());
+        QueryContext emptyQueryContext = queryContextFactory.create(ImmutableMap.of());
 
         LOGGER.debug("Generating the reference query for {} with ref parameters {}",
                 predefinedQuery.getId(),
                 bindingSet);
 
-        return queryReformulator.reformulateIntoNativeQuery(newQuery, tmpQueryLogger);
+        return queryReformulator.reformulateIntoNativeQuery(newQuery, emptyQueryContext, tmpQueryLogger);
     }
 
     private QueryLogger createQueryLogger(PredefinedQuery<?> predefinedQuery, ImmutableMap<String, String> bindings,
