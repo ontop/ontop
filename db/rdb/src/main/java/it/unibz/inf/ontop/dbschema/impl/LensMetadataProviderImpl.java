@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
@@ -14,6 +15,8 @@ import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
+import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
+import it.unibz.inf.ontop.model.atom.impl.DistinctVariableOnlyDataAtomImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -46,6 +49,7 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
     private MetadataLookup mergedMetadataLookupForFK;
 
     private final boolean ignoreInvalidLensEntries;
+    private final CoreSingletons coreSingletons;
 
     @AssistedInject
     protected LensMetadataProviderImpl(@Assisted MetadataProvider parentMetadataProvider,
@@ -89,6 +93,7 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
         this.dependencyCacheMetadataLookup = new CachingMetadataLookupWithDependencies(this);
 
         ignoreInvalidLensEntries = ((OntopOBDASettings)coreSingletons.getSettings()).ignoreInvalidLensEntries();
+        this.coreSingletons = coreSingletons;
     }
 
     /**
@@ -123,7 +128,7 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
             } catch (IllegalArgumentException | MetadataExtractionException e) {
                 if(!ignoreInvalidLensEntries)
                     throw e;
-                cachedLenses.put(id, new DatabaseTableDefinition(ImmutableList.of(id), new RelationDefinition.AttributeListBuilder() {
+                cachedLenses.put(id, new LensImpl(ImmutableList.of(id), new RelationDefinition.AttributeListBuilder() {
 
                     @Override
                     public RelationDefinition.AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, String typeName, boolean isNullable) {
@@ -139,7 +144,11 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
                     public ImmutableList<Attribute> build(RelationDefinition relation) {
                         return ImmutableList.of();
                     }
-                }));
+                }, coreSingletons.getIQFactory().createIQ(
+                        coreSingletons.getAtomFactory().getDistinctVariableOnlyDataAtom(
+                                coreSingletons.getAtomFactory().getRDFAnswerPredicate(0),
+                                ImmutableList.of()
+                ), coreSingletons.getIQFactory().createTrueNode()), 1, coreSingletons));
                 LOGGER.warn("Lens {} was ignored due to an issue: {}", id, e.getMessage());
                 return cachedLenses.get(id);
             }
@@ -192,12 +201,7 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
             }
         }
         else {
-            try {
-                parentMetadataProvider.insertIntegrityConstraints(relation, metadataLookupForFK);
-            } catch (IllegalArgumentException | MetadataExtractionException e) {
-                if(!ignoreInvalidLensEntries)
-                    throw e;
-            }
+            parentMetadataProvider.insertIntegrityConstraints(relation, metadataLookupForFK);
         }
     }
 

@@ -103,16 +103,16 @@ public class IgnoreInvalidMappingEntriesTest extends AbstractRDF4JTest {
         String dbExtract = "/ignore-invalid-mapping-entries/test.db-extract.json";
         ImmutableSet<Lens> lenses = loadLensesH2(AbstractRDF4JTest.class.getResource(lens).getPath(),
                 AbstractRDF4JTest.class.getResource(dbExtract).getPath());
-        assertEquals(1, lenses.size());
+        assertEquals(2, lenses.size());
     }
 
     @Test
-    public void testInvalidLensNonExistendTable() throws Exception {
+    public void testInvalidLensNonExistentTable() throws Exception {
         String lens = "/ignore-invalid-mapping-entries/lenses-table.json";
         String dbExtract = "/ignore-invalid-mapping-entries/test.db-extract.json";
         ImmutableSet<Lens> lenses = loadLensesH2(AbstractRDF4JTest.class.getResource(lens).getPath(),
                 AbstractRDF4JTest.class.getResource(dbExtract).getPath());
-        assertEquals(1, lenses.size());
+        assertEquals(2, lenses.size());
     }
 
     public static ImmutableSet<Lens> loadLensesH2(String viewFilePath,
