@@ -1,12 +1,12 @@
-package it.unibz.inf.ontop.answering.reformulation.impl;
+package it.unibz.inf.ontop.evaluator.impl;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.answering.reformulation.QueryContext;
-import it.unibz.inf.ontop.injection.OntopReformulationSettings;
+import it.unibz.inf.ontop.evaluator.QueryContext;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
@@ -25,7 +25,7 @@ public class QueryContextImpl implements QueryContext {
 
     @AssistedInject
     protected QueryContextImpl(@Assisted ImmutableMap<String, String> normalizedHttpHeaders,
-                               OntopReformulationSettings settings) {
+                               OntopModelSettings settings) {
         if (settings.isAuthorizationEnabled()) {
             var commaSplitter = Splitter.on(",");
             // TODO: validate user name

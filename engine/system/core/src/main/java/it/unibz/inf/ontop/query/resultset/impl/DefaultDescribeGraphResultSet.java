@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.query.resultset.impl;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.answering.connection.impl.Evaluator;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
-import it.unibz.inf.ontop.answering.reformulation.QueryContext;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.query.ConstructQuery;
 import it.unibz.inf.ontop.query.DescribeQuery;
 import it.unibz.inf.ontop.query.SelectQuery;

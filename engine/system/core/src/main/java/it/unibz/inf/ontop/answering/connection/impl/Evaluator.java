@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.answering.connection.impl;
 
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
-import it.unibz.inf.ontop.answering.reformulation.QueryContext;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.query.KGQuery;
 import it.unibz.inf.ontop.query.resultset.OBDAResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.answering.reformulation;
+package it.unibz.inf.ontop.evaluator;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;

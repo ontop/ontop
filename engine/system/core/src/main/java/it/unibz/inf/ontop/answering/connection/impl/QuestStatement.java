@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
-import it.unibz.inf.ontop.answering.reformulation.QueryContext;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.query.*;
 import it.unibz.inf.ontop.query.resultset.impl.DefaultDescribeGraphResultSet;

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.answering.reformulation;
 
 
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.query.KGQuery;
 import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
