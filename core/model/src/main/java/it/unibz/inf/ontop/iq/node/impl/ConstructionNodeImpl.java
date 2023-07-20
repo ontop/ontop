@@ -311,8 +311,11 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
      */
     private ImmutableSet<ImmutableSet<Variable>> getNewRepresentations(ImmutableSet<Variable> previousUC, ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap) {
         ImmutableSet.Builder<ImmutableSet<Variable>> builder = ImmutableSet.builder();
+        ImmutableSet<Variable> relatedVariables = projectedVariables.stream()
+                .filter(v -> previousUC.contains(v) || !Sets.intersection(previousUC, determinedByMap.get(v)).isEmpty())
+                .collect(ImmutableCollectors.toSet());
 
-        List<ImmutableList<Variable>> setsToCheck = projectedVariables.stream()
+        List<ImmutableList<Variable>> setsToCheck = relatedVariables.stream()
                 .map(ImmutableList::of)
                 .collect(Collectors.toList());
 
@@ -323,7 +326,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 continue;
             }
             setsToCheck.addAll(
-                    projectedVariables.stream()
+                    relatedVariables.stream()
                             .filter(v -> v.getName().compareTo(next.get(next.size() - 1).getName()) > 0) //Only test variables in alphabetical order
                             .filter(v -> !includesAll(next, determinedByMap.get(v), determinedByMap)) //Skip variables that do not add new determinants
                             .map(v -> Stream.concat(next.stream(), Stream.of(v)).collect(ImmutableCollectors.toList()))
