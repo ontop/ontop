@@ -66,6 +66,24 @@ public abstract class AbstractHrJsonTest extends AbstractVirtualModeTest {
     }
 
     @Test
+    public void testFlattenTags3() throws Exception {
+        String query = "PREFIX : <http://person.example.org/>" +
+                "\n" +
+                "SELECT  ?person ?tagIds ?v " +
+                "WHERE {" +
+                "BIND ('333' AS ?v)\n" +
+                "?person  :tag_ids ?tagIds . " +
+                "?person  :tag_str ?v . \n" +
+                "}";
+        ImmutableList<String> expectedValues =
+                ImmutableList.of("333");
+
+        String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
+
+        LOGGER.debug("SQL Query: \n" + sql);
+    }
+
+    @Test
     public void testTagIds() throws Exception {
         String query = "PREFIX : <http://person.example.org/>" +
                 "\n" +
@@ -102,7 +120,7 @@ public abstract class AbstractHrJsonTest extends AbstractVirtualModeTest {
     }
 
     @Test
-    public void testFlattenFriends() throws Exception {
+    public void testFlattenFriends1() throws Exception {
         String query = "PREFIX : <http://person.example.org/>" +
                 "\n" +
                 "SELECT  ?person ?f ?v " +
@@ -112,6 +130,25 @@ public abstract class AbstractHrJsonTest extends AbstractVirtualModeTest {
                 "}";
         ImmutableList<String> expectedValues =
                 ImmutableList.of( "Bolzano", "Merano");
+
+        String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
+
+        LOGGER.debug("SQL Query: \n" + sql);
+
+    }
+
+    @Test
+    public void testFlattenFriends2() throws Exception {
+        String query = "PREFIX : <http://person.example.org/>" +
+                "\n" +
+                "SELECT  ?person ?f ?v " +
+                "WHERE {" +
+                "?person  :hasFriend ?f . " +
+                "?f  :city ?v .\n" +
+                "FILTER (?f = <http://person.example.org/person/1/1>)\n" +
+                "}";
+        ImmutableList<String> expectedValues =
+                ImmutableList.of( "Bolzano");
 
         String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
 
