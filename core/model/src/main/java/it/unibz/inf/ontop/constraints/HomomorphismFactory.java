@@ -20,7 +20,5 @@ public interface HomomorphismFactory {
 
     <P extends AtomPredicate> LinearInclusionDependencies.Builder<P> getFullLinearInclusionDependenciesBuilder();
 
-    <P extends AtomPredicate> ImmutableCQContainmentCheck<P> getCQSyntacticContainmentCheck();
-
     <P extends AtomPredicate> ImmutableCQContainmentCheck<P> getCQContainmentCheck(LinearInclusionDependencies<P> dependencies);
 }

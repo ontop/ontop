@@ -49,11 +49,6 @@ public class HomomorphismFactoryImpl implements HomomorphismFactory {
     }
 
     @Override
-    public <P extends AtomPredicate> ImmutableCQContainmentCheck<P> getCQSyntacticContainmentCheck() {
-        return new ImmutableCQSyntacticContainmentCheck<>();
-    }
-
-    @Override
     public <P extends AtomPredicate> ImmutableCQContainmentCheck<P> getCQContainmentCheck(LinearInclusionDependencies<P> dependencies) {
         return new ImmutableCQContainmentCheckUnderLIDs<>(this, dependencies);
     }
