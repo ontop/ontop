@@ -392,4 +392,39 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
                 term);
     }
 
+    @Override
+    protected String serializeDecade(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("FLOOR(EXTRACT(YEAR FROM %s) / 10.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCentury(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CEIL(EXTRACT(YEAR FROM %s) / 100.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMillennium(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CEIL(EXTRACT(YEAR FROM %s) / 1000.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMilliseconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(EXTRACT(SECOND FROM %s) * 1000)", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("FLOOR(EXTRACT(SECOND FROM %s) * 1000000)", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeWeek(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        var term = termConverter.apply(terms.get(0));
+        return String.format("WEEK_ISO(%s)", term);
+    }
+
+    @Override
+    protected String serializeQuarter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("QUARTER(%s)", termConverter.apply(terms.get(0)));
+    }
 }

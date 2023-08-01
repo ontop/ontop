@@ -20,6 +20,8 @@ import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -87,6 +89,26 @@ public class AbstractDockerRDF4JTest {
         }
         result.close();
         return count;
+    }
+
+    protected void executeAndCompareValuesAny(String queryString, ImmutableList<ImmutableSet<String>> expectedVValues) {
+        executeAndCompareValuesAny(queryString, expectedVValues, new MapBindingSet());
+    }
+
+    protected void executeAndCompareValuesAny(String queryString, ImmutableList<ImmutableSet<String>> expectedVValues,
+                                              BindingSet bindings) {
+        ImmutableSet<String> vValues = ImmutableSet.copyOf(runQuery(queryString, bindings));
+        List<AssertionError> errors = new ArrayList<>();
+        for(var possibleResult : expectedVValues) {
+            try {
+                assertEquals(possibleResult, vValues);
+                return;
+            }
+            catch (AssertionError e) {
+                errors.add(e);
+            }
+        }
+        throw errors.get(0);
     }
 
     protected void executeAndCompareValues(String queryString, ImmutableSet<String> expectedVValues) {

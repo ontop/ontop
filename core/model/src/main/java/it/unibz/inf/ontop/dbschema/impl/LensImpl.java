@@ -58,4 +58,9 @@ public class LensImpl extends AbstractNamedRelationDefinition implements Lens {
     public void freeze() {
         this.isFrozen = true;
     }
+
+    @Override
+    public String toString() {
+        return "Lens " + getID();
+    }
 }

@@ -734,6 +734,54 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected String serializeWeek(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(WEEK FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeQuarter(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(QUARTER FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDecade(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(DECADE FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCentury(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(CENTURY FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMillennium(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(MILLENNIUM FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMilliseconds(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(MILLISECONDS FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(MICROSECONDS FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDateTrunc(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATE_TRUNC(%s, %s)", termConverter.apply(terms.get(1)), termConverter.apply(terms.get(0)));
+    }
+
+    @Override
     protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType) {
         // TODO: check if it is safe to allow the decomposition
         return new DecomposeStrictEqualitySQLTimestampISONormFunctionSymbol(

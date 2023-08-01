@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -332,9 +333,16 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         }
     	else
             return String.format(
-                    "REPLACE(REPLACE(REGEXP_REPLACE(TO_CHAR(%s,'YYYY-MM-DD HH24:MI:SSxFFTZH:TZM'),' ','T',1,1),' ',''),',','.')",
+                    "REPLACE(REPLACE(REGEXP_REPLACE(TO_CHAR(CAST(%s AS TIMESTAMP WITH TIME ZONE),'YYYY-MM-DD HH24:MI:SSxFFTZH:TZM'),' ','T',1,1),' ',''),',','.')",
                     termConverter.apply(terms.get(0)));
     }
+
+    @Override
+    protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
+        return new EqualsTrueDBIsTrueFunctionSymbolImpl(dbBooleanType);
+    }
+
+
 
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
@@ -575,5 +583,69 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     protected DBFunctionSymbol createDBSample(DBTermType termType) {
         return new DBSampleFunctionSymbolImpl(termType, "ANY_VALUE");
+    }
+
+    @Override
+    protected DBTermType inferOutputTypeMathOperator(String dbMathOperatorName, DBTermType arg1Type, DBTermType arg2Type) {
+        if (dbMathOperatorName.equals(SPARQL.NUMERIC_DIVIDE))
+            return dbDecimalType;
+
+        return super.inferOutputTypeMathOperator(dbMathOperatorName, arg1Type, arg2Type);
+    }
+
+    @Override
+    protected String serializeDecade(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("FLOOR(EXTRACT(YEAR FROM %s) / 10.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCentury(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CEIL(EXTRACT(YEAR FROM %s) / 100.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMillennium(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CEIL(EXTRACT(YEAR FROM %s) / 1000.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMilliseconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(EXTRACT(SECOND FROM %s) * 1000)", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("FLOOR(EXTRACT(SECOND FROM %s) * 1000000)", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeWeek(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        var term = termConverter.apply(terms.get(0));
+        return String.format("(CASE WHEN (%s >= trunc(NEXT_DAY(trunc(%s, 'YEAR') - 1, 'THURSDAY'), 'iw')) THEN FLOOR(EXTRACT(DAY FROM %s - trunc(NEXT_DAY(trunc(%s, 'YEAR') - 1, 'THURSDAY'), 'iw')) / 7.00) + 1 ELSE FLOOR(EXTRACT(DAY FROM %s - trunc(NEXT_DAY(trunc(trunc(%s, 'YEAR') - 1, 'YEAR') - 1, 'THURSDAY'), 'iw')) / 7.00) + 1 END)",
+                term,
+                term,
+                term,
+                term,
+                term,
+                term);
+    }
+
+    @Override
+    protected String serializeQuarter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("FLOOR(EXTRACT(DAY FROM publication_date - trunc(publication_date, 'YEAR')) / 92 + 1)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDateTrunc(ImmutableList<? extends ImmutableTerm> terms,
+                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC(%s, %s)", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    public DBFunctionSymbol getDBDateTrunc(String datePart) {
+        if(ImmutableSet.of("microseconds", "milliseconds", "microsecond", "millisecond", "decade", "century", "millennium").contains(datePart.toLowerCase())) {
+            throw new IllegalArgumentException(String.format("Oracle does not support DATE_TRUNC on %s.", datePart));
+        }
+        return super.getDBDateTrunc(datePart);
     }
 }

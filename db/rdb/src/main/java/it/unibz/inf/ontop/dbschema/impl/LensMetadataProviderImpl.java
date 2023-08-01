@@ -6,12 +6,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.json.*;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.OntopOBDASettings;
+import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
+import it.unibz.inf.ontop.model.atom.impl.DistinctVariableOnlyDataAtomImpl;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
@@ -20,6 +26,8 @@ import java.io.Reader;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.dbschema.impl.AbstractDBMetadataProvider.LOGGER;
 
 public class LensMetadataProviderImpl implements LensMetadataProvider {
 
@@ -40,11 +48,14 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
     @Nullable
     private MetadataLookup mergedMetadataLookupForFK;
 
+    private final boolean ignoreInvalidLensEntries;
+    private final CoreSingletons coreSingletons;
+
     @AssistedInject
     protected LensMetadataProviderImpl(@Assisted MetadataProvider parentMetadataProvider,
                                        @Assisted Reader lensesReader,
                                        LensNormalizer lensNormalizer,
-                                       LensFKSaturator fkSaturator) throws MetadataExtractionException {
+                                       LensFKSaturator fkSaturator, CoreSingletons coreSingletons) throws MetadataExtractionException {
         this.parentMetadataProvider = new DelegatingMetadataProvider(parentMetadataProvider) {
             private final Set<RelationID> completeRelations = new HashSet<>();
 
@@ -80,6 +91,9 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
         this.lensNormalizer = lensNormalizer;
         // Depends on this provider for supporting views of level >1
         this.dependencyCacheMetadataLookup = new CachingMetadataLookupWithDependencies(this);
+
+        ignoreInvalidLensEntries = ((OntopOBDASettings)coreSingletons.getSettings()).ignoreInvalidLensEntries();
+        this.coreSingletons = coreSingletons;
     }
 
     /**
@@ -107,9 +121,37 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
     public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
         JsonLens jsonLens = jsonMap.get(id);
         if (jsonLens != null) {
-            if (!cachedLenses.containsKey(id))
-                cachedLenses.put(id, jsonLens.createViewDefinition(getDBParameters(), dependencyCacheMetadataLookup.getCachingMetadataLookupFor(id)));
-            return cachedLenses.get(id);
+            try {
+                if (!cachedLenses.containsKey(id))
+                    cachedLenses.put(id, jsonLens.createViewDefinition(getDBParameters(), dependencyCacheMetadataLookup.getCachingMetadataLookupFor(id)));
+                return cachedLenses.get(id);
+            } catch (IllegalArgumentException | MetadataExtractionException e) {
+                if(!ignoreInvalidLensEntries)
+                    throw e;
+                cachedLenses.put(id, new LensImpl(ImmutableList.of(id), new RelationDefinition.AttributeListBuilder() {
+
+                    @Override
+                    public RelationDefinition.AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, String typeName, boolean isNullable) {
+                        return this;
+                    }
+
+                    @Override
+                    public RelationDefinition.AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, boolean isNullable) {
+                        return this;
+                    }
+
+                    @Override
+                    public ImmutableList<Attribute> build(RelationDefinition relation) {
+                        return ImmutableList.of();
+                    }
+                }, coreSingletons.getIQFactory().createIQ(
+                        coreSingletons.getAtomFactory().getDistinctVariableOnlyDataAtom(
+                                coreSingletons.getAtomFactory().getRDFAnswerPredicate(0),
+                                ImmutableList.of()
+                ), coreSingletons.getIQFactory().createTrueNode()), 1, coreSingletons));
+                LOGGER.warn("Lens {} was ignored due to an issue: {}", id, e.getMessage());
+                return cachedLenses.get(id);
+            }
         }
 
 
@@ -129,7 +171,7 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
 
         RelationID relationId = relation.getID();
         JsonLens jsonLens = jsonMap.get(relationId);
-        if (jsonLens != null) {
+        if (jsonLens != null && (relation instanceof Lens)) {
             // Useful for views having multiple children
             boolean notInserted = alreadyProcessedViews.add(relationId);
             if (notInserted) {

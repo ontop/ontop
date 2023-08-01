@@ -49,7 +49,10 @@ public class PartiallyTypedSimpleCastTransformerImpl implements PartiallyTypedSi
             return conversionFunctionSymbol.isSimple()
                     && (!conversionFunctionSymbol.isTemporary())
                     && (!conversionFunctionSymbol.getInputType().isPresent())
-                    && conversionFunctionSymbol.getArity() == 1;
+                    && conversionFunctionSymbol.getArity() == 1
+                    // Temporary HACK (preventing TIMESTAMPTZ to DATE to be considered as injective)
+                    // TODO: refactor the approach around "simple" casts
+                    && conversionFunctionSymbol.getTargetType().getCategory() != DBTermType.Category.DATE;
         }
 
         @Override

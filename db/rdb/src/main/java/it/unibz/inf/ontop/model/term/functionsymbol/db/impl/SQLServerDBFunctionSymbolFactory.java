@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.SQLServerDBTypeFactory;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -32,6 +33,8 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
 
     // Created in init()
     private DBFunctionSymbol substr2FunctionSymbol;
+    private DBBooleanFunctionSymbol regexpLike2;
+    private DBBooleanFunctionSymbol regexpLike3;
 
     @Inject
     private SQLServerDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -46,6 +49,9 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         // Non-regular
         substr2FunctionSymbol = new DBFunctionSymbolWithSerializerImpl(SUBSTR_STR + "2",
                 ImmutableList.of(abstractRootDBType, abstractRootDBType), dbStringType, false, this::serializeSubString2);
+
+        regexpLike2 = new DBRegexMatchAsLikeFunctionSymbolImpl(REGEXP_LIKE_STR + "2", dbStringType, dbBooleanType, 2);
+        regexpLike3 = new DBRegexMatchAsLikeFunctionSymbolImpl(REGEXP_LIKE_STR + "3", dbStringType, dbBooleanType, 3);
     }
 
     /**
@@ -116,6 +122,8 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         // Removals not replaced by regular function symbols
         table.remove(SUBSTRING_STR, 2);
         table.remove(SUBSTR_STR, 2);
+        table.remove(REGEXP_LIKE_STR, 2);
+        table.remove(REGEXP_LIKE_STR, 3);
 
         return ImmutableTable.copyOf(table);
     }
@@ -143,22 +151,6 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
         return "ROW_NUMBER() OVER (ORDER BY (SELECT NULL))";
-    }
-
-    /**
-     * TODO: update
-     */
-    @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
-        return super.getDBRegexpMatches2();
-    }
-
-    /**
-     * TODO: update
-     */
-    @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
-        return super.getDBRegexpMatches3();
     }
 
     @Override
@@ -260,7 +252,7 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
 
     @Override
     protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
-        return new SQLServerDBIsTrueFunctionSymbolImpl(dbBooleanType);
+        return new EqualsTrueDBIsTrueFunctionSymbolImpl(dbBooleanType);
     }
 
     @Override
@@ -279,6 +271,10 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     public DBFunctionSymbol getDBRegexpReplace4() {
         throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+    }
+
+    protected DBFunctionSymbol createDBIriStringResolver(IRI baseIRI) {
+        return new SQLServerDBIriStringResolverFunctionSymbolImpl(baseIRI, typeFactory.getDBTypeFactory().getAbstractRootDBType(), dbStringType);
     }
 
     /**
@@ -363,6 +359,17 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     public DBFunctionSymbol getDBSubString2() {
         return substr2FunctionSymbol;
     }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
+        return regexpLike2;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
+        return regexpLike3;
+    }
+
 
     @Override
     protected DBFunctionSymbol createDBAvg(DBTermType inputType, boolean isDistinct) {
@@ -622,5 +629,69 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
                         "ISJSON(%s, ARRAY) = 1",
                         termConverter.apply(terms.get(0))
                 ));
+    }
+
+    @Override
+    protected String serializeWeek(ImmutableList<? extends ImmutableTerm> terms,
+                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATEPART(ISO_WEEK, %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeQuarter(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATEPART(QUARTER, %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDecade(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("FLOOR(DATEPART(YEAR, %s) / 10.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCentury(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CEILING(DATEPART(YEAR, %s) / 100.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMillennium(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CEILING(DATEPART(YEAR, %s) / 1000.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMilliseconds(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(DATEPART(SECOND, %s) * 1000 + DATEPART(MILLISECOND, %s))",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(DATEPART(SECOND, %s) * 1000000 + DATEPART(MILLISECOND, %s) * 1000 + DATEPART(MICROSECOND, %s))",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDateTrunc(ImmutableList<? extends ImmutableTerm> terms,
+                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String template = String.format(" WHEN %s LIKE '%%s' THEN DATETRUNC(%%s, %s)", termConverter.apply(terms.get(1)), termConverter.apply(terms.get(0)));
+        ImmutableList<String> possibleParts = ImmutableList.of("year", "quarter", "month", "day", "week", "hour", "minute", "second", "millisecond", "microsecond");
+        StringBuilder serializationBuilder = new StringBuilder("CASE");
+        possibleParts.stream()
+                .forEach(part -> serializationBuilder.append(String.format(template, part, part)));
+        serializationBuilder.append(" ELSE NULL END");
+        return serializationBuilder.toString();
+    }
+
+    @Override
+    public DBFunctionSymbol getDBDateTrunc(String datePart) {
+        if(ImmutableSet.of("microseconds", "milliseconds", "decade", "century", "millennium").contains(datePart.toLowerCase())) {
+            throw new IllegalArgumentException(String.format("SQL Server does not support DATE_TRUNC on %s.", datePart));
+        }
+        return super.getDBDateTrunc(datePart);
     }
 }

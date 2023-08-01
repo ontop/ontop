@@ -110,4 +110,20 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
         super.testDaysBetweenDateMappingInput();
     }
 
+    @Override
+    protected ImmutableSet<String> getDivisionOutputTypeExpectedResults() {
+        return ImmutableSet.of("\"3.33333333333333333333333333333333333333E00\"^^xsd:decimal");
+    }
+
+    @Disabled("Currently Oracle does not support DATE_TRUNC for the type `DECADE`")
+    @Test
+    @Override
+    public void testDateTruncGroupBy() {
+        super.testDateTruncGroupBy();
+    }
+
+    @Override
+    protected ImmutableSet<String> getSimpleDateTrunkExpectedValues() {
+        return ImmutableSet.of("\"1970-01-01T00:00:00.000000+01:00\"^^xsd:dateTime", "\"2011-01-01T00:00:00.000000+01:00\"^^xsd:dateTime", "\"2014-01-01T00:00:00.000000+01:00\"^^xsd:dateTime", "\"2015-01-01T00:00:00.000000+01:00\"^^xsd:dateTime");
+    }
 }

@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
+import it.unibz.inf.ontop.iq.type.NotYetTypedBinaryMathOperationTransformer;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
@@ -43,6 +44,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final MappingCanonicalTransformer canonicalTransformer;
     private final MappingCaster mappingCaster;
     private final NotYetTypedEqualityTransformer mappingEqualityTransformer;
+    private final NotYetTypedBinaryMathOperationTransformer mappingBinaryMathOperationTransformer;
     private final NoNullValueEnforcer noNullValueEnforcer;
     private final IntermediateQueryFactory iqFactory;
     private final JDBCMetadataProviderFactory metadataProviderFactory;
@@ -71,6 +73,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                                 MappingCanonicalTransformer canonicalTransformer,
                                 MappingCaster mappingCaster,
                                 NotYetTypedEqualityTransformer mappingEqualityTransformer,
+                                NotYetTypedBinaryMathOperationTransformer mappingBinaryMathOperatioNTransformer,
                                 NoNullValueEnforcer noNullValueEnforcer,
                                 IntermediateQueryFactory iqFactory,
                                 MetaMappingExpander metamappingExpander,
@@ -87,6 +90,7 @@ public class SQLMappingExtractor implements MappingExtractor {
         this.canonicalTransformer = canonicalTransformer;
         this.mappingCaster = mappingCaster;
         this.mappingEqualityTransformer = mappingEqualityTransformer;
+        this.mappingBinaryMathOperationTransformer = mappingBinaryMathOperatioNTransformer;
         this.noNullValueEnforcer = noNullValueEnforcer;
         this.iqFactory = iqFactory;
         this.lensMetadataProviderFactory = lensMetadataProviderFactory;
@@ -155,7 +159,8 @@ public class SQLMappingExtractor implements MappingExtractor {
         for (MappingAssertion assertion : expMapping) {
             IQTree tree = assertion.getQuery().getTree();
             IQTree equalityTransformedTree = mappingEqualityTransformer.transform(tree);
-            IQTree normalizedTree = equalityTransformedTree.normalizeForOptimization(assertion.getQuery().getVariableGenerator());
+            IQTree binaryMathOperationsTransformedTree = mappingBinaryMathOperationTransformer.transform(equalityTransformedTree);
+            IQTree normalizedTree = binaryMathOperationsTransformedTree.normalizeForOptimization(assertion.getQuery().getVariableGenerator());
             IQTree noNullTree = noNullValueEnforcer.transform(normalizedTree);
             if (noNullTree.isDeclaredAsEmpty())
                 continue;

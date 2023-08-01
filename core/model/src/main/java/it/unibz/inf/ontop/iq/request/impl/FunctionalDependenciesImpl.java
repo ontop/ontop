@@ -96,13 +96,13 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
         var collectedDependencies = Streams.concat(dependencyPairs.stream(), inferTransitiveDependencies(dependencyPairs))
                 .collect(Collectors.groupingBy(Map.Entry::getKey))
                 .entrySet().stream()
-                .map(e -> new FunctionalDependency(e.getKey(), e.getValue().stream()
+                .map(e -> new FunctionalDependency(e.getKey(), ImmutableSet.copyOf(e.getValue().stream()
                         .reduce(
-                                ImmutableSet.of(),
-                                (set, entry) -> Sets.union(set, entry.getValue()).immutableCopy(),
-                                (set1, set2) -> Sets.union(set1, set2).immutableCopy()
+                                Set.of(),
+                                (set, entry) -> Sets.union(set, entry.getValue()),
+                                (set1, set2) -> Sets.union(set1, set2)
                         )
-                ))
+                )))
                 .collect(ImmutableCollectors.toSet());
 
         var dependenciesToRemove = collectedDependencies.stream()

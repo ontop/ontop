@@ -85,4 +85,10 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
     protected ImmutableList<String> getConstantIntegerDivideExpectedResults() {
         return ImmutableList.of("\"0.50000000000000000000\"^^xsd:decimal");
     }
+
+    @Override
+    protected ImmutableSet<String> getExtraDateExtractionsExpectedValues() {
+        return ImmutableSet.of("\"3 21 201 2 23 52000.000 52000000\"^^xsd:string", "\"3 21 201 4 49 0.000 0\"^^xsd:string",
+                "\"3 21 201 3 39 6000.000 6000000\"^^xsd:string", "\"2 20 197 4 45 0.000 0\"^^xsd:string");
+    }
 }
