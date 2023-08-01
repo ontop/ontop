@@ -44,13 +44,10 @@ import java.util.stream.Stream;
 
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static java.util.function.Function.identity;
 
 
 /**
@@ -199,7 +196,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 .min(Comparator.comparing(Object::toString))
                 .get();
 
-        if (roots.stream().filter(t -> t instanceof Constant).count() > 1)
+        if (roots.stream().filter(t -> !(t instanceof Variable)).count() > 1)
             return ImmutableList.of();
 
         Substitution<VariableOrGroundTerm> substitution = roots.stream()
@@ -316,12 +313,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
 
     ImmutableCQ<RDFAtomPredicate> convert(CQ cq, ImmutableList<Variable> vars) {
-
-        // TODO: fix dealing with constants!
-        Substitution<Variable> s = cq.substitution.restrictRangeTo(Variable.class);
-
 	    return new ImmutableCQ<>(
-                substitutionFactory.apply(s, vars),
+                substitutionFactory.onVariableOrGroundTerms().apply(cq.substitution, vars),
                 ImmutableList.copyOf(cq.atoms));
     }
 
@@ -331,7 +324,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 .map(a -> iqFactory.createIntensionalDataNode((DataAtom<AtomPredicate>)(DataAtom)a))
                 .collect(ImmutableCollectors.toList());
 
-        Substitution<?> substitution = substitutionFactory.getSubstitution(vars, cq.getAnswerVariables());
+        Substitution<?> substitution = substitutionFactory.getSubstitution(vars, cq.getAnswerTerms());
         if (substitution.isEmpty())
             return body;
 
@@ -369,7 +362,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                                 .map(a -> (DataAtom<RDFAtomPredicate>)(DataAtom)a)
                                 .collect(ImmutableCollectors.toList());
 
-                        List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(new ImmutableCQ<>(avs, bgp));
+                        List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(new ImmutableCQ<>(ImmutableList.copyOf(avs), bgp));
 
                         ImmutableList<CQ> ucq = ccs.stream()
                                 .map(cc -> rewriteCC(cc).stream())

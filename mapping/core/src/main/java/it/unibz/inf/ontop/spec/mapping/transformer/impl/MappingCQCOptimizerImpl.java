@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.iq.transform.impl.LazyRecursiveIQTreeVisitingTransform
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
@@ -49,7 +50,7 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
 
                 Optional<ImmutableList<ExtensionalDataNode>> c = IQ2CQ.getExtensionalDataNodes(tree, coreSingletons);
 
-                ImmutableList<Variable> answerVariables = ImmutableList.copyOf(
+                ImmutableList<VariableOrGroundTerm> answerVariables = ImmutableList.copyOf(
                         Sets.union(
                                 constructionNode.getSubstitution().getRangeVariables(),
                                 rootNode.getOptionalFilterCondition().stream()
