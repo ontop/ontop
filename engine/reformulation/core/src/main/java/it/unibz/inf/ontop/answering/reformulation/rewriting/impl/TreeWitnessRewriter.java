@@ -115,24 +115,29 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
 	private class CQ {
 		private final Substitution<VariableOrGroundTerm> substitution;
-		private final ImmutableSet<DataAtom<RDFAtomPredicate>> atoms;
+		private final ImmutableList<DataAtom<RDFAtomPredicate>> atoms;
 
-		CQ(Substitution<VariableOrGroundTerm> substitution, ImmutableSet<DataAtom<RDFAtomPredicate>> atoms) {
+		CQ(Substitution<VariableOrGroundTerm> substitution, ImmutableList<DataAtom<RDFAtomPredicate>> atoms) {
 		    this.substitution = substitution;
 		    this.atoms = atoms;
         }
 
-        CQ(ImmutableSet<DataAtom<RDFAtomPredicate>> atoms) {
+        CQ(ImmutableList<DataAtom<RDFAtomPredicate>> atoms) {
             this(substitutionFactory.getSubstitution(), atoms);
+        }
+
+        CQ(DataAtom<RDFAtomPredicate> atom) {
+            this(ImmutableList.of(atom));
         }
 
         CQ join(CQ cq) {
             Substitution<VariableOrGroundTerm> composition = substitutionFactory.onVariableOrGroundTerms().compose(substitution, cq.substitution);
 
             return new CQ(composition,
-                    Sets.union(atoms, cq.atoms).stream()
+                    Stream.concat(atoms.stream(), cq.atoms.stream())
+                            .distinct()
                             .map(a -> atomFactory.getDataAtom(a.getPredicate(), substitutionFactory.onVariableOrGroundTerms().applyToTerms(composition, a.getArguments())))
-                            .collect(ImmutableCollectors.toSet()));
+                            .collect(ImmutableCollectors.toList()));
         }
 
         @Override
@@ -185,7 +190,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
     }
 
     public Collector<Stream<CQ>, UCQBuilder, ImmutableList<CQ>> toUCQ() {
-        return toUCQ(new CQ(ImmutableSet.of()));
+        return toUCQ(new CQ(ImmutableList.of()));
     }
 
 
@@ -205,9 +210,9 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 .map(t -> (Variable)t)
                 .collect(substitutionFactory.toSubstitution(v -> v, v -> representative));
 
-        UCQBuilder ucq = new UCQBuilder(new CQ(substitution, tw.getRootAtoms()));
+        UCQBuilder ucq = new UCQBuilder(new CQ(substitution, ImmutableList.copyOf(tw.getRootAtoms())));
         return ucq.join(getAtomsForGenerators(tw.getGenerators().stream(), representative).stream()
-                        .map(a -> new CQ(ImmutableSet.of(a))))
+                        .map(CQ::new))
                 .build();
     }
 
@@ -222,7 +227,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		ImmutableList.Builder<CQ> builder = ImmutableList.builder();
 		if (cc.hasNoFreeTerms() && (!cc.isDegenerate() || cc.getLoop().isPresent())) {
             builder.addAll(getAtomsForGenerators(tws.getGeneratorsOfDetachedCC().stream(), getFreshVariable()).stream()
-                        .map(a -> new CQ(ImmutableSet.of(a)))
+                        .map(CQ::new)
                         .collect(ImmutableCollectors.toList()));
 		}
 
@@ -236,7 +241,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 					CQ edges = new CQ(cc.getEdges().stream()
                             .filter(edge -> compatibleTWs.stream().noneMatch(edge::isCoveredBy))
                             .flatMap(edge -> edge.getAtoms().stream())
-                            .collect(ImmutableCollectors.toSet()));
+                            .distinct()
+                            .collect(ImmutableCollectors.toList()));
 
 					builder.addAll(
 					        compatibleTWs.stream()
@@ -250,10 +256,11 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 				builder.addAll(
 				        cc.getEdges().stream()
                             .map(edge -> Stream.concat(
-                                Stream.of(new CQ(ImmutableSet.copyOf(edge.getAtoms()))),
+                                Stream.of(new CQ(edge.getAtoms())),
                                 tws.getTWs().stream()
                                         .filter(edge::isCoveredBy)
-                                        .flatMap(tw -> getTreeWitnessFormula(tw).stream())))
+                                        .map(this::getTreeWitnessFormula)
+                                        .flatMap(Collection::stream)))
                             .collect(toUCQ()));
             }
 		}
@@ -261,8 +268,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 			// degenerate connected component
 			log.debug("LOOP {}", cc.getLoop());
 			builder.add(new CQ(cc.getLoop()
-                    .map(l -> ImmutableSet.copyOf(l.getAtoms()))
-                    .orElse(ImmutableSet.of())));
+                    .map(l -> l.getAtoms())
+                    .orElse(ImmutableList.of())));
 		}
 		return builder.build();
 	}
