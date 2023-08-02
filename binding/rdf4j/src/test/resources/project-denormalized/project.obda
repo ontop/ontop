@@ -1,0 +1,27 @@
+[PrefixDeclaration]
+:		http://example.org/voc#
+ex:		http://example.org/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	project
+target		ex:project/{id} a :Project ; :municipality ex:mun/{mun_id} ; :province ex:province/{province_id} ; :region ex:region/{region_id} .
+source		SELECT * FROM "lenses"."projects"
+
+mappingId	mun
+target		ex:mun/{mun_id} a :Municipality ; :province ex:province/{province_id} ; :region ex:region/{region_id} ; :name {mun_label} .
+source		SELECT * FROM "lenses"."projects"
+
+mappingId	province
+target		ex:province/{province_id} a :Province ; :region ex:region/{region_id} ; :name {province_label} .
+source		SELECT * FROM "lenses"."projects"
+
+mappingId	mun
+target		ex:region/{region_id} a :Region ; :name {region_label} .
+source		SELECT * FROM "lenses"."projects"
+
+]]
+
