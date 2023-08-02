@@ -128,15 +128,26 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
         }
 
         protected IQTree transformBySearchingFromScratchFromDistinctTree(IQTree tree) {
+            return transformBySearchingFromScratchFromDistinctTree(tree, tree::getVariableNullability);
+        }
+
+        protected IQTree transformBySearchingFromScratchFromDistinctTree(IQTree tree, Supplier<VariableNullability> variableNullabilitySupplier) {
             CardinalityInsensitiveTransformer newTransformer = new CardinalityInsensitiveTransformer(lookForDistinctTransformer,
-                    tree::getVariableNullability, variableGenerator, requiredDataNodeExtractor,
+                    variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor,
                     rightProvenanceNormalizer, variableNullabilityTools, coreSingletons);
             return tree.acceptTransformer(newTransformer);
         }
 
         @Override
         protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition) {
-            return transformBySearchingFromScratchFromDistinctTree(rightChild);
+
+            return transformBySearchingFromScratchFromDistinctTree(rightChild,
+                    () -> ljCondition
+                            .map(c -> variableNullabilityTools.updateWithFilter(
+                                            c,
+                                            rightChild.getVariableNullability().getNullableGroups(),
+                                            rightChild.getVariables()))
+                            .orElseGet(rightChild::getVariableNullability));
         }
 
         @Override
