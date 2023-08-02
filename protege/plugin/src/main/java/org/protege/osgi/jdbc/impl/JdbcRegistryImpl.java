@@ -16,7 +16,9 @@ public class JdbcRegistryImpl implements JdbcRegistry {
 
 	@Override
 	public void addJdbcDriver(String className, URL location) throws JdbcRegistryException {
-		try (URLClassLoader classLoader = new URLClassLoader(new URL[] { location }, ClassLoader.getSystemClassLoader())) {
+		// TODO: keep track of created class loaders and then close them on exit
+		URLClassLoader classLoader = new URLClassLoader(new URL[] { location }, ClassLoader.getSystemClassLoader());
+		try {
 			Class<? extends Driver> driverClass = classLoader.loadClass(className).asSubclass(Driver.class);
 			Driver driver = driverClass.getConstructor().newInstance();
 			drivers.add(driver);
