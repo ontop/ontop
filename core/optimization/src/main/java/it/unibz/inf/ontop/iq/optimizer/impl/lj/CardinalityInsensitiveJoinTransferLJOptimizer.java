@@ -122,6 +122,15 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
                     .map(idx -> new SelectedNode(idx, rightDataNode));
         }
 
+        /**
+         * Enables applying self-join elimination after the self-left-join has been reduced
+         * to an inner join on the right child.
+         */
+        @Override
+        protected boolean preventRecursiveOptimizationOnRightChild() {
+            return true;
+        }
+
         @Override
         protected IQTree transformBySearchingFromScratch(IQTree tree) {
             return lookForDistinctTransformer.transform(tree);
