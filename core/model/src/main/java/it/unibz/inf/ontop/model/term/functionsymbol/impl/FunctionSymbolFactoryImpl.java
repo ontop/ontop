@@ -257,6 +257,12 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new MinOrMaxOrSampleSPARQLFunctionSymbolImpl(typeFactory, MinOrMaxOrSampleSPARQLFunctionSymbolImpl.MinMaxSampleType.MIN),
                 new MinOrMaxOrSampleSPARQLFunctionSymbolImpl(typeFactory, MinOrMaxOrSampleSPARQLFunctionSymbolImpl.MinMaxSampleType.MAX),
                 new AvgSPARQLFunctionSymbolImpl(abstractRDFType, false),
+                new StdevSPARQLFunctionSymbolImpl(abstractRDFType, false, false),
+                new StdevSPARQLFunctionSymbolImpl(abstractRDFType, true, false),
+                new StdevSPARQLFunctionSymbolImpl(abstractRDFType, false),
+                new VarianceSPARQLFunctionSymbolImpl(abstractRDFType, false, false),
+                new VarianceSPARQLFunctionSymbolImpl(abstractRDFType, true, false),
+                new VarianceSPARQLFunctionSymbolImpl(abstractRDFType, false),
                 new MinOrMaxOrSampleSPARQLFunctionSymbolImpl(typeFactory, MinOrMaxOrSampleSPARQLFunctionSymbolImpl.MinMaxSampleType.SAMPLE),
                 /*
                  * Geo SF relation Functions
@@ -466,7 +472,13 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new MinOrMaxOrSampleSPARQLFunctionSymbolImpl(typeFactory, MinOrMaxOrSampleSPARQLFunctionSymbolImpl.MinMaxSampleType.MIN),
                 // Distinct can be safely ignored
                 new MinOrMaxOrSampleSPARQLFunctionSymbolImpl(typeFactory, MinOrMaxOrSampleSPARQLFunctionSymbolImpl.MinMaxSampleType.SAMPLE),
-                new AvgSPARQLFunctionSymbolImpl(abstractRDFType, true)
+                new AvgSPARQLFunctionSymbolImpl(abstractRDFType, true),
+                new StdevSPARQLFunctionSymbolImpl(abstractRDFType, true, true),
+                new StdevSPARQLFunctionSymbolImpl(abstractRDFType, false, true),
+                new StdevSPARQLFunctionSymbolImpl(abstractRDFType, true),
+                new VarianceSPARQLFunctionSymbolImpl(abstractRDFType, true, true),
+                new VarianceSPARQLFunctionSymbolImpl(abstractRDFType, false, true),
+                new VarianceSPARQLFunctionSymbolImpl(abstractRDFType, true)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();

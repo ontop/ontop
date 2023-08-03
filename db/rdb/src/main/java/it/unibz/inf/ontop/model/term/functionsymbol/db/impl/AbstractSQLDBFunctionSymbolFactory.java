@@ -167,6 +167,18 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected DBFunctionSymbol createDBStdev(DBTermType inputType, boolean isPop, boolean isDistinct) {
+        DBTermType targetType = inputType.equals(dbIntegerType) ? dbDecimalType : inputType;
+        return new NullIgnoringDBStdevFunctionSymbol(inputType, targetType, isPop, isDistinct);
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBVariance(DBTermType inputType, boolean isPop, boolean isDistinct) {
+        DBTermType targetType = inputType.equals(dbIntegerType) ? dbDecimalType : inputType;
+        return new NullIgnoringDBVarianceFunctionSymbol(inputType, targetType, isPop, isDistinct);
+    }
+
+    @Override
     protected DBFunctionSymbol createDBMin(DBTermType termType) {
         return new DBMinFunctionSymbolImpl(termType);
     }

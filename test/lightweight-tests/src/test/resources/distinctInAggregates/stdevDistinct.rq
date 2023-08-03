@@ -1,0 +1,13 @@
+PREFIX : <http://www.example.org/test#>
+PREFIX agg: <http://jena.apache.org/ARQ/function/aggregate#>
+SELECT ?p (agg:stdev_pop(DISTINCT ?s) as ?pop) (agg:stdev_samp(DISTINCT ?s) as ?samp) (agg:stdev(DISTINCT ?s) as ?stdev)
+WHERE {
+?p :teaches ?c .
+{
+?c :numberOfStudents ?s .
+}
+UNION
+{
+BIND("1"^^xsd:integer AS ?s)
+}
+} GROUP BY ?p
