@@ -17,7 +17,9 @@
             "dependents": [
               "\"mun_label\"",
               "\"province_id\"",
-              "\"region_id\""
+              "\"province_label\"",
+              "\"region_id\"",
+              "\"region_label\""
             ]
           },
           {
@@ -26,7 +28,8 @@
             ],
             "dependents": [
               "\"province_label\"",
-              "\"region_id\""
+              "\"region_id\"",
+              "\"region_label\""
             ]
           },
           {

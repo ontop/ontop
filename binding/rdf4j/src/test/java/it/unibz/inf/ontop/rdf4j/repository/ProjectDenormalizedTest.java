@@ -44,6 +44,24 @@ public class ProjectDenormalizedTest extends AbstractRDF4JTest {
     }
 
     @Test
+    public void testProvince1() {
+        String query = "PREFIX : <http://example.org/voc#>\n" +
+                "SELECT * \n" +
+                "WHERE {\n" +
+                "   ?p a :Province . \n " +
+                "   OPTIONAL { ?p :name ?provinceName } \n" +
+                "   OPTIONAL { \n" +
+                "      ?p :region ?r . \n " +
+                "      OPTIONAL { ?r :name ?regionName } \n" +
+                "   }\n" +
+                "}";
+
+        String sql = reformulateIntoNativeQuery(query);
+        assertFalse("Left joins found in " + sql, sql.toLowerCase().contains("left"));
+
+    }
+
+    @Test
     public void testProject1() {
         String query = "PREFIX : <http://example.org/voc#>\n" +
                 "SELECT * \n" +
@@ -84,6 +102,56 @@ public class ProjectDenormalizedTest extends AbstractRDF4JTest {
                 "        OPTIONAL { ?r :name ?regionName } \n" +
                 "     }\n" +
                 "   } \n" +
+                "}";
+
+        String sql = reformulateIntoNativeQuery(query);
+        assertFalse("Left joins found in " + sql, sql.toLowerCase().contains("left"));
+        assertFalse("Distinct found in " + sql, sql.toLowerCase().contains("distinct"));
+    }
+
+    @Test
+    public void testProject3() {
+        String query = "PREFIX : <http://example.org/voc#>\n" +
+                "SELECT ?project ?v ?provinceName ?regionName \n" +
+                "WHERE {\n" +
+                " ?project a :Project \n" +
+                " OPTIONAL { \n" +
+                "   ?project :municipality ?m . \n" +
+                "   OPTIONAL { ?m :name ?v }  \n" +
+                "   OPTIONAL { " +
+                "     ?m :province ?p . \n " +
+                "     OPTIONAL { ?p :name ?provinceName } \n" +
+                "     OPTIONAL { \n" +
+                "        ?p :region ?r . \n " +
+                "        OPTIONAL { ?r :name ?regionName } \n" +
+                "     }\n" +
+                "   } \n" +
+                " } \n" +
+                "}";
+
+        String sql = reformulateIntoNativeQuery(query);
+        assertFalse("Left joins found in " + sql, sql.toLowerCase().contains("left"));
+        assertFalse("Distinct found in " + sql, sql.toLowerCase().contains("distinct"));
+    }
+
+    @Test
+    public void testProject4() {
+        String query = "PREFIX : <http://example.org/voc#>\n" +
+                "SELECT DISTINCT ?project ?v ?provinceName ?regionName \n" +
+                "WHERE {\n" +
+                " ?project a :Project \n" +
+                " OPTIONAL { \n" +
+                "   ?project :municipality ?m . \n" +
+                "   OPTIONAL { ?m :name ?v }  \n" +
+                "   OPTIONAL { " +
+                "     ?m :province ?p . \n " +
+                "     OPTIONAL { ?p :name ?provinceName } \n" +
+                "     OPTIONAL { \n" +
+                "        ?p :region ?r . \n " +
+                "        OPTIONAL { ?r :name ?regionName } \n" +
+                "     }\n" +
+                "   } \n" +
+                " } \n" +
                 "}";
 
         String sql = reformulateIntoNativeQuery(query);
