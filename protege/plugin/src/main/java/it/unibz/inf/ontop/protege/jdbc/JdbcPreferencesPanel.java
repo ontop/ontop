@@ -5,8 +5,11 @@ import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
+import org.protege.osgi.jdbc.JdbcRegistryException;
 import org.protege.osgi.jdbc.preferences.JdbcPreferencesPanelBundleActivator;
 import org.protege.osgi.jdbc.JdbcRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,6 +24,8 @@ import static java.awt.event.KeyEvent.VK_ENTER;
 
 public class JdbcPreferencesPanel extends OWLPreferencesPanel {
     private static final long serialVersionUID = 2892884854196959326L;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JdbcPreferencesPanel.class);
 
     public static final String PREFERENCES_SET = "org.protege.osgi.jdbc.prefs";
     public static final String DEFAULT_DRIVER_DIR = "driver.dir";
@@ -97,7 +102,14 @@ public class JdbcPreferencesPanel extends OWLPreferencesPanel {
                     getEditorKit().getWorkspace(),
                     jdbcRegistryTracker);
             DialogUtils.setLocationRelativeToProtegeAndOpen(getEditorKit(), dialog);
-            dialog.getDriverInfo().ifPresent(i -> driverTableModel.addDriver(i));
+            dialog.getDriverInfo().ifPresent(i -> {
+                try {
+                    driverTableModel.addOrReplaceDriver(i);
+                }
+                catch (JdbcRegistryException ex) {
+                    LOGGER.info("Could not de-register JDBC driver: {}", ex);
+                }
+            });
         }
     };
 
@@ -114,7 +126,14 @@ public class JdbcPreferencesPanel extends OWLPreferencesPanel {
                     jdbcRegistryTracker,
                     info);
             DialogUtils.setLocationRelativeToProtegeAndOpen(getEditorKit(), dialog);
-            dialog.getDriverInfo().ifPresent(i -> driverTableModel.replaceDriver(row, i));
+            dialog.getDriverInfo().ifPresent(i -> {
+                try {
+                    driverTableModel.replaceDriver(row, i);
+                }
+                catch (JdbcRegistryException ex) {
+                    LOGGER.info("Could not de-register JDBC driver: {}", ex);
+                }
+            });
         }
     };
 
@@ -132,7 +151,12 @@ public class JdbcPreferencesPanel extends OWLPreferencesPanel {
                     "Delete JDBC Driver Confirmation"))
                 return;
 
-            driverTableModel.removeDrivers(row);
+            try {
+                driverTableModel.removeDriver(row);
+            }
+            catch (JdbcRegistryException ex) {
+                LOGGER.info("Could not de-register JDBC driver: {}", e);
+            }
         }
     };
 }
