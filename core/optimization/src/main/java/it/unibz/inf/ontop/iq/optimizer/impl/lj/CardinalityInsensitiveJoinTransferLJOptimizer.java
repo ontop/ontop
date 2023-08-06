@@ -122,21 +122,41 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
                     .map(idx -> new SelectedNode(idx, rightDataNode));
         }
 
+        /**
+         * Enables applying self-join elimination after the self-left-join has been reduced
+         * to an inner join on the right child.
+         */
+        @Override
+        protected boolean preventRecursiveOptimizationOnRightChild() {
+            return true;
+        }
+
         @Override
         protected IQTree transformBySearchingFromScratch(IQTree tree) {
             return lookForDistinctTransformer.transform(tree);
         }
 
         protected IQTree transformBySearchingFromScratchFromDistinctTree(IQTree tree) {
+            return transformBySearchingFromScratchFromDistinctTree(tree, tree::getVariableNullability);
+        }
+
+        protected IQTree transformBySearchingFromScratchFromDistinctTree(IQTree tree, Supplier<VariableNullability> variableNullabilitySupplier) {
             CardinalityInsensitiveTransformer newTransformer = new CardinalityInsensitiveTransformer(lookForDistinctTransformer,
-                    tree::getVariableNullability, variableGenerator, requiredDataNodeExtractor,
+                    variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor,
                     rightProvenanceNormalizer, variableNullabilityTools, coreSingletons);
             return tree.acceptTransformer(newTransformer);
         }
 
         @Override
         protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition) {
-            return transformBySearchingFromScratchFromDistinctTree(rightChild);
+
+            return transformBySearchingFromScratchFromDistinctTree(rightChild,
+                    () -> ljCondition
+                            .map(c -> variableNullabilityTools.updateWithFilter(
+                                            c,
+                                            rightChild.getVariableNullability().getNullableGroups(),
+                                            rightChild.getVariables()))
+                            .orElseGet(rightChild::getVariableNullability));
         }
 
         @Override
