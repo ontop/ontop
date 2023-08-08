@@ -253,7 +253,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(StringValue expression) {
-            result = termFactory.getDBConstant(expression.getValue(), dbTypeFactory.getDBStringType());
+            result = termFactory.getDBConstant(expression.getNotExcapedValue(), dbTypeFactory.getDBStringType());
         }
 
         @Override
