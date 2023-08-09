@@ -174,7 +174,7 @@ public abstract class JsonLens extends JsonOpenObject {
                 .normalizeForOptimization(variableGenerator);
     }
 
-    protected void insertTransitiveFunctionalDependencies(ImmutableSet<FunctionalDependencyConstruct> previousDependencies, NamedRelationDefinition relation, CoreSingletons coreSingletons) throws AttributeNotFoundException {
+    protected void insertTransitiveFunctionalDependencies(ImmutableSet<FunctionalDependencyConstruct> previousDependencies, NamedRelationDefinition relation, CoreSingletons coreSingletons) throws AttributeNotFoundException, MetadataExtractionException {
         var uselessVariableGenerator = new VariableGeneratorImpl(ImmutableSet.of(), coreSingletons.getTermFactory());
         var var2Attr = relation.getAttributes().stream()
                 .collect(ImmutableCollectors.toMap(
@@ -186,6 +186,15 @@ public abstract class JsonLens extends JsonOpenObject {
                         entry -> entry.getValue().getID(),
                         Map.Entry::getKey)
                 );
+        if(previousDependencies.stream()
+                .anyMatch(fd ->
+                                fd.getDeterminants().stream()
+                                        .anyMatch(id -> !id2Var.containsKey(id))
+                                || fd.getDeterminants().stream()
+                                        .anyMatch(id -> !id2Var.containsKey(id))
+                        ))
+            throw new MetadataExtractionException(String.format(
+                    "Cannot find attribute for Functional Dependency of %s.", relation.getID()));
         FunctionalDependencies allDependencies = previousDependencies.stream()
                 .map(fd -> Maps.immutableEntry(
                         fd.getDeterminants().stream()
