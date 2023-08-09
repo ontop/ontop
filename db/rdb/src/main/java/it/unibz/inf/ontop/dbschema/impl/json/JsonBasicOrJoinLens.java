@@ -111,7 +111,7 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         insertFunctionalDependencies(relation, idFactory, hiddenColumns, addedColumns,
                 (otherFunctionalDependencies != null) ? otherFunctionalDependencies.added : ImmutableList.of(),
-                ImmutableList.of(), baseRelations);
+                ImmutableList.of(), baseRelations, coreSingletons);
 
         insertForeignKeys(relation, metadataLookupForFK,
                 (foreignKeys != null) ? foreignKeys.added : ImmutableList.of(),
