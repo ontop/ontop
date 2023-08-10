@@ -96,8 +96,11 @@ public class BindWithFunctionsMariaDBTest extends AbstractBindTestWithFunctions 
         super.testDateTruncGroupBy();
     }
 
+    /*
+     * MariaDB returns an integer for STDEV and VARIANCE so there are no non-zero digits after the decimal point.
+     */
     @Override
     protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
-        return ImmutableSet.of("\"215.3400\"^^xsd:decimal");
+        return ImmutableSet.of("\"215.0000\"^^xsd:decimal");
     }
 }
