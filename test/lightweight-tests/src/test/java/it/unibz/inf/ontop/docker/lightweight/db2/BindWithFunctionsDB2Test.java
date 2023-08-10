@@ -150,4 +150,16 @@ public class BindWithFunctionsDB2Test extends AbstractBindTestWithFunctions {
     protected ImmutableSet<String> getSimpleDateTrunkExpectedValues() {
         return ImmutableSet.of("\"1970-01-01T00:00:00.000000\"^^xsd:dateTime", "\"2011-01-01T00:00:00.000000\"^^xsd:dateTime", "\"2014-01-01T00:00:00.000000\"^^xsd:dateTime", "\"2015-01-01T00:00:00.000000\"^^xsd:dateTime");
     }
+
+    @Disabled("DB2 struggles with the division included in the query as it seems to interpret it as a division by 0.")
+    @Test
+    @Override
+    public void testStatisticalAggregates() {
+        super.testStatisticalAggregates();
+    }
+
+    @Override
+    protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
+        return ImmutableSet.of("\"207.00000000000000000000000000\"^^xsd:decimal");
+    }
 }

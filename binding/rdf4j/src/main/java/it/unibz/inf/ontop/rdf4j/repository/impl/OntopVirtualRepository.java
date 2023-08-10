@@ -7,10 +7,12 @@ import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.query.RDF4JQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
+import it.unibz.inf.ontop.rdf4j.query.aggregates.*;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.query.parser.sparql.aggregate.CustomAggregateFunctionRegistry;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.base.AbstractRepository;
 import org.slf4j.Logger;
@@ -68,6 +70,12 @@ public class OntopVirtualRepository extends AbstractRepository implements OntopR
      */
     @Override
     protected void initializeInternal() throws RepositoryException {
+        CustomAggregateFunctionRegistry.getInstance().add(new VarianceSampAggregateFactory());
+        CustomAggregateFunctionRegistry.getInstance().add(new VariancePopAggregateFactory());
+        CustomAggregateFunctionRegistry.getInstance().add(new VarianceShortAggregateFactory());
+        CustomAggregateFunctionRegistry.getInstance().add(new StdevSampAggregateFactory());
+        CustomAggregateFunctionRegistry.getInstance().add(new StdevPopAggregateFactory());
+        CustomAggregateFunctionRegistry.getInstance().add(new StdevShortAggregateFactory());
         try {
             queryEngine = configuration.loadQueryEngine();
             queryEngine.connect();

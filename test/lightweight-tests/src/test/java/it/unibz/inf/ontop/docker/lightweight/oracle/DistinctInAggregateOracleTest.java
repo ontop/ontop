@@ -27,4 +27,18 @@ public class DistinctInAggregateOracleTest extends AbstractDistinctInAggregateTe
     public void testAvgDistinct() throws Exception {
         super.testAvgDistinct();
     }
+
+    @Disabled("Distinct statistical functions are not supported by this dialect.")
+    @Test
+    @Override
+    public void testStdevDistinct() throws Exception {
+        super.testStdevDistinct();
+    }
+
+    @Disabled("Distinct statistical functions are not supported by this dialect.")
+    @Test
+    @Override
+    public void testVarianceDistinct() throws Exception {
+        super.testVarianceDistinct();
+    }
 }

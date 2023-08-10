@@ -27,10 +27,14 @@ public class NullIgnoringDBVarianceFunctionSymbol extends AbstractDBAggregationF
     }
 
     protected NullIgnoringDBVarianceFunctionSymbol(@Nonnull DBTermType inputType, @Nonnull DBTermType targetType, boolean isPop, boolean isDistinct) {
-        this(inputType, targetType, isDistinct, isPop,
+        this("VAR_" + (isPop ? "POP" : "SAMP"), inputType, targetType, isPop, isDistinct);
+    }
+
+    protected NullIgnoringDBVarianceFunctionSymbol(@Nonnull String nameInDialect, @Nonnull DBTermType inputType, @Nonnull DBTermType targetType, boolean isPop, boolean isDistinct) {
+        this(inputType, targetType, isPop, isDistinct,
                 isDistinct
-                        ? Serializers.getDistinctAggregationSerializer("VAR_" + (isPop ? "POP" : "SAMP"))
-                        : Serializers.getRegularSerializer("VAR_" + (isPop ? "POP" : "SAMP")));
+                        ? Serializers.getDistinctAggregationSerializer(nameInDialect)
+                        : Serializers.getRegularSerializer(nameInDialect));
     }
 
     @Override

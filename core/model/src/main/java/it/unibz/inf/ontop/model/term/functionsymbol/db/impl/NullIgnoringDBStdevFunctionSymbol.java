@@ -27,10 +27,14 @@ public class NullIgnoringDBStdevFunctionSymbol extends AbstractDBAggregationFunc
     }
 
     protected NullIgnoringDBStdevFunctionSymbol(@Nonnull DBTermType inputType, @Nonnull DBTermType targetType, boolean isPop, boolean isDistinct) {
-        this(inputType, targetType, isDistinct, isPop,
+        this("STDDEV_" + (isPop ? "POP" : "SAMP"), inputType, targetType, isPop, isDistinct);
+    }
+
+    protected NullIgnoringDBStdevFunctionSymbol(@Nonnull String nameInDialect, @Nonnull DBTermType inputType, @Nonnull DBTermType targetType, boolean isPop, boolean isDistinct) {
+        this(inputType, targetType, isPop, isDistinct,
                 isDistinct
-                        ? Serializers.getDistinctAggregationSerializer("STDDEV_" + (isPop ? "POP" : "SAMP"))
-                        : Serializers.getRegularSerializer("STDDEV_" + (isPop ? "POP" : "SAMP")));
+                        ? Serializers.getDistinctAggregationSerializer(nameInDialect)
+                        : Serializers.getRegularSerializer(nameInDialect));
     }
 
     @Override

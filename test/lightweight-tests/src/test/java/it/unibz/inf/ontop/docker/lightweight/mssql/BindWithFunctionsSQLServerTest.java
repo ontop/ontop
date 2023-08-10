@@ -77,4 +77,10 @@ public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunction
     protected ImmutableSet<String> getSimpleDateTrunkExpectedValues() {
         return ImmutableSet.of("\"1970-01-01T00:00:00\"^^xsd:dateTime", "\"2011-01-01T00:00:00\"^^xsd:dateTime", "\"2014-01-01T00:00:00\"^^xsd:dateTime", "\"2015-01-01T00:00:00\"^^xsd:dateTime");
     }
+
+
+    @Override
+    protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
+        return ImmutableSet.of("\"215.340000\"^^xsd:decimal");
+    }
 }

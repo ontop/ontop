@@ -148,4 +148,9 @@ public class BindWithFunctionsSparkTest extends AbstractBindTestWithFunctions {
         var error = assertThrows(QueryEvaluationException.class, () -> this.runQuery(query));
         assertEquals("it.unibz.inf.ontop.exception.OntopReformulationException: java.lang.IllegalArgumentException: SparkSQL does not support DATE_TRUNC on century.", error.getMessage());
     }
+
+    @Override
+    protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
+        return ImmutableSet.of("\"215.340000\"^^xsd:decimal");
+    }
 }
