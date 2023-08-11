@@ -2,10 +2,12 @@ package it.unibz.inf.ontop.query.translation.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.query.aggregates.*;
 import it.unibz.inf.ontop.query.translation.InsertClauseNormalizer;
 import it.unibz.inf.ontop.query.translation.RDF4JQueryTranslator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -32,12 +34,14 @@ import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.impl.SimpleDataset;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.ParsedUpdate;
+import org.eclipse.rdf4j.query.parser.sparql.aggregate.CustomAggregateFunctionRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
+@Singleton
 public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
     private final CoreUtilsFactory coreUtilsFactory;
@@ -70,6 +74,13 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         this.functionSymbolFactory = functionSymbolFactory;
         this.insertClauseNormalizer = insertClauseNormalizer;
         this.iqTreeTools = iqTreeTools;
+        CustomAggregateFunctionRegistry registry = CustomAggregateFunctionRegistry.getInstance();
+        registry.add(new VarianceSampAggregateFactory());
+        registry.add(new VariancePopAggregateFactory());
+        registry.add(new VarianceShortAggregateFactory());
+        registry.add(new StdevSampAggregateFactory());
+        registry.add(new StdevPopAggregateFactory());
+        registry.add(new StdevShortAggregateFactory());
     }
 
     @Override
