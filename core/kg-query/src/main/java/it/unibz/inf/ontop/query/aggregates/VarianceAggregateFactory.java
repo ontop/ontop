@@ -16,11 +16,11 @@ public abstract class VarianceAggregateFactory implements AggregateFunctionFacto
 
     @Override
     public AggregateFunction buildFunction(Function<BindingSet, Value> function) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public AggregateCollector getCollector() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 }
