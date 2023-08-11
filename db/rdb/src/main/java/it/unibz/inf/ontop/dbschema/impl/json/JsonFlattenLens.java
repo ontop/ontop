@@ -263,7 +263,8 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                 addedColumns,
                 Optional.ofNullable(otherFunctionalDependencies).map(d -> d.added).orElseGet(ImmutableList::of),
                 inferFDsFromParentUCs(keptColumns, baseRelation),
-                baseRelations);
+                baseRelations,
+                dbParameters.getCoreSingletons());
 
         insertForeignKeys(relation, metadataLookupForFK,
                 Stream.concat(

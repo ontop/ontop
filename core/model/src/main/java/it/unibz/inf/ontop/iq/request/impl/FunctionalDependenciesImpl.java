@@ -93,7 +93,14 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
      */
     protected FunctionalDependencies complete() {
         var dependencyPairs = stream().collect(ImmutableCollectors.toSet());
-        var collectedDependencies = Streams.concat(dependencyPairs.stream(), inferTransitiveDependencies(dependencyPairs))
+        var withTransitive = dependencyPairs;
+        var lastSize = 0;
+        while(lastSize != withTransitive.size()) {
+            lastSize = withTransitive.size();
+            withTransitive = Streams.concat(dependencyPairs.stream(), inferTransitiveDependencies(withTransitive))
+                    .collect(ImmutableCollectors.toSet());
+        }
+        var collectedDependencies = withTransitive.stream()
                 .collect(Collectors.groupingBy(Map.Entry::getKey))
                 .entrySet().stream()
                 .map(e -> new FunctionalDependency(e.getKey(), ImmutableSet.copyOf(e.getValue().stream()
