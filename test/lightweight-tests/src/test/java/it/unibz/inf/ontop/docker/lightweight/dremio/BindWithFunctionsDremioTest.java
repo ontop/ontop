@@ -68,4 +68,9 @@ public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
     protected ImmutableSet<String> getDateTruncGroupByExpectedValues() {
         return ImmutableSet.of("\"1970-01-01T00:00:00: 1\"^^xsd:string", "\"2010-01-01T00:00:00: 3\"^^xsd:string");
     }
+
+    @Override
+    protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
+        return ImmutableSet.of("\"215.340000\"^^xsd:decimal");
+    }
 }

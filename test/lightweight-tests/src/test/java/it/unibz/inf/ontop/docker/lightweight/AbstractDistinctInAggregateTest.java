@@ -19,6 +19,8 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractDockerRDF4
 
     protected static final String sumDistinctQueryFile = "/distinctInAggregates/sumDistinct.rq";
     protected static final String avgDistinctQueryFile = "/distinctInAggregates/avgDistinct.rq";
+    protected static final String stdevDistinctQueryFile = "/distinctInAggregates/stdevDistinct.rq";
+    protected static final String varianceDistinctQueryFile = "/distinctInAggregates/varianceDistinct.rq";
     protected static final String countDistinctQueryFile = "/distinctInAggregates/countDistinct.rq";
     protected static final String groupConcatDistinctQueryFile = "/distinctInAggregates/groupConcatDistinct.rq";
 
@@ -44,6 +46,22 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractDockerRDF4
         Assertions.assertEquals(
                 getTuplesForAvg(),
                 executeQueryAndCompareBindingLexicalValues(readQueryFile(avgDistinctQueryFile))
+        );
+    }
+
+    @Test
+    public void testStdevDistinct() throws Exception {
+        Assertions.assertEquals(
+                getTuplesForStdev(),
+                executeQueryAndCompareBindingLexicalValues(readQueryFile(stdevDistinctQueryFile))
+        );
+    }
+
+    @Test
+    public void testVarianceDistinct() throws Exception {
+        Assertions.assertEquals(
+                getTuplesForVariance(),
+                executeQueryAndCompareBindingLexicalValues(readQueryFile(varianceDistinctQueryFile))
         );
     }
 
@@ -101,6 +119,52 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractDockerRDF4
                 ImmutableMap.of(
                         "p",buildAnswerIRI("8"),
                         "ad", "\"13.0000\"^^xsd:decimal"
+                )
+        );
+    }
+
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForStdev() {
+        return ImmutableSet.of(
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("1"),
+                        "pop", "\"4.4969125210773472\"^^xsd:decimal",
+                        "samp", "\"5.5075705472861020\"^^xsd:decimal",
+                        "stdev", "\"5.5075705472861020\"^^xsd:decimal"
+                ),
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("3"),
+                        "pop", "\"5.5000000000000000\"^^xsd:decimal",
+                        "samp", "\"7.7781745930520228\"^^xsd:decimal",
+                        "stdev", "\"7.7781745930520228\"^^xsd:decimal"
+                ),
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("8"),
+                        "pop", "\"6.0000000000000000\"^^xsd:decimal",
+                        "samp", "\"8.4852813742385703\"^^xsd:decimal",
+                        "stdev", "\"8.4852813742385703\"^^xsd:decimal"
+                )
+        );
+    }
+
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForVariance() {
+        return ImmutableSet.of(
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("1"),
+                        "pop", "\"20.2222222222222222\"^^xsd:decimal",
+                        "samp", "\"30.3333333333333333\"^^xsd:decimal",
+                        "variance", "\"30.3333333333333333\"^^xsd:decimal"
+                ),
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("3"),
+                        "pop", "\"30.2500000000000000\"^^xsd:decimal",
+                        "samp", "\"60.5000000000000000\"^^xsd:decimal",
+                        "variance", "\"60.5000000000000000\"^^xsd:decimal"
+                ),
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("8"),
+                        "pop", "\"36.0000000000000000\"^^xsd:decimal",
+                        "samp", "\"72.0000000000000000\"^^xsd:decimal",
+                        "variance", "\"72.0000000000000000\"^^xsd:decimal"
                 )
         );
     }
