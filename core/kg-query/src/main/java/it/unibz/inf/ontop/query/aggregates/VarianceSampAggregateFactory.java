@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.rdf4j.query.aggregates;
+package it.unibz.inf.ontop.query.aggregates;
 
 import it.unibz.inf.ontop.model.vocabulary.AGG;
 

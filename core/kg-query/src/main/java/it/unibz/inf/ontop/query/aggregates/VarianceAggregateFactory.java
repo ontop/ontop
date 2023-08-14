@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.rdf4j.query.aggregates;
+package it.unibz.inf.ontop.query.aggregates;
 
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.BindingSet;
@@ -16,11 +16,11 @@ public abstract class VarianceAggregateFactory implements AggregateFunctionFacto
 
     @Override
     public AggregateFunction buildFunction(Function<BindingSet, Value> function) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public AggregateCollector getCollector() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 }
