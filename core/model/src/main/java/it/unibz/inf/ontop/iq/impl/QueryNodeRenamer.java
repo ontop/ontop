@@ -100,7 +100,8 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public EmptyNode transform(EmptyNode emptyNode) {
-        return iqFactory.createEmptyNode(emptyNode.getVariables());
+        ImmutableSet<Variable> newVariables = substitutionFactory.apply(renamingSubstitution, emptyNode.getVariables());
+        return iqFactory.createEmptyNode(newVariables);
     }
 
     public TrueNode transform(TrueNode trueNode) {
