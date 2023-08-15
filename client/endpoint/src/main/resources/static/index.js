@@ -109,7 +109,7 @@ $(() => {
                 const endpointUrl = new Request('sparql').url;
                 window.endpointUrl = endpointUrl;
                 $('#endpoint').text(endpointUrl);
-                var yasgui = YASGUI(document.getElementById("yasgui0"), {
+                window.yasgui = YASGUI(document.getElementById("yasgui0"), {
                     yasqe: {sparql: {endpoint: endpointUrl}}
                 });
             }
