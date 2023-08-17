@@ -117,7 +117,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             ImmutableList.Builder<RelationID> builder = ImmutableList.builder();
             while (rs.next()) {
                 RelationID id = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
-                if (!isRelationExcluded(id))
+                if (!isRelationExcluded(id) || settings.exposeSystemTables())
                     builder.add(id);
             }
             return builder.build();
