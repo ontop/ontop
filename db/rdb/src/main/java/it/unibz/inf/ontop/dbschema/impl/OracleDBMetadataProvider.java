@@ -134,6 +134,11 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     @Override
     protected boolean isRelationExcluded(RelationID id) {
+        /*
+        We lose the information of whether a relation is a table or a view that was accessible
+        while checking for these conditions in the original query. Therefore, we exclude ALL
+        relations names that correspond to either system tables OR system views.
+         */
         String schema = getRelationSchema(id);
         String table = getRelationName(id);
         return IGNORED_VIEW_SCHEMAS.contains(schema)
