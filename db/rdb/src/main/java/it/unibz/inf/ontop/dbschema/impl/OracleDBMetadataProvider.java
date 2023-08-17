@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.RelationID;
@@ -62,82 +63,99 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     @Override
     protected String getRelationSchema(RelationID id) { return id.getComponents().size() > SCHEMA_INDEX ? id.getComponents().get(SCHEMA_INDEX).getName() : null; }
 
+    private static final ImmutableSet<String> IGNORED_TABLE_SCHEMAS = ImmutableSet.of("SYS",
+            "GSMADMIN_INTERNAL",
+            "OUTLN",
+            "DBSNMP",
+            "DBSFWUSER",
+            "XDB",
+            "CTXSYS",
+            "MDSYS",
+            "APPQOSSYS",
+            "LBACSYS",
+            "DVSYS",
+            "APPQOSSYS",
+            "WMSYS",
+            "ORDDATA",
+            "AUDSYS");
+
+    private static final ImmutableSet<String> IGNORED_TABLE_PREFIXES = ImmutableSet.of("MVIEW$_",
+            "LOGMNR_",
+            "AQ$_",
+            "DEF$_",
+            "REPCAT$_",
+            "LOGSTDBY$",
+            "OL$");
+
+    private static final ImmutableSet<String> IGNORED_SYSTEM_TABLES = ImmutableSet.of("ROLLING$DIRECTIVES",
+            "SCHEDULER_JOB_ARGS_TBL",
+            "REDO_DB",
+            "REDO_LOG",
+            "ROLLING$DATABASES",
+            "ROLLING$EVENTS",
+            "SCHEDULER_PROGRAM_ARGS",
+            "REPL_SUPPORT_MATRIX",
+            "ROLLING$PARAMETERS",
+            "ROLLING$STATISTICS",
+            "SCHEDULER_PROGRAM_ARGS_TBL",
+            "PRODUCT_PRIVS",
+            "SQLPLUS_PRODUCT_PROFILE",
+            "REPL_VALID_COMPAT",
+            "SCHEDULER_JOB_ARGS",
+            "ROLLING$CONNECTIONS",
+            "ROLLING$PLAN",
+            "HELP",
+            "ROLLING$STATUS");
+
+    private static final ImmutableSet<String> IGNORED_VIEW_PREFIXES = ImmutableSet.of("MVIEW_",
+            "LOGMNR_" +
+            "AQ$_");
+
+    private static final ImmutableSet<String> IGNORED_VIEW_SCHEMAS = ImmutableSet.of("SYS",
+            "GSMADMIN_INTERNAL",
+            "OUTLN",
+            "DBSNMP",
+            "DBSFWUSER",
+            "XDB",
+            "WMSYS",
+            "CTXSYS",
+            "ORDDATA",
+            "ORDSYS",
+            "OLAPSYS",
+            "MDSYS",
+            "LBACSYS",
+            "DVSYS",
+            "APPQOSSYS",
+            "AUDSYS");
+
+    private static ImmutableSet<String> IGNORED_SYSTEM_VIEWS = ImmutableSet.of("SCHEDULER_PROGRAM_ARGS",
+            "SCHEDULER_JOB_ARGS",
+            "PRODUCT_PRIVS");
+
+    @Override
+    protected boolean isRelationExcluded(RelationID id) {
+        String schema = getRelationSchema(id);
+        String table = getRelationName(id);
+        return IGNORED_VIEW_SCHEMAS.contains(schema)
+                || IGNORED_TABLE_SCHEMAS.contains(schema)
+                || (schema.equals("SYSTEM") && IGNORED_SYSTEM_VIEWS.contains(table))
+                || (schema.equals("SYSTEM") && IGNORED_SYSTEM_TABLES.contains(table))
+                || IGNORED_VIEW_PREFIXES.stream()
+                    .anyMatch(table::startsWith)
+                || IGNORED_TABLE_PREFIXES.stream()
+                    .anyMatch(table::startsWith);
+    }
+
     @Override
     protected ResultSet getRelationIDsResultSet() throws SQLException {
         Statement stmt = connection.createStatement();
         stmt.closeOnCompletion();
         // Obtain the relational objects (i.e., tables and views)
-        // filter out all irrelevant table and view names
         return stmt.executeQuery("SELECT NULL AS TABLE_CAT, OWNER as TABLE_SCHEM, table_name as TABLE_NAME " +
                 "FROM all_tables " +
-                "WHERE " +
-                "   NOT table_name LIKE 'MVIEW$_%' AND " +
-                "   NOT table_name LIKE 'LOGMNR_%' AND " +
-                "   NOT table_name LIKE 'AQ$_%' AND " +
-                "   NOT table_name LIKE 'DEF$_%' AND " +
-                "   NOT table_name LIKE 'REPCAT$_%' AND " +
-                "   NOT table_name LIKE 'LOGSTDBY$%' AND " +
-                "   NOT table_name LIKE 'OL$%' AND" +
-                "   owner NOT IN ('SYS', " +
-                        "'GSMADMIN_INTERNAL', " +
-                        "'OUTLN', " +
-                        "'DBSNMP', " +
-                        "'DBSFWUSER', " +
-                        "'XDB', " +
-                        "'CTXSYS', " +
-                        "'MDSYS', " +
-                        "'APPQOSSYS', " +
-                        "'LBACSYS', " +
-                        "'DVSYS', " +
-                        "'APPQOSSYS', " +
-                        "'WMSYS', " +
-                        "'ORDDATA', " +
-                        "'AUDSYS') AND " +
-                "   NOT (owner = 'SYSTEM' AND table_name IN ('ROLLING$DIRECTIVES', " +
-                        "'SCHEDULER_JOB_ARGS_TBL', " +
-                        "'REDO_DB', " +
-                        "'REDO_LOG', " +
-                        "'ROLLING$DATABASES', " +
-                        "'ROLLING$EVENTS', " +
-                        "'SCHEDULER_PROGRAM_ARGS', " +
-                        "'REPL_SUPPORT_MATRIX', " +
-                        "'ROLLING$PARAMETERS', " +
-                        "'ROLLING$STATISTICS', " +
-                        "'SCHEDULER_PROGRAM_ARGS_TBL', " +
-                        "'PRODUCT_PRIVS', " +
-                        "'SQLPLUS_PRODUCT_PROFILE', " +
-                        "'REPL_VALID_COMPAT', " +
-                        "'SCHEDULER_JOB_ARGS', " +
-                        "'ROLLING$CONNECTIONS', " +
-                        "'ROLLING$PLAN', " +
-                        "'HELP', " +
-                        "'ROLLING$STATUS' )) " +
                 "UNION ALL " +
                 "SELECT NULL AS TABLE_CAT, owner as TABLE_SCHEM, view_name as TABLE_NAME " +
-                "FROM all_views " +
-                "WHERE " +
-                "   NOT view_name LIKE 'MVIEW_%' AND " +
-                "   NOT view_name LIKE 'LOGMNR_%' AND " +
-                "   NOT view_name LIKE 'AQ$_%' AND " +
-                "   owner NOT IN ('SYS', " +
-                                "'GSMADMIN_INTERNAL', " +
-                                "'OUTLN', " +
-                                "'DBSNMP', " +
-                                "'DBSFWUSER', " +
-                                "'XDB', " +
-                                "'WMSYS', " +
-                                "'CTXSYS', " +
-                                "'ORDDATA', " +
-                                "'ORDSYS', " +
-                                "'OLAPSYS', " +
-                                "'MDSYS', " +
-                                "'LBACSYS', " +
-                                "'DVSYS', " +
-                                "'APPQOSSYS', " +
-                                "'AUDSYS') AND " +
-                "   NOT (owner = 'SYSTEM' AND view_name IN ('SCHEDULER_PROGRAM_ARGS', " +
-                                "'SCHEDULER_JOB_ARGS', " +
-                                "'PRODUCT_PRIVS'))");
+                "FROM all_views");
     }
 
     @Override
