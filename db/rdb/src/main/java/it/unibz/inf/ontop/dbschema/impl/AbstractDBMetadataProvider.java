@@ -104,6 +104,10 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         // Does nothing
     }
 
+    protected OntopOBDASettings getSettings() {
+        return settings;
+    }
+
 
     protected boolean isRelationExcluded(RelationID id) { return false; }
 
