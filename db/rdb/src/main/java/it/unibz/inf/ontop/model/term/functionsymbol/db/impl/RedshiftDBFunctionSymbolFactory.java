@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Function;
 
 public class RedshiftDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
@@ -179,33 +178,22 @@ public class RedshiftDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
                 Serializers.getOperatorSerializer("~"));
     }
 
+    /**
+     * NOTE: Redshift only allows four possible RegEx parameters:
+     *      c - case sensitive.
+     *      i - case insensitive.
+     *      e - instead use the first subexpression in `pattern`.
+     *      p - Use the Perl Compatible Regular Expression dialect instead.
+     */
     @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches3() {
-        return new DBBooleanFunctionSymbolWithSerializerImpl(REGEXP_LIKE_STR + "3",
-                ImmutableList.of(abstractRootDBType, abstractRootDBType, abstractRootType), dbBooleanType, false,
-                /*
-                 * TODO: is it safe to assume the flags are not empty?
-                 */
+        return new DBBooleanFunctionSymbolWithSerializerImpl(REGEXP_LIKE_STR + "3", ImmutableList.of(abstractRootDBType, abstractRootDBType, abstractRootType), dbBooleanType, false,
                 ((terms, termConverter, termFactory) -> {
-                    /*
-                     * Normalizes the flag
-                     *   - DOT_ALL: s -> n
-                     */
-                    ImmutableTerm flagTerm = termFactory.getDBReplace(terms.get(2),
-                            termFactory.getDBStringConstant("s"),
-                            termFactory.getDBStringConstant("n"));
-
-                    ImmutableTerm extendedPatternTerm = termFactory.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(
-                                    termFactory.getDBStringConstant("(?"),
-                                    flagTerm,
-                                    termFactory.getDBStringConstant(")"),
-                                    terms.get(1)))
-                            .simplify();
-
-
-                    return String.format("%s ~ %s",
+                    //REGEXP_INSTR(string, pattern, starting_position, number_of_occurrence, return_start_or_end_index, parameters) -> index (or 0 if not found)
+                    return String.format("REGEXP_INSTR(%s, %s, 1, 1, 0, %s) > 0",
                             termConverter.apply(terms.get(0)),
-                            termConverter.apply(extendedPatternTerm));
+                            termConverter.apply(terms.get(1)),
+                            termConverter.apply(terms.get(2)));
                 }));
     }
 
