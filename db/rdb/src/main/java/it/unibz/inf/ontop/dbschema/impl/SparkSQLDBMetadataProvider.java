@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -66,6 +67,23 @@ public class SparkSQLDBMetadataProvider extends AbstractDBMetadataProvider {
         return defaultCatalog == null
                 ? new RelationIDImpl(ImmutableList.of(table, schema))
                 : new RelationIDImpl(ImmutableList.of(table, schema, defaultCatalog));
+    }
+
+    @Override
+    protected ResultSet getRelationIDsResultSet() throws SQLException {
+        if(getSettings().exposeSystemTables()) {
+            try {
+                Statement stmt = connection.createStatement();
+                stmt.closeOnCompletion();
+                // Obtain the relational objects (i.e., tables and views)
+                return stmt.executeQuery("SELECT table_catalog as TABLE_CAT, table_schema as TABLE_SCHEM, TABLE_NAME " +
+                        "from system.information_schema.tables " +
+                        "WHERE table_type in ('TABLE', 'VIEW', 'EXTERNAL')");
+            } catch (SQLException e) {
+                LOGGER.warn("Unable to load system tables due to SQLException: " + e.getMessage());
+            }
+        }
+        return metadata.getTables(null, null, null, new String[] { "TABLE", "VIEW", "SYSTEM" });
     }
 
     @Override
