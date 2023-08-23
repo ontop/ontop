@@ -557,7 +557,7 @@
         <dependency>
             <groupId>org.apache.arrow</groupId>
             <artifactId>flight-sql-jdbc-driver</artifactId>
-            <version>11.0.0</version>
+            <version>13.0.0</version>
             <exclusions>
                 <!-- cause compilation errors  -->
                 <exclusion>
