@@ -163,6 +163,10 @@
     "type": "Boolean",
     "description": "Default value: `false`. If true, the pattern `?s ?p <to_describe>` is also considered when answering a DESCRIBE query."
   },
+  "ontop.registerCustomSPARQLAggregateFunctions": {
+    "type": "Boolean",
+    "description": "Default value: `true`. If true, Ontop's custom aggregate functions are registered in the RDF4J SPARQL parser's aggregate function registry."
+  },
   "ontop.query.defaultTimeout": {
     "type": "Integer",
     "description": "Query timeout (in seconds) assigned to the DB engine. Has no effect if negative or equal to 0."
