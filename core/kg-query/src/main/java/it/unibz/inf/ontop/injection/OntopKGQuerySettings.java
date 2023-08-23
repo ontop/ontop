@@ -9,5 +9,8 @@ public interface OntopKGQuerySettings extends OntopOBDASettings, OntopOptimizati
      */
     boolean isFixedObjectIncludedInDescribe();
 
+    boolean isCustomSPARQLFunctionRegistrationEnabled();
+
     String INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE = "ontop.includeFixedObjectPositionInDescribe";
+    String REGISTER_CUSTON_SPARQL_AGGREGATE_FUNCTIONS = "ontop.registerCustomSPARQLAggregateFunctions";
 }
