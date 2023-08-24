@@ -8,9 +8,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
@@ -20,6 +18,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -33,13 +32,12 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
+import it.unibz.inf.ontop.utils.impl.VariableGeneratorImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @JsonDeserialize(using = JsonLens.JSONLensDeserializer.class)
 public abstract class JsonLens extends JsonOpenObject {
@@ -174,6 +172,58 @@ public abstract class JsonLens extends JsonOpenObject {
                 newConstructionNode,
                 iqTreeBeforeIRISafeConstraints.applyFreshRenaming(renaming))
                 .normalizeForOptimization(variableGenerator);
+    }
+
+    protected void insertTransitiveFunctionalDependencies(ImmutableSet<FunctionalDependencyConstruct> previousDependencies, NamedRelationDefinition relation, CoreSingletons coreSingletons) throws AttributeNotFoundException, MetadataExtractionException {
+        var uselessVariableGenerator = new VariableGeneratorImpl(ImmutableSet.of(), coreSingletons.getTermFactory());
+        var var2Attr = relation.getAttributes().stream()
+                .collect(ImmutableCollectors.toMap(
+                        attr -> uselessVariableGenerator.generateNewVariable(attr.getID().getName()),
+                        attr -> attr
+                ));
+        var id2Var = var2Attr.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        entry -> entry.getValue().getID(),
+                        Map.Entry::getKey)
+                );
+        if(previousDependencies.stream()
+                .anyMatch(fd ->
+                                fd.getDeterminants().stream()
+                                        .anyMatch(id -> !id2Var.containsKey(id))
+                                || fd.getDeterminants().stream()
+                                        .anyMatch(id -> !id2Var.containsKey(id))
+                        ))
+            throw new MetadataExtractionException(String.format(
+                    "Cannot find attribute for Functional Dependency of %s.", relation.getID()));
+        FunctionalDependencies allDependencies = previousDependencies.stream()
+                .map(fd -> Maps.immutableEntry(
+                        fd.getDeterminants().stream()
+                                .map(id2Var::get).collect(ImmutableCollectors.toSet()),
+                        fd.getDependents().stream()
+                                .map(id2Var::get).collect(ImmutableCollectors.toSet())
+                ))
+                .collect(FunctionalDependencies.toFunctionalDependencies());
+        for(var entry : allDependencies.stream().collect(ImmutableCollectors.toList())) {
+            addTransitiveDependency(
+                    relation,
+                    entry.getKey().stream()
+                            .map(var2Attr::get)
+                            .collect(ImmutableCollectors.toSet()),
+                    entry.getValue().stream()
+                            .map(var2Attr::get)
+                            .collect(ImmutableCollectors.toSet()));
+        }
+    }
+
+    private void addTransitiveDependency(NamedRelationDefinition relation, ImmutableSet<Attribute> determinants, Set<Attribute> dependents) throws AttributeNotFoundException {
+        var builder = FunctionalDependency.defaultBuilder(relation);
+        for (Attribute determinant : determinants) {
+            builder.addDeterminant(determinant.getID());
+        }
+        for (Attribute attribute : dependents) {
+            builder.addDependent(attribute.getID());
+        }
+        builder.build();
     }
 
 

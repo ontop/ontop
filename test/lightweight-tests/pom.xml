@@ -6,7 +6,7 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-test</artifactId>
-        <version>5.1.0-SNAPSHOT</version>
+        <version>5.1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-lightweight-tests</artifactId>
@@ -539,7 +539,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-redshiftserverless</artifactId>
-            <version>1.12.251</version>
+            <version>1.12.528</version>
             <scope>test</scope>
         </dependency>
         <dependency>

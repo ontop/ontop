@@ -284,6 +284,28 @@ public class ExpressionParserTest {
     }
 
     @Test
+    public void equalsTo_constant_with_quoteTest() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X = 'Jane''s dogs'", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getNotYetTypedEquality(
+                v,
+                TERM_FACTORY.getDBStringConstant("Jane's dogs")), translation.get(0));
+    }
+
+    @Test
+    public void equalsTo_constant_with_quote2Test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X = 'Jane''''s dogs'", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getNotYetTypedEquality(
+                v,
+                TERM_FACTORY.getDBStringConstant("Jane''s dogs")), translation.get(0));
+    }
+
+    @Test
     public void greater_than_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X > 3", ImmutableMap.of(

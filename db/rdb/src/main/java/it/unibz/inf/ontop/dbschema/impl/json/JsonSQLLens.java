@@ -98,7 +98,7 @@ public class JsonSQLLens extends JsonLens {
             insertUniqueConstraints(relation, idFactory, uniqueConstraints.added);
 
         if (otherFunctionalDependencies != null)
-            insertFunctionalDependencies(relation, idFactory, otherFunctionalDependencies.added);
+            insertFunctionalDependencies(relation, idFactory, otherFunctionalDependencies.added, dbParameters.getCoreSingletons());
 
     }
 
@@ -186,21 +186,25 @@ public class JsonSQLLens extends JsonLens {
 
     private void insertFunctionalDependencies(NamedRelationDefinition relation,
                                               QuotedIDFactory idFactory,
-                                              List<JsonSQLLens.AddFunctionalDependency> addFunctionalDependencies)
+                                              List<JsonSQLLens.AddFunctionalDependency> addFunctionalDependencies,
+                                              CoreSingletons coreSingletons)
             throws MetadataExtractionException {
 
-        for (JsonSQLLens.AddFunctionalDependency addFD : addFunctionalDependencies) {
-            FunctionalDependency.Builder builder = FunctionalDependency.defaultBuilder(relation);
-
-            try {
-                JsonMetadata.deserializeAttributeList(idFactory, addFD.determinants, builder::addDeterminant);
-                JsonMetadata.deserializeAttributeList(idFactory, addFD.dependents, builder::addDependent);
-                builder.build();
-            }
-            catch (MetadataExtractionException e) {
-                throw new MetadataExtractionException(String.format(
-                        "Cannot find attribute for Functional Dependency %s", addFD.determinants));
-            }
+        try {
+            insertTransitiveFunctionalDependencies(
+                    addFunctionalDependencies.stream()
+                        .map(jsonFD -> new FunctionalDependencyConstruct(
+                            jsonFD.determinants.stream()
+                                    .map(idFactory::createAttributeID)
+                                    .collect(ImmutableCollectors.toSet()),
+                            jsonFD.dependents.stream()
+                                    .map(idFactory::createAttributeID)
+                                    .collect(ImmutableCollectors.toSet())))
+                        .collect(ImmutableCollectors.toSet()),
+                    relation, coreSingletons);
+        } catch (AttributeNotFoundException e) {
+            throw new MetadataExtractionException(String.format(
+                    "Cannot find attribute %s for Functional Dependency.", e.getAttributeID()));
         }
 
     }

@@ -7,7 +7,7 @@ import java.util.Collection;
 public interface JdbcRegistry {
 	void addJdbcDriver(String className, URL location) throws JdbcRegistryException;
 
-    void removeJdbcDriver(String className);
+    void removeJdbcDriver(String className) throws JdbcRegistryException;
 
     Collection<Driver> getJdbcDrivers();
 }

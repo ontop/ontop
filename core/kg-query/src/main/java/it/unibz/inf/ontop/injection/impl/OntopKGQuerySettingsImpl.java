@@ -30,4 +30,9 @@ public class OntopKGQuerySettingsImpl extends OntopOBDASettingsImpl implements O
     public boolean isFixedObjectIncludedInDescribe() {
         return getRequiredBoolean(INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE);
     }
+
+    @Override
+    public boolean isCustomSPARQLFunctionRegistrationEnabled() {
+        return getRequiredBoolean(REGISTER_CUSTON_SPARQL_AGGREGATE_FUNCTIONS);
+    }
 }

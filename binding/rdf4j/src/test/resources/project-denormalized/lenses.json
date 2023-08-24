@@ -1,0 +1,44 @@
+{
+  "relations": [
+    {
+      "name": [
+        "\"lenses\"",
+        "\"projects\""
+      ],
+      "baseRelation": [
+        "\"project\""
+      ],
+      "otherFunctionalDependencies": {
+        "added": [
+          {
+            "determinants": [
+              "\"mun_id\""
+            ],
+            "dependents": [
+              "\"mun_label\"",
+              "\"province_id\""
+            ]
+          },
+          {
+            "determinants": [
+              "\"province_id\""
+            ],
+            "dependents": [
+              "\"province_label\"",
+              "\"region_id\""
+            ]
+          },
+          {
+            "determinants": [
+              "\"region_id\""
+            ],
+            "dependents": [
+              "\"region_label\""
+            ]
+          }
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}

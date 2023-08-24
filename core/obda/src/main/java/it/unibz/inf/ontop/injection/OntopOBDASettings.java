@@ -17,6 +17,11 @@ public interface OntopOBDASettings extends OntopModelSettings {
     boolean ignoreInvalidMappingEntries();
     boolean ignoreInvalidLensEntries();
 
+    /**
+     * If true, system tables will also be accessible by ontop.
+     */
+    boolean exposeSystemTables();
+
     //--------------------------
     // Keys
     //--------------------------
@@ -25,4 +30,5 @@ public interface OntopOBDASettings extends OntopModelSettings {
     String ALLOW_RETRIEVING_BLACK_BOX_VIEW_METADATA_FROM_DB = "ontop.allowRetrievingBlackBoxViewMetadataFromDB";
     String IGNORE_INVALID_MAPPING_ENTRIES = "ontop.ignoreInvalidMappingEntries";
     String IGNORE_INVALID_LENS_ENTRIES = "ontop.ignoreInvalidLensEntries";
+    String EXPOSE_SYSTEM_TABLES = "ontop.exposeSystemTables";
 }
