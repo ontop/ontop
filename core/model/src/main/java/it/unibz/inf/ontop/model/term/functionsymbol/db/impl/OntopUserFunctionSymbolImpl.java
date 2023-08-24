@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
+import javax.annotation.Nullable;
+
 public class OntopUserFunctionSymbolImpl extends AbstractDBAuthorizationFunctionSymbol {
 
     public static final String ONTOP_USER = "ONTOP_USER";
@@ -16,8 +18,11 @@ public class OntopUserFunctionSymbolImpl extends AbstractDBAuthorizationFunction
     }
 
     @Override
-    public ImmutableTerm simplifyWithContext(ImmutableList<ImmutableTerm> terms, QueryContext queryContext,
+    public ImmutableTerm simplifyWithContext(ImmutableList<ImmutableTerm> terms, @Nullable QueryContext queryContext,
                                         TermFactory termFactory) {
+        if (queryContext == null)
+            return termFactory.getNullConstant();
+
         return queryContext.getUsername()
                 .map(termFactory::getDBStringConstant)
                 .map(c -> (Constant) c)

@@ -16,6 +16,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.AuthorizationFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BooleanAuthorizationFunctionSymbol;
 
+import javax.annotation.Nullable;
+
 @Singleton
 public class AuthorizationFunctionEvaluatorImpl implements AuthorizationFunctionEvaluator {
 
@@ -27,7 +29,7 @@ public class AuthorizationFunctionEvaluatorImpl implements AuthorizationFunction
     }
 
     @Override
-    public IQ optimize(IQ iq, QueryContext queryContext) {
+    public IQ optimize(IQ iq, @Nullable QueryContext queryContext) {
         var transformer = new AuthorizationFunctionTransformer(queryContext, coreSingletons);
 
         var initialTree = iq.getTree();
@@ -40,9 +42,10 @@ public class AuthorizationFunctionEvaluatorImpl implements AuthorizationFunction
 
     protected static class AuthorizationFunctionTransformer extends AbstractExpressionTransformer {
 
+        @Nullable
         private final QueryContext queryContext;
 
-        protected AuthorizationFunctionTransformer(QueryContext queryContext, CoreSingletons coreSingletons) {
+        protected AuthorizationFunctionTransformer(@Nullable QueryContext queryContext, CoreSingletons coreSingletons) {
             super(coreSingletons.getIQFactory(), coreSingletons.getUniqueTermTypeExtractor(), coreSingletons.getTermFactory());
             this.queryContext = queryContext;
         }
