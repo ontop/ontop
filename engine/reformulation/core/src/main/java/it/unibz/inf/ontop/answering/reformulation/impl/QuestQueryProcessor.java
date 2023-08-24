@@ -80,7 +80,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		long beginning = System.currentTimeMillis();
 
-		IQ cachedQuery = queryCache.get(inputQuery);
+		IQ cachedQuery = queryCache.get(inputQuery, queryContext);
 		if (cachedQuery != null) {
 			queryLogger.declareReformulationFinishedAndSerialize(cachedQuery,true);
 			return cachedQuery;
@@ -116,7 +116,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 				queryLogger.setPlannedQuery(plannedQuery);
 
 				IQ executableQuery = generateExecutableQuery(plannedQuery);
-				queryCache.put(inputQuery, executableQuery);
+				queryCache.put(inputQuery, queryContext, executableQuery);
 				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
 				LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
 				return executableQuery;

@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -20,7 +21,7 @@ public class QueryContextImpl implements QueryContext {
     public static final String ROLES_HTTP_HEADER_LOWERCASE = "x-roles";
 
     @Nullable
-    private String username;
+    private final String username;
     private final ImmutableSet<String> rolesOrGroups;
 
     @AssistedInject
@@ -49,5 +50,18 @@ public class QueryContextImpl implements QueryContext {
     @Override
     public ImmutableSet<String> getRolesOrGroups() {
         return rolesOrGroups;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        QueryContextImpl that = (QueryContextImpl) o;
+        return Objects.equals(username, that.username) && Objects.equals(rolesOrGroups, that.rolesOrGroups);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, rolesOrGroups);
     }
 }

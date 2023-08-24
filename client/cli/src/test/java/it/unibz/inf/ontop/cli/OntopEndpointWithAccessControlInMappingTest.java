@@ -40,17 +40,24 @@ public class OntopEndpointWithAccessControlInMappingTest {
         repo.setAdditionalHttpHeaders(ImmutableMap.of("x-roles", "librarian"));
         repo.init();
 
-        try (RepositoryConnection conn = repo.getConnection()) {
-            String queryString = "PREFIX : <http://meraka/moss/exampleBooks.owl#>\n" +
-                    "SELECT ?x ?edition\n" +
-                    "WHERE { ?x a :Book; :hasEdition ?z.\n" +
-                    "\t\t ?z a :SpecialEdition; :editionNumber ?edition\n" +
-                    "}";
+        String queryString = "PREFIX : <http://meraka/moss/exampleBooks.owl#>\n" +
+                "SELECT ?x ?edition\n" +
+                "WHERE { ?x a :Book; :hasEdition ?z.\n" +
+                "\t\t ?z a :SpecialEdition; :editionNumber ?edition\n" +
+                "}";
 
+        try (RepositoryConnection conn = repo.getConnection()) {
             TupleQuery tupleQuery = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
             try (TupleQueryResult result = tupleQuery.evaluate()) {
                 long count = result.stream().count();
                 assertEquals(7, count);
+            }
+        }
+
+        try (RepositoryConnection conn = repo.getConnection()) {
+            TupleQuery tupleQuery = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+            try (TupleQueryResult result = tupleQuery.evaluate()) {
+                result.stream().count();
             }
         }
     }
