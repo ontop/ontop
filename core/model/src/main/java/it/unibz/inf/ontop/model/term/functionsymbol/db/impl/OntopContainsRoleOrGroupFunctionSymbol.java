@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 
 public class OntopContainsRoleOrGroupFunctionSymbol extends AbstractBooleanAuthorizationFunctionSymbol {
 
-    public static final String ONTOP_CONTAINS_ROLE_OR_GROUP = "ontop_contains_role_or_group";
+    public static final String ONTOP_CONTAINS_ROLE_OR_GROUP = "ONTOP_CONTAINS_ROLE_OR_GROUP";
     protected OntopContainsRoleOrGroupFunctionSymbol(DBTermType dbStringType, DBTermType dbBooleanTermType) {
         super(ONTOP_CONTAINS_ROLE_OR_GROUP, ImmutableList.of(dbStringType), dbBooleanTermType);
     }

@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 
 public class OntopUserFunctionSymbolImpl extends AbstractDBAuthorizationFunctionSymbol {
 
-    public static final String ONTOP_USER = "ontop_user";
+    public static final String ONTOP_USER = "ONTOP_USER";
 
     protected OntopUserFunctionSymbolImpl(DBTermType dbBooleanTermType) {
         super(ONTOP_USER, ImmutableList.of(),dbBooleanTermType);
