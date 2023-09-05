@@ -265,6 +265,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final Map<Integer, TrueOrNullFunctionSymbol> trueOrNullMap;
 
     /**
+     * For the IN functions
+     */
+    private final Map<Integer, DBInFunctionSymbolImpl> dbInMap;
+
+    /**
      * Coalesce functions according to their arities
      */
     private final Map<Integer, DBFunctionSymbol> coalesceMap;
@@ -369,6 +374,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.strictNEqMap = new ConcurrentHashMap<>();
         this.falseOrNullMap = new ConcurrentHashMap<>();
         this.trueOrNullMap = new ConcurrentHashMap<>();
+        this.dbInMap = new ConcurrentHashMap<>();
         this.castMap = new ConcurrentHashMap<>();
         this.iriTemplateMap = new ConcurrentHashMap<>();
         this.bnodeTemplateMap = new ConcurrentHashMap<>();
@@ -866,6 +872,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return containsFunctionSymbol;
     }
 
+    @Override
+    public DBBooleanFunctionSymbol getDBIn(int arity) {
+        return dbInMap
+                .computeIfAbsent(arity, (this::createInFunctionSymbol));
+    }
     @Override
     public DBBooleanFunctionSymbol getDBLike() {
         return dbLikeFunctionSymbol;
@@ -1447,6 +1458,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected TrueOrNullFunctionSymbol createTrueOrNullFunctionSymbol(int arity) {
         return new TrueOrNullFunctionSymbolImpl(arity, dbBooleanType);
+    }
+
+    protected DBInFunctionSymbolImpl createInFunctionSymbol(int arity) {
+        return new DBInFunctionSymbolImpl(arity, rootDBType, dbBooleanType);
     }
 
     protected DBFunctionSymbol createMD5FunctionSymbol() {

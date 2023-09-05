@@ -58,6 +58,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(BooleanExpressionPushDownOptimizer.class);
         bindFromSettings(PreventDistinctOptimizer.class);
         bindFromSettings(PreventDistinctProjectionSplitter.class);
+        bindFromSettings(DisjunctionOfEqualitiesMergingSimplifier.class);
 
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
 

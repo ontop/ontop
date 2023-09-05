@@ -22,6 +22,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     private final AggregationSplitter aggregationSplitter;
     private final FlattenLifter flattenLifter;
     private final PreventDistinctOptimizer preventDistinctOptimizer;
+    private final DisjunctionOfEqualitiesMergingSimplifier disjunctionOfEqualitiesMergingSimplifier;
 
     @Inject
     private GeneralStructuralAndSemanticIQOptimizerImpl(UnionAndBindingLiftOptimizer bindingLiftOptimizer,
@@ -31,7 +32,8 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
                                                         LensUnfolder lensUnfolder,
                                                         AggregationSplitter aggregationSplitter,
                                                         FlattenLifter flattenLifter,
-                                                        PreventDistinctOptimizer preventDistinctOptimizer) {
+                                                        PreventDistinctOptimizer preventDistinctOptimizer,
+                                                        DisjunctionOfEqualitiesMergingSimplifier disjunctionOfEqualitiesMergingSimplifier) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
         this.orderBySimplifier = orderBySimplifier;
@@ -40,6 +42,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         this.aggregationSplitter = aggregationSplitter;
         this.flattenLifter = flattenLifter;
         this.preventDistinctOptimizer = preventDistinctOptimizer;
+        this.disjunctionOfEqualitiesMergingSimplifier = disjunctionOfEqualitiesMergingSimplifier;
     }
 
     @Override
@@ -87,8 +90,11 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         IQ optimizedQuery = orderBySimplifier.optimize(queryAfterAggregationSplitting);
         LOGGER.debug("New query after simplifying the order by node:\n{}\n", optimizedQuery);
 
+        IQ mergedDisjunctionsQuery = disjunctionOfEqualitiesMergingSimplifier.optimize(optimizedQuery);
+        LOGGER.debug("New query after simplifying disjunctions of equalities:\n{}\n", mergedDisjunctionsQuery);
+
         // Called a second time in case the order of nodes was changed during previous optimization steps.
-        IQ resultingQuery = preventDistinctOptimizer.optimize(optimizedQuery);
+        IQ resultingQuery = preventDistinctOptimizer.optimize(mergedDisjunctionsQuery);
         LOGGER.debug("Query tree after preventing DISTINCT for non-supported data types, second pass:\n{}\n", resultingQuery);
 
         return resultingQuery;
