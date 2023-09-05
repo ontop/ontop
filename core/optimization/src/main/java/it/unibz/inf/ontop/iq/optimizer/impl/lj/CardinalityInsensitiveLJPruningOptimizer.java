@@ -111,7 +111,9 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
 
         @Override
         public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            if (leftChild.getVariables().containsAll(variablesUsedByAncestors))
+            var treeVariables = tree.getVariables();
+
+            if (treeVariables.isEmpty() || leftChild.getVariables().containsAll(Sets.intersection(variablesUsedByAncestors, treeVariables)))
                 // Prunes the right child
                 return leftChild.acceptTransformer(this);
 
