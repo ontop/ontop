@@ -18,6 +18,11 @@ public interface OntopModelSettings {
     boolean isLimitOptimizationDisabled();
 
     /**
+     * If false, user information is not extracted.
+     */
+    boolean isAuthorizationEnabled();
+
+    /**
      * Not for end-users!
      * Please avoid using that class.
      */
@@ -49,4 +54,5 @@ public interface OntopModelSettings {
     String CARDINALITY_MODE = "ontop.cardinalityMode";
     String TEST_MODE = "ontop.testMode";
     String DISABLE_LIMIT_OPTIMIZATION = "ontop.disableLimitOptimization";
+    String AUTHORIZATION = "ontop.authorization";
 }

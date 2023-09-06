@@ -104,6 +104,11 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
+    public boolean isAuthorizationEnabled() {
+        return systemSettings.isAuthorizationEnabled();
+    }
+
+    @Override
     public boolean isKeepAliveEnabled() {
         return systemSettings.isKeepAliveEnabled();
     }

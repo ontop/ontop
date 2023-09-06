@@ -18,7 +18,7 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
     private final Properties properties;
     private final CardinalityPreservationMode cardinalityMode;
     private final boolean testMode;
-    private final boolean dsiableLimitOptimization;
+    private final boolean disableLimitOptimization;
 
     /**
      * Beware: immutable class!
@@ -40,7 +40,7 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
 
         cardinalityMode = extractCardinalityMode(properties);
         testMode = extractBoolean(properties, OntopModelSettings.TEST_MODE);
-        dsiableLimitOptimization = extractBoolean(properties, OntopModelSettings.DISABLE_LIMIT_OPTIMIZATION);
+        disableLimitOptimization = extractBoolean(properties, OntopModelSettings.DISABLE_LIMIT_OPTIMIZATION);
     }
 
     private static CardinalityPreservationMode extractCardinalityMode(Properties properties)
@@ -109,7 +109,12 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
 
     @Override
     public boolean isLimitOptimizationDisabled() {
-        return dsiableLimitOptimization;
+        return disableLimitOptimization;
+    }
+
+    @Override
+    public boolean isAuthorizationEnabled() {
+        return getRequiredBoolean(AUTHORIZATION);
     }
 
     /**
