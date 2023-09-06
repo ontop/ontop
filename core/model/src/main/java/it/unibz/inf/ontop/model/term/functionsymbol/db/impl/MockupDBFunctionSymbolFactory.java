@@ -85,6 +85,16 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    protected DBFunctionSymbol createDBStdev(DBTermType termType, boolean isPop, boolean isDistinct) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBVariance(DBTermType termType, boolean isPop, boolean isDistinct) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
     protected DBFunctionSymbol createDBMin(DBTermType termType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }

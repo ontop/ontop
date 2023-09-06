@@ -99,4 +99,12 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
         return id.getComponents().get(TABLE_INDEX).getName();
     }
 
+    @Override
+    protected ResultSet getRelationIDsResultSet() throws SQLException {
+        return metadata.getTables(null, null, null, getSettings().exposeSystemTables()
+                ? new String[] { "TABLE", "VIEW", "MATERIALIZED VIEW", "SYSTEM_TABLE", "SYSTEM_VIEW" }
+                : new String[] { "TABLE", "VIEW", "MATERIALIZED VIEW"});
+
+    }
+
 }

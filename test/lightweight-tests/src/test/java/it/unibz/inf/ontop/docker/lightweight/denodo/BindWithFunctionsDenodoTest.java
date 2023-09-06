@@ -139,4 +139,9 @@ public class BindWithFunctionsDenodoTest extends AbstractBindTestWithFunctions {
     public void testDateTruncGroupBy() {
         super.testDateTruncGroupBy();
     }
+
+    @Override
+    protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
+        return ImmutableSet.of("\"215.340000\"^^xsd:decimal");
+    }
 }

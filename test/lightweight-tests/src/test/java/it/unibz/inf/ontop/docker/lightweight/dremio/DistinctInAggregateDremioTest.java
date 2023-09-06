@@ -83,4 +83,52 @@ public class DistinctInAggregateDremioTest extends AbstractDistinctInAggregateTe
         ImmutableSet results = executeQueryAndCompareBindingLexicalValues(readQueryFile(groupConcatDistinctQueryFile));
         Assertions.assertTrue(results.equals(getTuplesForConcat1()) || results.equals(getTuplesForConcat2()));
     }
+
+    @Override
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForStdev() {
+        return ImmutableSet.of(
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("1"),
+                        "pop", "\"4.496912521077347\"^^xsd:decimal",
+                        "samp", "\"5.507570547286101\"^^xsd:decimal",
+                        "stdev", "\"5.507570547286101\"^^xsd:decimal"
+                ),
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("3"),
+                        "pop", "\"5.5\"^^xsd:decimal",
+                        "samp", "\"7.7781745930520225\"^^xsd:decimal",
+                        "stdev", "\"7.7781745930520225\"^^xsd:decimal"
+                ),
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("8"),
+                        "pop", "\"6.0\"^^xsd:decimal",
+                        "samp", "\"8.48528137423857\"^^xsd:decimal",
+                        "stdev", "\"8.48528137423857\"^^xsd:decimal"
+                )
+        );
+    }
+
+    @Override
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForVariance() {
+        return ImmutableSet.of(
+                ImmutableMap.of(
+                        "p", buildAnswerIRI("1"),
+                        "pop", "\"20.222222222222218\"^^xsd:decimal",
+                        "samp", "\"30.33333333333333\"^^xsd:decimal",
+                        "variance", "\"30.33333333333333\"^^xsd:decimal"
+                ),
+                ImmutableMap.of(
+                        "p", buildAnswerIRI("3"),
+                        "pop", "\"30.25\"^^xsd:decimal",
+                        "samp", "\"60.5\"^^xsd:decimal",
+                        "variance", "\"60.5\"^^xsd:decimal"
+                ),
+                ImmutableMap.of(
+                        "p", buildAnswerIRI("8"),
+                        "pop", "\"36.0\"^^xsd:decimal",
+                        "samp", "\"72.0\"^^xsd:decimal",
+                        "variance", "\"72.0\"^^xsd:decimal"
+                )
+        );
+    }
 }

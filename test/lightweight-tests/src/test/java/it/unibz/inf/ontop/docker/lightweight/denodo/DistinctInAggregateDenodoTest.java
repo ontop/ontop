@@ -52,4 +52,18 @@ public class DistinctInAggregateDenodoTest extends AbstractDistinctInAggregateTe
     public void testGroupConcatDistinct() throws Exception {
         super.testGroupConcatDistinct();
     }
+
+    @Disabled("Distinct statistical functions are not supported by this dialect.")
+    @Test
+    @Override
+    public void testStdevDistinct() throws Exception {
+        super.testStdevDistinct();
+    }
+
+    @Disabled("Distinct statistical functions are not supported by this dialect.")
+    @Test
+    @Override
+    public void testVarianceDistinct() throws Exception {
+        super.testVarianceDistinct();
+    }
 }
