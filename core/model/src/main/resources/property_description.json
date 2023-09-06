@@ -190,5 +190,9 @@
   "ontop.http.cache.staleIfError": {
     "type": "Integer",
     "description": "DEPRECATED. Please use `ontop.http.cacheControl` instead."
+  },
+  "ontop.authorization": {
+    "type": "Boolean",
+    "description": "Default value: `false`. If true, extracts user, group and role information from HTTP headers."
   }
 }
