@@ -84,6 +84,12 @@ public class ExpressionParser {
             .put("MAX", this::getMax)
             .put("SUM", this::getSum)
             .put("AVG", this::getAvg)
+            .put("STDDEV", this::getStddev)
+            .put("STDDEV_POP", this::getStddevPop)
+            .put("STDDEV_SAMP", this::getStddevSamp)
+            .put("VARIANCE", this::getVariance)
+            .put("VAR_POP", this::getVarPop)
+            .put("VAR_SAMP", this::getVarSamp)
             // Array functions (PostgreSQL) change cardinality
             .put("UNNEST", this::reject)
             .put("JSON_EACH", this::reject)
@@ -172,6 +178,30 @@ public class ExpressionParser {
         return reject(function, termVisitor);
     }
 
+    protected ImmutableFunctionalTerm getStddev(Function function, TermVisitor termVisitor) {
+        return reject(function, termVisitor);
+    }
+
+    protected ImmutableFunctionalTerm getStddevPop(Function function, TermVisitor termVisitor) {
+        return reject(function, termVisitor);
+    }
+
+    protected ImmutableFunctionalTerm getStddevSamp(Function function, TermVisitor termVisitor) {
+        return reject(function, termVisitor);
+    }
+
+    protected ImmutableFunctionalTerm getVariance(Function function, TermVisitor termVisitor) {
+        return reject(function, termVisitor);
+    }
+
+    protected ImmutableFunctionalTerm getVarPop(Function function, TermVisitor termVisitor) {
+        return reject(function, termVisitor);
+    }
+
+    protected ImmutableFunctionalTerm getVarSamp(Function function, TermVisitor termVisitor) {
+        return reject(function, termVisitor);
+    }
+
     protected ImmutableFunctionalTerm reject(Function expression, TermVisitor termVisitor) {
         throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
@@ -253,7 +283,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(StringValue expression) {
-            result = termFactory.getDBConstant(expression.getValue(), dbTypeFactory.getDBStringType());
+            result = termFactory.getDBConstant(expression.getNotExcapedValue(), dbTypeFactory.getDBStringType());
         }
 
         @Override

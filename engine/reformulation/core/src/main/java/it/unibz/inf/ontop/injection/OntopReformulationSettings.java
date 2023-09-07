@@ -15,6 +15,7 @@ public interface OntopReformulationSettings extends OntopKGQuerySettings {
     boolean areInvalidTriplesExcludedFromResultSet();
 
     boolean isQueryLoggingEnabled();
+
     boolean isQueryTemplateExtractionEnabled();
     boolean isSparqlQueryIncludedIntoQueryLog();
     boolean isReformulatedQueryIncludedIntoQueryLog();

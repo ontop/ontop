@@ -54,6 +54,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final DBTermType dbStringType;
     private final SPARQLFunctionSymbol iriNoBaseFunctionSymbol;
 
+    private final FunctionSymbol identityFunctionSymbol;
+
     /**
      * Created in init()
      */
@@ -105,6 +107,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.iriNoBaseFunctionSymbol = new IriSPARQLFunctionSymbolImpl(typeFactory.getAbstractRDFTermType(),
                 typeFactory.getXsdStringDatatype(), typeFactory.getIRITermType());
         this.extractLexicalTermFunctionSymbol = new ExtractLexicalTermFunctionSymbolImpl(typeFactory.getAbstractRDFTermType(), dbStringType);
+        this.identityFunctionSymbol = new IdentityFunctionSymbol(dbTypeFactory.getAbstractRootDBType());
     }
 
     @Inject
@@ -257,6 +260,12 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new MinOrMaxOrSampleSPARQLFunctionSymbolImpl(typeFactory, MinOrMaxOrSampleSPARQLFunctionSymbolImpl.MinMaxSampleType.MIN),
                 new MinOrMaxOrSampleSPARQLFunctionSymbolImpl(typeFactory, MinOrMaxOrSampleSPARQLFunctionSymbolImpl.MinMaxSampleType.MAX),
                 new AvgSPARQLFunctionSymbolImpl(abstractRDFType, false),
+                new StdevSPARQLFunctionSymbolImpl(abstractRDFType, false, false),
+                new StdevSPARQLFunctionSymbolImpl(abstractRDFType, true, false),
+                new StdevSPARQLFunctionSymbolImpl(abstractRDFType, false),
+                new VarianceSPARQLFunctionSymbolImpl(abstractRDFType, false, false),
+                new VarianceSPARQLFunctionSymbolImpl(abstractRDFType, true, false),
+                new VarianceSPARQLFunctionSymbolImpl(abstractRDFType, false),
                 new MinOrMaxOrSampleSPARQLFunctionSymbolImpl(typeFactory, MinOrMaxOrSampleSPARQLFunctionSymbolImpl.MinMaxSampleType.SAMPLE),
                 /*
                  * Geo SF relation Functions
@@ -466,7 +475,13 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new MinOrMaxOrSampleSPARQLFunctionSymbolImpl(typeFactory, MinOrMaxOrSampleSPARQLFunctionSymbolImpl.MinMaxSampleType.MIN),
                 // Distinct can be safely ignored
                 new MinOrMaxOrSampleSPARQLFunctionSymbolImpl(typeFactory, MinOrMaxOrSampleSPARQLFunctionSymbolImpl.MinMaxSampleType.SAMPLE),
-                new AvgSPARQLFunctionSymbolImpl(abstractRDFType, true)
+                new AvgSPARQLFunctionSymbolImpl(abstractRDFType, true),
+                new StdevSPARQLFunctionSymbolImpl(abstractRDFType, true, true),
+                new StdevSPARQLFunctionSymbolImpl(abstractRDFType, false, true),
+                new StdevSPARQLFunctionSymbolImpl(abstractRDFType, true),
+                new VarianceSPARQLFunctionSymbolImpl(abstractRDFType, true, true),
+                new VarianceSPARQLFunctionSymbolImpl(abstractRDFType, false, true),
+                new VarianceSPARQLFunctionSymbolImpl(abstractRDFType, true)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
@@ -693,6 +708,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public FunctionSymbol getExtractLexicalTermFromRDFTerm() {
         return extractLexicalTermFunctionSymbol;
+    }
+
+    @Override
+    public FunctionSymbol getIdentity() {
+        return identityFunctionSymbol;
     }
 
 }

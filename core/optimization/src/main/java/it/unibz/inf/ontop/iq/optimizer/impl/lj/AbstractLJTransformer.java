@@ -53,12 +53,26 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
         // Cannot reuse
         IQTree transformedRightChild = preTransformLJRightChild(rightChild, rootNode.getOptionalFilterCondition());
 
+        if (preventRecursiveOptimizationOnRightChild()
+                && !transformedRightChild.equals(rightChild))
+            return iqFactory.createBinaryNonCommutativeIQTree(rootNode, transformedLeftChild, transformedRightChild)
+                                        .normalizeForOptimization(variableGenerator);
+
         return furtherTransformLeftJoin(rootNode, transformedLeftChild, transformedRightChild)
                 .orElseGet(() -> transformedLeftChild.equals(leftChild)
                         && transformedRightChild.equals(rightChild)
                                 ? tree
                                 : iqFactory.createBinaryNonCommutativeIQTree(rootNode, transformedLeftChild, transformedRightChild))
                                         .normalizeForOptimization(variableGenerator);
+    }
+
+    /**
+     * If the right child has just been optimized by this optimizer, stops the optimization.
+     * This allows to run other optimizers before running again this one.
+     * This helps further simplifying the right child before applying the optimization at this level.
+     */
+    protected boolean preventRecursiveOptimizationOnRightChild() {
+        return false;
     }
 
     /**

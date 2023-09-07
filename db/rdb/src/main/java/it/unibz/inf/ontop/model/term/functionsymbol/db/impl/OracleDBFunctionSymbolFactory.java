@@ -648,4 +648,20 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         }
         return super.getDBDateTrunc(datePart);
     }
+
+    @Override
+    public DBFunctionSymbol getNullIgnoringDBStdev(DBTermType dbType, boolean isPop, boolean isDistinct) {
+        if(isDistinct) {
+            throw new UnsupportedOperationException("This dialect does not allow the use of DISTINCT with the standard deviation function.");
+        }
+        return super.getNullIgnoringDBStdev(dbType, isPop, false);
+    }
+
+    @Override
+    public DBFunctionSymbol getNullIgnoringDBVariance(DBTermType dbType, boolean isPop, boolean isDistinct) {
+        if(isDistinct) {
+            throw new UnsupportedOperationException("This dialect does not allow the use of DISTINCT with the variance function.");
+        }
+        return super.getNullIgnoringDBVariance(dbType, isPop, false);
+    }
 }

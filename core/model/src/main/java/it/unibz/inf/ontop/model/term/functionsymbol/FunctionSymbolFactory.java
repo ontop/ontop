@@ -128,4 +128,6 @@ public interface FunctionSymbolFactory {
                                                       DBTermType targetType);
 
     FunctionSymbol getExtractLexicalTermFromRDFTerm();
+
+    FunctionSymbol getIdentity();
 }

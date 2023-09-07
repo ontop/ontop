@@ -154,7 +154,8 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
                                                 ImmutableSet<QuotedID> addedColumns,
                                                 List<AddFunctionalDependency> addFunctionalDependencies,
                                                 List<FunctionalDependencyConstruct> inferredFunctionalDependencies,
-                                                ImmutableList<NamedRelationDefinition> baseRelations)
+                                                ImmutableList<NamedRelationDefinition> baseRelations,
+                                                CoreSingletons coreSingletons)
             throws MetadataExtractionException {
 
         Stream<FunctionalDependencyConstruct> inheritedFDConstructs = baseRelations.stream()
@@ -195,9 +196,12 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
                         .get())
                 .collect(ImmutableCollectors.toSet());
 
-        // Insert the FDs
-        for (FunctionalDependencyConstruct fdConstruct : fdConstructs) {
-            addFunctionalDependency(relation, fdConstruct);
+        // Insert the FDs with transitive closure
+        try {
+            insertTransitiveFunctionalDependencies(fdConstructs, relation, coreSingletons);
+        } catch (AttributeNotFoundException e) {
+            throw new MetadataExtractionException(String.format(
+                    "Cannot find attribute %s for Functional Dependency.", e.getAttributeID()));
         }
     }
 
@@ -227,25 +231,6 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
 
     private boolean isInherited(QuotedID id, ImmutableSet<QuotedID> addedColumns, ImmutableSet<QuotedID> hiddenColumns) {
         return !addedColumns.contains(id) && !hiddenColumns.contains(id);
-    }
-
-    private void addFunctionalDependency(NamedRelationDefinition viewDefinition,
-                                         FunctionalDependencyConstruct fdConstruct) throws MetadataExtractionException {
-
-        FunctionalDependency.Builder builder = FunctionalDependency.defaultBuilder(viewDefinition);
-
-        try {
-            for (QuotedID determinant : fdConstruct.getDeterminants())
-                builder.addDeterminant(determinant);
-
-            for (QuotedID dependent : fdConstruct.getDependents())
-                builder.addDependent(dependent);
-        }
-        catch (AttributeNotFoundException e) {
-            throw new MetadataExtractionException(String.format(
-                    "Cannot find attribute %s for Functional Dependency %s", e.getAttributeID(), fdConstruct));
-        }
-        builder.build();
     }
 
     protected void insertForeignKeys(Lens relation, MetadataLookup lookup,

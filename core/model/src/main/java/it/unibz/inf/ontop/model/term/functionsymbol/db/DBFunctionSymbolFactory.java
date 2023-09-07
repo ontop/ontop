@@ -301,6 +301,18 @@ public interface DBFunctionSymbolFactory {
      */
     DBFunctionSymbol getNullIgnoringDBAvg(DBTermType dbType, boolean isDistinct);
 
+    /**
+     * Ignores nulls.
+     * Returns NULL if the bag/set does not contain any non-null value.
+     */
+    DBFunctionSymbol getNullIgnoringDBStdev(DBTermType dbType, boolean isPop, boolean isDistinct);
+
+    /**
+     * Ignores nulls.
+     * Returns NULL if the bag/set does not contain any non-null value.
+     */
+    DBFunctionSymbol getNullIgnoringDBVariance(DBTermType dbType, boolean isPop, boolean isDistinct);
+
     DBFunctionSymbol getDBMin(DBTermType dbType);
     DBFunctionSymbol getDBMax(DBTermType dbType);
     DBFunctionSymbol getDBSample(DBTermType dbType);
@@ -403,4 +415,7 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBMicroseconds();
 
     DBFunctionSymbol getDBDateTrunc(String datePart);
+
+    DBFunctionSymbol getOntopUser();
+    DBBooleanFunctionSymbol getOntopContainsRoleOrGroup();
 }

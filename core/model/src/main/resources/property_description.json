@@ -71,6 +71,10 @@
     "type": "Boolean",
     "description": "Since 5.1.0. Default value: `false`. If `true`, lens entries that result in an error will be created as empty instead of failing the initialization procedure. Expected to be used together with `ontop.ignoreInvalidMappingEntries`."
   },
+  "ontop.exposeSystemTables": {
+    "type": "Boolean",
+    "description": "Since 5.1.0. Default value: `false`. If `true`, system tables of the database system will be made accessible for Ontop."
+  },
   "ontop.enableValuesNode": {
     "type": "Boolean",
     "description": "Since 4.2.0. Default value: `true`. If false Union Nodes are used instead of Values Nodes for facts."
@@ -159,6 +163,10 @@
     "type": "Boolean",
     "description": "Default value: `false`. If true, the pattern `?s ?p <to_describe>` is also considered when answering a DESCRIBE query."
   },
+  "ontop.registerCustomSPARQLAggregateFunctions": {
+    "type": "Boolean",
+    "description": "Default value: `true`. If true, Ontop's custom aggregate functions are registered in the RDF4J SPARQL parser's aggregate function registry."
+  },
   "ontop.query.defaultTimeout": {
     "type": "Integer",
     "description": "Query timeout (in seconds) assigned to the DB engine. Has no effect if negative or equal to 0."
@@ -182,5 +190,9 @@
   "ontop.http.cache.staleIfError": {
     "type": "Integer",
     "description": "DEPRECATED. Please use `ontop.http.cacheControl` instead."
+  },
+  "ontop.authorization": {
+    "type": "Boolean",
+    "description": "Default value: `false`. If true, extracts user, group and role information from HTTP headers."
   }
 }

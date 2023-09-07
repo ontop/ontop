@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.answering.reformulation.impl.QuestQueryProcessor;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -133,7 +134,8 @@ public class QueryRewriting {
         KGQuery<?> query = kgQueryFactory.createSPARQLQuery(sparqlQuery);
         QueryReformulator reformulator = configuration.loadQueryReformulator();
         QueryLogger queryLogger = reformulator.getQueryLoggerFactory().create(ImmutableMultimap.of());
-        IQ iq = reformulator.reformulateIntoNativeQuery(query, queryLogger);
+        QueryContext emptyQueryContext = reformulator.getQueryContextFactory().create(ImmutableMap.of());
+        IQ iq = reformulator.reformulateIntoNativeQuery(query, emptyQueryContext, queryLogger);
         QuestQueryProcessor.returnPlannedQuery = false;
 
         IQTree iqt = iq.getTree();

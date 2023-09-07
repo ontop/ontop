@@ -6,6 +6,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
@@ -62,12 +63,13 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
                                           GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
                                           QueryPlanner queryPlanner,
                                           QueryLogger.Factory queryLoggerFactory,
+                                          QueryContext.Factory queryContextFactory,
                                           FederationOptimizer federationOptimizer,
                                           IntermediateQueryFactory iqFactory,
                                           TermFactory termFactory,
                                           SubstitutionFactory substitutionFactory) {
         super(obdaSpecification, queryCache, queryUnfolderFactory, translationFactory, queryRewriter, kgQueryFactory,
-                inputQueryTranslator, generalOptimizer, queryPlanner, queryLoggerFactory, federationOptimizer);
+                inputQueryTranslator, generalOptimizer, queryPlanner, queryLoggerFactory, queryContextFactory, federationOptimizer);
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
