@@ -184,8 +184,8 @@ public class ConjunctionOfDisjunctionsMergingTest {
 
         FilterNode filterNode2 = IQ_FACTORY.createFilterNode(
                 or(
-                        and(is(B, "W"), in(A, "W", "X")),
-                        and(is(A, "X"), in(B, "V", "W"))
+                        and(in(B, "V", "W"), is(A, "X")),
+                        and(is(B, "W"), in(A, "W", "X"))
                 )
         );
         IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
@@ -276,8 +276,8 @@ public class ConjunctionOfDisjunctionsMergingTest {
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(
                 and(
-                        notNull(C1),
-                        in(B2, "C75.5","C75.4","C75.3","C75.2","C75.9")
+                        in(B2, "C75.5","C75.4","C75.3","C75.2","C75.9"),
+                        notNull(C1)
                 )
         );
 
