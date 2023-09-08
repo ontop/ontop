@@ -19,9 +19,11 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.Set;
 
 
 public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctNode {
@@ -105,7 +107,16 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child) {
         return Sets.union(
                 child.inferUniqueConstraints(),
-                ImmutableSet.of(child.getVariables())).immutableCopy();
+                ImmutableSet.of(inferNewUC(child))).immutableCopy();
+    }
+
+    private ImmutableSet<Variable> inferNewUC(IQTree child) {
+        var dependents = child.inferFunctionalDependencies().stream()
+                .flatMap(e -> e.getValue().stream())
+                .collect(ImmutableCollectors.toSet());
+
+        return Sets.difference(child.getVariables(), dependents)
+                .immutableCopy();
     }
 
     @Override
@@ -113,12 +124,25 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
         return child.inferFunctionalDependencies();
     }
 
-    /**
-     * TODO: implement it more seriously, by consider functional dependencies between variables
-     */
     @Override
     public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
-        return VariableNonRequirement.empty();
+        var childVariableNonRequirement = child.getVariableNonRequirement();
+
+        if (childVariableNonRequirement.isEmpty())
+            return childVariableNonRequirement;
+
+        var requiredByDistinct = inferNewUC(child);
+        if (requiredByDistinct.isEmpty())
+            return childVariableNonRequirement;
+
+        return childVariableNonRequirement
+                .filter((v, conds) -> !requiredByDistinct.contains(v));
+    }
+
+    private static ImmutableSet<Variable> getDependents(IQTree child) {
+        return child.inferFunctionalDependencies().stream()
+                .flatMap(e -> e.getValue().stream())
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override
