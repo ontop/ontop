@@ -1353,10 +1353,11 @@ public class NormalizationTest {
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
-        UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(constructionNode,
-                IQ_FACTORY.createUnaryIQTree(distinctNode,
+        ExtensionalDataNode newExtensionalDataNode1 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR2, ImmutableMap.of(0, A));
+
+        UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(distinctNode,
                         IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode,
-                                extensionalDataNode1, extensionalDataNode2)));
+                                newExtensionalDataNode1, extensionalDataNode2));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
         normalizeAndCompare(initialIQ, expectedIQ);
