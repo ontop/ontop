@@ -60,6 +60,9 @@ public class DBInFunctionSymbolImpl extends DBBooleanFunctionSymbolImpl implemen
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory, VariableNullability variableNullability) {
+        if(newTerms.get(0).isNull())
+            return termFactory.getNullConstant();
+
         //Remove duplicates
         ImmutableList<ImmutableTerm> newChildren = Stream.concat(
                 Stream.of(newTerms.get(0)),
