@@ -45,7 +45,6 @@ public class OntopOBDASettingsImpl extends OntopModelSettingsImpl implements Ont
         return getRequiredBoolean(IGNORE_INVALID_LENS_ENTRIES);
     }
 
-    @Override
     public boolean exposeSystemTables() {
         return getRequiredBoolean(EXPOSE_SYSTEM_TABLES);
     }

@@ -664,6 +664,16 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
+    @Override
+    public DBFunctionSymbol getOntopUser() {
+        return new OntopUserFunctionSymbolImpl(dbBooleanType);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getOntopContainsRoleOrGroup() {
+        return new OntopContainsRoleOrGroupFunctionSymbol(dbStringType, dbBooleanType);
+    }
+
     // Topological functions
     @Override
     public DBBooleanFunctionSymbol getDBSTWithin() {

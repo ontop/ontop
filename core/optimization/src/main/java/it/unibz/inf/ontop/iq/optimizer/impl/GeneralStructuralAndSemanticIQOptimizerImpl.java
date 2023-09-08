@@ -1,11 +1,13 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.lens.LensUnfolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -23,6 +25,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     private final FlattenLifter flattenLifter;
     private final PreventDistinctOptimizer preventDistinctOptimizer;
     private final DisjunctionOfEqualitiesMergingSimplifier disjunctionOfEqualitiesMergingSimplifier;
+    private final AuthorizationFunctionEvaluator authorizationFunctionEvaluator;
 
     @Inject
     private GeneralStructuralAndSemanticIQOptimizerImpl(UnionAndBindingLiftOptimizer bindingLiftOptimizer,
@@ -33,7 +36,8 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
                                                         AggregationSplitter aggregationSplitter,
                                                         FlattenLifter flattenLifter,
                                                         PreventDistinctOptimizer preventDistinctOptimizer,
-                                                        DisjunctionOfEqualitiesMergingSimplifier disjunctionOfEqualitiesMergingSimplifier) {
+                                                        DisjunctionOfEqualitiesMergingSimplifier disjunctionOfEqualitiesMergingSimplifier,
+                                                        AuthorizationFunctionEvaluator authorizationFunctionEvaluator) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
         this.orderBySimplifier = orderBySimplifier;
@@ -43,10 +47,16 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         this.flattenLifter = flattenLifter;
         this.preventDistinctOptimizer = preventDistinctOptimizer;
         this.disjunctionOfEqualitiesMergingSimplifier = disjunctionOfEqualitiesMergingSimplifier;
+        this.authorizationFunctionEvaluator = authorizationFunctionEvaluator;
     }
 
     @Override
     public IQ optimize(IQ query) {
+        return optimize(query, null);
+    }
+
+    @Override
+    public IQ optimize(IQ query, @Nullable QueryContext queryContext) {
         //lift bindings and union when it is possible
         IQ liftedQuery = bindingLiftOptimizer.optimize(query);
 
@@ -58,6 +68,12 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
 
         IQ current = pushedIntoDistinct;
         do {
+            long beginningAuthorizationEvaluation = System.currentTimeMillis();
+            current = authorizationFunctionEvaluator.optimize(current, queryContext);
+
+            LOGGER.debug("New query after evaluation authorization functions ({} ms):\n{}\n",
+                    System.currentTimeMillis() - beginningAuthorizationEvaluation,
+                    current);
 
             long beginningJoinLike = System.currentTimeMillis();
             current = joinLikeOptimizer.optimize(current);

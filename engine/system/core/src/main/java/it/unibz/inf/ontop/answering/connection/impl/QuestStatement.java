@@ -1,8 +1,10 @@
 package it.unibz.inf.ontop.answering.connection.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.query.*;
 import it.unibz.inf.ontop.query.resultset.impl.DefaultDescribeGraphResultSet;
@@ -12,6 +14,7 @@ import it.unibz.inf.ontop.query.resultset.BooleanResultSet;
 import it.unibz.inf.ontop.query.resultset.GraphResultSet;
 import it.unibz.inf.ontop.query.resultset.OBDAResultSet;
 import it.unibz.inf.ontop.query.resultset.TupleResultSet;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +29,7 @@ public abstract class QuestStatement implements OntopStatement {
 
 	private final QueryReformulator engine;
 	private final QueryLogger.Factory queryLoggerFactory;
+	private final QueryContext.Factory queryContextFactory;
 
 	private QueryExecutionThread<?,?> executionThread;
 	private boolean canceled = false;
@@ -37,6 +41,7 @@ public abstract class QuestStatement implements OntopStatement {
 	public QuestStatement(QueryReformulator queryProcessor) {
 		this.engine = queryProcessor;
 		this.queryLoggerFactory = queryProcessor.getQueryLoggerFactory();
+		this.queryContextFactory = queryProcessor.getQueryContextFactory();
 	}
 
 	/**
@@ -46,6 +51,7 @@ public abstract class QuestStatement implements OntopStatement {
 
 		private final Q inputQuery;
 		private final QueryLogger queryLogger;
+		private final QueryContext queryContext;
 		private final Evaluator<R, Q> evaluator;
 		private final CountDownLatch monitor;
 
@@ -53,10 +59,11 @@ public abstract class QuestStatement implements OntopStatement {
 		private Exception exception;
 		private boolean executingTargetQuery;
 
-		QueryExecutionThread(Q inputQuery, QueryLogger queryLogger, Evaluator<R,Q> evaluator,
+		QueryExecutionThread(Q inputQuery, QueryLogger queryLogger, QueryContext queryContext, Evaluator<R,Q> evaluator,
 						CountDownLatch monitor) {
 			this.inputQuery = inputQuery;
 			this.queryLogger = queryLogger;
+			this.queryContext = queryContext;
 			this.evaluator = evaluator;
 			this.monitor = monitor;
 			this.exception = null;
@@ -97,7 +104,7 @@ public abstract class QuestStatement implements OntopStatement {
 				 * Executes the target query.
 				 */
 				executingTargetQuery = true;
-				resultSet = evaluator.evaluate(inputQuery, queryLogger);
+				resultSet = evaluator.evaluate(inputQuery, queryContext, queryLogger);
 				// NB: finished if the result set is blocking!
 				log.debug("Result set unblocked.\n");
 				/*
@@ -112,15 +119,15 @@ public abstract class QuestStatement implements OntopStatement {
 		}
 	}
 
-	private TupleResultSet executeSelectQuery(SelectQuery inputQuery, QueryLogger queryLogger)
+	private TupleResultSet executeSelectQuery(SelectQuery inputQuery, QueryContext queryContext, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopReformulationException {
-		return executeSelectQuery(inputQuery, queryLogger, true);
+		return executeSelectQuery(inputQuery, queryContext, queryLogger, true);
 	}
 
-	private TupleResultSet executeSelectQuery(SelectQuery inputQuery, QueryLogger queryLogger,
+	private TupleResultSet executeSelectQuery(SelectQuery inputQuery, QueryContext queryContext, QueryLogger queryLogger,
 											  boolean shouldAlsoCloseStatement)
 			throws OntopQueryEvaluationException, OntopReformulationException {
-		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery, queryLogger);
+		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery, queryContext, queryLogger);
 		logExecutionStartingMessage();
 		return executeSelectQuery(executableQuery, queryLogger, shouldAlsoCloseStatement);
 	}
@@ -135,22 +142,22 @@ public abstract class QuestStatement implements OntopStatement {
 														 boolean shouldAlsoCloseStatement)
 			throws OntopQueryEvaluationException;
 
-	private BooleanResultSet executeBooleanQuery(AskQuery inputQuery, QueryLogger queryLogger)
+	private BooleanResultSet executeBooleanQuery(AskQuery inputQuery, QueryContext queryContext, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopReformulationException {
-		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery, queryLogger);
+		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery, queryContext, queryLogger);
 		logExecutionStartingMessage();
 		return executeBooleanQuery(executableQuery, queryLogger);
 	}
 
-	private GraphResultSet executeConstructQuery(ConstructQuery constructQuery, QueryLogger queryLogger)
+	private GraphResultSet executeConstructQuery(ConstructQuery constructQuery, QueryContext queryContext, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException, OntopReformulationException {
-		return executeConstructQuery(constructQuery, queryLogger, true);
+		return executeConstructQuery(constructQuery, queryContext, queryLogger, true);
 	}
 
-	private GraphResultSet executeConstructQuery(ConstructQuery constructQuery, QueryLogger queryLogger,
+	private GraphResultSet executeConstructQuery(ConstructQuery constructQuery, QueryContext queryContext, QueryLogger queryLogger,
 												 boolean shouldAlsoCloseStatement)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException, OntopReformulationException {
-		IQ executableQuery = engine.reformulateIntoNativeQuery(constructQuery, queryLogger);
+		IQ executableQuery = engine.reformulateIntoNativeQuery(constructQuery, queryContext, queryLogger);
 		logExecutionStartingMessage();
 		return executeConstructQuery(constructQuery.getConstructTemplate(), executableQuery, queryLogger, shouldAlsoCloseStatement);
 	}
@@ -161,15 +168,15 @@ public abstract class QuestStatement implements OntopStatement {
 		return executeConstructQuery(constructTemplate, executableQuery, queryLogger, true);
 	}
 
-	protected abstract GraphResultSet executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger,
-															boolean shouldAlsoCloseStatement)
+	protected abstract GraphResultSet executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery,
+															QueryLogger queryLogger, boolean shouldAlsoCloseStatement)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException;
 
-	protected GraphResultSet executeDescribeQuery(DescribeQuery describeQuery, QueryLogger queryLogger)
+	protected GraphResultSet executeDescribeQuery(DescribeQuery describeQuery, QueryContext queryContext, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopConnectionException, OntopReformulationException, OntopResultConversionException {
-		return new DefaultDescribeGraphResultSet(describeQuery, queryLogger, queryLoggerFactory,
-				(selectQuery, logger) -> executeSelectQuery(selectQuery, logger, false),
-				(constructQuery, logger) -> executeConstructQuery(constructQuery, logger, false),
+		return new DefaultDescribeGraphResultSet(describeQuery, queryLogger, queryLoggerFactory, queryContext,
+				(selectQuery, qContext, logger) -> executeSelectQuery(selectQuery, qContext, logger, false),
+				(constructQuery, qContext, logger) -> executeConstructQuery(constructQuery, qContext, logger, false),
 				this::close);
 	}
 
@@ -197,16 +204,16 @@ public abstract class QuestStatement implements OntopStatement {
 			throws OntopConnectionException, OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
 
 		if (inputQuery instanceof SelectQuery) {
-			return (R) executeInThread((SelectQuery) inputQuery, httpHeaders, this::executeSelectQuery);
+			return (R) executeInThread((SelectQuery) inputQuery, httpHeaders, (inputQuery1, queryContext, queryLogger) -> executeSelectQuery(inputQuery1, queryContext, queryLogger));
 		}
 		else if (inputQuery instanceof AskQuery) {
-			return (R) executeInThread((AskQuery) inputQuery, httpHeaders, this::executeBooleanQuery);
+			return (R) executeInThread((AskQuery) inputQuery, httpHeaders, (inputQuery1, queryContext, queryLogger) -> executeBooleanQuery(inputQuery1, queryContext, queryLogger));
 		}
 		else if (inputQuery instanceof DescribeQuery) {
-			return (R) executeInThread((DescribeQuery) inputQuery, httpHeaders, this::executeDescribeQuery);
+			return (R) executeInThread((DescribeQuery) inputQuery, httpHeaders, (describeQuery, queryContext, queryLogger) -> executeDescribeQuery(describeQuery, queryContext, queryLogger));
 		}
 		else if (inputQuery instanceof ConstructQuery) {
-			return (R) executeInThread((ConstructQuery) inputQuery, httpHeaders, this::executeConstructQuery);
+			return (R) executeInThread((ConstructQuery) inputQuery, httpHeaders, (constructQuery, queryContext, queryLogger) -> executeConstructQuery(constructQuery, queryContext, queryLogger));
 		}
 		else {
 			throw new OntopUnsupportedInputQueryException("Unsupported query type: " + inputQuery);
@@ -220,13 +227,18 @@ public abstract class QuestStatement implements OntopStatement {
 	private <R extends OBDAResultSet, Q extends KGQuery<R>> R executeInThread(Q inputQuery, ImmutableMultimap<String, String> httpHeaders,
 																			  Evaluator<R, Q> evaluator)
 			throws OntopReformulationException, OntopQueryEvaluationException {
-		QueryLogger queryLogger = queryLoggerFactory.create(httpHeaders);
 
+		ImmutableMap<String, String> normalizedHttpHeaders = normalizeHttpHeaders(httpHeaders);
+
+		// TODO: use normalizedHttpHeaders
+		QueryLogger queryLogger = queryLoggerFactory.create(httpHeaders);
 		queryLogger.setSparqlQuery(inputQuery.getOriginalString());
+
+		QueryContext queryContext = queryContextFactory.create(normalizedHttpHeaders);
 
 		CountDownLatch monitor = new CountDownLatch(1);
 
-		QueryExecutionThread<R, Q> executionthread = new QueryExecutionThread<>(inputQuery, queryLogger, evaluator,
+		QueryExecutionThread<R, Q> executionthread = new QueryExecutionThread<>(inputQuery, queryLogger, queryContext, evaluator,
 				monitor);
 
 		this.executionThread = executionthread;
@@ -258,6 +270,19 @@ public abstract class QuestStatement implements OntopStatement {
 		return executionthread.getResultSet();
 	}
 
+	/**
+	 * TODO: move somewhere else?
+	 * FROM RFC2616: It MUST be possible to combine the multiple header fields into one "field-name: field-value" pair,
+	 * without changing the semantics of the message, by appending each subsequent field-value to the first,
+	 * each separated by a comma.
+	 */
+	private ImmutableMap<String, String> normalizeHttpHeaders(ImmutableMultimap<String, String> httpHeaders) {
+		return httpHeaders.asMap().entrySet().stream()
+				.collect(ImmutableCollectors.toMap(
+						e -> e.getKey().toLowerCase(),
+						e -> String.join(",", e.getValue())));
+	}
+
 
 	@Override
 	public void cancel() throws OntopConnectionException {
@@ -283,7 +308,8 @@ public abstract class QuestStatement implements OntopStatement {
 
 	@Override
 	public  <R extends OBDAResultSet>  IQ getExecutableQuery(KGQuery<R> inputQuery) throws OntopReformulationException {
-		return engine.reformulateIntoNativeQuery(inputQuery, queryLoggerFactory.create(ImmutableMultimap.of()));
+		return engine.reformulateIntoNativeQuery(inputQuery, queryContextFactory.create(ImmutableMap.of()),
+				queryLoggerFactory.create(ImmutableMultimap.of()));
 	}
 
 }
