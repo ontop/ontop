@@ -238,7 +238,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(FunctionalDependencies.toFunctionalDependencies())
-                .concat(FunctionalDependencies.fromUniqueConstraints(inferUniqueConstraints(), variables));
+                .concat(FunctionalDependencies.fromUniqueConstraints(inferUniqueConstraints(), getLocalVariables()));
     }
 
     private Optional<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> convertFunctionalDependency(FunctionalDependency functionalDependency) {
