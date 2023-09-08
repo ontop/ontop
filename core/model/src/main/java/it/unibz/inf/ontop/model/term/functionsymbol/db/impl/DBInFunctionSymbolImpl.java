@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBInFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -11,7 +12,7 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class DBInFunctionSymbolImpl extends DBBooleanFunctionSymbolImpl {
+public class DBInFunctionSymbolImpl extends DBBooleanFunctionSymbolImpl implements DBInFunctionSymbol {
 
     protected DBInFunctionSymbolImpl(int arity, DBTermType rootDBTermType, DBTermType dbBooleanTermType) {
         super("DB_IN_" + arity, IntStream.range(0, arity)
@@ -68,7 +69,11 @@ public class DBInFunctionSymbolImpl extends DBBooleanFunctionSymbolImpl {
         ).collect(ImmutableCollectors.toList());
 
         if(newChildren.size() <= 1) {
-            return termFactory.getDBBooleanConstant(false);
+            //If the search term is NULL, this will evaluate to NULL. Otherwise it is FALSE.
+            return termFactory.getBooleanIfElseNull(
+                    termFactory.getDBIsNotNull(newTerms.get(0)),
+                    termFactory.getIsTrue(termFactory.getDBBooleanConstant(false))
+            );
         }
         if(newChildren.size() == 2) {
             //The pattern `"x" IN (anything)` can be replaced with `"x" = anything`.

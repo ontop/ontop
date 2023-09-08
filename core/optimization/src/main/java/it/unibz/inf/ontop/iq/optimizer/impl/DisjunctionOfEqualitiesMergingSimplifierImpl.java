@@ -13,9 +13,9 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBAndFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBInFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBOrFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.DBInFunctionSymbolImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
@@ -164,7 +164,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
                 return 2;
             if(isBooleanOperation(f) && ((f.getFunctionSymbol() instanceof DBAndFunctionSymbol) == conjunction))
                 return 1;
-            if(f.getFunctionSymbol() instanceof DBInFunctionSymbolImpl)
+            if(f.getFunctionSymbol() instanceof DBInFunctionSymbol)
                 return 0;
             return 4;
         }
@@ -205,10 +205,10 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
             var fRight = convertSingleEqualities(right, termFactory).orElse((ImmutableFunctionalTerm) right);
 
 
-            if(fRight.getFunctionSymbol() instanceof DBInFunctionSymbolImpl) {
+            if(fRight.getFunctionSymbol() instanceof DBInFunctionSymbol) {
                 return mergeInto(fLeft, fRight, conjunction);
             }
-            if(fLeft.getFunctionSymbol() instanceof DBInFunctionSymbolImpl) {
+            if(fLeft.getFunctionSymbol() instanceof DBInFunctionSymbol) {
                 return mergeInto(fRight, fLeft, conjunction);
             }
 
@@ -245,7 +245,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
          * if it is a AND or OR.
          */
         private ImmutableSet<ImmutableTerm> findAllSearchTerms(ImmutableFunctionalTerm term) {
-            if(term.getFunctionSymbol() instanceof DBInFunctionSymbolImpl) {
+            if(term.getFunctionSymbol() instanceof DBInFunctionSymbol) {
                 return ImmutableSet.of(term.getTerm(0));
             }
             if(isBooleanOperation(term)) {
@@ -266,7 +266,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
                         .map(t -> (ImmutableFunctionalTerm) t)
                         .filter(t -> (t.getFunctionSymbol() instanceof DBAndFunctionSymbol)
                             || (t.getFunctionSymbol() instanceof DBOrFunctionSymbol)
-                            || (t.getFunctionSymbol() instanceof DBInFunctionSymbolImpl))
+                            || (t.getFunctionSymbol() instanceof DBInFunctionSymbol))
                         .isEmpty()
                     || !findAllSearchTerms((ImmutableFunctionalTerm) target).contains(in.getTerm(0))
                     || Optional.of(target)
@@ -284,7 +284,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
 
             
             var f = (ImmutableFunctionalTerm) target;
-            if(f.getFunctionSymbol() instanceof DBInFunctionSymbolImpl) {
+            if(f.getFunctionSymbol() instanceof DBInFunctionSymbol) {
                 //If target is an IN expression, we simply merge.
                 if(canMergeWith(f.getTerms(), in.getTerms()))
                     return mergeWith(f.getTerms(), in.getTerms(), conjunction);
@@ -316,7 +316,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
                 return false;
             var f = (ImmutableFunctionalTerm) target;
 
-            if(f.getFunctionSymbol() instanceof DBInFunctionSymbolImpl)
+            if(f.getFunctionSymbol() instanceof DBInFunctionSymbol)
                 return canMergeWith(f.getTerms(), in.getTerms());
             if(isBooleanOperation(f))
                 return f.getTerms().stream()
@@ -356,12 +356,12 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
          * of the list of matches of IN2.
          */
         private boolean isImpliedBy(ImmutableFunctionalTerm determinant, ImmutableFunctionalTerm dependent) {
-            if(determinant.getFunctionSymbol() instanceof DBInFunctionSymbolImpl && dependent.getFunctionSymbol() instanceof DBInFunctionSymbolImpl) {
+            if(determinant.getFunctionSymbol() instanceof DBInFunctionSymbol && dependent.getFunctionSymbol() instanceof DBInFunctionSymbol) {
                 //IN1 --> IN2 <==> search(IN1) = search(IN2) AND terms(IN1) subsetof terms(IN2)
                 return determinant.getTerm(0).equals(dependent.getTerm(0))
                         && Sets.difference(ImmutableSet.copyOf(determinant.getTerms()), ImmutableSet.copyOf(dependent.getTerms())).isEmpty();
             }
-            if(determinant.getFunctionSymbol() instanceof DBInFunctionSymbolImpl && isBooleanOperation(dependent)) {
+            if(determinant.getFunctionSymbol() instanceof DBInFunctionSymbol && isBooleanOperation(dependent)) {
                 if(dependent.getFunctionSymbol() instanceof DBAndFunctionSymbol) {
                     return dependent.getTerms().stream()
                             .allMatch(term -> (term instanceof ImmutableFunctionalTerm) && isImpliedBy(determinant, (ImmutableFunctionalTerm) term));
@@ -370,7 +370,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
                             .anyMatch(term -> (term instanceof ImmutableFunctionalTerm) && isImpliedBy(determinant, (ImmutableFunctionalTerm) term));
                 }
             }
-            if(dependent.getFunctionSymbol() instanceof DBInFunctionSymbolImpl && isBooleanOperation(determinant)) {
+            if(dependent.getFunctionSymbol() instanceof DBInFunctionSymbol && isBooleanOperation(determinant)) {
                 if(determinant.getFunctionSymbol() instanceof DBAndFunctionSymbol) {
                     return determinant.getTerms().stream()
                             .anyMatch(term -> (term instanceof ImmutableFunctionalTerm) && isImpliedBy((ImmutableFunctionalTerm) term, dependent));
