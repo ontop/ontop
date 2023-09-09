@@ -251,44 +251,22 @@ public class FunctionalDependencyInferenceTest {
 
     @Test
     public void testLeftJoinFromChildren() {
-        ImmutableList<IQTree> children = ImmutableList.of(
-                IQ_FACTORY.createUnaryIQTree(
-                        IQ_FACTORY.createConstructionNode(
-                                ImmutableSet.of(A, B),
-                                SUBSTITUTION_FACTORY.getSubstitution()),
-                        DATA_NODE_1_WITH_ADDED_FD),
-                IQ_FACTORY.createUnaryIQTree(
-                        IQ_FACTORY.createConstructionNode(
-                                ImmutableSet.of(C, D),
-                                SUBSTITUTION_FACTORY.getSubstitution()),
-                        DATA_NODE_2_WITH_ADDED_FD));
         IQTree tree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
                 IQ_FACTORY.createLeftJoinNode(),
-                children.get(0),
-                children.get(1)
+                DATA_NODE_1_WITH_ADDED_FD,
+                DATA_NODE_2_WITH_ADDED_FD
         );
-        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B)), tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
+        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B), ImmutableSet.of(C), ImmutableSet.of(D)), tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
     }
 
     @Test
     public void testLeftJoinCrossInfer() {
-        ImmutableList<IQTree> children = ImmutableList.of(
-                IQ_FACTORY.createUnaryIQTree(
-                        IQ_FACTORY.createConstructionNode(
-                                ImmutableSet.of(A, B),
-                                SUBSTITUTION_FACTORY.getSubstitution()),
-                        DATA_NODE_1_WITH_ADDED_FD),
-                IQ_FACTORY.createUnaryIQTree(
-                        IQ_FACTORY.createConstructionNode(
-                                ImmutableSet.of(C, D),
-                                SUBSTITUTION_FACTORY.getSubstitution()),
-                        DATA_NODE_2_WITH_ADDED_FD));
         IQTree tree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
                 IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(A, C)),
-                children.get(0),
-                children.get(1)
+                DATA_NODE_1_WITH_ADDED_FD,
+                DATA_NODE_2_WITH_ADDED_FD
         );
-        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B), ImmutableSet.of(D, A), ImmutableSet.of(C)), tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
+        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B, D, C)), tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
     }
 
     @Test
