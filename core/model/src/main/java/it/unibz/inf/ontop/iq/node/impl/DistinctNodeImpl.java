@@ -139,12 +139,6 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
                 .filter((v, conds) -> !requiredByDistinct.contains(v));
     }
 
-    private static ImmutableSet<Variable> getDependents(IQTree child) {
-        return child.inferFunctionalDependencies().stream()
-                .flatMap(e -> e.getValue().stream())
-                .collect(ImmutableCollectors.toSet());
-    }
-
     @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
         visitor.visit(this);
