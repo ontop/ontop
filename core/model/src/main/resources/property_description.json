@@ -193,6 +193,6 @@
   },
   "ontop.authorization": {
     "type": "Boolean",
-    "description": "Default value: `false`. If true, extracts user, group and role information from HTTP headers."
+    "description": "Since 5.2.0. Default value: `false`. If true, extracts user, group and role information from HTTP headers."
   }
 }
