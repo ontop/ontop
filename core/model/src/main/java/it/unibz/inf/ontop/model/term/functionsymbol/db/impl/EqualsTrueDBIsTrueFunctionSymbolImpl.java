@@ -17,6 +17,9 @@ public class EqualsTrueDBIsTrueFunctionSymbolImpl extends DefaultDBIsTrueFunctio
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        if(terms.get(0) instanceof ImmutableExpression) {
+            return inBrackets(termConverter.apply(terms.get(0)));
+        }
         ImmutableExpression newTerm = termFactory.getStrictEquality(terms.get(0), termFactory.getDBBooleanConstant(true));
         return inBrackets(termConverter.apply(newTerm));
     }
