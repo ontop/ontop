@@ -14,25 +14,30 @@ public class SQLServerExtraNormalizer implements DialectExtraNormalizer {
     private final DialectExtraNormalizer projectionWrapper;
     private final DialectExtraNormalizer limitOffsetOldVersionNormalizer;
     private final DialectExtraNormalizer insertOrderByInSlizeNormalizer;
+    private final DialectExtraNormalizer avoidEqualsBoolNormalizer;
 
     @Inject
     protected SQLServerExtraNormalizer(AlwaysProjectOrderByTermsNormalizer projectOrderByTermsNormalizer,
                                        WrapProjectedOrOrderByExpressionNormalizer projectionWrapper,
                                        SQLServerLimitOffsetOldVersionNormalizer limitOffsetOldVersionNormalizer,
-                                       SQLServerInsertOrderByInSliceNormalizer insertOrderByInSlizeNormalizer) {
+                                       SQLServerInsertOrderByInSliceNormalizer insertOrderByInSlizeNormalizer,
+                                       AvoidEqualsBoolNormalizer avoidEqualsBoolNormalizer) {
         this.projectOrderByTermsNormalizer = projectOrderByTermsNormalizer;
         this.projectionWrapper = projectionWrapper;
         this.limitOffsetOldVersionNormalizer = limitOffsetOldVersionNormalizer;
         this.insertOrderByInSlizeNormalizer = insertOrderByInSlizeNormalizer;
+        this.avoidEqualsBoolNormalizer = avoidEqualsBoolNormalizer;
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return insertOrderByInSlizeNormalizer.transform(
+        return avoidEqualsBoolNormalizer.transform(
+            insertOrderByInSlizeNormalizer.transform(
                 limitOffsetOldVersionNormalizer.transform(
                     projectOrderByTermsNormalizer.transform(
                         projectionWrapper.transform(tree, variableGenerator),
                     variableGenerator), variableGenerator),
-                variableGenerator);
+                variableGenerator),
+            variableGenerator);
     }
 }

@@ -7,13 +7,13 @@ ns:  http://example.org/ns#
 [MappingDeclaration] @collection [[
 mappingId	mapping1
 target	:{id} a :Book ; dc:title {title}@en ; ns:price {price} ; ns:discount {discount} ; ns:pubYear {publication_date} ; dc:description {description}@en .
-source	SELECT id, title, price, discount, publication_date, description, lang FROM books.books WHERE lang = 'en'
+source	SELECT id, title, price, discount, publication_date, description, lang FROM books WHERE lang = 'en'
 
 mappingId	divisionTest
-target	dc:divisionResult dc:value {value} .
-source	SELECT (10 / 3) as value FROM dual
+target	dc:divisionResult dc:value {value} ; dc:result {res} .
+source	SELECT (10 / 3) as value, CASE price = 4 WHEN true THEN 'hello' ELSE null END as res FROM books
 
 mappingId switchCaseTest
 target dc:switchCaseResult dc:value {value} .
-source SELECT CASE id = 4 WHEN true THEN 1 ELSE 2 END AS value FROM books.books
+source SELECT CASE id = 4 WHEN true THEN 1 ELSE 2 END AS value FROM books
 ]]
