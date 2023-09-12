@@ -16,7 +16,7 @@ public class DBInFunctionSymbolImpl extends DBBooleanFunctionSymbolImpl implemen
 
     protected DBInFunctionSymbolImpl(int arity, DBTermType rootDBTermType, DBTermType dbBooleanTermType) {
         super("DB_IN_" + arity, IntStream.range(0, arity)
-                .mapToObj(i -> (TermType) rootDBTermType)
+                .<TermType>mapToObj(i -> rootDBTermType)
                 .collect(ImmutableCollectors.toList()), dbBooleanTermType);
     }
 

@@ -350,6 +350,12 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
             return conjunctionDisjunctionOf(finalTerms, !conjunction);
         }
 
+        private boolean isImpliedByTerm(ImmutableTerm determinant, ImmutableTerm dependent) {
+            if(!(determinant instanceof ImmutableFunctionalTerm) || !(dependent instanceof ImmutableFunctionalTerm))
+                return false;
+            return isImpliedBy((ImmutableFunctionalTerm) determinant, (ImmutableFunctionalTerm) dependent);
+        }
+
         /**
          * Determines whether the term `dependent` is implied by the term `determinant` in temrs of IN operations,
          * where IN1 implies IN2 if they both share the same search term and the list of matches of IN1 is a subset
@@ -364,19 +370,19 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
             if(determinant.getFunctionSymbol() instanceof DBInFunctionSymbol && isBooleanOperation(dependent)) {
                 if(dependent.getFunctionSymbol() instanceof DBAndFunctionSymbol) {
                     return dependent.getTerms().stream()
-                            .allMatch(term -> (term instanceof ImmutableFunctionalTerm) && isImpliedBy(determinant, (ImmutableFunctionalTerm) term));
+                            .allMatch(term -> isImpliedByTerm(determinant, term));
                 } else {
                     return dependent.getTerms().stream()
-                            .anyMatch(term -> (term instanceof ImmutableFunctionalTerm) && isImpliedBy(determinant, (ImmutableFunctionalTerm) term));
+                            .anyMatch(term -> isImpliedByTerm(determinant, term));
                 }
             }
             if(dependent.getFunctionSymbol() instanceof DBInFunctionSymbol && isBooleanOperation(determinant)) {
                 if(determinant.getFunctionSymbol() instanceof DBAndFunctionSymbol) {
                     return determinant.getTerms().stream()
-                            .anyMatch(term -> (term instanceof ImmutableFunctionalTerm) && isImpliedBy((ImmutableFunctionalTerm) term, dependent));
+                            .anyMatch(term -> isImpliedByTerm(term, dependent));
                 } else {
                     return determinant.getTerms().stream()
-                            .allMatch(term -> (term instanceof ImmutableFunctionalTerm) && isImpliedBy((ImmutableFunctionalTerm) term, dependent));
+                            .allMatch(term -> isImpliedByTerm(term, dependent));
                 }
             }
             if(isBooleanOperation(determinant) && isBooleanOperation(dependent)) {
