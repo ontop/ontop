@@ -1286,7 +1286,7 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
     }
 
     @Test
-    public void testOrderByDistinct() throws Exception {
+    public void testOrderByDistinct1() throws Exception {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -1294,6 +1294,25 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
                 "WHERE {\n" +
                 "   ?v :teaches ?c .\n" +
                 "   ?v :lastName ?l .\n" +
+                "}" +
+                "ORDER BY ?l";
+
+        String [] expectedValues = {
+                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/3>",
+                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/8>",
+                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/1>"};
+        String sql = checkReturnedValuesAndReturnSql(query, "v", Arrays.asList(expectedValues));
+    }
+
+    @Test
+    public void testOrderByDistinct2() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT DISTINCT ?v \n" +
+                "WHERE {\n" +
+                "   ?v :teaches ?c .\n" +
+                "   OPTIONAL { ?v :lastName ?l . }\n" +
                 "}" +
                 "ORDER BY ?l";
 
