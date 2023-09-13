@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeExtendedTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -66,7 +67,12 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
 
         return decomposition.orderByNode
                 .filter(o -> decomposition.distinctNode.isPresent() || (!onlyInPresenceOfDistinct))
-                .map(o -> new Analysis(decomposition.distinctNode.isPresent(), decomposition.constructionNode, o.getComparators()))
+                .map(o -> new Analysis(decomposition.distinctNode.isPresent(), decomposition.constructionNode, o.getComparators(),
+                        decomposition.distinctNode.isPresent()
+                                ? decomposition.descendantTree
+                                    .normalizeForOptimization(variableGenerator)
+                                    .inferFunctionalDependencies()
+                                : FunctionalDependencies.empty()))
                 .map(a -> normalize(newTree, a, variableGenerator))
                 .orElse(newTree);
     }
@@ -112,7 +118,7 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
 
         // decides whether the new bindings can be added
         if (analysis.hasDistinct && newBindings.values().stream()
-                .anyMatch(t -> mayImpactDistinct(t, alreadyDefinedTerms))) {
+                .anyMatch(t -> mayImpactDistinct(t, alreadyDefinedTerms, analysis.descendantTreeFunctionalDependencies))) {
             throw new DistinctOrderByDialectLimitationException();
         }
 
@@ -132,7 +138,8 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
     /**
      * TODO: explain
      */
-    protected boolean mayImpactDistinct(ImmutableTerm term, ImmutableSet<ImmutableTerm> alreadyProjectedTerms) {
+    protected boolean mayImpactDistinct(ImmutableTerm term, ImmutableSet<ImmutableTerm> alreadyProjectedTerms,
+                                        FunctionalDependencies descendantTreeFunctionalDependencies) {
         if (term instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
             if (functionalTerm.getFunctionSymbol() instanceof NonDeterministicDBFunctionSymbol)
@@ -142,10 +149,13 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
             else
                 return functionalTerm.getTerms().stream()
                         // Recursive
-                        .anyMatch(t -> mayImpactDistinct(t, alreadyProjectedTerms));
+                        .anyMatch(t -> mayImpactDistinct(t, alreadyProjectedTerms, descendantTreeFunctionalDependencies));
         }
         else if (term instanceof Variable) {
-            return !alreadyProjectedTerms.contains(term);
+            if (alreadyProjectedTerms.contains(term))
+                return false;
+            return descendantTreeFunctionalDependencies.getDeterminantsOf((Variable) term).stream()
+                    .noneMatch(alreadyProjectedTerms::containsAll);
         }
         // Constant
         else
@@ -190,12 +200,15 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
         final boolean hasDistinct;
         final Optional<ConstructionNode> constructionNode;
         final ImmutableList<OrderByNode.OrderComparator> sortConditions;
+        final FunctionalDependencies descendantTreeFunctionalDependencies;
 
         private Analysis(boolean hasDistinct, Optional<ConstructionNode> constructionNode,
-                         ImmutableList<OrderByNode.OrderComparator> sortConditions) {
+                         ImmutableList<OrderByNode.OrderComparator> sortConditions,
+                         FunctionalDependencies descendantTreeFunctionalDependencies) {
             this.hasDistinct = hasDistinct;
             this.constructionNode = constructionNode;
             this.sortConditions = sortConditions;
+            this.descendantTreeFunctionalDependencies = descendantTreeFunctionalDependencies;
         }
 
         Substitution<ImmutableTerm> getSubstitution() {
