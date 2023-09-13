@@ -126,4 +126,13 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     protected ImmutableSet<String> getSimpleDateTrunkExpectedValues() {
         return ImmutableSet.of("\"1970-01-01T00:00:00.000000+01:00\"^^xsd:dateTime", "\"2011-01-01T00:00:00.000000+01:00\"^^xsd:dateTime", "\"2014-01-01T00:00:00.000000+01:00\"^^xsd:dateTime", "\"2015-01-01T00:00:00.000000+01:00\"^^xsd:dateTime");
     }
+
+    @Test
+    /**
+     * Tests the `CASE <EXPRESSION> WHEN ...` operator for SQLServer.
+     */
+    public void testSwitchCaseSuccessful() {
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\nSELECT ?v WHERE { dc:switchCaseResult dc:value ?v } ";
+        executeAndCompareValues(query, ImmutableSet.of("\"2\"^^xsd:integer", "\"1\"^^xsd:integer"));
+    }
 }

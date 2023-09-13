@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Disabled;
 public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunctions {
 
     private static final String PROPERTIES_FILE = "/books/mssql/books-mssql.properties";
+    private static final String OBDA_FILE = "/books/mssql/books.obda";
 
     @BeforeAll
     public static void before() {
@@ -82,5 +83,14 @@ public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunction
     @Override
     protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
         return ImmutableSet.of("\"215.340000\"^^xsd:decimal");
+    }
+
+    @Test
+    /**
+     * Tests the `CASE <EXPRESSION> WHEN ...` operator for SQLServer.
+     */
+    public void testSwitchCaseSuccessful() {
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\nSELECT ?v WHERE { dc:switchCaseResult dc:value ?v } ";
+        executeAndCompareValues(query, ImmutableSet.of("\"2\"^^xsd:integer", "\"1\"^^xsd:integer"));
     }
 }
