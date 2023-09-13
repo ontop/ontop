@@ -261,19 +261,14 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
          * Merges an IN function call into a complex boolean expression.
          */
         private ImmutableTerm mergeInto(ImmutableTerm target, ImmutableFunctionalTerm in, boolean conjunction) {
-            if(Optional.of(target)
-                        .filter(t -> t instanceof ImmutableFunctionalTerm)
-                        .map(t -> (ImmutableFunctionalTerm) t)
-                        .filter(t -> (t.getFunctionSymbol() instanceof DBAndFunctionSymbol)
-                            || (t.getFunctionSymbol() instanceof DBOrFunctionSymbol)
-                            || (t.getFunctionSymbol() instanceof DBInFunctionSymbol))
+            var targetFunction = Optional.of(target)
+                    .filter(t -> t instanceof ImmutableFunctionalTerm)
+                    .map(t -> (ImmutableFunctionalTerm) t);
+
+            if(targetFunction
+                        .filter(t -> (isBooleanOperation(t) && t.getArity() <= MAX_ARITY) || (t.getFunctionSymbol() instanceof DBInFunctionSymbol))
                         .isEmpty()
-                    || !findAllSearchTerms((ImmutableFunctionalTerm) target).contains(in.getTerm(0))
-                    || Optional.of(target)
-                            .filter(InMergingTransformer::isBooleanOperation)
-                            .map(t -> (ImmutableFunctionalTerm) t)
-                            .filter(t -> t.getArity() > MAX_ARITY)
-                            .isPresent()
+                    || !findAllSearchTerms(targetFunction.get()).contains(in.getTerm(0))
             ) {
                 /* We can only merge into AND, OR, or IN FunctionSymbols and only if
                 *    - target has any IN terms that may be merged
@@ -283,7 +278,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
             }
 
             
-            var f = (ImmutableFunctionalTerm) target;
+            var f = targetFunction.get();
             if(f.getFunctionSymbol() instanceof DBInFunctionSymbol) {
                 //If target is an IN expression, we simply merge.
                 if(canMergeWith(f.getTerms(), in.getTerms()))
