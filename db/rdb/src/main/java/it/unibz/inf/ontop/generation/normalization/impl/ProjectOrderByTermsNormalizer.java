@@ -68,7 +68,11 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
         return decomposition.orderByNode
                 .filter(o -> decomposition.distinctNode.isPresent() || (!onlyInPresenceOfDistinct))
                 .map(o -> new Analysis(decomposition.distinctNode.isPresent(), decomposition.constructionNode, o.getComparators(),
-                        decomposition.descendantTree.normalizeForOptimization(variableGenerator).inferFunctionalDependencies()))
+                        decomposition.distinctNode.isPresent()
+                                ? decomposition.descendantTree
+                                    .normalizeForOptimization(variableGenerator)
+                                    .inferFunctionalDependencies()
+                                : FunctionalDependencies.empty()))
                 .map(a -> normalize(newTree, a, variableGenerator))
                 .orElse(newTree);
     }
