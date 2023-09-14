@@ -202,6 +202,8 @@ public interface DBFunctionSymbolFactory {
      */
     DBBooleanFunctionSymbol getDBContains();
 
+    DBBooleanFunctionSymbol getDBIn(int arity);
+
     NonDeterministicDBFunctionSymbol getDBRand(UUID uuid);
     NonDeterministicDBFunctionSymbol getDBUUID(UUID uuid);
 

@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.optimizer.DisjunctionOfEqualitiesMergingSimplifier;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
@@ -40,6 +41,9 @@ public class DefaultMappingTransformer implements MappingTransformer {
     private final TermFactory termFactory;
     private final RuleExecutor ruleExecutor;
 
+    private final DisjunctionOfEqualitiesMergingSimplifier disjunctionOfEqualitiesMergingSimplifier;
+
+
     @Inject
     private DefaultMappingTransformer(MappingVariableNameNormalizer mappingNormalizer,
                                       MappingSaturator mappingSaturator,
@@ -49,6 +53,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
                                       SpecificationFactory specificationFactory,
                                       RDF rdfFactory,
                                       MappingDistinctTransformer mappingDistinctTransformer,
+                                      DisjunctionOfEqualitiesMergingSimplifier disjunctionOfEqualitiesMergingSimplifier,
                                       TermFactory termFactory, RuleExecutor ruleExecutor) {
         this.mappingNormalizer = mappingNormalizer;
         this.mappingSaturator = mappingSaturator;
@@ -58,6 +63,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
         this.specificationFactory = specificationFactory;
         this.rdfFactory = rdfFactory;
         this.mappingDistinctTransformer = mappingDistinctTransformer;
+        this.disjunctionOfEqualitiesMergingSimplifier = disjunctionOfEqualitiesMergingSimplifier;
         this.termFactory = termFactory;
         this.ruleExecutor = ruleExecutor;
     }
@@ -84,7 +90,11 @@ public class DefaultMappingTransformer implements MappingTransformer {
 
         ImmutableList<MappingAssertion> sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping);
         ImmutableList<MappingAssertion> saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, tbox);
-        ImmutableList<MappingAssertion> mappingAfterApplyingRules = ruleExecutor.apply(saturatedMapping, rules);
+
+        ImmutableList<MappingAssertion> simplifiedBooleanExpressionsMapping = saturatedMapping.stream()
+                .map(m -> m.copyOf(disjunctionOfEqualitiesMergingSimplifier.optimize(m.getQuery())))
+                .collect(ImmutableCollectors.toList());
+        ImmutableList<MappingAssertion> mappingAfterApplyingRules = ruleExecutor.apply(simplifiedBooleanExpressionsMapping, rules);
         ImmutableList<MappingAssertion> normalizedMapping = mappingNormalizer.normalize(mappingAfterApplyingRules);
 
         // Don't insert the distinct if the cardinality preservation is set to LOOSE
