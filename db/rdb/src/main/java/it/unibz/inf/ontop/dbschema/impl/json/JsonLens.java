@@ -87,6 +87,14 @@ public abstract class JsonLens extends JsonOpenObject {
     }
 
     /**
+     * Propagates foreign key constraints of this lens to its parents, if possible. Returns true if at least one constraint was propagated.
+     */
+    public boolean propagateForeignKeyConstraintsUp(Lens relation, ImmutableList<NamedRelationDefinition> parents, QuotedIDFactory idFactory) throws MetadataExtractionException {
+        //Does nothing by default, but is implemented by JsonBasicLens. May also be implemented by other lenses under certain conditions.
+        return false;
+    }
+
+    /**
      * May be incomplete, but must not produce any false positive.
      *
      * Returns the attributes for which it can be proved that the projection over them includes the results
