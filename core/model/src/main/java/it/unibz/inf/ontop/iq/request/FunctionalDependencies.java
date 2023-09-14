@@ -24,6 +24,12 @@ public interface FunctionalDependencies {
     FunctionalDependencies rename(InjectiveSubstitution<Variable> renamingSubstitution, SubstitutionFactory substitutionFactory);
     FunctionalDependencies concat(FunctionalDependencies other);
 
+    /**
+     * "Merges" two sets of determinants in the sense of a union: The dependents become the intersection of any
+     * two dependent sets of the two FD sets that are not empty, while the determinants become their union.
+     */
+    FunctionalDependencies merge(FunctionalDependencies other);
+
     boolean contains(ImmutableSet<Variable> determinants, ImmutableSet<Variable> dependents);
 
     ImmutableSet<ImmutableSet<Variable>> getDeterminantsOf(Variable variable);

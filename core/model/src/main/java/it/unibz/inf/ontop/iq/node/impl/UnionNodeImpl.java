@@ -387,12 +387,14 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             throw new InvalidIntermediateQueryException("At least 2 children are expected for a union");
 
         IQTree firstChild = children.get(0);
+
+        var mergedDependencies = children.stream()
+                .skip(1)
+                .reduce(firstChild.inferFunctionalDependencies(), (fd, c) -> fd.merge(c.inferFunctionalDependencies()), (fd1, fd2) -> fd1.merge(fd2));
+
         // Partitions the fds based on if they are fully disjoint or not. Guaranteed to have two entries: true and false (but they may be empty)
-        ImmutableMap<Boolean, ImmutableList<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>>> fdsPartitionedByDisjointness = firstChild.inferFunctionalDependencies().stream()
-                .filter(fd -> children.stream()
-                        .skip(1)
-                        .allMatch(c -> c.inferFunctionalDependencies().contains(fd.getKey(), fd.getValue())))
-                .collect(ImmutableCollectors.partitioningBy(uc -> areDisjoint(children, uc.getKey())));
+        ImmutableMap<Boolean, ImmutableList<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>>> fdsPartitionedByDisjointness = mergedDependencies.stream()
+                .collect(ImmutableCollectors.partitioningBy(fd -> areDisjoint(children, fd.getKey())));
 
         if(fdsPartitionedByDisjointness.get(false).isEmpty())
             return fdsPartitionedByDisjointness.get(true)

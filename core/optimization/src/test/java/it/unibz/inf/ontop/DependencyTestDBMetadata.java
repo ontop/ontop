@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.createMetadataProviderBuilder;
@@ -30,6 +31,7 @@ public class DependencyTestDBMetadata {
 
     public static final RelationDefinition FD_TABLE1_AR2;
     public static final RelationDefinition FD_TABLE2_AR2;
+    public static final RelationDefinition FD_TABLE1_AR5;
 
     static {
         OptimizationTestingTools.OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
@@ -57,5 +59,7 @@ public class DependencyTestDBMetadata {
 
         FD_TABLE1_AR2 = builder.createRelationWithFD(1, 2, false);
         FD_TABLE2_AR2 = builder.createRelationWithFD(2, 2, false);
+        FD_TABLE1_AR5 = builder.createRelationWithCompositeFD(1, 5, false,
+                ImmutableSet.of(1, 2), ImmutableSet.of(3, 4));
     }
 }
