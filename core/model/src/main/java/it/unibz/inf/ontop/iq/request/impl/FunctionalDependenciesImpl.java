@@ -30,7 +30,7 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
     private static Stream<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> inferTransitiveDependencies(ImmutableSet<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> dependencies) {
         return dependencies.stream()
                 .flatMap(entry -> dependencies.stream()
-                        .filter(entry2 -> Sets.union(entry2.getValue(), entry2.getKey()).containsAll(entry.getKey()))
+                        .filter(entry2 -> entry.hashCode() < entry2.hashCode() && Sets.union(entry2.getValue(), entry2.getKey()).containsAll(entry.getKey()))
                         .map(entry2 -> Maps.immutableEntry(entry2.getKey(), Sets.difference(entry.getValue(), entry2.getKey()).immutableCopy()))
                 );
     }
