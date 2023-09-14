@@ -63,6 +63,26 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
         ).complete();
     }
 
+    private ImmutableSet<ImmutableSet<Variable>> mergeDeterminants(ImmutableSet<ImmutableSet<Variable>> left, ImmutableSet<ImmutableSet<Variable>> right) {
+        return left.stream()
+                .flatMap(l -> right.stream()
+                        .map(r -> Sets.union(l, r).immutableCopy()))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
+    public FunctionalDependencies merge(FunctionalDependencies other) {
+        var allDependents = Streams.concat(
+                dependencies.stream()
+                        .flatMap(fd -> fd.dependents.stream())
+        ).collect(ImmutableCollectors.toSet());
+
+        return allDependents.stream()
+                .flatMap(v -> mergeDeterminants(getDeterminantsOf(v), other.getDeterminantsOf(v)).stream()
+                        .map(d -> Maps.immutableEntry(d, ImmutableSet.of(v))))
+                .collect(FunctionalDependencies.toFunctionalDependencies());
+    }
+
     @Override
     public boolean contains(ImmutableSet<Variable> determinants, ImmutableSet<Variable> dependents) {
         return dependencies.stream()

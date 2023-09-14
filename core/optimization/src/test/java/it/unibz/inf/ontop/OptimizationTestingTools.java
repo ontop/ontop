@@ -246,6 +246,20 @@ public class OptimizationTestingTools {
             return tableDef;
         }
 
+        public NamedRelationDefinition createRelationWithCompositeFD(int tableNumber, int arity, boolean canNull,
+                                                                     ImmutableSet<Integer> determinants,
+                                                                     ImmutableSet<Integer> dependents) {
+            DBTermType stringDBType = getDBTypeFactory().getDBStringType();
+            NamedRelationDefinition tableDef = createRelation(tableNumber, arity, stringDBType, "FD_", canNull);
+            FunctionalDependency.Builder builder = FunctionalDependency.defaultBuilder(tableDef);
+            determinants.stream()
+                    .forEach(builder::addDeterminant);
+            dependents.stream()
+                    .forEach(builder::addDependent);
+            builder.build();
+            return tableDef;
+        }
+
         public RelationDefinition createRelationWithStringAttributes(int tableNumber, int arity, boolean canBeNull) {
             return createRelation(tableNumber, arity, getDBTypeFactory().getDBStringType(), "STR_", canBeNull);
         }
