@@ -182,9 +182,9 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
                 jsonLens.insertIntegrityConstraints((Lens) relation, baseRelations, metadataLookupForFK,
                         getDBParameters());
 
-                /* Propagate UCs to the parent relation.
-                If at least one UC was sent up this way, repeat this process from the parent.
-                Keep going until either no UC could be propagated up or the root element is reached.
+                /* Propagate UCs and KFs to the parent relation.
+                If at least one UC or FK was sent up this way, repeat this process from the parent.
+                Keep going until either no UC/FK could be propagated up or the root element is reached.
                  */
                 Queue<NamedRelationDefinition> lensesForPropagation = new ArrayDeque<>();
                 lensesForPropagation.add(relation);
@@ -193,6 +193,11 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
                     JsonLens currentPropagationJsonLens = jsonMap.get(currentPropagationLens.getID());
                     ImmutableList<NamedRelationDefinition> currentPropagationParents = dependencyCacheMetadataLookup.getBaseRelations(currentPropagationLens.getID());
                     if(currentPropagationJsonLens.propagateUniqueConstraintsUp((Lens)currentPropagationLens, currentPropagationParents, getQuotedIDFactory())) {
+                        lensesForPropagation.addAll(currentPropagationParents.stream()
+                                .filter(l -> l instanceof Lens)
+                                .collect(Collectors.toList()));
+                    }
+                    if(currentPropagationJsonLens.propagateForeignKeyConstraintsUp((Lens)currentPropagationLens, currentPropagationParents, getQuotedIDFactory())) {
                         lensesForPropagation.addAll(currentPropagationParents.stream()
                                 .filter(l -> l instanceof Lens)
                                 .collect(Collectors.toList()));
