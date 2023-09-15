@@ -112,7 +112,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
         }
 
         @Override
-        protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition) {
+        protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition, ImmutableSet<Variable> leftVariables) {
             Supplier<VariableNullability> variableNullabilitySupplier =
                     () -> computeRightChildVariableNullability(rightChild, ljCondition);
 

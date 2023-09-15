@@ -51,7 +51,7 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
     public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         IQTree transformedLeftChild = transform(leftChild);
         // Cannot reuse
-        IQTree transformedRightChild = preTransformLJRightChild(rightChild, rootNode.getOptionalFilterCondition());
+        IQTree transformedRightChild = preTransformLJRightChild(rightChild, rootNode.getOptionalFilterCondition(), leftChild.getVariables());
 
         if (preventRecursiveOptimizationOnRightChild()
                 && !transformedRightChild.equals(rightChild))
@@ -173,7 +173,8 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
      * Can be overridden
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    abstract protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition);
+    abstract protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition,
+                                                       ImmutableSet<Variable> leftVariables);
 
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
