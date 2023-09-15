@@ -32,10 +32,10 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
      * The performance of this method is critical.
      * Currently, it has a complexity around O(n^2*m) where `n` is the number of FDs and `m` the number of variables in it.
      */
-    private static boolean inferTransitiveDependencies(ImmutableSet<Map.Entry<ImmutableSet<Variable>, Set<Variable>>> dependencies) {
+    private static boolean inferTransitiveDependencies(ImmutableSet<Map.Entry<ImmutableSet<Variable>, Set<Variable>>> mutableDependencies) {
         boolean changed = false;
-        for(var entry : dependencies) {
-            for(var entry2 : dependencies) {
+        for(var entry : mutableDependencies) {
+            for(var entry2 : mutableDependencies) {
                 if(Sets.difference(entry.getKey(), entry2.getKey()).isEmpty()
                             || Sets.difference(Sets.difference(entry.getValue(), entry2.getKey()), entry2.getValue()).isEmpty()
                             || !Sets.union(entry2.getValue(), entry2.getKey()).containsAll(entry.getKey()))
