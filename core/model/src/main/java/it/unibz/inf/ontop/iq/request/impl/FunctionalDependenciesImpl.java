@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.*;
@@ -27,14 +28,23 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
                 .collect(ImmutableCollectors.toSet());
     }
 
-    private static Stream<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> inferTransitiveDependencies(ImmutableSet<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> dependencies) {
-        return dependencies.stream()
-                .flatMap(entry -> dependencies.stream()
-                        .filter(entry2 -> entry.hashCode() <= entry2.hashCode()
-                                && (!entry.equals(entry2))
-                                && Sets.union(entry2.getValue(), entry2.getKey()).containsAll(entry.getKey()))
-                        .map(entry2 -> Maps.immutableEntry(entry2.getKey(), Sets.difference(entry.getValue(), entry2.getKey()).immutableCopy()))
-                );
+    /*
+     * The performance of this method is critical.
+     * Currently, it has a complexity around O(n^2*m) where `n` is the number of FDs and `m` the number of variables in it.
+     */
+    private static boolean inferTransitiveDependencies(ImmutableSet<Map.Entry<ImmutableSet<Variable>, Set<Variable>>> dependencies) {
+        boolean changed = false;
+        for(var entry : dependencies) {
+            for(var entry2 : dependencies) {
+                if(Sets.difference(entry.getKey(), entry2.getKey()).isEmpty()
+                            || Sets.difference(Sets.difference(entry.getValue(), entry2.getKey()), entry2.getValue()).isEmpty()
+                            || !Sets.union(entry2.getValue(), entry2.getKey()).containsAll(entry.getKey()))
+                    continue;
+                entry2.getValue().addAll(Sets.difference(entry.getValue(), entry2.getKey()));
+                changed = true;
+            }
+        }
+        return changed;
     }
 
     @Override
@@ -115,13 +125,10 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
      */
     protected FunctionalDependencies complete() {
         var dependencyPairs = stream().collect(ImmutableCollectors.toSet());
-        var withTransitive = dependencyPairs;
-        var lastSize = 0;
-        while(lastSize != withTransitive.size()) {
-            lastSize = withTransitive.size();
-            withTransitive = Streams.concat(dependencyPairs.stream(), inferTransitiveDependencies(withTransitive))
-                    .collect(ImmutableCollectors.toSet());
-        }
+        var withTransitive = dependencyPairs.stream()
+                .map(entry -> Maps.<ImmutableSet<Variable>, Set<Variable>>immutableEntry(entry.getKey(), new HashSet<>(entry.getValue())))
+                .collect(ImmutableCollectors.toSet());
+        while(inferTransitiveDependencies(withTransitive));
         var collectedDependencies = withTransitive.stream()
                 .collect(Collectors.groupingBy(Map.Entry::getKey))
                 .entrySet().stream()
