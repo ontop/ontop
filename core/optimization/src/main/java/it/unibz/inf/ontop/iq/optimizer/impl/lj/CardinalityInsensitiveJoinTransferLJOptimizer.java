@@ -166,7 +166,10 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
 
         @Override
         public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
-            return transformUnaryNode(tree, rootNode, child, this::transformBySearchingFromScratchFromDistinctTree);
+            var childVariableNullabilitySupplier = computeChildVariableNullabilityFromConstructionParent(tree, rootNode, child);
+
+            return transformUnaryNode(tree, rootNode, child,
+                    t -> transformBySearchingFromScratchFromDistinctTree(t, childVariableNullabilitySupplier));
         }
 
         @Override

@@ -204,5 +204,25 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
                 .orElse(nullabilityWithLJCondition);
     }
 
+    protected Supplier<VariableNullability> computeChildVariableNullabilityFromConstructionParent(IQTree tree,
+                                                                                                ConstructionNode rootNode, IQTree child) {
+        var childVariables = child.getVariables();
+        var inheritedVariableNullability = getInheritedVariableNullability();
+        var bottomUpVariableNullability = tree.getVariableNullability();
+
+        var isNotNullConditions = termFactory.getConjunction(childVariables.stream()
+                .filter(v -> !rootNode.getSubstitution().isDefining(v))
+                .filter(bottomUpVariableNullability::isPossiblyNullable)
+                .filter(v -> ! inheritedVariableNullability.isPossiblyNullable(v))
+                .map(termFactory::getDBIsNotNull));
+
+        return () -> isNotNullConditions
+                .map(c -> variableNullabilityTools.updateWithFilter(
+                        c,
+                        child.getVariableNullability().getNullableGroups(),
+                        childVariables))
+                .orElseGet(child::getVariableNullability);
+    }
+
 
 }
