@@ -12,9 +12,12 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class DBInFunctionSymbolImpl extends DBBooleanFunctionSymbolImpl implements DBInFunctionSymbol {
+/**
+ * Relies on strict equalities
+ */
+public class StrictDBInFunctionSymbolImpl extends DBBooleanFunctionSymbolImpl implements DBInFunctionSymbol {
 
-    protected DBInFunctionSymbolImpl(int arity, DBTermType rootDBTermType, DBTermType dbBooleanTermType) {
+    protected StrictDBInFunctionSymbolImpl(int arity, DBTermType rootDBTermType, DBTermType dbBooleanTermType) {
         super("DB_IN_" + arity, IntStream.range(0, arity)
                 .<TermType>mapToObj(i -> rootDBTermType)
                 .collect(ImmutableCollectors.toList()), dbBooleanTermType);
@@ -59,9 +62,22 @@ public class DBInFunctionSymbolImpl extends DBBooleanFunctionSymbolImpl implemen
     }
 
     @Override
-    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory, VariableNullability variableNullability) {
-        if(newTerms.get(0).isNull())
+    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
+                                                     VariableNullability variableNullability) {
+        var firstTerm = newTerms.get(0);
+
+        if(firstTerm.isNull())
             return termFactory.getNullConstant();
+
+        if (firstTerm instanceof DBConstant) {
+            if (newTerms.stream()
+                    .skip(1)
+                    .anyMatch(t -> t.equals(firstTerm)))
+                return termFactory.getDBBooleanConstant(true);
+            if (newTerms.stream().allMatch(t -> t instanceof DBConstant))
+                return termFactory.getDBBooleanConstant(false);
+            // TODO: further simplify in case other arguments are not constant
+        }
 
         //Remove duplicates
         ImmutableList<ImmutableTerm> newChildren = Stream.concat(
@@ -82,6 +98,6 @@ public class DBInFunctionSymbolImpl extends DBBooleanFunctionSymbolImpl implemen
             //The pattern `"x" IN (anything)` can be replaced with `"x" = anything`.
             return termFactory.getStrictEquality(newChildren);
         }
-        return termFactory.getImmutableExpression(termFactory.getDBFunctionSymbolFactory().getDBIn(newChildren.size()), newChildren);
+        return termFactory.getImmutableExpression(termFactory.getDBFunctionSymbolFactory().getStrictDBIn(newChildren.size()), newChildren);
     }
 }

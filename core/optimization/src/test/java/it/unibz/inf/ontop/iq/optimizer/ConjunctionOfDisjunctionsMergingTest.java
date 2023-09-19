@@ -63,7 +63,7 @@ public class ConjunctionOfDisjunctionsMergingTest {
 
     private ImmutableExpression in(ImmutableTerm left, String... items) {
         return TERM_FACTORY.getImmutableExpression(
-                TERM_FACTORY.getDBFunctionSymbolFactory().getDBIn(items.length + 1),
+                TERM_FACTORY.getDBFunctionSymbolFactory().getStrictDBIn(items.length + 1),
                 Streams.concat(
                         Stream.of(left),
                         Arrays.stream(items)
@@ -74,7 +74,7 @@ public class ConjunctionOfDisjunctionsMergingTest {
 
     private ImmutableExpression in(ImmutableTerm left, ImmutableTerm... items) {
         return TERM_FACTORY.getImmutableExpression(
-                TERM_FACTORY.getDBFunctionSymbolFactory().getDBIn(items.length + 1),
+                TERM_FACTORY.getDBFunctionSymbolFactory().getStrictDBIn(items.length + 1),
                 Streams.concat(
                         Stream.of(left),
                         Arrays.stream(items)

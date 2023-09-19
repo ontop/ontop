@@ -76,7 +76,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
             return Optional.empty();
         var f = (ImmutableFunctionalTerm) term;
         return Optional.of(termFactory.getImmutableExpression(
-                termFactory.getDBFunctionSymbolFactory().getDBIn(2),
+                termFactory.getDBFunctionSymbolFactory().getStrictDBIn(2),
                 f.getTerm(0) instanceof Constant ? f.getTerm(1) : f.getTerm(0),
                 f.getTerm(1) instanceof Constant ? f.getTerm(1) : f.getTerm(0)
         ));
@@ -111,7 +111,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
                                 .map(t -> (ImmutableExpression) t),
                         converted.entrySet().stream()
                                 .map(entry -> termFactory.getImmutableExpression(
-                                        termFactory.getDBFunctionSymbolFactory().getDBIn(1 + entry.getValue().size()),
+                                        termFactory.getDBFunctionSymbolFactory().getStrictDBIn(1 + entry.getValue().size()),
                                         Streams.concat(
                                                 Stream.of(entry.getKey()),
                                                 entry.getValue().stream()
@@ -466,7 +466,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
                     conjunction ? Sets.intersection(ownChildren, otherChildren).stream() : Sets.union(ownChildren, otherChildren).stream()
             ).collect(ImmutableCollectors.toList());
             return termFactory.getImmutableExpression(
-                    termFactory.getDBFunctionSymbolFactory().getDBIn(mergedChildren.size()),
+                    termFactory.getDBFunctionSymbolFactory().getStrictDBIn(mergedChildren.size()),
                     mergedChildren
             );
         }
