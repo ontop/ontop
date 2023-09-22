@@ -75,7 +75,7 @@
     <scm>
         <connection>scm:git:git@github.com:ontop/ontop.git</connection>
         <developerConnection>scm:git:git@github.com:ontop/ontop.git</developerConnection>
-        <tag>ontop-5.1.0</tag>
+        <tag>ontop-5.0.1</tag>
         <url>git@github.com:ontop/ontop.git</url>
     </scm>
 

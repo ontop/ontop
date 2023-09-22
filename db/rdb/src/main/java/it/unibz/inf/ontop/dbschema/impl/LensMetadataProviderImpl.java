@@ -179,8 +179,17 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
                 for (NamedRelationDefinition baseRelation : baseRelations)
                     insertIntegrityConstraints(baseRelation, metadataLookupForFK);
 
-                jsonLens.insertIntegrityConstraints((Lens) relation, baseRelations, metadataLookupForFK,
-                        getDBParameters());
+                try {
+                    jsonLens.insertIntegrityConstraints((Lens) relation, baseRelations, metadataLookupForFK,
+                            getDBParameters());
+                } catch (MetadataExtractionException e) {
+                    if (ignoreInvalidLensEntries) {
+                        LOGGER.warn("Integrity constraints on lens {} were ignored due to an issue: {}", relationId, e.getMessage());
+                        return;
+                    }
+                    else
+                        throw e;
+                }
 
                 /* Propagate UCs and KFs to the parent relation.
                 If at least one UC or FK was sent up this way, repeat this process from the parent.
