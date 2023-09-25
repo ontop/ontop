@@ -38,6 +38,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.protege.utils.DialogUtils.*;
@@ -135,6 +136,8 @@ public class DataSourcePanel extends JPanel implements OBDAModelManagerListener 
         activeOntologyChanged(obdaModelManager.getCurrentOBDAModel());
     }
 
+    private SwingWorker<String, Void> databaseConnectionCheckWorker;
+
     private final OntopAbstractAction testAction = new OntopAbstractAction("Test Connection",
             "execute.png",
             "Test settings by connecting to the server",
@@ -145,21 +148,48 @@ public class DataSourcePanel extends JPanel implements OBDAModelManagerListener 
             connectionStatusLabel.setForeground(Color.BLACK);
             connectionStatusLabel.setText("Establishing connection...");
 
-            DataSource dataSource =  obdaModelManager.getCurrentOBDAModel().getDataSource();
-            try (Connection ignored = dataSource.getConnection()) {
-                connectionStatusLabel.setForeground(Color.GREEN.darker());
-                connectionStatusLabel.setText("Connection is OK");
-            }
-            catch (SQLException e) {
-                String help = (e.getMessage().startsWith("No suitable driver"))
-                        ? "<br><br>" +
-                        "HINT: To setup JDBC drivers, open the Preference panel and go to the \"JDBC Drivers\" tab.<br>" +
-                        HTML_TAB + "(Windows and Linux: Files &gt; Preferences..., Mac OS X: Protege &gt; Preferences...)" 
-                        : "";
+            if (databaseConnectionCheckWorker == null || databaseConnectionCheckWorker.isDone()) {
+                DataSource dataSource =  obdaModelManager.getCurrentOBDAModel().getDataSource();
 
-                connectionStatusLabel.setForeground(Color.RED);
-                connectionStatusLabel.setText(String.format("<html>%s (ERR-CODE: %s)%s</html>", e.getMessage(), e.getErrorCode(), help));
+                databaseConnectionCheckWorker = new SwingWorker<>() {
+                    @Override
+                    protected String doInBackground() {
+                        try (Connection conn = dataSource.getConnection()) {
+                            // In Trino, non-null connection object does not mean that a connection has been established.
+                            // This username request forces the Trino driver to execute an SQL query (so, a connection will be opened).
+                            conn.getMetaData().getUserName();
+                            return null;
+                        }
+                        catch (SQLException e) {
+                            String help = (e.getMessage().startsWith("No suitable driver"))
+                                    ? "<br><br>" +
+                                    "HINT: To setup JDBC drivers, open the Preference panel and go to the \"JDBC Drivers\" tab.<br>" +
+                                    HTML_TAB + "(Windows and Linux: Files &gt; Preferences..., Mac OS X: Protege &gt; Preferences...)"
+                                    : "";
+                            return String.format("<html>%s (ERR-CODE: %s)%s</html>", e.getMessage(), e.getErrorCode(), help);
+                        }
+                    }
+
+                    @Override
+                    protected void done() {
+                        try {
+                            String label = get();
+                            if (label == null) {
+                                connectionStatusLabel.setForeground(Color.GREEN.darker());
+                                connectionStatusLabel.setText("Connection is OK");
+                            }
+                            else {
+                                connectionStatusLabel.setForeground(Color.RED);
+                                connectionStatusLabel.setText(label);
+                            }
+                        }
+                        catch (ExecutionException | InterruptedException ignored) {
+                        }
+                    }
+                };
+                databaseConnectionCheckWorker.execute();
             }
+
         }
     };
 
