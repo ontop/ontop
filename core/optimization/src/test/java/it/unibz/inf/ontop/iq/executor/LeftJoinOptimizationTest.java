@@ -3654,7 +3654,6 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
-    @Ignore("TODO: support composite UC inference after transformation in ConstructionNode, to get that query optimized")
     @Test
     public void testMergeLJs22() {
 
