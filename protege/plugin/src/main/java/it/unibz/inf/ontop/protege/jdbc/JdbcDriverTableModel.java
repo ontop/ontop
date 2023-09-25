@@ -6,6 +6,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.osgi.jdbc.JdbcRegistry;
+import org.protege.osgi.jdbc.JdbcRegistryException;
 
 import javax.swing.table.AbstractTableModel;
 import java.io.File;
@@ -14,8 +15,8 @@ import java.util.*;
 import java.util.function.Function;
 
 public class JdbcDriverTableModel extends AbstractTableModel {
-    private static final long serialVersionUID = -7588371899390500462L;
 
+	// drivers are uniquely identified by their class names
 	private final List<JdbcDriverInfo> drivers;
     private final Set<String> installedDriverClasses = new HashSet<>();
     private final ServiceTracker<?,?> jdbcRegistryTracker;
@@ -48,9 +49,9 @@ public class JdbcDriverTableModel extends AbstractTableModel {
 	}
 
 	@Override
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		JdbcDriverInfo info = drivers.get(rowIndex);
-		return COLUMNS.get(columnIndex).getValue().apply(info);
+	public Object getValueAt(int row, int column) {
+		JdbcDriverInfo info = getDriver(row);
+		return COLUMNS.get(column).getValue().apply(info);
 	}
 
 	private void updateDriverStatus() {
@@ -74,32 +75,42 @@ public class JdbcDriverTableModel extends AbstractTableModel {
 		return drivers.get(row);
 	}
 
-	public void addDriver(JdbcDriverInfo driver) {
-		JdbcDriverInfo toRemove = null;
-		for (JdbcDriverInfo existingDriver : drivers) {
-			if (existingDriver.getClassName().equals(driver.getClassName())) {
-				toRemove = existingDriver;
-				break;
-			}
-		}
-		if (toRemove != null) {
-		    drivers.remove(toRemove);
-		}
+	public void addOrReplaceDriver(JdbcDriverInfo driver) throws JdbcRegistryException {
+		Optional<JdbcDriverInfo> toRemove = drivers.stream()
+				.filter(d -> d.getClassName().equals(driver.getClassName()))
+				.findFirst();
+
+		if (toRemove.isPresent())
+			removeAndUnloadDriver(toRemove.get());
+
 		drivers.add(driver);
 		updateDriverStatus();
 	}
 	
-	public void removeDrivers(int row) {
-		drivers.remove(row);
+	public void removeDriver(int row) throws JdbcRegistryException {
+		removeAndUnloadDriver(getDriver(row));
 		updateDriverStatus();
 	}
 	
-	public void replaceDriver(int row, JdbcDriverInfo newDriver) {
-	    drivers.remove(row);
+	public void replaceDriver(int row, JdbcDriverInfo newDriver) throws JdbcRegistryException {
+	    removeAndUnloadDriver(getDriver(row));
 	    drivers.add(row, newDriver);
 		updateDriverStatus();
 	}
 
+	private void removeAndUnloadDriver(JdbcDriverInfo driver) throws JdbcRegistryException {
+		try {
+			jdbcRegistryTracker.open();
+			for (Object o : jdbcRegistryTracker.getServices()) {
+				JdbcRegistry registry = (JdbcRegistry) o;
+				registry.removeJdbcDriver(driver.getClassName());
+			}
+		}
+		finally {
+			jdbcRegistryTracker.close();
+		}
+		drivers.remove(driver);
+	}
 
 	public void storeDriverInfoInPreferences() {
 		Preferences prefs = PreferencesManager.getInstance().getPreferencesForSet(JdbcPreferencesPanel.PREFERENCES_SET, JdbcPreferencesPanel.DRIVER_PREFERENCES_KEY);

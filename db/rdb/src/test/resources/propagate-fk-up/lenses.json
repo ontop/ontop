@@ -1,0 +1,218 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"", "\"l1\""],
+      "baseRelation": ["\"base_table\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"l2\""],
+      "baseRelation": ["\"lenses\"", "\"l1\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"l3\""],
+      "baseRelation": ["\"lenses\"", "\"l2\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"l4\""],
+      "baseRelation": ["\"lenses\"", "\"l3\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "uc",
+            "determinants": [
+              "\"id_A\"",
+              "\"id_B_1\"",
+              "\"id_B_2\""
+            ],
+            "isPrimaryKey": false
+          }
+        ]
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "fk_1",
+            "from": ["\"id_A\""],
+            "to": {
+              "relation": ["\"A\""],
+              "columns": ["\"id\""]
+            }
+          },
+          {
+            "name": "fk_2",
+            "from": ["\"id_B_1\"", "\"id_B_2\""],
+            "to": {
+              "relation": ["\"B\""],
+              "columns": ["\"id_1\"", "\"id_2\""]
+            }
+          }
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"x1\""],
+      "baseRelation": ["\"lenses\"", "\"x2\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "fk_1",
+            "from": ["\"id_A\""],
+            "to": {
+              "relation": ["\"A\""],
+              "columns": ["\"id\""]
+            }
+          },
+          {
+            "name": "fk_2",
+            "from": ["\"id_B_1\"", "\"id_B_2\""],
+            "to": {
+              "relation": ["\"B\""],
+              "columns": ["\"id_1\"", "\"id_2\""]
+            }
+          }
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"x2\""],
+      "baseRelation": ["\"lenses\"", "\"x3\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"x3\""],
+      "baseRelation": ["\"base_table_2\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"noIsParent\""],
+      "baseRelation": ["\"A\""],
+      "columns": {
+        "added": [
+          {
+            "name": "\"id\"",
+            "expression": "\"id\" + \"y\""
+          }
+        ],
+        "hidden": []
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "fk_1",
+            "from": ["\"y\""],
+            "to": {
+              "relation": ["\"A\""],
+              "columns": ["\"y\""]
+            }
+          }
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"modified\""],
+      "baseRelation": ["\"base_table_3\""],
+      "columns": {
+        "added": [
+          {
+            "name": "\"id_B_1\"",
+            "expression": "\"id_B_1\" + \"id_B_2\""
+          },
+          {
+            "name": "\"id_A\"",
+            "expression": "\"id_A\""
+          }
+        ],
+        "hidden": []
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "fk_1",
+            "from": ["\"id_A\""],
+            "to": {
+              "relation": ["\"A\""],
+              "columns": ["\"id\""]
+            }
+          },
+          {
+            "name": "fk_2",
+            "from": ["\"id_B_1\"", "\"id_B_2\""],
+            "to": {
+              "relation": ["\"B\""],
+              "columns": ["\"id_1\"", "\"id_2\""]
+            }
+          }
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"other_change\""],
+      "baseRelation": ["\"base_table_4\""],
+      "columns": {
+        "added": [
+          {
+            "name": "\"x\"",
+            "expression": "\"x\" + \"x\""
+          }
+        ],
+        "hidden": []
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "fk_1",
+            "from": ["\"id_A\""],
+            "to": {
+              "relation": ["\"A\""],
+              "columns": ["\"id\""]
+            }
+          },
+          {
+            "name": "fk_2",
+            "from": ["\"id_B_1\"", "\"id_B_2\""],
+            "to": {
+              "relation": ["\"B\""],
+              "columns": ["\"id_1\"", "\"id_2\""]
+            }
+          }
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}

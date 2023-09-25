@@ -85,6 +85,16 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    protected DBFunctionSymbol createDBStdev(DBTermType termType, boolean isPop, boolean isDistinct) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBVariance(DBTermType termType, boolean isPop, boolean isDistinct) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
     protected DBFunctionSymbol createDBMin(DBTermType termType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
@@ -652,6 +662,16 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     @Override
     public DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBFunctionSymbol getOntopUser() {
+        return new OntopUserFunctionSymbolImpl(dbBooleanType);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getOntopContainsRoleOrGroup() {
+        return new OntopContainsRoleOrGroupFunctionSymbol(dbStringType, dbBooleanType);
     }
 
     // Topological functions

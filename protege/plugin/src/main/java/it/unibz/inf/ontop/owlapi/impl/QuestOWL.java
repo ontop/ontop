@@ -80,7 +80,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		try {
 			ontopConfiguration.validate();
 		} catch (InvalidOntopConfigurationException e) {
-			throw new IllegalConfigurationException(e.getMessage(), owlConfiguration);
+			throw new IllegalConfigurationException(e.getMessage(), e, owlConfiguration);
 		}
 
         this.structuralReasoner = new StructuralReasoner(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
@@ -95,7 +95,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			 * Mapping parsing exceptions are re-thrown as configuration exceptions.
 			 */
 		} catch (OBDASpecificationException e) {
-			throw new IllegalConfigurationException(e, owlConfiguration);
+			throw new IllegalConfigurationException(e.getMessage(), e, owlConfiguration);
 		}
 
 		kgQueryFactory = ontopConfiguration.getKGQueryFactory();

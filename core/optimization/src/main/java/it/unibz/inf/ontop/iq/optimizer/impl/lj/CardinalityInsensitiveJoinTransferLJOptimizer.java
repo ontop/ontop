@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.FunctionalDependency;
@@ -23,6 +20,7 @@ import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerIm
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -30,6 +28,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @Singleton
 public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQOptimizer {
@@ -122,26 +121,55 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
                     .map(idx -> new SelectedNode(idx, rightDataNode));
         }
 
+        /**
+         * Enables applying self-join elimination after the self-left-join has been reduced
+         * to an inner join on the right child.
+         */
+        @Override
+        protected boolean preventRecursiveOptimizationOnRightChild() {
+            return true;
+        }
+
         @Override
         protected IQTree transformBySearchingFromScratch(IQTree tree) {
             return lookForDistinctTransformer.transform(tree);
         }
 
         protected IQTree transformBySearchingFromScratchFromDistinctTree(IQTree tree) {
+            return transformBySearchingFromScratchFromDistinctTree(tree, tree::getVariableNullability);
+        }
+
+        protected IQTree transformBySearchingFromScratchFromDistinctTree(IQTree tree, Supplier<VariableNullability> variableNullabilitySupplier) {
             CardinalityInsensitiveTransformer newTransformer = new CardinalityInsensitiveTransformer(lookForDistinctTransformer,
-                    tree::getVariableNullability, variableGenerator, requiredDataNodeExtractor,
+                    variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor,
                     rightProvenanceNormalizer, variableNullabilityTools, coreSingletons);
             return tree.acceptTransformer(newTransformer);
         }
 
         @Override
-        protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition) {
-            return transformBySearchingFromScratchFromDistinctTree(rightChild);
+        protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition,
+                                                  ImmutableSet<Variable> leftVariables) {
+
+            var isNotNullFromImplicitEqualities = Sets.intersection(leftVariables, rightChild.getVariables()).stream()
+                    .map(termFactory::getDBIsNotNull);
+
+            var condition = termFactory.getConjunction(Stream.concat(ljCondition.stream(), isNotNullFromImplicitEqualities));
+
+            return transformBySearchingFromScratchFromDistinctTree(rightChild,
+                    () -> condition
+                            .map(c -> variableNullabilityTools.updateWithFilter(
+                                            c,
+                                            rightChild.getVariableNullability().getNullableGroups(),
+                                            rightChild.getVariables()))
+                            .orElseGet(rightChild::getVariableNullability));
         }
 
         @Override
         public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
-            return transformUnaryNode(tree, rootNode, child, this::transformBySearchingFromScratchFromDistinctTree);
+            var childVariableNullabilitySupplier = computeChildVariableNullabilityFromConstructionParent(tree, rootNode, child);
+
+            return transformUnaryNode(tree, rootNode, child,
+                    t -> transformBySearchingFromScratchFromDistinctTree(t, childVariableNullabilitySupplier));
         }
 
         @Override

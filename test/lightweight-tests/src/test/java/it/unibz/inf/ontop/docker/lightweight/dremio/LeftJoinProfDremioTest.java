@@ -46,7 +46,7 @@ public class LeftJoinProfDremioTest extends AbstractLeftJoinProfTest {
 
     @Override
     protected ImmutableList<String> getExpectedValuesMultitypedSum1() {
-        return ImmutableList.of("\"31.0000\"^^xsd:decimal", "\"32.0000\"^^xsd:decimal", "\"115.5000\"^^xsd:decimal");
+        return ImmutableList.of("\"31.000000000000000000000000000000\"^^xsd:decimal", "\"32.000000000000000000000000000000\"^^xsd:decimal", "\"115.500000000000000000000000000000\"^^xsd:decimal");
     }
 
     @Override

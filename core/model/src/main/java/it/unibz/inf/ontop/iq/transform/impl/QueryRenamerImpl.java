@@ -40,7 +40,7 @@ public class QueryRenamerImpl implements QueryRenamer {
         if (renamingSubstitution.isEmpty())
             return originalQuery;
 
-        HomogeneousIQTreeVisitingTransformer iqTransformer = getIQTransfiormer();
+        HomogeneousIQTreeVisitingTransformer iqTransformer = getIQTransformer();
         IQTree newIQTree = originalQuery.getTree().acceptTransformer(iqTransformer);
 
         DistinctVariableOnlyDataAtom atom = originalQuery.getProjectionAtom();
@@ -55,11 +55,11 @@ public class QueryRenamerImpl implements QueryRenamer {
         if (renamingSubstitution.isEmpty())
             return originalTree;
 
-        HomogeneousIQTreeVisitingTransformer iqTransformer = getIQTransfiormer();
+        HomogeneousIQTreeVisitingTransformer iqTransformer = getIQTransformer();
         return originalTree.acceptTransformer(iqTransformer);
     }
 
-    private HomogeneousIQTreeVisitingTransformer getIQTransfiormer() {
+    private HomogeneousIQTreeVisitingTransformer getIQTransformer() {
         QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(iqFactory, renamingSubstitution, atomFactory, substitutionFactory);
         return new HomogeneousIQTreeVisitingTransformer(nodeTransformer, iqFactory);
     }

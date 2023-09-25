@@ -406,10 +406,13 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             v -> v.getKey(),
                             v -> new QualifiedAttributeID(idFactory.createRelationID(alias), v.getValue().getAttribute())
                     ));
+
+            var aliasFactory = createAttributeAliasFactory();
+
             var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()
                     .filter(v -> variableAliases.containsKey(v))
                     .map(
-                            v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + idFactory.createAttributeID(v.getName()).getSQLRendering()
+                            v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + aliasFactory.createAttributeAlias(v.getName()).getSQLRendering()
                     )
                     .collect(Collectors.joining(", "));
             if(subProjection.length() > 0)

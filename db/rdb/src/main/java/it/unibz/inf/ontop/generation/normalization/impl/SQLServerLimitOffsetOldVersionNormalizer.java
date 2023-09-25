@@ -83,9 +83,10 @@ public class SQLServerLimitOffsetOldVersionNormalizer extends DefaultRecursiveIQ
         } else {
             newChild = child;
         }
+        IQTree normalizedChild = this.transform(newChild, variableGenerator);
 
         IQTree newTree = iqFactory.createUnaryIQTree(newFilter,
-                iqFactory.createUnaryIQTree(newConstruction, newChild));
+                iqFactory.createUnaryIQTree(newConstruction, normalizedChild));
 
         // Additional CONSTRUCTION necessary when subtree leaf in NaryIQTree (e.g. sub-query)
         return iqFactory.createUnaryIQTree(

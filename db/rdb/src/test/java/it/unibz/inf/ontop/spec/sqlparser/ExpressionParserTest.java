@@ -284,6 +284,28 @@ public class ExpressionParserTest {
     }
 
     @Test
+    public void equalsTo_constant_with_quoteTest() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X = 'Jane''s dogs'", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getNotYetTypedEquality(
+                v,
+                TERM_FACTORY.getDBStringConstant("Jane's dogs")), translation.get(0));
+    }
+
+    @Test
+    public void equalsTo_constant_with_quote2Test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X = 'Jane''''s dogs'", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getNotYetTypedEquality(
+                v,
+                TERM_FACTORY.getDBStringConstant("Jane''s dogs")), translation.get(0));
+    }
+
+    @Test
     public void greater_than_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X > 3", ImmutableMap.of(
@@ -890,6 +912,24 @@ public class ExpressionParserTest {
                         DB_FS_FACTORY.getDBDefaultInequality(GTE),
                         v,
                         TERM_FACTORY.getDBConstant("1", dbLongType))), translation.get(0));
+    }
+
+    @Test
+    public void ontop_contains_role_or_group_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE ontop_contains_role_or_group('admin')", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getOntopContainsRoleOrGroup(), TERM_FACTORY.getDBStringConstant("admin")), translation.get(0));
+    }
+
+    @Test
+    public void ontop_user_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE ontop_user() = 'roger'", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getOntopUser()), TERM_FACTORY.getDBStringConstant("roger")), translation.get(0));
     }
 
     @Test

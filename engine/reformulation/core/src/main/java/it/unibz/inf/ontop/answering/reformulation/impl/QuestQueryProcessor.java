@@ -4,6 +4,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.query.KGQuery;
@@ -42,6 +43,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
 	private final QueryPlanner queryPlanner;
 	private final QueryLogger.Factory queryLoggerFactory;
+	private final QueryContext.Factory queryContextFactory;
 
 	@AssistedInject
 	protected QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -53,12 +55,14 @@ public class QuestQueryProcessor implements QueryReformulator {
 								KGQueryTranslator inputQueryTranslator,
 								GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
 								QueryPlanner queryPlanner,
-								QueryLogger.Factory queryLoggerFactory) {
+								QueryLogger.Factory queryLoggerFactory,
+								QueryContext.Factory queryContextFactory) {
 		this.kgQueryFactory = kgQueryFactory;
 		this.rewriter = queryRewriter;
 		this.generalOptimizer = generalOptimizer;
 		this.queryPlanner = queryPlanner;
 		this.queryLoggerFactory = queryLoggerFactory;
+		this.queryContextFactory = queryContextFactory;
 
 		this.rewriter.setTBox(obdaSpecification.getSaturatedTBox());
 		this.queryUnfolder = queryUnfolderFactory.create(obdaSpecification.getSaturatedMapping());
@@ -71,12 +75,12 @@ public class QuestQueryProcessor implements QueryReformulator {
 	}
 
 	@Override
-	public IQ reformulateIntoNativeQuery(KGQuery<?> inputQuery, QueryLogger queryLogger)
+	public IQ reformulateIntoNativeQuery(KGQuery<?> inputQuery, QueryContext queryContext, QueryLogger queryLogger)
 			throws OntopReformulationException {
 
 		long beginning = System.currentTimeMillis();
 
-		IQ cachedQuery = queryCache.get(inputQuery);
+		IQ cachedQuery = queryCache.get(inputQuery, queryContext);
 		if (cachedQuery != null) {
 			queryLogger.declareReformulationFinishedAndSerialize(cachedQuery,true);
 			return cachedQuery;
@@ -105,14 +109,14 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 				LOGGER.debug("Unfolded query:\n{}\n", unfoldedIQ);
 
-                IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ);
+                IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ, queryContext);
 				IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
 				LOGGER.debug("Planned query:\n{}\n", plannedQuery);
 
 				queryLogger.setPlannedQuery(plannedQuery);
 
 				IQ executableQuery = generateExecutableQuery(plannedQuery);
-				queryCache.put(inputQuery, executableQuery);
+				queryCache.put(inputQuery, queryContext, executableQuery);
 				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
 				LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
 				return executableQuery;
@@ -187,5 +191,10 @@ public class QuestQueryProcessor implements QueryReformulator {
 	@Override
 	public QueryLogger.Factory getQueryLoggerFactory() {
 		return  queryLoggerFactory;
+	}
+
+	@Override
+	public QueryContext.Factory getQueryContextFactory() {
+		return queryContextFactory;
 	}
 }

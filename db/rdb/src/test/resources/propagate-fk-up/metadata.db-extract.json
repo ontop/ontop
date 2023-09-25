@@ -1,0 +1,197 @@
+{
+  "relations": [
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"id_A\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"id_B_1\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"id_B_2\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"x\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"base_table\""
+      ]
+    },
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"y\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"A\""
+      ]
+    },
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id_1\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"id_2\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"z\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"B\""
+      ]
+    },
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"id_A\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"id_B_1\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"id_B_2\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"x\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"base_table_2\""
+      ]
+    },
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"id_A\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"id_B_1\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"id_B_2\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"x\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"base_table_3\""
+      ]
+    },
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"id_A\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"id_B_1\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"id_B_2\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"x\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"base_table_4\""
+      ]
+    }
+  ],
+  "metadata": {
+    "dbmsProductName": "H2",
+    "dbmsVersion": "1.4.199 (2019-03-13)",
+    "driverName": "H2 JDBC Driver",
+    "driverVersion": "1.4.199 (2019-03-13)",
+    "quotationString": "\"",
+    "extractionTime": "2020-11-12T17:24:30"
+  }
+}

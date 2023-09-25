@@ -83,10 +83,14 @@ public class JsonBasicLens extends JsonBasicOrJoinLens {
         return true;
     }
 
-    private boolean hasNoDeterminantOverridden(UniqueConstraint uc, QuotedIDFactory idFactory) {
-        return uc.getDeterminants().stream()
+    private boolean hasNoAttributeSetOverridden(ImmutableSet<Attribute> attributes, QuotedIDFactory idFactory) {
+        return attributes.stream()
                 .noneMatch(a -> columns.added.stream()
                         .anyMatch(c -> a.getID().equals(idFactory.createAttributeID(c.name))));
+    }
+
+    private boolean hasNoDeterminantOverridden(UniqueConstraint uc, QuotedIDFactory idFactory) {
+        return hasNoAttributeSetOverridden(uc.getDeterminants(), idFactory);
     }
 
     private boolean isUcNotInParent(UniqueConstraint uc, NamedRelationDefinition parent) {
@@ -102,5 +106,48 @@ public class JsonBasicLens extends JsonBasicOrJoinLens {
                 )
                 .collect(ImmutableCollectors.toList());
         return determinants.get(0).equals(determinants.get(1));
+    }
+
+    @Override
+    public boolean propagateForeignKeyConstraintsUp(Lens relation, ImmutableList<NamedRelationDefinition> parents,
+                                                QuotedIDFactory idFactory) throws MetadataExtractionException {
+        ImmutableList<ForeignKeyConstraint> fks = relation.getForeignKeys();
+        ImmutableList<ForeignKeyConstraint> propagableConstraints = fks.stream()
+                .filter(fk -> hasNoAttributeSetOverridden(fk.getComponents().stream()
+                        .map(ForeignKeyConstraint.Component::getAttribute)
+                        .collect(ImmutableCollectors.toSet()), idFactory))
+                .filter(fk -> isFkNotInParent(fk, parents.get(0)))
+                .filter(fk -> fk.getReferencedRelation() != parents.get(0))
+                .collect(ImmutableCollectors.toList());
+        if(propagableConstraints.isEmpty())
+            return false;
+
+        for(ForeignKeyConstraint fk : propagableConstraints) {
+            try {
+                ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(fk.getName(), parents.get(0), fk.getReferencedRelation());
+                for (ForeignKeyConstraint.Component component : fk.getComponents()) {
+                    builder.add(component.getAttribute().getID(), component.getReferencedAttribute().getID());
+                }
+                builder.build();
+            } catch (AttributeNotFoundException e) {
+                throw new MetadataExtractionException(e);
+            }
+        }
+        return true;
+    }
+
+    private boolean isFkNotInParent(ForeignKeyConstraint fk, NamedRelationDefinition parent) {
+        return parent.getForeignKeys().stream()
+                .noneMatch(f -> fkEquals(f, fk));
+    }
+
+    private boolean fkEquals(ForeignKeyConstraint fk1, ForeignKeyConstraint fk2) {
+        return Optional.of(fk1)
+                .filter(f -> f.getReferencedRelation().equals(fk2.getReferencedRelation()))
+                .filter(f -> f.getComponents().stream()
+                        .allMatch(c1 -> fk2.getComponents().stream()
+                                .anyMatch(c2 -> c1.getAttribute().getID().equals(c2.getAttribute().getID())
+                                                && c1.getReferencedAttribute().equals(c2.getReferencedAttribute()))))
+                .isPresent();
     }
 }

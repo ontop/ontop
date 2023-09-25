@@ -694,4 +694,16 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         }
         return super.getDBDateTrunc(datePart);
     }
+
+    @Override
+    protected DBFunctionSymbol createDBStdev(DBTermType inputType, boolean isPop, boolean isDistinct) {
+        DBTermType targetType = inputType.equals(dbIntegerType) ? dbDecimalType : inputType;
+        return new NullIgnoringDBStdevFunctionSymbol(isPop ? "STDEVP" : "STDEV", inputType, targetType, isPop, isDistinct);
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBVariance(DBTermType inputType, boolean isPop, boolean isDistinct) {
+        DBTermType targetType = inputType.equals(dbIntegerType) ? dbDecimalType : inputType;
+        return new NullIgnoringDBVarianceFunctionSymbol(isPop ? "VARP" : "VAR", inputType, targetType, isPop, isDistinct);
+    }
 }

@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory;
 import it.unibz.inf.ontop.evaluator.ExpressionNormalizer;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.*;
@@ -128,6 +129,9 @@ public class OntopModelModule extends OntopAbstractModule {
 
         String idFactoryType = QuotedIDFactory.getIDFactoryType(SQLStandardQuotedIDFactory.class);
         bindFromSettings(Key.get(QuotedIDFactory.class, Names.named(idFactoryType)), SQLStandardQuotedIDFactory.class);
+
+        Module queryContextModule = buildFactory(ImmutableList.of(QueryContext.class), QueryContext.Factory.class);
+        install(queryContextModule);
 
         bind(QuotedIDFactory.Supplier.class).toInstance(new QuotedIDFactory.Supplier() {
 

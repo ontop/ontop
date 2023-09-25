@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.*;
@@ -27,12 +28,23 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
                 .collect(ImmutableCollectors.toSet());
     }
 
-    private static Stream<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> inferTransitiveDependencies(ImmutableSet<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> dependencies) {
-        return dependencies.stream()
-                .flatMap(entry -> dependencies.stream()
-                        .filter(entry2 -> Sets.union(entry2.getValue(), entry2.getKey()).containsAll(entry.getKey()))
-                        .map(entry2 -> Maps.immutableEntry(entry2.getKey(), Sets.difference(entry.getValue(), entry2.getKey()).immutableCopy()))
-                );
+    /*
+     * The performance of this method is critical.
+     * Currently, it has a complexity around O(n^2*m) where `n` is the number of FDs and `m` the number of variables in it.
+     */
+    private static boolean inferTransitiveDependencies(ImmutableSet<Map.Entry<ImmutableSet<Variable>, Set<Variable>>> mutableDependencies) {
+        boolean changed = false;
+        for(var entry : mutableDependencies) {
+            for(var entry2 : mutableDependencies) {
+                if(Sets.difference(entry.getKey(), entry2.getKey()).isEmpty()
+                            || Sets.difference(Sets.difference(entry.getValue(), entry2.getKey()), entry2.getValue()).isEmpty()
+                            || !Sets.union(entry2.getValue(), entry2.getKey()).containsAll(entry.getKey()))
+                    continue;
+                entry2.getValue().addAll(Sets.difference(entry.getValue(), entry2.getKey()));
+                changed = true;
+            }
+        }
+        return changed;
     }
 
     @Override
@@ -61,6 +73,26 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
                 Stream.concat(stream(), other.stream())
                         .collect(ImmutableCollectors.toSet())
         ).complete();
+    }
+
+    private ImmutableSet<ImmutableSet<Variable>> mergeDeterminants(ImmutableSet<ImmutableSet<Variable>> left, ImmutableSet<ImmutableSet<Variable>> right) {
+        return left.stream()
+                .flatMap(l -> right.stream()
+                        .map(r -> Sets.union(l, r).immutableCopy()))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
+    public FunctionalDependencies merge(FunctionalDependencies other) {
+        var allDependents = Streams.concat(
+                dependencies.stream()
+                        .flatMap(fd -> fd.dependents.stream())
+        ).collect(ImmutableCollectors.toSet());
+
+        return allDependents.stream()
+                .flatMap(v -> mergeDeterminants(getDeterminantsOf(v), other.getDeterminantsOf(v)).stream()
+                        .map(d -> Maps.immutableEntry(d, ImmutableSet.of(v))))
+                .collect(FunctionalDependencies.toFunctionalDependencies());
     }
 
     @Override
@@ -93,16 +125,20 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
      */
     protected FunctionalDependencies complete() {
         var dependencyPairs = stream().collect(ImmutableCollectors.toSet());
-        var collectedDependencies = Streams.concat(dependencyPairs.stream(), inferTransitiveDependencies(dependencyPairs))
+        var withTransitive = dependencyPairs.stream()
+                .map(entry -> Maps.<ImmutableSet<Variable>, Set<Variable>>immutableEntry(entry.getKey(), new HashSet<>(entry.getValue())))
+                .collect(ImmutableCollectors.toSet());
+        while(inferTransitiveDependencies(withTransitive));
+        var collectedDependencies = withTransitive.stream()
                 .collect(Collectors.groupingBy(Map.Entry::getKey))
                 .entrySet().stream()
-                .map(e -> new FunctionalDependency(e.getKey(), e.getValue().stream()
+                .map(e -> new FunctionalDependency(e.getKey(), ImmutableSet.copyOf(e.getValue().stream()
                         .reduce(
-                                ImmutableSet.of(),
-                                (set, entry) -> Sets.union(set, entry.getValue()).immutableCopy(),
-                                (set1, set2) -> Sets.union(set1, set2).immutableCopy()
+                                Set.of(),
+                                (set, entry) -> Sets.union(set, entry.getValue()),
+                                (set1, set2) -> Sets.union(set1, set2)
                         )
-                ))
+                )))
                 .collect(ImmutableCollectors.toSet());
 
         var dependenciesToRemove = collectedDependencies.stream()

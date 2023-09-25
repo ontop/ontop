@@ -28,6 +28,8 @@ public class FunctionalDependencyInferenceTest {
     private final ExtensionalDataNode DATA_NODE_1_WITH_ADDED_FD = createExtensionalDataNode(FD_TABLE1_AR2 , ImmutableList.of(A, B));
     private final ExtensionalDataNode DATA_NODE_2_WITH_ADDED_FD = createExtensionalDataNode(FD_TABLE2_AR2 , ImmutableList.of(C, D));
     private final ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(PK_TABLE1_AR3, ImmutableList.of(A, B, C));
+    private final ExtensionalDataNode DATA_NODE_3_WITH_ADDED_FD = createExtensionalDataNode(FD_TABLE1_AR5 , ImmutableList.of(A, B, C, D, E));
+    private final ExtensionalDataNode DATA_NODE_4_WITH_ADDED_FD = createExtensionalDataNode(FD_TABLE1_AR2 , ImmutableList.of(A, C));
 
     private static final NamedRelationDefinition COMPOSITE_PK_REL;
 
@@ -250,49 +252,102 @@ public class FunctionalDependencyInferenceTest {
     }
 
     @Test
-    public void testLeftJoinFromChildren() {
-        ImmutableList<IQTree> children = ImmutableList.of(
+    public void testUnionWithSmallerDependentSet() {
+        IQTree leftChild = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(A, B, C, D, E, X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBStringType()))),
                 IQ_FACTORY.createUnaryIQTree(
                         IQ_FACTORY.createConstructionNode(
-                                ImmutableSet.of(A, B),
-                                SUBSTITUTION_FACTORY.getSubstitution()),
-                        DATA_NODE_1_WITH_ADDED_FD),
+                                ImmutableSet.of(A, B, C, D, E),
+                                SUBSTITUTION_FACTORY.getSubstitution(D, TERM_FACTORY.getDBRand(UUID.randomUUID()))),
+                        DATA_NODE_3_WITH_ADDED_FD
+                )
+        );
+        IQTree rightChild = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(A, B, C, D, E, X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBStringType()))),
+                DATA_NODE_3_WITH_ADDED_FD
+        );
+
+        IQTree tree1 = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C, D, E, X)),
+                ImmutableList.of(leftChild, rightChild));
+        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A, B, X), ImmutableSet.of(C)), tree1.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree1.getKnownVariables())).inferFunctionalDependencies());
+
+        IQTree tree2 = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C, D, E, X)),
+                ImmutableList.of(rightChild, leftChild));
+        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A, B, X), ImmutableSet.of(C)), tree2.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree2.getKnownVariables())).inferFunctionalDependencies());
+    }
+
+    @Test
+    public void testUnionWithSmallerDeterminantSet() {
+        IQTree leftChild = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(A, B, C, D, X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBStringType()))),
                 IQ_FACTORY.createUnaryIQTree(
                         IQ_FACTORY.createConstructionNode(
-                                ImmutableSet.of(C, D),
-                                SUBSTITUTION_FACTORY.getSubstitution()),
-                        DATA_NODE_2_WITH_ADDED_FD));
+                                ImmutableSet.of(A, B, C, D),
+                                SUBSTITUTION_FACTORY.getSubstitution(
+                                        B, TERM_FACTORY.getDBRand(UUID.randomUUID()),
+                                        D, TERM_FACTORY.getDBRand(UUID.randomUUID())
+                                )),
+                        DATA_NODE_4_WITH_ADDED_FD
+                )
+        );
+        IQTree rightChild = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(A, B, C, D, X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBStringType()))),
+                DATA_NODE_3_WITH_ADDED_FD
+        );
+
+        IQTree tree1 = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C, D, X)),
+                ImmutableList.of(leftChild, rightChild));
+        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A, B, X), ImmutableSet.of(C)), tree1.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree1.getKnownVariables())).inferFunctionalDependencies());
+
+        IQTree tree2 = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C, D, X)),
+                ImmutableList.of(rightChild, leftChild));
+        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A, B, X), ImmutableSet.of(C)), tree2.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree2.getKnownVariables())).inferFunctionalDependencies());
+    }
+
+    @Test
+    public void testLeftJoinFromChildren1() {
         IQTree tree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
                 IQ_FACTORY.createLeftJoinNode(),
-                children.get(0),
-                children.get(1)
+                DATA_NODE_1_WITH_ADDED_FD,
+                DATA_NODE_2_WITH_ADDED_FD
         );
-        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B)), tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
+        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B), ImmutableSet.of(C), ImmutableSet.of(D)), tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
+    }
+
+    @Test
+    public void testLeftJoinFromChildren2() {
+        IQTree tree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(A, C)),
+                DATA_NODE_1_WITH_ADDED_FD,
+                DATA_NODE_2_WITH_ADDED_FD
+        );
+        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B, C, D)), tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
     }
 
     @Test
     public void testLeftJoinCrossInfer() {
-        ImmutableList<IQTree> children = ImmutableList.of(
-                IQ_FACTORY.createUnaryIQTree(
-                        IQ_FACTORY.createConstructionNode(
-                                ImmutableSet.of(A, B),
-                                SUBSTITUTION_FACTORY.getSubstitution()),
-                        DATA_NODE_1_WITH_ADDED_FD),
-                IQ_FACTORY.createUnaryIQTree(
-                        IQ_FACTORY.createConstructionNode(
-                                ImmutableSet.of(C, D),
-                                SUBSTITUTION_FACTORY.getSubstitution()),
-                        DATA_NODE_2_WITH_ADDED_FD));
         IQTree tree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
                 IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(A, C)),
-                children.get(0),
-                children.get(1)
+                DATA_NODE_1_WITH_ADDED_FD,
+                DATA_NODE_2_WITH_ADDED_FD
         );
-        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B), ImmutableSet.of(D, A), ImmutableSet.of(C)), tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
+        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B, D, C)), tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
     }
 
     @Test
-    public void testInnerJoinFromChildren() {
+    public void testInnerJoinFromChildren1() {
         ImmutableList<IQTree> children = ImmutableList.of(
                 IQ_FACTORY.createUnaryIQTree(
                         IQ_FACTORY.createConstructionNode(
@@ -309,6 +364,51 @@ public class FunctionalDependencyInferenceTest {
                 ImmutableList.of(children.get(0), children.get(1))
         );
         assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B), ImmutableSet.of(C), ImmutableSet.of(D)), tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
+    }
+
+    @Test
+    public void testInnerJoinFromChildren2() {
+        ImmutableList<IQTree> children = ImmutableList.of(
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createConstructionNode(
+                                ImmutableSet.of(A, B),
+                                SUBSTITUTION_FACTORY.getSubstitution()),
+                        DATA_NODE_1_WITH_ADDED_FD),
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createConstructionNode(
+                                ImmutableSet.of(C, D),
+                                SUBSTITUTION_FACTORY.getSubstitution()),
+                        DATA_NODE_2_WITH_ADDED_FD));
+        IQTree tree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getStrictEquality(A, D)),
+                ImmutableList.of(children.get(0), children.get(1))
+        );
+        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B, D),
+                ImmutableSet.of(C), ImmutableSet.of(D, B, A),
+                ImmutableSet.of(D), ImmutableSet.of(A, B)),
+                tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
+    }
+
+    @Test
+    public void testInnerJoinFromChildren3() {
+        ImmutableList<IQTree> children = ImmutableList.of(
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createConstructionNode(
+                                ImmutableSet.of(A, B),
+                                SUBSTITUTION_FACTORY.getSubstitution()),
+                        DATA_NODE_1_WITH_ADDED_FD),
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createConstructionNode(
+                                ImmutableSet.of(C, D),
+                                SUBSTITUTION_FACTORY.getSubstitution()),
+                        DATA_NODE_2_WITH_ADDED_FD));
+        IQTree tree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getStrictEquality(A, C)),
+                ImmutableList.of(children.get(0), children.get(1))
+        );
+        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B, C, D),
+                        ImmutableSet.of(C), ImmutableSet.of(D, B, A)),
+                tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
     }
 
     @Test

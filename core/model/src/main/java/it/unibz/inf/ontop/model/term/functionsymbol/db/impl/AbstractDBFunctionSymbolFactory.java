@@ -265,6 +265,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final Map<Integer, TrueOrNullFunctionSymbol> trueOrNullMap;
 
     /**
+     * For the IN functions
+     */
+    private final Map<Integer, StrictDBInFunctionSymbolImpl> strictInMap;
+
+    /**
      * Coalesce functions according to their arities
      */
     private final Map<Integer, DBFunctionSymbol> coalesceMap;
@@ -321,6 +326,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     private final Map<DBTermType, DBFunctionSymbol> distinctAvgMap;
     private final Map<DBTermType, DBFunctionSymbol> regularAvgMap;
+    private final Map<Map.Entry<DBTermType, Boolean>, DBFunctionSymbol> distinctStdevMap;
+    private final Map<Map.Entry<DBTermType, Boolean>, DBFunctionSymbol> regularStdevMap;
+    private final Map<Map.Entry<DBTermType, Boolean>, DBFunctionSymbol> distinctVarianceMap;
+    private final Map<Map.Entry<DBTermType, Boolean>, DBFunctionSymbol> regularVarianceMap;
 
     private final Map<DBTermType, DBFunctionSymbol> minMap;
     private final Map<DBTermType, DBFunctionSymbol> maxMap;
@@ -365,6 +374,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.strictNEqMap = new ConcurrentHashMap<>();
         this.falseOrNullMap = new ConcurrentHashMap<>();
         this.trueOrNullMap = new ConcurrentHashMap<>();
+        this.strictInMap = new ConcurrentHashMap<>();
         this.castMap = new ConcurrentHashMap<>();
         this.iriTemplateMap = new ConcurrentHashMap<>();
         this.bnodeTemplateMap = new ConcurrentHashMap<>();
@@ -388,6 +398,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         this.distinctAvgMap = new ConcurrentHashMap<>();
         this.regularAvgMap = new ConcurrentHashMap<>();
+
+        this.distinctStdevMap = new ConcurrentHashMap<>();
+        this.regularStdevMap = new ConcurrentHashMap<>();
+
+        this.distinctVarianceMap = new ConcurrentHashMap<>();
+        this.regularVarianceMap = new ConcurrentHashMap<>();
 
         this.minMap = new ConcurrentHashMap<>();
         this.maxMap = new ConcurrentHashMap<>();
@@ -857,6 +873,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBBooleanFunctionSymbol getStrictDBIn(int arity) {
+        return strictInMap
+                .computeIfAbsent(arity, (this::createStrictInFunctionSymbol));
+    }
+    @Override
     public DBBooleanFunctionSymbol getDBLike() {
         return dbLikeFunctionSymbol;
     }
@@ -1185,6 +1206,24 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBFunctionSymbol getNullIgnoringDBStdev(DBTermType dbType, boolean isPop, boolean isDistinct) {
+        Function<Map.Entry<DBTermType, Boolean>, DBFunctionSymbol> creationFct = entry -> createDBStdev(dbType, isPop, isDistinct);
+
+        return isDistinct
+                ? distinctStdevMap.computeIfAbsent(Maps.immutableEntry(dbType, isPop), creationFct)
+                : regularStdevMap.computeIfAbsent(Maps.immutableEntry(dbType, isPop), creationFct);
+    }
+
+    @Override
+    public DBFunctionSymbol getNullIgnoringDBVariance(DBTermType dbType, boolean isPop, boolean isDistinct) {
+        Function<Map.Entry<DBTermType, Boolean>, DBFunctionSymbol> creationFct = entry -> createDBVariance(dbType, isPop, isDistinct);
+
+        return isDistinct
+                ? distinctVarianceMap.computeIfAbsent(Maps.immutableEntry(dbType, isPop), creationFct)
+                : regularVarianceMap.computeIfAbsent(Maps.immutableEntry(dbType, isPop), creationFct);
+    }
+
+    @Override
     public DBFunctionSymbol getDBMin(DBTermType dbType) {
         return minMap.computeIfAbsent(dbType, this::createDBMin);
     }
@@ -1301,6 +1340,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBSum(DBTermType termType, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBAvg(DBTermType termType, boolean isDistinct);
+    protected abstract DBFunctionSymbol createDBStdev(DBTermType termType, boolean isPop, boolean isDistinct);
+    protected abstract DBFunctionSymbol createDBVariance(DBTermType termType, boolean isPop, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBMin(DBTermType termType);
     protected abstract DBFunctionSymbol createDBMax(DBTermType termType);
 
@@ -1417,6 +1458,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected TrueOrNullFunctionSymbol createTrueOrNullFunctionSymbol(int arity) {
         return new TrueOrNullFunctionSymbolImpl(arity, dbBooleanType);
+    }
+
+    protected StrictDBInFunctionSymbolImpl createStrictInFunctionSymbol(int arity) {
+        return new StrictDBInFunctionSymbolImpl(arity, rootDBType, dbBooleanType);
     }
 
     protected DBFunctionSymbol createMD5FunctionSymbol() {

@@ -1,0 +1,140 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"", "\"invalid\""],
+      "baseRelation": ["\"rabbits\""],
+      "columns": {
+        "added":  [
+          {
+            "name": "\"new_breed\"",
+            "expression": "CONCAT(\"breed\",'!')"
+          }
+        ],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"invalid2\""],
+      "baseRelation": ["\"dogs\""],
+      "columns": {
+        "added":  [
+          {
+            "name": "\"new_breed\"",
+            "expression": "CONCAT(\"breed\",'!')"
+          }
+        ],
+        "hidden": []
+      },
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "uc2",
+            "determinants": ["\"nonExistingPK\""]
+          }
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"invalid3\""],
+      "baseRelation": ["\"dogs\""],
+      "columns": {
+        "added":  [
+          {
+            "name": "\"new_breed\"",
+            "expression": "CONCAT(\"breed\",'!')"
+          }
+        ],
+        "hidden": []
+      },
+      "nonNullConstraints": {
+        "added": ["\"nonExistingPK\""]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"invalid4\""],
+      "baseRelation": ["\"dogs\""],
+      "columns": {
+        "added":  [
+          {
+            "name": "\"new_breed\"",
+            "expression": "CONCAT(\"breed\",'!')"
+          }
+        ],
+        "hidden": []
+      },
+      "iriSafeConstraints": {
+        "added": ["\"nonExistingPK\""]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"invalid5FK\""],
+      "baseRelation": ["\"dogs\""],
+      "columns": {
+        "added":  [
+          {
+            "name": "\"new_breed\"",
+            "expression": "CONCAT(\"breed\",'!')"
+          }
+        ],
+        "hidden": []
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "fk1",
+            "from": ["\"nonExistingPK\""],
+            "to": {
+              "relation": ["\"dogs\""],
+              "columns": ["\"breed\""]
+            }
+          }
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"invalid6FK\""],
+      "baseRelation": ["\"dogs\""],
+      "columns": {
+        "added":  [
+          {
+            "name": "\"new_breed\"",
+            "expression": "CONCAT(\"breed\",'!')"
+          }
+        ],
+        "hidden": []
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "fk1",
+            "from": ["\"breed\""],
+            "to": {
+              "relation": ["\"dogs\""],
+              "columns": ["\"nonExistingPK\""]
+            }
+          }
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"valid\""],
+      "baseRelation": ["\"dogs\""],
+      "columns": {
+        "added":  [
+          {
+            "name": "\"new_breed\"",
+            "expression": "CONCAT(\"breed\",'!')"
+          }
+        ],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    }
+  ]
+}

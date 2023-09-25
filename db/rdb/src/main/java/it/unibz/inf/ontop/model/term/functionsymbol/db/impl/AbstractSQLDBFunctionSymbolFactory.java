@@ -167,6 +167,18 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected DBFunctionSymbol createDBStdev(DBTermType inputType, boolean isPop, boolean isDistinct) {
+        DBTermType targetType = inputType.equals(dbIntegerType) ? dbDecimalType : inputType;
+        return new NullIgnoringDBStdevFunctionSymbol(inputType, targetType, isPop, isDistinct);
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBVariance(DBTermType inputType, boolean isPop, boolean isDistinct) {
+        DBTermType targetType = inputType.equals(dbIntegerType) ? dbDecimalType : inputType;
+        return new NullIgnoringDBVarianceFunctionSymbol(inputType, targetType, isPop, isDistinct);
+    }
+
+    @Override
     protected DBFunctionSymbol createDBMin(DBTermType termType) {
         return new DBMinFunctionSymbolImpl(termType);
     }
@@ -375,6 +387,14 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol makepointSymbol = new GeoDBTypedFunctionSymbol(ST_MAKEPOINT, 2, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_MAKEPOINT, 2, makepointSymbol);
+
+        DBFunctionSymbol ontopUserSymbol = new OntopUserFunctionSymbolImpl(dbBooleanType);
+        builder.put(OntopUserFunctionSymbolImpl.ONTOP_USER, 0, ontopUserSymbol);
+
+        DBFunctionSymbol ontopContainsRoleOrGroupFunctionSymbol = new OntopContainsRoleOrGroupFunctionSymbol(dbStringType,
+                dbBooleanType);
+        builder.put(OntopContainsRoleOrGroupFunctionSymbol.ONTOP_CONTAINS_ROLE_OR_GROUP, 1,
+                ontopContainsRoleOrGroupFunctionSymbol);
 
         return builder.build();
     }
@@ -1182,6 +1202,17 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBFunctionSymbol getDBGetSRID() {
         return getRegularDBFunctionSymbol(ST_SRID, 1);
+    }
+
+    @Override
+    public DBFunctionSymbol getOntopUser() {
+        return getRegularDBFunctionSymbol(OntopUserFunctionSymbolImpl.ONTOP_USER, 0);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getOntopContainsRoleOrGroup() {
+        return (DBBooleanFunctionSymbol)
+                getRegularDBFunctionSymbol(OntopContainsRoleOrGroupFunctionSymbol.ONTOP_CONTAINS_ROLE_OR_GROUP, 1);
     }
 
     @Override

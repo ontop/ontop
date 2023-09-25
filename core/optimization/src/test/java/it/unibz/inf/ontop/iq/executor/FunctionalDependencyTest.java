@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -934,6 +935,70 @@ public class FunctionalDependencyTest {
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }
+
+    @Test
+    public void testNonRequiredVariableDistinctProjection1() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_1, A);
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE11, ImmutableMap.of( 1, A, 2, B, 4, C));
+
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(
+                TERM_FACTORY.getConjunction(
+                        TERM_FACTORY.getDBIsNotNull(A),
+                        TERM_FACTORY.getDBNumericInequality(InequalityLabel.LTE, C, TWO)));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(topConstructionNode,
+                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(),
+                                IQ_FACTORY.createUnaryIQTree(
+                                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B)),
+                                        IQ_FACTORY.createUnaryIQTree(
+                                                filterNode,
+                                                dataNode1)))));
+
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE11, ImmutableMap.of( 1, A, 4, C));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
+                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(),
+                                IQ_FACTORY.createUnaryIQTree(
+                                        topConstructionNode,
+                                        IQ_FACTORY.createUnaryIQTree(
+                                                filterNode,
+                                                newDataNode1))));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testNonRequiredVariableDistinctProjection2() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, A, C);
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE11, ImmutableMap.of( 1, A, 2, B, 4, C));
+
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(A));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(topConstructionNode,
+                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(),
+                                IQ_FACTORY.createUnaryIQTree(
+                                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B, C)),
+                                        IQ_FACTORY.createUnaryIQTree(
+                                                filterNode,
+                                                dataNode1)))));
+
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE11, ImmutableMap.of( 1, A, 4, C));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(),
+                                IQ_FACTORY.createUnaryIQTree(
+                                        filterNode,
+                                        newDataNode1)));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+
+
 
     private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
         System.out.println("Initial query: "+ initialIQ);

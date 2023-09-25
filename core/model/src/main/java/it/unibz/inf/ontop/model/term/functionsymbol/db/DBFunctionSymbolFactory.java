@@ -202,6 +202,11 @@ public interface DBFunctionSymbolFactory {
      */
     DBBooleanFunctionSymbol getDBContains();
 
+    /**
+     * Relies on strict equalities
+     */
+    DBBooleanFunctionSymbol getStrictDBIn(int arity);
+
     NonDeterministicDBFunctionSymbol getDBRand(UUID uuid);
     NonDeterministicDBFunctionSymbol getDBUUID(UUID uuid);
 
@@ -300,6 +305,18 @@ public interface DBFunctionSymbolFactory {
      * Returns NULL if the bag/set does not contain any non-null value.
      */
     DBFunctionSymbol getNullIgnoringDBAvg(DBTermType dbType, boolean isDistinct);
+
+    /**
+     * Ignores nulls.
+     * Returns NULL if the bag/set does not contain any non-null value.
+     */
+    DBFunctionSymbol getNullIgnoringDBStdev(DBTermType dbType, boolean isPop, boolean isDistinct);
+
+    /**
+     * Ignores nulls.
+     * Returns NULL if the bag/set does not contain any non-null value.
+     */
+    DBFunctionSymbol getNullIgnoringDBVariance(DBTermType dbType, boolean isPop, boolean isDistinct);
 
     DBFunctionSymbol getDBMin(DBTermType dbType);
     DBFunctionSymbol getDBMax(DBTermType dbType);
@@ -403,4 +420,7 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBMicroseconds();
 
     DBFunctionSymbol getDBDateTrunc(String datePart);
+
+    DBFunctionSymbol getOntopUser();
+    DBBooleanFunctionSymbol getOntopContainsRoleOrGroup();
 }

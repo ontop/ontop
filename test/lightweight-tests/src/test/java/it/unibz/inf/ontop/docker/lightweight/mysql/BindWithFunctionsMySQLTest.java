@@ -95,4 +95,10 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
     public void testDateTruncGroupBy() {
         super.testDateTruncGroupBy();
     }
+
+
+    @Override
+    protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
+        return ImmutableSet.of("\"215.3400\"^^xsd:decimal");
+    }
 }

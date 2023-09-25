@@ -1,0 +1,10 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"", "\"tb_edition\""],
+      "baseRelation": ["\"tb_edition\""],
+      "filterExpression": "ontop_contains_role_or_group('librarian') or ontop_user() = 'roger' or \"ed_type\" <> 'S'",
+      "type": "BasicLens"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "driverName": "PostgreSQL JDBC Driver",
+    "dbmsVersion": "12.5 (Debian 12.5-1.pgdg100+1)",
+    "driverVersion": "42.2.12",
+    "idFactoryType": "POSTGRESQL",
+    "extractionTime": "2021-01-15T09:27:31",
+    "dbmsProductName": "PostgreSQL",
+    "quotationString": "\""
+  },
+  "relations": [
+    {
+      "name": [
+        "\"rabbits\""
+      ],
+      "columns": [
+        {
+          "name": "\"name\"",
+          "datatype": "varchar(100)",
+          "isNullable": false
+        },
+        {
+          "name": "\"age\"",
+          "datatype": "int4",
+          "isNullable": false
+        }
+      ]
+    },
+    {
+      "name": [
+        "\"dogs\""
+      ],
+      "columns": [
+        {
+          "name": "\"name\"",
+          "datatype": "varchar(100)",
+          "isNullable": false
+        },
+        {
+          "name": "\"breed\"",
+          "datatype": "varchar(100)",
+          "isNullable": false
+        },
+        {
+          "name": "\"age\"",
+          "datatype": "int4",
+          "isNullable": false
+        }
+      ]
+    }
+  ]
+}
