@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.constraints;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.apache.commons.rdf.api.IRI;
@@ -56,43 +57,43 @@ public class CQCUtilitiesTest {
 	public void testContainment1() {
 
 		// Query 1 - q(x,y) :- R(x,y), R(y,z)
-		ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableList.of(x, y), ImmutableList.of(
+		ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableSet.of(x, y), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y),
                 ATOM_FACTORY.getIntensionalTripleAtom(y, propertyR, x)));
 
 		// Query 2 - q(y,y) :- R(y,y)
-        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(y, y), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableSet.of(x, y), SUBSTITUTION_FACTORY.getSubstitution(x, y), ImmutableList.of(
 		        ATOM_FACTORY.getIntensionalTripleAtom(y, propertyR, y)));
 
 		// Query 3 - q(m,n) :- R(m,n)
-        ImmutableCQ<AtomPredicate> q3 = new ImmutableCQ<>(ImmutableList.of(m, n), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q3 = new ImmutableCQ<>(ImmutableSet.of(x, y), SUBSTITUTION_FACTORY.getSubstitution(x, m, y, n), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(m, propertyR, n)));
 
 		// Query 4 - q(m,n) :- S(m,n) R(m,n)
-        ImmutableCQ<AtomPredicate> q4 = new ImmutableCQ<>(ImmutableList.of(m, n), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q4 = new ImmutableCQ<>(ImmutableSet.of(x, y), SUBSTITUTION_FACTORY.getSubstitution(x, m, y, n), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(m, propertyS, n),
                 ATOM_FACTORY.getIntensionalTripleAtom(m, propertyR, n)));
 
 		// Query 5 - q() :- S(x,y)
-        ImmutableCQ<AtomPredicate> q5 = new ImmutableCQ<>(ImmutableList.of(), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q5 = new ImmutableCQ<>(ImmutableSet.of(), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, propertyS, y)));
 
 		// Query 6 - q() :- S(_,_)
-        ImmutableCQ<AtomPredicate> q6 = new ImmutableCQ<>(ImmutableList.of(), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q6 = new ImmutableCQ<>(ImmutableSet.of(), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(m, propertyS, n)));
 
 		// Query 7 - q(x,y) :- R(x,y), P(y,_)
-        ImmutableCQ<AtomPredicate> q7 = new ImmutableCQ<>(ImmutableList.of(x, y), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q7 = new ImmutableCQ<>(ImmutableSet.of(x, y), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y),
                 ATOM_FACTORY.getIntensionalTripleAtom(y, propertyP, m)));
 
 		// Query 8 - q(x,y) :- R(x,y), P(_,_)
-        ImmutableCQ<AtomPredicate> q8 = new ImmutableCQ<>(ImmutableList.of(x, y), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q8 = new ImmutableCQ<>(ImmutableSet.of(x, y), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y),
                 ATOM_FACTORY.getIntensionalTripleAtom(m, propertyP, n)));
 
 		// Query 9 - q() :- R(x,m), R(x,y), S(m,n), S(y,z),T(n,o),T(z,x)
-        ImmutableCQ<AtomPredicate> q9 = new ImmutableCQ<>(ImmutableList.of(), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q9 = new ImmutableCQ<>(ImmutableSet.of(), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, m),
                 ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y),
                 ATOM_FACTORY.getIntensionalTripleAtom(m, propertyS, n),
@@ -101,7 +102,7 @@ public class CQCUtilitiesTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(z, propertyT, x)));
 
 		// Query 10 - q() :- R(i,j), S(j,k), T(k,i)
-        ImmutableCQ<AtomPredicate> q10 = new ImmutableCQ<>(ImmutableList.of(), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q10 = new ImmutableCQ<>(ImmutableSet.of(), SUBSTITUTION_FACTORY.getSubstitution(),  ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(m, propertyR, n),
                 ATOM_FACTORY.getIntensionalTripleAtom(n, propertyS, o),
                 ATOM_FACTORY.getIntensionalTripleAtom(o, propertyT, m)));
@@ -196,10 +197,10 @@ public class CQCUtilitiesTest {
     public void testSemanticContainment_1()  {
         // q(x) :- A(x), q(y) :- C(y), with A ISA C
 
-        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableList.of(x), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableSet.of(x), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
 
-        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(y), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableSet.of(x), SUBSTITUTION_FACTORY.getSubstitution(x, y), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
@@ -218,10 +219,10 @@ public class CQCUtilitiesTest {
     public void testSemanticContainment_2() {
         // q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
 
-        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableList.of(x), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableSet.of(x), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
 
-        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(y), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableSet.of(x), SUBSTITUTION_FACTORY.getSubstitution(x, y), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(y, propertyR, z)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
@@ -240,10 +241,10 @@ public class CQCUtilitiesTest {
     public void testSemanticContainment_3() {
         // q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
 
-        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableList.of(x), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableSet.of(x), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
 
-        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(y), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableSet.of(x), SUBSTITUTION_FACTORY.getSubstitution(x, y), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(z, propertyR, y)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
@@ -262,10 +263,10 @@ public class CQCUtilitiesTest {
     public void testSemanticContainment_4() {
         // q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
 
-        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableList.of(x), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableSet.of(x), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
 
-        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(z), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableSet.of(x), SUBSTITUTION_FACTORY.getSubstitution(x, z), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(z, classA)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
@@ -284,10 +285,10 @@ public class CQCUtilitiesTest {
     public void testSemanticContainment_5() {
         // q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
 
-        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableList.of(y), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableSet.of(y), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
 
-        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(z), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableSet.of(x), SUBSTITUTION_FACTORY.getSubstitution(x, z), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(z, classA)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
@@ -306,10 +307,10 @@ public class CQCUtilitiesTest {
     public void testSemanticContainment_6() {
         // q(x) :- A(x), q(y) :- C(y), with A ISA B, B ISA C
 
-        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableList.of(x), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableSet.of(x), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
 
-        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(y), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableSet.of(x), SUBSTITUTION_FACTORY.getSubstitution(x, y), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
@@ -332,10 +333,10 @@ public class CQCUtilitiesTest {
     public void testSemanticContainment_7() {
         // q(x) :- A(x), q(y) :- C(y), with A ISA exists R, exists R ISA C
 
-        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableList.of(x), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableSet.of(x), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
 
-        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(y), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableSet.of(x), SUBSTITUTION_FACTORY.getSubstitution(x, y), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
@@ -358,10 +359,10 @@ public class CQCUtilitiesTest {
     public void testSemanticContainment_8() {
         // q(x) :- A(x), q(y) :- C(y), with A ISA exists inv(R), exists inv(R) ISA C
 
-        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableList.of(x), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableSet.of(x), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
 
-        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(y), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableSet.of(x), SUBSTITUTION_FACTORY.getSubstitution(x, y), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
@@ -384,10 +385,10 @@ public class CQCUtilitiesTest {
     public void testSemanticContainment_9() {
         // q(x,y) :- R(x,y), q(s,t) :- S(s,t), with R ISA S
 
-        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableList.of(x, y), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableSet.of(x, y), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
 
-        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(s, t), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableSet.of(x, y), SUBSTITUTION_FACTORY.getSubstitution(x, s, y, t), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
@@ -406,10 +407,10 @@ public class CQCUtilitiesTest {
     public void testSemanticContainment_10() {
         // q(x,y) :- R(x,y), q(s,t) :- S(s,t), with R ISA T, T ISA S
 
-        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableList.of(x, y), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableSet.of(x, y), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
 
-        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(s, t), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableSet.of(x, y), SUBSTITUTION_FACTORY.getSubstitution(x, s, y, t), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
@@ -432,10 +433,10 @@ public class CQCUtilitiesTest {
     public void testSemanticContainment_11() {
         // q(x,y) :- R(x,y), q(s,t) :- S(s,t), with R ISA inv(T), inv(T) ISA S
 
-        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableList.of(x, y), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableSet.of(x, y), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
 
-        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(s, t), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableSet.of(x, y), SUBSTITUTION_FACTORY.getSubstitution(x, s, y, t), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
@@ -458,10 +459,10 @@ public class CQCUtilitiesTest {
     public void testSemanticContainment_12() {
         // q(x,y) :- R(x,y), q(s,t) :- S(s,t), with inv(R) ISA T, T ISA inv(S)
 
-        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableList.of(x, y), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q1 = new ImmutableCQ<>(ImmutableSet.of(x, y), SUBSTITUTION_FACTORY.getSubstitution(), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
 
-        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableList.of(s, t), ImmutableList.of(
+        ImmutableCQ<AtomPredicate> q2 = new ImmutableCQ<>(ImmutableSet.of(x, y), SUBSTITUTION_FACTORY.getSubstitution(x, s, y, t), ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =

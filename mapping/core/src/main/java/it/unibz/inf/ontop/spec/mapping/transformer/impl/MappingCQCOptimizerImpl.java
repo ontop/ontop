@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.constraints.ImmutableCQ;
@@ -17,6 +18,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,12 +32,14 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
     
     private final IntermediateQueryFactory iqFactory;
     private final CoreSingletons coreSingletons;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
     public MappingCQCOptimizerImpl(IntermediateQueryFactory iqFactory,
                                    CoreSingletons coreSingletons) {
         this.iqFactory = iqFactory;
         this.coreSingletons = coreSingletons;
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
     }
 
     @Override
@@ -50,12 +54,11 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
 
                 Optional<ImmutableList<ExtensionalDataNode>> c = IQ2CQ.getExtensionalDataNodes(tree, coreSingletons);
 
-                ImmutableList<VariableOrGroundTerm> answerVariables = ImmutableList.copyOf(
-                        Sets.union(
+                ImmutableSet<Variable> answerVariables = Sets.union(
                                 constructionNode.getSubstitution().getRangeVariables(),
                                 rootNode.getOptionalFilterCondition().stream()
                                         .flatMap(ImmutableTerm::getVariableStream)
-                                        .collect(ImmutableCollectors.toSet())));
+                                        .collect(ImmutableCollectors.toSet())).immutableCopy();
 
                 ImmutableList<ExtensionalDataNode> children = c.get();
                 int currentIndex = 0;
@@ -72,8 +75,8 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                             .containsAll(answerVariables)) {
 
                         if (cqContainmentCheck.isContainedIn(
-                                new ImmutableCQ<>(answerVariables, IQ2CQ.toDataAtoms(subChildren, coreSingletons)),
-                                new ImmutableCQ<>(answerVariables, IQ2CQ.toDataAtoms(children, coreSingletons)))) {
+                                new ImmutableCQ<>(answerVariables, substitutionFactory.getSubstitution(), IQ2CQ.toDataAtoms(subChildren, coreSingletons)),
+                                new ImmutableCQ<>(answerVariables, substitutionFactory.getSubstitution(), IQ2CQ.toDataAtoms(children, coreSingletons)))) {
                             //System.out.println("CQC-REMOVED: " + children.get(currentIndex) + " FROM " + children);
                             log.debug("CQC-REMOVED: " + children.get(currentIndex) + " FROM " + children);
                             children = subChildren;
