@@ -117,14 +117,10 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
     }
 
     private ImmutableCQ<RDFAtomPredicate> createCQ(ImmutableList<DataAtom<RDFAtomPredicate>> atoms) {
-        return createCQ(atoms.stream()
+        return new ImmutableCQ<>(atoms.stream()
                         .flatMap(a -> a.getVariables().stream())
                         .collect(ImmutableCollectors.toSet()),
                 substitutionFactory.getSubstitution(), atoms);
-    }
-
-    private ImmutableCQ<RDFAtomPredicate> createCQ(DataAtom<RDFAtomPredicate> atom) {
-        return createCQ(atom.getVariables(), substitutionFactory.getSubstitution(), ImmutableList.of(atom));
     }
 
 
@@ -137,7 +133,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
         UCQBuilder join(Stream<ImmutableCQ<RDFAtomPredicate>> cqs) {
             list = cqs
-                    .flatMap(cq2 -> list.stream().map(cq1 -> joinCQs(cq1, cq2)))
+                    .flatMap(cq2 -> list.stream()
+                            .flatMap(cq1 -> joinCQs(cq1, cq2).stream()))
                     .collect(Collectors.toList());
 
             for (int i = 0; i < list.size(); i++) {
@@ -159,17 +156,48 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	        return this;
         }
 
-        private ImmutableCQ<RDFAtomPredicate> joinCQs(ImmutableCQ<RDFAtomPredicate> cq1, ImmutableCQ<RDFAtomPredicate> cq2) {
-            Substitution<VariableOrGroundTerm> composition = substitutionFactory.onVariableOrGroundTerms().compose(cq1.getSubstitution(), cq2.getSubstitution());
+        private ImmutableSet<Set<VariableOrGroundTerm>> mergeOnePairOfClasses(ImmutableSet<Set<VariableOrGroundTerm>> equivalenceClasses) {
+            for (Set<VariableOrGroundTerm> s1 : equivalenceClasses)
+                for (Set<VariableOrGroundTerm> s2 : equivalenceClasses)
+                    if (s1 != s2) {
+                        if (!Sets.intersection(s1, s2).isEmpty())
+                            return Sets.union(Sets.difference(equivalenceClasses, ImmutableSet.of(s1, s2)), ImmutableSet.of(Sets.union(s1, s2))).immutableCopy();
+                    }
+            return null;
+        }
 
-            return createCQ(
+        private Optional<ImmutableCQ<RDFAtomPredicate>> joinCQs(ImmutableCQ<RDFAtomPredicate> cq1, ImmutableCQ<RDFAtomPredicate> cq2) {
+
+            ImmutableSet<Set<VariableOrGroundTerm>> equivalenceClasses = Stream.of(cq1, cq2)
+                    .map(ImmutableCQ::getSubstitution)
+                    .map(Substitution::inverseMap)
+                    .map(ImmutableMap::entrySet)
+                    .flatMap(Collection::stream)
+                    .map(e -> Sets.union(ImmutableSet.of(e.getKey()), ImmutableSet.copyOf(e.getValue())))
+                    .collect(ImmutableCollectors.toSet());
+
+            while (true) {
+                ImmutableSet<Set<VariableOrGroundTerm>> newEquivalenceClasses = mergeOnePairOfClasses(equivalenceClasses);
+                if (newEquivalenceClasses == null)
+                    break;
+                equivalenceClasses = newEquivalenceClasses;
+            }
+
+            ImmutableMap<Set<VariableOrGroundTerm>, VariableOrGroundTerm> map = equivalenceClasses.stream()
+                    .map(c -> Maps.immutableEntry(c, getEquivalenceClassRepresentative(c)))
+                    .collect(ImmutableCollectors.toMap());
+            if (map.containsValue(null))
+                return Optional.empty();
+
+            Substitution<VariableOrGroundTerm> substitution = getSubstitution(map);
+
+            return Optional.of(createCQ(
                     Sets.union(cq1.getAnswerVariables(), cq2.getAnswerVariables()).immutableCopy(),
-                    composition,
+                    substitution,
                     Stream.concat(cq1.getAtoms().stream(), cq2.getAtoms().stream())
                             .distinct()
-                            .map(a -> atomFactory.getDataAtom(a.getPredicate(), substitutionFactory.onVariableOrGroundTerms().applyToTerms(composition, a.getArguments())))
-                            .collect(ImmutableCollectors.toList()));
-
+                            .map(a -> atomFactory.getDataAtom(a.getPredicate(), substitutionFactory.onVariableOrGroundTerms().applyToTerms(substitution, a.getArguments())))
+                            .collect(ImmutableCollectors.toList())));
         }
 
         ImmutableList<ImmutableCQ<RDFAtomPredicate>> build() { return ImmutableList.copyOf(list); }
@@ -188,36 +216,50 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
         return toUCQ(createCQ(ImmutableList.of()));
     }
 
+    private VariableOrGroundTerm getEquivalenceClassRepresentative(Set<VariableOrGroundTerm> equivalenceClass) {
+        ImmutableSet<Variable> equivalenceClassVariables = equivalenceClass.stream()
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable)t)
+                .collect(ImmutableCollectors.toSet());
+
+        switch (equivalenceClass.size() - equivalenceClassVariables.size()) {
+            case 0: // all variables
+                return equivalenceClassVariables.stream()
+                        .min(Comparator.comparing(Object::toString))
+                        .get();
+            case 1: // a single constant
+                return Sets.difference(equivalenceClass, equivalenceClassVariables).stream().findFirst().get();
+            default: // more than one constant
+                return null;
+        }
+    }
+
+    private Substitution<VariableOrGroundTerm> getSubstitution(ImmutableMap<Set<VariableOrGroundTerm>, VariableOrGroundTerm> map) {
+        return map.entrySet().stream()
+                .flatMap(e -> e.getKey().stream()
+                        .filter(v -> v != e.getValue())
+                        .map(v -> Maps.immutableEntry((Variable)v, e.getValue())))
+                .collect(substitutionFactory.toSubstitution());
+    }
 
     ImmutableList<ImmutableCQ<RDFAtomPredicate>> getTreeWitnessFormula(TreeWitness tw) {
         Set<VariableOrGroundTerm> roots = tw.getRoots();
+
+        // get canonical representative
+        VariableOrGroundTerm representative = getEquivalenceClassRepresentative(roots);
+        if (representative == null)
+                return ImmutableList.of();
+
+        Substitution<VariableOrGroundTerm> substitution = getSubstitution(ImmutableMap.of(roots, representative));
+
         ImmutableSet<Variable> rootVariables = roots.stream()
                 .filter(t -> t instanceof Variable)
                 .map(t -> (Variable)t)
                 .collect(ImmutableCollectors.toSet());
 
-        // get canonical representative
-        VariableOrGroundTerm representative;
-        switch (roots.size() - rootVariables.size()) {
-            case 0: // all variables
-                representative = rootVariables.stream()
-                        .min(Comparator.comparing(Object::toString))
-                        .get();
-                break;
-            case 1: // a single constant
-                representative = Sets.difference(roots, rootVariables).stream().findFirst().get();
-                break;
-            default: // more than one constant
-                return ImmutableList.of();
-        }
-
-        Substitution<VariableOrGroundTerm> substitution = rootVariables.stream()
-                .filter(t -> t != representative)
-                .collect(substitutionFactory.toSubstitution(v -> v, v -> representative));
-
         UCQBuilder ucq = new UCQBuilder(createCQ(rootVariables, substitution, ImmutableList.copyOf(tw.getRootAtoms())));
         return ucq.join(getAtomsForGenerators(tw.getGenerators().stream(), representative).stream()
-                        .map(a -> createCQ(a)))
+                        .map(a -> createCQ(ImmutableList.of(a))))
                 .build();
     }
 
@@ -232,7 +274,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		ImmutableList.Builder<ImmutableCQ<RDFAtomPredicate>> builder = ImmutableList.builder();
 		if (cc.hasNoFreeTerms() && (!cc.isDegenerate() || cc.getLoop().isPresent())) {
             builder.addAll(getAtomsForGenerators(tws.getGeneratorsOfDetachedCC().stream(), getFreshVariable()).stream()
-                        .map(a -> createCQ(a))
+                        .map(a -> createCQ(ImmutableList.of(a)))
                         .collect(ImmutableCollectors.toList()));
 		}
 
