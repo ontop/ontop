@@ -37,6 +37,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
@@ -158,6 +159,10 @@ public class DataSourcePanel extends JPanel implements OBDAModelManagerListener 
                             // In Trino, non-null connection object does not mean that a connection has been established.
                             // This username request forces the Trino driver to execute an SQL query (so, a connection will be opened).
                             conn.getMetaData().getUserName();
+                            // A workaround for H2
+                            //noinspection EmptyTryBlock
+                            try (ResultSet rs = conn.getMetaData().getTableTypes()) {
+                            }
                             return null;
                         }
                         catch (SQLException e) {
