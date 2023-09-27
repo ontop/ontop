@@ -31,9 +31,14 @@ target		data:weather/observation/result/{id} qudt:unit qudt-unit:DegreeCelsius .
 source		select m.id from "source3_weather_measurement" m, "source3_measurement_types" t
 			WHERE m.name = t.name and t.unit = '°C'
 
-mappingId	Observation result m/s
+mappingId	Observation result m/s 1
 target		data:weather/observation/result/{id} qudt:unit qudt-unit:MeterPerSecond .
 source		select m.id from "source3_weather_measurement" m, "source3_measurement_types" t
 			WHERE m.name = t.name and t.unit = 'm/s'
+
+mappingId	Observation result m/s 2
+target		data:weather/observation/result/{id} qudt:unit qudt-unit:MeterPerSecond .
+source		select m.id from "source3_weather_measurement" m, "source3_measurement_types" t
+			WHERE m.name = t.name and t.unit = '[m/s]'
 
 ]]
