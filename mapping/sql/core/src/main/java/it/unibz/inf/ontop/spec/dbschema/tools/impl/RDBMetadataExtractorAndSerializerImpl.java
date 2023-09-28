@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.ImmutableMetadata;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
+import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
+import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
 import it.unibz.inf.ontop.dbschema.impl.json.JsonMetadata;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
@@ -14,6 +16,7 @@ import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.function.Function;
 
 public class RDBMetadataExtractorAndSerializerImpl implements DBMetadataExtractorAndSerializer {
 
@@ -28,14 +31,14 @@ public class RDBMetadataExtractorAndSerializerImpl implements DBMetadataExtracto
     }
 
     @Override
-    public String extractAndSerialize() throws MetadataExtractionException {
+    public String extractAndSerialize(Function<NamedRelationDefinition, RelationID> fkRelationIDExtractor) throws MetadataExtractionException {
 
         try (Connection localConnection = LocalJDBCConnectionUtils.createConnection(settings)) {
             MetadataProvider metadataProvider = metadataProviderFactory.getMetadataProvider(localConnection);
             ImmutableMetadata metadata = ImmutableMetadata.extractImmutableMetadata(metadataProvider);
 
             ObjectMapper mapper = new ObjectMapper();
-            JsonMetadata jsonMetadata = new JsonMetadata(metadata);
+            JsonMetadata jsonMetadata = new JsonMetadata(metadata, fkRelationIDExtractor);
             return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonMetadata);
         }
         catch (SQLException e) {
