@@ -6,8 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ValuesNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -25,6 +23,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
+import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,9 +43,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
     private final DBTypeFactory dbTypeFactory;
 
     private final DistinctVariableOnlyDataAtom tripleAtom;
-    private final RDFAtomPredicate tripleAtomPredicate;
     private final DistinctVariableOnlyDataAtom quadAtom;
-    private final RDFAtomPredicate quadAtomPredicate;
 
     private final IRIConstant RDF_TYPE;
 
@@ -68,15 +65,12 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                 projectedVariableGenerator.generateNewVariable(),
                 projectedVariableGenerator.generateNewVariable(),
                 projectedVariableGenerator.generateNewVariable());
-        tripleAtomPredicate = (RDFAtomPredicate) tripleAtom.getPredicate();
 
         quadAtom = atomFactory.getDistinctQuadAtom(
                 projectedVariableGenerator.generateNewVariable(),
                 projectedVariableGenerator.generateNewVariable(),
                 projectedVariableGenerator.generateNewVariable(),
                 projectedVariableGenerator.generateNewVariable());
-        quadAtomPredicate = (RDFAtomPredicate) quadAtom.getPredicate();
-
     }
 
     @Override
@@ -104,27 +98,15 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
     }
 
     private MappingAssertionIndex getMappingAssertionIndex(CustomKey key) {
-        if (key.graphOptional.isPresent()) {
-            return key.isClass
-                    ? MappingAssertionIndex.ofClass(quadAtomPredicate,
-                    Optional.of(key.classOrProperty)
-                            .filter(c -> c instanceof IRIConstant)
-                            .map(c -> ((IRIConstant) c).getIRI())
-                            .orElseThrow(() -> new RuntimeException(
-                                    "TODO: support bnode for classes as mapping assertion index")))
-                    : MappingAssertionIndex.ofProperty(quadAtomPredicate,
-                    ((IRIConstant) key.classOrProperty).getIRI());
-        } else {
-            return key.isClass
-                    ? MappingAssertionIndex.ofClass(tripleAtomPredicate,
-                    Optional.of(key.classOrProperty)
-                            .filter(c -> c instanceof IRIConstant)
-                            .map(c -> ((IRIConstant) c).getIRI())
-                            .orElseThrow(() -> new RuntimeException(
-                                    "TODO: support bnode for classes as mapping assertion index")))
-                    : MappingAssertionIndex.ofProperty(tripleAtomPredicate,
-                    ((IRIConstant) key.classOrProperty).getIRI());
-        }
+        RDFAtomPredicate predicate = (RDFAtomPredicate) key.graphOptional.map(g -> quadAtom).orElse(tripleAtom).getPredicate();
+        IRI iri = Optional.of(key.classOrProperty)
+                .filter(c -> c instanceof IRIConstant)
+                .map(c -> (IRIConstant)c)
+                .map(IRIConstant::getIRI)
+                .orElseThrow(() -> new RuntimeException("TODO: support bnode for classes as mapping assertion index"));
+        return key.isClass
+                ? MappingAssertionIndex.ofClass(predicate, iri)
+                : MappingAssertionIndex.ofProperty(predicate, iri);
     }
 
     private IQ createIQ(CustomKey key, ImmutableList<RDFFact> facts) {
@@ -201,15 +183,14 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private IQ createConstructionIQ(ImmutableTerm subject, ImmutableTerm predicate, ImmutableTerm object, Optional<ObjectConstant> graph, ValuesNode valuesNode) {
-        Substitution<?> substitution = graph.map(g -> substitutionFactory.getSubstitution(
-                        quadAtom.getArguments(),  ImmutableList.of(subject, predicate, object, g)))
-                .orElseGet(() -> substitutionFactory.getSubstitution(
-                        tripleAtom.getArguments(), ImmutableList.of(subject, predicate, object)));
+        DistinctVariableOnlyDataAtom atom = graph.map(g -> quadAtom).orElse(tripleAtom);
+        Substitution<?> substitution = substitutionFactory.getSubstitution(atom.getArguments(),
+                graph.map(g -> ImmutableList.of(subject, predicate, object, g))
+                        .orElseGet(() -> ImmutableList.of(subject, predicate, object)));
 
-        ConstructionNode cn = iqFactory.createConstructionNode(substitution.getDomain(), substitution);
-        IQTree iqTree = iqFactory.createUnaryIQTree(cn, valuesNode);
-
-        return iqFactory.createIQ(graph.map(g -> quadAtom).orElse(tripleAtom), iqTree);
+        return iqFactory.createIQ(atom,
+                iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(substitution.getDomain(), substitution), valuesNode));
     }
 
     private ValuesNode createSingleTypeDBValuesNode(CustomKey key, ImmutableList<RDFFact> facts) {
