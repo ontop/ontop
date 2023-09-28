@@ -33,7 +33,7 @@ public class TMappingRule {
 		this.headTerms = ((ConstructionNode)iq.getTree().getRootNode()).getSubstitution().apply(projectionAtom.getArguments());
 
 		IQTree tree = iq.getTree().getChildren().get(0);
-		ImmutableList<ExtensionalDataNode> dataAtoms = IQ2CQ.getExtensionalDataNodes(tree, coreSingletons).get();
+		ImmutableList<ExtensionalDataNode> dataAtoms = IQ2CQ.getExtensionalDataNodes(tree, coreSingletons);
 		ImmutableSet<ImmutableExpression> joinConditions = IQ2CQ.getFilterExpressions(tree);
 
 		// maps all non-variables to fresh variables

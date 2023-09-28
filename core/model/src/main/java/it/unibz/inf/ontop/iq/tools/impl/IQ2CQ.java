@@ -8,6 +8,7 @@ import com.google.common.hash.Hashing;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -115,30 +116,30 @@ public class IQ2CQ {
             return dataNode;
     }
 
-    public static Optional<ImmutableList<ExtensionalDataNode>> getExtensionalDataNodes(IQTree tree,
+    public static ImmutableList<ExtensionalDataNode> getExtensionalDataNodes(IQTree tree,
                                                                                        CoreSingletons coreSingletons) {
         QueryNode node = tree.getRootNode();
         if (node instanceof FilterNode) {
             return getExtensionalDataNodes(tree.getChildren().get(0), coreSingletons);
         }
         else if (node instanceof ExtensionalDataNode) {
-            return Optional.of(ImmutableList.of((ExtensionalDataNode)tree));
+            return ImmutableList.of((ExtensionalDataNode)tree);
         }
         else if (node instanceof TrueNode) {
-            return Optional.of(ImmutableList.of());
+            return ImmutableList.of();
         }
         else if (node instanceof ValuesNode) {
-            return Optional.of(ImmutableList.of(convertIntoExtensionalDataNode((ValuesNode) node, coreSingletons)));
+            return ImmutableList.of(convertIntoExtensionalDataNode((ValuesNode) node, coreSingletons));
         }
         else if (node instanceof InnerJoinNode) {
             if (tree.getChildren().stream().anyMatch(c -> !(c.getRootNode() instanceof ExtensionalDataNode)))
-                return Optional.empty();
+                throw new MinorOntopInternalBugException("Unexpected IQ structure for InnerJoin " + tree);
 
-            return Optional.of(tree.getChildren().stream()
+            return tree.getChildren().stream()
                     .map(n -> (ExtensionalDataNode)n)
-                    .collect(ImmutableCollectors.toList()));
+                    .collect(ImmutableCollectors.toList());
         }
-        return Optional.empty();
+        throw new MinorOntopInternalBugException("Unexpected IQ structure " + tree);
     }
 
     public static ImmutableSet<ImmutableExpression> getFilterExpressions(IQTree tree) {
@@ -162,7 +163,7 @@ public class IQ2CQ {
                             .collect(ImmutableCollectors.toSet()))
                     .orElseGet(ImmutableSet::of);
         }
-        throw new IllegalStateException("Use getExtensionalDataNodes first to check whether it's a CQ");
+        throw new MinorOntopInternalBugException("Use getExtensionalDataNodes first to check whether it's a CQ " + tree);
     }
 
     /**

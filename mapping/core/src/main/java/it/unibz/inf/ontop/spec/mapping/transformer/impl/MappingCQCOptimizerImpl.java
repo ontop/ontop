@@ -52,7 +52,7 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
             @Override
             public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children0) {
 
-                Optional<ImmutableList<ExtensionalDataNode>> c = IQ2CQ.getExtensionalDataNodes(tree, coreSingletons);
+                ImmutableList<ExtensionalDataNode> children = IQ2CQ.getExtensionalDataNodes(tree, coreSingletons);
 
                 ImmutableSet<Variable> answerVariables = Sets.union(
                                 constructionNode.getSubstitution().getRangeVariables(),
@@ -60,7 +60,6 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                                         .flatMap(ImmutableTerm::getVariableStream)
                                         .collect(ImmutableCollectors.toSet())).immutableCopy();
 
-                ImmutableList<ExtensionalDataNode> children = c.get();
                 int currentIndex = 0;
                 while (currentIndex < children.size()) {
                     ImmutableList.Builder<ExtensionalDataNode> builder = ImmutableList.builder();
