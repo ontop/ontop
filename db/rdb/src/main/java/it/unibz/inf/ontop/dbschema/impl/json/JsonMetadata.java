@@ -15,6 +15,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -36,8 +37,12 @@ public class JsonMetadata extends JsonOpenObject {
     }
 
     public JsonMetadata(ImmutableMetadata metadata) {
+        this(metadata, NamedRelationDefinition::getID);
+    }
+
+    public JsonMetadata(ImmutableMetadata metadata, Function<NamedRelationDefinition, RelationID> fkRelationIDExtractor) {
         this.relations = metadata.getAllRelations().stream()
-                .map(JsonDatabaseTable::new)
+                .map(relation -> new JsonDatabaseTable(relation, fkRelationIDExtractor))
                 .collect(ImmutableList.toImmutableList());
         this.metadata = new Parameters(metadata.getDBParameters());
     }

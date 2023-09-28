@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -51,6 +52,10 @@ public class JsonDatabaseTable extends JsonOpenObject {
     }
 
     public JsonDatabaseTable(NamedRelationDefinition relation) {
+        this(relation, NamedRelationDefinition::getID);
+    }
+
+    public JsonDatabaseTable(NamedRelationDefinition relation, Function<NamedRelationDefinition, RelationID> fkRelationIDExtractor) {
         this.name = JsonMetadata.serializeRelationID(relation.getID());
         this.otherNames = relation.getAllIDs().stream()
                 .filter(id -> !id.equals(relation.getID()))
@@ -60,7 +65,7 @@ public class JsonDatabaseTable extends JsonOpenObject {
                 .map(Column::new)
                 .collect(ImmutableCollectors.toList());
         this.foreignKeys = relation.getForeignKeys().stream()
-                .map(JsonForeignKey::new)
+                .map(fk -> new JsonForeignKey(fk, fkRelationIDExtractor))
                 .collect(ImmutableCollectors.toList());
         this.uniqueConstraints = relation.getUniqueConstraints().stream()
                 .map(JsonUniqueConstraint::new)
