@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
@@ -104,64 +106,66 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                 .map(c -> (IRIConstant)c)
                 .map(IRIConstant::getIRI)
                 .orElseThrow(() -> new RuntimeException("TODO: support bnode for classes as mapping assertion index"));
+
         return key.isClass
                 ? MappingAssertionIndex.ofClass(predicate, iri)
                 : MappingAssertionIndex.ofProperty(predicate, iri);
     }
 
+    private static final ImmutableList<Function<RDFFact, RDFConstant>> CLASS_EXTRACTORS = ImmutableList.of(RDFFact::getSubject);
+    private static final ImmutableList<Function<RDFFact, RDFConstant>> PROPERTY_EXTRACTORS = ImmutableList.of(RDFFact::getSubject, RDFFact::getObject);
+
     private IQ createIQ(CustomKey key, ImmutableList<RDFFact> facts) {
+        ImmutableList<Function<RDFFact, RDFConstant>> extractors = key.isClass ? CLASS_EXTRACTORS : PROPERTY_EXTRACTORS;
+
+        final ValuesNode valuesNode;
+        final ImmutableList<ImmutableFunctionalTerm> terms;
+        if (extractors.stream().anyMatch(e -> containsMultipleTypes(facts, e))) {
+            valuesNode = iqFactory.createValuesNode(
+                    Stream.concat(extractors.stream(), extractors.stream()).map(e -> projectedVariableGenerator.generateNewVariable()).collect(ImmutableCollectors.toList()),
+                    facts.stream()
+                            .map(rdfFact -> Stream.concat(
+                                            extractors.stream().<Constant>map(e -> termFactory.getDBStringConstant(e.apply(rdfFact).getValue())),
+                                            extractors.stream().<Constant>map(e -> termFactory.getRDFTermTypeConstant(e.apply(rdfFact).getType())))
+                                    .collect(ImmutableCollectors.toList()))
+                            .collect(ImmutableCollectors.toList()));
+
+            ImmutableList<Variable> orderedVariables = valuesNode.getOrderedVariables();
+            terms = IntStream.range(0, extractors.size())
+                    .mapToObj(i -> termFactory.getRDFFunctionalTerm(orderedVariables.get(i), orderedVariables.get(extractors.size() + i)))
+                    .collect(ImmutableCollectors.toList());
+        }
+        else {
+            // We've already excluded multiple types
+            valuesNode = iqFactory.createValuesNode(
+                    extractors.stream().map(e -> projectedVariableGenerator.generateNewVariable()).collect(ImmutableCollectors.toList()),
+                    facts.stream()
+                            .map(rdfFact -> extractors.stream()
+                                    .map(e -> e.apply(rdfFact))
+                                    .map(this::extractNaturalDBValue)
+                                    .collect(ImmutableCollectors.toList()))
+                            .collect(ImmutableCollectors.toList()));
+
+            ImmutableList<Variable> orderedVariables = valuesNode.getOrderedVariables();
+            RDFFact firstFact = facts.get(0);
+            terms = IntStream.range(0, extractors.size())
+                    .mapToObj(i -> getTerm(extractors.get(i).apply(firstFact), orderedVariables.get(i)))
+                    .collect(ImmutableCollectors.toList());
+        }
+
         return key.isClass
-                ? createClassIQ(key, facts)
-                : createPropertyIQ(key, facts);
+                ? createConstructionIQ(terms.get(0), RDF_TYPE, key.classOrProperty, key.graphOptional, valuesNode)
+                : createConstructionIQ(terms.get(0), key.classOrProperty, terms.get(1), key.graphOptional, valuesNode);
     }
 
-    private IQ createClassIQ(CustomKey key, ImmutableList<RDFFact> facts) {
-        final ValuesNode valuesNode;
-        final ImmutableFunctionalTerm subject;
-        if (containsMultipleSubjectOrObjectTypes(facts, true)) {
-            LOGGER.debug("This should only be reached if blank nodes are accepted.");
-            valuesNode = createMultiTypedDBValuesNode(key, facts);
-
-            ImmutableList<Variable> orderedVariables = valuesNode.getOrderedVariables();
-            subject = termFactory.getRDFFunctionalTerm(orderedVariables.get(0), orderedVariables.get(1));
-        }
-        else {
-            // We've already excluded multiple types
-            valuesNode = createSingleTypeDBValuesNode(key, facts);
-            subject = getTerm(facts.get(0).getSubject(), valuesNode.getOrderedVariables().get(0));
-        }
-
-        return createConstructionIQ(subject, RDF_TYPE, key.classOrProperty, key.graphOptional, valuesNode);
-    }
-
-    private IQ createPropertyIQ(CustomKey key, ImmutableList<RDFFact> facts) {
-        final ValuesNode valuesNode;
-        final ImmutableFunctionalTerm subject;
-        final ImmutableFunctionalTerm object;
-        if (containsMultipleSubjectOrObjectTypes(facts, true) || containsMultipleSubjectOrObjectTypes(facts, false)) {
-            valuesNode = createMultiTypedDBValuesNode(key, facts);
-
-            ImmutableList<Variable> orderedVariables = valuesNode.getOrderedVariables();
-            subject = termFactory.getRDFFunctionalTerm(orderedVariables.get(0), orderedVariables.get(2));
-            object = termFactory.getRDFFunctionalTerm(orderedVariables.get(1), orderedVariables.get(3));
-        }
-        else {
-            // We've already excluded multiple types
-            valuesNode = createSingleTypeDBValuesNode(key, facts);
-            subject = getTerm(facts.get(0).getSubject(), valuesNode.getOrderedVariables().get(0));
-            object = getTerm(facts.get(0).getObject(), valuesNode.getOrderedVariables().get(1));
-        }
-
-        return createConstructionIQ(subject, key.classOrProperty, object, key.graphOptional, valuesNode);
-    }
 
     private ImmutableFunctionalTerm getTerm(RDFConstant constant, Variable variable) {
-        RDFTermType subjectType = constant.getType();
-        DBTermType subjectDBType = subjectType.getClosestDBType(dbTypeFactory);
-        RDFTermTypeConstant subjectRDFTypeConstant = termFactory.getRDFTermTypeConstant(subjectType);
+        RDFTermType type = constant.getType();
+        DBTermType dbType = type.getClosestDBType(dbTypeFactory);
+        RDFTermTypeConstant rdfTypeConstant = termFactory.getRDFTermTypeConstant(type);
         return termFactory.getRDFFunctionalTerm(
-                termFactory.getConversion2RDFLexical(subjectDBType, variable, subjectRDFTypeConstant.getRDFTermType()),
-                subjectRDFTypeConstant);
+                termFactory.getConversion2RDFLexical(dbType, variable, rdfTypeConstant.getRDFTermType()),
+                rdfTypeConstant);
     }
 
 
@@ -170,13 +174,12 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
      *
      * @return a boolean
      */
-    private boolean containsMultipleSubjectOrObjectTypes(ImmutableList<RDFFact> facts, boolean isSubject) {
+    private boolean containsMultipleTypes(ImmutableList<RDFFact> facts, Function<RDFFact, RDFConstant> extractor) {
         RDFFact firstFact = facts.get(0);
-        RDFConstant firstTerm = isSubject ? firstFact.getSubject() : firstFact.getObject();
-        RDFTermType firstRDFTermType = firstTerm.getType();
+        RDFTermType firstRDFTermType = extractor.apply(firstFact).getType();
 
         return facts.stream()
-                .map(f -> isSubject ? f.getSubject() : f.getObject())
+                .map(extractor)
                 .anyMatch(c -> !(c.getType().equals(firstRDFTermType)));
     }
 
@@ -191,58 +194,6 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
         return iqFactory.createIQ(atom,
                 iqFactory.createUnaryIQTree(
                         iqFactory.createConstructionNode(substitution.getDomain(), substitution), valuesNode));
-    }
-
-    private ValuesNode createSingleTypeDBValuesNode(CustomKey key, ImmutableList<RDFFact> facts) {
-        // Two cases, class assertion or not
-        return key.isClass
-
-                ? iqFactory.createValuesNode(
-                ImmutableList.of(
-                        projectedVariableGenerator.generateNewVariable()),
-                facts.stream()
-                        .map(rdfFact -> ImmutableList.of(
-                                extractNaturalDBValue(rdfFact.getSubject())))
-                        .collect(ImmutableCollectors.toList()))
-
-                : iqFactory.createValuesNode(
-                ImmutableList.of(
-                        projectedVariableGenerator.generateNewVariable(),
-                        projectedVariableGenerator.generateNewVariable()),
-                facts.stream()
-                        .map(rdfFact -> ImmutableList.of(
-                                extractNaturalDBValue(rdfFact.getSubject()),
-                                extractNaturalDBValue(rdfFact.getObject())))
-                        .collect(ImmutableCollectors.toList()));
-    }
-
-    private ValuesNode createMultiTypedDBValuesNode(CustomKey key, ImmutableList<RDFFact> facts) {
-        // Two cases, class assertion or not
-        return key.isClass
-                ? iqFactory.createValuesNode(
-                ImmutableList.of(
-                        projectedVariableGenerator.generateNewVariable(),
-                        projectedVariableGenerator.generateNewVariable()),
-                facts.stream()
-                        .map(RDFFact::getSubject)
-                        .map(subject -> ImmutableList.<Constant>of(
-                                termFactory.getDBStringConstant(subject.getValue()),
-                                termFactory.getRDFTermTypeConstant(subject.getType())))
-                        .collect(ImmutableCollectors.toList()))
-
-                : iqFactory.createValuesNode(
-                ImmutableList.of(
-                        projectedVariableGenerator.generateNewVariable(),
-                        projectedVariableGenerator.generateNewVariable(),
-                        projectedVariableGenerator.generateNewVariable(),
-                        projectedVariableGenerator.generateNewVariable()),
-                facts.stream()
-                        .map(rdfFact -> ImmutableList.<Constant>of(
-                                termFactory.getDBStringConstant(rdfFact.getSubject().getValue()),
-                                termFactory.getDBStringConstant(rdfFact.getObject().getValue()),
-                                termFactory.getRDFTermTypeConstant(rdfFact.getSubject().getType()),
-                                termFactory.getRDFTermTypeConstant(rdfFact.getObject().getType())))
-                        .collect(ImmutableCollectors.toList()));
     }
 
     private Constant extractNaturalDBValue(RDFConstant rdfConstant) {
