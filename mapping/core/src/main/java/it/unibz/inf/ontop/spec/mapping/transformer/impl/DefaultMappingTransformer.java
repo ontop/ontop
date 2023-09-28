@@ -70,26 +70,16 @@ public class DefaultMappingTransformer implements MappingTransformer {
 
     @Override
     public OBDASpecification transform(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters,
-                                       Optional<Ontology> ontology, ImmutableSet<RDFFact> facts,
+                                       Optional<Ontology> optionalOntology, ImmutableSet<RDFFact> facts,
                                        ImmutableList<IQ> rules) {
         ImmutableList<MappingAssertion> factsAsMapping = factConverter.convert(facts);
         ImmutableList<MappingAssertion> mappingWithFacts =
                 Stream.concat(mapping.stream(), factsAsMapping.stream()).collect(ImmutableCollectors.toList());
 
-        if (ontology.isPresent()) {
-            return createSpecification(mappingWithFacts, dbParameters, ontology.get().tbox(), rules);
-        }
-        else {
-            ClassifiedTBox emptyTBox = OntologyBuilderImpl.builder(rdfFactory, termFactory).build().tbox();
-            return createSpecification(mappingWithFacts, dbParameters, emptyTBox, rules);
-        }
-    }
+        Ontology ontology = optionalOntology.orElseGet(() -> OntologyBuilderImpl.builder(rdfFactory, termFactory).build());
 
-    private OBDASpecification createSpecification(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters,
-                                                  ClassifiedTBox tbox, ImmutableList<IQ> rules) {
-
-        ImmutableList<MappingAssertion> sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping);
-        ImmutableList<MappingAssertion> saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, tbox);
+        ImmutableList<MappingAssertion> sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mappingWithFacts);
+        ImmutableList<MappingAssertion> saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, ontology.tbox());
 
         ImmutableList<MappingAssertion> simplifiedBooleanExpressionsMapping = saturatedMapping.stream()
                 .map(m -> m.copyOf(disjunctionOfEqualitiesMergingSimplifier.optimize(m.getQuery())))
@@ -102,7 +92,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
                 ? normalizedMapping
                 : mappingDistinctTransformer.addDistinct(normalizedMapping);
 
-        return specificationFactory.createSpecification(getMapping(finalMapping), dbParameters, tbox);
+        return specificationFactory.createSpecification(getMapping(finalMapping), dbParameters, ontology.tbox());
     }
 
     private Mapping getMapping(ImmutableList<MappingAssertion> assertions) {
