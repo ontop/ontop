@@ -75,11 +75,9 @@ public class PunningTest {
                                 P, TERM_FACTORY.getConstantIRI(PROP_IRI))),
                         IQ_FACTORY.createExtensionalDataNode(company, ImmutableMap.of(0, A, 1, B))));
 
-        RDFAtomPredicate tp = (RDFAtomPredicate) ATOM_FACTORY.getDistinctTripleAtom(S, P, B).getPredicate();
-
         ImmutableList<MappingAssertion> mapping = ImmutableList.of(
-                new MappingAssertion(MappingAssertionIndex.ofProperty(tp, PROP_IRI), propertyMappingAssertion, null),
-                new MappingAssertion(MappingAssertionIndex.ofClass(tp, CLASS_IRI), classMappingAssertion, null));
+                new MappingAssertion(propertyMappingAssertion, null),
+                new MappingAssertion(classMappingAssertion, null));
 
         OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY, TERM_FACTORY);
         builder.declareClass(CLASS_IRI);

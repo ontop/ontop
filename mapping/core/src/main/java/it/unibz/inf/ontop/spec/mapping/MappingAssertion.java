@@ -72,9 +72,9 @@ public class MappingAssertion {
     }
 
     public Substitution<ImmutableTerm> getTopSubstitution() {
-       return Optional.of(query.getTree())
-                .filter(t -> t.getRootNode() instanceof ConstructionNode)
+        return Optional.of(query.getTree())
                 .map(IQTree::getRootNode)
+                .filter(n -> n instanceof ConstructionNode)
                 .map(n -> (ConstructionNode) n)
                 .map(ConstructionNode::getSubstitution)
                 .orElseThrow(() -> new MinorOntopInternalBugException(

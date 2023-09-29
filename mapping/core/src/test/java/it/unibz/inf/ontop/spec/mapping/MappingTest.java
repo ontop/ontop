@@ -157,7 +157,7 @@ public class MappingTest {
         IQ iq = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, table1DataNode));
 
         RDFAtomPredicate tp = (RDFAtomPredicate)projectionAtom.getPredicate();
-        ImmutableList<MappingAssertion> nonNormalizedMapping = ImmutableList.of(new MappingAssertion(MappingAssertionIndex.ofClass(tp, CLASS_1), iq, null));
+        ImmutableList<MappingAssertion> nonNormalizedMapping = ImmutableList.of(new MappingAssertion(iq, null));
 
         ImmutableMap<MappingAssertionIndex, IQ> normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping).stream()
                 .collect(ImmutableCollectors.toMap(MappingAssertion::getIndex, MappingAssertion::getQuery));

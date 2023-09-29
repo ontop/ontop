@@ -119,9 +119,9 @@ public class MappingSaturationTest {
          */
         RDFAtomPredicate tp = (RDFAtomPredicate)spoAtom.getPredicate();
         ImmutableList<MappingAssertion> mapping = ImmutableList.of(
-                new MappingAssertion(MappingAssertionIndex.ofProperty(tp, PROP_TEACHES), maTeaches, null),
-                new MappingAssertion(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LAB), maGivesLab, null),
-                new MappingAssertion(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LECTURE), maGivesLecture, null));
+                new MappingAssertion(maTeaches, null),
+                new MappingAssertion(maGivesLab, null),
+                new MappingAssertion(maGivesLecture, null));
 
         ImmutableMap<MappingAssertionIndex, IQ> saturatedMapping = MAPPING_SATURATOR.saturate(mapping, classifiedTBox).stream()
                 .collect(ImmutableCollectors.toMap(MappingAssertion::getIndex, MappingAssertion::getQuery));
