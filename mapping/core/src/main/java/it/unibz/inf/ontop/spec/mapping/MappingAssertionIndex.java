@@ -3,23 +3,34 @@ package it.unibz.inf.ontop.spec.mapping;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import org.apache.commons.rdf.api.IRI;
 
+import java.util.Objects;
+import java.util.Optional;
+
 public class MappingAssertionIndex {
     private final boolean isClass;
-    private final IRI iri;
+    private final Optional<IRI> iri;
     private final RDFAtomPredicate predicate;
 
-    private MappingAssertionIndex(RDFAtomPredicate predicate, IRI iri, boolean isClass) {
+    private MappingAssertionIndex(RDFAtomPredicate predicate, Optional<IRI> iri, boolean isClass) {
         this.predicate = predicate;
         this.iri = iri;
         this.isClass = isClass;
     }
 
-    public static MappingAssertionIndex ofProperty(RDFAtomPredicate predicate, IRI iri) {
+    public static MappingAssertionIndex ofProperty(RDFAtomPredicate predicate, Optional<IRI> iri) {
         return new MappingAssertionIndex(predicate, iri, false);
     }
 
-    public static MappingAssertionIndex ofClass(RDFAtomPredicate predicate, IRI iri) {
+    public static MappingAssertionIndex ofClass(RDFAtomPredicate predicate, Optional<IRI> iri) {
         return new MappingAssertionIndex(predicate, iri, true);
+    }
+
+    public static MappingAssertionIndex ofProperty(RDFAtomPredicate predicate, IRI iri) {
+        return new MappingAssertionIndex(predicate, Optional.of(iri), false);
+    }
+
+    public static MappingAssertionIndex ofClass(RDFAtomPredicate predicate, IRI iri) {
+        return new MappingAssertionIndex(predicate, Optional.of(iri), true);
     }
 
     public boolean isClass() {
@@ -27,13 +38,14 @@ public class MappingAssertionIndex {
     }
 
     public IRI getIri() {
-        return iri;
+        return iri
+                .orElseThrow(() -> new MappingAssertion.NoGroundPredicateOntopInternalBugException("The definition of the predicate is not always a ground term"));
     }
 
     public RDFAtomPredicate getPredicate() { return predicate; }
 
     @Override
-    public int hashCode() { return iri.hashCode() ^ predicate.hashCode(); }
+    public int hashCode() { return Objects.hash(iri, predicate); }
 
     @Override
     public boolean equals(Object o) {
