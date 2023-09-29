@@ -107,16 +107,10 @@ public class MappingTest {
         /*
          * Renaming
          */
-        final RDFAtomPredicate tp = rdfAtomPredicate;
         ImmutableList<MappingAssertion> nonNormalizedMapping = Stream.concat(
-                propertyMapBuilder.build().entrySet().stream()
-                        .map(e -> Maps.immutableEntry(
-                                MappingAssertionIndex.ofProperty(tp, e.getKey()), e.getValue())),
-                classMap.entrySet().stream()
-                        .map(e -> Maps.immutableEntry(
-                                MappingAssertionIndex.ofClass(tp, e.getKey()), e.getValue())))
-                .collect(ImmutableCollectors.toMap()).entrySet().stream()
-                .map(e -> new MappingAssertion(e.getKey(), e.getValue(), null))
+                        propertyMapBuilder.build().values().stream(),
+                        classMap.values().stream())
+                .map(iq -> new MappingAssertion(iq, null))
                 .collect(ImmutableCollectors.toList());
         ImmutableMap<MappingAssertionIndex, IQ> normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping).stream()
                 .collect(ImmutableCollectors.toMap(MappingAssertion::getIndex, MappingAssertion::getQuery));
