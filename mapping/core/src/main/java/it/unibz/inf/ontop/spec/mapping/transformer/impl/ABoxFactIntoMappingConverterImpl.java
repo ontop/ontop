@@ -89,9 +89,14 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
 
         ImmutableList<MappingAssertion> assertions = dict.entrySet().stream()
                 .map(entry -> new MappingAssertion(
-                        getMappingAssertionIndex(entry.getKey()),
                         createIQ(entry.getKey(), entry.getValue()),
-                        new ABoxFactProvenance(entry.getValue())))
+                        new PPMappingAssertionProvenance() {
+                            private final String provenance = entry.getValue().toString();
+                            @Override
+                            public String getProvenanceInfo() {
+                                return provenance;
+                            }
+                        }))
                 .collect(ImmutableCollectors.toList());
 
         LOGGER.debug("Transformed {} rdfFacts into {} mappingAssertions", facts.size(), assertions.size());
@@ -99,18 +104,6 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
         return assertions;
     }
 
-    private MappingAssertionIndex getMappingAssertionIndex(CustomKey key) {
-        RDFAtomPredicate predicate = (RDFAtomPredicate) key.graphOptional.map(g -> quadAtom).orElse(tripleAtom).getPredicate();
-        IRI iri = Optional.of(key.classOrProperty)
-                .filter(c -> c instanceof IRIConstant)
-                .map(c -> (IRIConstant)c)
-                .map(IRIConstant::getIRI)
-                .orElseThrow(() -> new RuntimeException("TODO: support bnode for classes as mapping assertion index"));
-
-        return key.isClass
-                ? MappingAssertionIndex.ofClass(predicate, iri)
-                : MappingAssertionIndex.ofProperty(predicate, iri);
-    }
 
     private static final ImmutableList<Function<RDFFact, RDFConstant>> CLASS_EXTRACTORS = ImmutableList.of(RDFFact::getSubject);
     private static final ImmutableList<Function<RDFFact, RDFConstant>> PROPERTY_EXTRACTORS = ImmutableList.of(RDFFact::getSubject, RDFFact::getObject);
@@ -201,19 +194,6 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                 termFactory.getDBStringConstant(rdfConstant.getValue()),
                 rdfConstant.getType());
         return (Constant) functionalTerm.simplify();
-    }
-
-    private static class ABoxFactProvenance implements PPMappingAssertionProvenance {
-        private final String provenance;
-
-        private ABoxFactProvenance(ImmutableList<RDFFact> rdfFacts) {
-            provenance = rdfFacts.toString();
-        }
-
-        @Override
-        public String getProvenanceInfo() {
-            return provenance;
-        }
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
