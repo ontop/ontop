@@ -72,18 +72,20 @@ public class DefaultMappingTransformer implements MappingTransformer {
     public OBDASpecification transform(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters,
                                        Optional<Ontology> optionalOntology, ImmutableSet<RDFFact> facts,
                                        ImmutableList<IQ> rules) {
+
         ImmutableList<MappingAssertion> factsAsMapping = factConverter.convert(facts);
         ImmutableList<MappingAssertion> mappingWithFacts =
                 Stream.concat(mapping.stream(), factsAsMapping.stream()).collect(ImmutableCollectors.toList());
 
         Ontology ontology = optionalOntology.orElseGet(() -> OntologyBuilderImpl.builder(rdfFactory, termFactory).build());
 
-        ImmutableList<MappingAssertion> sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mappingWithFacts);
-        ImmutableList<MappingAssertion> saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, ontology.tbox());
+        ImmutableList<MappingAssertion> sameAsRewrittenMapping = sameAsInverseRewriter.rewrite(mappingWithFacts);
+        ImmutableList<MappingAssertion> saturatedMapping = mappingSaturator.saturate(sameAsRewrittenMapping, ontology.tbox());
 
         ImmutableList<MappingAssertion> simplifiedBooleanExpressionsMapping = saturatedMapping.stream()
                 .map(m -> m.copyOf(disjunctionOfEqualitiesMergingSimplifier.optimize(m.getQuery())))
                 .collect(ImmutableCollectors.toList());
+
         ImmutableList<MappingAssertion> mappingAfterApplyingRules = ruleExecutor.apply(simplifiedBooleanExpressionsMapping, rules);
         ImmutableList<MappingAssertion> normalizedMapping = mappingNormalizer.normalize(mappingAfterApplyingRules);
 
