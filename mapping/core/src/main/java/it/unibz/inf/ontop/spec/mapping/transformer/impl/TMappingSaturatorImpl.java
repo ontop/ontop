@@ -121,16 +121,16 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                 .filter(e -> !e.getValue().isEmpty())
                 .collect(ImmutableCollectors.toMap());
 
-        ImmutableMap<MappingAssertionIndex, ImmutableList<TMappingRule>> combined = Stream.concat(
-                saturated.entrySet().stream(),
+        ImmutableList<ImmutableList<TMappingRule>> combined = Stream.concat(
+                saturated.values().stream(),
                 original.entrySet().stream()
                         .filter(e -> !saturated.containsKey(e.getKey()))
-                        .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().stream()
-                                        .collect(TMappingEntry.toTMappingEntry(cqc, coreSingletons)))))
-                .collect(ImmutableCollectors.toMap());
+                        .map(e -> e.getValue().stream()
+                                        .collect(TMappingEntry.toTMappingEntry(cqc, coreSingletons))))
+                .collect(ImmutableCollectors.toList());
 
-        return combined.entrySet().stream()
-                .map(e -> new MappingAssertion(e.getKey(), toIQ(e.getValue()), null))
+        return combined.stream()
+                .map(tMappingRules -> new MappingAssertion(toIQ(tMappingRules), null))
                 .collect(ImmutableCollectors.toList());
     }
 

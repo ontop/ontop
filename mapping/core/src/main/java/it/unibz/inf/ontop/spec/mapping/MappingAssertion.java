@@ -27,7 +27,7 @@ public class MappingAssertion {
     private final IQ query;
     private final PPMappingAssertionProvenance provenance;
 
-    public MappingAssertion(MappingAssertionIndex index, IQ query, PPMappingAssertionProvenance provenance) {
+    private MappingAssertion(MappingAssertionIndex index, IQ query, PPMappingAssertionProvenance provenance) {
         this.index = index;
         this.query = query;
         this.provenance = provenance;
