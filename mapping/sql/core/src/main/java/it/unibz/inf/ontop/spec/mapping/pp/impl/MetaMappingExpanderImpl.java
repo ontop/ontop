@@ -148,9 +148,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
     private Optional<ExpansionPosition> getExpansionPosition(MappingAssertion assertion) {
         RDFAtomPredicate predicate = assertion.getRDFAtomPredicate();
 
-        RDFAtomPredicate.ComponentGetter componentGetter = predicate.getPropertyIRI(assertion.getTerms())
-                        .filter(p -> p.equals(RDF.TYPE))
-                        .isPresent()
+        RDFAtomPredicate.ComponentGetter componentGetter = assertion.getIndex().isClass()
                         ? predicate::getObject
                         : predicate::getProperty;
 

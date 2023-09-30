@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public class MappingAssertionIndex {
     private final boolean isClass;
-    private final Optional<IRI> iri;
+    private final Optional<IRI> iri; // iri can be empty, but only for meta-mappings
     private final RDFAtomPredicate predicate;
 
     private MappingAssertionIndex(RDFAtomPredicate predicate, Optional<IRI> iri, boolean isClass) {

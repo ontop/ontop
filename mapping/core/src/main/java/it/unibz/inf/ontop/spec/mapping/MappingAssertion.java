@@ -20,10 +20,13 @@ import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 
+/**
+ * Assumes that the top=level node is a ConstructionNode.
+ * This ConstructionNode determines the index of the mapping assertion.
+ */
 public class MappingAssertion {
 
-    // lazy
-    private MappingAssertionIndex index;
+    private final MappingAssertionIndex index;
     private final IQ query;
     private final PPMappingAssertionProvenance provenance;
 
@@ -41,19 +44,10 @@ public class MappingAssertion {
                 .map(p -> (RDFAtomPredicate) p)
                 .orElseThrow(() -> new MinorOntopInternalBugException("The mapping assertion does not have an RDFAtomPredicate"));
 
-        // some mapping assertions (from rules) have UNION as the top node
-        // TODO: revise this
-        Optional<ImmutableList<? extends ImmutableTerm>> optionalArgs = Optional.of(query.getTree())
-                .map(IQTree::getRootNode)
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode) n)
-                .map(ConstructionNode::getSubstitution)
-                .map(s -> s.apply(query.getProjectionAtom().getArguments()));
-
-        Optional<IRI> propertyIRI = optionalArgs.flatMap(rdfAtomPredicate::getPropertyIRI);
-
+        ImmutableList<? extends ImmutableTerm> terms = getTerms();
+        Optional<IRI> propertyIRI = rdfAtomPredicate.getPropertyIRI(terms);
         this.index = propertyIRI.filter(iri -> iri.equals(RDF.TYPE)).isPresent()
-                ? MappingAssertionIndex.ofClass(rdfAtomPredicate, optionalArgs.flatMap(rdfAtomPredicate::getClassIRI))
+                ? MappingAssertionIndex.ofClass(rdfAtomPredicate, rdfAtomPredicate.getClassIRI(terms))
                 : MappingAssertionIndex.ofProperty(rdfAtomPredicate, propertyIRI);
     }
 
