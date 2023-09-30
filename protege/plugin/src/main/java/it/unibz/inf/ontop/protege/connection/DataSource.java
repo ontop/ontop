@@ -124,8 +124,14 @@ public class DataSource {
 	 * If the connection doesn't exist or is dead, it will create a new connection.
 	 */
 	public Connection getConnection() throws SQLException {
-		if (connection == null || connection.isClosed())
-			connection = DriverManager.getConnection(url, username, password);
+		if (connection == null || connection.isClosed()) {
+			// H2: https://www.h2database.com/html/features.html#database_only_if_exists
+			String effectiveUrl = url.startsWith("jdbc:h2") && !url.contains("IFEXISTS=TRUE")
+					? url + ";IFEXISTS=TRUE"
+					: url;
+
+			connection = DriverManager.getConnection(effectiveUrl, username, password);
+		}
 
 		return connection;
 	}
