@@ -30,12 +30,6 @@ public class MappingAssertion {
     private final IQ query;
     private final PPMappingAssertionProvenance provenance;
 
-    private MappingAssertion(MappingAssertionIndex index, IQ query, PPMappingAssertionProvenance provenance) {
-        this.index = index;
-        this.query = query;
-        this.provenance = provenance;
-    }
-
     public MappingAssertion(IQ query, PPMappingAssertionProvenance provenance) {
         this.query = query;
         this.provenance = provenance;
@@ -56,15 +50,11 @@ public class MappingAssertion {
     public PPMappingAssertionProvenance getProvenance() { return provenance; }
 
     public MappingAssertion copyOf(IQ query) {
-        return query.getTree().getRootNode().equals(this.query.getTree().getRootNode())
-                ? new MappingAssertion(index, query, provenance)
-                : new MappingAssertion(query, provenance);
+        return new MappingAssertion(query, provenance);
     }
 
     public MappingAssertion copyOf(IQTree tree, IntermediateQueryFactory iqFactory) {
-        return query.getTree().getRootNode().equals(tree.getRootNode())
-                ? new MappingAssertion(index, iqFactory.createIQ(query.getProjectionAtom(), tree), provenance)
-                : new MappingAssertion(iqFactory.createIQ(query.getProjectionAtom(), tree), provenance);
+        return new MappingAssertion(iqFactory.createIQ(query.getProjectionAtom(), tree), provenance);
     }
 
     public ImmutableSet<Variable> getProjectedVariables() {
