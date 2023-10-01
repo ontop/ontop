@@ -19,9 +19,11 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionOperations;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Singleton
 public class FilterNormalizerImpl implements FilterNormalizer {
@@ -29,15 +31,13 @@ public class FilterNormalizerImpl implements FilterNormalizer {
     private static final int MAX_NORMALIZATION_ITERATIONS = 10000;
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
     private final ConditionSimplifier conditionSimplifier;
 
     @Inject
-    private FilterNormalizerImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory,
+    private FilterNormalizerImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory,
                                  ConditionSimplifier conditionSimplifier) {
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
-        this.substitutionFactory = substitutionFactory;
         this.conditionSimplifier = conditionSimplifier;
     }
 
@@ -106,29 +106,21 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
         private State updateParentChildAndCondition(UnaryOperatorNode newParent,
                                                                        ImmutableExpression newCondition, IQTree newChild) {
-            ImmutableList<UnaryOperatorNode> newAncestors = ImmutableList.<UnaryOperatorNode>builder()
-                    .add(newParent)
-                    .addAll(ancestors)
-                    .build();
-
+            ImmutableList<UnaryOperatorNode> newAncestors = extendAncestors(newParent);
             return new State(projectedVariables, newAncestors, Optional.of(newCondition), newChild);
         }
 
         private State addParentRemoveConditionAndUpdateChild(UnaryOperatorNode newParent, IQTree newChild) {
-            ImmutableList<UnaryOperatorNode> newAncestors = ImmutableList.<UnaryOperatorNode>builder()
-                    .add(newParent)
-                    .addAll(ancestors)
-                    .build();
-
+            ImmutableList<UnaryOperatorNode> newAncestors = extendAncestors(newParent);
             return new State(projectedVariables, newAncestors, Optional.empty(), newChild);
         }
 
-        private State liftChildAsParent(UnaryIQTree formerChildTree) {
-            ImmutableList<UnaryOperatorNode> newAncestors = ImmutableList.<UnaryOperatorNode>builder()
-                    .add(formerChildTree.getRootNode())
-                    .addAll(ancestors)
-                    .build();
+        private ImmutableList<UnaryOperatorNode> extendAncestors(UnaryOperatorNode newNode) {
+            return Stream.concat(Stream.of(newNode), ancestors.stream()).collect(ImmutableCollectors.toList());
+        }
 
+        private State liftChildAsParent(UnaryIQTree formerChildTree) {
+            ImmutableList<UnaryOperatorNode> newAncestors = extendAncestors(formerChildTree.getRootNode());
             IQTree newChild = formerChildTree.getChild();
             return new State(projectedVariables, newAncestors, condition, newChild);
         }
@@ -159,7 +151,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 return iqFactory.createEmptyNode(projectedVariables);
 
             IQTree filterLevelTree = condition
-                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(iqFactory.createFilterNode(c), child,
+                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(iqFactory.createFilterNode(c), child,
                             treeCache.declareAsNormalizedForOptimizationWithEffect()))
                     .orElse(child);
 

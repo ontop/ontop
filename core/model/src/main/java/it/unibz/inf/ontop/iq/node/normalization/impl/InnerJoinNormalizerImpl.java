@@ -323,7 +323,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 case 1:
                     IQTree uniqueChild = children.get(0);
                     return joiningCondition
-                            .map(e -> (IQTree) iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), uniqueChild))
+                            .<IQTree>map(e -> iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), uniqueChild))
                             .orElse(uniqueChild);
                 default:
                     return liftLeftJoin()
@@ -448,8 +448,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
             Stream<ImmutableExpression> conditions = conditionAndTrees.stream()
                     .map(ct -> ct.condition)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get);
+                    .flatMap(Optional::stream);
 
             Optional<ImmutableExpression> newJoiningCondition = termFactory.getConjunction(joiningCondition, conditions);
 

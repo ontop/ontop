@@ -94,7 +94,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             ImmutableList<IQTree> grandChildren = newChild.getChildren();
 
             ImmutableList<IQTree> newChildren = grandChildren.stream()
-                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(this, c))
+                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(this, c))
                     .collect(ImmutableCollectors.toList());
 
             return iqFactory.createNaryIQTree(unionNode, newChildren);

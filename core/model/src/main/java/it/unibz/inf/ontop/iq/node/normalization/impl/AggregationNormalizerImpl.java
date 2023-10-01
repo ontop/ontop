@@ -149,17 +149,12 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         /**
          * Initial state
          */
-        protected AggregationNormalizationState(AggregationNode aggregationNode, @Nonnull ConstructionNode childConstructionNode,
+        private AggregationNormalizationState(AggregationNode aggregationNode, @Nullable ConstructionNode childConstructionNode,
                                                 IQTree grandChild, VariableGenerator variableGenerator,
                                                 @Nullable FilterNode sampleFilter) {
 
-            this.groupingVariables = aggregationNode.getGroupingVariables();
-            this.aggregationSubstitution = aggregationNode.getSubstitution();
-            this.childConstructionNode = childConstructionNode;
-            this.grandChild = grandChild;
-            this.variableGenerator = variableGenerator;
-            this.ancestors = ImmutableList.of();
-            this.sampleFilter = sampleFilter;
+            this(ImmutableList.of(),  aggregationNode.getGroupingVariables(), aggregationNode.getSubstitution(),
+                    childConstructionNode, grandChild, variableGenerator, sampleFilter);
         }
 
         private AggregationNormalizationState(ImmutableList<ConstructionNode> ancestors,
@@ -224,7 +219,6 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                 return this;
 
             Substitution<ImmutableTerm> substitution = childConstructionNode.getSubstitution();
-
             if (substitution.isEmpty())
                 return this;
 
@@ -295,7 +289,10 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     : Optional.empty();
 
             Substitution<ImmutableFunctionalTerm> finalAggregationSubstitution = sampleVariable.map(
-                    s -> newAggregationSubstitution.compose(substitutionFactory.getSubstitution(sampleVariable.get(), termFactory.getDBSample(termFactory.getDBIntegerConstant(1), termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType())))
+                    s -> newAggregationSubstitution.compose(
+                            substitutionFactory.getSubstitution(sampleVariable.get(),
+                                    termFactory.getDBSample(termFactory.getDBIntegerConstant(1),
+                                            termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType())))
                             .builder()
                             .transform(t -> (ImmutableFunctionalTerm)t)
                             .build()
@@ -434,7 +431,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
         protected IQTree createNormalizedTree(IQTreeCache normalizedTreeCache) {
             IQTree newChildTree = Optional.ofNullable(childConstructionNode)
-                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChild,
+                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(c, grandChild,
                             iqFactory.createIQTreeCache(true)))
                     .orElse(grandChild);
 

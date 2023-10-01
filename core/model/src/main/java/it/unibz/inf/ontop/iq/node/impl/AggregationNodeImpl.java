@@ -261,7 +261,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
         validateNode();
 
-        Sets.SetView<Variable> missingVariables = Sets.difference(getLocallyRequiredVariables(), child.getVariables());
+        Set<Variable> missingVariables = Sets.difference(getLocallyRequiredVariables(), child.getVariables());
         if (!missingVariables.isEmpty()) {
             throw new InvalidIntermediateQueryException("The child of the aggregation node is missing some variables: "
                     + missingVariables);

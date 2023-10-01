@@ -101,9 +101,11 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        NativeNodeImpl that = (NativeNodeImpl) o;
-        return nativeQueryString.equals(that.nativeQueryString) && variables.equals(that.variables);
+        if (o instanceof NativeNodeImpl) {
+            NativeNodeImpl that = (NativeNodeImpl) o;
+            return nativeQueryString.equals(that.nativeQueryString) && variables.equals(that.variables);
+        }
+        return false;
     }
 
     @Override

@@ -35,14 +35,12 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
 
     private final ImmutableList<OrderComparator> comparators;
     private final OrderByNormalizer normalizer;
-    private final SubstitutionFactory substitutionFactory;
 
 
     @AssistedInject
-    private OrderByNodeImpl(@Assisted ImmutableList<OrderComparator> comparators, IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
+    private OrderByNodeImpl(@Assisted ImmutableList<OrderComparator> comparators, IntermediateQueryFactory iqFactory,
                             OrderByNormalizer normalizer) {
         super(iqFactory);
-        this.substitutionFactory = substitutionFactory;
         this.comparators = comparators;
         this.normalizer = normalizer;
     }
@@ -83,7 +81,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
         IQTree newChild = child.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator);
 
         return newOrderByNode
-                .map(o -> (IQTree) iqFactory.createUnaryIQTree(o, newChild))
+                .<IQTree>map(o -> iqFactory.createUnaryIQTree(o, newChild))
                 .orElse(newChild);
     }
 
@@ -95,7 +93,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
         IQTree newChild = child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
 
         return newOrderByNode
-                .map(o -> (IQTree) iqFactory.createUnaryIQTree(o, newChild))
+                .<IQTree>map(o -> iqFactory.createUnaryIQTree(o, newChild))
                 .orElse(newChild);
     }
 
@@ -196,9 +194,11 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        OrderByNodeImpl that = (OrderByNodeImpl) o;
-        return comparators.equals(that.comparators);
+        if (o instanceof OrderByNodeImpl) {
+            OrderByNodeImpl that = (OrderByNodeImpl) o;
+            return comparators.equals(that.comparators);
+        }
+        return false;
     }
 
     @Override

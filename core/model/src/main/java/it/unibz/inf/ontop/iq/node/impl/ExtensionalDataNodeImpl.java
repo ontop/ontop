@@ -319,10 +319,9 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     @Override
     public synchronized ImmutableSet<Variable> getLocalVariables() {
         if (variables == null) {
-            variables = argumentMap.values()
-                    .stream()
-                    .filter(Variable.class::isInstance)
-                    .map(Variable.class::cast)
+            variables = argumentMap.values().stream()
+                    .filter(t -> t instanceof Variable)
+                    .map(t -> (Variable)t)
                     .collect(ImmutableCollectors.toSet());
         }
         return variables;

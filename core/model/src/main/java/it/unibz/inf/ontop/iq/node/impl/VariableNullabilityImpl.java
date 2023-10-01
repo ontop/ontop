@@ -211,9 +211,7 @@ public class VariableNullabilityImpl implements VariableNullability {
          * Projects away irrelevant variables
          */
         ImmutableSet<ImmutableSet<Variable>> nullableGroups = nullabilityBeforeProjectingOut.getNullableGroups().stream()
-                .map(g -> g.stream()
-                        .filter(newScope::contains)
-                        .collect(ImmutableCollectors.toSet()))
+                .map(g -> Sets.intersection(g, newScope).immutableCopy())
                 .filter(g -> !g.isEmpty())
                 .collect(ImmutableCollectors.toSet());
 

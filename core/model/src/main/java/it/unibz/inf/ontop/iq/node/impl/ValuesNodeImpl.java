@@ -187,9 +187,11 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ValuesNodeImpl that = (ValuesNodeImpl) o;
-        return projectedVariables.equals(that.projectedVariables) && values.equals(that.values);
+        if (o instanceof ValuesNodeImpl) {
+            ValuesNodeImpl that = (ValuesNodeImpl) o;
+            return projectedVariables.equals(that.projectedVariables) && values.equals(that.values);
+        }
+        return false;
     }
 
     @Override

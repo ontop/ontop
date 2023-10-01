@@ -147,7 +147,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
 
         public IQTree createNormalizedTree(VariableGenerator variableGenerator, IQTreeCache treeCache) {
             IQTree orderByLevelTree = orderByNode
-                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, child, treeCache.declareAsNormalizedForOptimizationWithEffect()))
+                    .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, child, treeCache.declareAsNormalizedForOptimizationWithEffect()))
                     .orElse(child);
 
             if (ancestors.isEmpty())

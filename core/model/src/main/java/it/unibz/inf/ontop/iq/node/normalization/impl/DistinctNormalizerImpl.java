@@ -136,11 +136,11 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
         IQTree newUnionTree = iqFactory.createNaryIQTree((UnionNode) child.getRootNode(), newUnionChildren);
 
         IQTree newFilterTree = Optional.ofNullable(filterNode)
-                .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newUnionTree))
+                .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, newUnionTree))
                 .orElse(newUnionTree);
 
         IQTree newOrderByTree = Optional.ofNullable(orderByNode)
-                .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newFilterTree))
+                .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, newFilterTree))
                 .orElse(newFilterTree);
 
         UnaryIQTree newTree = iqFactory.createUnaryIQTree(

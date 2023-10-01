@@ -376,7 +376,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 ucsPartitionedByDisjointness.get(true).stream(),
                 ucsPartitionedByDisjointness.get(false).stream()
                         .flatMap(uc -> disjointVariables.stream()
-                                        .map(v -> appendVariable(uc, v)))
+                                        .map(v -> Sets.union(uc, ImmutableSet.of(v)).immutableCopy()))
                 ).collect(ImmutableCollectors.toSet());
     }
 
@@ -415,21 +415,13 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         ).collect(FunctionalDependencies.toFunctionalDependencies());
     }
 
-    private Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>> appendDeterminant(Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>> fd, Variable v) {
+    private static Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>> appendDeterminant(Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>> fd, Variable v) {
+        ImmutableSet<Variable> vSet = ImmutableSet.of(v);
         return Maps.immutableEntry(
-                Stream.concat(
-                    fd.getKey().stream(),
-                    Stream.of(v)).collect(ImmutableCollectors.toSet()
-                ),
-                Sets.difference(fd.getValue(), ImmutableSet.of(v)).immutableCopy()
-        );
+                Sets.union(fd.getKey(), vSet).immutableCopy(),
+                Sets.difference(fd.getValue(), vSet).immutableCopy());
     }
 
-    private ImmutableSet<Variable> appendVariable(ImmutableSet<Variable> uc, Variable v) {
-        return Stream.concat(
-                uc.stream(),
-                Stream.of(v)).collect(ImmutableCollectors.toSet());
-    }
 
     private boolean areDisjoint(ImmutableList<IQTree> children, ImmutableSet<Variable> uc) {
         int childrenCount = children.size();
@@ -474,9 +466,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UnionNodeImpl unionNode = (UnionNodeImpl) o;
-        return projectedVariables.equals(unionNode.projectedVariables);
+        if (o instanceof UnionNodeImpl) {
+            UnionNodeImpl that = (UnionNodeImpl) o;
+            return projectedVariables.equals(that.projectedVariables);
+        }
+        return false;
     }
 
     @Override

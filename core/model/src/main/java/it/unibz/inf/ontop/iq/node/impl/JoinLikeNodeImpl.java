@@ -45,22 +45,14 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         for (IQTree child : children) {
             ImmutableSet<Variable> childProjectedVariables = child.getVariables();
 
+            Set<Variable> childNonProjectedVariables = Sets.difference(child.getKnownVariables(), childProjectedVariables);
 
-            ImmutableSet<Variable> childNonProjectedVariables = child.getKnownVariables().stream()
-                    .filter(v -> !childProjectedVariables.contains(v))
-                    .collect(ImmutableCollectors.toSet());
-
-            ImmutableSet<Variable> conflictingVariables = childNonProjectedVariables.stream()
-                    .filter(allVariables::contains)
-                    .collect(ImmutableCollectors.toSet());
-
-
+            Set<Variable> conflictingVariables = Sets.intersection(childNonProjectedVariables, allVariables);
             if (!conflictingVariables.isEmpty()) {
                 throw new InvalidIntermediateQueryException("The following non-projected variables "
                         + conflictingVariables + " are appearing in different children of "+ this + ": \n"
                         + children.stream()
-                            .filter(c -> c.getKnownVariables().stream()
-                                    .anyMatch(conflictingVariables::contains))
+                            .filter(c -> !Sets.intersection(c.getKnownVariables(), conflictingVariables).isEmpty())
                             .map(c -> "\n" + c)
                             .collect(ImmutableCollectors.toList()));
             }
