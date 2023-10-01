@@ -47,7 +47,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
      * Returns the new child
      */
     private IQTree propagateDescendingSubstitutionToChild(IQTree child,
-                                                          PropagationResults<VariableOrGroundTerm> tauFPropagationResults,
+                                                          PropagationResults tauFPropagationResults,
                                                           Optional<ImmutableExpression> constraint,
                                                           VariableGenerator variableGenerator) throws EmptyTreeException {
 
@@ -86,7 +86,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         ImmutableSet<Variable> newProjectedVariables = iqTreeTools.computeNewProjectedVariables(tau, getVariables());
 
         try {
-            PropagationResults<VariableOrGroundTerm> tauPropagationResults = propagateTau(tau, child.getVariables());
+            PropagationResults tauPropagationResults = propagateTau(tau, child.getVariables());
 
             Optional<FilterNode> filterNode = tauPropagationResults.filter
                     .map(iqFactory::createFilterNode);
@@ -113,7 +113,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
             ImmutableSet<Variable> newProjectedVariables, Substitution<ImmutableTerm> theta, IQTree newChild);
 
 
-    private PropagationResults<VariableOrGroundTerm> propagateTau(Substitution<? extends VariableOrGroundTerm> tau, ImmutableSet<Variable> childVariables) throws EmptyTreeException {
+    private PropagationResults propagateTau(Substitution<? extends VariableOrGroundTerm> tau, ImmutableSet<Variable> childVariables) throws EmptyTreeException {
 
         ImmutableSet<Variable> projectedVariables = getVariables();
         Substitution<? extends ImmutableTerm> substitution = getSubstitution();
@@ -204,7 +204,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         Optional<ImmutableExpression> newF = termFactory.getConjunction(f, newConditionStream);
 
-        return new PropagationResults<>(newTheta, delta, newF);
+        return new PropagationResults(newTheta, delta, newF);
     }
 
     @Override
@@ -250,7 +250,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     @FunctionalInterface
     protected interface DescendingSubstitutionChildUpdateFunction {
 
-        IQTree apply(IQTree child, PropagationResults<VariableOrGroundTerm> tauFPropagationResults)
+        IQTree apply(IQTree child, PropagationResults tauFPropagationResults)
                 throws EmptyTreeException;
 
     }
@@ -259,14 +259,14 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     }
 
 
-    private static class PropagationResults<T extends VariableOrGroundTerm> {
+    private static class PropagationResults {
 
-        public final Substitution<T> delta;
+        public final Substitution<VariableOrGroundTerm> delta;
         public final Optional<ImmutableExpression> filter;
         public final Substitution<ImmutableTerm> theta;
 
         PropagationResults(Substitution<ImmutableTerm> theta,
-                           Substitution<T> delta,
+                           Substitution<VariableOrGroundTerm> delta,
                            Optional<ImmutableExpression> filter) {
             this.theta = theta;
             this.delta = delta;

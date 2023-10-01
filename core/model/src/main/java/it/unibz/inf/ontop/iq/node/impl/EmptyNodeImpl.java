@@ -152,9 +152,11 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        EmptyNodeImpl emptyNode = (EmptyNodeImpl) o;
-        return projectedVariables.equals(emptyNode.projectedVariables);
+        if (o instanceof EmptyNodeImpl) {
+            EmptyNodeImpl emptyNode = (EmptyNodeImpl) o;
+            return projectedVariables.equals(emptyNode.projectedVariables);
+        }
+        return false;
     }
 
     @Override
