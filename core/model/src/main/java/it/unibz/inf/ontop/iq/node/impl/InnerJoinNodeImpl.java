@@ -125,10 +125,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        return obj != null && getClass() == obj.getClass()
-                && getOptionalFilterCondition().equals(((InnerJoinNode) obj).getOptionalFilterCondition());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o instanceof InnerJoinNodeImpl) {
+            InnerJoinNodeImpl that = (InnerJoinNodeImpl) o;
+            return getOptionalFilterCondition().equals(that.getOptionalFilterCondition());
+        }
+        return false;
     }
 
     @Override
@@ -348,7 +351,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         Multimap<IQTree, IQTree> saturatedDependencyMap = saturateDependencies(directDependencyMap);
 
         return saturatedDependencyMap.asMap().entrySet().stream()
-                .filter(e -> e.getValue().containsAll(Sets.difference(childrenSet, ImmutableSet.of(e.getKey())).immutableCopy()))
+                .filter(e -> e.getValue().containsAll(Sets.difference(childrenSet, ImmutableSet.of(e.getKey()))))
                 .map(Map.Entry::getKey)
                 .flatMap(child -> childConstraintMap.get(child).stream())
                 .collect(ImmutableCollectors.toSet());
@@ -418,8 +421,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     private Stream<Map.Entry<IQTree, IQTree>> extractFunctionalDependencies(
             IQTree t1, IQTree t2, ImmutableMap<IQTree, ImmutableSet<ImmutableSet<Variable>>> constraintMap) {
-        ImmutableSet<Variable> commonVariables = Sets.intersection(t1.getVariables(), t2.getVariables())
-                .immutableCopy();
+
+        Set<Variable> commonVariables = Sets.intersection(t1.getVariables(), t2.getVariables());
         if (commonVariables.isEmpty())
             return Stream.empty();
 
@@ -430,15 +433,14 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 Optional.of(Maps.immutableEntry(t2, t1))
                         .filter(e -> constraintMap.get(e.getValue()).stream()
                                 .anyMatch(commonVariables::containsAll)))
-                .filter(Optional::isPresent)
-                .map(Optional::get);
+                .flatMap(Optional::stream);
     }
 
     private Multimap<IQTree, IQTree> saturateDependencies(ImmutableMultimap<IQTree, IQTree> directDependencyMap) {
         Multimap<IQTree, IQTree> mutableMultimap = HashMultimap.create(directDependencyMap);
 
-        boolean hasConverged = false;
-        while (!hasConverged) {
+        boolean hasConverged;
+        do {
             hasConverged = true;
 
             for (IQTree determinant : directDependencyMap.keys()) {
@@ -448,7 +450,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                         hasConverged = false;
                 }
             }
-        }
+        } while (!hasConverged);
         return mutableMultimap;
     }
 

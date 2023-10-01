@@ -107,7 +107,6 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
         if (children.stream().noneMatch(child -> mayChildCauseParentBeingNonDistinct(tree, child)))
             return true;
 
-
         ImmutableSet<ImmutableSet<Variable>> constraints = tree.inferUniqueConstraints();
         if (constraints.isEmpty())
             return false;

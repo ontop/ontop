@@ -107,10 +107,13 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        return obj != null && getClass() == obj.getClass()
-                && getProjectionAtom().equals(((IntensionalDataNode) obj).getProjectionAtom());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o instanceof IntensionalDataNodeImpl) {
+            IntensionalDataNodeImpl that = (IntensionalDataNodeImpl) o;
+            return getProjectionAtom().equals(that.getProjectionAtom());
+        }
+        return false;
     }
 
     @Override

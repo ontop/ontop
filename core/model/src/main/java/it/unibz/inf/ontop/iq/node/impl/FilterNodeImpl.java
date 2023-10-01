@@ -88,16 +88,17 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         /*
          * Lift the union above the filter
          */
-        if ((newChildRoot instanceof UnionNode)
-                && ((UnionNode) newChildRoot).hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
+        if (newChildRoot instanceof UnionNode) {
             UnionNode unionNode = (UnionNode) newChildRoot;
-            ImmutableList<IQTree> grandChildren = newChild.getChildren();
+            if (unionNode.hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
+                ImmutableList<IQTree> grandChildren = newChild.getChildren();
 
-            ImmutableList<IQTree> newChildren = grandChildren.stream()
-                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(this, c))
-                    .collect(ImmutableCollectors.toList());
+                ImmutableList<IQTree> newChildren = grandChildren.stream()
+                        .<IQTree>map(c -> iqFactory.createUnaryIQTree(this, c))
+                        .collect(ImmutableCollectors.toList());
 
-            return iqFactory.createNaryIQTree(unionNode, newChildren);
+                return iqFactory.createNaryIQTree(unionNode, newChildren);
+            }
         }
         return iqFactory.createUnaryIQTree(this, newChild);
     }
@@ -204,8 +205,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        return o != null && getClass() == o.getClass()
-                && getFilterCondition().equals(((FilterNode) o).getFilterCondition());
+        if (o instanceof FilterNodeImpl) {
+            FilterNodeImpl that = (FilterNodeImpl) o;
+            return getFilterCondition().equals(that.getFilterCondition());
+        }
+        return false;
     }
 
     @Override

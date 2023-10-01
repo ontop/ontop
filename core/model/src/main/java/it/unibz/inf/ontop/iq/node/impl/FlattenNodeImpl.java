@@ -33,8 +33,6 @@ import java.util.stream.Stream;
 
 public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNode {
 
-
-
     private final Variable flattenedVariable;
     private final Variable outputVariable;
     private final Optional<Variable> indexVariable;
@@ -106,12 +104,10 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public ImmutableSet<Variable> getVariables(ImmutableSet<Variable> childVariables) {
-        return
-        Stream.concat(
-                childVariables.stream()
-                        .filter(v -> v != flattenedVariable),
-                getLocallyDefinedVariables().stream()
-        ).collect(ImmutableCollectors.toSet());
+        return Sets.union(
+                        Sets.filter(childVariables, v -> v != flattenedVariable),
+                        getLocallyDefinedVariables())
+                .immutableCopy();
     }
 
     @Override
@@ -228,22 +224,21 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
      */
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child) {
         //If there is no index variable, we cannot infer unique constraints.
-        if(indexVariable.isEmpty())
+        if (indexVariable.isEmpty())
             return ImmutableSet.of();
 
         var childConstraints = child.inferUniqueConstraints();
         return childConstraints.stream()
-                .map(constraint -> Stream.concat(constraint.stream(), Stream.of(indexVariable.get()))
-                            .collect(ImmutableCollectors.toSet()))
+                .map(c -> indexVariable.map(index -> Sets.union(c, ImmutableSet.of(index)).immutableCopy()).orElse(c))
                 .collect(ImmutableCollectors.toSet());
     }
 
     @Override
     public FunctionalDependencies inferFunctionalDependencies(IQTree child, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables) {
         var childFDs = child.inferFunctionalDependencies();
-        if(indexVariable.isEmpty())
+        if (indexVariable.isEmpty())
             return childFDs;
-        var index = indexVariable.get();
+        Variable index = indexVariable.get();
         //if FD A -> B exists, and B contains the flattened field, then there is a FD (A, index) -> output.
         return childFDs.stream()
                 .filter(fd -> fd.getValue().contains(flattenedVariable))
@@ -265,11 +260,9 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     @Override
     public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
         if (!child.getVariables().contains(flattenedVariable)) {
-            throw new InvalidIntermediateQueryException(
-                    String.format( "Variable %s is flattened by Node %s but is not projected by its child",
-                            flattenedVariable,
-                            this
-                    ));
+            throw new InvalidIntermediateQueryException(String.format(
+                    "Variable %s is flattened by Node %s but is not projected by its child",
+                    flattenedVariable, this));
         }
     }
 
@@ -281,12 +274,8 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
      */
     @Override
     public VariableNullability getVariableNullability(IQTree child) {
-
         return child.getVariableNullability().extendToExternalVariables(
-                Stream.of(Optional.of(outputVariable), indexVariable)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-        );
+                Stream.of(Optional.of(outputVariable), indexVariable).flatMap(Optional::stream));
     }
 
     @Override
@@ -296,10 +285,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
-        builder.add(outputVariable);
-        indexVariable.ifPresent(builder::add);
-        return builder.build();
+        return indexVariable.map(index -> ImmutableSet.of(outputVariable, index)).orElseGet(() -> ImmutableSet.of(outputVariable));
     }
 
     @Override
@@ -313,18 +299,19 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         QueryNode newChildRoot = newChild.getRootNode();
 
         /*
-         * Lift the union above the flatten
+         * Lift the union above the flatten node
          */
-        if ((newChildRoot instanceof UnionNode)
-                && ((UnionNode) newChildRoot).hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
+        if (newChildRoot instanceof UnionNode) {
             UnionNode unionNode = (UnionNode) newChildRoot;
-            ImmutableList<IQTree> grandChildren = newChild.getChildren();
+            if (unionNode.hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
+                ImmutableList<IQTree> grandChildren = newChild.getChildren();
 
-            ImmutableList<IQTree> newChildren = grandChildren.stream()
-                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(this, c))
-                    .collect(ImmutableCollectors.toList());
+                ImmutableList<IQTree> newChildren = grandChildren.stream()
+                        .<IQTree>map(c -> iqFactory.createUnaryIQTree(this, c))
+                        .collect(ImmutableCollectors.toList());
 
-            return iqFactory.createNaryIQTree(unionNode, newChildren);
+                return iqFactory.createNaryIQTree(unionNode, newChildren);
+            }
         }
         return iqFactory.createUnaryIQTree(this, newChild);
     }
@@ -339,12 +326,13 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        FlattenNodeImpl that = (FlattenNodeImpl) o;
-        return
-                flattenedVariable.equals(that.flattenedVariable) &&
-                outputVariable.equals(that.outputVariable) &&
-                indexVariable.equals(that.indexVariable);
+        if (o instanceof FlattenNodeImpl) {
+            FlattenNodeImpl that = (FlattenNodeImpl) o;
+            return flattenedVariable.equals(that.flattenedVariable) &&
+                    outputVariable.equals(that.outputVariable) &&
+                    indexVariable.equals(that.indexVariable);
+        }
+        return false;
     }
 
     @Override
@@ -375,9 +363,8 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public boolean wouldKeepDescendingGroundTermInFilterAbove(Variable variable, boolean isConstant) {
-        return variable.equals(outputVariable) || indexVariable
-                .filter(variable::equals)
-                .isPresent();
+        return variable.equals(outputVariable)
+                || indexVariable.filter(variable::equals).isPresent();
     }
 
     /**
@@ -386,17 +373,12 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     private FlattenNode applySubstitution(Substitution<? extends VariableOrGroundTerm> sub) {
         Variable sFlattenedVar = applySubstitution(flattenedVariable, sub);
         Variable sOutputVar = applySubstitution(outputVariable, sub);
-        Optional<Variable> sIndexVar = indexVariable.map(variable -> applySubstitution(variable, sub));
+        Optional<Variable> sIndexVar = indexVariable.map(index -> applySubstitution(index, sub));
         return sFlattenedVar.equals(flattenedVariable) &&
                 sOutputVar.equals(outputVariable) &&
-                sIndexVar.equals(indexVariable) ?
-                this :
-                iqFactory.createFlattenNode(
-                        sOutputVar,
-                        sFlattenedVar,
-                        sIndexVar,
-                        flattenedType
-                );
+                sIndexVar.equals(indexVariable)
+                ? this
+                : iqFactory.createFlattenNode(sOutputVar, sFlattenedVar, sIndexVar, flattenedType);
     }
 
     @FunctionalInterface
