@@ -8,11 +8,12 @@ import java.util.Optional;
 
 public class MappingAssertionIndex {
     private final boolean isClass;
-    private final Optional<IRI> iri; // iri can be empty, but only for meta-mappings
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private final Optional<IRI> iri; // iri can be empty in meta-mappings or facts with blank nodes for the class
     private final RDFAtomPredicate predicate;
 
     private MappingAssertionIndex(RDFAtomPredicate predicate, Optional<IRI> iri, boolean isClass) {
-        this.predicate = predicate;
+        this.predicate = Objects.requireNonNull(predicate);
         this.iri = iri;
         this.isClass = isClass;
     }
@@ -49,6 +50,7 @@ public class MappingAssertionIndex {
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (o instanceof MappingAssertionIndex) {
             MappingAssertionIndex other = (MappingAssertionIndex)o;
             return predicate.equals(other.predicate) && iri.equals(other.iri) && isClass == other.isClass;

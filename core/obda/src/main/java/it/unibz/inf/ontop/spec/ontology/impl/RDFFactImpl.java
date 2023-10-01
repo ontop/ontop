@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.spec.ontology.impl;
 
-import com.google.common.base.Objects;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.RDFConstant;
@@ -8,6 +7,7 @@ import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.Optional;
 
 public class RDFFactImpl implements RDFFact {
@@ -20,22 +20,12 @@ public class RDFFactImpl implements RDFFact {
     private final ObjectConstant graph;
     private final ObjectConstant classOrProperty;
 
-    /**
-     * Quad
-     */
-    private RDFFactImpl(ObjectConstant subject, IRIConstant property, RDFConstant object, ObjectConstant graph) {
-        this.subject = subject;
-        this.property = property;
-        this.object = object;
+    private RDFFactImpl(ObjectConstant subject, IRIConstant property, RDFConstant object, @Nullable ObjectConstant graph) {
+        this.subject = Objects.requireNonNull(subject);
+        this.property = Objects.requireNonNull(property);
+        this.object = Objects.requireNonNull(object);
         this.graph = graph;
         this.classOrProperty = extractClassOrProperty(property, object);
-    }
-
-    /**
-     * Triple
-     */
-    private RDFFactImpl(ObjectConstant subject, IRIConstant property, RDFConstant object) {
-        this(subject, property, object, null);
     }
 
     public static RDFFact createQuadFact(ObjectConstant subject, IRIConstant property, RDFConstant object, ObjectConstant graph) {
@@ -43,7 +33,7 @@ public class RDFFactImpl implements RDFFact {
     }
 
     public static RDFFact createTripleFact(ObjectConstant subject, IRIConstant property, RDFConstant object) {
-        return new RDFFactImpl(subject, property, object);
+        return new RDFFactImpl(subject, property, object, null);
     }
 
 
@@ -91,18 +81,19 @@ public class RDFFactImpl implements RDFFact {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof RDFFact)) return false;
-        RDFFact rdfFact = (RDFFact) o;
-        return Objects.equal(getSubject(), rdfFact.getSubject()) &&
-                Objects.equal(getProperty(), rdfFact.getProperty()) &&
-                Objects.equal(getObject(), rdfFact.getObject()) &&
-                Objects.equal(getGraph(), rdfFact.getGraph()) &&
-                Objects.equal(getClassOrProperty(), rdfFact.getClassOrProperty());
+        if (o instanceof RDFFactImpl) {
+            RDFFactImpl rdfFact = (RDFFactImpl) o;
+            return subject.equals(rdfFact.subject) &&
+                    property.equals(rdfFact.property) &&
+                    object.equals(rdfFact.object) &&
+                    Objects.equals(graph, rdfFact.graph);
+        }
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getSubject(), getProperty(), getObject(), getGraph(), getClassOrProperty());
+        return Objects.hash(subject, property, object, graph);
     }
 
     @Override
