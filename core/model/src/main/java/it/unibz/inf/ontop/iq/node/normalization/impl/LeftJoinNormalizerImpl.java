@@ -290,9 +290,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         private LJNormalizationState liftRightFilter(UnaryIQTree liftedRightChild) {
             FilterNode filterNode = (FilterNode) liftedRightChild.getRootNode();
 
-            ImmutableExpression newLJCondition = ljCondition
-                    .map(c -> termFactory.getConjunction(c, filterNode.getFilterCondition()))
-                    .orElseGet(filterNode::getFilterCondition);
+            ImmutableExpression newLJCondition = getConjunction(ljCondition, filterNode.getFilterCondition());
 
             return updateConditionAndRightChild(Optional.of(newLJCondition), liftedRightChild.getChild());
         }
@@ -303,9 +301,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             Optional<ImmutableExpression> filterCondition = joinNode.getOptionalFilterCondition();
             if (filterCondition.isPresent()) {
                 ImmutableExpression condition = filterCondition.get();
-                ImmutableExpression newLJCondition = ljCondition
-                        .map(c -> termFactory.getConjunction(c, condition))
-                        .orElse(condition);
+                ImmutableExpression newLJCondition = getConjunction(ljCondition, condition);
 
                 NaryIQTree newRightChild = iqFactory.createNaryIQTree(
                         joinNode.changeOptionalFilterCondition(Optional.empty()),
@@ -550,9 +546,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 FilterNode filterNode = (FilterNode) grandChildNode;
                 ImmutableExpression filterCondition = filterNode.getFilterCondition();
 
-                ImmutableExpression newLJCondition = ljCondition
-                        .map(c -> termFactory.getConjunction(c, filterCondition))
-                        .orElse(filterCondition);
+                ImmutableExpression newLJCondition = getConjunction(ljCondition, filterCondition);
 
                 ImmutableSet<Variable> childVariablesToProject = Sets.union(rightChildRequiredVariables, filterCondition.getVariables())
                         .immutableCopy();
@@ -570,9 +564,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 Optional<ImmutableExpression> filterCondition = joinNode.getOptionalFilterCondition();
                 if (filterCondition.isPresent()) {
                     ImmutableExpression condition = filterCondition.get();
-                    ImmutableExpression newLJCondition = ljCondition
-                            .map(c -> termFactory.getConjunction(c, condition))
-                            .orElse(condition);
+                    ImmutableExpression newLJCondition = getConjunction(ljCondition, condition);
 
                     NaryIQTree newRightGrandChild = iqFactory.createNaryIQTree(
                             joinNode.changeOptionalFilterCondition(Optional.empty()),
@@ -633,12 +625,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         iqFactory.createLeftJoinNode(ljCondition), leftChild, rightChild, normalizedProperties);
             }
 
-            IQTree ancestorTree = ancestors.stream()
-                    .reduce(ljLevelTree, (t, n) -> iqFactory.createUnaryIQTree(n, t),
-                            // Should not be called
-                            (t1, t2) -> {
-                                throw new MinorOntopInternalBugException("The order must be respected");
-                            });
+            IQTree ancestorTree = iqTreeTools.createAncestorsUnaryIQTree(ancestors, ljLevelTree);
 
             IQTree nonNormalizedTree = iqTreeTools.createConstructionNodeTreeIfNontrivial(ancestorTree, projectedVariables);
 
@@ -771,5 +758,11 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             }
             return this;
         }
+    }
+
+    private ImmutableExpression getConjunction(Optional<ImmutableExpression> optionalExpression, ImmutableExpression expression) {
+        return optionalExpression
+                .map(e -> termFactory.getConjunction(e, expression))
+                .orElse(expression);
     }
 }

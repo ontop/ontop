@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
@@ -30,13 +31,15 @@ public class FilterNormalizerImpl implements FilterNormalizer {
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final ConditionSimplifier conditionSimplifier;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private FilterNormalizerImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory,
-                                 ConditionSimplifier conditionSimplifier) {
+                                 ConditionSimplifier conditionSimplifier, IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.conditionSimplifier = conditionSimplifier;
+        this.iqTreeTools = iqTreeTools;
     }
 
     /**
@@ -149,17 +152,14 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 return iqFactory.createEmptyNode(projectedVariables);
 
             IQTree filterLevelTree = condition
-                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(iqFactory.createFilterNode(c), child,
-                            treeCache.declareAsNormalizedForOptimizationWithEffect()))
+                    .map(iqFactory::createFilterNode)
+                    .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, child, treeCache.declareAsNormalizedForOptimizationWithEffect()))
                     .orElse(child);
 
             if (ancestors.isEmpty())
                 return filterLevelTree;
 
-            return ancestors.stream()
-                    .reduce(filterLevelTree, (t, n) -> iqFactory.createUnaryIQTree(n, t),
-                            // Should not be called
-                            (t1, t2) -> { throw new MinorOntopInternalBugException("The order must be respected"); })
+            return iqTreeTools.createAncestorsUnaryIQTree(ancestors, filterLevelTree)
                     // Normalizes the ancestors (recursive)
                     .normalizeForOptimization(variableGenerator);
         }

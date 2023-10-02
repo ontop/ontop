@@ -41,7 +41,6 @@ public class OrderComparatorImpl implements OrderByNode.OrderComparator {
 
     @Override
     public String toString() {
-        String prefix = isAscending ? ASC_PREFIX : DESC_PREFIX;
-        return prefix + term + ")";
+        return (isAscending ? ASC_PREFIX : DESC_PREFIX) + term + ")";
     }
 }

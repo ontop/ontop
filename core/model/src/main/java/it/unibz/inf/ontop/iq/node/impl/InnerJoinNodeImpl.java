@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.*;
-import com.google.common.io.Files;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
@@ -38,7 +37,6 @@ import java.util.stream.Stream;
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
 
     private static final String JOIN_NODE_STR = "JOIN";
-    private final IQTreeTools iqTreeTools;
     private final InnerJoinNormalizer normalizer;
 
     @AssistedInject
@@ -50,8 +48,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                 JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier,
                                 InnerJoinNormalizer normalizer) {
         super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, variableNullabilityTools, conditionSimplifier);
-        this.iqTreeTools = iqTreeTools;
+                substitutionFactory, variableNullabilityTools, conditionSimplifier, iqTreeTools);
         this.normalizer = normalizer;
     }
 
@@ -156,7 +153,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .map(descendingSubstitution::apply);
 
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
-                iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
+                iqTreeTools.computeNewProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)));
 
         VariableNullability extendedVariableNullability = constraint
                 .map(c -> simplifiedChildFutureVariableNullability.extendToExternalVariables(c.getVariableStream()))
@@ -181,11 +178,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     newChildren);
 
             return iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, expressionAndSubstitution.getSubstitution(),
-                    () -> iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
+                    () -> iqTreeTools.computeNewProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)));
         }
         catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(
-                    iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
+                    iqTreeTools.computeNewProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)));
         }
     }
 
@@ -222,12 +219,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
         IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
         return iqFactory.createNaryIQTree(newJoinNode, newChildren, newTreeCache);
-    }
-
-    private ImmutableSet<Variable> getProjectedVariables(ImmutableList<IQTree> children) {
-        return children.stream()
-                    .flatMap(c -> c.getVariables().stream())
-                    .collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -495,7 +486,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                             .collect(ImmutableCollectors.toSet()));
         }
         catch (UnsatisfiableConditionException e) {
-            return iqFactory.createEmptyNode(getProjectedVariables(children));
+            return iqFactory.createEmptyNode(iqTreeTools.getChildrenVariables(children));
         }
     }
 

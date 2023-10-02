@@ -169,7 +169,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
         var renamedBlockedSubstitution = substitutionFactory.rename(renaming, blockedSubstitution);
 
-        var filterNode = termFactory.getConjunction(renamedBlockedSubstitution.stream()
+        Optional<FilterNode> filterNode = termFactory.getConjunction(renamedBlockedSubstitution.stream()
                         .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())))
                 .map(iqFactory::createFilterNode);
 

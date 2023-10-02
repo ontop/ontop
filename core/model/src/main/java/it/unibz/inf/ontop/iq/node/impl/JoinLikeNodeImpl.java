@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.request.impl.VariableNonRequirementImpl;
@@ -27,9 +28,10 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                                TermNullabilityEvaluator nullabilityEvaluator,
                                TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                TypeFactory typeFactory, SubstitutionFactory substitutionFactory,
-                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier) {
+                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier,
+                               IQTreeTools iqTreeTools) {
         super(optionalJoinCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, variableNullabilityTools, conditionSimplifier);
+                substitutionFactory, variableNullabilityTools, conditionSimplifier, iqTreeTools);
     }
 
 

@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
@@ -27,18 +28,21 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
     protected final TypeFactory typeFactory;
     protected final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
     protected final ConditionSimplifier conditionSimplifier;
+    protected final IQTreeTools iqTreeTools;
 
     protected JoinOrFilterNodeImpl(Optional<ImmutableExpression> optionalFilterCondition,
                                    TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
                                    IntermediateQueryFactory iqFactory, TypeFactory typeFactory,
                                    SubstitutionFactory substitutionFactory,
-                                   JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier) {
+                                   JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier,
+                                   IQTreeTools iqTreeTools) {
         super(substitutionFactory, termFactory, iqFactory);
         this.optionalFilterCondition = optionalFilterCondition;
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.typeFactory = typeFactory;
         this.variableNullabilityTools = variableNullabilityTools;
         this.conditionSimplifier = conditionSimplifier;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -78,9 +82,7 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
     protected void checkExpression(ImmutableExpression expression, ImmutableList<IQTree> children)
             throws InvalidIntermediateQueryException {
 
-        ImmutableSet<Variable> childrenVariables = children.stream()
-                .flatMap(c -> c.getVariables().stream())
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> childrenVariables = iqTreeTools.getChildrenVariables(children);
 
         ImmutableSet<Variable> unboundVariables = expression.getVariableStream()
                 .filter(v -> !childrenVariables.contains(v))

@@ -282,12 +282,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             if (joinLevelTree.isDeclaredAsEmpty())
                 return joinLevelTree;
 
-            IQTree ancestorTree = ancestors.stream()
-                    .reduce(joinLevelTree, (t, n) -> iqFactory.createUnaryIQTree(n, t),
-                            // Should not be called
-                            (t1, t2) -> {
-                                throw new MinorOntopInternalBugException("The order must be respected");
-                            });
+            IQTree ancestorTree = iqTreeTools.createAncestorsUnaryIQTree(ancestors, joinLevelTree);
 
             IQTree nonNormalizedTree = iqTreeTools.createConstructionNodeTreeIfNontrivial(ancestorTree, projectedVariables);
 
@@ -321,9 +316,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     return iqFactory.createTrueNode();
                 case 1:
                     IQTree uniqueChild = children.get(0);
-                    return joiningCondition
-                            .<IQTree>map(e -> iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), uniqueChild))
-                            .orElse(uniqueChild);
+                    return iqTreeTools.createOptionalUnaryIQTree(joiningCondition.map(iqFactory::createFilterNode), uniqueChild);
                 default:
                     return liftLeftJoin()
                             .orElseGet(()-> iqFactory.createNaryIQTree(
@@ -358,10 +351,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             BinaryNonCommutativeIQTree newLeftJoinTree = iqFactory.createBinaryNonCommutativeIQTree(ljChild.getRootNode(), newJoinOnLeft,
                     ljChild.getRightChild());
 
-            IQTree newTree = joiningCondition
-                    .map(iqFactory::createFilterNode)
-                    .<IQTree>map(t -> iqFactory.createUnaryIQTree(t, newLeftJoinTree))
-                    .orElse(newLeftJoinTree);
+            IQTree newTree = iqTreeTools.createOptionalUnaryIQTree(joiningCondition.map(iqFactory::createFilterNode), newLeftJoinTree);
 
             return Optional.of(newTree);
         }

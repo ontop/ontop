@@ -37,7 +37,6 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     private static final String FILTER_NODE_STR = "FILTER";
 
-    private final IQTreeTools iqTreeTools;
     private final CoreUtilsFactory coreUtilsFactory;
     private final FilterNormalizer normalizer;
 
@@ -48,8 +47,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                            IQTreeTools iqTreeTools, ConditionSimplifier conditionSimplifier,
                            CoreUtilsFactory coreUtilsFactory, FilterNormalizer normalizer, JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
         super(Optional.of(filterCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, variableNullabilityTools, conditionSimplifier);
-        this.iqTreeTools = iqTreeTools;
+                substitutionFactory, variableNullabilityTools, conditionSimplifier, iqTreeTools);
         this.coreUtilsFactory = coreUtilsFactory;
         this.normalizer = normalizer;
     }
@@ -123,10 +121,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                             .map(c -> child.propagateDownConstraint(c, variableGenerator))
                             .orElse(child));
 
-            IQTree filterLevelTree = conditionSimplificationResults.getOptionalExpression()
-                    .map(e -> e.equals(getFilterCondition()) ? this : iqFactory.createFilterNode(e))
-                    .<IQTree>map(filterNode -> iqFactory.createUnaryIQTree(filterNode, newChild))
-                    .orElse(newChild);
+            Optional<FilterNode> filterNode = conditionSimplificationResults.getOptionalExpression()
+                    .map(e -> e.equals(getFilterCondition()) ? this : iqFactory.createFilterNode(e));
+
+            IQTree filterLevelTree = iqTreeTools.createOptionalUnaryIQTree(filterNode, newChild);
 
             return iqTreeTools.createConstructionNodeTreeIfNontrivial(
                     filterLevelTree, conditionSimplificationResults.getSubstitution(), child::getVariables);
@@ -254,10 +252,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                     substitutionFactory.onVariableOrGroundTerms().compose(descendingSubstitution, expressionAndSubstitution.getSubstitution());
 
             IQTree newChild = child.applyDescendingSubstitution(downSubstitution, downConstraint, variableGenerator);
-            IQTree filterLevelTree = expressionAndSubstitution.getOptionalExpression()
-                    .map(iqFactory::createFilterNode)
-                    .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, newChild))
-                    .orElse(newChild);
+            Optional<FilterNode> filterNode = expressionAndSubstitution.getOptionalExpression()
+                    .map(iqFactory::createFilterNode);
+
+            IQTree filterLevelTree = iqTreeTools.createOptionalUnaryIQTree(filterNode, newChild);
 
             return iqTreeTools.createConstructionNodeTreeIfNontrivial(
                     filterLevelTree, expressionAndSubstitution.getSubstitution(), () -> newlyProjectedVariables);

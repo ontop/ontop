@@ -43,8 +43,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     private final LeftJoinNormalizer ljNormalizer;
     private final CoreUtilsFactory coreUtilsFactory;
 
-    private final IQTreeTools iqTreeTools;
-
     @AssistedInject
     private LeftJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalJoinCondition,
                              TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
@@ -52,10 +50,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                              ConditionSimplifier conditionSimplifier, LeftJoinNormalizer ljNormalizer,
                              JoinOrFilterVariableNullabilityTools variableNullabilityTools, CoreUtilsFactory coreUtilsFactory, IQTreeTools iqTreeTools) {
         super(optionalJoinCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, variableNullabilityTools, conditionSimplifier);
+                substitutionFactory, variableNullabilityTools, conditionSimplifier, iqTreeTools);
         this.ljNormalizer = ljNormalizer;
         this.coreUtilsFactory = coreUtilsFactory;
-        this.iqTreeTools = iqTreeTools;
     }
 
     @AssistedInject

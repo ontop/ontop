@@ -5,8 +5,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -81,6 +83,20 @@ public class IQTreeTools {
 
     public ImmutableSet<Variable> getChildrenVariables(IQTree child, Variable newVariable) {
         return Sets.union(child.getVariables(), ImmutableSet.of(newVariable)).immutableCopy();
+    }
+
+    public IQTree createOptionalUnaryIQTree(Optional<? extends UnaryOperatorNode> optionalNode, IQTree tree) {
+        return optionalNode
+                .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, tree))
+                .orElse(tree);
+    }
+
+    public IQTree createAncestorsUnaryIQTree(ImmutableList<? extends UnaryOperatorNode> ancestors, IQTree tree) {
+        return ancestors.stream()
+                .reduce(tree,
+                        (t, a) -> iqFactory.createUnaryIQTree(a, t),
+                        (t1, t2) -> { throw new MinorOntopInternalBugException("No merge was expected"); });
+
     }
 
     /**

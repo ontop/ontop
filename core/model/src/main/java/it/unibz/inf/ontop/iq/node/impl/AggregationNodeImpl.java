@@ -169,8 +169,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         AggregationNode newNode = iqFactory.createAggregationNode(newGroupingVariables,
                 substitutionFactory.onImmutableFunctionalTerms().rename(renamingSubstitution, substitution));
 
-        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
-        return iqFactory.createUnaryIQTree(newNode, newChild, newTreeCache);
+        return iqFactory.createUnaryIQTree(newNode, newChild, treeCache.applyFreshRenaming(renamingSubstitution));
     }
 
 
