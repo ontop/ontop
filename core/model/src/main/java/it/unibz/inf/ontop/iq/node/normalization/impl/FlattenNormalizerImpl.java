@@ -72,8 +72,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
             ConstructionNode newParentCn = iqFactory.createConstructionNode(
                     Sets.union(
                             flattenNode.getLocallyDefinedVariables(),
-                            Sets.difference(cn.getVariables(), ImmutableSet.of(flattenedVar))
-                    ).immutableCopy(),
+                            Sets.difference(cn.getVariables(), ImmutableSet.of(flattenedVar))).immutableCopy(),
                     primeSubstitution);
 
             IQTree grandChild = normalizedChild.getChildren().get(0);
@@ -83,8 +82,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                         iqFactory.createConstructionNode(
                                 Sets.union(
                                         ImmutableSet.of(flattenedVar),
-                                        Sets.difference(newParentCn.getLocallyRequiredVariables(), flattenNode.getLocallyDefinedVariables())
-                                ).immutableCopy(),
+                                        Sets.difference(newParentCn.getLocallyRequiredVariables(), flattenNode.getLocallyDefinedVariables())).immutableCopy(),
                                 flattenedVarSubstitution),
                         grandChild
                 ).normalizeForOptimization(variableGenerator);

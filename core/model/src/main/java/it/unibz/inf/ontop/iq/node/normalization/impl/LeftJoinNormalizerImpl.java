@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 @Singleton
@@ -245,8 +246,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             if (rightChild.isDistinct())
                 return true;
 
-            IQTree innerJoinTree = iqFactory.createNaryIQTree(
-                    iqFactory.createInnerJoinNode(ljCondition),
+            IQTree innerJoinTree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(ljCondition),
                     ImmutableList.of(distinctLeftChild, rightChild));
 
             return innerJoinTree.isDistinct();
@@ -353,14 +353,15 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
         @Override
         public boolean equals(Object o) {
-            if (!(o instanceof LJNormalizationState))
-                return false;
-
-            LJNormalizationState other = (LJNormalizationState) o;
-            return leftChild.equals(other.leftChild)
-                    && rightChild.equals(other.rightChild)
-                    && ljCondition.equals(other.ljCondition)
-                    && ancestors.equals(other.ancestors);
+            if (this == o) return true;
+            if (o instanceof LJNormalizationState) {
+                LJNormalizationState that = (LJNormalizationState) o;
+                return leftChild.equals(that.leftChild)
+                        && rightChild.equals(that.rightChild)
+                        && ljCondition.equals(that.ljCondition)
+                        && ancestors.equals(that.ancestors);
+            }
+            return false;
         }
 
         private LJNormalizationState optimizeLeftJoinCondition() {
@@ -615,8 +616,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
             IQTree ljLevelTree;
             if (rightChild.isDeclaredAsEmpty()) {
-                Sets.SetView<Variable> rightSpecificVariables =
-                        Sets.difference(rightChild.getVariables(), leftChild.getVariables());
+                Set<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables());
 
                 ConstructionNode newParentConstructionNode = iqFactory.createConstructionNode(
                         iqTreeTools.getChildrenVariables(leftChild, rightChild),

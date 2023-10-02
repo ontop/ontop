@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Set;
 import java.util.stream.IntStream;
 
 @Singleton
@@ -171,37 +172,27 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
         @Override
         public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
-            return iqFactory.createUnaryIQTree(
-                    rootNode,
-                    transform(child));
+            return iqFactory.createUnaryIQTree(rootNode, transform(child));
         }
 
         @Override
         public IQTree transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child) {
-            return iqFactory.createUnaryIQTree(
-                    rootNode,
-                    transform(child));
+            return iqFactory.createUnaryIQTree(rootNode, transform(child));
         }
 
         @Override
         public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
-            return iqFactory.createUnaryIQTree(
-                    rootNode,
-                    transform(child));
+            return iqFactory.createUnaryIQTree(rootNode, transform(child));
         }
 
         @Override
         public IQTree transformSlice(IQTree tree, SliceNode rootNode, IQTree child) {
-            return iqFactory.createUnaryIQTree(
-                    rootNode,
-                    transform(child));
+            return iqFactory.createUnaryIQTree(rootNode, transform(child));
         }
 
         @Override
         public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
-            return iqFactory.createUnaryIQTree(
-                    rootNode,
-                    transform(child));
+            return iqFactory.createUnaryIQTree(rootNode, transform(child));
         }
 
         @Override
@@ -230,13 +221,13 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
          * Transforms the non-unique child only if needed
          */
         private IQTree transformNonUniqueChild(IQTree child) {
-            Sets.SetView<Variable> childVariablesToRemove = Sets.intersection(child.getVariables(), variablesToRemove);
+            ImmutableSet<Variable> childVariablesToRemove = Sets.intersection(child.getVariables(), variablesToRemove).immutableCopy();
 
             return childVariablesToRemove.isEmpty()
                     ? child
                     : childVariablesToRemove.equals(variablesToRemove)
                         ? transform(child)
-                        : createNewTransformer(childVariablesToRemove.immutableCopy()).transform(child);
+                        : createNewTransformer(childVariablesToRemove).transform(child);
         }
 
         @Override

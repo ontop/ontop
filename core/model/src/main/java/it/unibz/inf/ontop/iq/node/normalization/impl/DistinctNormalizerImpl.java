@@ -43,9 +43,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
 
         if (child.getVariables().isEmpty()) {
             // No child variable -> replace by a LIMIT 1
-            IQTree limitTree = iqFactory.createUnaryIQTree(
-                    iqFactory.createSliceNode(0, 1),
-                    child);
+            IQTree limitTree = iqFactory.createUnaryIQTree(iqFactory.createSliceNode(0, 1), child);
 
             return limitTree.normalizeForOptimization(variableGenerator);
         }
@@ -63,8 +61,9 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                     (UnaryIQTree) child, variableGenerator);
         }
         else if (childRoot instanceof ValuesNode) {
-            return iqFactory.createValuesNode(((ValuesNode) childRoot).getOrderedVariables(),
-                    ((ValuesNode) childRoot).getValues().stream().distinct().collect(ImmutableCollectors.toList()));
+            ValuesNode valuesNode = (ValuesNode) childRoot;
+            return iqFactory.createValuesNode(valuesNode.getOrderedVariables(),
+                    valuesNode.getValues().stream().distinct().collect(ImmutableCollectors.toList()));
         }
         else if (childRoot instanceof UnionNode) {
             Optional<IQTree> newTree = simplifyUnion(child, distinctNode, null, null, variableGenerator);
@@ -143,9 +142,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                 .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, newFilterTree))
                 .orElse(newFilterTree);
 
-        UnaryIQTree newTree = iqFactory.createUnaryIQTree(
-                distinctNode,
-                newOrderByTree);
+        UnaryIQTree newTree = iqFactory.createUnaryIQTree(distinctNode, newOrderByTree);
 
         return Optional.of(newTree.normalizeForOptimization(variableGenerator));
     }

@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -168,16 +169,15 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
         @Override
         public boolean equals(Object o) {
-            if (o == this)
-                return true;
-            if (!(o instanceof State))
-                return false;
-            State other = (State) o;
-
-            return joiningCondition.equals(other.joiningCondition)
-                    && children.equals(other.children)
-                    && ancestors.equals(other.ancestors)
-                    && projectedVariables.equals(other.projectedVariables);
+            if (o == this) return true;
+            if (o instanceof State) {
+                State that = (State) o;
+                return joiningCondition.equals(that.joiningCondition)
+                        && children.equals(that.children)
+                        && ancestors.equals(that.ancestors)
+                        && projectedVariables.equals(that.projectedVariables);
+            }
+            return false;
         }
 
 
@@ -303,14 +303,13 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             if (currentChild.getRootNode() instanceof LeftJoinNode) {
                 BinaryNonCommutativeIQTree leftJoinTree = (BinaryNonCommutativeIQTree) currentChild;
 
-                Sets.SetView<Variable> rightSpecificVariables = Sets.difference(
+                Set<Variable> rightSpecificVariables = Sets.difference(
                         leftJoinTree.getRightChild().getVariables(),
                         leftJoinTree.getLeftChild().getVariables());
 
                 return IntStream.range(0, children.size())
                         .filter(j -> i != j)
-                        .noneMatch(j -> children.get(j).getVariables().stream()
-                                .anyMatch(rightSpecificVariables::contains));
+                        .allMatch(j -> Sets.intersection(children.get(j).getVariables(), rightSpecificVariables).isEmpty());
             }
             return false;
         }
@@ -361,7 +360,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
             IQTree newTree = joiningCondition
                     .map(iqFactory::createFilterNode)
-                    .map(t -> (IQTree) iqFactory.createUnaryIQTree(t, newLeftJoinTree))
+                    .<IQTree>map(t -> iqFactory.createUnaryIQTree(t, newLeftJoinTree))
                     .orElse(newLeftJoinTree);
 
             return Optional.of(newTree);

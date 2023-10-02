@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -60,10 +61,9 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             return iqFactory.createTrueNode();
         }
         else if (aggregationNode.getSubstitution().isEmpty()) {
-            IQTree newTree = iqFactory.createUnaryIQTree(
-                    iqFactory.createDistinctNode(),
-                    iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(aggregationNode.getGroupingVariables()),
+            IQTree newTree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
+                    iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
+                            aggregationNode.getGroupingVariables()),
                             child));
 
             return newTree.normalizeForOptimization(variableGenerator);
@@ -106,9 +106,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         Substitution<ImmutableTerm> newSubstitution = aggregationNode.getSubstitution()
                 .transform(this::simplifyEmptyAggregate);
 
-        ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, newSubstitution);
-
-        return iqFactory.createUnaryIQTree(constructionNode, iqFactory.createTrueNode(), normalizedTreeCache);
+        return iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(projectedVariables, newSubstitution),
+                iqFactory.createTrueNode(), normalizedTreeCache);
     }
 
     private ImmutableTerm simplifyEmptyAggregate(ImmutableFunctionalTerm aggregateTerm) {
@@ -181,7 +180,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                 return this;
 
             // NB: non grouping variables that are USED by the aggregation node (we can safely ignore the non-used ones)
-            Sets.SetView<Variable> nonGroupingVariables = Sets.difference(
+            Set<Variable> nonGroupingVariables = Sets.difference(
                     extractChildVariables(groupingVariables, aggregationSubstitution),
                     groupingVariables);
 
@@ -417,15 +416,10 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         }
 
         private ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(ImmutableFunctionalTerm arg)  {
-
-            Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition> optional = decomposeFunctionalTerm(arg);
-            // Injective functional sub-term
-            if (optional.isPresent())
-                return optional.get();
-
-            // Otherwise a fresh variable
-            Variable var = variableGenerator.generateNewVariable();
-            return termFactory.getFunctionalTermDecomposition(var, substitutionFactory.getSubstitution(var, arg));
+            return decomposeFunctionalTerm(arg)
+                    .orElseGet(() -> {
+                        Variable var = variableGenerator.generateNewVariable();
+                        return termFactory.getFunctionalTermDecomposition(var, substitutionFactory.getSubstitution(var, arg));});
         }
 
 
