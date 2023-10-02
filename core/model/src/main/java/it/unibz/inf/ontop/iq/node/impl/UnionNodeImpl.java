@@ -45,7 +45,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                           SubstitutionFactory substitutionFactory, TermFactory termFactory,
                           CoreUtilsFactory coreUtilsFactory, IQTreeTools iqTreeTools,
                           NotRequiredVariableRemover notRequiredVariableRemover) {
-        super(substitutionFactory, termFactory, iqFactory);
+        super(substitutionFactory, termFactory, iqFactory, iqTreeTools);
         this.projectedVariables = projectedVariables;
         this.iqTreeTools = iqTreeTools;
         this.coreUtilsFactory = coreUtilsFactory;
@@ -99,9 +99,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .map(v -> computeNullableGroup(v, preselectedGroupMap, variableNullabilities))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSet<Variable> scope = children.stream()
-                .flatMap(c -> c.getVariables().stream())
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> scope = iqTreeTools.getChildrenVariables(children);
 
         return coreUtilsFactory.createVariableNullability(nullableGroups, scope);
     }
@@ -248,7 +246,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     private boolean areDisjointWhenNonNull(ImmutableTerm t1, ImmutableTerm t2, VariableNullability variableNullability) {
         IncrementalEvaluation evaluation = t1.evaluateStrictEq(t2, variableNullability);
-        switch(evaluation.getStatus()) {
+        switch (evaluation.getStatus()) {
             case SIMPLIFIED_EXPRESSION:
                 return evaluation.getNewExpression()
                         .orElseThrow(() -> new MinorOntopInternalBugException("An expression was expected"))
@@ -351,7 +349,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         .allMatch(c -> c.inferUniqueConstraints().contains(uc)))
                 .collect(ImmutableCollectors.partitioningBy(uc -> areDisjoint(children, uc)));
 
-        if(ucsPartitionedByDisjointness.get(false).isEmpty())
+        if (ucsPartitionedByDisjointness.get(false).isEmpty())
             return ImmutableSet.copyOf(ucsPartitionedByDisjointness.get(true));
 
         // By definition not parts of the non-disjoint UCs
@@ -384,7 +382,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         ImmutableMap<Boolean, ImmutableList<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>>> fdsPartitionedByDisjointness = mergedDependencies.stream()
                 .collect(ImmutableCollectors.partitioningBy(fd -> areDisjoint(children, fd.getKey())));
 
-        if(fdsPartitionedByDisjointness.get(false).isEmpty())
+        if (fdsPartitionedByDisjointness.get(false).isEmpty())
             return fdsPartitionedByDisjointness.get(true)
                     .stream()
                     .collect(FunctionalDependencies.toFunctionalDependencies());
@@ -764,7 +762,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 // this construction node
                 .transform(t -> (VariableOrGroundTerm)t)
                 .build();
-
 
         IQTree newChild = liftedChildTree.getChild()
                 .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);

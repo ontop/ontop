@@ -89,12 +89,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         if (newChildRoot instanceof UnionNode) {
             UnionNode unionNode = (UnionNode) newChildRoot;
             if (unionNode.hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
-                ImmutableList<IQTree> grandChildren = newChild.getChildren();
-
-                ImmutableList<IQTree> newChildren = grandChildren.stream()
-                        .<IQTree>map(c -> iqFactory.createUnaryIQTree(this, c))
-                        .collect(ImmutableCollectors.toList());
-
+                ImmutableList<IQTree> newChildren = iqTreeTools.createUnaryOperatorChildren(this, newChild);
                 return iqFactory.createNaryIQTree(unionNode, newChildren);
             }
         }

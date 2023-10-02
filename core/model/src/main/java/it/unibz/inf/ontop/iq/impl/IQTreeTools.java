@@ -8,6 +8,8 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.InnerJoinNode;
+import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -96,7 +98,16 @@ public class IQTreeTools {
                 .reduce(tree,
                         (t, a) -> iqFactory.createUnaryIQTree(a, t),
                         (t1, t2) -> { throw new MinorOntopInternalBugException("No merge was expected"); });
+    }
 
+    public ImmutableList<IQTree> createUnaryOperatorChildren(UnaryOperatorNode node, IQTree child) {
+         return child.getChildren().stream()
+                .<IQTree>map(c -> iqFactory.createUnaryIQTree(node, c))
+                .collect(ImmutableCollectors.toList());
+    }
+
+    public InnerJoinNode createInnerJoinNode(Optional<ImmutableExpression> optionalExpression) {
+        return optionalExpression.map(iqFactory::createInnerJoinNode).orElseGet(iqFactory::createInnerJoinNode);
     }
 
     /**

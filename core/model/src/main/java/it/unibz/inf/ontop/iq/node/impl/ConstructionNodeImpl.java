@@ -161,13 +161,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
          */
         if ((newChildRoot instanceof UnionNode)
                 && ((UnionNode) newChildRoot).hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
-
-            ImmutableList<IQTree> newChildren = newChild.getChildren().stream()
-                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(this, c))
-                    .collect(ImmutableCollectors.toList());
-
-            UnionNode newUnionNode = iqFactory.createUnionNode(getVariables());
-            return iqFactory.createNaryIQTree(newUnionNode, newChildren);
+            ImmutableList<IQTree> newChildren = iqTreeTools.createUnaryOperatorChildren(this, newChild);
+            return iqFactory.createNaryIQTree(iqFactory.createUnionNode(getVariables()), newChildren);
         }
         return iqFactory.createUnaryIQTree(this, newChild);
     }
@@ -193,7 +188,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         validateNode();
 
         ImmutableSet<Variable> requiredChildVariables = getChildVariables();
-
         ImmutableSet<Variable> childVariables = child.getVariables();
 
         if (!childVariables.containsAll(requiredChildVariables)) {
@@ -314,8 +308,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .map(ImmutableList::of)
                 .collect(Collectors.toList());
 
-        while(!setsToCheck.isEmpty()) {
-            var next = setsToCheck.remove(0);
+        while (!setsToCheck.isEmpty()) {
+            ImmutableList<Variable> next = setsToCheck.remove(0);
             if (includesAll(next, previousUC, determinedByMap)) {
                 builder.add(next.stream().collect(ImmutableCollectors.toSet()));
                 continue;

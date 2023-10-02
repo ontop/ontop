@@ -191,10 +191,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
             VariableGenerator variableGenerator) {
 
-        InnerJoinNode newJoinNode = getOptionalFilterCondition()
-                .map(descendingSubstitution::apply)
-                .map(iqFactory::createInnerJoinNode)
-                .orElseGet(iqFactory::createInnerJoinNode);
+        InnerJoinNode newJoinNode = iqTreeTools.createInnerJoinNode(
+                getOptionalFilterCondition().map(descendingSubstitution::apply));
 
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator))
@@ -474,16 +472,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
             InnerJoinNode newJoin = conditionSimplificationResults.getOptionalExpression().equals(getOptionalFilterCondition())
                     ? this
-                    : conditionSimplificationResults.getOptionalExpression()
-                        .map(iqFactory::createInnerJoinNode)
-                        .orElseGet(iqFactory::createInnerJoinNode);
+                    : iqTreeTools.createInnerJoinNode(conditionSimplificationResults.getOptionalExpression());
 
             NaryIQTree joinTree = iqFactory.createNaryIQTree(newJoin, newChildren);
 
             return iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, conditionSimplificationResults.getSubstitution(),
-                    () -> children.stream()
-                            .flatMap(c -> c.getVariables().stream())
-                            .collect(ImmutableCollectors.toSet()));
+                    () -> iqTreeTools.getChildrenVariables(children));
         }
         catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(iqTreeTools.getChildrenVariables(children));

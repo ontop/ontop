@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.FlattenNormalizer;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -47,8 +48,9 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                             SubstitutionFactory substitutionFactory,
                             IntermediateQueryFactory iqFactory,
                             TermFactory termFactory,
-                            FlattenNormalizer normalizer) {
-        super(substitutionFactory, termFactory, iqFactory);
+                            FlattenNormalizer normalizer,
+                            IQTreeTools iqTreeTools) {
+        super(substitutionFactory, termFactory, iqFactory, iqTreeTools);
         this.outputVariable = outputVariable;
         this.flattenedVariable = flattenedVariable;
         this.indexVariable = indexVariable;
@@ -78,23 +80,21 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public Optional<TermType> inferOutputType(Optional<TermType> flattenedVarType) {
-        Optional<DBTermType> optTermType = flattenedVarType
+        return flattenedVarType
                 .filter(t -> t instanceof DBTermType)
-                .map(t -> (DBTermType) t);
-        if(optTermType.isPresent()){
-            DBTermType type = optTermType.get();
-            switch (type.getCategory()){
-                case JSON:
-                //e.g. STRING is used by SparkSQL instead of JSON.
-                case STRING:
-                    return flattenedVarType;
-                case ARRAY:
-                    return Optional.of(((GenericDBTermType)type).getGenericArguments().get(0));
-                default:
-                    return Optional.empty();
-            }
-        }
-        return Optional.empty();
+                .map(t -> (DBTermType) t)
+                .flatMap(t -> {
+                    switch (t.getCategory()){
+                        case JSON:
+                            //e.g. STRING is used by SparkSQL instead of JSON.
+                        case STRING:
+                            return flattenedVarType;
+                        case ARRAY:
+                            return Optional.of(((GenericDBTermType)t).getGenericArguments().get(0));
+                        default:
+                            return Optional.empty();
+                    }
+                });
     }
 
     @Override
@@ -304,12 +304,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         if (newChildRoot instanceof UnionNode) {
             UnionNode unionNode = (UnionNode) newChildRoot;
             if (unionNode.hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
-                ImmutableList<IQTree> grandChildren = newChild.getChildren();
-
-                ImmutableList<IQTree> newChildren = grandChildren.stream()
-                        .<IQTree>map(c -> iqFactory.createUnaryIQTree(this, c))
-                        .collect(ImmutableCollectors.toList());
-
+                ImmutableList<IQTree> newChildren = iqTreeTools.createUnaryOperatorChildren(this, newChild);
                 return iqFactory.createNaryIQTree(unionNode, newChildren);
             }
         }

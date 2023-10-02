@@ -28,7 +28,6 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
     protected final TypeFactory typeFactory;
     protected final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
     protected final ConditionSimplifier conditionSimplifier;
-    protected final IQTreeTools iqTreeTools;
 
     protected JoinOrFilterNodeImpl(Optional<ImmutableExpression> optionalFilterCondition,
                                    TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
@@ -36,13 +35,12 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
                                    SubstitutionFactory substitutionFactory,
                                    JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier,
                                    IQTreeTools iqTreeTools) {
-        super(substitutionFactory, termFactory, iqFactory);
+        super(substitutionFactory, termFactory, iqFactory, iqTreeTools);
         this.optionalFilterCondition = optionalFilterCondition;
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.typeFactory = typeFactory;
         this.variableNullabilityTools = variableNullabilityTools;
         this.conditionSimplifier = conditionSimplifier;
-        this.iqTreeTools = iqTreeTools;
     }
 
     @Override

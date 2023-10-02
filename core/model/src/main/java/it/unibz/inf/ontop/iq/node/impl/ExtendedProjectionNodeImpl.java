@@ -21,14 +21,11 @@ import java.util.stream.Stream;
 
 public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl implements ExtendedProjectionNode {
 
-    protected final IQTreeTools iqTreeTools;
-
     public ExtendedProjectionNodeImpl(SubstitutionFactory substitutionFactory,
                                       IntermediateQueryFactory iqFactory,
                                       IQTreeTools iqTreeTools,
                                       TermFactory termFactory) {
-        super(substitutionFactory, termFactory, iqFactory);
-        this.iqTreeTools = iqTreeTools;
+        super(substitutionFactory, termFactory, iqFactory, iqTreeTools);
     }
 
     @Override
