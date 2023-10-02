@@ -102,10 +102,13 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        return obj != null && getClass() == obj.getClass()
-                && getOptionalFilterCondition().equals(((LeftJoinNode) obj).getOptionalFilterCondition());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o instanceof LeftJoinNodeImpl) {
+            LeftJoinNodeImpl that = (LeftJoinNodeImpl) o;
+            return getOptionalFilterCondition().equals(that.getOptionalFilterCondition());
+        }
+        return false;
     }
 
     @Override
@@ -521,7 +524,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     private boolean isRejectingRightSpecificNulls(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild) {
 
-        Sets.SetView<Variable> nullVariables = Sets.intersection(
+        Set<Variable> nullVariables = Sets.intersection(
                 Sets.difference(rightChild.getVariables(), leftChild.getVariables()),
                 constraint.getVariables());
 
@@ -595,7 +598,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 && rightChild.inferUniqueConstraints().stream()
                     .anyMatch(commonVariables::containsAll)) {
 
-            var rightSpecificNonRequiredVariables = Sets.intersection(
+            Set<Variable> rightSpecificNonRequiredVariables = Sets.intersection(
                     rightSpecificVariables, nonRequirementBeforeFilter.getNotRequiredVariables());
 
             ImmutableSet<Variable> filterVariables = getLocalVariables();

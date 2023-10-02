@@ -93,7 +93,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         ImmutableMap<Variable, ImmutableSet<Variable>> preselectedGroupMap = multimap.asMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
-                        e -> intersect(e.getValue())));
+                        e -> intersectionOfAll(e.getValue())));
 
         ImmutableSet<ImmutableSet<Variable>> nullableGroups = preselectedGroupMap.keySet().stream()
                 .map(v -> computeNullableGroup(v, preselectedGroupMap, variableNullabilities))
@@ -111,24 +111,12 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                                                         ImmutableSet<VariableNullability> variableNullabilities) {
         return preselectedGroupMap.get(mainVariable).stream()
                 .filter(v -> mainVariable.equals(v)
-                        || areInterdependent(mainVariable, v, preselectedGroupMap, variableNullabilities))
+                        || preselectedGroupMap.get(v).contains(mainVariable)
+                            && variableNullabilities.stream().allMatch(vn -> vn.isPossiblyNullable(mainVariable) == vn.isPossiblyNullable(v)))
                 .collect(ImmutableCollectors.toSet());
     }
 
-    private boolean areInterdependent(Variable v1, Variable v2,
-                                      ImmutableMap<Variable, ImmutableSet<Variable>> preselectedGroupMap,
-                                      ImmutableSet<VariableNullability> variableNullabilities) {
-        return preselectedGroupMap.get(v2).contains(v1)
-                && variableNullabilities.stream()
-                .allMatch(vn -> {
-                    boolean v1Nullable = vn.isPossiblyNullable(v1);
-                    boolean v2Nullable = vn.isPossiblyNullable(v2);
-
-                    return (v1Nullable && v2Nullable) || ((!v1Nullable) && (!v2Nullable));
-                });
-    }
-
-    private static ImmutableSet<Variable> intersect(Collection<ImmutableSet<Variable>> groups) {
+    private static ImmutableSet<Variable> intersectionOfAll(Collection<ImmutableSet<Variable>> groups) {
         return groups.stream()
                 .reduce((g1, g2) -> Sets.intersection(g1, g2).immutableCopy())
                 .orElseThrow(() -> new IllegalArgumentException("groups must not be empty"));
@@ -604,12 +592,12 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .normalizeForOptimization(variableGenerator);
     }
 
-    private ImmutableList<IQTree> flattenChildren(ImmutableList<IQTree> liftedChildren) {
-        ImmutableList<IQTree> flattenedChildren = liftedChildren.stream()
+    private ImmutableList<IQTree> flattenChildren(ImmutableList<IQTree> children) {
+        ImmutableList<IQTree> flattenedChildren = children.stream()
                 .flatMap(this::flattenChild)
                 .collect(ImmutableCollectors.toList());
-        return (liftedChildren.size() == flattenedChildren.size())
-                ? liftedChildren
+        return (children.size() == flattenedChildren.size())
+                ? children
                 : flattenedChildren;
     }
 

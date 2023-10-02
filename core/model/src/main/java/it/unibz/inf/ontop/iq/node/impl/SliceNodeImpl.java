@@ -425,9 +425,11 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SliceNodeImpl sliceNode = (SliceNodeImpl) o;
-        return offset == sliceNode.offset && Objects.equals(limit, sliceNode.limit);
+        if (o instanceof SliceNodeImpl) {
+            SliceNodeImpl that = (SliceNodeImpl) o;
+            return offset == that.offset && Objects.equals(limit, that.limit);
+        }
+        return false;
     }
 
     @Override
