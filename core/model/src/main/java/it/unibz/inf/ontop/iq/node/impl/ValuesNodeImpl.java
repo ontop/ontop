@@ -483,8 +483,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                         .map(c -> (DBConstant) c)
                         .flatMap(c -> decomposer.decompose(c)
                                 .map(additionalColumns -> mergeColumns(row, variablePosition, additionalColumns))))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .collect(ImmutableCollectors.toList());
 
         return buildNewTreeWithDecomposition(variableGenerator, variableToReplace, functionSymbol, newValues);

@@ -220,32 +220,23 @@ public class DefaultTermTypeTermVisitingTreeTransformer
     @Override
     public IQTree transformValues(ValuesNode valuesNode) {
         // TODO: Currently we walk through all values three times in calling the below three methods. Is there a better way?
-        ImmutableSet<Variable> metaTermTypeVariables = getMetaTermTypeVariables(valuesNode);
+        ImmutableSet<Variable> metaTermTypeVariables = valuesNode.getOrderedVariables().stream()
+                .filter(v -> valuesNode.getValueStream(v)
+                        .anyMatch(c1 -> c1 instanceof RDFTermTypeConstant))
+                .collect(ImmutableCollectors.toSet());
 
         if (metaTermTypeVariables.isEmpty())
                 return transformLeaf(valuesNode);
 
-        ImmutableSet<RDFTermTypeConstant> possibleConstants = getPossibleConstants(valuesNode);
-
-        return createConstructionValuesTree(valuesNode, metaTermTypeVariables, possibleConstants);
-    }
-
-    private ImmutableSet<Variable> getMetaTermTypeVariables(ValuesNode valuesNode) {
-        return valuesNode.getOrderedVariables().stream()
-                .filter(variable -> valuesNode.getValueStream(variable)
-                                            .anyMatch(constant -> constant instanceof RDFTermTypeConstant))
-                .collect(ImmutableCollectors.toSet());
-    }
-
-    private ImmutableSet<RDFTermTypeConstant> getPossibleConstants(ValuesNode valuesNode) {
-        ImmutableList<ImmutableList<Constant>>  values = valuesNode.getValues();
-        return values.stream()
+        ImmutableSet<RDFTermTypeConstant> possibleConstants = valuesNode.getValues().stream()
                 .map(tuple -> tuple.stream()
-                        .filter(constant -> constant instanceof RDFTermTypeConstant)
-                        .map(constant -> (RDFTermTypeConstant) constant)
+                        .filter(c -> c instanceof RDFTermTypeConstant)
+                        .map(c -> (RDFTermTypeConstant) c)
                         .collect(ImmutableCollectors.toSet()))
                 .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toSet());
+
+        return createConstructionValuesTree(valuesNode, metaTermTypeVariables, possibleConstants);
     }
 
     IQTree createConstructionValuesTree(ValuesNode valuesNode,
