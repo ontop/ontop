@@ -188,9 +188,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         validateNode();
 
         ImmutableSet<Variable> requiredChildVariables = getChildVariables();
-        ImmutableSet<Variable> childVariables = child.getVariables();
 
-        if (!childVariables.containsAll(requiredChildVariables)) {
+        if (!child.getVariables().containsAll(requiredChildVariables)) {
             throw new InvalidIntermediateQueryException("This child " + child
                     + " does not project all the variables " +
                     "required by the CONSTRUCTION node (" + requiredChildVariables + ")\n" + this);

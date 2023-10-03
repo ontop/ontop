@@ -382,17 +382,16 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         IQTree newRightChild = rightChild.removeDistincts();
 
         IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newLeftChild.equals(leftChild) && newRightChild.equals(rightChild));
-
         return iqFactory.createBinaryNonCommutativeIQTree(this, newLeftChild, newRightChild, newTreeCache);
     }
 
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree leftChild, IQTree rightChild) {
-        var leftChildConstraints = leftChild.inferUniqueConstraints();
+        ImmutableSet<ImmutableSet<Variable>> leftChildConstraints = leftChild.inferUniqueConstraints();
         if (leftChildConstraints.isEmpty())
             return ImmutableSet.of();
 
-        var rightChildConstraints = rightChild.inferUniqueConstraints();
+        ImmutableSet<ImmutableSet<Variable>> rightChildConstraints = rightChild.inferUniqueConstraints();
         if (rightChildConstraints.isEmpty())
             return ImmutableSet.of();
 
@@ -408,14 +407,14 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     public FunctionalDependencies inferFunctionalDependencies(IQTree leftChild, IQTree rightChild,
                                                               ImmutableSet<ImmutableSet<Variable>> uniqueConstraints,
                                                               ImmutableSet<Variable> variables) {
-        var rightFunctionalDependencies = rightChild.inferFunctionalDependencies();
+        FunctionalDependencies rightFunctionalDependencies = rightChild.inferFunctionalDependencies();
         if (rightFunctionalDependencies.isEmpty())
             return leftChild.inferFunctionalDependencies();
 
-        var leftVariables = leftChild.getVariables();
+        ImmutableSet<Variable> leftVariables = leftChild.getVariables();
 
         // Makes sure the right child does not add FDs on left variables (as dependents)
-        var filterRightFunctionalDependencies = rightFunctionalDependencies.stream()
+        FunctionalDependencies filterRightFunctionalDependencies = rightFunctionalDependencies.stream()
                 .map(e -> Maps.immutableEntry(
                         e.getKey(),
                         Sets.difference(e.getValue(), leftVariables).immutableCopy()))
@@ -549,7 +548,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
         Substitution<Variable> restricted = descendingSubstitution.restrictRangeTo(Variable.class);
 
-        Sets.SetView<Variable> variables = Sets.union(leftVariables, rightVariables);
+        Set<Variable> variables = Sets.union(leftVariables, rightVariables);
         ImmutableSet<Variable> freshVariables = restricted.getPreImage(t -> !variables.contains(t));
 
         return !Sets.intersection(

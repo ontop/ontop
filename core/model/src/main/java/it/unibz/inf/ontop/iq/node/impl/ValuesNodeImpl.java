@@ -99,6 +99,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     private Optional<ConstructionAndValues> liftSingleValueVariables() {
+
         ImmutableSet<Integer> singleValueVariableIndices = IntStream.range(0, orderedVariables.size())
                 .filter(i -> 1 == getValueStream(orderedVariables.get(i))
                         .unordered()
@@ -121,6 +122,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                     .filter(i -> !singleValueVariableIndices.contains(i))
                     .boxed()
                     .collect(ImmutableCollectors.toSet());
+
             ImmutableList<Variable> newValuesNodeVariables = multiValueVariableIndices.stream()
                     .map(orderedVariables::get)
                     .collect(ImmutableCollectors.toList());

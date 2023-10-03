@@ -87,6 +87,12 @@ public class IQTreeTools {
         return Sets.union(child.getVariables(), ImmutableSet.of(newVariable)).immutableCopy();
     }
 
+    public ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> groupingVariables,
+                                                               Substitution<ImmutableFunctionalTerm> substitution) {
+        return Sets.union(groupingVariables, substitution.getRangeVariables()).immutableCopy();
+    }
+
+
     public IQTree createOptionalUnaryIQTree(Optional<? extends UnaryOperatorNode> optionalNode, IQTree tree) {
         return optionalNode
                 .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, tree))

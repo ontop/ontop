@@ -100,7 +100,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableSet<Variable> scope = iqTreeTools.getChildrenVariables(children);
-
         return coreUtilsFactory.createVariableNullability(nullableGroups, scope);
     }
 
@@ -162,7 +161,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         if (areGroupDisjoint(compatibilityMap)) {
             // NB: multiple occurrences of the same child are automatically eliminated
-            return makeDistinctDisjointGroups(ImmutableSet.copyOf(compatibilityMap.values()));
+            ImmutableList<IQTree> newChildren = ImmutableSet.copyOf(compatibilityMap.values()).stream()
+                    .map(this::makeDistinctGroup)
+                    .collect(ImmutableCollectors.toList());
+
+            return makeDistinctGroupTree(newChildren);
         }
         /*
          * Fail-back: in the presence of non-disjoint groups of children,
@@ -193,31 +196,19 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         e -> ImmutableSet.copyOf(e.getValue())));
     }
 
-    private IQTree makeDistinctDisjointGroups(ImmutableSet<ImmutableSet<IQTree>> disjointGroups) {
-        ImmutableList<IQTree> newChildren = disjointGroups.stream()
-                .map(this::makeDistinctGroup)
-                .collect(ImmutableCollectors.toList());
-
-        switch (newChildren.size()) {
-            case 0:
-                throw new MinorOntopInternalBugException("Was expecting to have at least one group of Union children");
-            case 1:
-                return newChildren.get(0);
-            default:
-                return iqFactory.createNaryIQTree(this, newChildren);
-        }
+    private IQTree makeDistinctGroup(ImmutableSet<IQTree> childGroup) {
+        return iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
+                makeDistinctGroupTree(ImmutableList.copyOf(childGroup)));
     }
 
-    private IQTree makeDistinctGroup(ImmutableSet<IQTree> childGroup) {
-        switch (childGroup.size()) {
+    private IQTree makeDistinctGroupTree(ImmutableList<IQTree> list) {
+        switch (list.size()) {
             case 0:
                 throw new MinorOntopInternalBugException("Unexpected empty child group");
             case 1:
-                return iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(), childGroup.iterator().next());
+                return list.get(0);
             default:
-                return iqFactory.createUnaryIQTree(
-                        iqFactory.createDistinctNode(),
-                        iqFactory.createNaryIQTree(this, ImmutableList.copyOf(childGroup)));
+                return iqFactory.createNaryIQTree(this, list);
         }
     }
 
@@ -308,7 +299,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         }
 
         ImmutableSet<Variable> unionVariables = getVariables();
-
         for (IQTree child : children) {
             if (!child.getVariables().equals(unionVariables)) {
                 throw new InvalidIntermediateQueryException("This child " + child
@@ -325,7 +315,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .collect(ImmutableCollectors.toList());
 
         IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChildren.equals(children));
-
         return iqFactory.createNaryIQTree(this, children, newTreeCache);
     }
 
@@ -491,7 +480,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
                                               VariableGenerator variableGenerator) {
-        ImmutableSet<Variable> updatedProjectedVariables = iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables);
 
         ImmutableList<IQTree> updatedChildren = children.stream()
                 .map(c -> c.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator))
@@ -500,11 +488,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         switch (updatedChildren.size()) {
             case 0:
-                return iqFactory.createEmptyNode(updatedProjectedVariables);
+                return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables));
             case 1:
                 return updatedChildren.get(0);
             default:
-                UnionNode newRootNode = iqFactory.createUnionNode(updatedProjectedVariables);
+                UnionNode newRootNode = iqFactory.createUnionNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables));
                 return iqFactory.createNaryIQTree(newRootNode, updatedChildren);
         }
     }
@@ -533,7 +521,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         UnionNode newUnionNode = iqFactory.createUnionNode(substitutionFactory.apply(renamingSubstitution, getVariables()));
 
         IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
-
         return iqFactory.createNaryIQTree(newUnionNode, newChildren, newTreeCache);
     }
 

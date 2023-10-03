@@ -51,16 +51,12 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         this.substitution = substitution;
         this.aggregationNormalizer = aggregationNormalizer;
         this.projectedVariables = Sets.union(groupingVariables, substitution.getDomain()).immutableCopy();
-        this.childVariables = extractChildVariables(groupingVariables, substitution);
+        this.childVariables = iqTreeTools.extractChildVariables(groupingVariables, substitution);
 
         if (settings.isTestModeEnabled())
             validateNode();
     }
 
-    public static ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> groupingVariables,
-                                                               Substitution<ImmutableFunctionalTerm> substitution) {
-        return Sets.union(groupingVariables, substitution.getRangeVariables()).immutableCopy();
-    }
 
     @Override
     public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
@@ -96,21 +92,19 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         Substitution<Variable> blockedVariableSubstitution = descendingVar2Var.restrictDomainTo(blockedVariables);
 
-        Set<Variable> blockedDomain =
-                Sets.union(blockedGroundTermSubstitution.getDomain(), blockedVariableSubstitution.getDomain());
+        Substitution<? extends VariableOrGroundTerm> blockedSubstitution =
+                substitutionFactory.union(blockedGroundTermSubstitution, blockedVariableSubstitution);
 
-        Substitution<? extends VariableOrGroundTerm> nonBlockedSubstitution = descendingSubstitution.removeFromDomain(blockedDomain);
+        Substitution<? extends VariableOrGroundTerm> nonBlockedSubstitution = descendingSubstitution.removeFromDomain(blockedSubstitution.getDomain());
 
         IQTree newSubTree = applyNonBlockedSubstitutionFct.apply(nonBlockedSubstitution);
 
-        if (blockedDomain.isEmpty())
+        if (blockedSubstitution.isEmpty())
             return newSubTree;
 
         // Blocked entries -> reconverted into a filter
         ImmutableExpression condition = termFactory.getConjunction(
-                Stream.concat(blockedGroundTermSubstitution.builder().toStream(termFactory::getStrictEquality),
-                                blockedVariableSubstitution.builder().toStream(termFactory::getStrictEquality))
-                        .collect(ImmutableCollectors.toList()));
+                blockedSubstitution.builder().toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList()));
 
         FilterNode filterNode = iqFactory.createFilterNode(condition);
 

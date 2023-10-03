@@ -20,14 +20,11 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.iq.node.impl.AggregationNodeImpl.extractChildVariables;
 
 public class AggregationNormalizerImpl implements AggregationNormalizer {
 
@@ -184,7 +181,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             // NB: non grouping variables that are USED by the aggregation node (we can safely ignore the non-used ones)
             Set<Variable> nonGroupingVariables = Sets.difference(
-                    extractChildVariables(groupingVariables, aggregationSubstitution),
+                    iqTreeTools.extractChildVariables(groupingVariables, aggregationSubstitution),
                     groupingVariables);
 
             Substitution<ImmutableTerm> nonGroupingSubstitution = childConstructionNode.getSubstitution()
@@ -306,7 +303,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     // Only keeps the child construction node if it has a substitution
                     .filter(n -> !n.getSubstitution().isEmpty())
                     .map(n -> iqFactory.createConstructionNode(
-                            extractChildVariables(newGroupingVariables, finalAggregationSubstitution),
+                            iqTreeTools.extractChildVariables(newGroupingVariables, finalAggregationSubstitution),
                             n.getSubstitution()))
                     .orElse(null);
 
