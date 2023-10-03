@@ -42,10 +42,9 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     private static final String VALUES_NODE_STR = "VALUES";
     // The variables as used in this node, we need to keep order.
     private final ImmutableList<Variable> orderedVariables;
-    private final ImmutableMap<Variable, Integer> invertedVariableIndex;
     // The variables consistent with all interfaces, as unordered set.
     private final ImmutableSet<Variable> projectedVariables;
-    private final ImmutableList<ImmutableList<Constant>> values;
+    private final ImmutableList<ImmutableMap<Variable, Constant>> valueMaps;
 
     private final CoreUtilsFactory coreUtilsFactory;
     private final SubstitutionFactory substitutionFactory;
@@ -67,12 +66,34 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                              IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory,
                              OntopModelSettings settings, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         super(iqTreeTools, iqFactory);
+
         this.orderedVariables = orderedVariables;
-        this.invertedVariableIndex = IntStream.range(0, orderedVariables.size())
-                .boxed()
-                .collect(ImmutableCollectors.toMap(orderedVariables::get, i -> i));
         this.projectedVariables = ImmutableSet.copyOf(orderedVariables);
-        this.values = values;
+        this.valueMaps = values.stream()
+                .map(tuple -> IntStream.range(0, orderedVariables.size())
+                        .mapToObj(i -> Maps.immutableEntry(orderedVariables.get(i), tuple.get(i)))
+                        .collect(ImmutableCollectors.toMap()))
+                .collect(ImmutableCollectors.toList());
+        this.coreUtilsFactory = coreUtilsFactory;
+        this.substitutionFactory = substitutionFactory;
+        this.termFactory = termFactory;
+
+        if (settings.isTestModeEnabled())
+            validate();
+    }
+
+    @AssistedInject
+    protected ValuesNodeImpl(@Assisted("valueMaps") ImmutableList<ImmutableMap<Variable, Constant>> valueMaps,
+                             IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory,
+                             OntopModelSettings settings, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+        super(iqTreeTools, iqFactory);
+
+        if (valueMaps.isEmpty())
+            throw new InvalidIntermediateQueryException("Expected non-empty valueMaps");
+
+        this.orderedVariables = ImmutableList.copyOf(valueMaps.get(0).keySet());
+        this.projectedVariables = ImmutableSet.copyOf(orderedVariables);
+        this.valueMaps = valueMaps;
         this.coreUtilsFactory = coreUtilsFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
@@ -83,7 +104,16 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public ImmutableList<ImmutableList<Constant>> getValues() {
-        return values;
+        return valueMaps.stream()
+                .map(tuple -> orderedVariables.stream()
+                        .map(tuple::get)
+                        .collect(ImmutableCollectors.toList()))
+                .collect(ImmutableCollectors.toList());
+    }
+
+    @Override
+    public ImmutableList<ImmutableMap<Variable, Constant>> getValueMaps() {
+        return valueMaps;
     }
 
     @Override
@@ -99,12 +129,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         return furtherNormalize(this);
     }
 
-    private Constant getConstant(ImmutableList<Constant> row, Variable v) {
-        Integer index = invertedVariableIndex.get(v);
-        if (index == null)
-            throw new MinorOntopInternalBugException("The index for " + v + " is null");
-        return row.get(index);
-    }
 
     private Optional<ConstructionAndValues> liftSingleValueVariables() {
 
@@ -120,20 +144,20 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
             Substitution<ImmutableTerm> substitutions = singleValueVariables.stream()
                     .collect(substitutionFactory.toSubstitution(
                             v -> v,
-                            v -> getConstant(values.get(0), v)));
+                            v -> valueMaps.get(0).get(v)));
 
             ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, substitutions);
 
             // Create the ValueNode
             Set<Variable> multiValueVariables = Sets.difference(projectedVariables, singleValueVariables);
 
-            ImmutableList<Variable> newValuesNodeVariables = ImmutableList.copyOf(multiValueVariables);
-            ImmutableList<ImmutableList<Constant>> newValuesNodeValues = values.stream()
-                    .map(constants -> newValuesNodeVariables.stream()
-                            .map(v -> getConstant(constants, v))
-                            .collect(ImmutableCollectors.toList()))
+            ImmutableList<ImmutableMap<Variable, Constant>> newValuesNodeValues = valueMaps.stream()
+                    .map(tuple -> tuple.entrySet().stream()
+                            .filter(e -> multiValueVariables.contains(e.getKey()))
+                            .collect(ImmutableCollectors.toMap()))
                     .collect(ImmutableCollectors.toList());
-            ValuesNode valuesNode = iqFactory.createValuesNode(newValuesNodeVariables, newValuesNodeValues);
+
+            ValuesNode valuesNode = iqFactory.createValuesNode(newValuesNodeValues);
 
             return Optional.of(new ConstructionAndValues(constructionNode, valuesNode));
         }
@@ -156,13 +180,11 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public Stream<Constant> getValueStream(Variable variable) {
-        Integer index = invertedVariableIndex.get(variable);
-        if (index == null)
+        if (!projectedVariables.contains(variable))
             return Stream.empty();
 
-        int idx = index;
-        return values.stream()
-                .map(t -> t.get(idx));
+        return valueMaps.stream()
+                .map(t -> t.get(variable));
     }
 
     @Override
@@ -195,7 +217,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         if (this == o) return true;
         if (o instanceof ValuesNodeImpl) {
             ValuesNodeImpl that = (ValuesNodeImpl) o;
-            return projectedVariables.equals(that.projectedVariables) && values.equals(that.values);
+            return projectedVariables.equals(that.projectedVariables) && valueMaps.equals(that.valueMaps);
         }
         return false;
     }
@@ -207,7 +229,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public int hashCode() {
-        return Objects.hash(projectedVariables, values);
+        return Objects.hash(projectedVariables, valueMaps);
     }
 
     @Override
@@ -236,7 +258,11 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
         return newVariables.equals(orderedVariables)
                 ? this
-                : iqFactory.createValuesNode(newVariables, values);
+                : iqFactory.createValuesNode(valueMaps.stream()
+                        .map(tuple -> tuple.entrySet().stream()
+                                .map(e -> Maps.immutableEntry(substitutionFactory.apply(freshRenamingSubstitution, e.getKey()), e.getValue()))
+                                .collect(ImmutableCollectors.toMap()))
+                        .collect(ImmutableCollectors.toList()));
     }
 
     @Override
@@ -410,7 +436,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                     .orElse(reshapedTree);
         }
 
-        ValuesNode filteredValuesNode = filterValuesNodeEntries(termFactory.getConjunction(
+        IQTree filteredValuesNode = filterValuesNodeEntries(termFactory.getConjunction(
                         Stream.concat(
                                 Stream.of(firstStrictEquality),
                                 otherConditions.stream())
@@ -466,30 +492,28 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     private Optional<IQTree> decompose(StringConstantDecomposer decomposer,
                                        Variable variableToReplace, FunctionSymbol functionSymbol,
                                        VariableGenerator variableGenerator) {
-        int variablePosition = invertedVariableIndex.get(variableToReplace);
-
-        ImmutableList<ImmutableList<Constant>> newValues = values.stream()
-                .map(row -> Optional.of(row.get(variablePosition))
-                        .filter(c -> c instanceof DBConstant)
-                        .map(c -> (DBConstant) c)
-                        .flatMap(c -> decomposer.decompose(c)
-                                .map(additionalColumns -> mergeColumns(row, variablePosition, additionalColumns))))
-                .flatMap(Optional::stream)
-                .collect(ImmutableCollectors.toList());
-
-        return buildNewTreeWithDecomposition(variableGenerator, variableToReplace, functionSymbol, newValues);
-    }
-
-
-    private Optional<IQTree> buildNewTreeWithDecomposition(VariableGenerator variableGenerator, Variable variableToReplace,
-                                                           FunctionSymbol functionSymbol,
-                                                           ImmutableList<ImmutableList<Constant>> newValues) {
-        if (newValues.isEmpty())
-            return Optional.of(iqFactory.createEmptyNode(projectedVariables));
 
         ImmutableList<Variable> newVariables = IntStream.range(0, functionSymbol.getArity())
                 .mapToObj(i -> variableGenerator.generateNewVariable())
                 .collect(ImmutableCollectors.toList());
+
+        ImmutableList<ImmutableMap<Variable, Constant>> newValues = valueMaps.stream()
+                .map(tuple -> Optional.of(tuple.get(variableToReplace))
+                        .filter(c -> c instanceof DBConstant)
+                        .map(c -> (DBConstant) c)
+                        .flatMap(c -> decomposer.decompose(c)
+                                .map(additionalColumns -> Streams.concat(
+                                        tuple.entrySet().stream()
+                                                .filter(e -> !e.getKey().equals(variableToReplace)),
+                                        IntStream.range(0, newVariables.size())
+                                                .mapToObj(i -> Maps.<Variable, Constant>immutableEntry(newVariables.get(i), additionalColumns.get(i))))
+                                        .collect(ImmutableCollectors.toMap()))))
+                .flatMap(Optional::stream)
+                .collect(ImmutableCollectors.toList());
+
+        if (newValues.isEmpty())
+            return Optional.of(iqFactory.createEmptyNode(projectedVariables));
+
 
         ImmutableList<Variable> newOrderedVariables = Stream.concat(
                 orderedVariables.stream()
@@ -497,7 +521,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 newVariables.stream())
                 .collect(ImmutableCollectors.toList());
 
-        ValuesNode newValueNode = iqFactory.createValuesNode(newOrderedVariables, newValues);
+        ValuesNode newValueNode = iqFactory.createValuesNode(newValues);
 
         ConstructionNode constructionNode = iqFactory.createConstructionNode(
                 projectedVariables,
@@ -507,6 +531,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         return Optional.of(iqFactory.createUnaryIQTree(constructionNode, newValueNode)
                 .normalizeForOptimization(variableGenerator));
     }
+
 
     private static ImmutableList<Constant> mergeColumns(ImmutableList<Constant> row, int variableToRemovePosition,
                                                  ImmutableList<? extends Constant> additionalColumns) {
@@ -519,26 +544,29 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
 
-    private ValuesNode filterValuesNodeEntries(ImmutableExpression constraint) {
+    private IQTree filterValuesNodeEntries(ImmutableExpression constraint) {
         var variableNullability = getVariableNullability();
-        ImmutableList<ImmutableList<Constant>> newValues = values.stream()
-                .filter(constants -> !(substitutionFactory.getSubstitution(orderedVariables, constants)
+        ImmutableList<ImmutableMap<Variable, Constant>> newValues = valueMaps.stream()
+                .filter(tuple -> !(tuple.entrySet().stream().collect(substitutionFactory.toSubstitution())
                         .apply(constraint))
                         .evaluate(variableNullability)
                         .isEffectiveFalse())
                 .collect(ImmutableCollectors.toList());
-        return iqFactory.createValuesNode(getOrderedVariables(), newValues);
+
+        return newValues.isEmpty()
+            ? iqFactory.createEmptyNode(projectedVariables)
+            : iqFactory.createValuesNode(newValues);
     }
 
     @Override
     public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions() {
         if (possibleVariableDefinitions == null) {
-            Stream<ImmutableList<Constant>> distinctValuesStream = ((isDistinct != null) && isDistinct)
-                    ? values.stream()
-                    : values.stream().distinct();
+            Stream<ImmutableMap<Variable, Constant>> distinctValuesStream = ((isDistinct != null) && isDistinct)
+                    ? valueMaps.stream()
+                    : valueMaps.stream().distinct();
 
             possibleVariableDefinitions = distinctValuesStream
-                    .map(row -> substitutionFactory.<NonVariableTerm>getSubstitution(orderedVariables, row))
+                    .map(tuple -> tuple.entrySet().stream().collect(substitutionFactory.<NonVariableTerm>toSubstitution()))
                     .collect(ImmutableCollectors.toSet());
         }
         return possibleVariableDefinitions;
@@ -552,7 +580,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     @Override
     public boolean isDistinct() {
         if (isDistinct == null) {
-            isDistinct = (values.size() == values.stream()
+            isDistinct = (valueMaps.size() == valueMaps.stream()
                                                 .unordered()
                                                 .distinct()
                                                 .count()); }
@@ -561,7 +589,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public boolean isDeclaredAsEmpty() {
-        return values.isEmpty();
+        return valueMaps.isEmpty();
     }
 
     @Override
@@ -611,9 +639,11 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public String toString() {
-        String valuesString = values.stream().map(tuple -> tuple.stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(","," (",")")))
+        String valuesString = valueMaps.stream()
+                .map(tuple -> orderedVariables.stream()
+                        .map(tuple::get)
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(","," (",")")))
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
                 .toString();
         return VALUES_NODE_STR + " " + orderedVariables + valuesString;

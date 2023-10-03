@@ -68,6 +68,8 @@ public interface IntermediateQueryFactory {
     ValuesNode createValuesNode(@Assisted("orderedVariables") ImmutableList<Variable> orderedVariables,
                                 @Assisted("values") ImmutableList<ImmutableList<Constant>> values);
 
+    ValuesNode createValuesNode(@Assisted("valueMaps") ImmutableList<ImmutableMap<Variable, Constant>> values);
+
     NativeNode createNativeNode(ImmutableSortedSet<Variable> variables,
                                 @Assisted("variableTypeMap") ImmutableMap<Variable, DBTermType> variableTypeMap,
                                 @Assisted("columnNames") ImmutableMap<Variable, QuotedID> columnNames,
