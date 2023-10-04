@@ -64,21 +64,13 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                              @Assisted("values") ImmutableList<ImmutableList<Constant>> values,
                              IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory,
                              OntopModelSettings settings, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
-        super(iqTreeTools, iqFactory);
-
-        this.orderedVariables = orderedVariables;
-        this.projectedVariables = ImmutableSet.copyOf(orderedVariables);
-        this.valueMaps = values.stream()
-                .map(tuple -> IntStream.range(0, orderedVariables.size())
-                        .mapToObj(i -> Maps.immutableEntry(orderedVariables.get(i), tuple.get(i)))
-                        .collect(ImmutableCollectors.toMap()))
-                .collect(ImmutableCollectors.toList());
-        this.coreUtilsFactory = coreUtilsFactory;
-        this.substitutionFactory = substitutionFactory;
-        this.termFactory = termFactory;
-
-        if (settings.isTestModeEnabled())
-            validate();
+        this(ImmutableSet.copyOf(orderedVariables),
+                values.stream()
+                        .map(tuple -> IntStream.range(0, orderedVariables.size())
+                                .mapToObj(i -> Maps.immutableEntry(orderedVariables.get(i), tuple.get(i)))
+                                .collect(ImmutableCollectors.toMap()))
+                        .collect(ImmutableCollectors.toList()),
+                iqTreeTools, iqFactory, coreUtilsFactory, settings, substitutionFactory, termFactory);
     }
 
     @AssistedInject
@@ -293,14 +285,10 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         }
 
         Substitution<Constant> constantSubstitutionFragment = descendingSubstitution.restrictRangeTo(Constant.class);
-        if (!constantSubstitutionFragment.isEmpty()) {
-            valuesNode = substituteConstants(constantSubstitutionFragment, valuesNode);
-        }
+        valuesNode = substituteConstants(constantSubstitutionFragment, valuesNode);
 
         Substitution<Variable> variableSubstitutionFragment = descendingSubstitution.restrictRangeTo(Variable.class);
-        if (!variableSubstitutionFragment.isEmpty()) {
-            valuesNode = substituteVariables(variableSubstitutionFragment, valuesNode);
-        }
+        valuesNode = substituteVariables(variableSubstitutionFragment, valuesNode);
 
         if (constructionNode == null) {
             return valuesNode;
@@ -311,7 +299,10 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     private ValuesNode substituteConstants(Substitution<Constant> substitution, ValuesNode valuesNode) {
 
-        ImmutableSet<Variable> newProjectionVariables = Sets.difference(valuesNode.getVariables(), substitution.getDomain()).immutableCopy();
+        ImmutableSet<Variable> variables = valuesNode.getVariables();
+        ImmutableSet<Variable> newProjectionVariables = Sets.difference(variables, substitution.getDomain()).immutableCopy();
+        if (newProjectionVariables.size() == variables.size())
+            return valuesNode;
 
         ImmutableList<ImmutableMap<Variable, Constant>> newValues = valuesNode.getValueMaps().stream()
                 .filter(tuple -> tuple.entrySet().stream()
@@ -495,17 +486,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
 
-    private static ImmutableList<Constant> mergeColumns(ImmutableList<Constant> row, int variableToRemovePosition,
-                                                 ImmutableList<? extends Constant> additionalColumns) {
-        return Stream.concat(
-                        IntStream.range(0, row.size())
-                                .filter(i -> i != variableToRemovePosition)
-                                .mapToObj(row::get),
-                        additionalColumns.stream())
-                .collect(ImmutableCollectors.toList());
-    }
-
-
     private IQTree filterValuesNodeEntries(ImmutableExpression constraint) {
         var variableNullability = getVariableNullability();
         ImmutableList<ImmutableMap<Variable, Constant>> newValues = valueMaps.stream()
@@ -615,19 +595,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
         private ConstructionAndValues(ConstructionNode constructionNode, ValuesNode valuesNode) {
             this.constructionNode = constructionNode;
-            this.valuesNode = valuesNode;
-        }
-    }
-
-    private static class ConstructionAndFilterAndValues {
-        public final ConstructionNode constructionNode;
-        public final FilterNode filterNode;
-        public final ValuesNode valuesNode;
-
-        private ConstructionAndFilterAndValues(ConstructionNode constructionNode,
-                                      FilterNode filterNode, ValuesNode valuesNode) {
-            this.constructionNode = constructionNode;
-            this.filterNode = filterNode;
             this.valuesNode = valuesNode;
         }
     }
