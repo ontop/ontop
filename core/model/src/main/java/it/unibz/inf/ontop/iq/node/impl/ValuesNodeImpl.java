@@ -268,31 +268,28 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         if (descendingSubstitution.isEmpty())
             return this;
 
-        ConstructionNode constructionNode = null;
-        FilterNode filterNode = null;
+        final ConstructionNode constructionNode;
+        final FilterNode filterNode;
         ValuesNode valuesNode = this;
 
         Substitution<GroundFunctionalTerm> functionalSubstitutionFragment = descendingSubstitution.restrictRangeTo(GroundFunctionalTerm.class);
         if (!functionalSubstitutionFragment.isEmpty()) {
-            constructionNode = iqFactory.createConstructionNode(Sets.difference(valuesNode.getVariables(), descendingSubstitution.getDomain()).immutableCopy());
-
             InjectiveSubstitution<Variable> renaming = Sets.intersection(valuesNode.getVariables(), functionalSubstitutionFragment.getDomain()).stream()
                     .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
-            ConstructionNode constructionNode1 = constructionNode;
-            ValuesNode valuesNode1 = valuesNode;
+            ImmutableExpression filterCondition = termFactory.getConjunction(
+                    substitutionFactory.rename(renaming, functionalSubstitutionFragment)
+                            .builder()
+                            .toStream(termFactory::getStrictEquality))
+                    .orElseThrow(() -> new MinorOntopInternalBugException("There must be an exception"));
 
-            ConstructionAndFilterAndValues constructionAndFilterAndValues = termFactory.getConjunction(substitutionFactory.rename(renaming, functionalSubstitutionFragment).builder().toStream(termFactory::getStrictEquality))
-                    .map(filterCondition ->
-                            new ConstructionAndFilterAndValues(
-                                    constructionNode1,
-                                    iqFactory.createFilterNode(filterCondition),
-                                    valuesNode1.applyFreshRenaming(renaming)))
-                    .orElseGet(() -> new ConstructionAndFilterAndValues(null, null, valuesNode1));
-
-            constructionNode  = constructionAndFilterAndValues.constructionNode;
-            filterNode = constructionAndFilterAndValues.filterNode;;
-            valuesNode = constructionAndFilterAndValues.valuesNode;
+                constructionNode = iqFactory.createConstructionNode(Sets.difference(valuesNode.getVariables(), descendingSubstitution.getDomain()).immutableCopy());
+                filterNode = iqFactory.createFilterNode(filterCondition);
+                valuesNode = valuesNode.applyFreshRenaming(renaming);
+        }
+        else {
+            constructionNode = null;
+            filterNode = null;
         }
 
         Substitution<Constant> constantSubstitutionFragment = descendingSubstitution.restrictRangeTo(Constant.class);
