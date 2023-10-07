@@ -23,8 +23,6 @@ import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
 import org.eclipse.rdf4j.rio.nquads.NQuadsWriter;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,6 +31,11 @@ import java.io.OutputStream;
 import java.util.Collections;
 
 public class SparqlQueryExecutor {
+
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final int BAD_REQUEST = 400;
+    private static final int NOT_ACCEPTABLE = 406;
+    private static final int NOT_IMPLEMENTED = 501;
 
     private final OntopRepository repository;
 
@@ -57,19 +60,19 @@ public class SparqlQueryExecutor {
                 response.setCharacterEncoding("UTF-8");
 
                 if ("*/*".equals(accept) || accept.contains("json")) {
-                    response.setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-results+json;charset=UTF-8");
+                    response.setHeader(CONTENT_TYPE, "application/sparql-results+json;charset=UTF-8");
                     evaluateSelectQuery(selectQuery, new SPARQLResultsJSONWriter(bao), response);
                 } else if (accept.contains("xml")) {
-                    response.setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-results+xml;charset=UTF-8");
+                    response.setHeader(CONTENT_TYPE, "application/sparql-results+xml;charset=UTF-8");
                     evaluateSelectQuery(selectQuery, new SPARQLResultsXMLWriter(bao), response);
                 } else if (accept.contains("csv")) {
-                    response.setHeader(HttpHeaders.CONTENT_TYPE, "text/sparql-results+csv;charset=UTF-8");
+                    response.setHeader(CONTENT_TYPE, "text/sparql-results+csv;charset=UTF-8");
                     evaluateSelectQuery(selectQuery, new SPARQLResultsCSVWriter(bao), response);
                 } else if (accept.contains("tsv") || accept.contains("text/tab-separated-values")) {
-                    response.setHeader(HttpHeaders.CONTENT_TYPE, "text/sparql-results+tsv;charset=UTF-8");
+                    response.setHeader(CONTENT_TYPE, "text/sparql-results+tsv;charset=UTF-8");
                     evaluateSelectQuery(selectQuery, new SPARQLResultsTSVWriter(bao), response);
                 } else {
-                    response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
+                    response.setStatus(NOT_ACCEPTABLE);
                 }
 
             } else if (q instanceof BooleanQuery) {
@@ -77,56 +80,56 @@ public class SparqlQueryExecutor {
                 boolean b = askQuery.evaluate();
 
                 if ("*/*".equals(accept) || accept.contains("json")) {
-                    response.setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-results+json");
+                    response.setHeader(CONTENT_TYPE, "application/sparql-results+json");
                     addCacheHeaders(response);
                     BooleanQueryResultWriter writer = new SPARQLBooleanJSONWriter(bao);
                     writer.handleBoolean(b);
                 } else if (accept.contains("xml")) {
-                    response.setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-results+xml");
+                    response.setHeader(CONTENT_TYPE, "application/sparql-results+xml");
                     addCacheHeaders(response);
                     BooleanQueryResultWriter writer = new SPARQLBooleanXMLWriter(bao);
                     writer.handleBoolean(b);
                 } else if (accept.contains("text")) {
-                    response.setHeader(HttpHeaders.CONTENT_TYPE, "text/boolean");
+                    response.setHeader(CONTENT_TYPE, "text/boolean");
                     addCacheHeaders(response);
                     BooleanQueryResultWriter writer = new BooleanTextWriter(bao);
                     writer.handleBoolean(b);
                 } else {
-                    response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
+                    response.setStatus(NOT_ACCEPTABLE);
                 }
             } else if (q instanceof GraphQuery) {
                 GraphQuery graphQuery = (GraphQuery) q;
                 response.setCharacterEncoding("UTF-8");
 
                 if ("*/*".equals(accept) || accept.contains("turtle")) {
-                    response.setHeader(HttpHeaders.CONTENT_TYPE, "text/turtle;charset=UTF-8");
+                    response.setHeader(CONTENT_TYPE, "text/turtle;charset=UTF-8");
                     evaluateGraphQuery(graphQuery, new TurtleWriter(bao), response);
                 } else if (accept.contains("rdf+json")) {
-                    response.setHeader(HttpHeaders.CONTENT_TYPE, "application/rdf+json;charset=UTF-8");
+                    response.setHeader(CONTENT_TYPE, "application/rdf+json;charset=UTF-8");
                     evaluateGraphQuery(graphQuery, new RDFJSONWriter(bao, RDFFormat.RDFJSON), response);
                 } else if (accept.contains("json")) {
                     // specification of rdf/json, recommend the use of json-ld (we use it as default)
-                    response.setHeader(HttpHeaders.CONTENT_TYPE, "application/ld+json;charset=UTF-8");
+                    response.setHeader(CONTENT_TYPE, "application/ld+json;charset=UTF-8");
                     evaluateGraphQuery(graphQuery, new JSONLDWriter(bao), response);
                 }
                 else if (accept.contains("xml")) {
-                    response.setHeader(HttpHeaders.CONTENT_TYPE, "application/rdf+xml;charset=UTF-8");
+                    response.setHeader(CONTENT_TYPE, "application/rdf+xml;charset=UTF-8");
                     evaluateGraphQuery(graphQuery, new RDFXMLWriter(bao), response);
                 }
                 else if (accept.contains("n-triples")) {
-                    response.setHeader(HttpHeaders.CONTENT_TYPE, "application/n-triples;charset=UTF-8");
+                    response.setHeader(CONTENT_TYPE, "application/n-triples;charset=UTF-8");
                     evaluateGraphQuery(graphQuery, new NTriplesWriter(bao), response);
                 }
                 else if (accept.contains("n-quads")) {
-                    response.setHeader(HttpHeaders.CONTENT_TYPE, "application/n-quads;charset=UTF-8");
+                    response.setHeader(CONTENT_TYPE, "application/n-quads;charset=UTF-8");
                     evaluateGraphQuery(graphQuery, new NQuadsWriter(bao), response);
                 } else {
-                    response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
+                    response.setStatus(NOT_ACCEPTABLE);
                 }
             } else if (q instanceof Update) {
-                response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
+                response.setStatus(NOT_IMPLEMENTED);
             } else {
-                response.setStatus(HttpStatus.BAD_REQUEST.value());
+                response.setStatus(BAD_REQUEST);
             }
             bao.flush();
         }
