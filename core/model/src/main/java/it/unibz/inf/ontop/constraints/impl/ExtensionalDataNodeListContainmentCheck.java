@@ -13,10 +13,7 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class ExtensionalDataNodeListContainmentCheck {
@@ -41,7 +38,7 @@ public class ExtensionalDataNodeListContainmentCheck {
             builder.extend(answerVariables1.get(i), answerVariables2.get(i));
 
         if (builder.isValid()) {
-            ImmutableList<ChasedExtensionalDataNode> chase = chaseExtensionalDataNodes(nodes1);
+            ImmutableSet<ChasedExtensionalDataNode> chase = chase(nodes1);
             ImmutableSet<RelationDefinition> relationsInChase = chase.stream()
                     .map(ChasedExtensionalDataNode::getRelationDefinition)
                     .collect(ImmutableCollectors.toSet());
@@ -61,14 +58,14 @@ public class ExtensionalDataNodeListContainmentCheck {
     }
 
 
-    private ImmutableList<ChasedExtensionalDataNode> chaseExtensionalDataNodes(ImmutableList<ExtensionalDataNode> nodes) {
+    public ImmutableSet<ChasedExtensionalDataNode> chase(ImmutableList<ExtensionalDataNode> nodes) {
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(nodes.stream()
                 .flatMap(n -> n.getVariables().stream())
                 .collect(ImmutableCollectors.toSet()));
 
         return nodes.stream()
                 .flatMap(node -> chase(node, variableGenerator))
-                .collect(ImmutableCollectors.toList());
+                .collect(ImmutableCollectors.toSet());
     }
 
     private Stream<ChasedExtensionalDataNode> chase(ExtensionalDataNode node, VariableGenerator variableGenerator) {
@@ -115,6 +112,20 @@ public class ExtensionalDataNodeListContainmentCheck {
 
         public VariableOrGroundTerm getArgument(int index) {
             return argumentMap.computeIfAbsent(index, i -> variableGenerator.generateNewVariable());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof ChasedExtensionalDataNode) {
+                ChasedExtensionalDataNode other = (ChasedExtensionalDataNode) o;
+                return relationDefinition.equals(other.relationDefinition) && argumentMap.equals(other.argumentMap);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(relationDefinition, argumentMap);
         }
 
         @Override

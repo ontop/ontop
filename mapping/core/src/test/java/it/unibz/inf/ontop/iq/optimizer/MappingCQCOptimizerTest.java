@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
 import it.unibz.inf.ontop.constraints.Homomorphism;
+import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeListContainmentCheck;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
@@ -63,17 +64,17 @@ public class MappingCQCOptimizerTest {
 
         IQ q = IQ_FACTORY.createIQ(root, rootTree);
 
-        LinearInclusionDependencies.Builder<RelationPredicate> b = CORE_SINGLETONS.getHomomorphismFactory().getLinearInclusionDependenciesBuilder();
+        //LinearInclusionDependencies.Builder<RelationPredicate> b = CORE_SINGLETONS.getHomomorphismFactory().getLinearInclusionDependenciesBuilder();
 
-        final Variable cmpShare1M = TERM_FACTORY.getVariable("cmpShare1M");
-        final Variable fldNpdidField1M = TERM_FACTORY.getVariable("fldNpdidField1M");
-        final Variable cmpNpdidCompany2M = TERM_FACTORY.getVariable("cmpNpdidCompany2M");
-        final Variable cmpShortName2M = TERM_FACTORY.getVariable("cmpShortName2M");
+        //final Variable cmpShare1M = TERM_FACTORY.getVariable("cmpShare1M");
+        //final Variable fldNpdidField1M = TERM_FACTORY.getVariable("fldNpdidField1M");
+        //final Variable cmpNpdidCompany2M = TERM_FACTORY.getVariable("cmpNpdidCompany2M");
+        //final Variable cmpShortName2M = TERM_FACTORY.getVariable("cmpShortName2M");
 
-        b.add(ATOM_FACTORY.getDataAtom(company.getAtomPredicate(), cmpShortName2M, cmpNpdidCompany2M),
-                ATOM_FACTORY.getDataAtom(companyReserves.getAtomPredicate(), cmpShare1M, fldNpdidField1M, cmpNpdidCompany2M));
+        //b.add(ATOM_FACTORY.getDataAtom(company.getAtomPredicate(), cmpShortName2M, cmpNpdidCompany2M),
+        //        ATOM_FACTORY.getDataAtom(companyReserves.getAtomPredicate(), cmpShare1M, fldNpdidField1M, cmpNpdidCompany2M));
 
-        ImmutableCQContainmentCheck<RelationPredicate> foreignKeyCQC = CORE_SINGLETONS.getHomomorphismFactory().getCQContainmentCheck(b.build());
+        ExtensionalDataNodeListContainmentCheck foreignKeyCQC = new ExtensionalDataNodeListContainmentCheck(CORE_SINGLETONS.getHomomorphismFactory(), CORE_SINGLETONS.getCoreUtilsFactory());
 
         IQ r = MAPPING_CQC_OPTIMIZER.optimize(foreignKeyCQC, q);
 

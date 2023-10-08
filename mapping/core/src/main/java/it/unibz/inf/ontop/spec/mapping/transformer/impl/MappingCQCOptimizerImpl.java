@@ -38,17 +38,14 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
     private final IntermediateQueryFactory iqFactory;
     private final CoreSingletons coreSingletons;
 
-    private final ExtensionalDataNodeListContainmentCheck containmentCheck;
-
     @Inject
     public MappingCQCOptimizerImpl(CoreSingletons coreSingletons) {
         this.iqFactory = coreSingletons.getIQFactory();
         this.coreSingletons = coreSingletons;
-        this.containmentCheck = new ExtensionalDataNodeListContainmentCheck(coreSingletons.getHomomorphismFactory(), coreSingletons.getCoreUtilsFactory());
     }
 
     @Override
-    public IQ optimize(ImmutableCQContainmentCheck<RelationPredicate> cqContainmentCheck, IQ query) {
+    public IQ optimize(ExtensionalDataNodeListContainmentCheck cqContainmentCheck, IQ query) {
 
         IQTree tree = query.getTree();
         ConstructionNode constructionNode = (ConstructionNode) tree.getRootNode();
@@ -78,7 +75,7 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                             .collect(ImmutableCollectors.toSet())
                             .containsAll(answerVariables)) {
 
-                        if (containmentCheck.isContainedIn(
+                        if (cqContainmentCheck.isContainedIn(
                                 answerVariables, subChildren, answerVariables, children)) {
                             System.out.println("CQC-REMOVED: " + children.get(currentIndex) + " FROM " + children);
                             log.debug("CQC-REMOVED: " + children.get(currentIndex) + " FROM " + children);
@@ -97,8 +94,5 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                 return IQ2CQ.toIQTree(children, rootNode.getOptionalFilterCondition(), coreSingletons);
             }
         }));
-
     }
-
-
 }

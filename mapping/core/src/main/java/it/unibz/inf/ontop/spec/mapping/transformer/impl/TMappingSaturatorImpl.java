@@ -24,6 +24,7 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
+import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeListContainmentCheck;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -80,9 +81,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
     @Override
     public ImmutableList<MappingAssertion> saturate(ImmutableList<MappingAssertion> mapping, ClassifiedTBox reasoner) {
 
-        ImmutableCQContainmentCheck<RelationPredicate> cqc =
-                coreSingletons.getHomomorphismFactory().getCQContainmentCheck(
-                        coreSingletons.getHomomorphismFactory().getDBLinearInclusionDependencies());
+        ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(coreSingletons.getHomomorphismFactory(), coreSingletons.getCoreUtilsFactory());
 
 	    // index mapping assertions by the predicate type
         //     same IRI can be a class name and a property name
@@ -145,7 +144,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                                                      EquivalencesDAG<T> dag,
                                                      ImmutableMap<MappingAssertionIndex, Collection<TMappingRule>> original,
                                                      Function<T, TMappingRuleHeadConstructor> constructor,
-                                                     ImmutableCQContainmentCheck<RelationPredicate> cqc) {
+                                                     ExtensionalDataNodeListContainmentCheck cqc) {
 
 	    IRIConstant iri = constructor.apply(node.getRepresentative()).getIri();
 

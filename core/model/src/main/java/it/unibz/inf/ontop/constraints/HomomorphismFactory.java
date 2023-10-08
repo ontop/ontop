@@ -14,8 +14,6 @@ public interface HomomorphismFactory {
 
     <P extends AtomPredicate> Iterator<Homomorphism> getHomomorphismIterator(Homomorphism baseHomomorphism, ImmutableList<DataAtom<P>> from, ImmutableCollection<DataAtom<P>> to);
 
-    LinearInclusionDependencies<RelationPredicate> getDBLinearInclusionDependencies();
-
     <P extends AtomPredicate> LinearInclusionDependencies.Builder<P> getLinearInclusionDependenciesBuilder();
 
     <P extends AtomPredicate> LinearInclusionDependencies.Builder<P> getFullLinearInclusionDependenciesBuilder();

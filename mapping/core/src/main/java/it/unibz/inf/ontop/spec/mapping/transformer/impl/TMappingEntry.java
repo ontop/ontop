@@ -3,7 +3,10 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.constraints.Homomorphism;
+import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
+import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeHomomorphismIteratorImpl;
+import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeListContainmentCheck;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.tools.impl.IQ2CQ;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
@@ -19,7 +22,7 @@ import java.util.stream.Stream;
 
 public class TMappingEntry {
 
-    public static Collector<TMappingRule, TMappingEntry, ImmutableList<TMappingRule>> toTMappingEntry(ImmutableCQContainmentCheck<RelationPredicate> cqc, CoreSingletons coreSingletons) {
+    public static Collector<TMappingRule, TMappingEntry, ImmutableList<TMappingRule>> toTMappingEntry(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons) {
         return Collector.of(
                 () -> new TMappingEntry(cqc, coreSingletons), // Supplier
                 TMappingEntry::add, // Accumulator
@@ -29,14 +32,14 @@ public class TMappingEntry {
     }
 
     private final List<TMappingRule> rules = new ArrayList<>();
-    private final ImmutableCQContainmentCheck<RelationPredicate> cqc;
+    private final ExtensionalDataNodeListContainmentCheck cqc;
     private final TermFactory termFactory;
-    private final CoreSingletons coreSingletons;
+    private final HomomorphismFactory homomorphismFactory;
 
-    public TMappingEntry(ImmutableCQContainmentCheck<RelationPredicate> cqc, CoreSingletons coreSingletons) {
+    public TMappingEntry(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons) {
         this.cqc = cqc;
         this.termFactory = coreSingletons.getTermFactory();
-        this.coreSingletons = coreSingletons;
+        this.homomorphismFactory = coreSingletons.getHomomorphismFactory();
     }
 
     public TMappingEntry add(TMappingRule rule) {
@@ -179,14 +182,14 @@ public class TMappingEntry {
     }
 
     private Optional<Iterator<Homomorphism>> getHomomorphismIterator(TMappingRule from, TMappingRule to) {
-        Homomorphism.Builder builder = coreSingletons.getHomomorphismFactory().getHomomorphismBuilder();
+        Homomorphism.Builder builder = homomorphismFactory.getHomomorphismBuilder();
         if (!builder.extend(from.getHeadTerms(), to.getHeadTerms()).isValid())
                 return Optional.empty();
 
         Homomorphism h = builder.build();
-        return Optional.of(coreSingletons.getHomomorphismFactory().getHomomorphismIterator(
+        return Optional.of(new ExtensionalDataNodeHomomorphismIteratorImpl(
                 h,
-                IQ2CQ.toDataAtoms(from.getDatabaseAtoms(), coreSingletons),
-                cqc.chaseAllAtoms(IQ2CQ.toDataAtoms(to.getDatabaseAtoms(), coreSingletons))));
+                from.getDatabaseAtoms(),
+                cqc.chase(to.getDatabaseAtoms())));
     }
 }

@@ -33,29 +33,7 @@ import java.util.stream.IntStream;
 
 public class IQ2CQ {
 
-    public static ImmutableList<DataAtom<RelationPredicate>> toDataAtoms(ImmutableList<ExtensionalDataNode> nodes,
-                                                                         CoreSingletons singletons) {
-        AtomFactory atomFactory = singletons.getAtomFactory();
-        VariableGenerator variableGenerator = singletons.getCoreUtilsFactory().createVariableGenerator(
-                nodes.stream()
-                        .flatMap(a -> a.getVariables().stream())
-                        .collect(ImmutableCollectors.toSet()));
-         return nodes.stream()
-                 .map(node -> toDataAtom(node, variableGenerator, atomFactory))
-                 .collect(ImmutableCollectors.toList());
-    }
 
-    private static DataAtom<RelationPredicate> toDataAtom(ExtensionalDataNode node, VariableGenerator variableGenerator,
-                                                          AtomFactory atomFactory) {
-        ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = node.getArgumentMap();
-        RelationPredicate predicate = node.getRelationDefinition().getAtomPredicate();
-        ImmutableList<VariableOrGroundTerm> newArguments = IntStream.range(0, predicate.getArity())
-                .mapToObj(i -> Optional.<VariableOrGroundTerm>ofNullable(argumentMap.get(i))
-                        .orElseGet(variableGenerator::generateNewVariable))
-                .collect(ImmutableCollectors.toList());
-
-        return atomFactory.getDataAtom(predicate, newArguments);
-    }
 
     public static IQTree toIQTree(ImmutableList<? extends IQTree> extensionalNodes, Optional<ImmutableExpression> joiningConditions,
                                   CoreSingletons coreSingletons) {

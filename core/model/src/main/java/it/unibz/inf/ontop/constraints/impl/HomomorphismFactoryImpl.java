@@ -34,11 +34,6 @@ public class HomomorphismFactoryImpl implements HomomorphismFactory {
     }
 
     @Override
-    public LinearInclusionDependencies<RelationPredicate> getDBLinearInclusionDependencies() {
-        return new DBLinearInclusionDependenciesImpl(coreUtilsFactory, atomFactory);
-    }
-
-    @Override
     public <P extends AtomPredicate> LinearInclusionDependencies.Builder<P> getLinearInclusionDependenciesBuilder() {
         return new LinearInclusionDependenciesImpl.Builder<>(coreUtilsFactory, atomFactory, this);
     }
