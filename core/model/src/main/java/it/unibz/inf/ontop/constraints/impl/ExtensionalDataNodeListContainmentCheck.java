@@ -30,7 +30,6 @@ public class ExtensionalDataNodeListContainmentCheck {
     }
 
     public boolean isContainedIn(ImmutableList<? extends VariableOrGroundTerm> answerVariables1, ImmutableList<ExtensionalDataNode> nodes1, ImmutableList<? extends VariableOrGroundTerm> answerVariables2, ImmutableList<ExtensionalDataNode> nodes2) {
-        System.out.println("CHECKING: " + nodes1 + " <- " + nodes2 + " (" + answerVariables1 + " <- " + answerVariables2 + ")");
         Homomorphism.Builder builder = homomorphismFactory.getHomomorphismBuilder();
         // get the substitution for the answer variables first
         // this will ensure that all answer variables are mapped either to constants or
@@ -67,12 +66,9 @@ public class ExtensionalDataNodeListContainmentCheck {
                 .flatMap(n -> n.getVariables().stream())
                 .collect(ImmutableCollectors.toSet()));
 
-        ImmutableList<ChasedExtensionalDataNode> result = nodes.stream()
+        return nodes.stream()
                 .flatMap(node -> chase(node, variableGenerator))
                 .collect(ImmutableCollectors.toList());
-
-        System.out.println("CHASED: " + nodes + "\n" + "RESULT: " + result);
-        return result;
     }
 
     private Stream<ChasedExtensionalDataNode> chase(ExtensionalDataNode node, VariableGenerator variableGenerator) {
