@@ -1,11 +1,14 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.constraints.ImmutableCQ;
+import it.unibz.inf.ontop.constraints.Homomorphism;
+import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
+import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeListContainmentCheck;
+import it.unibz.inf.ontop.constraints.impl.HomomorphismImpl;
+import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -20,10 +23,12 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
@@ -32,14 +37,14 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
     
     private final IntermediateQueryFactory iqFactory;
     private final CoreSingletons coreSingletons;
-    private final SubstitutionFactory substitutionFactory;
+
+    private final ExtensionalDataNodeListContainmentCheck containmentCheck;
 
     @Inject
-    public MappingCQCOptimizerImpl(IntermediateQueryFactory iqFactory,
-                                   CoreSingletons coreSingletons) {
-        this.iqFactory = iqFactory;
+    public MappingCQCOptimizerImpl(CoreSingletons coreSingletons) {
+        this.iqFactory = coreSingletons.getIQFactory();
         this.coreSingletons = coreSingletons;
-        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.containmentCheck = new ExtensionalDataNodeListContainmentCheck(coreSingletons.getHomomorphismFactory(), coreSingletons.getCoreUtilsFactory());
     }
 
     @Override
@@ -54,29 +59,28 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
 
                 ImmutableList<ExtensionalDataNode> children = IQ2CQ.getExtensionalDataNodes(tree, coreSingletons);
 
-                ImmutableSet<Variable> answerVariables = Sets.union(
-                                constructionNode.getSubstitution().getRangeVariables(),
+                ImmutableList<Variable> answerVariables = Stream.concat(
+                                constructionNode.getSubstitution().getRangeVariables().stream(),
                                 rootNode.getOptionalFilterCondition().stream()
-                                        .flatMap(ImmutableTerm::getVariableStream)
-                                        .collect(ImmutableCollectors.toSet())).immutableCopy();
+                                        .flatMap(ImmutableTerm::getVariableStream))
+                        .distinct()
+                        .collect(ImmutableCollectors.toList());
 
                 int currentIndex = 0;
                 while (currentIndex < children.size()) {
-                    ImmutableList.Builder<ExtensionalDataNode> builder = ImmutableList.builder();
-                    for (int i = 0; i < children.size(); i++)
-                        if (i != currentIndex)
-                            builder.add(children.get(i));
-                    ImmutableList<ExtensionalDataNode> subChildren = builder.build();
+                    ExtensionalDataNode current = children.get(currentIndex);
+                    ImmutableList<ExtensionalDataNode> subChildren = children.stream()
+                            .filter(child -> child != current)
+                            .collect(ImmutableCollectors.toList());
 
                     if (subChildren.stream()
                             .flatMap(a -> a.getVariables().stream())
                             .collect(ImmutableCollectors.toSet())
                             .containsAll(answerVariables)) {
 
-                        if (cqContainmentCheck.isContainedIn(
-                                new ImmutableCQ<>(answerVariables, substitutionFactory.getSubstitution(), IQ2CQ.toDataAtoms(subChildren, coreSingletons)),
-                                new ImmutableCQ<>(answerVariables, substitutionFactory.getSubstitution(), IQ2CQ.toDataAtoms(children, coreSingletons)))) {
-                            //System.out.println("CQC-REMOVED: " + children.get(currentIndex) + " FROM " + children);
+                        if (containmentCheck.isContainedIn(
+                                answerVariables, subChildren, answerVariables, children)) {
+                            System.out.println("CQC-REMOVED: " + children.get(currentIndex) + " FROM " + children);
                             log.debug("CQC-REMOVED: " + children.get(currentIndex) + " FROM " + children);
                             children = subChildren;
                             if (children.size() < 2)
@@ -95,4 +99,6 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
         }));
 
     }
+
+
 }

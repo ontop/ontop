@@ -40,7 +40,7 @@ public class MappingCQCOptimizerTest {
             "fldNpdidField", integerType, false,
             "cmpNpdidCompany", integerType, false);
         ForeignKeyConstraint.builder("FK", companyReserves, company)
-                .add(2, 1)
+                .add(3, 2)
                 .build();
 
         final Variable cmpShare1 = TERM_FACTORY.getVariable("cmpShare1");
