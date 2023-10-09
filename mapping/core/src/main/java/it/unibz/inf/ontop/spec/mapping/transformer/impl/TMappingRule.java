@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 public class TMappingRule {
 
 	private final DistinctVariableOnlyDataAtom projectionAtom;
-	private final ImmutableList<ImmutableTerm> headTerms;
+	private final Substitution<ImmutableTerm> substitution;
 
 	private final ImmutableList<ExtensionalDataNode> extensionalNodes;
 	// an OR-connected list of AND-connected atomic filters
@@ -30,7 +30,7 @@ public class TMappingRule {
 
 	public TMappingRule(IQ iq, CoreSingletons coreSingletons) {
 		this.projectionAtom = iq.getProjectionAtom();
-		this.headTerms = ((ConstructionNode)iq.getTree().getRootNode()).getSubstitution().apply(projectionAtom.getArguments());
+		this.substitution = ((ConstructionNode)iq.getTree().getRootNode()).getSubstitution();
 
 		IQTree tree = iq.getTree().getChildren().get(0);
 		ImmutableList<ExtensionalDataNode> dataAtoms = IQ2CQ.getExtensionalDataNodes(tree, coreSingletons);
@@ -74,18 +74,23 @@ public class TMappingRule {
 
 	TMappingRule(TMappingRule baseRule, ImmutableList<ImmutableList<ImmutableExpression>> filter) {
 		this.projectionAtom = baseRule.projectionAtom;
-		this.headTerms = baseRule.headTerms;
+		this.substitution = baseRule.substitution;
 
 		this.extensionalNodes = baseRule.extensionalNodes;
 		this.filter = filter;
 	}
 
-	TMappingRule(ImmutableList<ImmutableTerm> headTerms, TMappingRule baseRule) {
+
+	private TMappingRule(Substitution<ImmutableTerm> substitution, TMappingRule baseRule) {
 		this.projectionAtom = baseRule.projectionAtom;
-		this.headTerms = headTerms;
+		this.substitution = substitution;
 
 		this.extensionalNodes = baseRule.extensionalNodes;
 		this.filter = baseRule.filter;
+	}
+
+	TMappingRule createCopy(Substitution<ImmutableTerm> substitution) {
+		return new TMappingRule(substitution, this);
 	}
 
 	public IQ asIQ(CoreSingletons coreSingletons) {
@@ -98,18 +103,17 @@ public class TMappingRule {
 		Optional<ImmutableExpression> mergedConditions = termFactory.getDisjunction(
 				filter.stream().map(termFactory::getConjunction));
 
-		if (projectionAtom.getArity() != headTerms.size())
-			throw new MinorOntopInternalBugException("size mismatch");
-
-		Substitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(projectionAtom.getArguments(), headTerms);
-
 		return iqFactory.createIQ(projectionAtom,
 				iqFactory.createUnaryIQTree(
 						iqFactory.createConstructionNode(projectionAtom.getVariables(), substitution),
 						IQ2CQ.toIQTree(extensionalNodes, mergedConditions, coreSingletons)));
 	}
 
-	public ImmutableList<ImmutableTerm> getHeadTerms() { return headTerms;  }
+	public ImmutableList<ImmutableTerm> getHeadTerms() { return substitution.applyToTerms(projectionAtom.getArguments());  }
+
+	public DistinctVariableOnlyDataAtom getProjectionAtom() { return projectionAtom; }
+
+	public Substitution<ImmutableTerm> getSubstitution() { return substitution; }
 
 	public ImmutableList<ExtensionalDataNode> getDatabaseAtoms() { return extensionalNodes; }
 
@@ -119,7 +123,7 @@ public class TMappingRule {
 
 	@Override
 	public int hashCode() {
-		return headTerms.hashCode() ^ extensionalNodes.hashCode() ^ filter.hashCode();
+		return Objects.hash(substitution, extensionalNodes, filter);
 	}
 
 	@Override
@@ -127,7 +131,7 @@ public class TMappingRule {
 		if (other instanceof TMappingRule) {
 			TMappingRule otherRule = (TMappingRule)other;
 			return (projectionAtom.equals(otherRule.projectionAtom) &&
-					headTerms.equals(otherRule.headTerms) &&
+					substitution.equals(otherRule.substitution) &&
 					extensionalNodes.equals(otherRule.extensionalNodes) &&
 					filter.equals(otherRule.filter));
 		}
@@ -136,6 +140,6 @@ public class TMappingRule {
 
 	@Override
 	public String toString() {
-		return projectionAtom.getPredicate() + "(" + headTerms + ") <- " + extensionalNodes + " FILTER " + filter;
+		return projectionAtom.getPredicate() + "(" + getHeadTerms() + ") <- " + extensionalNodes + " FILTER " + filter;
 	}
 }

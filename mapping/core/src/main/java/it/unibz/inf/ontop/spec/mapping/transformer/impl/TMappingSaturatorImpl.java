@@ -23,18 +23,21 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeListContainmentCheck;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
@@ -43,6 +46,8 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingSaturator;
 import it.unibz.inf.ontop.spec.mapping.transformer.QueryUnionSplitter;
 import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
@@ -61,6 +66,8 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
     private final MappingCQCOptimizer mappingCqcOptimizer;
     private final UnionBasedQueryMerger queryMerger;
     private final CoreSingletons coreSingletons;
+    private final IntermediateQueryFactory iqFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
 	private TMappingSaturatorImpl(TMappingExclusionConfig tMappingExclusionConfig,
@@ -76,6 +83,8 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
         this.mappingCqcOptimizer = mappingCqcOptimizer;
         this.queryMerger = queryMerger;
         this.coreSingletons = coreSingletons;
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.iqFactory = coreSingletons.getIQFactory();
     }
 
     @Override
@@ -95,78 +104,84 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                         .map(q -> Maps.immutableEntry(a.getIndex(), new TMappingRule(q, coreSingletons))))
                 .collect(ImmutableCollectors.toMultimap()).asMap();
 
-        ImmutableMap<MappingAssertionIndex, ImmutableList<TMappingRule>> saturated = original.keySet().stream()
+        ImmutableMap<MappingAssertionIndex, IQ> saturated = original.keySet().stream()
                 .map(MappingAssertionIndex::getPredicate)
                 .distinct()
-                .map(rdfAtomPredicate -> new TMappingRuleHeadConstructorProvider(rdfAtomPredicate, termFactory))
+                .map(rdfAtomPredicate -> new TMappingRuleHeadConstructorProvider(rdfAtomPredicate))
                 .flatMap(provider -> Stream.concat(Stream.concat(
                     reasoner.objectPropertiesDAG().stream()
-                        .filter(node -> !node.getRepresentative().isInverse() && !tMappingExclusionConfig.contains(node.getRepresentative()))
-                        .flatMap(node -> node.getMembers().stream()
-                                .filter(d -> !d.isInverse() || d.getInverse() != node.getRepresentative())
-                                .map(saturator(node, reasoner.objectPropertiesDAG(), original, provider::constructor, cqc))),
+                            .filter(node -> !node.getRepresentative().isInverse() && !tMappingExclusionConfig.contains(node.getRepresentative()))
+                            .map(node -> Maps.immutableEntry(node, getSaturatedRepresentative(node, reasoner.objectPropertiesDAG(), original, provider::constructor, cqc)))
+                            .flatMap(e -> e.getKey().getMembers().stream()
+                                .filter(d -> !d.isInverse() || d.getInverse() != e.getKey().getRepresentative())
+                                .map(d -> Maps.immutableEntry(provider.constructor(d), e.getValue()))),
 
                     reasoner.dataPropertiesDAG().stream()
-                        .filter(node -> !tMappingExclusionConfig.contains(node.getRepresentative()))
-                        .flatMap(node -> node.getMembers().stream()
-                                .map(saturator(node, reasoner.dataPropertiesDAG(), original, provider::constructor, cqc)))),
+                            .filter(node -> !tMappingExclusionConfig.contains(node.getRepresentative()))
+                            .map(node -> Maps.immutableEntry(node, getSaturatedRepresentative(node, reasoner.dataPropertiesDAG(), original, provider::constructor, cqc)))
+                            .flatMap(e -> e.getKey().getMembers().stream()
+                                    .map(d -> Maps.immutableEntry(provider.constructor(d), e.getValue())))),
 
                     reasoner.classesDAG().stream()
-                        .filter(node -> (node.getRepresentative() instanceof OClass) && !tMappingExclusionConfig.contains((OClass)node.getRepresentative()))
-                        .flatMap(node -> node.getMembers().stream()
-                                .filter(d -> d instanceof OClass)
-                                .map(saturator(node, reasoner.classesDAG(), original, provider::constructor, cqc)))))
+                            .filter(node -> (node.getRepresentative() instanceof OClass) && !tMappingExclusionConfig.contains((OClass)node.getRepresentative()))
+                            .map(node -> Maps.immutableEntry(node, getSaturatedRepresentative(node, reasoner.classesDAG(), original, provider::constructor, cqc)))
+                            .flatMap(e -> e.getKey().getMembers().stream()
+                                    .filter(d -> d instanceof OClass)
+                                    .map(d -> Maps.immutableEntry(provider.constructor(d), e.getValue())))))
 
-                .filter(e -> !e.getValue().isEmpty())
+                .filter(e -> e.getValue().isPresent())
+                .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().get()))
+
+                .map(e -> Maps.immutableEntry(
+                        e.getKey().indexOf(), e.getKey().updateConstructionNodeIri(e.getValue())))
                 .collect(ImmutableCollectors.toMap());
 
-        ImmutableList<ImmutableList<TMappingRule>> combined = Stream.concat(
+        ImmutableList<IQ> combined = Stream.concat(
                 saturated.values().stream(),
                 original.entrySet().stream()
                         .filter(e -> !saturated.containsKey(e.getKey()))
                         .map(e -> e.getValue().stream()
-                                        .collect(TMappingEntry.toTMappingEntry(cqc, coreSingletons))))
+                                        .collect(TMappingEntry.toTMappingEntry(cqc, coreSingletons)))
+                        .map(this::toIQ)
+                        .map(Optional::get))
                 .collect(ImmutableCollectors.toList());
 
         return combined.stream()
-                .map(tMappingRules -> new MappingAssertion(toIQ(tMappingRules), null))
+                .map(q -> new MappingAssertion(q, null))
                 .collect(ImmutableCollectors.toList());
     }
 
-    private IQ toIQ(Collection<TMappingRule> rules) {
+    private Optional<IQ> toIQ(Collection<TMappingRule> rules) {
         return queryMerger.mergeDefinitions(rules.stream()
                         .map(r -> r.asIQ(coreSingletons))
-                        .collect(ImmutableCollectors.toList())).get()
-                .normalizeForOptimization();
+                        .collect(ImmutableCollectors.toList()))
+                .map(IQ::normalizeForOptimization);
     }
 
-    private <T> Function<T, Map.Entry<MappingAssertionIndex, ImmutableList<TMappingRule>>> saturator(Equivalences<T> node,
-                                                     EquivalencesDAG<T> dag,
-                                                     ImmutableMap<MappingAssertionIndex, Collection<TMappingRule>> original,
-                                                     Function<T, TMappingRuleHeadConstructor> constructor,
-                                                     ExtensionalDataNodeListContainmentCheck cqc) {
+    private <T> Optional<IQ> getSaturatedRepresentative(Equivalences<T> node,
+                                                                       EquivalencesDAG<T> dag,
+                                                                       ImmutableMap<MappingAssertionIndex, Collection<TMappingRule>> original,
+                                                                       Function<T, TMappingRuleHeadConstructor> constructor,
+                                                                       ExtensionalDataNodeListContainmentCheck cqc) {
+        IRIConstant iri = constructor.apply(node.getRepresentative()).getIri();
 
-	    IRIConstant iri = constructor.apply(node.getRepresentative()).getIri();
-
-        ImmutableList<TMappingRule> saturatedRepresentative = dag.getSub(node).stream()
+        ImmutableList<TMappingRule> list = dag.getSub(node).stream()
                 .flatMap(subnode -> subnode.getMembers().stream())
                 .map(constructor)
-                .flatMap(t -> original.getOrDefault(t.indexOf(), ImmutableList.of()).stream()
-                        .map(m -> new TMappingRule(t.getArguments(m.getHeadTerms(), iri), m)))
+                .flatMap(t -> Optional.ofNullable(original.get(t.indexOf()))
+                        .map(l -> l.stream()
+                                .map(m -> m.createCopy(t.updateConstructionNodeIri(m.getProjectionAtom(), m.getSubstitution(), iri))))
+                        .orElseGet(Stream::of))
                 .collect(TMappingEntry.toTMappingEntry(cqc, coreSingletons));
 
-        return constructor.andThen(
-                t -> Maps.immutableEntry(
-                        t.indexOf(),
-                        saturatedRepresentative.stream()
-                            .map(m -> new TMappingRule(t.getArguments(m.getHeadTerms(), t.getIri()), m))
-                            .collect(ImmutableCollectors.toList())));
+        return toIQ(list);
     }
 
-    private static abstract class TMappingRuleHeadConstructor {
+
+    private abstract class TMappingRuleHeadConstructor {
         final MappingAssertionIndex index;
         final IRIConstant iri;
-        TMappingRuleHeadConstructor(MappingAssertionIndex index, TermFactory termFactory) {
+        TMappingRuleHeadConstructor(MappingAssertionIndex index) {
             this.index = index;
             this.iri = termFactory.getConstantIRI(index.getIri());
         }
@@ -174,44 +189,55 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
 
         IRIConstant getIri() { return iri; }
 
-        abstract ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri);
+        abstract ImmutableList<ImmutableTerm> updateAtomArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri);
+
+        public Substitution<ImmutableTerm> updateConstructionNodeIri(DistinctVariableOnlyDataAtom projectionAtom, Substitution<ImmutableTerm> substitution, IRIConstant newIri) {
+            ImmutableList<Variable> variables = projectionAtom.getArguments();
+            return substitutionFactory.getSubstitution(variables, updateAtomArguments(substitution.apply(variables), newIri));
+        }
+
+        public IQ updateConstructionNodeIri(IQ query) {
+                ConstructionNode constructionNode = (ConstructionNode) query.getTree().getRootNode();
+                Substitution<ImmutableTerm> updatedSubstitution = updateConstructionNodeIri(query.getProjectionAtom(), constructionNode.getSubstitution(), iri);
+                ConstructionNode updatedConstructionNode = iqFactory.createConstructionNode(constructionNode.getVariables(), updatedSubstitution);
+                return iqFactory.createIQ(query.getProjectionAtom(),
+                        iqFactory.createUnaryIQTree(updatedConstructionNode, ((UnaryIQTree)query.getTree()).getChild()));
+        }
     }
 
-    private static class TMappingRuleHeadConstructorProvider {
+    private class TMappingRuleHeadConstructorProvider {
 	    private final RDFAtomPredicate p;
-	    private final TermFactory termFactory;
         private final IRIConstant rdfType;
 
-        TMappingRuleHeadConstructorProvider(RDFAtomPredicate rdfAtomPredicate, TermFactory termFactory) {
+        TMappingRuleHeadConstructorProvider(RDFAtomPredicate rdfAtomPredicate) {
             this.p = rdfAtomPredicate;
-            this.termFactory = termFactory;
             this.rdfType = termFactory.getConstantIRI(RDF.TYPE);
         }
 
         TMappingRuleHeadConstructor constructor(ClassExpression ce) {
             if (ce instanceof OClass) {
                 OClass oc = (OClass)ce;
-                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofClass(p, oc.getIRI()), termFactory) {
+                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofClass(p, oc.getIRI())) {
                     @Override
-                    public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri) {
+                    public ImmutableList<ImmutableTerm> updateAtomArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri) {
                         return p.updateSPO(args, p.getSubject(args), rdfType, newIri);
                     }
                 };
             }
             else if (ce instanceof ObjectSomeValuesFrom) {
                 ObjectPropertyExpression ope = ((ObjectSomeValuesFrom) ce).getProperty();
-                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, ope.getIRI()), termFactory) {
+                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, ope.getIRI())) {
                     @Override
-                    public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri) {
+                    public ImmutableList<ImmutableTerm> updateAtomArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri) {
                         return p.updateSPO(args, ope.isInverse() ? p.getObject(args) : p.getSubject(args), rdfType, newIri);
                     }
                 };
             }
             else if (ce instanceof DataSomeValuesFrom) {
                 DataPropertyExpression dpe = ((DataSomeValuesFrom) ce).getProperty();
-                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, dpe.getIRI()), termFactory) {
+                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, dpe.getIRI())) {
                     @Override
-                    public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri) {
+                    public ImmutableList<ImmutableTerm> updateAtomArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri) {
                         return p.updateSPO(args, p.getSubject(args), rdfType, newIri);
                     }
                 };
@@ -221,9 +247,9 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
         }
 
         TMappingRuleHeadConstructor constructor(ObjectPropertyExpression ope) {
-            return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, ope.getIRI()), termFactory) {
+            return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, ope.getIRI())) {
                 @Override
-                public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri) {
+                public ImmutableList<ImmutableTerm> updateAtomArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri) {
                     return ope.isInverse()
                             ? p.updateSPO(args, p.getObject(args), newIri, p.getSubject(args))
                             : p.updateSPO(args, p.getSubject(args), newIri, p.getObject(args));
@@ -232,9 +258,9 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
         }
 
         TMappingRuleHeadConstructor constructor(DataPropertyExpression dpe) {
-            return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, dpe.getIRI()), termFactory) {
+            return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, dpe.getIRI())) {
                 @Override
-                public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri) {
+                public ImmutableList<ImmutableTerm> updateAtomArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri) {
                     return p.updateSPO(args, p.getSubject(args), newIri, p.getObject(args));
                 }
             };
