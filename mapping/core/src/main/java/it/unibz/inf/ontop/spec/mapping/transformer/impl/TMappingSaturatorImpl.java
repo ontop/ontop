@@ -51,6 +51,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -141,8 +142,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                 original.entrySet().stream()
                         .filter(e -> !saturated.containsKey(e.getKey()))
                         .map(e -> e.getValue().stream()
-                                        .collect(TMappingEntry.toTMappingEntry(cqc, coreSingletons)))
-                        .map(this::toIQ)
+                                        .collect(TMappingEntry.toIQ(cqc, coreSingletons, queryMerger)))
                         .map(Optional::get))
                 .collect(ImmutableCollectors.toList());
 
@@ -151,12 +151,6 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                 .collect(ImmutableCollectors.toList());
     }
 
-    private Optional<IQ> toIQ(Collection<TMappingRule> rules) {
-        return queryMerger.mergeDefinitions(rules.stream()
-                        .map(r -> r.asIQ(coreSingletons))
-                        .collect(ImmutableCollectors.toList()))
-                .map(IQ::normalizeForOptimization);
-    }
 
     private <T> Optional<IQ> getSaturatedRepresentative(Equivalences<T> node,
                                                                        EquivalencesDAG<T> dag,
@@ -165,31 +159,33 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                                                                        ExtensionalDataNodeListContainmentCheck cqc) {
         IRIConstant iri = constructor.apply(node.getRepresentative()).getIri();
 
-        ImmutableList<TMappingRule> list = dag.getSub(node).stream()
+        return dag.getSub(node).stream()
                 .flatMap(subnode -> subnode.getMembers().stream())
                 .map(constructor)
                 .flatMap(t -> Optional.ofNullable(original.get(t.indexOf()))
                         .map(l -> l.stream()
                                 .map(m -> m.createCopy(t.updateConstructionNodeIri(m.getProjectionAtom(), m.getSubstitution(), iri))))
                         .orElseGet(Stream::of))
-                .collect(TMappingEntry.toTMappingEntry(cqc, coreSingletons));
-
-        return toIQ(list);
+                .collect(TMappingEntry.toIQ(cqc, coreSingletons, queryMerger));
     }
 
 
-    private abstract class TMappingRuleHeadConstructor {
-        final MappingAssertionIndex index;
-        final IRIConstant iri;
-        TMappingRuleHeadConstructor(MappingAssertionIndex index) {
+    private class TMappingRuleHeadConstructor {
+        private final MappingAssertionIndex index;
+        private final IRIConstant iri;
+        private final BiFunction<ImmutableList<ImmutableTerm>, IRIConstant, ImmutableList<ImmutableTerm>> termTransformer;
+        TMappingRuleHeadConstructor(MappingAssertionIndex index, BiFunction<ImmutableList<ImmutableTerm>, IRIConstant, ImmutableList<ImmutableTerm>> termTransformer) {
             this.index = index;
             this.iri = termFactory.getConstantIRI(index.getIri());
+            this.termTransformer = termTransformer;
         }
         MappingAssertionIndex indexOf() { return index; }
 
         IRIConstant getIri() { return iri; }
 
-        abstract ImmutableList<ImmutableTerm> updateAtomArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri);
+        ImmutableList<ImmutableTerm> updateAtomArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri) {
+            return termTransformer.apply(args, newIri);
+        }
 
         public Substitution<ImmutableTerm> updateConstructionNodeIri(DistinctVariableOnlyDataAtom projectionAtom, Substitution<ImmutableTerm> substitution, IRIConstant newIri) {
             ImmutableList<Variable> variables = projectionAtom.getArguments();
@@ -217,53 +213,33 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
         TMappingRuleHeadConstructor constructor(ClassExpression ce) {
             if (ce instanceof OClass) {
                 OClass oc = (OClass)ce;
-                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofClass(p, oc.getIRI())) {
-                    @Override
-                    public ImmutableList<ImmutableTerm> updateAtomArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri) {
-                        return p.updateSPO(args, p.getSubject(args), rdfType, newIri);
-                    }
-                };
+                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofClass(p, oc.getIRI()),
+                        (args, newIri) ->  p.updateSPO(args, p.getSubject(args), rdfType, newIri));
             }
             else if (ce instanceof ObjectSomeValuesFrom) {
                 ObjectPropertyExpression ope = ((ObjectSomeValuesFrom) ce).getProperty();
-                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, ope.getIRI())) {
-                    @Override
-                    public ImmutableList<ImmutableTerm> updateAtomArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri) {
-                        return p.updateSPO(args, ope.isInverse() ? p.getObject(args) : p.getSubject(args), rdfType, newIri);
-                    }
-                };
+                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, ope.getIRI()),
+                        (args, newIri) -> p.updateSPO(args, ope.isInverse() ? p.getObject(args) : p.getSubject(args), rdfType, newIri));
             }
             else if (ce instanceof DataSomeValuesFrom) {
                 DataPropertyExpression dpe = ((DataSomeValuesFrom) ce).getProperty();
-                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, dpe.getIRI())) {
-                    @Override
-                    public ImmutableList<ImmutableTerm> updateAtomArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri) {
-                        return p.updateSPO(args, p.getSubject(args), rdfType, newIri);
-                    }
-                };
+                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, dpe.getIRI()),
+                        (args, newIri) -> p.updateSPO(args, p.getSubject(args), rdfType, newIri));
             }
             else
                 throw new MinorOntopInternalBugException("Unexpected type" + ce);
         }
 
         TMappingRuleHeadConstructor constructor(ObjectPropertyExpression ope) {
-            return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, ope.getIRI())) {
-                @Override
-                public ImmutableList<ImmutableTerm> updateAtomArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri) {
-                    return ope.isInverse()
-                            ? p.updateSPO(args, p.getObject(args), newIri, p.getSubject(args))
-                            : p.updateSPO(args, p.getSubject(args), newIri, p.getObject(args));
-                }
-            };
+            return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, ope.getIRI()),
+                    ope.isInverse()
+                            ? (args, newIri) -> p.updateSPO(args, p.getObject(args), newIri, p.getSubject(args))
+                            : (args, newIri) -> p.updateSPO(args, p.getSubject(args), newIri, p.getObject(args)));
         }
 
         TMappingRuleHeadConstructor constructor(DataPropertyExpression dpe) {
-            return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, dpe.getIRI())) {
-                @Override
-                public ImmutableList<ImmutableTerm> updateAtomArguments(ImmutableList<ImmutableTerm> args, IRIConstant newIri) {
-                    return p.updateSPO(args, p.getSubject(args), newIri, p.getObject(args));
-                }
-            };
+            return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, dpe.getIRI()),
+                    (args, newIri) -> p.updateSPO(args, p.getSubject(args), newIri, p.getObject(args)));
         }
     }
 }

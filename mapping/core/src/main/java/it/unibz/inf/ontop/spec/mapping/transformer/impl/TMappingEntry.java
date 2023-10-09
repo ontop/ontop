@@ -4,29 +4,26 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.constraints.Homomorphism;
 import it.unibz.inf.ontop.constraints.HomomorphismFactory;
-import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeHomomorphismIteratorImpl;
 import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeListContainmentCheck;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.iq.tools.impl.IQ2CQ;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 public class TMappingEntry {
 
-    public static Collector<TMappingRule, TMappingEntry, ImmutableList<TMappingRule>> toTMappingEntry(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons) {
+    public static Collector<TMappingRule, TMappingEntry, Optional<IQ>> toIQ(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger) {
         return Collector.of(
-                () -> new TMappingEntry(cqc, coreSingletons), // Supplier
+                () -> new TMappingEntry(cqc, coreSingletons, queryMerger), // Supplier
                 TMappingEntry::add, // Accumulator
-                (b1, b2) -> b1.addAll(b2.build().iterator()), // Merger
+                (b1, b2) -> { throw new MinorOntopInternalBugException("no merge"); }, // Merger
                 TMappingEntry::build, // Finisher
                 Collector.Characteristics.UNORDERED);
     }
@@ -35,11 +32,15 @@ public class TMappingEntry {
     private final ExtensionalDataNodeListContainmentCheck cqc;
     private final TermFactory termFactory;
     private final HomomorphismFactory homomorphismFactory;
+    private final CoreSingletons coreSingletons;
+    private final UnionBasedQueryMerger queryMerger;
 
-    public TMappingEntry(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons) {
+    public TMappingEntry(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger) {
         this.cqc = cqc;
         this.termFactory = coreSingletons.getTermFactory();
         this.homomorphismFactory = coreSingletons.getHomomorphismFactory();
+        this.coreSingletons = coreSingletons;
+        this.queryMerger = queryMerger;
     }
 
     public TMappingEntry add(TMappingRule rule) {
@@ -47,14 +48,11 @@ public class TMappingEntry {
         return this;
     }
 
-    public TMappingEntry addAll(Iterator<TMappingRule> rs) {
-        while (rs.hasNext())
-            mergeMappingsWithCQC(rs.next());
-        return this;
-    }
-
-    public ImmutableList<TMappingRule> build() {
-        return ImmutableList.copyOf(rules);
+    public Optional<IQ> build() {
+        return queryMerger.mergeDefinitions(rules.stream()
+                        .map(r -> r.asIQ(coreSingletons))
+                        .collect(ImmutableCollectors.toList()))
+                .map(IQ::normalizeForOptimization);
     }
 
 
