@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
@@ -19,7 +20,7 @@ import java.util.stream.Stream;
 
 public class TMappingEntry {
 
-    public static Collector<TMappingRule, TMappingEntry, Optional<IQ>> toIQ(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger) {
+    public static Collector<MappingAssertion, TMappingEntry, Optional<MappingAssertion>> toMappingAssertion(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger) {
         return Collector.of(
                 () -> new TMappingEntry(cqc, coreSingletons, queryMerger), // Supplier
                 TMappingEntry::add, // Accumulator
@@ -43,16 +44,19 @@ public class TMappingEntry {
         this.queryMerger = queryMerger;
     }
 
-    public TMappingEntry add(TMappingRule rule) {
+    public TMappingEntry add(MappingAssertion assertion) {
+        TMappingRule rule = new TMappingRule(assertion.getQuery(), coreSingletons);
         mergeMappingsWithCQC(rule);
         return this;
     }
 
-    public Optional<IQ> build() {
-        return queryMerger.mergeDefinitions(rules.stream()
+    public Optional<MappingAssertion> build() {
+        Optional<IQ> query = queryMerger.mergeDefinitions(rules.stream()
                         .map(r -> r.asIQ(coreSingletons))
                         .collect(ImmutableCollectors.toList()))
                 .map(IQ::normalizeForOptimization);
+
+        return query.map(q -> new MappingAssertion(q, null));
     }
 
 
