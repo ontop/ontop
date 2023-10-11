@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.iq.tools.impl.IQ2CQ;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
@@ -26,7 +25,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -41,7 +39,8 @@ public class TMappingEntry {
                 Collector.Characteristics.UNORDERED);
     }
 
-    private final List<ConjunctiveIQ> rules = new ArrayList<>();
+    private final List<ConjunctiveIQ> conjunctiveIqs = new ArrayList<>();
+    private final List<IQ> otherIqs = new ArrayList<>();
     private final ExtensionalDataNodeListContainmentCheck cqc;
     private final TermFactory termFactory;
     private final IntermediateQueryFactory iqFactory;
@@ -60,7 +59,7 @@ public class TMappingEntry {
 
     public TMappingEntry add(MappingAssertion assertion) {
         Optional<ConjunctiveIQ> cq = extractConjunctiveIQ(assertion);
-        mergeMappingsWithCQC(cq.get());
+        cq.ifPresentOrElse(this::mergeMappingsWithCQC, () -> otherIqs.add(assertion.getQuery()));
         return this;
     }
 
@@ -209,9 +208,9 @@ public class TMappingEntry {
             IQTree childTree = ((UnaryIQTree)topTree).getChild();
             QueryNode childNode = childTree.getRootNode();
             if (childNode instanceof ExtensionalDataNode)
-                return Optional.of(new ConjunctiveIQ(assertion.getProjectionAtom(), constructionNode, ImmutableList.of((ExtensionalDataNode) childNode), Optional.empty(), getDisjunctionOfConjuncitons(filter)));
+                return Optional.of(new ConjunctiveIQ(assertion.getProjectionAtom(), constructionNode, ImmutableList.of((ExtensionalDataNode) childNode), Optional.empty(), getDisjunctionOfConjunctions(filter)));
             if (childNode instanceof ValuesNode)
-                return Optional.of(new ConjunctiveIQ(assertion.getProjectionAtom(), constructionNode, ImmutableList.of(), Optional.of((ValuesNode) childNode), getDisjunctionOfConjuncitons(filter)));
+                return Optional.of(new ConjunctiveIQ(assertion.getProjectionAtom(), constructionNode, ImmutableList.of(), Optional.of((ValuesNode) childNode), getDisjunctionOfConjunctions(filter)));
         }
 
         if (topNode instanceof InnerJoinNode) {
@@ -230,7 +229,7 @@ public class TMappingEntry {
 
             if (extensionalDataNodes.size() + valuesNodes.size() == childrenTrees.size() && valuesNodes.size() <= 1) {
                 ImmutableList<ImmutableList<ImmutableExpression>> filter = ((InnerJoinNode) topNode).getOptionalFilterCondition()
-                        .map(this::getDisjunctionOfConjuncitons)
+                        .map(this::getDisjunctionOfConjunctions)
                         .orElseGet(ImmutableList::of);
 
                 return Optional.of(new ConjunctiveIQ(assertion.getProjectionAtom(), constructionNode, extensionalDataNodes, valuesNodes.stream().findFirst(), filter));
@@ -240,14 +239,14 @@ public class TMappingEntry {
         return Optional.empty();
     }
 
-    private ImmutableList<ImmutableList<ImmutableExpression>> getDisjunctionOfConjuncitons(ImmutableExpression condition) {
+    private ImmutableList<ImmutableList<ImmutableExpression>> getDisjunctionOfConjunctions(ImmutableExpression condition) {
         return ImmutableList.of(condition.flattenAND().collect(ImmutableCollectors.toList()));
     }
 
     public Optional<MappingAssertion> build() {
-        Optional<IQ> query = queryMerger.mergeDefinitions(rules.stream()
-                        .map(ConjunctiveIQ::asIQ)
-                        .collect(ImmutableCollectors.toList()))
+        Optional<IQ> query = queryMerger.mergeDefinitions(
+                        Stream.concat(conjunctiveIqs.stream().map(ConjunctiveIQ::asIQ), otherIqs.stream())
+                                .collect(ImmutableCollectors.toList()))
                 .map(IQ::normalizeForOptimization);
 
         return query.map(q -> new MappingAssertion(q, null));
@@ -277,15 +276,15 @@ public class TMappingEntry {
 
     private void mergeMappingsWithCQC(ConjunctiveIQ assertion) {
 
-        if (rules.contains(assertion))
+        if (conjunctiveIqs.contains(assertion))
             return;
 
         if (assertion.getValuesNode().isPresent()) {
-            rules.add(assertion); // facts are just added
+            conjunctiveIqs.add(assertion); // facts are just added
             return;
         }
 
-        Iterator<ConjunctiveIQ> mappingIterator = rules.iterator();
+        Iterator<ConjunctiveIQ> mappingIterator = conjunctiveIqs.iterator();
         while (mappingIterator.hasNext()) {
 
             ConjunctiveIQ current = mappingIterator.next();
@@ -364,7 +363,7 @@ public class TMappingEntry {
 
                     // REPLACE THE CURRENT RULE
                     mappingIterator.remove();
-                    rules.add(new ConjunctiveIQ(current, Stream.concat(
+                    conjunctiveIqs.add(new ConjunctiveIQ(current, Stream.concat(
                             current.getConditions().stream()
                                     // if each of the new conditions is found among econd then the old condition is redundant
                                     .filter(f -> !f.containsAll(newf)),
@@ -374,7 +373,7 @@ public class TMappingEntry {
                 }
             }
         }
-        rules.add(assertion);
+        conjunctiveIqs.add(assertion);
     }
 
     private Optional<Iterator<Homomorphism>> getHomomorphismIterator(ConjunctiveIQ from, ConjunctiveIQ to) {
