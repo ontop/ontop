@@ -32,7 +32,12 @@
       "foreignKeys" : {
         "added" : []
       },
-      "type": "BasicViewDefinition"
+      "type": "BasicLens"
+    },
+    {
+      "name" : ["\"views\"", "\"teaching\""],
+      "baseRelation" : ["\"PUBLIC\"", "\"TEACHING\""],
+      "type": "BasicLens"
     }
   ]
 }
