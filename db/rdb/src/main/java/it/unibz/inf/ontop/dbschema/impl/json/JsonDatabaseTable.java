@@ -103,8 +103,10 @@ public class JsonDatabaseTable extends JsonOpenObject {
             fd.insert(relation, lookupForFk.getQuotedIDFactory());
 
         for (JsonForeignKey fk : foreignKeys) {
-            if (!fk.from.relation.equals(this.name))
-                throw new MetadataExtractionException("Table names mismatch: " + name + " != " + fk.from.relation);
+            if ((!fk.from.relation.equals(this.name))
+                    && this.otherNames.stream().noneMatch(n -> n.equals(fk.from.relation)))
+                throw new MetadataExtractionException("Table names mismatch: " + fk.from.relation + " not equal to "
+                 + name + " and " + otherNames);
 
             fk.insert(relation, lookupForFk);
         }
