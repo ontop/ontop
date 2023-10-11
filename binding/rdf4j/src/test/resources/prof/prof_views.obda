@@ -13,4 +13,8 @@ mappingId	MAPID-professor
 target		:professor/{prof_id} a :Professor ; :nickname {nickname} ; :ufirstname {"upper_first_name"} ; :vnickname {"valid_nick_name"} .
 source		SELECT prof_id, nickname, "upper_first_name", "valid_nick_name" FROM "views"."profs";
 
+mappingId	MAPID-teaches
+target		:professor/{prof_id} :teaches :course/{course_id} .
+source		SELECT prof_id, course_id FROM "views"."teaching";
+
 ]]
