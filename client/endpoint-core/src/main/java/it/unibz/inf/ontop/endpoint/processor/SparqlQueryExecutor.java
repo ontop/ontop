@@ -46,10 +46,7 @@ public class SparqlQueryExecutor {
     public void executeQuery(HttpServletRequest request, String accept, String query,
                              String[] defaultGraphUri, String[] namedGraphUri, HttpServletResponse response) {
 
-        ImmutableMultimap<String, String> httpHeaders = Collections.list(request.getHeaderNames()).stream()
-                .flatMap(k -> Collections.list(request.getHeaders(k)).stream()
-                        .map(v -> Maps.immutableEntry(k, v)))
-                .collect(ImmutableCollectors.toMultimap());
+        ImmutableMultimap<String, String> httpHeaders = extractHttpHeaders(request);
 
         try (OntopRepositoryConnection connection = repository.getConnection()) {
             Query q = connection.prepareQuery(QueryLanguage.SPARQL, query, httpHeaders);
@@ -136,6 +133,13 @@ public class SparqlQueryExecutor {
         catch (IOException ex) {
             throw new Error(ex);
         }
+    }
+
+    public static ImmutableMultimap<String, String> extractHttpHeaders(HttpServletRequest request) {
+        return Collections.list(request.getHeaderNames()).stream()
+                .flatMap(k -> Collections.list(request.getHeaders(k)).stream()
+                        .map(v -> Maps.immutableEntry(k, v)))
+                .collect(ImmutableCollectors.toMultimap());
     }
 
     private void evaluateSelectQuery(TupleQuery selectQuery, TupleQueryResultWriter writer, HttpServletResponse response) {
