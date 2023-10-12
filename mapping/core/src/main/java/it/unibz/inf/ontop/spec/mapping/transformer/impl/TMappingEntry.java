@@ -123,7 +123,6 @@ public class TMappingEntry {
         }
 
         IQ asIQ() {
-
             return iqFactory.createIQ(projectionAtom,
                     iqFactory.createUnaryIQTree(
                             iqFactory.createConstructionNode(projectionAtom.getVariables(), substitution), getTree()));
@@ -150,9 +149,7 @@ public class TMappingEntry {
         }
 
         public ImmutableList<ImmutableTerm> getHeadTerms() { return substitution.applyToTerms(projectionAtom.getArguments());  }
-
-        public DistinctVariableOnlyDataAtom getProjectionAtom() { return projectionAtom; }
-
+        
         public Substitution<ImmutableTerm> getSubstitution() { return substitution; }
 
         public ImmutableList<ExtensionalDataNode> getDatabaseAtoms() { return extensionalDataNodes; }
@@ -189,40 +186,37 @@ public class TMappingEntry {
     }
 
     private Optional<ConjunctiveIQ> extractConjunctiveIQ(MappingAssertion assertion) {
+        DistinctVariableOnlyDataAtom projectionAtom = assertion.getProjectionAtom();
         ConstructionNode constructionNode = (ConstructionNode) assertion.getQuery().getTree().getRootNode();
         IQTree topTree = assertion.getTopChild();
+        if (topTree instanceof TrueNode) {
+            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of(), Optional.empty(), ImmutableList.of()));
+        }
+        if (topTree instanceof ExtensionalDataNode) {
+            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of((ExtensionalDataNode) topTree), Optional.empty(), ImmutableList.of()));
+        }
+        if (topTree instanceof ValuesNode) {
+            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of(), Optional.of((ValuesNode) topTree), ImmutableList.of()));
+        }
+
         QueryNode topNode = topTree.getRootNode();
-        if (topNode instanceof TrueNode)
-            return Optional.of(new ConjunctiveIQ(assertion.getProjectionAtom(), constructionNode, ImmutableList.of(), Optional.empty(), ImmutableList.of()));
-
-        if (topNode instanceof ExtensionalDataNode) {
-            return Optional.of(new ConjunctiveIQ(assertion.getProjectionAtom(), constructionNode, ImmutableList.of((ExtensionalDataNode) topNode), Optional.empty(), ImmutableList.of()));
-        }
-
-        if (topNode instanceof ValuesNode) {
-            return Optional.of(new ConjunctiveIQ(assertion.getProjectionAtom(), constructionNode, ImmutableList.of(), Optional.of((ValuesNode) topNode), ImmutableList.of()));
-        }
-
         if (topNode instanceof FilterNode) {
             ImmutableExpression filter = ((FilterNode)topNode).getFilterCondition();
             IQTree childTree = ((UnaryIQTree)topTree).getChild();
-            QueryNode childNode = childTree.getRootNode();
-            if (childNode instanceof ExtensionalDataNode)
-                return Optional.of(new ConjunctiveIQ(assertion.getProjectionAtom(), constructionNode, ImmutableList.of((ExtensionalDataNode) childNode), Optional.empty(), getDisjunctionOfConjunctions(filter)));
-            if (childNode instanceof ValuesNode)
-                return Optional.of(new ConjunctiveIQ(assertion.getProjectionAtom(), constructionNode, ImmutableList.of(), Optional.of((ValuesNode) childNode), getDisjunctionOfConjunctions(filter)));
+            if (childTree instanceof ExtensionalDataNode)
+                return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of((ExtensionalDataNode) childTree), Optional.empty(), getDisjunctionOfConjunctions(filter)));
+            if (childTree instanceof ValuesNode)
+                return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of(), Optional.of((ValuesNode) childTree), getDisjunctionOfConjunctions(filter)));
         }
 
         if (topNode instanceof InnerJoinNode) {
             ImmutableList<IQTree> childrenTrees = topTree.getChildren();
             ImmutableList<ExtensionalDataNode> extensionalDataNodes = childrenTrees.stream()
-                    .map(IQTree::getRootNode)
                     .filter(n -> n instanceof ExtensionalDataNode)
                     .map(n -> (ExtensionalDataNode)n)
                     .collect(ImmutableCollectors.toList());
 
             ImmutableList<ValuesNode> valuesNodes = childrenTrees.stream()
-                    .map(IQTree::getRootNode)
                     .filter(n -> n instanceof ValuesNode)
                     .map(n -> (ValuesNode)n)
                     .collect(ImmutableCollectors.toList());
@@ -232,7 +226,7 @@ public class TMappingEntry {
                         .map(this::getDisjunctionOfConjunctions)
                         .orElseGet(ImmutableList::of);
 
-                return Optional.of(new ConjunctiveIQ(assertion.getProjectionAtom(), constructionNode, extensionalDataNodes, valuesNodes.stream().findFirst(), filter));
+                return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, extensionalDataNodes, valuesNodes.stream().findFirst(), filter));
             }
         }
 
