@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.owlapi.connection.impl;
 
+import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.query.*;
 import it.unibz.inf.ontop.query.resultset.GraphResultSet;
 import it.unibz.inf.ontop.exception.*;
@@ -183,7 +184,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 
 	public long getTupleCount(String query) throws OntopOWLException {
 		try {
-			return st.getTupleCount(parseQueryString(query));
+			return st.getTupleCount(parseQueryString(query), ImmutableMultimap.of());
 		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
@@ -200,7 +201,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 
 	public IQ getExecutableQuery(String query) throws OntopOWLException {
 		try {
-			return st.getExecutableQuery(parseQueryString(query));
+			return st.getExecutableQuery(parseQueryString(query), ImmutableMultimap.of());
 		} catch (OntopReformulationException e) {
 			throw new OntopOWLException(e);
 		}

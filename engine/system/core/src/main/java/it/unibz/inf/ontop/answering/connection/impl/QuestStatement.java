@@ -307,8 +307,8 @@ public abstract class QuestStatement implements OntopStatement {
 	}
 
 	@Override
-	public  <R extends OBDAResultSet>  IQ getExecutableQuery(KGQuery<R> inputQuery) throws OntopReformulationException {
-		return engine.reformulateIntoNativeQuery(inputQuery, queryContextFactory.create(ImmutableMap.of()),
+	public  <R extends OBDAResultSet>  IQ getExecutableQuery(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders) throws OntopReformulationException {
+		return engine.reformulateIntoNativeQuery(inputQuery, queryContextFactory.create(normalizeHttpHeaders(httpHeaders)),
 				queryLoggerFactory.create(ImmutableMultimap.of()));
 	}
 
