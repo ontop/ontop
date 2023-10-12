@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
+import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.fact.FactExtractor;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -56,6 +57,7 @@ public class MappingTestingTools {
     public static final NamedRelationDefinition TABLE2_AR3;
     public static final NamedRelationDefinition TABLE3_AR3;
     public static final NamedRelationDefinition TABLE4_AR3;
+    public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
 
     static {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -82,6 +84,7 @@ public class MappingTestingTools {
         TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
+        UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 
         EMPTY_PREFIX_MANAGER = SPECIFICATION_FACTORY.createPrefixManager(ImmutableMap.of());
 
