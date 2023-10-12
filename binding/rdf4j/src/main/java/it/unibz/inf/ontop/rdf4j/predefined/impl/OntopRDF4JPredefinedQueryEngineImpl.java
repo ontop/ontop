@@ -8,7 +8,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
@@ -102,7 +101,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     @Override
     public void evaluate(String queryId, ImmutableMap<String, String> bindings,
                          ImmutableList<String> acceptMediaTypes,
-                         ImmutableMultimap<String, String> httpHeaders,
+                         ImmutableMap<String, String> httpHeaders,
                          Consumer<Integer> httpStatusSetter,
                          BiConsumer<String, String> httpHeaderSetter,
                          OutputStream outputStream) throws LateEvaluationOrConversionException {
@@ -130,7 +129,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
 
     @Override
     public String evaluate(String queryId, ImmutableMap<String, String> bindings, ImmutableList<String> acceptMediaTypes,
-                           ImmutableMultimap<String, String> httpHeaders, Consumer<Integer> httpStatusSetter,
+                           ImmutableMap<String, String> httpHeaders, Consumer<Integer> httpStatusSetter,
                            BiConsumer<String, String> httpHeaderSetter) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
@@ -158,7 +157,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     }
 
     private void evaluateGraphWithHandler(PredefinedGraphQuery predefinedQuery, ImmutableMap<String, String> bindings, ImmutableList<String> acceptMediaTypes,
-                                          ImmutableMultimap<String, String> httpHeaders, BiConsumer<String, String> httpHeaderSetter,
+                                          ImmutableMap<String, String> httpHeaders, BiConsumer<String, String> httpHeaderSetter,
                                           Consumer<Integer> httpStatusSetter, OutputStream outputStream) throws LateEvaluationOrConversionException {
 
         RDFWriterRegistry registry = RDFWriterRegistry.getInstance();
@@ -268,7 +267,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         PredefinedGraphQuery predefinedQuery = Optional.ofNullable(graphQueries.get(queryId))
                 .orElseThrow(() -> new IllegalArgumentException("The query" + queryId + " is not defined as a graph query"));
         ConstructTemplate constructTemplate = predefinedQuery.getConstructTemplate();
-        QueryLogger queryLogger = createQueryLogger(predefinedQuery, bindings, ImmutableMultimap.of());
+        QueryLogger queryLogger = createQueryLogger(predefinedQuery, bindings, ImmutableMap.of());
         try {
             IQ executableQuery = createExecutableQuery(predefinedQuery, bindings, queryLogger);
             return executeConstructQuery(constructTemplate, executableQuery, queryLogger);
@@ -308,7 +307,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
                 .newBindings(bindingSet);
 
         // TODO: shall we consider some HTTP headers?
-        QueryLogger tmpQueryLogger = queryLoggerFactory.create(ImmutableMultimap.of());
+        QueryLogger tmpQueryLogger = queryLoggerFactory.create(ImmutableMap.of());
         QueryContext emptyQueryContext = queryContextFactory.create(ImmutableMap.of());
 
         LOGGER.debug("Generating the reference query for {} with ref parameters {}",
@@ -319,7 +318,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     }
 
     private QueryLogger createQueryLogger(PredefinedQuery<?> predefinedQuery, ImmutableMap<String, String> bindings,
-                                          ImmutableMultimap<String, String> httpHeaders) {
+                                          ImmutableMap<String, String> httpHeaders) {
         QueryLogger queryLogger = queryLoggerFactory.create(httpHeaders);
         queryLogger.setPredefinedQuery(predefinedQuery.getId(), bindings);
         return queryLogger;
@@ -354,8 +353,8 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     }
 
     private void evaluateTupleWithHandler(String queryId, ImmutableMap<String, String> bindings, ImmutableList<String> acceptMediaTypes,
-                                          ImmutableMultimap<String, String> httpHeaders, BiConsumer<String, String> httpHeaderSetter,
+                                          ImmutableMap<String, String> httpHeaders, BiConsumer<String, String> httpHeaderSetter,
                                           Consumer<Integer> httpStatusSetter, OutputStream outputStream) {
-        throw new RuntimeException("TODO: support SELECT queries");
+        throw new RuntimeException("TODO: support SELECT queries");
     }
 }

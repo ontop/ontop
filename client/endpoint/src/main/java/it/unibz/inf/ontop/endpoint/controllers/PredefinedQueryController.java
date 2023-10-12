@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.endpoint.controllers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.answering.connection.impl.QuestStatement;
 import it.unibz.inf.ontop.rdf4j.predefined.LateEvaluationOrConversionException;
 import it.unibz.inf.ontop.rdf4j.predefined.OntopRDF4JPredefinedQueryEngine;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -51,10 +51,10 @@ public class PredefinedQueryController {
                 .map(m -> m.getType() + "/" + m.getSubtype())
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableMultimap<String, String> httpHeaders = Collections.list(request.getHeaderNames()).stream()
+        ImmutableMap<String, String> httpHeaders = QuestStatement.normalizeHttpHeaders(Collections.list(request.getHeaderNames()).stream()
                 .flatMap(k -> Collections.list(request.getHeaders(k)).stream()
                         .map(v -> Maps.immutableEntry(k, v)))
-                .collect(ImmutableCollectors.toMultimap());
+                .collect(ImmutableCollectors.toMultimap()));
 
         ImmutableMap<String, String> requestParams = ImmutableMap.copyOf(allRequestParams);
         ServletOutputStream responseOutputStream = response.getOutputStream();

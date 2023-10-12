@@ -42,7 +42,7 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
                                                               Evaluator<TupleResultSet, SelectQuery> selectQueryEvaluator)
             throws OntopQueryEvaluationException, OntopConnectionException,
             OntopReformulationException, OntopResultConversionException {
-        QueryLogger selectQueryLogger = queryLoggerFactory.create(ImmutableMultimap.of());
+        QueryLogger selectQueryLogger = queryLoggerFactory.create(ImmutableMap.of());
         try (TupleResultSet resultSet = selectQueryEvaluator.evaluate(inputQuery.getSelectQuery(), queryContext, selectQueryLogger)) {
             queryLogger.declareResultSetUnblockedAndSerialize();
 
@@ -118,7 +118,7 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
             do {
                 if (currentGraphResultSetIterator == null) {
                     if (constructQueryIterator.hasNext()) {
-                        QueryLogger constructQueryLogger = queryLoggerFactory.create(ImmutableMultimap.of());
+                        QueryLogger constructQueryLogger = queryLoggerFactory.create(ImmutableMap.of());
                         try {
                             GraphResultSet graphResultSet = constructQueryEvaluator.evaluate(constructQueryIterator.next(),
                                     queryContext, constructQueryLogger);

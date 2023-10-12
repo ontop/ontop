@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.rdf4j.predefined.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.rdf4j.predefined.OntopRDF4JPredefinedQueryEngine;
 import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
@@ -16,7 +15,7 @@ public class FakeOntopRDF4JPredefinedQueryEngine implements OntopRDF4JPredefined
 
     @Override
     public void evaluate(String queryId, ImmutableMap<String, String> bindings, ImmutableList<String> acceptMediaTypes,
-                         ImmutableMultimap<String, String> httpHeaders, Consumer<Integer> httpStatusSetter,
+                         ImmutableMap<String, String> httpHeaders, Consumer<Integer> httpStatusSetter,
                          BiConsumer<String, String> httpHeaderSetter, OutputStream outputStream)
             throws QueryEvaluationException, RDFHandlerException {
         // Not-recognized query id
@@ -25,7 +24,7 @@ public class FakeOntopRDF4JPredefinedQueryEngine implements OntopRDF4JPredefined
 
     @Override
     public String evaluate(String queryId, ImmutableMap<String, String> bindings, ImmutableList<String> acceptMediaTypes,
-                           ImmutableMultimap<String, String> httpHeaders, Consumer<Integer> httpStatusSetter,
+                           ImmutableMap<String, String> httpHeaders, Consumer<Integer> httpStatusSetter,
                            BiConsumer<String, String> httpHeaderSetter) {
         // Not-recognized query id
         httpStatusSetter.accept(404);
