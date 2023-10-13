@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
-import it.unibz.inf.ontop.spec.mapping.transformer.impl.TMappingEntry;
+import it.unibz.inf.ontop.spec.mapping.transformer.impl.MappingAssertionUnion;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -61,7 +61,8 @@ public class MappingAssertionMergeWithCQCTest {
                 "id", integerDBType, false,
                 "first_name", stringDBType, false,
                 "last_name", stringDBType, false,
-                "ssn", stringDBType, true);
+                "ssn", stringDBType, true,
+                "kind", integerDBType, false);
 
         TABLE_ADDRESS = builder.createDatabaseRelation("ADDRESS",
                 "ID", integerDBType, false,
@@ -76,7 +77,7 @@ public class MappingAssertionMergeWithCQCTest {
         IQ affiliatedWriterIQ = getAffiliatedWritersIQ(ImmutableMap.of(0, C));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        TMappingEntry entry = new TMappingEntry(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
         entry.add(new MappingAssertion(authorIQ, null));
         entry.add(new MappingAssertion(affiliatedWriterIQ, null));
         MappingAssertion result = entry.build().get();
@@ -90,7 +91,7 @@ public class MappingAssertionMergeWithCQCTest {
         IQ affiliatedWriterIQ = getAffiliatedWritersIQ(ImmutableMap.of(0, C));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        TMappingEntry entry = new TMappingEntry(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
         entry.add(new MappingAssertion(affiliatedWriterIQ, null));
         entry.add(new MappingAssertion(authorIQ, null));
         MappingAssertion result = entry.build().get();
@@ -124,7 +125,7 @@ public class MappingAssertionMergeWithCQCTest {
         IQ studentIQ2 = getStudentIQ(ImmutableMap.of(0, C, 2, B));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        TMappingEntry entry = new TMappingEntry(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
         entry.add(new MappingAssertion(studentIQ1, null));
         entry.add(new MappingAssertion(studentIQ2, null));
         MappingAssertion result = entry.build().get();
@@ -138,7 +139,7 @@ public class MappingAssertionMergeWithCQCTest {
         IQ studentIQ2 = getStudentIQ(ImmutableMap.of(0, C, 2, B));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        TMappingEntry entry = new TMappingEntry(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
         entry.add(new MappingAssertion(studentIQ2, null));
         entry.add(new MappingAssertion(studentIQ1, null));
         MappingAssertion result = entry.build().get();
@@ -176,7 +177,7 @@ public class MappingAssertionMergeWithCQCTest {
                                 IQ_FACTORY.createExtensionalDataNode(TABLE_ADDRESS, ImmutableMap.of(0, C, 1, B)))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        TMappingEntry entry = new TMappingEntry(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
         entry.add(new MappingAssertion(addressIQ1, null));
         entry.add(new MappingAssertion(addressIQ2, null));
         MappingAssertion result = entry.build().get();
@@ -204,7 +205,7 @@ public class MappingAssertionMergeWithCQCTest {
                                 IQ_FACTORY.createExtensionalDataNode(TABLE_ADDRESS, ImmutableMap.of(0, C, 1, B)))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        TMappingEntry entry = new TMappingEntry(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
         entry.add(new MappingAssertion(addressIQ2, null));
         entry.add(new MappingAssertion(addressIQ1, null));
         MappingAssertion result = entry.build().get();
@@ -234,7 +235,7 @@ public class MappingAssertionMergeWithCQCTest {
                         IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 3, B)))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        TMappingEntry entry = new TMappingEntry(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
         entry.add(new MappingAssertion(studentIQ1, null));
         entry.add(new MappingAssertion(studentIQ2, null));
         MappingAssertion result = entry.build().get();
@@ -273,7 +274,7 @@ public class MappingAssertionMergeWithCQCTest {
                                 IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 3, B)))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        TMappingEntry entry = new TMappingEntry(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
         entry.add(new MappingAssertion(studentIQ1, null));
         entry.add(new MappingAssertion(studentIQ2, null));
         MappingAssertion result = entry.build().get();
@@ -285,6 +286,101 @@ public class MappingAssertionMergeWithCQCTest {
                                         O, TERM_FACTORY.getConstantIRI(PERSON))),
                         IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(B)),
                                 IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(3, B))))), result.getQuery());
+    }
+
+
+    @Test
+    public void testRedundancyDueToAdditionalFilters() {
+
+        IQ addressIQ1 = IQ_FACTORY.createIQ(ATOM_FACTORY.getDistinctTripleAtom(S, P, O),
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
+                                SUBSTITUTION_FACTORY.getSubstitution(S, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_STUDENT, ImmutableList.of(C)),
+                                        P, TERM_FACTORY.getConstantIRI(RDF.TYPE),
+                                        O, TERM_FACTORY.getConstantIRI(PERSON))),
+                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(
+                                TERM_FACTORY.getDisjunction(
+                                        TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(1)),
+                                        TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(2)))),
+                                IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 4, B)))));
+
+        IQ addressIQ2 = IQ_FACTORY.createIQ(ATOM_FACTORY.getDistinctTripleAtom(S, P, O),
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
+                                SUBSTITUTION_FACTORY.getSubstitution(S, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_STUDENT, ImmutableList.of(C)),
+                                        P, TERM_FACTORY.getConstantIRI(RDF.TYPE),
+                                        O, TERM_FACTORY.getConstantIRI(PERSON))),
+                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(
+                                        TERM_FACTORY.getDisjunction(
+                                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(1)),
+                                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(2)),
+                                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(3)))),
+                                IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 4, B)))));
+
+        ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        entry.add(new MappingAssertion(addressIQ1, null));
+        entry.add(new MappingAssertion(addressIQ2, null));
+        MappingAssertion result = entry.build().get();
+        assertEquals(IQ_FACTORY.createIQ(ATOM_FACTORY.getDistinctTripleAtom(S, P, O),
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
+                                SUBSTITUTION_FACTORY.getSubstitution(S, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_STUDENT, ImmutableList.of(C)),
+                                        P, TERM_FACTORY.getConstantIRI(RDF.TYPE),
+                                        O, TERM_FACTORY.getConstantIRI(PERSON))),
+                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(
+                                        TERM_FACTORY.getDisjunction(
+                                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(3)),
+                                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(2)),
+                                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(1)))),
+                                IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 4, B))))), result.getQuery());
+    }
+
+    @Test
+    public void testRedundancyDueToAdditionalFiltersReverseOrder() {
+
+        IQ addressIQ1 = IQ_FACTORY.createIQ(ATOM_FACTORY.getDistinctTripleAtom(S, P, O),
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
+                                SUBSTITUTION_FACTORY.getSubstitution(S, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_STUDENT, ImmutableList.of(C)),
+                                        P, TERM_FACTORY.getConstantIRI(RDF.TYPE),
+                                        O, TERM_FACTORY.getConstantIRI(PERSON))),
+                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(
+                                        TERM_FACTORY.getDisjunction(
+                                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(1)),
+                                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(2)))),
+                                IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 4, B)))));
+
+        IQ addressIQ2 = IQ_FACTORY.createIQ(ATOM_FACTORY.getDistinctTripleAtom(S, P, O),
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
+                                SUBSTITUTION_FACTORY.getSubstitution(S, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_STUDENT, ImmutableList.of(C)),
+                                        P, TERM_FACTORY.getConstantIRI(RDF.TYPE),
+                                        O, TERM_FACTORY.getConstantIRI(PERSON))),
+                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(
+                                        TERM_FACTORY.getDisjunction(
+                                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(1)),
+                                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(2)),
+                                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(3)))),
+                                IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 4, B)))));
+
+        ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        entry.add(new MappingAssertion(addressIQ2, null));
+        entry.add(new MappingAssertion(addressIQ1, null));
+        MappingAssertion result = entry.build().get();
+        assertEquals(IQ_FACTORY.createIQ(ATOM_FACTORY.getDistinctTripleAtom(S, P, O),
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
+                                SUBSTITUTION_FACTORY.getSubstitution(S, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_STUDENT, ImmutableList.of(C)),
+                                        P, TERM_FACTORY.getConstantIRI(RDF.TYPE),
+                                        O, TERM_FACTORY.getConstantIRI(PERSON))),
+                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(
+                                        TERM_FACTORY.getDisjunction(
+                                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(3)),
+                                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(2)),
+                                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(1)))),
+                                IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 4, B))))), result.getQuery());
     }
 
 }

@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.constraints.Homomorphism;
 import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeHomomorphismIteratorImpl;
@@ -28,14 +25,14 @@ import java.util.stream.Collector;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class TMappingEntry {
+public class MappingAssertionUnion {
 
-    public static Collector<MappingAssertion, TMappingEntry, Optional<MappingAssertion>> toMappingAssertion(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger) {
+    public static Collector<MappingAssertion, MappingAssertionUnion, Optional<MappingAssertion>> toMappingAssertion(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger) {
         return Collector.of(
-                () -> new TMappingEntry(cqc, coreSingletons, queryMerger), // Supplier
-                TMappingEntry::add, // Accumulator
+                () -> new MappingAssertionUnion(cqc, coreSingletons, queryMerger), // Supplier
+                MappingAssertionUnion::add, // Accumulator
                 (b1, b2) -> { throw new MinorOntopInternalBugException("no merge"); }, // Merger
-                TMappingEntry::build, // Finisher
+                MappingAssertionUnion::build, // Finisher
                 Collector.Characteristics.UNORDERED);
     }
 
@@ -48,7 +45,7 @@ public class TMappingEntry {
     private final CoreSingletons coreSingletons;
     private final UnionBasedQueryMerger queryMerger;
 
-    public TMappingEntry(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger) {
+    public MappingAssertionUnion(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger) {
         this.cqc = cqc;
         this.termFactory = coreSingletons.getTermFactory();
         this.iqFactory = coreSingletons.getIQFactory();
@@ -57,7 +54,7 @@ public class TMappingEntry {
         this.queryMerger = queryMerger;
     }
 
-    public TMappingEntry add(MappingAssertion assertion) {
+    public MappingAssertionUnion add(MappingAssertion assertion) {
         Optional<ConjunctiveIQ> cq = extractConjunctiveIQ(assertion);
         cq.ifPresentOrElse(this::mergeMappingsWithCQC, () -> otherIqs.add(assertion.getQuery()));
         return this;
@@ -68,10 +65,10 @@ public class TMappingEntry {
         private final Substitution<ImmutableTerm> substitution;
         private final ImmutableList<ExtensionalDataNode> extensionalDataNodes;
         private final Optional<ValuesNode> valuesNode;
-        private final ImmutableList<ImmutableList<ImmutableExpression>> filter;
-        private final ImmutableList<ImmutableExpression> constantsFilter;
+        private final DisjunctionOfConjunctions filter;
+        private final ImmutableSet<ImmutableExpression> constantsFilter;
 
-        ConjunctiveIQ(DistinctVariableOnlyDataAtom projectionAtom, ConstructionNode constructionNode, ImmutableList<ExtensionalDataNode> extensionalDataNodes, Optional<ValuesNode> valuesNode, ImmutableList<ImmutableList<ImmutableExpression>> filter) {
+        ConjunctiveIQ(DistinctVariableOnlyDataAtom projectionAtom, ConstructionNode constructionNode, ImmutableList<ExtensionalDataNode> extensionalDataNodes, Optional<ValuesNode> valuesNode, DisjunctionOfConjunctions filter) {
             this.projectionAtom = projectionAtom;
             this.substitution = constructionNode.getSubstitution();
             this.valuesNode = valuesNode;
@@ -102,24 +99,19 @@ public class TMappingEntry {
                     .flatMap(me -> me.getValue().entrySet().stream()
                             .map(e -> Maps.immutableEntry(e.getValue(), extensionalDataNodes.get(me.getKey()).getArgumentMap().get(e.getKey()))))
                     .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()))
-                    .collect(ImmutableCollectors.toList());
+                    .collect(ImmutableCollectors.toSet());
 
-            if (constantsFilter.isEmpty())
-                this.filter = filter;
-            else
-                this.filter = filter.isEmpty()
-                        ? ImmutableList.of(constantsFilter)
-                        : ImmutableList.of(Stream.concat(constantsFilter.stream(), filter.get(0).stream()).collect(ImmutableCollectors.toList()));
+            this.filter = DisjunctionOfConjunctions.getAND(filter, constantsFilter);
         }
 
-        ConjunctiveIQ(ConjunctiveIQ other, ImmutableList<ImmutableList<ImmutableExpression>> filter) {
+        ConjunctiveIQ(ConjunctiveIQ other, DisjunctionOfConjunctions filter) {
             this.projectionAtom = other.projectionAtom;
             this.substitution = other.substitution;
             this.extensionalDataNodes = other.extensionalDataNodes;
             this.valuesNode = other.valuesNode;
 
             this.filter = filter;
-            this.constantsFilter = ImmutableList.of();
+            this.constantsFilter = ImmutableSet.of();
         }
 
         IQ asIQ() {
@@ -131,7 +123,7 @@ public class TMappingEntry {
         IQTree getTree() {
             // assumes that filterAtoms is a possibly empty list of non-empty lists
             Optional<ImmutableExpression> mergedConditions = termFactory.getDisjunction(
-                    filter.stream().map(termFactory::getConjunction));
+                    filter.get().stream().map(e -> termFactory.getConjunction(ImmutableList.copyOf(e))));
 
             if (extensionalDataNodes.isEmpty() && valuesNode.isEmpty())
                     return iqFactory.createTrueNode();
@@ -149,16 +141,14 @@ public class TMappingEntry {
         }
 
         public ImmutableList<ImmutableTerm> getHeadTerms() { return substitution.applyToTerms(projectionAtom.getArguments());  }
-        
+
         public Substitution<ImmutableTerm> getSubstitution() { return substitution; }
 
         public ImmutableList<ExtensionalDataNode> getDatabaseAtoms() { return extensionalDataNodes; }
 
         public Optional<ValuesNode> getValuesNode() { return valuesNode; }
 
-        public ImmutableList<ImmutableList<ImmutableExpression>> getConditions() { return filter; }
-
-        // there is a .contains() method call that relies on equals
+        public DisjunctionOfConjunctions getConditions() { return filter; }
 
         @Override
         public int hashCode() {
@@ -190,13 +180,13 @@ public class TMappingEntry {
         ConstructionNode constructionNode = (ConstructionNode) assertion.getQuery().getTree().getRootNode();
         IQTree topTree = assertion.getTopChild();
         if (topTree instanceof TrueNode) {
-            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of(), Optional.empty(), ImmutableList.of()));
+            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of(), Optional.empty(), DisjunctionOfConjunctions.empty()));
         }
         if (topTree instanceof ExtensionalDataNode) {
-            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of((ExtensionalDataNode) topTree), Optional.empty(), ImmutableList.of()));
+            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of((ExtensionalDataNode) topTree), Optional.empty(), DisjunctionOfConjunctions.empty()));
         }
         if (topTree instanceof ValuesNode) {
-            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of(), Optional.of((ValuesNode) topTree), ImmutableList.of()));
+            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of(), Optional.of((ValuesNode) topTree), DisjunctionOfConjunctions.empty()));
         }
 
         QueryNode topNode = topTree.getRootNode();
@@ -204,9 +194,9 @@ public class TMappingEntry {
             ImmutableExpression filter = ((FilterNode)topNode).getFilterCondition();
             IQTree childTree = ((UnaryIQTree)topTree).getChild();
             if (childTree instanceof ExtensionalDataNode)
-                return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of((ExtensionalDataNode) childTree), Optional.empty(), getDisjunctionOfConjunctions(filter)));
+                return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of((ExtensionalDataNode) childTree), Optional.empty(), DisjunctionOfConjunctions.of(filter)));
             if (childTree instanceof ValuesNode)
-                return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of(), Optional.of((ValuesNode) childTree), getDisjunctionOfConjunctions(filter)));
+                return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of(), Optional.of((ValuesNode) childTree), DisjunctionOfConjunctions.of(filter)));
         }
 
         if (topNode instanceof InnerJoinNode) {
@@ -222,19 +212,15 @@ public class TMappingEntry {
                     .collect(ImmutableCollectors.toList());
 
             if (extensionalDataNodes.size() + valuesNodes.size() == childrenTrees.size() && valuesNodes.size() <= 1) {
-                ImmutableList<ImmutableList<ImmutableExpression>> filter = ((InnerJoinNode) topNode).getOptionalFilterCondition()
-                        .map(this::getDisjunctionOfConjunctions)
-                        .orElseGet(ImmutableList::of);
+                DisjunctionOfConjunctions filter = ((InnerJoinNode) topNode).getOptionalFilterCondition()
+                        .map(DisjunctionOfConjunctions::of)
+                        .orElseGet(DisjunctionOfConjunctions::empty);
 
                 return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, extensionalDataNodes, valuesNodes.stream().findFirst(), filter));
             }
         }
 
         return Optional.empty();
-    }
-
-    private ImmutableList<ImmutableList<ImmutableExpression>> getDisjunctionOfConjunctions(ImmutableExpression condition) {
-        return ImmutableList.of(condition.flattenAND().collect(ImmutableCollectors.toList()));
     }
 
     public Optional<MappingAssertion> build() {
@@ -245,6 +231,8 @@ public class TMappingEntry {
 
         return query.map(q -> new MappingAssertion(q, null));
     }
+
+
 
 
     /***
@@ -268,106 +256,92 @@ public class TMappingEntry {
      *     S(x,z) :- R(x,y,z), OR(y > 7, y = 2)
      */
 
-    private void mergeMappingsWithCQC(ConjunctiveIQ assertion) {
+    private void mergeMappingsWithCQC(ConjunctiveIQ newCiq) {
 
-        if (conjunctiveIqs.contains(assertion))
+        //System.out.println("PROCESSING: " + newCiq);
+
+        if (conjunctiveIqs.contains(newCiq))
             return;
 
-        if (assertion.getValuesNode().isPresent()) {
-            conjunctiveIqs.add(assertion); // facts are just added
+        if (newCiq.getValuesNode().isPresent()) {
+            conjunctiveIqs.add(newCiq); // facts are just added
             return;
         }
 
-        Iterator<ConjunctiveIQ> mappingIterator = conjunctiveIqs.iterator();
-        while (mappingIterator.hasNext()) {
+        Iterator<ConjunctiveIQ> iterator = conjunctiveIqs.iterator();
+        while (iterator.hasNext()) {
 
-            ConjunctiveIQ current = mappingIterator.next();
-            // to and from refer to "to assertion" and "from assertion"
+            ConjunctiveIQ currentCiq = iterator.next();
 
             boolean couldIgnore = false;
 
-            Optional<Homomorphism> to = getHomomorphismIterator(current, assertion)
+            Optional<Homomorphism> toNewCiq = getHomomorphismIterator(currentCiq, newCiq)
                             .filter(Iterator::hasNext)
                             .map(Iterator::next);
 
-            if (to.isPresent()) {
-                if (current.getConditions().isEmpty() ||
-                        (current.getConditions().size() == 1 &&
-                                assertion.getConditions().size() == 1 &&
-                                // rule1.getConditions().get(0) contains all images of rule2.getConditions.get(0)
-                                current.getConditions().get(0).stream()
-                                        .map(atom -> to.get().applyToBooleanExpression(atom, termFactory))
-                                        .allMatch(atom -> assertion.getConditions().get(0).contains(atom)))) {
-
-                    if (assertion.getDatabaseAtoms().size() < current.getDatabaseAtoms().size()) {
+            if (toNewCiq.isPresent()) { // there is a homomorphism currentCiq -> newCiq
+                if (canHomomorphismBeExtendedToFilters(toNewCiq.get(), currentCiq, newCiq)) {
+                    if (newCiq.getDatabaseAtoms().size() < currentCiq.getDatabaseAtoms().size()) {
                         couldIgnore = true;
+                        //System.out.println("TME-COULD-IGNORE: " + currentCiq + " AND " + newCiq);
                     }
                     else {
-                        // if the new mapping is redundant and there are no conditions then do not add anything
+                        //System.out.println("TME-REDUNDANT: " + currentCiq + " AND " + newCiq);
                         return;
                     }
                 }
             }
 
-            Optional<Homomorphism> from = getHomomorphismIterator(assertion, current)
+            Optional<Homomorphism> fromNewCiq = getHomomorphismIterator(newCiq, currentCiq)
                             .filter(Iterator::hasNext)
                             .map(Iterator::next);
 
-            if (from.isPresent()) {
-                if (assertion.getConditions().isEmpty() ||
-                        (assertion.getConditions().size() == 1 &&
-                                current.getConditions().size() == 1 &&
-                                // rule1.getConditions().get(0) contains all images of rule2.getConditions.get(0)
-                                assertion.getConditions().get(0).stream()
-                                        .map(atom -> from.get().applyToBooleanExpression(atom, termFactory))
-                                        .allMatch(atom -> current.getConditions().get(0).contains(atom)))) {
-
-                    // The existing query is more specific than the new query, so we
-                    // need to add the new query and remove the old
-                    mappingIterator.remove();
+            if (fromNewCiq.isPresent()) {
+                if (canHomomorphismBeExtendedToFilters(fromNewCiq.get(), newCiq, currentCiq)) {
+                    //System.out.println("TME-MORE-SPECIFIC: " + currentCiq + " AND " + newCiq);
+                    iterator.remove();
                     continue;
                 }
             }
 
             if (couldIgnore) {
                 // if the new mapping is redundant and there are no conditions then do not add anything
+                //System.out.println("TME-COULD-IGNORE-REMOVE: " + currentCiq + " AND " + newCiq);
                 return;
             }
 
-            if (to.isPresent() && from.isPresent()) {
+            if (toNewCiq.isPresent() && fromNewCiq.isPresent()) {
                 // We found an equivalence, we will try to merge the conditions of
                 // newRule into the current
                 // Here we can merge conditions of the new query with the one we have just found
-                // new map always has just one set of filters  !!
-                ImmutableList<ImmutableExpression> newf = assertion.getConditions().get(0).stream()
-                        .map(atom -> from.get().applyToBooleanExpression(atom, termFactory))
-                        .collect(ImmutableCollectors.toList());
+                DisjunctionOfConjunctions newf = newCiq.getConditions().get().stream()
+                        .map(d -> d.stream().map(atom -> fromNewCiq.get().applyToBooleanExpression(atom, termFactory))
+                                .collect(ImmutableCollectors.toSet()))
+                        .collect(DisjunctionOfConjunctions.toDisjunctionOfConjunctions());
 
-                ImmutableSet<Variable> newfVars = newf.stream()
-                        .flatMap(ImmutableTerm::getVariableStream)
-                        .collect(ImmutableCollectors.toSet());
-                ImmutableSet<Variable> ccVars = current.getDatabaseAtoms().stream()
+                ImmutableSet<Variable> newfVars = newf.getVariables();
+                ImmutableSet<Variable> ccVars = currentCiq.getDatabaseAtoms().stream()
                         .flatMap(a -> a.getVariables().stream())
                         .collect(ImmutableCollectors.toSet());
-                if (ccVars.containsAll(newfVars)) {
-                    // if each of the existing conditions in one of the filter groups
-                    // is found in the new filter then the new filter is redundant
-                    if (current.getConditions().stream().anyMatch(newf::containsAll))
-                        return;
 
-                    // REPLACE THE CURRENT RULE
-                    mappingIterator.remove();
-                    conjunctiveIqs.add(new ConjunctiveIQ(current, Stream.concat(
-                            current.getConditions().stream()
-                                    // if each of the new conditions is found among econd then the old condition is redundant
-                                    .filter(f -> !f.containsAll(newf)),
-                            Stream.of(newf))
-                            .collect(ImmutableCollectors.toList())));
+                if (ccVars.containsAll(newfVars)) {
+                    DisjunctionOfConjunctions newC = DisjunctionOfConjunctions.getOR(currentCiq.getConditions(), newf);
+                    if (!newC.equals(currentCiq.getConditions())) {
+                        iterator.remove();
+                        conjunctiveIqs.add(new ConjunctiveIQ(currentCiq, newC));
+                        //if (!currentCiq.toString().contains("QUEST_"))
+                        //    System.out.println("TME-REPLACE: " + currentCiq + " AND " + newCiq);
+                    }
+                    //else
+                    //    System.out.println("TME-IGNORE-AS-INCLUDED: " + currentCiq + " AND " + newCiq);
+
                     return;
                 }
+                //else
+                //    System.out.println("TME-CAN'T-DO-MUCH: " + currentCiq + " AND " + newCiq + " CC " + ccVars + " NEWF " + newfVars);
             }
         }
-        conjunctiveIqs.add(assertion);
+        conjunctiveIqs.add(newCiq);
     }
 
     private Optional<Iterator<Homomorphism>> getHomomorphismIterator(ConjunctiveIQ from, ConjunctiveIQ to) {
@@ -380,5 +354,16 @@ public class TMappingEntry {
                 h,
                 from.getDatabaseAtoms(),
                 cqc.chase(to.getDatabaseAtoms())));
+    }
+
+    private boolean canHomomorphismBeExtendedToFilters(Homomorphism h, ConjunctiveIQ from, ConjunctiveIQ to) {
+        return (from.getConditions().get().isEmpty()
+                || (from.getConditions().get().size() == 1
+                    && to.getConditions().get().size() == 1
+                    // both to and from contain a single set of conditions
+                    // to contains h-images of all conditions of from
+                    && from.getConditions().get().iterator().next().stream()
+                        .map(atom -> h.applyToBooleanExpression(atom, termFactory))
+                        .allMatch(atom -> to.getConditions().get().iterator().next().contains(atom))));
     }
 }

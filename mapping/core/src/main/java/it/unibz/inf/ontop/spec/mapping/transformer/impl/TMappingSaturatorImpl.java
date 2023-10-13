@@ -131,7 +131,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                 original.asMap().entrySet().stream()
                         .filter(e -> !saturated.containsKey(e.getKey()))
                         .map(e -> e.getValue().stream()
-                                        .collect(TMappingEntry.toMappingAssertion(cqc, coreSingletons, queryMerger)))
+                                        .collect(MappingAssertionUnion.toMappingAssertion(cqc, coreSingletons, queryMerger)))
                         .map(Optional::get))
                 .collect(ImmutableCollectors.toList());
     }
@@ -146,7 +146,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                 .map(s -> transformerProvider.apply(s, representative))
                 .flatMap(u -> original.get(u.getFromIndex()).stream()
                         .map(u::updateConstructionNodeIri))
-                .collect(TMappingEntry.toMappingAssertion(cqc, coreSingletons, queryMerger));
+                .collect(MappingAssertionUnion.toMappingAssertion(cqc, coreSingletons, queryMerger));
     }
 
     private static <T> Stream<T> getSubsumees(EquivalencesDAG<T> dag, Equivalences<T> node) {
