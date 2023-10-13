@@ -91,11 +91,8 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
         // see https://www.w3.org/TR/owl2-new-features/#F12:_Punning
 
         ImmutableMultimap<MappingAssertionIndex, MappingAssertion> original = mapping.stream()
-                .flatMap(a -> Stream.of(a.getQuery())
-                        .map(IQ::normalizeForOptimization) // replaces join equalities
-                        .map(q -> mappingCqcOptimizer.optimize(cqc, q))
-                        .map(q -> Maps.immutableEntry(a.getIndex(), a.copyOf(q))))
-                .collect(ImmutableCollectors.toMultimap());
+                .map(m -> optmize(cqc, m))
+                .collect(ImmutableCollectors.toMultimap(MappingAssertion::getIndex, m -> m));
 
         ImmutableMap<MappingAssertionIndex, MappingAssertion> saturated = original.keySet().stream()
                 .map(MappingAssertionIndex::getPredicate)
@@ -136,6 +133,11 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                 .collect(ImmutableCollectors.toList());
     }
 
+    private MappingAssertion optmize(ExtensionalDataNodeListContainmentCheck cqc, MappingAssertion m) {
+        IQ optimizedIQ = m.getQuery().normalizeForOptimization();
+        IQ cqcOptimizedIQ = mappingCqcOptimizer.optimize(cqc, optimizedIQ);
+        return m.copyOf(cqcOptimizedIQ);
+    }
 
     private <T> Optional<MappingAssertion> saturate(T representative, Stream<T> subsumees,
                                                     ImmutableMultimap<MappingAssertionIndex, MappingAssertion> original,
@@ -145,7 +147,8 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
         return subsumees
                 .map(s -> transformerProvider.apply(s, representative))
                 .flatMap(u -> original.get(u.getFromIndex()).stream()
-                        .map(u::updateConstructionNodeIri))
+                        .map(u::updateConstructionNodeIri)
+                        .map(m -> u.needOptimization() ? optmize(cqc, m) : m))
                 .collect(MappingAssertionUnion.toMappingAssertion(cqc, coreSingletons, queryMerger));
     }
 
@@ -157,13 +160,17 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
     private class MappingAssertionConstructionNodeTransformer {
         private final MappingAssertionIndex fromIndex, toIndex;
         private final Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> termTransformer;
-        MappingAssertionConstructionNodeTransformer(MappingAssertionIndex fromIndex, MappingAssertionIndex toIndex, Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> termTransformer) {
+        private final boolean needOptimization;
+        MappingAssertionConstructionNodeTransformer(MappingAssertionIndex fromIndex, MappingAssertionIndex toIndex, Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> termTransformer, boolean needOptimization) {
             this.fromIndex = fromIndex;
             this.toIndex = toIndex;
             this.termTransformer = termTransformer;
+            this.needOptimization = needOptimization;
         }
         MappingAssertionIndex getFromIndex() { return fromIndex; }
         MappingAssertionIndex getToIndex() { return toIndex; }
+
+        boolean needOptimization() { return needOptimization; }
 
         MappingAssertion updateConstructionNodeIri(MappingAssertion assertion) {
             IQ query = assertion.getQuery();
@@ -204,7 +211,8 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                 return new MappingAssertionConstructionNodeTransformer(
                         MappingAssertionIndex.ofClass(rdfAtomPredicate, oc.getIRI()),
                         MappingAssertionIndex.ofClass(rdfAtomPredicate, toClass.getIRI()),
-                        args ->  rdfAtomPredicate.updateSPO(args, rdfAtomPredicate.getSubject(args), rdfType, newIri));
+                        args ->  rdfAtomPredicate.updateSPO(args, rdfAtomPredicate.getSubject(args), rdfType, newIri),
+                        false);
             }
             else if (from instanceof ObjectSomeValuesFrom) {
                 ObjectPropertyExpression ope = ((ObjectSomeValuesFrom) from).getProperty();
@@ -213,14 +221,16 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                         MappingAssertionIndex.ofClass(rdfAtomPredicate, toClass.getIRI()),
                         ope.isInverse()
                             ? args -> rdfAtomPredicate.updateSPO(args, rdfAtomPredicate.getObject(args), rdfType, newIri)
-                            : args -> rdfAtomPredicate.updateSPO(args, rdfAtomPredicate.getSubject(args), rdfType, newIri));
+                            : args -> rdfAtomPredicate.updateSPO(args, rdfAtomPredicate.getSubject(args), rdfType, newIri),
+                        true);
             }
             else if (from instanceof DataSomeValuesFrom) {
                 DataPropertyExpression dpe = ((DataSomeValuesFrom) from).getProperty();
                 return new MappingAssertionConstructionNodeTransformer(
                         MappingAssertionIndex.ofProperty(rdfAtomPredicate, dpe.getIRI()),
                         MappingAssertionIndex.ofClass(rdfAtomPredicate, toClass.getIRI()),
-                        args -> rdfAtomPredicate.updateSPO(args, rdfAtomPredicate.getSubject(args), rdfType, newIri));
+                        args -> rdfAtomPredicate.updateSPO(args, rdfAtomPredicate.getSubject(args), rdfType, newIri),
+                        true);
             }
             else
                 throw new MinorOntopInternalBugException("Unexpected type" + from);
@@ -233,7 +243,8 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                     MappingAssertionIndex.ofProperty(rdfAtomPredicate, to.getIRI()),
                     from.isInverse() != to.isInverse()
                             ? args -> rdfAtomPredicate.updateSPO(args, rdfAtomPredicate.getObject(args), newIri, rdfAtomPredicate.getSubject(args))
-                            : args -> rdfAtomPredicate.updateSPO(args, rdfAtomPredicate.getSubject(args), newIri, rdfAtomPredicate.getObject(args)));
+                            : args -> rdfAtomPredicate.updateSPO(args, rdfAtomPredicate.getSubject(args), newIri, rdfAtomPredicate.getObject(args)),
+                    false);
         }
 
         MappingAssertionConstructionNodeTransformer getTransformer(DataPropertyExpression from, DataPropertyExpression to) {
@@ -241,7 +252,8 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
             return new MappingAssertionConstructionNodeTransformer(
                     MappingAssertionIndex.ofProperty(rdfAtomPredicate, from.getIRI()),
                     MappingAssertionIndex.ofProperty(rdfAtomPredicate, to.getIRI()),
-                    args -> rdfAtomPredicate.updateSPO(args, rdfAtomPredicate.getSubject(args), newIri, rdfAtomPredicate.getObject(args)));
+                    args -> rdfAtomPredicate.updateSPO(args, rdfAtomPredicate.getSubject(args), newIri, rdfAtomPredicate.getObject(args)),
+                    false);
         }
     }
 }

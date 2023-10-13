@@ -256,92 +256,76 @@ public class MappingAssertionUnion {
      *     S(x,z) :- R(x,y,z), OR(y > 7, y = 2)
      */
 
-    private void mergeMappingsWithCQC(ConjunctiveIQ newCiq) {
+    private void mergeMappingsWithCQC(ConjunctiveIQ newCIQ) {
 
-        //System.out.println("PROCESSING: " + newCiq);
-
-        if (conjunctiveIqs.contains(newCiq))
+        if (conjunctiveIqs.contains(newCIQ))
             return;
 
-        if (newCiq.getValuesNode().isPresent()) {
-            conjunctiveIqs.add(newCiq); // facts are just added
+        if (newCIQ.getValuesNode().isPresent()) {
+            conjunctiveIqs.add(newCIQ); // facts are just added
             return;
         }
 
         Iterator<ConjunctiveIQ> iterator = conjunctiveIqs.iterator();
         while (iterator.hasNext()) {
 
-            ConjunctiveIQ currentCiq = iterator.next();
+            ConjunctiveIQ currentCIQ = iterator.next();
 
-            boolean couldIgnore = false;
+            boolean currentCiqContainsNewCiqButIsLonger = false;
 
-            Optional<Homomorphism> toNewCiq = getHomomorphismIterator(currentCiq, newCiq)
-                            .filter(Iterator::hasNext)
-                            .map(Iterator::next);
+            Optional<Homomorphism> fromCurrentCIQ = getHomomorphismIterator(currentCIQ, newCIQ)
+                    .filter(Iterator::hasNext)
+                    .map(Iterator::next);
+            Optional<DisjunctionOfConjunctions> currentCIQConditionsImage = fromCurrentCIQ
+                    .map(h -> applyHomomorphism(h, currentCIQ.getConditions()));
 
-            if (toNewCiq.isPresent()) { // there is a homomorphism currentCiq -> newCiq
-                if (canHomomorphismBeExtendedToFilters(toNewCiq.get(), currentCiq, newCiq)) {
-                    if (newCiq.getDatabaseAtoms().size() < currentCiq.getDatabaseAtoms().size()) {
-                        couldIgnore = true;
-                        //System.out.println("TME-COULD-IGNORE: " + currentCiq + " AND " + newCiq);
-                    }
-                    else {
-                        //System.out.println("TME-REDUNDANT: " + currentCiq + " AND " + newCiq);
+            if (fromCurrentCIQ.isPresent()) {
+                if (contains(currentCIQConditionsImage.get(), newCIQ.getConditions())) {
+                    if (newCIQ.getDatabaseAtoms().size() >= currentCIQ.getDatabaseAtoms().size()) {
                         return;
                     }
+                    currentCiqContainsNewCiqButIsLonger = true;
                 }
             }
 
-            Optional<Homomorphism> fromNewCiq = getHomomorphismIterator(newCiq, currentCiq)
-                            .filter(Iterator::hasNext)
-                            .map(Iterator::next);
+            Optional<Homomorphism> fromNewCIQ = getHomomorphismIterator(newCIQ, currentCIQ)
+                    .filter(Iterator::hasNext)
+                    .map(Iterator::next);
+            Optional<DisjunctionOfConjunctions> newCIQConditionsImage = fromNewCIQ
+                    .map(h -> applyHomomorphism(h, newCIQ.getConditions()));
 
-            if (fromNewCiq.isPresent()) {
-                if (canHomomorphismBeExtendedToFilters(fromNewCiq.get(), newCiq, currentCiq)) {
-                    //System.out.println("TME-MORE-SPECIFIC: " + currentCiq + " AND " + newCiq);
+            if (fromNewCIQ.isPresent()) {
+                if (contains(newCIQConditionsImage.get(), currentCIQ.getConditions())) {
                     iterator.remove();
                     continue;
                 }
             }
 
-            if (couldIgnore) {
-                // if the new mapping is redundant and there are no conditions then do not add anything
-                //System.out.println("TME-COULD-IGNORE-REMOVE: " + currentCiq + " AND " + newCiq);
+            if (currentCiqContainsNewCiqButIsLonger) {
                 return;
             }
 
-            if (toNewCiq.isPresent() && fromNewCiq.isPresent()) {
-                // We found an equivalence, we will try to merge the conditions of
-                // newRule into the current
-                // Here we can merge conditions of the new query with the one we have just found
-                DisjunctionOfConjunctions newf = newCiq.getConditions().get().stream()
-                        .map(d -> d.stream().map(atom -> fromNewCiq.get().applyToBooleanExpression(atom, termFactory))
-                                .collect(ImmutableCollectors.toSet()))
-                        .collect(DisjunctionOfConjunctions.toDisjunctionOfConjunctions());
+            if (fromCurrentCIQ.isPresent() && fromNewCIQ.isPresent()) {
+                // We found an equivalence, we will try to merge the conditions of newCIQ into currentCIQ
 
-                ImmutableSet<Variable> newfVars = newf.getVariables();
-                ImmutableSet<Variable> ccVars = currentCiq.getDatabaseAtoms().stream()
+                DisjunctionOfConjunctions mergedConditions = DisjunctionOfConjunctions.getOR(currentCIQ.getConditions(), newCIQConditionsImage.get());
+                if (mergedConditions.equals(currentCIQ.getConditions())) {
+                    return;
+                }
+
+                ImmutableSet<Variable> currentCIQDatabaseAtomVariables = currentCIQ.getDatabaseAtoms().stream()
                         .flatMap(a -> a.getVariables().stream())
                         .collect(ImmutableCollectors.toSet());
 
-                if (ccVars.containsAll(newfVars)) {
-                    DisjunctionOfConjunctions newC = DisjunctionOfConjunctions.getOR(currentCiq.getConditions(), newf);
-                    if (!newC.equals(currentCiq.getConditions())) {
-                        iterator.remove();
-                        conjunctiveIqs.add(new ConjunctiveIQ(currentCiq, newC));
-                        //if (!currentCiq.toString().contains("QUEST_"))
-                        //    System.out.println("TME-REPLACE: " + currentCiq + " AND " + newCiq);
-                    }
-                    //else
-                    //    System.out.println("TME-IGNORE-AS-INCLUDED: " + currentCiq + " AND " + newCiq);
-
+                if (currentCIQDatabaseAtomVariables.containsAll(newCIQConditionsImage.get().getVariables())) {
+                    iterator.remove();
+                    conjunctiveIqs.add(new ConjunctiveIQ(currentCIQ, mergedConditions));
                     return;
                 }
-                //else
-                //    System.out.println("TME-CAN'T-DO-MUCH: " + currentCiq + " AND " + newCiq + " CC " + ccVars + " NEWF " + newfVars);
+                // otherwise, need to merge data atoms - can be tricky
             }
         }
-        conjunctiveIqs.add(newCiq);
+        conjunctiveIqs.add(newCIQ);
     }
 
     private Optional<Iterator<Homomorphism>> getHomomorphismIterator(ConjunctiveIQ from, ConjunctiveIQ to) {
@@ -356,14 +340,16 @@ public class MappingAssertionUnion {
                 cqc.chase(to.getDatabaseAtoms())));
     }
 
-    private boolean canHomomorphismBeExtendedToFilters(Homomorphism h, ConjunctiveIQ from, ConjunctiveIQ to) {
-        return (from.getConditions().get().isEmpty()
-                || (from.getConditions().get().size() == 1
-                    && to.getConditions().get().size() == 1
-                    // both to and from contain a single set of conditions
-                    // to contains h-images of all conditions of from
-                    && from.getConditions().get().iterator().next().stream()
-                        .map(atom -> h.applyToBooleanExpression(atom, termFactory))
-                        .allMatch(atom -> to.getConditions().get().iterator().next().contains(atom))));
+    private DisjunctionOfConjunctions applyHomomorphism(Homomorphism h, DisjunctionOfConjunctions f) {
+        return f.get().stream()
+                .map(d -> d.stream().map(atom -> h.applyToBooleanExpression(atom, termFactory))
+                        .collect(ImmutableCollectors.toSet()))
+                .collect(DisjunctionOfConjunctions.toDisjunctionOfConjunctions());
+    }
+
+    private boolean contains(DisjunctionOfConjunctions f1, DisjunctionOfConjunctions f2) {
+        return f1.get().isEmpty()
+                || !f2.get().isEmpty()
+                    && f2.get().stream().allMatch(c -> f1.get().stream().anyMatch(c::containsAll));
     }
 }
