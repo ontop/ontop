@@ -69,6 +69,11 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
+    public boolean isUserInfoIncludedIntoQueryLog() {
+        return getRequiredBoolean(USER_INFO_INCLUDED_QUERY_LOGGING);
+    }
+
+    @Override
     public boolean isQueryLoggingDecompositionEnabled() {
         return getRequiredBoolean(QUERY_LOGGING_DECOMPOSITION);
     }

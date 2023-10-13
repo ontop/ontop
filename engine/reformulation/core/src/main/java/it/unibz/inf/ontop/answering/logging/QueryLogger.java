@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.answering.logging;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
@@ -34,6 +33,6 @@ public interface QueryLogger {
     void setPredefinedQuery(String queryId, ImmutableMap<String, String> bindings);
 
     interface Factory {
-        QueryLogger create(ImmutableMultimap<String, String> httpHeaders);
+        QueryLogger create(ImmutableMap<String, String> httpHeaders);
     }
 }

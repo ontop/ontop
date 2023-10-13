@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.answering.logging.impl;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.hash.Hashing;
 import com.google.inject.assistedinject.Assisted;
@@ -11,6 +10,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.logging.impl.ClassAndPropertyExtractor.ClassesAndProperties;
 import it.unibz.inf.ontop.answering.logging.impl.QueryTemplateExtractor.QueryTemplateExtraction;
+import it.unibz.inf.ontop.evaluator.impl.QueryContextImpl;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.iq.IQ;
@@ -73,6 +73,10 @@ public class QueryLoggerImpl implements QueryLogger {
     protected static final String PREDEFINED_KEY = "predefined";
     protected static final String PREDEFINED_QUERY_KEY = "queryId";
     protected static final String BINDINGS_KEY = "bindings";
+    protected static final String USER_KEY = "user";
+    protected static final String GROUPS_KEY = "groups";
+    protected static final String ROLES_KEY = "roles";
+
 
     private static final DateFormat  DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
     private static final Logger REGULAR_LOGGER = LoggerFactory.getLogger(QueryLoggerImpl.class);
@@ -81,7 +85,7 @@ public class QueryLoggerImpl implements QueryLogger {
     private final UUID queryId;
     private final long creationTime;
     private final PrintStream outputStream;
-    private final ImmutableMultimap<String, String> httpHeaders;
+    private final ImmutableMap<String, String> httpHeaders;
     private final OntopReformulationSettings settings;
     private final boolean disabled;
     private final String applicationName;
@@ -117,7 +121,7 @@ public class QueryLoggerImpl implements QueryLogger {
     private ImmutableMap<String, String> bindings;
 
     @AssistedInject
-    protected QueryLoggerImpl(@Assisted ImmutableMultimap<String, String> httpHeaders,
+    protected QueryLoggerImpl(@Assisted ImmutableMap<String, String> httpHeaders,
                               OntopReformulationSettings settings,
                               ClassAndPropertyExtractor classAndPropertyExtractor,
                               RelationNameExtractor relationNameExtractor,
@@ -125,7 +129,7 @@ public class QueryLoggerImpl implements QueryLogger {
         this(System.out, httpHeaders, settings, classAndPropertyExtractor, relationNameExtractor, queryTemplateExtractor);
     }
 
-    protected QueryLoggerImpl(PrintStream outputStream, ImmutableMultimap<String, String> httpHeaders,
+    protected QueryLoggerImpl(PrintStream outputStream, ImmutableMap<String, String> httpHeaders,
                               OntopReformulationSettings settings,
                               ClassAndPropertyExtractor classAndPropertyExtractor,
                               RelationNameExtractor relationNameExtractor, QueryTemplateExtractor queryTemplateExtractor) {
@@ -204,6 +208,7 @@ public class QueryLoggerImpl implements QueryLogger {
         js.writeNumberField(REFORMULATION_DURATION_KEY, reformulationTime - creationTime);
         js.writeBooleanField(REFORMULATION_CACHE_HIT_KEY, wasCached);
 
+        writeUserInfo(js);
         writeHttpHeaders(js);
         writeQueryTemplateExtraction(js);
         writePredefinedQueryInfo(js);
@@ -214,15 +219,30 @@ public class QueryLoggerImpl implements QueryLogger {
             js.writeStringField(REFORMULATED_QUERY_KEY, reformulatedQuery.toString());
     }
 
+    private void writeUserInfo(JsonGenerator js) throws IOException {
+        if (settings.isUserInfoIncludedIntoQueryLog()) {
+            var user = httpHeaders.get(QueryContextImpl.USER_HTTP_HEADER_LOWERCASE);
+            if (user != null)
+                js.writeStringField(USER_KEY, user);
+
+            var groups = httpHeaders.get(QueryContextImpl.GROUPS_HTTP_HEADER_LOWERCASE);
+            if (groups != null)
+                js.writeStringField(GROUPS_KEY, groups);
+
+            var roles = httpHeaders.get(QueryContextImpl.ROLES_HTTP_HEADER_LOWERCASE);
+            if (roles != null)
+                js.writeStringField(ROLES_KEY, roles);
+        }
+    }
+
     private void writeHttpHeaders(JsonGenerator js) throws IOException {
         js.writeObjectFieldStart(HTTP_HEADERS_KEY);
         ImmutableSet<String> namesToLog = settings.getHttpHeaderNamesToLog();
 
-        for (Map.Entry<String, Collection<String>> e : httpHeaders.asMap().entrySet()) {
+        for (Map.Entry<String, String> e : httpHeaders.entrySet()) {
             String normalizedKey = e.getKey().toLowerCase();
             if (namesToLog.contains(normalizedKey)) {
-                // We only consider the first value
-                js.writeStringField(normalizedKey, e.getValue().iterator().next());
+                js.writeStringField(normalizedKey, e.getValue());
             }
         }
         js.writeEndObject();

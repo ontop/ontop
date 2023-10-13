@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.rdf4j.predefined;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 
@@ -27,7 +26,7 @@ public interface OntopRDF4JPredefinedQueryEngine {
     void evaluate(String queryId,
                   ImmutableMap<String, String> bindings,
                   ImmutableList<String> acceptMediaTypes,
-                  ImmutableMultimap<String, String> httpHeaders,
+                  ImmutableMap<String, String> httpHeaders,
                   Consumer<Integer> httpStatusSetter,
                   BiConsumer<String, String> httpHeaderSetter,
                   OutputStream outputStream) throws LateEvaluationOrConversionException;
@@ -38,7 +37,7 @@ public interface OntopRDF4JPredefinedQueryEngine {
     String evaluate(String queryId,
                   ImmutableMap<String, String> bindings,
                   ImmutableList<String> acceptMediaTypes,
-                  ImmutableMultimap<String, String> httpHeaders,
+                  ImmutableMap<String, String> httpHeaders,
                   Consumer<Integer> httpStatusSetter,
                   BiConsumer<String, String> httpHeaderSetter);
 

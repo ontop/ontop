@@ -143,6 +143,10 @@
     "type": "Boolean",
     "description": "Includes DB tables/views into the query log."
   },
+  "ontop.queryLogging.includeUserInfo": {
+    "type": "Boolean",
+    "description": "Since 5.2.0. Default value: `false`. If `true`, includes the user ID, his/her groups and roles."
+  },
   "ontop.queryLogging.includeHttpHeader.HEADER_NAME": {
     "type": "Boolean",
     "description": "If true, includes a specific HTTP header (please replace `HEADER_NAME` by the desired one) into the query log."
