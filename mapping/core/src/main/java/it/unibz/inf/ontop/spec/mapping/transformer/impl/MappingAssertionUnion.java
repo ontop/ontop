@@ -108,10 +108,22 @@ public class MappingAssertionUnion {
             this.projectionAtom = other.projectionAtom;
             this.substitution = other.substitution;
             this.extensionalDataNodes = other.extensionalDataNodes;
+
             this.valuesNode = other.valuesNode;
 
             this.filter = filter;
             this.constantsFilter = ImmutableSet.of();
+        }
+
+        ConjunctiveIQ(ConjunctiveIQ other, ValuesNode valuesNode) {
+            this.projectionAtom = other.projectionAtom;
+            this.substitution = other.substitution;
+            this.extensionalDataNodes = other.extensionalDataNodes;
+
+            this.valuesNode = Optional.of(valuesNode);
+
+            this.filter = other.filter;
+            this.constantsFilter = other.constantsFilter;
         }
 
         IQ asIQ() {
@@ -261,10 +273,10 @@ public class MappingAssertionUnion {
         if (conjunctiveIqs.contains(newCIQ))
             return;
 
-        if (newCIQ.getValuesNode().isPresent()) {
-            conjunctiveIqs.add(newCIQ);
-            return;
-        }
+        //if (newCIQ.getValuesNode().isPresent()) {
+        //    conjunctiveIqs.add(newCIQ);
+        //    return;
+        //}
 
         Iterator<ConjunctiveIQ> iterator = conjunctiveIqs.iterator();
         while (iterator.hasNext()) {
@@ -280,10 +292,12 @@ public class MappingAssertionUnion {
                     .map(h -> applyHomomorphism(h, currentCIQ.getConditions()));
 ;
             if (fromCurrentCIQ.isPresent() && contains(currentCIQConditionsImage.get(), newCIQ.getConditions())) {
-                if (newCIQ.getDatabaseAtoms().size() >= currentCIQ.getDatabaseAtoms().size()) {
-                    return;
+                if (contains(fromCurrentCIQ.get(), currentCIQ.getValuesNode(), newCIQ.getValuesNode())) {
+                    if (newCIQ.getDatabaseAtoms().size() >= currentCIQ.getDatabaseAtoms().size()) {
+                        return;
+                    }
+                    currentCiqContainsNewCiqButIsLonger = true;
                 }
-                currentCiqContainsNewCiqButIsLonger = true;
             }
 
             Optional<Homomorphism> fromNewCIQ = getHomomorphismIterator(newCIQ, currentCIQ)
@@ -293,8 +307,10 @@ public class MappingAssertionUnion {
                     .map(h -> applyHomomorphism(h, newCIQ.getConditions()));
 
             if (fromNewCIQ.isPresent() && contains(newCIQConditionsImage.get(), currentCIQ.getConditions())) {
-                iterator.remove();
-                continue;
+                if (contains(fromNewCIQ.get(), newCIQ.getValuesNode(), currentCIQ.getValuesNode())) {
+                    iterator.remove();
+                    continue;
+                }
             }
 
             if (currentCiqContainsNewCiqButIsLonger) {
@@ -302,23 +318,42 @@ public class MappingAssertionUnion {
             }
 
             if (fromCurrentCIQ.isPresent() && fromNewCIQ.isPresent()) {
-                // We found an equivalence, we will try to merge the non-empty conditions of newCIQ into currentCIQ
+                if (currentCIQ.getValuesNode().isEmpty() && newCIQ.getValuesNode().isEmpty()) {
+                    // We found an equivalence, we will try to merge the *non-empty* conditions of newCIQ into currentCIQ
+                    DisjunctionOfConjunctions mergedConditions = DisjunctionOfConjunctions.getOR(currentCIQ.getConditions(), newCIQConditionsImage.get());
+                    if (mergedConditions.equals(currentCIQ.getConditions())) {
+                        System.out.println("MAU-MERGE-CONDITIONS-EQUAL");
+                        return;
+                    }
 
-                DisjunctionOfConjunctions mergedConditions = DisjunctionOfConjunctions.getOR(currentCIQ.getConditions(), newCIQConditionsImage.get());
-                if (mergedConditions.equals(currentCIQ.getConditions())) {
-                    return;
+                    ImmutableSet<Variable> currentCIQDatabaseAtomVariables = currentCIQ.getDatabaseAtoms().stream()
+                            .flatMap(a -> a.getVariables().stream())
+                            .collect(ImmutableCollectors.toSet());
+
+                    if (currentCIQDatabaseAtomVariables.containsAll(newCIQConditionsImage.get().getVariables())) {
+                        iterator.remove();
+                        conjunctiveIqs.add(new ConjunctiveIQ(currentCIQ, mergedConditions));
+                        return;
+                    }
+                    // otherwise, need to merge data atoms - can be tricky
                 }
+                else if (currentCIQ.getConditions().isTrue() && newCIQ.getConditions().isTrue()) {
+                    Optional<ValuesNode> newCQValuesNodeImage = applyHomomorphism(fromNewCIQ.get(), newCIQ.getValuesNode().get());
+                    if (newCQValuesNodeImage.isPresent() && newCQValuesNodeImage.get().getVariables().equals(currentCIQ.getValuesNode().get().getVariables())) {
+                        ImmutableList<ImmutableMap<Variable, Constant>> merged = Stream.concat(
+                                newCQValuesNodeImage.get().getValueMaps().stream(),
+                                currentCIQ.getValuesNode().get().getValueMaps().stream())
+                                .distinct()
+                                .collect(ImmutableCollectors.toList());
 
-                ImmutableSet<Variable> currentCIQDatabaseAtomVariables = currentCIQ.getDatabaseAtoms().stream()
-                        .flatMap(a -> a.getVariables().stream())
-                        .collect(ImmutableCollectors.toSet());
-
-                if (currentCIQDatabaseAtomVariables.containsAll(newCIQConditionsImage.get().getVariables())) {
-                    iterator.remove();
-                    conjunctiveIqs.add(new ConjunctiveIQ(currentCIQ, mergedConditions));
-                    return;
+                        iterator.remove();
+                        conjunctiveIqs.add(new ConjunctiveIQ(currentCIQ, iqFactory.createValuesNode(currentCIQ.getValuesNode().get().getVariables(), merged)));
+                        //System.out.println("MAU-MERGE: " + currentCIQ + " AND " + newCIQ);
+                        return;
+                    }
+                    else
+                        System.out.println("MAU-CANT-MERGE: " + currentCIQ + " AND " + newCIQ);
                 }
-                // otherwise, need to merge data atoms - can be tricky
             }
         }
         conjunctiveIqs.add(newCIQ);
@@ -365,9 +400,15 @@ public class MappingAssertionUnion {
                         .collect(ImmutableCollectors.toList())));
     }
 
-    private boolean contains(Optional<ValuesNode> v1, Optional<ValuesNode> v2) {
-        return v1.isEmpty()
-                || !v2.isEmpty() && v2.get().getValueMaps().stream()
-                        .allMatch(c -> v1.get().getValueMaps().stream().anyMatch(m -> c.entrySet().containsAll(m.entrySet())));
+    private boolean contains(Homomorphism h, Optional<ValuesNode> v1, Optional<ValuesNode> v2) {
+        if (v1.isEmpty())
+            return true;
+
+        Optional<ValuesNode> v1Image = applyHomomorphism(h, v1.get());
+        return v1Image
+                .filter(valuesNode -> v2.isPresent() && v2.get().getValueMaps().stream()
+                        .allMatch(c -> valuesNode.getValueMaps().stream().anyMatch(m -> c.entrySet().containsAll(m.entrySet()))))
+                .isPresent();
+
     }
 }
