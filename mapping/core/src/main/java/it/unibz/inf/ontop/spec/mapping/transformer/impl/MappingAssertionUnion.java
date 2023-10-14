@@ -14,7 +14,9 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -66,42 +68,77 @@ public class MappingAssertionUnion {
         private final ImmutableList<ExtensionalDataNode> extensionalDataNodes;
         private final Optional<ValuesNode> valuesNode;
         private final DisjunctionOfConjunctions filter;
-        private final ImmutableSet<ImmutableExpression> constantsFilter;
 
         ConjunctiveIQ(DistinctVariableOnlyDataAtom projectionAtom, ConstructionNode constructionNode, ImmutableList<ExtensionalDataNode> extensionalDataNodes, Optional<ValuesNode> valuesNode, DisjunctionOfConjunctions filter) {
-            this.projectionAtom = projectionAtom;
-            this.substitution = constructionNode.getSubstitution();
-            this.valuesNode = valuesNode;
 
             VariableGenerator variableGenerator = coreSingletons.getCoreUtilsFactory().createVariableGenerator(
                     Stream.concat(constructionNode.getVariables().stream(),
                                     Stream.concat(extensionalDataNodes.stream().flatMap(n -> n.getVariables().stream()),
                                             valuesNode.stream().flatMap(n -> n.getVariables().stream())))
                             .collect(ImmutableCollectors.toSet()));
-                    ;
+            ;
+            this.projectionAtom = projectionAtom;
+
+            // replaces constant IRI in the object position of properties with a ValueNode
+            RDFAtomPredicate rdfAtomPredicate = (RDFAtomPredicate) projectionAtom.getPredicate();
+            ImmutableList<ImmutableTerm> args = constructionNode.getSubstitution().apply(projectionAtom.getArguments());
+            final ImmutableMap<Variable, Constant> constantObjectEntry;
+            if (rdfAtomPredicate.getPropertyIRI(args).filter(i -> !i.equals(RDF.TYPE)).isPresent()
+                    && rdfAtomPredicate.getObject(args) instanceof IRIConstant) {
+                IRIConstant constant = (IRIConstant) rdfAtomPredicate.getObject(args);
+                Variable fresh = variableGenerator.generateNewVariable();
+                this.substitution = constructionNode.getSubstitution().transform(v -> v.equals(constant) ? termFactory.getIRIFunctionalTerm(fresh) : v);
+                constantObjectEntry = ImmutableMap.of(fresh, termFactory.getDBStringConstant(constant.getIRI().getIRIString()));
+            }
+            else {
+                this.substitution = constructionNode.getSubstitution();
+                constantObjectEntry = ImmutableMap.of();
+            }
+
+            // replaces constants in extensional data nodes with a ValueNode
             ImmutableMap<Integer, ImmutableMap<Integer, Variable>> variableMap = IntStream.range(0, extensionalDataNodes.size())
                     .boxed()
                     .collect(ImmutableCollectors.toMap(i -> i, i -> extensionalDataNodes.get(i).getArgumentMap().entrySet().stream()
-                            .filter(e -> !(e.getValue() instanceof Variable))
+                            .filter(e -> e.getValue() instanceof Constant)
                             .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> variableGenerator.generateNewVariable()))));
 
-            this.extensionalDataNodes = IntStream.range(0, extensionalDataNodes.size())
-                    .mapToObj(i -> iqFactory.createExtensionalDataNode(
-                            extensionalDataNodes.get(i).getRelationDefinition(),
-                            extensionalDataNodes.get(i).getArgumentMap().entrySet().stream()
-                                    .collect(ImmutableCollectors.toMap(
-                                            Map.Entry::getKey,
-                                            e -> Optional.<VariableOrGroundTerm>ofNullable(variableMap.get(i).get(e.getKey())).orElseGet(e::getValue)))))
-                    .collect(ImmutableCollectors.toList());
+            this.extensionalDataNodes = variableMap.isEmpty()
+                    ? extensionalDataNodes
+                    : IntStream.range(0, extensionalDataNodes.size())
+                        .mapToObj(i -> variableMap.get(i).isEmpty()
+                                ? extensionalDataNodes.get(i)
+                                : iqFactory.createExtensionalDataNode(
+                                    extensionalDataNodes.get(i).getRelationDefinition(),
+                                    extensionalDataNodes.get(i).getArgumentMap().entrySet().stream()
+                                        .collect(ImmutableCollectors.toMap(
+                                                Map.Entry::getKey,
+                                                e -> Optional.<VariableOrGroundTerm>ofNullable(variableMap.get(i).get(e.getKey()))
+                                                        .orElseGet(e::getValue)))))
+                        .collect(ImmutableCollectors.toList());
 
+            Optional<ImmutableMap<Variable, Constant>> constantsMap = Optional.of(Stream.concat(
+                            constantObjectEntry.entrySet().stream(),
+                            variableMap.entrySet().stream()
+                                    .flatMap(me -> me.getValue().entrySet().stream()
+                                            .map(e -> Maps.immutableEntry(
+                                                    e.getValue(),
+                                                    (Constant)extensionalDataNodes.get(me.getKey()).getArgumentMap().get(e.getKey())))))
+                    .collect(ImmutableCollectors.toMap()))
+                    .filter(cm -> !cm.isEmpty());
 
-            this.constantsFilter = variableMap.entrySet().stream()
-                    .flatMap(me -> me.getValue().entrySet().stream()
-                            .map(e -> Maps.immutableEntry(e.getValue(), extensionalDataNodes.get(me.getKey()).getArgumentMap().get(e.getKey()))))
-                    .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()))
-                    .collect(ImmutableCollectors.toSet());
+            this.valuesNode = valuesNode
+                    .map(v -> constantsMap
+                            .map(cm -> iqFactory.createValuesNode(
+                                    Sets.union(v.getVariables(), cm.keySet()).immutableCopy(),
+                                    v.getValueMaps().stream()
+                                            .map(m -> Stream.concat(m.entrySet().stream(), cm.entrySet().stream())
+                                                    .collect(ImmutableCollectors.toMap()))
+                                            .collect(ImmutableCollectors.toList())))
+                            .orElse(v))
+                    .or(() -> constantsMap
+                            .map(cm -> iqFactory.createValuesNode(cm.keySet(), ImmutableList.of(cm))));
 
-            this.filter = DisjunctionOfConjunctions.getAND(filter, constantsFilter);
+            this.filter = filter; //DisjunctionOfConjunctions.getAND(filter, constantsMap);
         }
 
         ConjunctiveIQ(ConjunctiveIQ other, DisjunctionOfConjunctions filter) {
@@ -112,7 +149,6 @@ public class MappingAssertionUnion {
             this.valuesNode = other.valuesNode;
 
             this.filter = filter;
-            this.constantsFilter = ImmutableSet.of();
         }
 
         ConjunctiveIQ(ConjunctiveIQ other, ValuesNode valuesNode) {
@@ -123,7 +159,6 @@ public class MappingAssertionUnion {
             this.valuesNode = Optional.of(valuesNode);
 
             this.filter = other.filter;
-            this.constantsFilter = other.constantsFilter;
         }
 
         IQ asIQ() {
@@ -270,13 +305,10 @@ public class MappingAssertionUnion {
 
     private void mergeMappingsWithCQC(ConjunctiveIQ newCIQ) {
 
+        //System.out.println("PROCESSING: " + newCIQ);
+
         if (conjunctiveIqs.contains(newCIQ))
             return;
-
-        //if (newCIQ.getValuesNode().isPresent()) {
-        //    conjunctiveIqs.add(newCIQ);
-        //    return;
-        //}
 
         Iterator<ConjunctiveIQ> iterator = conjunctiveIqs.iterator();
         while (iterator.hasNext()) {
@@ -320,39 +352,38 @@ public class MappingAssertionUnion {
             if (fromCurrentCIQ.isPresent() && fromNewCIQ.isPresent()) {
                 if (currentCIQ.getValuesNode().isEmpty() && newCIQ.getValuesNode().isEmpty()) {
                     // We found an equivalence, we will try to merge the *non-empty* conditions of newCIQ into currentCIQ
-                    DisjunctionOfConjunctions mergedConditions = DisjunctionOfConjunctions.getOR(currentCIQ.getConditions(), newCIQConditionsImage.get());
-                    if (mergedConditions.equals(currentCIQ.getConditions())) {
-                        System.out.println("MAU-MERGE-CONDITIONS-EQUAL");
-                        return;
-                    }
-
                     ImmutableSet<Variable> currentCIQDatabaseAtomVariables = currentCIQ.getDatabaseAtoms().stream()
                             .flatMap(a -> a.getVariables().stream())
                             .collect(ImmutableCollectors.toSet());
 
                     if (currentCIQDatabaseAtomVariables.containsAll(newCIQConditionsImage.get().getVariables())) {
                         iterator.remove();
-                        conjunctiveIqs.add(new ConjunctiveIQ(currentCIQ, mergedConditions));
+                        conjunctiveIqs.add(
+                                new ConjunctiveIQ(currentCIQ,
+                                        DisjunctionOfConjunctions.getOR(currentCIQ.getConditions(), newCIQConditionsImage.get())));
                         return;
                     }
                     // otherwise, need to merge data atoms - can be tricky
                 }
                 else if (currentCIQ.getConditions().isTrue() && newCIQ.getConditions().isTrue()) {
-                    Optional<ValuesNode> newCQValuesNodeImage = applyHomomorphism(fromNewCIQ.get(), newCIQ.getValuesNode().get());
-                    if (newCQValuesNodeImage.isPresent() && newCQValuesNodeImage.get().getVariables().equals(currentCIQ.getValuesNode().get().getVariables())) {
-                        ImmutableList<ImmutableMap<Variable, Constant>> merged = Stream.concat(
-                                newCQValuesNodeImage.get().getValueMaps().stream(),
-                                currentCIQ.getValuesNode().get().getValueMaps().stream())
-                                .distinct()
-                                .collect(ImmutableCollectors.toList());
-
-                        iterator.remove();
-                        conjunctiveIqs.add(new ConjunctiveIQ(currentCIQ, iqFactory.createValuesNode(currentCIQ.getValuesNode().get().getVariables(), merged)));
-                        //System.out.println("MAU-MERGE: " + currentCIQ + " AND " + newCIQ);
-                        return;
+                    ValuesNode currentCIQValuesNode = currentCIQ.getValuesNode().get();
+                    Optional<ValuesNode> optionalNewCIQValuesNodeImage = applyHomomorphism(fromNewCIQ.get(), newCIQ.getValuesNode().get());
+                    if (optionalNewCIQValuesNodeImage.isPresent()) {
+                        ValuesNode newCIQValuesNodeImage = optionalNewCIQValuesNodeImage.get();
+                        if (newCIQValuesNodeImage.getVariables().equals(currentCIQValuesNode.getVariables())) {
+                            iterator.remove();
+                            conjunctiveIqs.add(new ConjunctiveIQ(currentCIQ, iqFactory.createValuesNode(
+                                    currentCIQValuesNode.getVariables(),
+                                    Stream.concat(
+                                                    newCIQValuesNodeImage.getValueMaps().stream(),
+                                                    currentCIQValuesNode.getValueMaps().stream())
+                                            .distinct()
+                                            .collect(ImmutableCollectors.toList()))));
+                            //System.out.println("MAU-MERGE: " + currentCIQ + " AND " + newCIQ);
+                            return;
+                        }
                     }
-                    else
-                        System.out.println("MAU-CANT-MERGE: " + currentCIQ + " AND " + newCIQ);
+                    //System.out.println("MAU-CANT-MERGE: " + currentCIQ + " AND " + newCIQ);
                 }
             }
         }

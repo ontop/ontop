@@ -8,7 +8,9 @@ import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
 import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -24,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MappingAssertionMergeWithCQCTest {
 
-    private static final NamedRelationDefinition TABLE_AFFILIATED_WRITERS, TABLE_AUTHORS, TABLE_STUDENT, TABLE_ADDRESS;
+    private static final NamedRelationDefinition TABLE_AFFILIATED_WRITERS, TABLE_AUTHORS, TABLE_STUDENT, TABLE_ADDRESS, MEASUREMENT, MEASUREMENT_TYPE;
 
     private static final Variable A = TERM_FACTORY.getVariable("a");
     private static final Variable B = TERM_FACTORY.getVariable("b");
@@ -33,19 +35,33 @@ public class MappingAssertionMergeWithCQCTest {
     private static final Variable P = TERM_FACTORY.getVariable("p");
     private static final Variable O = TERM_FACTORY.getVariable("o");
 
+    private static final Variable V0 = TERM_FACTORY.getVariable("v0");
+    private static final Variable V1 = TERM_FACTORY.getVariable("v1");
+
+    private static final Variable ID = TERM_FACTORY.getVariable("id");
+    private static final Variable NAME = TERM_FACTORY.getVariable("name");
+
+
     private static final ImmutableList<Template.Component> URI_TEMPLATE_AUTHOR = Template.of("http://meraka/moss/exampleBooks.owl#author/", 0);
     private static final ImmutableList<Template.Component> URI_TEMPLATE_STUDENT = Template.of("http://example.org/voc#uni1/student/", 0);
     private static final ImmutableList<Template.Component> URI_TEMPLATE_ADDRESS = Template.of("http://www.owl-ontologies.com/Ontology1207768242.owl#address-", 0);
 
+    private static final ImmutableList<Template.Component> URI_TEMPLATE_RESULT = Template.of("http://example.org/weather/observation/result/", 0);
+
     private static final IRI AUTHOR = RDF_FACTORY.createIRI("http://meraka/moss/exampleBooks.owl#Author");
     private static final IRI PERSON = RDF_FACTORY.createIRI("http://xmlns.com/foaf/0.1/Person");
     private static final IRI ADDRESS = RDF_FACTORY.createIRI("http://www.owl-ontologies.com/Ontology1207768242.owl#Address");
+
+    private static final IRI PROP_UNIT = RDF_FACTORY.createIRI("http://example.org/qudt/unit");
+    private static final IRI DEGREES_CELCIUS = RDF_FACTORY.createIRI("http://example.org/qudt-unit/DegreeCelsius");
+    private static final IRI METERS_PER_SECOND = RDF_FACTORY.createIRI("http://example.org/qudt-unit/MeterPerSecond");
 
 
     static {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
         DBTermType stringDBType = builder.getDBTypeFactory().getDBStringType();
+        DBTermType largeIntDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
         TABLE_AUTHORS = builder.createDatabaseRelation("tb_authors",
                 "bk_code", integerDBType, false,
@@ -67,6 +83,15 @@ public class MappingAssertionMergeWithCQCTest {
         TABLE_ADDRESS = builder.createDatabaseRelation("ADDRESS",
                 "ID", integerDBType, false,
                 "STREET", stringDBType, true);
+
+        MEASUREMENT = builder.createDatabaseRelation("source3_weather_measurement",
+                "id", largeIntDBType, false,
+                "name", largeIntDBType, false);
+
+        MEASUREMENT_TYPE = builder.createDatabaseRelation("source3_measurement_types",
+                "name", largeIntDBType, false,
+                "unit", largeIntDBType, false);
+
     }
 
 
@@ -222,8 +247,8 @@ public class MappingAssertionMergeWithCQCTest {
                                         P, TERM_FACTORY.getConstantIRI(RDF.TYPE),
                                         O, TERM_FACTORY.getConstantIRI(PERSON))),
                         IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getDBIsNotNull(B)),
-                        ImmutableList.of(IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 1, A)),
-                                IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 3, B))))));
+                                ImmutableList.of(IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 1, A)),
+                                        IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 3, B))))));
 
         IQ studentIQ2 = IQ_FACTORY.createIQ(ATOM_FACTORY.getDistinctTripleAtom(S, P, O),
                 IQ_FACTORY.createUnaryIQTree(
@@ -232,7 +257,7 @@ public class MappingAssertionMergeWithCQCTest {
                                         P, TERM_FACTORY.getConstantIRI(RDF.TYPE),
                                         O, TERM_FACTORY.getConstantIRI(PERSON))),
                         IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(B)),
-                        IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 3, B)))));
+                                IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 3, B)))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
         MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
@@ -299,9 +324,9 @@ public class MappingAssertionMergeWithCQCTest {
                                         P, TERM_FACTORY.getConstantIRI(RDF.TYPE),
                                         O, TERM_FACTORY.getConstantIRI(PERSON))),
                         IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(
-                                TERM_FACTORY.getDisjunction(
-                                        TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(1)),
-                                        TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(2)))),
+                                        TERM_FACTORY.getDisjunction(
+                                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(1)),
+                                                TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(2)))),
                                 IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 4, B)))));
 
         IQ studentIQ2 = IQ_FACTORY.createIQ(ATOM_FACTORY.getDistinctTripleAtom(S, P, O),
@@ -434,7 +459,7 @@ public class MappingAssertionMergeWithCQCTest {
                                                 TERM_FACTORY.getConjunction(TERM_FACTORY.getDBIsNotNull(A), TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(5))),
                                                 TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(1)),
                                                 TERM_FACTORY.getConjunction(TERM_FACTORY.getDBIsNotNull(A), TERM_FACTORY.getStrictEquality(B, TERM_FACTORY.getDBIntegerConstant(6))))),
-                                IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 3, A,4, B))))), result.getQuery());
+                                IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 3, A, 4, B))))), result.getQuery());
     }
 
 
@@ -606,4 +631,80 @@ public class MappingAssertionMergeWithCQCTest {
                                         ImmutableMap.of(B, TERM_FACTORY.getDBIntegerConstant(3)))))))), result.getQuery());
     }
 
+
+    @Test
+    public void testMergeWithConstantPropertyValues() {
+
+        DistinctVariableOnlyDataAtom spoAtom = ATOM_FACTORY.getDistinctTripleAtom(S, P, O);
+
+        //  data:weather/observation/result/{id} qudt:unit qudt-unit:DegreeCelsius .
+        //  select m.id from "source3_weather_measurement" m, "source3_measurement_types" t
+        //          WHERE m.name = t.name and t.unit = 'C'
+        IQ mDegreeCelsius = IQ_FACTORY.createIQ(spoAtom,
+                IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
+                                SUBSTITUTION_FACTORY.getSubstitution(
+                                        S, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_RESULT, ImmutableList.of(ID)),
+                                        P, TERM_FACTORY.getConstantIRI(PROP_UNIT),
+                                        O, TERM_FACTORY.getConstantIRI(DEGREES_CELCIUS))),
+                        IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(
+                                IQ_FACTORY.createExtensionalDataNode(
+                                        MEASUREMENT, ImmutableMap.of(0, ID, 1, NAME)),
+                                IQ_FACTORY.createExtensionalDataNode(
+                                        MEASUREMENT_TYPE, ImmutableMap.of(0, NAME, 1, TERM_FACTORY.getDBStringConstant("C")))))));
+
+        //  data:weather/observation/result/{id} qudt:unit qudt-unit:MeterPerSecond .
+        //  select m.id from "source3_weather_measurement" m, "source3_measurement_types" t
+        //          WHERE m.name = t.name and t.unit = 'm/s'
+        IQ mMeterPerSecond = IQ_FACTORY.createIQ(spoAtom,
+                IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
+                                SUBSTITUTION_FACTORY.getSubstitution(
+                                        S, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_RESULT, ImmutableList.of(ID)),
+                                        P, TERM_FACTORY.getConstantIRI(PROP_UNIT),
+                                        O, TERM_FACTORY.getConstantIRI(METERS_PER_SECOND))),
+                        IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(
+                                IQ_FACTORY.createExtensionalDataNode(
+                                        MEASUREMENT, ImmutableMap.of(0, ID, 1, NAME)),
+                                IQ_FACTORY.createExtensionalDataNode(
+                                        MEASUREMENT_TYPE, ImmutableMap.of(0, NAME, 1, TERM_FACTORY.getDBStringConstant("m/s")))))));
+
+        //  data:weather/observation/result/{id} qudt:unit qudt-unit:MeterPerSecond .
+        //  select m.id from "source3_weather_measurement" m, "source3_measurement_types" t
+        //          WHERE m.name = t.name and t.unit = '[m/s]'
+        IQ mMeterPerSecond2 = IQ_FACTORY.createIQ(spoAtom,
+                IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
+                                SUBSTITUTION_FACTORY.getSubstitution(
+                                        S, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_RESULT, ImmutableList.of(ID)),
+                                        P, TERM_FACTORY.getConstantIRI(PROP_UNIT),
+                                        O, TERM_FACTORY.getConstantIRI(METERS_PER_SECOND))),
+                        IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(
+                                IQ_FACTORY.createExtensionalDataNode(
+                                        MEASUREMENT, ImmutableMap.of(0, ID, 1, NAME)),
+                                IQ_FACTORY.createExtensionalDataNode(
+                                        MEASUREMENT_TYPE, ImmutableMap.of(0, NAME, 1, TERM_FACTORY.getDBStringConstant("[m/s]")))))));
+
+        ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        entry.add(new MappingAssertion(mDegreeCelsius, null));
+        entry.add(new MappingAssertion(mMeterPerSecond, null));
+        entry.add(new MappingAssertion(mMeterPerSecond2, null));
+        MappingAssertion result = entry.build().get();
+
+        assertEquals(IQ_FACTORY.createIQ(spoAtom,
+                IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
+                                SUBSTITUTION_FACTORY.getSubstitution(
+                                        S, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_RESULT, ImmutableList.of(ID)),
+                                        P, TERM_FACTORY.getConstantIRI(PROP_UNIT),
+                                        O, TERM_FACTORY.getIRIFunctionalTerm(V0))),
+                        IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(
+                                IQ_FACTORY.createExtensionalDataNode(
+                                        MEASUREMENT, ImmutableMap.of(0, ID, 1, NAME)),
+                                IQ_FACTORY.createExtensionalDataNode(
+                                        MEASUREMENT_TYPE, ImmutableMap.of(0, NAME, 1, V1)),
+                                IQ_FACTORY.createValuesNode(ImmutableSet.of(V0, V1), ImmutableList.of(
+                                        ImmutableMap.of(V0, TERM_FACTORY.getDBStringConstant("http://example.org/qudt-unit/MeterPerSecond"), V1, TERM_FACTORY.getDBStringConstant("[m/s]")),
+                                        ImmutableMap.of(V0, TERM_FACTORY.getDBStringConstant("http://example.org/qudt-unit/MeterPerSecond"), V1, TERM_FACTORY.getDBStringConstant("m/s")),
+                                        ImmutableMap.of(V0, TERM_FACTORY.getDBStringConstant("http://example.org/qudt-unit/DegreeCelsius"), V1, TERM_FACTORY.getDBStringConstant("C")))))))),
+                result.getQuery());
+
+    }
 }
