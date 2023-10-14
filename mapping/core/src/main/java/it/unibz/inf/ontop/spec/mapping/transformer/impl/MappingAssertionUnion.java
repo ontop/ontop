@@ -262,7 +262,7 @@ public class MappingAssertionUnion {
             return;
 
         if (newCIQ.getValuesNode().isPresent()) {
-            conjunctiveIqs.add(newCIQ); // facts are just added
+            conjunctiveIqs.add(newCIQ);
             return;
         }
 
@@ -278,14 +278,12 @@ public class MappingAssertionUnion {
                     .map(Iterator::next);
             Optional<DisjunctionOfConjunctions> currentCIQConditionsImage = fromCurrentCIQ
                     .map(h -> applyHomomorphism(h, currentCIQ.getConditions()));
-
-            if (fromCurrentCIQ.isPresent()) {
-                if (contains(currentCIQConditionsImage.get(), newCIQ.getConditions())) {
-                    if (newCIQ.getDatabaseAtoms().size() >= currentCIQ.getDatabaseAtoms().size()) {
-                        return;
-                    }
-                    currentCiqContainsNewCiqButIsLonger = true;
+;
+            if (fromCurrentCIQ.isPresent() && contains(currentCIQConditionsImage.get(), newCIQ.getConditions())) {
+                if (newCIQ.getDatabaseAtoms().size() >= currentCIQ.getDatabaseAtoms().size()) {
+                    return;
                 }
+                currentCiqContainsNewCiqButIsLonger = true;
             }
 
             Optional<Homomorphism> fromNewCIQ = getHomomorphismIterator(newCIQ, currentCIQ)
@@ -294,11 +292,9 @@ public class MappingAssertionUnion {
             Optional<DisjunctionOfConjunctions> newCIQConditionsImage = fromNewCIQ
                     .map(h -> applyHomomorphism(h, newCIQ.getConditions()));
 
-            if (fromNewCIQ.isPresent()) {
-                if (contains(newCIQConditionsImage.get(), currentCIQ.getConditions())) {
-                    iterator.remove();
-                    continue;
-                }
+            if (fromNewCIQ.isPresent() && contains(newCIQConditionsImage.get(), currentCIQ.getConditions())) {
+                iterator.remove();
+                continue;
             }
 
             if (currentCiqContainsNewCiqButIsLonger) {
@@ -350,5 +346,28 @@ public class MappingAssertionUnion {
     private boolean contains(DisjunctionOfConjunctions f1, DisjunctionOfConjunctions f2) {
         return f1.isTrue()
                 || !f2.isTrue() && f2.stream().allMatch(c -> f1.stream().anyMatch(c::containsAll));
+    }
+
+    private Optional<ValuesNode> applyHomomorphism(Homomorphism h, ValuesNode n) {
+        ImmutableSet<Variable> newVariables = n.getVariables().stream()
+                .map(h::apply)
+                .map(v -> (Variable)v)
+                .collect(ImmutableCollectors.toSet());
+
+        if (newVariables.size() < n.getVariables().size())
+            return Optional.empty();
+
+        return Optional.of(iqFactory.createValuesNode(
+                newVariables,
+                n.getValueMaps().stream()
+                        .map(m -> m.entrySet().stream()
+                                .collect(ImmutableCollectors.toMap(e -> (Variable)h.apply(e.getKey()), Map.Entry::getValue)))
+                        .collect(ImmutableCollectors.toList())));
+    }
+
+    private boolean contains(Optional<ValuesNode> v1, Optional<ValuesNode> v2) {
+        return v1.isEmpty()
+                || !v2.isEmpty() && v2.get().getValueMaps().stream()
+                        .allMatch(c -> v1.get().getValueMaps().stream().anyMatch(m -> c.entrySet().containsAll(m.entrySet())));
     }
 }
