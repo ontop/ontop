@@ -10,7 +10,16 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collector;
+import java.util.stream.Stream;
 
+/**
+ * Represents Boolean expressions as disjunctions of conjunctions,
+ * where each conjunction is non-empty,
+ * but the disjunction can be empty, which means that the expression is TRUE.
+ * (This unusual assumption is convenient for most manipulations, including
+ * termFactory.getDisjunction(termFactory.getConjunction).)
+ * In some cases, a special check .isTrue() needs to be performed though.
+ */
 public class DisjunctionOfConjunctions {
     final ImmutableSet<ImmutableSet<ImmutableExpression>> disjunctions;
 
@@ -19,6 +28,12 @@ public class DisjunctionOfConjunctions {
     }
 
     public static DisjunctionOfConjunctions getOR(DisjunctionOfConjunctions o1, DisjunctionOfConjunctions o2) {
+        if (o1.isTrue())
+            return o1;
+
+        if (o2.isTrue())
+            return o2;
+
         Builder builder = new Builder(o1);
         o2.disjunctions.forEach(builder::add);
         return builder.build();
@@ -28,7 +43,7 @@ public class DisjunctionOfConjunctions {
         if (d.isEmpty())
             return o;
 
-        if (o.disjunctions.isEmpty())
+        if (o.isTrue())
             return new DisjunctionOfConjunctions(ImmutableSet.of(d));
 
         return new DisjunctionOfConjunctions(
@@ -37,13 +52,14 @@ public class DisjunctionOfConjunctions {
                         .collect(ImmutableCollectors.toSet()));
     }
 
-    public static DisjunctionOfConjunctions empty() { return new DisjunctionOfConjunctions(ImmutableSet.of()); }
+    public static DisjunctionOfConjunctions getTrue() { return new DisjunctionOfConjunctions(ImmutableSet.of()); }
+
+    public boolean isTrue() { return disjunctions.isEmpty(); }
 
     public static DisjunctionOfConjunctions of(ImmutableExpression e) {
         return e.flattenOR()
                 .map(c -> c.flattenAND().collect(ImmutableCollectors.toSet()))
                 .collect(toDisjunctionOfConjunctions());
-
     }
 
     public ImmutableSet<Variable> getVariables() {
@@ -53,7 +69,7 @@ public class DisjunctionOfConjunctions {
                 .collect(ImmutableCollectors.toSet());
     }
 
-    public ImmutableSet<ImmutableSet<ImmutableExpression>> get() { return disjunctions; }
+    public Stream<ImmutableSet<ImmutableExpression>> stream() { return disjunctions.stream(); }
 
     @Override
     public boolean equals(Object o) {
@@ -86,7 +102,7 @@ public class DisjunctionOfConjunctions {
 
         void add(ImmutableSet<ImmutableExpression> conjunction) {
             if (disjunctions.stream().noneMatch(conjunction::containsAll)) {
-                disjunctions.removeIf(conjunction::containsAll);
+                disjunctions.removeIf(c -> c.containsAll(conjunction));
                 disjunctions.add(conjunction);
             }
         }
@@ -103,13 +119,7 @@ public class DisjunctionOfConjunctions {
         }
     }
 
-
     public static Collector<ImmutableSet<ImmutableExpression>, Builder, DisjunctionOfConjunctions> toDisjunctionOfConjunctions() {
-        return Collector.of(
-                Builder::new, // Supplier
-                Builder::add, // Accumulator
-                Builder::addAll, // Merger
-                Builder::build, // Finisher
-                Collector.Characteristics.UNORDERED);
+        return Collector.of(Builder::new, Builder::add, Builder::addAll, Builder::build, Collector.Characteristics.UNORDERED);
     }
 }

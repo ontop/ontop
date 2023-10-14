@@ -91,7 +91,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
         // see https://www.w3.org/TR/owl2-new-features/#F12:_Punning
 
         ImmutableMultimap<MappingAssertionIndex, MappingAssertion> original = mapping.stream()
-                .map(m -> optmize(cqc, m))
+                .map(m -> optimize(cqc, m))
                 .collect(ImmutableCollectors.toMultimap(MappingAssertion::getIndex, m -> m));
 
         ImmutableMap<MappingAssertionIndex, MappingAssertion> saturated = original.keySet().stream()
@@ -133,7 +133,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                 .collect(ImmutableCollectors.toList());
     }
 
-    private MappingAssertion optmize(ExtensionalDataNodeListContainmentCheck cqc, MappingAssertion m) {
+    private MappingAssertion optimize(ExtensionalDataNodeListContainmentCheck cqc, MappingAssertion m) {
         IQ optimizedIQ = m.getQuery().normalizeForOptimization();
         IQ cqcOptimizedIQ = mappingCqcOptimizer.optimize(cqc, optimizedIQ);
         return m.copyOf(cqcOptimizedIQ);
@@ -148,7 +148,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                 .map(s -> transformerProvider.apply(s, representative))
                 .flatMap(u -> original.get(u.getFromIndex()).stream()
                         .map(u::updateConstructionNodeIri)
-                        .map(m -> u.needOptimization() ? optmize(cqc, m) : m))
+                        .map(m -> u.needOptimization() ? optimize(cqc, m) : m))
                 .collect(MappingAssertionUnion.toMappingAssertion(cqc, coreSingletons, queryMerger));
     }
 

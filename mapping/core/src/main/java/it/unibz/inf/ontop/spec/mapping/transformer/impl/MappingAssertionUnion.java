@@ -121,9 +121,9 @@ public class MappingAssertionUnion {
         }
 
         IQTree getTree() {
-            // assumes that filterAtoms is a possibly empty list of non-empty lists
+            // assumes that filter is a possibly empty list of non-empty lists
             Optional<ImmutableExpression> mergedConditions = termFactory.getDisjunction(
-                    filter.get().stream().map(e -> termFactory.getConjunction(ImmutableList.copyOf(e))));
+                    filter.stream().map(e -> termFactory.getConjunction(ImmutableList.copyOf(e))));
 
             if (extensionalDataNodes.isEmpty() && valuesNode.isEmpty())
                     return iqFactory.createTrueNode();
@@ -180,13 +180,13 @@ public class MappingAssertionUnion {
         ConstructionNode constructionNode = (ConstructionNode) assertion.getQuery().getTree().getRootNode();
         IQTree topTree = assertion.getTopChild();
         if (topTree instanceof TrueNode) {
-            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of(), Optional.empty(), DisjunctionOfConjunctions.empty()));
+            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of(), Optional.empty(), DisjunctionOfConjunctions.getTrue()));
         }
         if (topTree instanceof ExtensionalDataNode) {
-            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of((ExtensionalDataNode) topTree), Optional.empty(), DisjunctionOfConjunctions.empty()));
+            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of((ExtensionalDataNode) topTree), Optional.empty(), DisjunctionOfConjunctions.getTrue()));
         }
         if (topTree instanceof ValuesNode) {
-            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of(), Optional.of((ValuesNode) topTree), DisjunctionOfConjunctions.empty()));
+            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of(), Optional.of((ValuesNode) topTree), DisjunctionOfConjunctions.getTrue()));
         }
 
         QueryNode topNode = topTree.getRootNode();
@@ -214,7 +214,7 @@ public class MappingAssertionUnion {
             if (extensionalDataNodes.size() + valuesNodes.size() == childrenTrees.size() && valuesNodes.size() <= 1) {
                 DisjunctionOfConjunctions filter = ((InnerJoinNode) topNode).getOptionalFilterCondition()
                         .map(DisjunctionOfConjunctions::of)
-                        .orElseGet(DisjunctionOfConjunctions::empty);
+                        .orElseGet(DisjunctionOfConjunctions::getTrue);
 
                 return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, extensionalDataNodes, valuesNodes.stream().findFirst(), filter));
             }
@@ -306,7 +306,7 @@ public class MappingAssertionUnion {
             }
 
             if (fromCurrentCIQ.isPresent() && fromNewCIQ.isPresent()) {
-                // We found an equivalence, we will try to merge the conditions of newCIQ into currentCIQ
+                // We found an equivalence, we will try to merge the non-empty conditions of newCIQ into currentCIQ
 
                 DisjunctionOfConjunctions mergedConditions = DisjunctionOfConjunctions.getOR(currentCIQ.getConditions(), newCIQConditionsImage.get());
                 if (mergedConditions.equals(currentCIQ.getConditions())) {
@@ -341,15 +341,14 @@ public class MappingAssertionUnion {
     }
 
     private DisjunctionOfConjunctions applyHomomorphism(Homomorphism h, DisjunctionOfConjunctions f) {
-        return f.get().stream()
+        return f.stream()
                 .map(d -> d.stream().map(atom -> h.applyToBooleanExpression(atom, termFactory))
                         .collect(ImmutableCollectors.toSet()))
                 .collect(DisjunctionOfConjunctions.toDisjunctionOfConjunctions());
     }
 
     private boolean contains(DisjunctionOfConjunctions f1, DisjunctionOfConjunctions f2) {
-        return f1.get().isEmpty()
-                || !f2.get().isEmpty()
-                    && f2.get().stream().allMatch(c -> f1.get().stream().anyMatch(c::containsAll));
+        return f1.isTrue()
+                || !f2.isTrue() && f2.stream().allMatch(c -> f1.stream().anyMatch(c::containsAll));
     }
 }
