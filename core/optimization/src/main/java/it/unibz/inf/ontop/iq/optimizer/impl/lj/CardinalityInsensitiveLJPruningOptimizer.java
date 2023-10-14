@@ -113,16 +113,23 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
         public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             var treeVariables = tree.getVariables();
 
-            if (treeVariables.isEmpty() || leftChild.getVariables().containsAll(Sets.intersection(variablesUsedByAncestors, treeVariables)))
+            var leftVariables = leftChild.getVariables();
+
+            if (treeVariables.isEmpty() || leftVariables.containsAll(Sets.intersection(variablesUsedByAncestors, treeVariables)))
                 // Prunes the right child
                 return leftChild.acceptTransformer(this);
 
-            var newTransformer = rootNode.getOptionalFilterCondition()
+            var commonVariables = Sets.intersection(leftVariables, rightChild.getVariables());
+
+            var newVariablesUsed = rootNode.getOptionalFilterCondition()
                     .map(ImmutableFunctionalTerm::getVariables)
                     .filter(vs -> !vs.isEmpty())
-                    .map(vs -> Sets.union(variablesUsedByAncestors, vs).immutableCopy())
-                    .map(this::computeNewTransformer)
-                    .orElse(this);
+                    .map(vs -> Sets.union(variablesUsedByAncestors, Sets.union(vs, commonVariables)).immutableCopy())
+                    .orElse(Sets.union(variablesUsedByAncestors, commonVariables).immutableCopy());
+
+            var newTransformer = newVariablesUsed.equals(variablesUsedByAncestors)
+                    ? this
+                    : computeNewTransformer(newVariablesUsed);
 
             var newLeft = leftChild.acceptTransformer(newTransformer);
             var newRight = rightChild.acceptTransformer(newTransformer);
