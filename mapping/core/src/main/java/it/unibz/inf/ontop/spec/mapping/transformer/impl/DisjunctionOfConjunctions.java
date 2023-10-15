@@ -39,16 +39,16 @@ public class DisjunctionOfConjunctions {
         return builder.build();
     }
 
-    public static DisjunctionOfConjunctions getAND(DisjunctionOfConjunctions o, ImmutableSet<ImmutableExpression> d) {
-        if (d.isEmpty())
-            return o;
+    public static DisjunctionOfConjunctions getAND(DisjunctionOfConjunctions o1, DisjunctionOfConjunctions o2) {
+        if (o1.isTrue())
+            return o2;
 
-        if (o.isTrue())
-            return new DisjunctionOfConjunctions(ImmutableSet.of(d));
+        if (o2.isTrue())
+            return o1;
 
         return new DisjunctionOfConjunctions(
-                o.disjunctions.stream()
-                        .map(s -> Sets.union(s, d).immutableCopy())
+                o1.disjunctions.stream()
+                        .flatMap(s1 -> o2.disjunctions.stream().map(s2 -> Sets.union(s1, s2).immutableCopy()))
                         .collect(ImmutableCollectors.toSet()));
     }
 
