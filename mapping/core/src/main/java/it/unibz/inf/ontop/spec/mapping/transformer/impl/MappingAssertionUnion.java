@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
 import java.util.stream.Collector;
@@ -82,18 +83,26 @@ public class MappingAssertionUnion {
             // replaces constant IRI in the object position of properties with a ValueNode
             RDFAtomPredicate rdfAtomPredicate = (RDFAtomPredicate) projectionAtom.getPredicate();
             ImmutableList<ImmutableTerm> args = constructionNode.getSubstitution().apply(projectionAtom.getArguments());
-            final ImmutableMap<Variable, Constant> constantObjectEntry;
-            if (rdfAtomPredicate.getPropertyIRI(args).filter(i -> !i.equals(RDF.TYPE)).isPresent()
-                    && rdfAtomPredicate.getObject(args) instanceof IRIConstant) {
-                IRIConstant constant = (IRIConstant) rdfAtomPredicate.getObject(args);
-                Variable fresh = variableGenerator.generateNewVariable();
-                this.substitution = constructionNode.getSubstitution().transform(v -> v.equals(constant) ? termFactory.getIRIFunctionalTerm(fresh) : v);
-                constantObjectEntry = ImmutableMap.of(fresh, termFactory.getDBStringConstant(constant.getIRI().getIRIString()));
-            }
-            else {
-                this.substitution = constructionNode.getSubstitution();
-                constantObjectEntry = ImmutableMap.of();
-            }
+
+            ImmutableMap<IRIConstant, Variable> map  = Stream.of(
+                            Optional.of(rdfAtomPredicate.getSubject(args)),
+                            rdfAtomPredicate.getPropertyIRI(args)
+                                    .filter(i -> !i.equals(RDF.TYPE))
+                                    .map(i -> rdfAtomPredicate.getObject(args)),
+                            rdfAtomPredicate.getGraph(args))
+                    .flatMap(Optional::stream)
+                    .filter(c -> c instanceof IRIConstant)
+                    .map(c -> (IRIConstant)c)
+                    .distinct()
+                    .collect(ImmutableCollectors.toMap(c -> c, c -> variableGenerator.generateNewVariable()));
+
+            this.substitution = constructionNode.getSubstitution()
+                    .transform(t -> Optional.ofNullable(map.get(t)).<ImmutableTerm>map(termFactory::getIRIFunctionalTerm).orElse(t));
+
+            ImmutableMap<Variable, Constant> constantSubstitutionEntries = map.entrySet().stream()
+                    .collect(ImmutableCollectors.toMap(
+                            Map.Entry::getValue,
+                            e -> termFactory.getDBStringConstant(e.getKey().getIRI().getIRIString())));
 
             // replaces constants in extensional data nodes with a ValueNode
             ImmutableMap<Integer, ImmutableMap<Integer, Variable>> variableMap = IntStream.range(0, extensionalDataNodes.size())
@@ -117,7 +126,7 @@ public class MappingAssertionUnion {
                         .collect(ImmutableCollectors.toList());
 
             Optional<ImmutableMap<Variable, Constant>> constantsMap = Optional.of(Stream.concat(
-                            constantObjectEntry.entrySet().stream(),
+                            constantSubstitutionEntries.entrySet().stream(),
                             variableMap.entrySet().stream()
                                     .flatMap(me -> me.getValue().entrySet().stream()
                                             .map(e -> Maps.immutableEntry(
@@ -285,6 +294,9 @@ public class MappingAssertionUnion {
                                 .collect(ImmutableCollectors.toList()))
                 .map(IQ::normalizeForOptimization);
 
+        //if (query.toString().contains("UNION"))
+        //    System.out.println("MAU-UNION: " + query);
+
         return query.map(q -> new MappingAssertion(q, null));
     }
 
@@ -359,7 +371,7 @@ public class MappingAssertionUnion {
             }
 
             if (fromCurrentCIQ.isPresent() && fromNewCIQ.isPresent()) {
-                if (currentCIQ.getConditions().isTrue() && newCIQ.getConditions().isTrue()) {
+                if (currentCIQ.getConditions().isTrue() && newCIQ.getConditions().isTrue() || newCIQConditionsImage.get().equals(currentCIQ.getConditions())) {
                     ValuesNode currentCIQValuesNode = currentCIQ.getValuesNode().get();
                     Optional<ValuesNode> optionalNewCIQValuesNodeImage = applyHomomorphism(fromNewCIQ.get(), newCIQ.getValuesNode().get());
                     if (optionalNewCIQValuesNodeImage.isPresent()) {
@@ -367,7 +379,7 @@ public class MappingAssertionUnion {
                         if (newCIQValuesNodeImage.getVariables().equals(currentCIQValuesNode.getVariables())) {
                             iterator.remove();
                             conjunctiveIqs.add(new ConjunctiveIQ(currentCIQ,
-                                    DisjunctionOfConjunctions.getTrue(),
+                                    currentCIQ.getConditions(),
                                     Optional.of(iqFactory.createValuesNode(
                                             currentCIQValuesNode.getVariables(),
                                             Stream.concat(
@@ -403,7 +415,7 @@ public class MappingAssertionUnion {
                 }
                 // one reason for non-merge is R(x,_), x = 1 and R(_,x), x = 2 (see TMappingConstantPositionsTest)
                 // second reason for non-merge is variables in ValueNode that do not occur in data atoms (but occur in the ConstructionNode instead)
-                //System.out.println("MAU-CANT-MERGE-44: " + currentCIQ + " AND " + newCIQ + " " + currentCIQDatabaseAtomVariables + " " + newCIQCombinedConditionsImage.getVariables());
+                //System.out.println("MAU-CANT-MERGE-45: " + currentCIQ + " AND " + newCIQ + " " + currentCIQDatabaseAtomVariables + " " + newCIQCombinedConditionsImage.getVariables());
             }
         }
         conjunctiveIqs.add(newCIQ);
