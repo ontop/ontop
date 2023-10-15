@@ -159,8 +159,7 @@ public class MappingAssertionUnion {
 
         IQTree getTree() {
             // assumes that filter is a possibly empty list of non-empty lists
-            Optional<ImmutableExpression> mergedConditions = termFactory.getDisjunction(
-                    filter.stream().map(e -> termFactory.getConjunction(ImmutableList.copyOf(e))));
+            Optional<ImmutableExpression> mergedConditions = translate(filter);
 
             if (extensionalDataNodes.isEmpty() && valuesNode.isEmpty())
                     return iqFactory.createTrueNode();
@@ -175,6 +174,26 @@ public class MappingAssertionUnion {
             else return iqFactory.createNaryIQTree(
                             iqFactory.createInnerJoinNode(mergedConditions),
                             Stream.concat(extensionalDataNodes.stream(), valuesNode.stream()).collect(ImmutableCollectors.toList()));
+        }
+
+        Optional<ImmutableExpression> translate(DisjunctionOfConjunctions filter) {
+
+            switch (filter.getNumberOfConjunctions()) {
+                case 0:
+                    return Optional.empty();
+                case 1:
+                    return termFactory.getDisjunction(filter.stream()
+                            .map(e -> termFactory.getConjunction(ImmutableList.copyOf(e))));
+                default:
+                    ImmutableSet<ImmutableExpression> sharedAtoms = filter.stream().findFirst()
+                            .map(e -> e.stream().filter(c -> filter.stream().allMatch(e2 -> e2.contains(c))).collect(ImmutableCollectors.toSet()))
+                            .get();
+
+                    return termFactory.getConjunction(Stream.concat(
+                            sharedAtoms.stream(),
+                            termFactory.getDisjunction(filter.stream()
+                                    .map(e -> termFactory.getConjunction(ImmutableList.copyOf(Sets.difference(e, sharedAtoms))))).stream()));
+            }
         }
 
         public ImmutableList<ImmutableTerm> getHeadTerms() { return substitution.applyToTerms(projectionAtom.getArguments());  }

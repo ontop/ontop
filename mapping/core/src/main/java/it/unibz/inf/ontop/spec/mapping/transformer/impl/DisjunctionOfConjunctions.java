@@ -15,16 +15,16 @@ import java.util.stream.Stream;
 /**
  * Represents Boolean expressions as disjunctions of conjunctions,
  * where each conjunction is non-empty,
- * but the disjunction can be empty, which means that the expression is TRUE.
+ * but the list of disjunctions can be empty, which means that the expression is TRUE.
  * (This unusual assumption is convenient for most manipulations, including
  * termFactory.getDisjunction(termFactory.getConjunction).)
  * In some cases, a special check .isTrue() needs to be performed though.
  */
 public class DisjunctionOfConjunctions {
-    final ImmutableSet<ImmutableSet<ImmutableExpression>> disjunctions;
+    private final ImmutableSet<ImmutableSet<ImmutableExpression>> conjunctions;
 
-    private DisjunctionOfConjunctions(ImmutableSet<ImmutableSet<ImmutableExpression>> disjunctions) {
-        this.disjunctions = disjunctions;
+    private DisjunctionOfConjunctions(ImmutableSet<ImmutableSet<ImmutableExpression>> conjunctions) {
+        this.conjunctions = conjunctions;
     }
 
     public static DisjunctionOfConjunctions getOR(DisjunctionOfConjunctions o1, DisjunctionOfConjunctions o2) {
@@ -35,7 +35,7 @@ public class DisjunctionOfConjunctions {
             return o2;
 
         Builder builder = new Builder(o1);
-        o2.disjunctions.forEach(builder::add);
+        o2.conjunctions.forEach(builder::add);
         return builder.build();
     }
 
@@ -47,14 +47,16 @@ public class DisjunctionOfConjunctions {
             return o1;
 
         return new DisjunctionOfConjunctions(
-                o1.disjunctions.stream()
-                        .flatMap(s1 -> o2.disjunctions.stream().map(s2 -> Sets.union(s1, s2).immutableCopy()))
+                o1.conjunctions.stream()
+                        .flatMap(s1 -> o2.conjunctions.stream().map(s2 -> Sets.union(s1, s2).immutableCopy()))
                         .collect(ImmutableCollectors.toSet()));
     }
 
     public static DisjunctionOfConjunctions getTrue() { return new DisjunctionOfConjunctions(ImmutableSet.of()); }
 
-    public boolean isTrue() { return disjunctions.isEmpty(); }
+    public boolean isTrue() { return conjunctions.isEmpty(); }
+
+    public int getNumberOfConjunctions() { return conjunctions.size(); }
 
     public static DisjunctionOfConjunctions of(ImmutableExpression e) {
         return e.flattenOR()
@@ -63,31 +65,31 @@ public class DisjunctionOfConjunctions {
     }
 
     public ImmutableSet<Variable> getVariables() {
-        return disjunctions.stream()
+        return conjunctions.stream()
                 .flatMap(d -> d.stream()
                         .flatMap(ImmutableTerm::getVariableStream))
                 .collect(ImmutableCollectors.toSet());
     }
 
-    public Stream<ImmutableSet<ImmutableExpression>> stream() { return disjunctions.stream(); }
+    public Stream<ImmutableSet<ImmutableExpression>> stream() { return conjunctions.stream(); }
 
     @Override
     public boolean equals(Object o) {
         if (o instanceof DisjunctionOfConjunctions) {
             DisjunctionOfConjunctions other = (DisjunctionOfConjunctions) o;
-            return disjunctions.equals(other.disjunctions);
+            return conjunctions.equals(other.conjunctions);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return disjunctions.hashCode();
+        return conjunctions.hashCode();
     }
 
     @Override
     public String toString() {
-        return disjunctions.toString();
+        return conjunctions.toString();
     }
 
     private static class Builder {
@@ -97,7 +99,7 @@ public class DisjunctionOfConjunctions {
             disjunctions = new HashSet<>();
         }
         Builder(DisjunctionOfConjunctions disjunctionOfConjunctions) {
-            disjunctions = new HashSet<>(disjunctionOfConjunctions.disjunctions);
+            disjunctions = new HashSet<>(disjunctionOfConjunctions.conjunctions);
         }
 
         void add(ImmutableSet<ImmutableExpression> conjunction) {
