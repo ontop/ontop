@@ -73,7 +73,7 @@ public class DestinationUnitTest extends AbstractRDF4JTest {
         assertFalse("Should have no unions: "  + sql, sql.toLowerCase().contains("union"));
     }
 
-    @Ignore("temporarrily disabled - will enable it later")
+    @Ignore("temporarily disabled - will enable it later")
     @Test
     public void testOnlyOneUnitPerResult() {
         try {

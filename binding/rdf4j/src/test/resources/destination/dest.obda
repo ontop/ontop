@@ -118,4 +118,19 @@ mappingId	Source 2 - camping pitch
 target		data:source2/accommodation/{id} a schema:CampingPitch .
 source		SELECT * FROM "source2_accommodation"
 			WHERE acco_type = 3
+
+;This section is commented out until homomorphisms modulo IRI unification is implemented
+;mappingId	Source 3 - Measurement property
+;target		data:measurement/property/{name} a sosa:ObservableProperty ; schema:description {description}@it .
+;source		select * from "source3_measurement_types"
+;
+;mappingId	Source 3 - Wind Speed
+;target		data:measurement/property/{name} a :WindSpeed .
+;source		select * from "source3_measurement_types"
+;			where name = 'wind-speed'
+;
+;mappingId	Source 3 - Water temperature
+;target		data:measurement/property/{name} a :WaterTemperature .
+;source		select * from "source3_measurement_types"
+;			where name = 'water-temperature'
 ]]
