@@ -37,6 +37,7 @@ public class DestinationUnitTest extends AbstractRDF4JTest {
                 "}\n");
 
         assertFalse("Should have no unions: "  + sql, sql.toLowerCase().contains("union"));
+        assertFalse("Should have no distincts: "  + sql, sql.toLowerCase().contains("distinct"));
     }
 
     @Test
@@ -54,6 +55,7 @@ public class DestinationUnitTest extends AbstractRDF4JTest {
                 "}\n");
 
         assertFalse("Should have no unions: "  + sql, sql.toLowerCase().contains("union"));
+        assertFalse("Should have no distincts: "  + sql, sql.toLowerCase().contains("distinct"));
     }
 
     @Test
@@ -71,6 +73,7 @@ public class DestinationUnitTest extends AbstractRDF4JTest {
                 "}\n");
 
         assertFalse("Should have no unions: "  + sql, sql.toLowerCase().contains("union"));
+        assertFalse("Should have no distincts: "  + sql, sql.toLowerCase().contains("distinct"));
     }
 
     @Ignore("temporarily disabled - will enable it later")
