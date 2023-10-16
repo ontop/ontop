@@ -211,8 +211,8 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         ImmutableList<IQTree> children = childTree.getChildren();
 
         ImmutableMultimap<IQTree, Integer> cardinalityMultimap = children.stream()
-                .flatMap(c -> getKnownCardinality(c).stream()
-                        .map(card -> Maps.immutableEntry(c, card)))
+                .flatMap(c -> getKnownCardinality(c)
+                        .map(card -> Maps.immutableEntry(c, card)).stream())
                 .collect(ImmutableCollectors.toMultimap());
 
         Optional<Integer> maxChildCardinality = cardinalityMultimap.values().stream().max(Integer::compareTo);
@@ -221,9 +221,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
             return Optional.empty();
 
         if (maxChildCardinality.get() >= limit) {
-            IQTree largestChild = cardinalityMultimap.entries().stream()
-                    .filter(e -> e.getValue().equals(maxChildCardinality.get()))
-                    .map(Map.Entry::getKey)
+            IQTree largestChild = cardinalityMultimap.inverse().get(maxChildCardinality.get()).stream()
                     .findAny()
                     .orElseThrow(() -> new MinorOntopInternalBugException("There should be one child"));
 
@@ -231,8 +229,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                     .normalizeForOptimization(variableGenerator));
         }
 
-        int sum = cardinalityMultimap.values().stream().reduce(Integer::sum)
-                .orElseThrow(() -> new MinorOntopInternalBugException("At least one child expected"));
+        int sum = cardinalityMultimap.values().stream().reduce(0, Integer::sum);
 
         if (sum >= limit) {
             // Non-final
@@ -257,11 +254,9 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                             .normalizeForOptimization(variableGenerator));
         }
 
-        long countChildrenWithUnknownCardinality = children.stream()
-                .filter(c -> !cardinalityMultimap.containsKey(c))
-                .count();
+        int numberOfChildrenWithUnknownCardinality = children.size() - cardinalityMultimap.size();
 
-        if (countChildrenWithUnknownCardinality == 0)
+        if (numberOfChildrenWithUnknownCardinality == 0)
             // No more limit
             return Optional.of(childTree);
 
@@ -276,7 +271,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         IQTree newUnionTree = iqFactory.createNaryIQTree(childRoot, newChildren)
                 .normalizeForOptimization(variableGenerator);
 
-        return (countChildrenWithUnknownCardinality == 1)
+        return (numberOfChildrenWithUnknownCardinality == 1)
                 ? Optional.of(newUnionTree)
                 : newUnionTree.equals(childTree)
                     ? Optional.empty()
@@ -425,9 +420,11 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SliceNodeImpl sliceNode = (SliceNodeImpl) o;
-        return offset == sliceNode.offset && Objects.equals(limit, sliceNode.limit);
+        if (o instanceof SliceNodeImpl) {
+            SliceNodeImpl that = (SliceNodeImpl) o;
+            return offset == that.offset && Objects.equals(limit, that.limit);
+        }
+        return false;
     }
 
     @Override

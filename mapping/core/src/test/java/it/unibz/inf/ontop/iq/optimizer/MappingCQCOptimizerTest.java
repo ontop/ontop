@@ -2,11 +2,10 @@ package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.constraints.impl.LinearInclusionDependenciesImpl;
-import it.unibz.inf.ontop.constraints.ImmutableHomomorphism;
-import it.unibz.inf.ontop.constraints.ImmutableHomomorphismIterator;
-import it.unibz.inf.ontop.constraints.impl.BasicLinearInclusionDependenciesImpl;
-import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
+import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
+import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
+import it.unibz.inf.ontop.constraints.Homomorphism;
+import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeListContainmentCheck;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
@@ -19,6 +18,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import org.junit.jupiter.api.Test;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
@@ -41,7 +41,7 @@ public class MappingCQCOptimizerTest {
             "fldNpdidField", integerType, false,
             "cmpNpdidCompany", integerType, false);
         ForeignKeyConstraint.builder("FK", companyReserves, company)
-                .add(2, 1)
+                .add(3, 2)
                 .build();
 
         final Variable cmpShare1 = TERM_FACTORY.getVariable("cmpShare1");
@@ -64,17 +64,17 @@ public class MappingCQCOptimizerTest {
 
         IQ q = IQ_FACTORY.createIQ(root, rootTree);
 
-        LinearInclusionDependenciesImpl.Builder<RelationPredicate> b = LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY);
+        //LinearInclusionDependencies.Builder<RelationPredicate> b = CORE_SINGLETONS.getHomomorphismFactory().getLinearInclusionDependenciesBuilder();
 
-        final Variable cmpShare1M = TERM_FACTORY.getVariable("cmpShare1M");
-        final Variable fldNpdidField1M = TERM_FACTORY.getVariable("fldNpdidField1M");
-        final Variable cmpNpdidCompany2M = TERM_FACTORY.getVariable("cmpNpdidCompany2M");
-        final Variable cmpShortName2M = TERM_FACTORY.getVariable("cmpShortName2M");
+        //final Variable cmpShare1M = TERM_FACTORY.getVariable("cmpShare1M");
+        //final Variable fldNpdidField1M = TERM_FACTORY.getVariable("fldNpdidField1M");
+        //final Variable cmpNpdidCompany2M = TERM_FACTORY.getVariable("cmpNpdidCompany2M");
+        //final Variable cmpShortName2M = TERM_FACTORY.getVariable("cmpShortName2M");
 
-        b.add(ATOM_FACTORY.getDataAtom(company.getAtomPredicate(), cmpShortName2M, cmpNpdidCompany2M),
-                ATOM_FACTORY.getDataAtom(companyReserves.getAtomPredicate(), cmpShare1M, fldNpdidField1M, cmpNpdidCompany2M));
+        //b.add(ATOM_FACTORY.getDataAtom(company.getAtomPredicate(), cmpShortName2M, cmpNpdidCompany2M),
+        //        ATOM_FACTORY.getDataAtom(companyReserves.getAtomPredicate(), cmpShare1M, fldNpdidField1M, cmpNpdidCompany2M));
 
-        ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> foreignKeyCQC = new ImmutableCQContainmentCheckUnderLIDs<>(b.build());
+        ExtensionalDataNodeListContainmentCheck foreignKeyCQC = new ExtensionalDataNodeListContainmentCheck(CORE_SINGLETONS.getHomomorphismFactory(), CORE_SINGLETONS.getCoreUtilsFactory());
 
         IQ r = MAPPING_CQC_OPTIMIZER.optimize(foreignKeyCQC, q);
 
@@ -137,7 +137,7 @@ public class MappingCQCOptimizerTest {
 
         System.out.println("ONE " + one + "\n" + "TWO " + two);
 
-        LinearInclusionDependenciesImpl.Builder<RelationPredicate> b = LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY);
+        LinearInclusionDependencies.Builder<RelationPredicate> b = CORE_SINGLETONS.getHomomorphismFactory().getLinearInclusionDependenciesBuilder();
 
         final Variable addressIdM = TERM_FACTORY.getVariable("address_id_m");
         final Variable addressIdM2 = TERM_FACTORY.getVariable("address_id_m2");
@@ -158,23 +158,23 @@ public class MappingCQCOptimizerTest {
         b.add(ATOM_FACTORY.getDataAtom(store, storeIdM, addressIdM2, staffIdM2),
                 ATOM_FACTORY.getDataAtom(staff, staffIdM, addressIdM, storeIdM));
 
-        BasicLinearInclusionDependenciesImpl<RelationPredicate> lids = b.build();
+        LinearInclusionDependencies<RelationPredicate> lids = b.build();
         System.out.println("LIDS: " + lids);
 
-        ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> foreignKeyCQC = new ImmutableCQContainmentCheckUnderLIDs<>(lids);
+        ImmutableCQContainmentCheck<RelationPredicate> foreignKeyCQC = HOMOMORPHISM_FACTORY.getCQContainmentCheck(lids);
 
-        Optional<ImmutableHomomorphism> to =
-                Optional.of(ImmutableHomomorphism.builder().extend(address2, address2).extend(addressId2, addressId2).build())
-                        .map(h -> foreignKeyCQC.homomorphismIterator(h, one, two))
-                        .filter(ImmutableHomomorphismIterator::hasNext)
-                        .map(ImmutableHomomorphismIterator::next);
+        Optional<Homomorphism> to =
+                Optional.of(HOMOMORPHISM_FACTORY.getHomomorphismBuilder().extend(address2, address2).extend(addressId2, addressId2).build())
+                        .map(h -> HOMOMORPHISM_FACTORY.getHomomorphismIterator(h, one, foreignKeyCQC.chaseAllAtoms(two)))
+                        .filter(Iterator::hasNext)
+                        .map(Iterator::next);
         System.out.println(to.get());
 
-        Optional<ImmutableHomomorphism> from =
-                Optional.of(ImmutableHomomorphism.builder().extend(address2, address2).extend(addressId2, addressId2).build())
-                        .map(h -> foreignKeyCQC.homomorphismIterator(h, two, one))
-                        .filter(ImmutableHomomorphismIterator::hasNext)
-                        .map(ImmutableHomomorphismIterator::next);
+        Optional<Homomorphism> from =
+                Optional.of(HOMOMORPHISM_FACTORY.getHomomorphismBuilder().extend(address2, address2).extend(addressId2, addressId2).build())
+                        .map(h -> HOMOMORPHISM_FACTORY.getHomomorphismIterator(h, two, foreignKeyCQC.chaseAllAtoms(one)))
+                        .filter(Iterator::hasNext)
+                        .map(Iterator::next);
         System.out.println(from.get());
     }
 }

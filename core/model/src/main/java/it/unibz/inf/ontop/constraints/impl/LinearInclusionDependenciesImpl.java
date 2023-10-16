@@ -2,7 +2,9 @@ package it.unibz.inf.ontop.constraints.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.constraints.ImmutableHomomorphism;
+import it.unibz.inf.ontop.constraints.Homomorphism;
+import it.unibz.inf.ontop.constraints.HomomorphismFactory;
+import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -14,9 +16,10 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.stream.Stream;
 
-public class LinearInclusionDependenciesImpl<P extends AtomPredicate> extends BasicLinearInclusionDependenciesImpl<P> {
+public class LinearInclusionDependenciesImpl<P extends AtomPredicate> extends AbstractLinearInclusionDependencies<P> {
 
     protected final AtomFactory atomFactory;
+    protected final HomomorphismFactory homomorphismFactory;
 
     public static final class LinearInclusionDependency<P extends AtomPredicate> {
         private final DataAtom<P> head, body;
@@ -39,14 +42,12 @@ public class LinearInclusionDependenciesImpl<P extends AtomPredicate> extends Ba
 
     protected LinearInclusionDependenciesImpl(CoreUtilsFactory coreUtilsFactory,
                                               AtomFactory atomFactory,
+                                              HomomorphismFactory homomorphismFactory,
                                               ImmutableList<LinearInclusionDependency<P>> dependencies) {
         this.atomFactory = atomFactory;
+        this.homomorphismFactory = homomorphismFactory;
         this.dependencies = dependencies;
         this.variableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
-    }
-
-    public static <P extends AtomPredicate> Builder<P> builder(CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
-        return new Builder<>(coreUtilsFactory, atomFactory);
     }
 
     @Override
@@ -58,11 +59,11 @@ public class LinearInclusionDependenciesImpl<P extends AtomPredicate> extends Ba
         if (!id.getBody().getPredicate().equals(atom.getPredicate()))
             return Stream.empty();
 
-        ImmutableHomomorphism.Builder builder = ImmutableHomomorphism.builder();
+        Homomorphism.Builder builder = homomorphismFactory.getHomomorphismBuilder();
         if (!builder.extend(id.getBody().getArguments(), atom.getArguments()).isValid())
             return Stream.empty();
 
-        ImmutableHomomorphism h = extendWithLabelledNulls(id, builder.build());
+        Homomorphism h = extendWithLabelledNulls(id, builder.build());
         ImmutableList<VariableOrGroundTerm> newArguments = id.getHead().getArguments().stream()
                 .map(h::apply)
                 .collect(ImmutableCollectors.toList());
@@ -75,8 +76,8 @@ public class LinearInclusionDependenciesImpl<P extends AtomPredicate> extends Ba
         variableGenerator.registerAdditionalVariables(atom.getVariables());
     }
 
-    protected ImmutableHomomorphism extendWithLabelledNulls(LinearInclusionDependency<P> id, ImmutableHomomorphism h) {
-        ImmutableHomomorphism.Builder builder = ImmutableHomomorphism.builder(h);
+    protected Homomorphism extendWithLabelledNulls(LinearInclusionDependency<P> id, Homomorphism h) {
+        Homomorphism.Builder builder = h.builder();
         ImmutableSet<Variable> bodyVariables = id.getBody().getVariables();
         id.getHead().getVariables().stream()
                 .filter(v -> !bodyVariables.contains(v))
@@ -91,25 +92,28 @@ public class LinearInclusionDependenciesImpl<P extends AtomPredicate> extends Ba
 
 
 
-    public static class Builder<P extends AtomPredicate> {
+    static class Builder<P extends AtomPredicate> implements LinearInclusionDependencies.Builder<P> {
         protected final ImmutableList.Builder<LinearInclusionDependency<P>> builder = ImmutableList.builder();
 
         protected final CoreUtilsFactory coreUtilsFactory;
         protected final AtomFactory atomFactory;
+        protected final HomomorphismFactory homomorphismFactory;
 
-        protected Builder(CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
+        protected Builder(CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory, HomomorphismFactory homomorphismFactory) {
             this.coreUtilsFactory = coreUtilsFactory;
             this.atomFactory = atomFactory;
+            this.homomorphismFactory = homomorphismFactory;
         }
 
+        @Override
         public Builder<P> add(DataAtom<P> head, DataAtom<P> body) {
             builder.add(new LinearInclusionDependency<>(head, body));
             return this;
         }
 
-        public BasicLinearInclusionDependenciesImpl<P> build() {
-            return new LinearInclusionDependenciesImpl<>(coreUtilsFactory, atomFactory, builder.build());
+        @Override
+        public LinearInclusionDependencies<P> build() {
+            return new LinearInclusionDependenciesImpl<>(coreUtilsFactory, atomFactory, homomorphismFactory, builder.build());
         }
     }
-
 }

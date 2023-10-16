@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.*;
@@ -42,8 +43,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     private final LeftJoinNormalizer ljNormalizer;
     private final CoreUtilsFactory coreUtilsFactory;
 
-    private final IQTreeTools iqTreeTools;
-
     @AssistedInject
     private LeftJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalJoinCondition,
                              TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
@@ -51,10 +50,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                              ConditionSimplifier conditionSimplifier, LeftJoinNormalizer ljNormalizer,
                              JoinOrFilterVariableNullabilityTools variableNullabilityTools, CoreUtilsFactory coreUtilsFactory, IQTreeTools iqTreeTools) {
         super(optionalJoinCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, variableNullabilityTools, conditionSimplifier);
+                substitutionFactory, variableNullabilityTools, conditionSimplifier, iqTreeTools);
         this.ljNormalizer = ljNormalizer;
         this.coreUtilsFactory = coreUtilsFactory;
-        this.iqTreeTools = iqTreeTools;
     }
 
     @AssistedInject
@@ -101,10 +99,13 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        return obj != null && getClass() == obj.getClass()
-                && getOptionalFilterCondition().equals(((LeftJoinNode) obj).getOptionalFilterCondition());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o instanceof LeftJoinNodeImpl) {
+            LeftJoinNodeImpl that = (LeftJoinNodeImpl) o;
+            return getOptionalFilterCondition().equals(that.getOptionalFilterCondition());
+        }
+        return false;
     }
 
     @Override
@@ -126,13 +127,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                         rightChild.getVariables()))
                 .orElseGet(rightChild::getVariableNullability);
 
-        ImmutableSet<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables())
-                .immutableCopy();
+        Set<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables());
 
         ImmutableSet<ImmutableSet<Variable>> rightSelectedGroups = rightNullability.getNullableGroups().stream()
-                .map(g -> g.stream()
-                        .filter(rightSpecificVariables::contains)
-                        .collect(ImmutableCollectors.toSet()))
+                .map(g -> Sets.intersection(g, rightSpecificVariables).immutableCopy())
                 .filter(g -> !g.isEmpty())
                 .collect(ImmutableCollectors.toSet());
 
@@ -143,19 +141,17 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .filter(v -> !rightNullability.isPossiblyNullable(v))
                 .collect(ImmutableCollectors.toSet());
 
-        Stream<ImmutableSet<Variable>> rightGroupStream = initiallyNonNullableRightSpecificGroup.isEmpty()
-                ? rightSelectedGroups.stream()
-                : Stream.concat(Stream.of(initiallyNonNullableRightSpecificGroup), rightSelectedGroups.stream());
+        Set<ImmutableSet<Variable>> rightGroupStream = initiallyNonNullableRightSpecificGroup.isEmpty()
+                ? rightSelectedGroups
+                : Sets.union(ImmutableSet.of(initiallyNonNullableRightSpecificGroup), rightSelectedGroups);
 
         /*
          * Nullable groups from the left are preserved
          *
          * Nullable groups from the right are only dealing with right-specific variables
          */
-        ImmutableSet<ImmutableSet<Variable>> nullableGroups = Stream.concat(
-                leftChild.getVariableNullability().getNullableGroups().stream(),
-                rightGroupStream)
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<ImmutableSet<Variable>> nullableGroups = Sets.union(
+                leftChild.getVariableNullability().getNullableGroups(), rightGroupStream).immutableCopy();
 
         ImmutableSet<Variable> scope = Sets.union(leftChild.getVariables(), rightChild.getVariables()).immutableCopy();
 
@@ -169,7 +165,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree leftChild, IQTree rightChild) {
         ImmutableSet<Substitution<NonVariableTerm>> leftDefs = leftChild.getPossibleVariableDefinitions();
 
-        Sets.SetView<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables());
+        Set<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables());
 
         ImmutableSet<Substitution<NonVariableTerm>> rightDefs = rightChild.getPossibleVariableDefinitions().stream()
                 .map(s -> s.restrictDomainTo(rightSpecificVariables))
@@ -342,9 +338,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
         Optional<ImmutableExpression> optionalFilterCondition = getOptionalFilterCondition();
 
-        ImmutableSet<Variable> leftVariables = leftChild.getVariables();
         ImmutableSet<Variable> rightVariables = rightChild.getVariables();
-        Sets.SetView<Variable> commonVariables = Sets.intersection(leftVariables, rightVariables);
+        Set<Variable> commonVariables = Sets.intersection(leftChild.getVariables(), rightVariables);
 
         if ((!optionalFilterCondition.isPresent()) && commonVariables.isEmpty())
             return false;
@@ -355,7 +350,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
         // Common variables have an implicit IS_NOT_NULL condition
         ImmutableSet<ImmutableSet<Variable>> nullableGroups = rightChild.getVariableNullability().getNullableGroups().stream()
-                .filter(g -> g.stream().noneMatch(commonVariables::contains))
+                .filter(g -> Sets.intersection(g, commonVariables).isEmpty())
                 .collect(ImmutableCollectors.toSet());
 
         VariableNullability variableNullabilityForRight = optionalFilterCondition
@@ -387,21 +382,20 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         IQTree newRightChild = rightChild.removeDistincts();
 
         IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newLeftChild.equals(leftChild) && newRightChild.equals(rightChild));
-
         return iqFactory.createBinaryNonCommutativeIQTree(this, newLeftChild, newRightChild, newTreeCache);
     }
 
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree leftChild, IQTree rightChild) {
-        var leftChildConstraints = leftChild.inferUniqueConstraints();
+        ImmutableSet<ImmutableSet<Variable>> leftChildConstraints = leftChild.inferUniqueConstraints();
         if (leftChildConstraints.isEmpty())
             return ImmutableSet.of();
 
-        var rightChildConstraints = rightChild.inferUniqueConstraints();
+        ImmutableSet<ImmutableSet<Variable>> rightChildConstraints = rightChild.inferUniqueConstraints();
         if (rightChildConstraints.isEmpty())
             return ImmutableSet.of();
 
-        var commonVariables = Sets.intersection(leftChild.getVariables(), rightChild.getVariables());
+        Set<Variable> commonVariables = Sets.intersection(leftChild.getVariables(), rightChild.getVariables());
 
         if (commonVariables.isEmpty() || rightChildConstraints.stream().noneMatch(commonVariables::containsAll))
             return ImmutableSet.of();
@@ -413,14 +407,14 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     public FunctionalDependencies inferFunctionalDependencies(IQTree leftChild, IQTree rightChild,
                                                               ImmutableSet<ImmutableSet<Variable>> uniqueConstraints,
                                                               ImmutableSet<Variable> variables) {
-        var rightFunctionalDependencies = rightChild.inferFunctionalDependencies();
+        FunctionalDependencies rightFunctionalDependencies = rightChild.inferFunctionalDependencies();
         if (rightFunctionalDependencies.isEmpty())
             return leftChild.inferFunctionalDependencies();
 
-        var leftVariables = leftChild.getVariables();
+        ImmutableSet<Variable> leftVariables = leftChild.getVariables();
 
         // Makes sure the right child does not add FDs on left variables (as dependents)
-        var filterRightFunctionalDependencies = rightFunctionalDependencies.stream()
+        FunctionalDependencies filterRightFunctionalDependencies = rightFunctionalDependencies.stream()
                 .map(e -> Maps.immutableEntry(
                         e.getKey(),
                         Sets.difference(e.getValue(), leftVariables).immutableCopy()))
@@ -489,7 +483,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                                                                            ImmutableSet<Variable> leftVariables,
                                                                            ImmutableSet<Variable> rightVariables) {
 
-        ImmutableSet<Variable> rightSpecificVariables = Sets.difference(rightVariables, leftVariables).immutableCopy();
+        Set<Variable> rightSpecificVariables = Sets.difference(rightVariables, leftVariables);
 
         ImmutableSet<ImmutableExpression> expressions = expression.flattenAND()
                 .collect(ImmutableCollectors.toSet());
@@ -526,7 +520,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     private boolean isRejectingRightSpecificNulls(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild) {
 
-        Sets.SetView<Variable> nullVariables = Sets.intersection(
+        Set<Variable> nullVariables = Sets.intersection(
                 Sets.difference(rightChild.getVariables(), leftChild.getVariables()),
                 constraint.getVariables());
 
@@ -554,7 +548,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
         Substitution<Variable> restricted = descendingSubstitution.restrictRangeTo(Variable.class);
 
-        Sets.SetView<Variable> variables = Sets.union(leftVariables, rightVariables);
+        Set<Variable> variables = Sets.union(leftVariables, rightVariables);
         ImmutableSet<Variable> freshVariables = restricted.getPreImage(t -> !variables.contains(t));
 
         return !Sets.intersection(
@@ -582,12 +576,12 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         IQTree leftChild = children.get(0);
         IQTree rightChild = children.get(1);
 
-        var rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables());
+        Set<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables());
 
         if (rightSpecificVariables.isEmpty())
             return nonRequirementBeforeFilter;
 
-        var commonVariables = Sets.intersection(leftChild.getVariables(), rightChild.getVariables());
+        Set<Variable> commonVariables = Sets.intersection(leftChild.getVariables(), rightChild.getVariables());
 
         /*
          * If the right child has no impact on cardinality (i.e. at most one match per row on the left),
@@ -600,7 +594,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 && rightChild.inferUniqueConstraints().stream()
                     .anyMatch(commonVariables::containsAll)) {
 
-            var rightSpecificNonRequiredVariables = Sets.intersection(
+            Set<Variable> rightSpecificNonRequiredVariables = Sets.intersection(
                     rightSpecificVariables, nonRequirementBeforeFilter.getNotRequiredVariables());
 
             ImmutableSet<Variable> filterVariables = getLocalVariables();

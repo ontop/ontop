@@ -9,17 +9,19 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Test;
 
+import java.util.Iterator;
+
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
 import static org.junit.Assert.*;
 
 @SuppressWarnings("ConstantConditions")
-public class ImmutableHomomorphismTest {
+public class HomomorphismTest {
 
     @Test
     public void test_empty_from() {
-        ImmutableHomomorphism h = ImmutableHomomorphism.builder().extend(TERM_FACTORY.getVariable("x"),
+        Homomorphism h = HOMOMORPHISM_FACTORY.getHomomorphismBuilder().extend(TERM_FACTORY.getVariable("x"),
                 TERM_FACTORY.getRDFLiteralConstant("a", XSD.STRING)).build();
-        ImmutableHomomorphismIterator<AtomPredicate> i = new ImmutableHomomorphismIterator<>(h, ImmutableList.of(), ImmutableList.of());
+        Iterator<Homomorphism> i = HOMOMORPHISM_FACTORY.getHomomorphismIterator(h, ImmutableList.of(), ImmutableList.of());
         assertTrue(i.hasNext());
         assertTrue(i.hasNext());
         assertEquals(h, i.next());
@@ -29,7 +31,7 @@ public class ImmutableHomomorphismTest {
 
     @Test
     public void test_backtrack() {
-        ImmutableHomomorphism h = ImmutableHomomorphism.builder().build();
+        Homomorphism h = HOMOMORPHISM_FACTORY.getHomomorphismBuilder().build();
         ImmutableList<DataAtom<AtomPredicate>> from = ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(TERM_FACTORY.getVariable("x"), RDF_FACTORY.createIRI("http://P"),  TERM_FACTORY.getVariable("y")),
                 ATOM_FACTORY.getIntensionalTripleAtom(TERM_FACTORY.getVariable("y"), RDF_FACTORY.createIRI("http://Q"), TERM_FACTORY.getVariable("z")),
@@ -46,10 +48,10 @@ public class ImmutableHomomorphismTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(TERM_FACTORY.getRDFLiteralConstant("c0", XSD.STRING),
                         RDF_FACTORY.createIRI("http://R"), TERM_FACTORY.getRDFLiteralConstant("d0", XSD.STRING)));
 
-        ImmutableHomomorphismIterator<AtomPredicate> i = new ImmutableHomomorphismIterator<>(h, from, to);
+        Iterator<Homomorphism> i = HOMOMORPHISM_FACTORY.getHomomorphismIterator(h, from, to);
         assertTrue(i.hasNext());
         assertTrue(i.hasNext());
-        assertEquals(ImmutableHomomorphism.builder()
+        assertEquals(HOMOMORPHISM_FACTORY.getHomomorphismBuilder()
                 .extend(TERM_FACTORY.getVariable("x"), TERM_FACTORY.getRDFLiteralConstant("a0", XSD.STRING))
                 .extend(TERM_FACTORY.getVariable("y"), TERM_FACTORY.getRDFLiteralConstant("b0", XSD.STRING))
                 .extend(TERM_FACTORY.getVariable("z"), TERM_FACTORY.getRDFLiteralConstant("c0", XSD.STRING))
@@ -61,7 +63,7 @@ public class ImmutableHomomorphismTest {
 
     @Test
     public void test_multiple() {
-        ImmutableHomomorphism h = ImmutableHomomorphism.builder().build();
+        Homomorphism h = HOMOMORPHISM_FACTORY.getHomomorphismBuilder().build();
         ImmutableList<DataAtom<AtomPredicate>> from = ImmutableList.of(
                 ATOM_FACTORY.getIntensionalTripleAtom(TERM_FACTORY.getVariable("x"), RDF_FACTORY.createIRI("http://P"),  TERM_FACTORY.getVariable("y")),
                 ATOM_FACTORY.getIntensionalTripleAtom(TERM_FACTORY.getVariable("y"), RDF_FACTORY.createIRI("http://Q"), TERM_FACTORY.getVariable("z")),
@@ -80,10 +82,10 @@ public class ImmutableHomomorphismTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(TERM_FACTORY.getRDFLiteralConstant("c0", XSD.STRING),
                         RDF_FACTORY.createIRI("http://R"), TERM_FACTORY.getRDFLiteralConstant("d0", XSD.STRING)));
 
-        ImmutableHomomorphismIterator<AtomPredicate> i = new ImmutableHomomorphismIterator<>(h, from, to);
+        Iterator<Homomorphism> i = HOMOMORPHISM_FACTORY.getHomomorphismIterator(h, from, to);
         assertTrue(i.hasNext());
         assertTrue(i.hasNext());
-        assertEquals(ImmutableHomomorphism.builder()
+        assertEquals(HOMOMORPHISM_FACTORY.getHomomorphismBuilder()
                 .extend(TERM_FACTORY.getVariable("x"), TERM_FACTORY.getRDFLiteralConstant("a", XSD.STRING))
                 .extend(TERM_FACTORY.getVariable("y"), TERM_FACTORY.getRDFLiteralConstant("b", XSD.STRING))
                 .extend(TERM_FACTORY.getVariable("z"), TERM_FACTORY.getRDFLiteralConstant("c", XSD.STRING))
@@ -91,7 +93,7 @@ public class ImmutableHomomorphismTest {
                 .build(), i.next());
         assertTrue(i.hasNext());
         assertTrue(i.hasNext());
-        assertEquals(ImmutableHomomorphism.builder()
+        assertEquals(HOMOMORPHISM_FACTORY.getHomomorphismBuilder()
                 .extend(TERM_FACTORY.getVariable("x"), TERM_FACTORY.getRDFLiteralConstant("a", XSD.STRING))
                 .extend(TERM_FACTORY.getVariable("y"), TERM_FACTORY.getRDFLiteralConstant("b0", XSD.STRING))
                 .extend(TERM_FACTORY.getVariable("z"), TERM_FACTORY.getRDFLiteralConstant("c0", XSD.STRING))
@@ -118,7 +120,7 @@ public class ImmutableHomomorphismTest {
             "staff_id", stringDBType, false,
             "address_id", stringDBType, false);
 
-        ImmutableHomomorphism h = ImmutableHomomorphism.builder().build();
+        Homomorphism h = HOMOMORPHISM_FACTORY.getHomomorphismBuilder().build();
         // ADDRESS(ADDRESS_ID0,ADDRESS3)
         // STAFF(STAFF_ID2,ADDRESS_ID0,STORE_ID2)
         ImmutableList<DataAtom<AtomPredicate>> from = ImmutableList.of(
@@ -138,7 +140,7 @@ public class ImmutableHomomorphismTest {
                 ATOM_FACTORY.getDataAtom(S.getAtomPredicate(), TERM_FACTORY.getVariable("STAFF_ID1"),
                         TERM_FACTORY.getVariable("p2"),  TERM_FACTORY.getVariable("p3")));
 
-        ImmutableHomomorphismIterator<AtomPredicate> i = new ImmutableHomomorphismIterator<>(h, from, to);
+        Iterator<Homomorphism> i = HOMOMORPHISM_FACTORY.getHomomorphismIterator(h, from, to);
         assertFalse(i.hasNext());
     }
 

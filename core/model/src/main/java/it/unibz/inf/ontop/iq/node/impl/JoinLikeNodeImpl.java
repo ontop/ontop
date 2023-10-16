@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.request.impl.VariableNonRequirementImpl;
@@ -27,9 +28,10 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                                TermNullabilityEvaluator nullabilityEvaluator,
                                TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                TypeFactory typeFactory, SubstitutionFactory substitutionFactory,
-                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier) {
+                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier,
+                               IQTreeTools iqTreeTools) {
         super(optionalJoinCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, variableNullabilityTools, conditionSimplifier);
+                substitutionFactory, variableNullabilityTools, conditionSimplifier, iqTreeTools);
     }
 
 
@@ -45,22 +47,14 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         for (IQTree child : children) {
             ImmutableSet<Variable> childProjectedVariables = child.getVariables();
 
+            Set<Variable> childNonProjectedVariables = Sets.difference(child.getKnownVariables(), childProjectedVariables);
 
-            ImmutableSet<Variable> childNonProjectedVariables = child.getKnownVariables().stream()
-                    .filter(v -> !childProjectedVariables.contains(v))
-                    .collect(ImmutableCollectors.toSet());
-
-            ImmutableSet<Variable> conflictingVariables = childNonProjectedVariables.stream()
-                    .filter(allVariables::contains)
-                    .collect(ImmutableCollectors.toSet());
-
-
+            Set<Variable> conflictingVariables = Sets.intersection(childNonProjectedVariables, allVariables);
             if (!conflictingVariables.isEmpty()) {
                 throw new InvalidIntermediateQueryException("The following non-projected variables "
                         + conflictingVariables + " are appearing in different children of "+ this + ": \n"
                         + children.stream()
-                            .filter(c -> c.getKnownVariables().stream()
-                                    .anyMatch(conflictingVariables::contains))
+                            .filter(c -> !Sets.intersection(c.getKnownVariables(), conflictingVariables).isEmpty())
                             .map(c -> "\n" + c)
                             .collect(ImmutableCollectors.toList()));
             }

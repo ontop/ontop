@@ -106,7 +106,7 @@ public class VariableNullabilityImpl implements VariableNullability {
     @Override
     public boolean canPossiblyBeNullSeparately(ImmutableSet<Variable> variables) {
         if (variableMap == null)
-            variableMap = extractVariableMap(nullableGroups);
+            variableMap = extractVariableMap(ImmutableList.copyOf(nullableGroups));
 
         return variables.stream()
                 .filter(variableMap::containsKey)
@@ -211,9 +211,7 @@ public class VariableNullabilityImpl implements VariableNullability {
          * Projects away irrelevant variables
          */
         ImmutableSet<ImmutableSet<Variable>> nullableGroups = nullabilityBeforeProjectingOut.getNullableGroups().stream()
-                .map(g -> g.stream()
-                        .filter(newScope::contains)
-                        .collect(ImmutableCollectors.toSet()))
+                .map(g -> Sets.intersection(g, newScope).immutableCopy())
                 .filter(g -> !g.isEmpty())
                 .collect(ImmutableCollectors.toSet());
 
@@ -315,10 +313,7 @@ public class VariableNullabilityImpl implements VariableNullability {
     }
 
 
-    private static ImmutableMap<Variable, Integer> extractVariableMap(
-            ImmutableCollection<ImmutableSet<Variable>> nullableGroups) {
-
-        ImmutableList<ImmutableSet<Variable>> groupList = ImmutableList.copyOf(nullableGroups);
+    private static ImmutableMap<Variable, Integer> extractVariableMap(ImmutableList<ImmutableSet<Variable>> groupList) {
         return IntStream.range(0, groupList.size())
                 .boxed()
                 .flatMap(i -> groupList.get(i).stream()

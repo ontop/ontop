@@ -67,3 +67,19 @@ CREATE TABLE "source2_accommodation" (
                                        italian_description text NULL,
                                        hotel text NOT NULL
 );
+
+CREATE TABLE "source3_measurement_types" (
+                                           name text primary key NOT NULL,
+                                           unit text NOT NULL,
+                                           description text NULL,
+                                           "statisticalType" text NULL
+);
+
+CREATE TABLE "source3_weather_measurement" (
+                                             id integer primary key NOT NULL,
+                                             period integer NOT NULL,
+                                             timestamp timestamp NOT NULL,
+                                             name text NOT NULL,
+                                             double_value float NOT NULL,
+                                             platform_id integer NOT NULL
+);

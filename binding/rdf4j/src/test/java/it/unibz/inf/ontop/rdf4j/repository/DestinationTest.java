@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.rdf4j.repository;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -304,6 +305,19 @@ public class DestinationTest extends AbstractRDF4JTest {
 
         String sql = reformulateIntoNativeQuery(sparql);
         assertEquals(0, StringUtils.countMatches(sql, "REPLACE"));
+    }
+
+    @Ignore("to be enabled when homomorphisms modulo IRI unification is implemented")
+    @Test
+    public void testObservableProperties() {
+        String sparql = "PREFIX sosa: <http://www.w3.org/ns/sosa/>\n" +
+                "SELECT * WHERE {\n" +
+                " ?sub a sosa:ObservableProperty .\n" +
+                "}\n";
+
+        String sql = reformulateIntoNativeQuery(sparql);
+        assertEquals(0, StringUtils.countMatches(sql, "DISTINCT"));
+        assertEquals(0, StringUtils.countMatches(sql, "UNION"));
     }
 
 }

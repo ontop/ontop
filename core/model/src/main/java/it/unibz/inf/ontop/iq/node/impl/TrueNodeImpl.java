@@ -73,7 +73,7 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        return o != null && getClass() == o.getClass();
+        return o instanceof TrueNodeImpl;
     }
 
     @Override

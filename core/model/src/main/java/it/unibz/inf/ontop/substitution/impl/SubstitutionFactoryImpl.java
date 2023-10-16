@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
-    final TermFactory termFactory;
+    private final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
     private final ImmutableTermsSubstitutionOperations immutableTermsSubstitutionOperations;
 
@@ -234,9 +234,12 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         };
     }
 
+    // lazy instantiation
+    private SubstitutionOperations<VariableOrGroundTerm> onVariableOrGroundTerms;
     @Override
     public SubstitutionOperations<VariableOrGroundTerm> onVariableOrGroundTerms() {
-        return new AbstractSubstitutionOperations<>(termFactory, v -> v, s -> s) {
+        if (onVariableOrGroundTerms == null)
+            onVariableOrGroundTerms = new AbstractSubstitutionOperations<>(termFactory, v -> v, s -> s) {
             @Override
             public VariableOrGroundTerm applyToTerm(Substitution<? extends VariableOrGroundTerm> substitution, VariableOrGroundTerm t) {
                 return (t instanceof Variable) ? apply(substitution, (Variable) t) : t;
@@ -254,6 +257,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 };
             }
         };
+        return onVariableOrGroundTerms;
     }
 
     @Override

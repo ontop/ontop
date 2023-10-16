@@ -57,12 +57,11 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mapping, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException, MetadataExtractionException {
         ImmutableList.Builder<MappingAssertion> builder = ImmutableList.builder();
         for (SQLPPTriplesMap assertion : mapping) {
-            RAExpression re;
             IQTree tree;
             Function<Variable, Optional<ImmutableTerm>> lookup;
 
             try {
-                re = getRAExpression(assertion, metadataLookup);
+                RAExpression re = getRAExpression(assertion, metadataLookup);
                 tree = sqlQueryParser.convert(re);
 
                 lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), re.getUnqualifiedAttributes());
@@ -81,7 +80,8 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 try {
                     PPMappingAssertionProvenance provenance = assertion.getMappingAssertionProvenance(target);
                     builder.add(convert(target, lookup, provenance, tree));
-                } catch (InvalidMappingSourceQueriesException e) {
+                }
+                catch (InvalidMappingSourceQueriesException e) {
                     if (!ignoreInvalidMappingEntries)
                         throw e;
                     LOGGER.warn("Target atom {} was ignored due to an issue: {}", target, e.getMessage());
@@ -102,7 +102,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         if (mappingAssertion instanceof OntopNativeSQLPPTriplesMap) {
             QuotedIDFactory rawIdFactory = new RawQuotedIDFactory(idFactory);
             return v -> Optional.ofNullable(standard.apply(v)
-                            .orElse(lookup.get(rawIdFactory.createAttributeID(v.getName()))));
+                            .orElseGet(() -> lookup.get(rawIdFactory.createAttributeID(v.getName()))));
         }
         else
             return standard;

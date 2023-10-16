@@ -46,8 +46,8 @@ public abstract class DataNodeImpl<P extends AtomPredicate> extends LeafIQTreeIm
         if (variables == null) {
             variables = atom.getArguments()
                     .stream()
-                    .filter(Variable.class::isInstance)
-                    .map(Variable.class::cast)
+                    .filter(t -> t instanceof Variable)
+                    .map(t -> (Variable)t)
                     .collect(ImmutableCollectors.toSet());
         }
         return variables;

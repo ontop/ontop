@@ -92,6 +92,7 @@ public class RuleExecutorImpl implements RuleExecutor {
     private MappingAssertion merge(MappingAssertion existingAssertion, MappingAssertion additionalAssertion) {
         IQ mergedDefinition = queryMerger.mergeDefinitions(
                         ImmutableSet.of(existingAssertion.getQuery(), additionalAssertion.getQuery()))
+                .map(IQ::normalizeForOptimization)
                 .orElseThrow(() -> new MinorOntopInternalBugException("Cannot merge the definitions"));
 
         return new MappingAssertion(mergedDefinition, null);

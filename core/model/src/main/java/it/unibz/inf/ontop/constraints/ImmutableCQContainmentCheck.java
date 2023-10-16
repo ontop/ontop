@@ -1,6 +1,9 @@
 package it.unibz.inf.ontop.constraints;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.DataAtom;
 
 import java.util.Iterator;
 import java.util.List;
@@ -18,6 +21,8 @@ public interface ImmutableCQContainmentCheck<P extends AtomPredicate> {
      */
 
     boolean isContainedIn(ImmutableCQ<P> cq1, ImmutableCQ<P> cq2);
+
+    ImmutableCollection<DataAtom<P>> chaseAllAtoms(ImmutableCollection<DataAtom<P>> atoms);
 
     /***
      * Removes queries that are contained syntactically, using the method

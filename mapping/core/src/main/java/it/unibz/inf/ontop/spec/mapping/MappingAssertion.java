@@ -20,22 +20,29 @@ import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 
+/**
+ * Assumes that the top=level node is a ConstructionNode.
+ * This ConstructionNode determines the index of the mapping assertion.
+ */
 public class MappingAssertion {
 
-    // lazy
-    private MappingAssertionIndex index;
+    private final MappingAssertionIndex index;
     private final IQ query;
     private final PPMappingAssertionProvenance provenance;
-
-    public MappingAssertion(MappingAssertionIndex index, IQ query, PPMappingAssertionProvenance provenance) {
-        this.index = index;
-        this.query = query;
-        this.provenance = provenance;
-    }
 
     public MappingAssertion(IQ query, PPMappingAssertionProvenance provenance) {
         this.query = query;
         this.provenance = provenance;
+        RDFAtomPredicate rdfAtomPredicate = Optional.of(query.getProjectionAtom().getPredicate())
+                .filter(p -> p instanceof RDFAtomPredicate)
+                .map(p -> (RDFAtomPredicate) p)
+                .orElseThrow(() -> new MinorOntopInternalBugException("The mapping assertion does not have an RDFAtomPredicate"));
+
+        ImmutableList<? extends ImmutableTerm> terms = getTerms();
+        Optional<IRI> propertyIRI = rdfAtomPredicate.getPropertyIRI(terms);
+        this.index = propertyIRI.filter(iri -> iri.equals(RDF.TYPE)).isPresent()
+                ? MappingAssertionIndex.ofClass(rdfAtomPredicate, rdfAtomPredicate.getClassIRI(terms))
+                : MappingAssertionIndex.ofProperty(rdfAtomPredicate, propertyIRI);
     }
 
     public IQ getQuery() { return query; }
@@ -43,13 +50,11 @@ public class MappingAssertion {
     public PPMappingAssertionProvenance getProvenance() { return provenance; }
 
     public MappingAssertion copyOf(IQ query) {
-        return (query.getProjectionAtom() == this.query.getProjectionAtom())
-                ? new MappingAssertion(index, query, provenance)
-                : new MappingAssertion(query, provenance);
+        return new MappingAssertion(query, provenance);
     }
 
     public MappingAssertion copyOf(IQTree tree, IntermediateQueryFactory iqFactory) {
-        return new MappingAssertion(index, iqFactory.createIQ(query.getProjectionAtom(), tree), provenance);
+        return new MappingAssertion(iqFactory.createIQ(query.getProjectionAtom(), tree), provenance);
     }
 
     public ImmutableSet<Variable> getProjectedVariables() {
@@ -57,14 +62,7 @@ public class MappingAssertion {
     }
 
     public RDFAtomPredicate getRDFAtomPredicate() {
-        if (index == null) {
-            return Optional.of(query.getProjectionAtom().getPredicate())
-                    .filter(p -> p instanceof RDFAtomPredicate)
-                    .map(p -> (RDFAtomPredicate) p)
-                    .orElseThrow(() -> new MinorOntopInternalBugException("The mapping assertion does not have an RDFAtomPredicate"));
-        }
-        else
-            return index.getPredicate();
+        return index.getPredicate();
     }
 
     public ImmutableList<ImmutableTerm> getTerms() {
@@ -72,9 +70,9 @@ public class MappingAssertion {
     }
 
     public Substitution<ImmutableTerm> getTopSubstitution() {
-       return Optional.of(query.getTree())
-                .filter(t -> t.getRootNode() instanceof ConstructionNode)
+        return Optional.of(query.getTree())
                 .map(IQTree::getRootNode)
+                .filter(n -> n instanceof ConstructionNode)
                 .map(n -> (ConstructionNode) n)
                 .map(ConstructionNode::getSubstitution)
                 .orElseThrow(() -> new MinorOntopInternalBugException(
@@ -90,19 +88,12 @@ public class MappingAssertion {
     }
 
     public MappingAssertionIndex getIndex() {
-        if (index == null) {
-            RDFAtomPredicate rdfAtomPredicate = getRDFAtomPredicate();
-            ImmutableList<? extends ImmutableTerm> substitutedArguments = getTerms();
-
-            IRI propertyIRI = rdfAtomPredicate.getPropertyIRI(substitutedArguments)
-                    .orElseThrow(() -> new NoGroundPredicateOntopInternalBugException("The definition of the predicate is not always a ground term " + query));
-
-            index = propertyIRI.equals(RDF.TYPE)
-                    ? MappingAssertionIndex.ofClass(rdfAtomPredicate, rdfAtomPredicate.getClassIRI(substitutedArguments)
-                    .orElseThrow(() -> new NoGroundPredicateOntopInternalBugException("The definition of the predicate is not always a ground term " + query)))
-                    : MappingAssertionIndex.ofProperty(rdfAtomPredicate, propertyIRI);
-        }
         return index;
+    }
+
+    @Override
+    public String toString() {
+        return query.toString();
     }
 
     public static class NoGroundPredicateOntopInternalBugException extends OntopInternalBugException {

@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * "Default" implementation for an extensional data node.
@@ -84,7 +85,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     @AssistedInject
     private ExtensionalDataNodeImpl(@Assisted RelationDefinition relationDefinition,
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
-                                    @Assisted VariableNullability variableNullability,
+                                    @Assisted @Nullable VariableNullability variableNullability,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
                                     CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
         super(iqTreeTools, iqFactory);
@@ -145,17 +146,17 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
     private boolean areDeterminantsPresentAndNotNull(ImmutableSet<Attribute> determinants) {
         ImmutableList<Optional<? extends VariableOrGroundTerm>> arguments = determinants.stream()
-                .map(a -> Optional.ofNullable(argumentMap.get(a.getIndex() - 1)))
+                .map(this::getArgument)
                 .collect(ImmutableCollectors.toList());
 
         VariableNullability variableNullability = getVariableNullability();
 
         return arguments.stream().allMatch(Optional::isPresent)
-                && arguments.stream()
-                .map(Optional::get)
-                .filter(t -> t instanceof Variable)
-                .map(v -> (Variable) v)
-                .noneMatch(variableNullability::isPossiblyNullable);
+                && getVariableStreamFrom(arguments).noneMatch(variableNullability::isPossiblyNullable);
+    }
+
+    private Optional<? extends VariableOrGroundTerm> getArgument(Attribute a) {
+        return Optional.ofNullable(argumentMap.get(a.getIndex() - 1));
     }
 
     @Override
@@ -206,11 +207,9 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     @Override
     public synchronized ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
         if (uniqueConstraints == null) {
-
             uniqueConstraints = relationDefinition.getUniqueConstraints().stream()
                     .map(this::convertUniqueConstraint)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
+                    .flatMap(Optional::stream)
                     .collect(ImmutableCollectors.toSet());
         }
         return uniqueConstraints;
@@ -218,54 +217,48 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
     private Optional<ImmutableSet<Variable>> convertUniqueConstraint(UniqueConstraint uniqueConstraint) {
         ImmutableList<Optional<? extends VariableOrGroundTerm>> arguments = uniqueConstraint.getDeterminants().stream()
-                .map(a -> Optional.ofNullable(argumentMap.get(a.getIndex() - 1)))
+                .map(this::getArgument)
                 .collect(ImmutableCollectors.toList());
 
         if (!arguments.stream().allMatch(Optional::isPresent))
             return Optional.empty();
 
-        return Optional.of(arguments.stream()
-                .map(Optional::get)
-                .filter(t -> t instanceof Variable)
-                .map(v -> (Variable)v)
-                .collect(ImmutableCollectors.toSet()));
+        return Optional.of(getVariableSetFrom(arguments));
     }
 
     @Override
     public synchronized FunctionalDependencies inferFunctionalDependencies() {
         return relationDefinition.getOtherFunctionalDependencies().stream()
                 .map(this::convertFunctionalDependency)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .collect(FunctionalDependencies.toFunctionalDependencies())
                 .concat(FunctionalDependencies.fromUniqueConstraints(inferUniqueConstraints(), getLocalVariables()));
     }
 
     private Optional<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> convertFunctionalDependency(FunctionalDependency functionalDependency) {
         ImmutableList<Optional<? extends VariableOrGroundTerm>> determinants = functionalDependency.getDeterminants().stream()
-                .map(a -> Optional.ofNullable(argumentMap.get(a.getIndex() - 1)))
+                .map(this::getArgument)
                 .collect(ImmutableCollectors.toList());
 
         ImmutableList<Optional<? extends VariableOrGroundTerm>> dependents = functionalDependency.getDependents().stream()
-                .map(a -> Optional.ofNullable(argumentMap.get(a.getIndex() - 1)))
+                .map(this::getArgument)
                 .collect(ImmutableCollectors.toList());
 
-        if (!determinants.stream().allMatch(Optional::isPresent) || !dependents.stream().anyMatch(Optional::isPresent))
+        if (!determinants.stream().allMatch(Optional::isPresent) || dependents.stream().noneMatch(Optional::isPresent))
             return Optional.empty();
 
-        return Optional.of(Maps.immutableEntry(
-                    determinants.stream()
-                            .map(Optional::get)
-                            .filter(t -> t instanceof Variable)
-                            .map(v -> (Variable)v)
-                            .collect(ImmutableCollectors.toSet()),
-                    dependents.stream()
-                            .filter(Optional::isPresent)
-                            .map(Optional::get)
-                            .filter(t -> t instanceof Variable)
-                            .map(v -> (Variable)v)
-                            .collect(ImmutableCollectors.toSet())
-                ));
+        return Optional.of(Maps.immutableEntry(getVariableSetFrom(determinants), getVariableSetFrom(dependents)));
+    }
+
+    private static ImmutableSet<Variable> getVariableSetFrom(ImmutableList<Optional<? extends VariableOrGroundTerm>> list) {
+        return getVariableStreamFrom(list).collect(ImmutableCollectors.toSet());
+    }
+
+    private static Stream<Variable> getVariableStreamFrom(ImmutableList<Optional<? extends VariableOrGroundTerm>> list) {
+        return list.stream()
+                .flatMap(Optional::stream)
+                .filter(t -> t instanceof Variable)
+                .map(v -> (Variable)v);
     }
 
     /**
@@ -291,9 +284,11 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ExtensionalDataNodeImpl that = (ExtensionalDataNodeImpl) o;
-        return relationDefinition.equals(that.relationDefinition) && argumentMap.equals(that.argumentMap);
+        if (o instanceof ExtensionalDataNodeImpl) {
+            ExtensionalDataNodeImpl that = (ExtensionalDataNodeImpl) o;
+            return relationDefinition.equals(that.relationDefinition) && argumentMap.equals(that.argumentMap);
+        }
+        return false;
     }
 
     @Override
@@ -319,10 +314,9 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     @Override
     public synchronized ImmutableSet<Variable> getLocalVariables() {
         if (variables == null) {
-            variables = argumentMap.values()
-                    .stream()
-                    .filter(Variable.class::isInstance)
-                    .map(Variable.class::cast)
+            variables = argumentMap.values().stream()
+                    .filter(t -> t instanceof Variable)
+                    .map(t -> (Variable)t)
                     .collect(ImmutableCollectors.toSet());
         }
         return variables;

@@ -92,19 +92,16 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     private void validateNode() throws InvalidQueryNodeException {
         ImmutableSet<Variable> substitutionDomain = substitution.getDomain();
 
-        // The substitution domain must be a subset of the projectedVariables
         if (!projectedVariables.containsAll(substitutionDomain)) {
             throw new InvalidQueryNodeException("ConstructionNode: all the domain variables " +
                     "of the substitution must be projected.\n" + this);
         }
 
-        // The variables contained in the domain and in the range of the substitution must be disjoint
         if (!Sets.intersection(substitutionDomain, childVariables).isEmpty()) {
             throw new InvalidQueryNodeException("ConstructionNode: variables defined by the substitution cannot " +
                     "be used for defining other variables.\n" + this);
         }
 
-        // Substitution to non-projected variables is incorrect
         if (!Sets.difference(substitution.restrictRangeTo(Variable.class).getRangeSet(), projectedVariables).isEmpty()) {
             throw new InvalidQueryNodeException(
                     "ConstructionNode: substituting a variable " +
@@ -135,11 +132,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        return Sets.union(
-                projectedVariables,
-                Sets.union(
-                        substitution.getDomain(),
-                        substitution.getRangeVariables())).immutableCopy();
+        return Sets.union(projectedVariables, substitution.getRangeVariables()).immutableCopy();
     }
 
     @Override
@@ -168,13 +161,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
          */
         if ((newChildRoot instanceof UnionNode)
                 && ((UnionNode) newChildRoot).hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
-
-            ImmutableList<IQTree> newChildren = newChild.getChildren().stream()
-                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(this, c))
-                    .collect(ImmutableCollectors.toList());
-
-            UnionNode newUnionNode = iqFactory.createUnionNode(getVariables());
-            return iqFactory.createNaryIQTree(newUnionNode, newChildren);
+            ImmutableList<IQTree> newChildren = iqTreeTools.createUnaryOperatorChildren(this, newChild);
+            return iqFactory.createNaryIQTree(iqFactory.createUnionNode(getVariables()), newChildren);
         }
         return iqFactory.createUnaryIQTree(this, newChild);
     }
@@ -201,9 +189,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
         ImmutableSet<Variable> requiredChildVariables = getChildVariables();
 
-        ImmutableSet<Variable> childVariables = child.getVariables();
-
-        if (!childVariables.containsAll(requiredChildVariables)) {
+        if (!child.getVariables().containsAll(requiredChildVariables)) {
             throw new InvalidIntermediateQueryException("This child " + child
                     + " does not project all the variables " +
                     "required by the CONSTRUCTION node (" + requiredChildVariables + ")\n" + this);
@@ -285,24 +271,26 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         return projectedVariables.stream()
                 .collect(ImmutableCollectors.toMap(
                         v -> v,
-                        v -> getDeterminedBy(Optional.ofNullable(substitution.get(v)).orElse(v), variableNullability)
-                ));
+                        v -> getDeterminedBy(substitution.apply(v), variableNullability)));
     }
 
     private ImmutableSet<Variable> getDeterminedBy(ImmutableTerm term, VariableNullability variableNullability) {
-        if(term instanceof Variable)
+        if (term instanceof Variable)
             return ImmutableSet.of((Variable)term);
-        if(!(term instanceof ImmutableFunctionalTerm))
-            return ImmutableSet.of();
-        ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
 
-        VariableGenerator uselessVariableGenerator = new VariableGeneratorImpl(ImmutableSet.of(), termFactory);
-        Optional<FunctionalTermDecomposition> analysis = functionalTerm.analyzeInjectivity(ImmutableSet.of(), variableNullability, uselessVariableGenerator);
-        return analysis
-                .map(t -> t.getLiftableTerm().getVariableStream())
-                .orElse(Stream.of())
-                .filter(v -> term.getVariableStream().anyMatch(v2 -> v2.equals(v)))
-                .collect(ImmutableCollectors.toSet());
+        else if (term instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
+
+            VariableGenerator uselessVariableGenerator = new VariableGeneratorImpl(ImmutableSet.of(), termFactory);
+            Optional<FunctionalTermDecomposition> analysis = functionalTerm.analyzeInjectivity(ImmutableSet.of(), variableNullability, uselessVariableGenerator);
+            return analysis
+                    .map(t -> t.getLiftableTerm().getVariableStream())
+                    .orElse(Stream.of())
+                    .filter(v -> term.getVariableStream().anyMatch(v::equals))
+                    .collect(ImmutableCollectors.toSet());
+        }
+        else
+            return ImmutableSet.of();
     }
 
     /**
@@ -319,9 +307,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .map(ImmutableList::of)
                 .collect(Collectors.toList());
 
-        while(!setsToCheck.isEmpty()) {
-            var next = setsToCheck.remove(0);
-            if(includesAll(next, previousUC, determinedByMap)) {
+        while (!setsToCheck.isEmpty()) {
+            ImmutableList<Variable> next = setsToCheck.remove(0);
+            if (includesAll(next, previousUC, determinedByMap)) {
                 builder.add(next.stream().collect(ImmutableCollectors.toSet()));
                 continue;
             }
@@ -341,10 +329,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .collect(ImmutableCollectors.toSet());
     }
 
-    private boolean includesAll(ImmutableList<Variable> variables, ImmutableSet<Variable> target, ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap) {
+    private static boolean includesAll(ImmutableList<Variable> variables, ImmutableSet<Variable> target, ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap) {
         return variables.stream()
                 .map(determinedByMap::get)
-                .reduce(Set.of(), (result, item) -> Sets.union(result, item), (set1, set2) -> Sets.union(set1, set2))
+                .reduce(Set.of(), Sets::union, Sets::union)
                 .containsAll(target);
     }
 
@@ -359,31 +347,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         return analysis
                 .map(FunctionalTermDecomposition::getLiftableTerm)
                 .filter(t -> t.getVariableStream()
-                        .collect(Collectors.toSet())
+                        .collect(ImmutableCollectors.toSet())
                         .containsAll(childConstraint))
                 .isPresent();
-    }
-
-    private Stream<ImmutableSet<Variable>> extractDuplicatedConstraints(ImmutableSet<Variable> childConstraint) {
-        Substitution<Variable> fullRenaming = getSubstitution().builder()
-                .restrictRangeTo(Variable.class)
-                .restrictRange(childConstraint::contains)
-                .build();
-
-        if (fullRenaming.isEmpty())
-            return Stream.empty();
-
-        ImmutableSet<Variable> fullRenamingDomain = fullRenaming.getDomain();
-
-        //noinspection UnstableApiUsages
-        return IntStream.range(1, fullRenamingDomain.size() + 1)
-                .mapToObj(i -> Sets.combinations(fullRenamingDomain, i))
-                .flatMap(Collection::stream)
-                .map(fullRenaming::restrictDomainTo)
-                .filter(Substitution::isInjective)
-                .map(substitutionFactory::extractAnInjectiveVar2VarSubstitutionFromInverseOf)
-                .map(s -> substitutionFactory.apply(s, childConstraint))
-                .filter(projectedVariables::containsAll);
     }
 
     @Override
@@ -406,22 +372,21 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .filter(e -> isDeterministic(e.getValue()))
                 .map(e -> Maps.immutableEntry(
                         e.getValue().getVariableStream().collect(ImmutableCollectors.toSet()),
-                        ImmutableSet.of(e.getKey())
-                ))
+                        ImmutableSet.of(e.getKey())))
                 .filter(e -> !e.getKey().isEmpty());
-        var substitutionToVariable = substitution.stream()
-                .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
-                .filter(e -> isAtomicConstraint((ImmutableFunctionalTerm) e.getValue(), ((ImmutableFunctionalTerm) e.getValue()).getVariables(), nullability))
-                .map(e -> Maps.immutableEntry(
-                        ImmutableSet.of(e.getKey()),
-                        e.getValue().getVariableStream().collect(ImmutableCollectors.toSet())
-                ))
-                .filter(e -> !e.getValue().isEmpty());
-        var renamingDependencies = getSubstitution().builder()
-                .restrictRangeTo(Variable.class)
-                .build()
+
+        var substitutionToVariable = substitution
+                .restrictRangeTo(ImmutableFunctionalTerm.class)
                 .stream()
-                .map(entry -> Maps.immutableEntry(ImmutableSet.of(entry.getKey()), ImmutableSet.of(entry.getValue())));
+                .filter(e -> isAtomicConstraint(e.getValue(), e.getValue().getVariables(), nullability))
+                .map(e -> Maps.immutableEntry(ImmutableSet.of(e.getKey()), e.getValue().getVariables()))
+                .filter(e -> !e.getValue().isEmpty());
+
+        var renamingDependencies = substitution
+                .restrictRangeTo(Variable.class)
+                .stream()
+                .map(e -> Maps.immutableEntry(ImmutableSet.of(e.getKey()), ImmutableSet.of(e.getValue())));
+
         return Streams.concat(variableToSubstitution, substitutionToVariable, renamingDependencies);
     }
 
@@ -429,34 +394,33 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                                                                                                             ImmutableSet<Variable> dependents,
                                                                                                             ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap) {
         //Dependents of new FD are all projected previous dependents + new variables that only use dependent variables in their substitution (with deterministic functions).
-        var keptDependents = Sets.intersection(dependents, projectedVariables);
-        var newDependents = substitution.stream()
-                .filter(s -> dependents.containsAll(s.getValue().getVariableStream().collect(ImmutableCollectors.toSet()))
-                        && this.isDeterministic(s.getValue()))
-                .map(s -> s.getKey());
-        var allDependents = Stream.concat(keptDependents.stream(), newDependents)
-                .collect(ImmutableCollectors.toSet());
-        if(allDependents.isEmpty())
-            return Stream.of();
+        Set<Variable> keptDependents = Sets.intersection(dependents, projectedVariables);
+        Set<Variable> newDependents = substitution.builder()
+                .restrictRange(t -> t.getVariableStream().allMatch(dependents::contains) && isDeterministic(t))
+                .build()
+                .getDomain();
 
+        Set<Variable> allDependents = Sets.union(keptDependents, newDependents);
+        if (allDependents.isEmpty())
+            return Stream.of();
 
         Stream<ImmutableSet<Variable>> preservedDeterminants = projectedVariables.containsAll(determinants) ? Stream.of(determinants) : Stream.of();
         var newDeterminants = extractTransformedUniqueConstraint(determinants, determinedByMap);
-        var allDeterminants = Streams.concat(preservedDeterminants, newDeterminants);
+        Stream<ImmutableSet<Variable>> allDeterminants = Streams.concat(preservedDeterminants, newDeterminants);
 
         return allDeterminants
                 .map(determinant -> Maps.immutableEntry(determinant, Sets.difference(allDependents, determinant).immutableCopy()))
                 .filter(e -> !e.getValue().isEmpty());
     }
 
-    private boolean isDeterministic(ImmutableTerm term) {
-        if(!(term instanceof ImmutableFunctionalTerm))
+    private static boolean isDeterministic(ImmutableTerm term) {
+        if (!(term instanceof ImmutableFunctionalTerm))
             return true;
         ImmutableFunctionalTerm f = (ImmutableFunctionalTerm) term;
-        if(!f.getFunctionSymbol().isDeterministic())
+        if (!f.getFunctionSymbol().isDeterministic())
             return false;
-        return f.getTerms().stream()
-                .allMatch(this::isDeterministic);
+        return f.getTerms().stream() // recursive
+                .allMatch(t -> isDeterministic(t));
     }
 
     /**
@@ -480,9 +444,11 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ConstructionNodeImpl that = (ConstructionNodeImpl) o;
-        return projectedVariables.equals(that.projectedVariables) && substitution.equals(that.substitution);
+        if (o instanceof ConstructionNodeImpl) {
+            ConstructionNodeImpl that = (ConstructionNodeImpl) o;
+            return projectedVariables.equals(that.projectedVariables) && substitution.equals(that.substitution);
+        }
+        return false;
     }
 
     @Override
@@ -573,8 +539,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
         Substitution<ImmutableTerm> newSubstitution = substitutionNormalization.getNormalizedSubstitution();
 
-        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
-                newSubstitution);
+        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables, newSubstitution);
 
         IQTree updatedGrandChild = substitutionNormalization.updateChild(grandChild, variableGenerator);
         IQTree newGrandChild = notRequiredVariableRemover.optimize(updatedGrandChild,
@@ -584,20 +549,5 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         return newGrandChild.getVariables().equals(newConstructionNode.getVariables())
                 ? newGrandChild
                 : iqFactory.createUnaryIQTree(newConstructionNode, newGrandChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
-    }
-
-    public static class PropagationResults<T extends VariableOrGroundTerm> {
-
-        public final Substitution<T> delta;
-        public final Optional<ImmutableExpression> filter;
-        public final Substitution<ImmutableTerm> theta;
-
-       PropagationResults(Substitution<ImmutableTerm> theta,
-                          Substitution<T> delta,
-                          Optional<ImmutableExpression> newF) {
-            this.theta = theta;
-            this.delta = delta;
-            this.filter = newF;
-        }
     }
 }

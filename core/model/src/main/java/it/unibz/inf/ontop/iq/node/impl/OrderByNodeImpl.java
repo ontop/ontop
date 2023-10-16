@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
@@ -21,7 +22,6 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -35,16 +35,16 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
 
     private final ImmutableList<OrderComparator> comparators;
     private final OrderByNormalizer normalizer;
-    private final SubstitutionFactory substitutionFactory;
+    private final IQTreeTools iqTreeTools;
 
 
     @AssistedInject
-    private OrderByNodeImpl(@Assisted ImmutableList<OrderComparator> comparators, IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
-                            OrderByNormalizer normalizer) {
+    private OrderByNodeImpl(@Assisted ImmutableList<OrderComparator> comparators, IntermediateQueryFactory iqFactory,
+                            OrderByNormalizer normalizer, IQTreeTools iqTreeTools) {
         super(iqFactory);
-        this.substitutionFactory = substitutionFactory;
         this.comparators = comparators;
         this.normalizer = normalizer;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -82,9 +82,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
         Optional<OrderByNode> newOrderByNode = applySubstitution(descendingSubstitution);
         IQTree newChild = child.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator);
 
-        return newOrderByNode
-                .map(o -> (IQTree) iqFactory.createUnaryIQTree(o, newChild))
-                .orElse(newChild);
+        return iqTreeTools.createOptionalUnaryIQTree(newOrderByNode, newChild);
     }
 
     @Override
@@ -94,9 +92,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
         Optional<OrderByNode> newOrderByNode = applySubstitution(descendingSubstitution);
         IQTree newChild = child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
 
-        return newOrderByNode
-                .map(o -> (IQTree) iqFactory.createUnaryIQTree(o, newChild))
-                .orElse(newChild);
+        return iqTreeTools.createOptionalUnaryIQTree(newOrderByNode, newChild);
     }
 
     @Override
@@ -106,8 +102,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
         OrderByNode newOrderByNode = applySubstitution(renamingSubstitution)
                 .orElseThrow(() -> new MinorOntopInternalBugException("The order by was expected to be kept"));
 
-        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
-        return iqFactory.createUnaryIQTree(newOrderByNode, newChild, newTreeCache);
+        return iqFactory.createUnaryIQTree(newOrderByNode, newChild, treeCache.applyFreshRenaming(renamingSubstitution));
     }
 
     @Override
@@ -196,9 +191,11 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        OrderByNodeImpl that = (OrderByNodeImpl) o;
-        return comparators.equals(that.comparators);
+        if (o instanceof OrderByNodeImpl) {
+            OrderByNodeImpl that = (OrderByNodeImpl) o;
+            return comparators.equals(that.comparators);
+        }
+        return false;
     }
 
     @Override

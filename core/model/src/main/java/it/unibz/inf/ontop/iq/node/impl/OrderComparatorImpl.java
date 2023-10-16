@@ -30,15 +30,17 @@ public class OrderComparatorImpl implements OrderByNode.OrderComparator {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return other instanceof OrderByNode.OrderComparator
-                && ((OrderByNode.OrderComparator) other).getTerm().equals(term)
-                && ((OrderByNode.OrderComparator) other).isAscending() == isAscending;
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (o instanceof OrderComparatorImpl) {
+            OrderComparatorImpl that = (OrderComparatorImpl)o;
+            return this.term.equals(that.term) && this.isAscending == that.isAscending;
+        }
+        return false;
     }
 
     @Override
     public String toString() {
-        String prefix = isAscending ? ASC_PREFIX : DESC_PREFIX;
-        return prefix + term + ")";
+        return (isAscending ? ASC_PREFIX : DESC_PREFIX) + term + ")";
     }
 }

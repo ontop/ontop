@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.node;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -22,6 +23,8 @@ public interface ValuesNode extends LeafIQTree {
     ImmutableList<Variable> getOrderedVariables();
 
     ImmutableList<ImmutableList<Constant>> getValues();
+
+    ImmutableList<ImmutableMap<Variable, Constant>> getValueMaps();
 
     Stream<Constant> getValueStream(Variable variable);
 

@@ -3,11 +3,13 @@ package it.unibz.inf.ontop.utils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
+import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.fact.FactExtractor;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -29,6 +31,7 @@ public class MappingTestingTools {
     public static final TypeFactory TYPE_FACTORY;
     public static final TargetAtomFactory TARGET_ATOM_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
+    public static final HomomorphismFactory HOMOMORPHISM_FACTORY;
     public static final RDF RDF_FACTORY;
     public static final MappingVariableNameNormalizer MAPPING_NORMALIZER;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
@@ -54,6 +57,7 @@ public class MappingTestingTools {
     public static final NamedRelationDefinition TABLE2_AR3;
     public static final NamedRelationDefinition TABLE3_AR3;
     public static final NamedRelationDefinition TABLE4_AR3;
+    public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
 
     static {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -68,6 +72,7 @@ public class MappingTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         TARGET_ATOM_FACTORY = injector.getInstance(TargetAtomFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
+        HOMOMORPHISM_FACTORY = injector.getInstance(HomomorphismFactory.class);
         FACT_EXTRACTOR = injector.getInstance(FactExtractor.class);
         A_BOX_FACT_INTO_MAPPING_CONVERTER = injector.getInstance(FactIntoMappingConverter.class);
         ONTOP_MAPPING_SETTINGS = injector.getInstance(OntopMappingSettings.class);
@@ -79,6 +84,7 @@ public class MappingTestingTools {
         TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
+        UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 
         EMPTY_PREFIX_MANAGER = SPECIFICATION_FACTORY.createPrefixManager(ImmutableMap.of());
 

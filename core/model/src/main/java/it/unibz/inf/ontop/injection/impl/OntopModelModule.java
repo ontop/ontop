@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import com.google.inject.*;
 import com.google.inject.name.Names;
+import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory;
@@ -57,6 +58,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(TermFactory.class);
         bindFromSettings(AtomFactory.class);
         bindFromSettings(SubstitutionFactory.class);
+        bindFromSettings(HomomorphismFactory.class);
 
         bindFromSettings(TermNullabilityEvaluator.class);
         bindFromSettings(NoNullValueEnforcer.class);

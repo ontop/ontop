@@ -29,7 +29,6 @@ import java.util.stream.Stream;
 
 public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements AggregationNode {
 
-
     private static final String AGGREGATE_NODE_STR = "AGGREGATE";
 
     private final ImmutableSet<Variable> projectedVariables;
@@ -52,16 +51,12 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         this.substitution = substitution;
         this.aggregationNormalizer = aggregationNormalizer;
         this.projectedVariables = Sets.union(groupingVariables, substitution.getDomain()).immutableCopy();
-        this.childVariables = extractChildVariables(groupingVariables, substitution);
+        this.childVariables = iqTreeTools.extractChildVariables(groupingVariables, substitution);
 
         if (settings.isTestModeEnabled())
             validateNode();
     }
 
-    public static ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> groupingVariables,
-                                                               Substitution<ImmutableFunctionalTerm> substitution) {
-        return Sets.union(groupingVariables, substitution.getRangeVariables()).immutableCopy();
-    }
 
     @Override
     public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
@@ -89,25 +84,27 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 .restrictRangeTo(GroundTerm.class)
                 .build();
 
-        Substitution<Variable> blockedVariableSubstitution = extractBlockedVar2VarSubstitutionMap(
-                descendingSubstitution.restrictRangeTo(Variable.class),
-                aggregationVariables);
+        Substitution<Variable> descendingVar2Var = descendingSubstitution.restrictRangeTo(Variable.class);
+        // Variables whose entries are blocked
+        ImmutableSet<Variable> blockedVariables = descendingVar2Var.getRangeSet().stream()
+                .flatMap(v -> extractBlockedDomainVars(v, descendingVar2Var.getPreImage(t -> t.equals(v)), aggregationVariables).stream())
+                .collect(ImmutableCollectors.toSet());
 
-        Sets.SetView<Variable> blockedDomain =
-                Sets.union(blockedGroundTermSubstitution.getDomain(), blockedVariableSubstitution.getDomain());
+        Substitution<Variable> blockedVariableSubstitution = descendingVar2Var.restrictDomainTo(blockedVariables);
 
-        Substitution<? extends VariableOrGroundTerm> nonBlockedSubstitution = descendingSubstitution.removeFromDomain(blockedDomain);
+        Substitution<? extends VariableOrGroundTerm> blockedSubstitution =
+                substitutionFactory.union(blockedGroundTermSubstitution, blockedVariableSubstitution);
+
+        Substitution<? extends VariableOrGroundTerm> nonBlockedSubstitution = descendingSubstitution.removeFromDomain(blockedSubstitution.getDomain());
 
         IQTree newSubTree = applyNonBlockedSubstitutionFct.apply(nonBlockedSubstitution);
 
-        if (blockedDomain.isEmpty())
+        if (blockedSubstitution.isEmpty())
             return newSubTree;
 
         // Blocked entries -> reconverted into a filter
         ImmutableExpression condition = termFactory.getConjunction(
-                Stream.concat(blockedGroundTermSubstitution.builder().toStream(termFactory::getStrictEquality),
-                                blockedVariableSubstitution.builder().toStream(termFactory::getStrictEquality))
-                        .collect(ImmutableCollectors.toList()));
+                blockedSubstitution.builder().toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList()));
 
         FilterNode filterNode = iqFactory.createFilterNode(condition);
 
@@ -123,26 +120,13 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 filterTree);
     }
 
-    /**
-     * Blocks implicit equalities involving aggregation variables but let other entries (like renamings) go.
-     */
-    private Substitution<Variable> extractBlockedVar2VarSubstitutionMap(Substitution<Variable> descendingVar2Var,
-                                                                        ImmutableSet<Variable> aggregationVariables) {
-        // Variables whose entries are blocked
-        ImmutableSet<Variable> blockedVariables = descendingVar2Var.getRangeSet().stream()
-                .flatMap(var -> extractBlockedDomainVars(var, descendingVar2Var.getPreImage(t -> t.equals(var)), aggregationVariables).stream())
-                .collect(ImmutableCollectors.toSet());
-
-         return descendingVar2Var.restrictDomainTo(blockedVariables);
-    }
-
     private Set<Variable> extractBlockedDomainVars(Variable rangeVariable, ImmutableSet<Variable> domainVariables,
                                                       ImmutableSet<Variable> aggregationVariables) {
         // Equalities to aggregation variable are blocked
         if (aggregationVariables.contains(rangeVariable))
             return domainVariables;
 
-        Sets.SetView<Variable> aggregationDomainVariables = Sets.intersection(domainVariables, aggregationVariables);
+        Set<Variable> aggregationDomainVariables = Sets.intersection(domainVariables, aggregationVariables);
 
         // Equalities from an aggregation variable to a grouping variable are blocked
         if (groupingVariables.contains(rangeVariable))
@@ -179,8 +163,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         AggregationNode newNode = iqFactory.createAggregationNode(newGroupingVariables,
                 substitutionFactory.onImmutableFunctionalTerms().rename(renamingSubstitution, substitution));
 
-        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
-        return iqFactory.createUnaryIQTree(newNode, newChild, newTreeCache);
+        return iqFactory.createUnaryIQTree(newNode, newChild, treeCache.applyFreshRenaming(renamingSubstitution));
     }
 
 
@@ -242,9 +225,11 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AggregationNodeImpl that = (AggregationNodeImpl) o;
-        return groupingVariables.equals(that.groupingVariables) && substitution.equals(that.substitution);
+        if (o instanceof AggregationNodeImpl) {
+            AggregationNodeImpl that = (AggregationNodeImpl) o;
+            return groupingVariables.equals(that.groupingVariables) && substitution.equals(that.substitution);
+        }
+        return false;
     }
 
     @Override
@@ -261,7 +246,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
         validateNode();
 
-        Sets.SetView<Variable> missingVariables = Sets.difference(getLocallyRequiredVariables(), child.getVariables());
+        Set<Variable> missingVariables = Sets.difference(getLocallyRequiredVariables(), child.getVariables());
         if (!missingVariables.isEmpty()) {
             throw new InvalidIntermediateQueryException("The child of the aggregation node is missing some variables: "
                     + missingVariables);
@@ -270,16 +255,15 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
     protected void validateNode() throws InvalidIntermediateQueryException {
         if (!Sets.intersection(groupingVariables, substitution.getDomain()).isEmpty()) {
-            throw new InvalidIntermediateQueryException(
-                    String.format("AggregationNode: " +
-                                    "the grouping variables (%s) and the substitution domain (%s) must be disjoint",
-                            groupingVariables, substitution.getDomain()));
+            throw new InvalidIntermediateQueryException(String.format(
+                    "AggregationNode: the grouping variables (%s) and the substitution domain (%s) must be disjoint",
+                    groupingVariables, substitution.getDomain()));
         }
 
         if (substitution.rangeAnyMatch(t -> !t.getFunctionSymbol().isAggregation())) {
-            throw new InvalidIntermediateQueryException("The substitution of the aggregation node " +
-                    "should only define aggregates, not " +
-                    substitution.builder().restrictRange(t -> !t.getFunctionSymbol().isAggregation()).build());
+            throw new InvalidIntermediateQueryException(String.format(
+                    "The substitution of the aggregation node should only define aggregates, not %s",
+                    substitution.builder().restrictRange(t -> !t.getFunctionSymbol().isAggregation()).build()));
         }
     }
 

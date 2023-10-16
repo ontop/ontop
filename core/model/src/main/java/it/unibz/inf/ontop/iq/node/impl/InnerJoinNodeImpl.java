@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.*;
-import com.google.common.io.Files;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
@@ -38,7 +37,6 @@ import java.util.stream.Stream;
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
 
     private static final String JOIN_NODE_STR = "JOIN";
-    private final IQTreeTools iqTreeTools;
     private final InnerJoinNormalizer normalizer;
 
     @AssistedInject
@@ -50,8 +48,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                 JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier,
                                 InnerJoinNormalizer normalizer) {
         super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, variableNullabilityTools, conditionSimplifier);
-        this.iqTreeTools = iqTreeTools;
+                substitutionFactory, variableNullabilityTools, conditionSimplifier, iqTreeTools);
         this.normalizer = normalizer;
     }
 
@@ -125,10 +122,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        return obj != null && getClass() == obj.getClass()
-                && getOptionalFilterCondition().equals(((InnerJoinNode) obj).getOptionalFilterCondition());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o instanceof InnerJoinNodeImpl) {
+            InnerJoinNodeImpl that = (InnerJoinNodeImpl) o;
+            return getOptionalFilterCondition().equals(that.getOptionalFilterCondition());
+        }
+        return false;
     }
 
     @Override
@@ -153,7 +153,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .map(descendingSubstitution::apply);
 
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
-                iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
+                iqTreeTools.computeNewProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)));
 
         VariableNullability extendedVariableNullability = constraint
                 .map(c -> simplifiedChildFutureVariableNullability.extendToExternalVariables(c.getVariableStream()))
@@ -178,11 +178,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     newChildren);
 
             return iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, expressionAndSubstitution.getSubstitution(),
-                    () -> iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
+                    () -> iqTreeTools.computeNewProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)));
         }
         catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(
-                    iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
+                    iqTreeTools.computeNewProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)));
         }
     }
 
@@ -191,10 +191,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
             VariableGenerator variableGenerator) {
 
-        InnerJoinNode newJoinNode = getOptionalFilterCondition()
-                .map(descendingSubstitution::apply)
-                .map(iqFactory::createInnerJoinNode)
-                .orElseGet(iqFactory::createInnerJoinNode);
+        InnerJoinNode newJoinNode = iqTreeTools.createInnerJoinNode(
+                getOptionalFilterCondition().map(descendingSubstitution::apply));
 
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator))
@@ -219,12 +217,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
         IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
         return iqFactory.createNaryIQTree(newJoinNode, newChildren, newTreeCache);
-    }
-
-    private ImmutableSet<Variable> getProjectedVariables(ImmutableList<IQTree> children) {
-        return children.stream()
-                    .flatMap(c -> c.getVariables().stream())
-                    .collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -297,7 +289,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .collect(ImmutableCollectors.toList());
 
         IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChildren.equals(children));
-
         return iqFactory.createNaryIQTree(this, children, newTreeCache);
     }
 
@@ -348,7 +339,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         Multimap<IQTree, IQTree> saturatedDependencyMap = saturateDependencies(directDependencyMap);
 
         return saturatedDependencyMap.asMap().entrySet().stream()
-                .filter(e -> e.getValue().containsAll(Sets.difference(childrenSet, ImmutableSet.of(e.getKey())).immutableCopy()))
+                .filter(e -> e.getValue().containsAll(Sets.difference(childrenSet, ImmutableSet.of(e.getKey()))))
                 .map(Map.Entry::getKey)
                 .flatMap(child -> childConstraintMap.get(child).stream())
                 .collect(ImmutableCollectors.toSet());
@@ -418,8 +409,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     private Stream<Map.Entry<IQTree, IQTree>> extractFunctionalDependencies(
             IQTree t1, IQTree t2, ImmutableMap<IQTree, ImmutableSet<ImmutableSet<Variable>>> constraintMap) {
-        ImmutableSet<Variable> commonVariables = Sets.intersection(t1.getVariables(), t2.getVariables())
-                .immutableCopy();
+
+        Set<Variable> commonVariables = Sets.intersection(t1.getVariables(), t2.getVariables());
         if (commonVariables.isEmpty())
             return Stream.empty();
 
@@ -430,15 +421,14 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 Optional.of(Maps.immutableEntry(t2, t1))
                         .filter(e -> constraintMap.get(e.getValue()).stream()
                                 .anyMatch(commonVariables::containsAll)))
-                .filter(Optional::isPresent)
-                .map(Optional::get);
+                .flatMap(Optional::stream);
     }
 
     private Multimap<IQTree, IQTree> saturateDependencies(ImmutableMultimap<IQTree, IQTree> directDependencyMap) {
         Multimap<IQTree, IQTree> mutableMultimap = HashMultimap.create(directDependencyMap);
 
-        boolean hasConverged = false;
-        while (!hasConverged) {
+        boolean hasConverged;
+        do {
             hasConverged = true;
 
             for (IQTree determinant : directDependencyMap.keys()) {
@@ -448,7 +438,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                         hasConverged = false;
                 }
             }
-        }
+        } while (!hasConverged);
         return mutableMultimap;
     }
 
@@ -481,19 +471,15 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
             InnerJoinNode newJoin = conditionSimplificationResults.getOptionalExpression().equals(getOptionalFilterCondition())
                     ? this
-                    : conditionSimplificationResults.getOptionalExpression()
-                        .map(iqFactory::createInnerJoinNode)
-                        .orElseGet(iqFactory::createInnerJoinNode);
+                    : iqTreeTools.createInnerJoinNode(conditionSimplificationResults.getOptionalExpression());
 
             NaryIQTree joinTree = iqFactory.createNaryIQTree(newJoin, newChildren);
 
             return iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, conditionSimplificationResults.getSubstitution(),
-                    () -> children.stream()
-                            .flatMap(c -> c.getVariables().stream())
-                            .collect(ImmutableCollectors.toSet()));
+                    () -> iqTreeTools.getChildrenVariables(children));
         }
         catch (UnsatisfiableConditionException e) {
-            return iqFactory.createEmptyNode(getProjectedVariables(children));
+            return iqFactory.createEmptyNode(iqTreeTools.getChildrenVariables(children));
         }
     }
 

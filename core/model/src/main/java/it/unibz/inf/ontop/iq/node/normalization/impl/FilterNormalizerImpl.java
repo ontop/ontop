@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
@@ -17,11 +18,11 @@ import it.unibz.inf.ontop.iq.node.normalization.FilterNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Singleton
 public class FilterNormalizerImpl implements FilterNormalizer {
@@ -29,16 +30,16 @@ public class FilterNormalizerImpl implements FilterNormalizer {
     private static final int MAX_NORMALIZATION_ITERATIONS = 10000;
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
     private final ConditionSimplifier conditionSimplifier;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
-    private FilterNormalizerImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory,
-                                 ConditionSimplifier conditionSimplifier) {
+    private FilterNormalizerImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory,
+                                 ConditionSimplifier conditionSimplifier, IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
-        this.substitutionFactory = substitutionFactory;
         this.conditionSimplifier = conditionSimplifier;
+        this.iqTreeTools = iqTreeTools;
     }
 
     /**
@@ -106,29 +107,21 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
         private State updateParentChildAndCondition(UnaryOperatorNode newParent,
                                                                        ImmutableExpression newCondition, IQTree newChild) {
-            ImmutableList<UnaryOperatorNode> newAncestors = ImmutableList.<UnaryOperatorNode>builder()
-                    .add(newParent)
-                    .addAll(ancestors)
-                    .build();
-
+            ImmutableList<UnaryOperatorNode> newAncestors = extendAncestors(newParent);
             return new State(projectedVariables, newAncestors, Optional.of(newCondition), newChild);
         }
 
         private State addParentRemoveConditionAndUpdateChild(UnaryOperatorNode newParent, IQTree newChild) {
-            ImmutableList<UnaryOperatorNode> newAncestors = ImmutableList.<UnaryOperatorNode>builder()
-                    .add(newParent)
-                    .addAll(ancestors)
-                    .build();
-
+            ImmutableList<UnaryOperatorNode> newAncestors = extendAncestors(newParent);
             return new State(projectedVariables, newAncestors, Optional.empty(), newChild);
         }
 
-        private State liftChildAsParent(UnaryIQTree formerChildTree) {
-            ImmutableList<UnaryOperatorNode> newAncestors = ImmutableList.<UnaryOperatorNode>builder()
-                    .add(formerChildTree.getRootNode())
-                    .addAll(ancestors)
-                    .build();
+        private ImmutableList<UnaryOperatorNode> extendAncestors(UnaryOperatorNode newNode) {
+            return Stream.concat(Stream.of(newNode), ancestors.stream()).collect(ImmutableCollectors.toList());
+        }
 
+        private State liftChildAsParent(UnaryIQTree formerChildTree) {
+            ImmutableList<UnaryOperatorNode> newAncestors = extendAncestors(formerChildTree.getRootNode());
             IQTree newChild = formerChildTree.getChild();
             return new State(projectedVariables, newAncestors, condition, newChild);
         }
@@ -159,17 +152,14 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 return iqFactory.createEmptyNode(projectedVariables);
 
             IQTree filterLevelTree = condition
-                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(iqFactory.createFilterNode(c), child,
-                            treeCache.declareAsNormalizedForOptimizationWithEffect()))
+                    .map(iqFactory::createFilterNode)
+                    .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, child, treeCache.declareAsNormalizedForOptimizationWithEffect()))
                     .orElse(child);
 
             if (ancestors.isEmpty())
                 return filterLevelTree;
 
-            return ancestors.stream()
-                    .reduce(filterLevelTree, (t, n) -> iqFactory.createUnaryIQTree(n, t),
-                            // Should not be called
-                            (t1, t2) -> { throw new MinorOntopInternalBugException("The order must be respected"); })
+            return iqTreeTools.createAncestorsUnaryIQTree(ancestors, filterLevelTree)
                     // Normalizes the ancestors (recursive)
                     .normalizeForOptimization(variableGenerator);
         }
@@ -177,32 +167,28 @@ public class FilterNormalizerImpl implements FilterNormalizer {
         public State liftBindingsAndDistinct() {
             QueryNode childRoot = child.getRootNode();
 
-            if (childRoot instanceof ConstructionNode)
-                return liftBindings((ConstructionNode) childRoot, (UnaryIQTree) child)
+            if (childRoot instanceof ConstructionNode) {
+                ConstructionNode constructionNode = (ConstructionNode) childRoot;
+                UnaryIQTree childTree = (UnaryIQTree) child;
+                return condition
+                        .map(e -> constructionNode.getSubstitution().apply(e))
+                        .map(e -> updateParentChildAndCondition(constructionNode, e, childTree.getChild()))
+                        .orElseGet(() -> liftChildAsParent(childTree))
                         // Recursive (maybe followed by a distinct)
                         .liftBindingsAndDistinct();
-
-            else if (childRoot instanceof DistinctNode)
-                return liftDistinct((DistinctNode) childRoot, (UnaryIQTree) child)
+            }
+            else if (childRoot instanceof DistinctNode) {
+                UnaryIQTree childTree = (UnaryIQTree) child;
+                return condition
+                        .map(e -> updateParentChildAndCondition((DistinctNode) childRoot, e, childTree.getChild()))
+                        .orElseGet(() -> liftChildAsParent(childTree))
                         // Recursive (may be followed by another construction node)
                         .liftBindingsAndDistinct();
+            }
             else
                 return this;
         }
 
-
-        private State liftBindings(ConstructionNode childConstructionNode, UnaryIQTree child) {
-            return condition
-                    .map(e -> childConstructionNode.getSubstitution().apply(e))
-                    .map(e -> updateParentChildAndCondition(childConstructionNode, e, child.getChild()))
-                    .orElseGet(() -> liftChildAsParent(child));
-        }
-
-        private State liftDistinct(DistinctNode childDistinct, UnaryIQTree child) {
-            return condition
-                    .map(e -> updateParentChildAndCondition(childDistinct, e, child.getChild()))
-                    .orElseGet(() -> liftChildAsParent(child));
-        }
 
         /**
          * Tries to merge with the child
@@ -220,15 +206,13 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
                     return updateConditionAndChild(newCondition, ((UnaryIQTree)child).getChild());
                 }
-
                 else if (childRoot instanceof InnerJoinNode) {
                     ImmutableExpression newJoiningCondition = ((InnerJoinNode) childRoot).getOptionalFilterCondition()
                             .map(c -> termFactory.getConjunction(condition.get(), c))
                             .orElse(condition.get());
 
-                    InnerJoinNode newJoinNode = iqFactory.createInnerJoinNode(newJoiningCondition);
-
-                    IQTree newChild = iqFactory.createNaryIQTree(newJoinNode, child.getChildren());
+                    IQTree newChild = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(newJoiningCondition),
+                            child.getChildren());
                     return removeConditionAndUpdateChild(newChild);
                 }
             }

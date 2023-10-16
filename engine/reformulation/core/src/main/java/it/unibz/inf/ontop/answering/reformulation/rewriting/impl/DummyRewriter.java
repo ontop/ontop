@@ -25,6 +25,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
+import it.unibz.inf.ontop.constraints.HomomorphismFactory;
+import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
 import it.unibz.inf.ontop.constraints.impl.FullLinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -51,25 +53,25 @@ import java.util.function.Function;
  */
 public class DummyRewriter implements QueryRewriter {
 
-    private FullLinearInclusionDependenciesImpl<RDFAtomPredicate> sigma;
+    private LinearInclusionDependencies<RDFAtomPredicate> sigma;
 
     protected final IntermediateQueryFactory iqFactory;
     protected final AtomFactory atomFactory;
     protected final TermFactory termFactory;
-    protected final CoreUtilsFactory coreUtilsFactory;
+    protected final HomomorphismFactory homomorphismFactory;
 
     @Inject
-    protected DummyRewriter(IntermediateQueryFactory iqFactory, AtomFactory atomFactory, TermFactory termFactory, CoreUtilsFactory coreUtilsFactory) {
+    protected DummyRewriter(IntermediateQueryFactory iqFactory, AtomFactory atomFactory, TermFactory termFactory, HomomorphismFactory homomorphismFactory) {
         this.iqFactory = iqFactory;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
-        this.coreUtilsFactory = coreUtilsFactory;
+        this.homomorphismFactory = homomorphismFactory;
     }
 
     @Override
     public void setTBox(ClassifiedTBox reasoner) {
 
-        FullLinearInclusionDependenciesImpl.Builder<RDFAtomPredicate> builder = FullLinearInclusionDependenciesImpl.builder(coreUtilsFactory, atomFactory);
+        LinearInclusionDependencies.Builder<RDFAtomPredicate> builder = homomorphismFactory.getFullLinearInclusionDependenciesBuilder();
 
         Variable x = termFactory.getVariable("x");
         Variable y = termFactory.getVariable("y");
@@ -84,7 +86,7 @@ public class DummyRewriter implements QueryRewriter {
         sigma = builder.build();
     }
 
-    protected FullLinearInclusionDependenciesImpl<RDFAtomPredicate> getSigma() {
+    protected LinearInclusionDependencies<RDFAtomPredicate> getSigma() {
         return sigma;
     }
 
@@ -132,7 +134,7 @@ public class DummyRewriter implements QueryRewriter {
     private static <T> void traverseDAG(EquivalencesDAG<T> dag,
                                         java.util.function.Predicate<T> filter,
                                         Function<T, DataAtom<RDFAtomPredicate>> translate,
-                                        FullLinearInclusionDependenciesImpl.Builder<RDFAtomPredicate> builder) {
+                                        LinearInclusionDependencies.Builder<RDFAtomPredicate> builder) {
         for (Equivalences<T> node : dag)
             for (Equivalences<T> subNode : dag.getSub(node))
                 for (T sub : subNode)

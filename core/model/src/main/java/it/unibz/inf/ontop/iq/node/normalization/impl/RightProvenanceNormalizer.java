@@ -67,10 +67,9 @@ public class RightProvenanceNormalizer {
                 .flatMap(e -> termFactory.getConjunction(
                         e.flattenAND()
                                 .filter(e1 -> rightVariables.containsAll(e1.getVariables()))))
-                .map(e -> iqFactory.createUnaryIQTree(
-                        iqFactory.createFilterNode(e),
-                        rightTree).getVariableNullability())
-                .orElseGet(rightTree::getVariableNullability);
+                .<IQTree>map(e -> iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), rightTree))
+                .orElse(rightTree)
+                .getVariableNullability();
 
         return normalizeRightProvenance(rightTree, leftVariables, rightTree.getVariables(), variableGenerator,
                 rightNullability);

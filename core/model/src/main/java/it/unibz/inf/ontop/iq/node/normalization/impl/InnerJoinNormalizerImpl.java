@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -168,16 +169,15 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
         @Override
         public boolean equals(Object o) {
-            if (o == this)
-                return true;
-            if (!(o instanceof State))
-                return false;
-            State other = (State) o;
-
-            return joiningCondition.equals(other.joiningCondition)
-                    && children.equals(other.children)
-                    && ancestors.equals(other.ancestors)
-                    && projectedVariables.equals(other.projectedVariables);
+            if (o == this) return true;
+            if (o instanceof State) {
+                State that = (State) o;
+                return joiningCondition.equals(that.joiningCondition)
+                        && children.equals(that.children)
+                        && ancestors.equals(that.ancestors)
+                        && projectedVariables.equals(that.projectedVariables);
+            }
+            return false;
         }
 
 
@@ -282,12 +282,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             if (joinLevelTree.isDeclaredAsEmpty())
                 return joinLevelTree;
 
-            IQTree ancestorTree = ancestors.stream()
-                    .reduce(joinLevelTree, (t, n) -> iqFactory.createUnaryIQTree(n, t),
-                            // Should not be called
-                            (t1, t2) -> {
-                                throw new MinorOntopInternalBugException("The order must be respected");
-                            });
+            IQTree ancestorTree = iqTreeTools.createAncestorsUnaryIQTree(ancestors, joinLevelTree);
 
             IQTree nonNormalizedTree = iqTreeTools.createConstructionNodeTreeIfNontrivial(ancestorTree, projectedVariables);
 
@@ -303,14 +298,13 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             if (currentChild.getRootNode() instanceof LeftJoinNode) {
                 BinaryNonCommutativeIQTree leftJoinTree = (BinaryNonCommutativeIQTree) currentChild;
 
-                Sets.SetView<Variable> rightSpecificVariables = Sets.difference(
+                Set<Variable> rightSpecificVariables = Sets.difference(
                         leftJoinTree.getRightChild().getVariables(),
                         leftJoinTree.getLeftChild().getVariables());
 
                 return IntStream.range(0, children.size())
                         .filter(j -> i != j)
-                        .noneMatch(j -> children.get(j).getVariables().stream()
-                                .anyMatch(rightSpecificVariables::contains));
+                        .allMatch(j -> Sets.intersection(children.get(j).getVariables(), rightSpecificVariables).isEmpty());
             }
             return false;
         }
@@ -322,9 +316,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     return iqFactory.createTrueNode();
                 case 1:
                     IQTree uniqueChild = children.get(0);
-                    return joiningCondition
-                            .map(e -> (IQTree) iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), uniqueChild))
-                            .orElse(uniqueChild);
+                    return iqTreeTools.createOptionalUnaryIQTree(joiningCondition.map(iqFactory::createFilterNode), uniqueChild);
                 default:
                     return liftLeftJoin()
                             .orElseGet(()-> iqFactory.createNaryIQTree(
@@ -359,10 +351,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             BinaryNonCommutativeIQTree newLeftJoinTree = iqFactory.createBinaryNonCommutativeIQTree(ljChild.getRootNode(), newJoinOnLeft,
                     ljChild.getRightChild());
 
-            IQTree newTree = joiningCondition
-                    .map(iqFactory::createFilterNode)
-                    .map(t -> (IQTree) iqFactory.createUnaryIQTree(t, newLeftJoinTree))
-                    .orElse(newLeftJoinTree);
+            IQTree newTree = iqTreeTools.createOptionalUnaryIQTree(joiningCondition.map(iqFactory::createFilterNode), newLeftJoinTree);
 
             return Optional.of(newTree);
         }
@@ -448,8 +437,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
             Stream<ImmutableExpression> conditions = conditionAndTrees.stream()
                     .map(ct -> ct.condition)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get);
+                    .flatMap(Optional::stream);
 
             Optional<ImmutableExpression> newJoiningCondition = termFactory.getConjunction(joiningCondition, conditions);
 

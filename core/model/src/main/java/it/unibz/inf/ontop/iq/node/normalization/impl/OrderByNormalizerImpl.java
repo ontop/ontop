@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.OrderByNormalizer;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
@@ -20,10 +21,12 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
 
     private static final int MAX_ITERATIONS = 1000;
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
-    private OrderByNormalizerImpl(IntermediateQueryFactory iqFactory) {
+    private OrderByNormalizerImpl(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     /**
@@ -147,16 +150,13 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
 
         public IQTree createNormalizedTree(VariableGenerator variableGenerator, IQTreeCache treeCache) {
             IQTree orderByLevelTree = orderByNode
-                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, child, treeCache.declareAsNormalizedForOptimizationWithEffect()))
+                    .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, child, treeCache.declareAsNormalizedForOptimizationWithEffect()))
                     .orElse(child);
 
             if (ancestors.isEmpty())
                 return orderByLevelTree;
 
-            return ancestors.stream()
-                    .reduce(orderByLevelTree, (t, n) -> iqFactory.createUnaryIQTree(n, t),
-                            // Should not be called
-                            (t1, t2) -> { throw new MinorOntopInternalBugException("The order must be respected"); })
+            return iqTreeTools.createAncestorsUnaryIQTree(ancestors, orderByLevelTree)
                     // Normalizes the ancestors (recursive)
                     .normalizeForOptimization(variableGenerator);
         }

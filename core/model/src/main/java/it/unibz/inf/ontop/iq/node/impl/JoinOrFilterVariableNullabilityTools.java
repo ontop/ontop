@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -21,12 +22,14 @@ public class JoinOrFilterVariableNullabilityTools {
 
     private final TermNullabilityEvaluator nullabilityEvaluator;
     private final CoreUtilsFactory coreUtilsFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private JoinOrFilterVariableNullabilityTools(TermNullabilityEvaluator nullabilityEvaluator,
-                                                 CoreUtilsFactory coreUtilsFactory) {
+                                                 CoreUtilsFactory coreUtilsFactory, IQTreeTools iqTreeTools) {
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.coreUtilsFactory = coreUtilsFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     public VariableNullability getChildrenVariableNullability(ImmutableList<IQTree> children) {
@@ -53,9 +56,7 @@ public class JoinOrFilterVariableNullabilityTools {
                         .noneMatch(coOccuringVariables::contains))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSet<Variable> scope = children.stream()
-                .flatMap(c -> c.getVariables().stream())
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> scope =  iqTreeTools.getChildrenVariables(children);
 
         return joiningCondition
                 .map(e -> updateWithFilter(e, nullableGroups, scope))

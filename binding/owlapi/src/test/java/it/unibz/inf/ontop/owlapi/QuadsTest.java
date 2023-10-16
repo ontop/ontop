@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +22,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 import static it.unibz.inf.ontop.injection.OntopReformulationSettings.*;
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
@@ -99,28 +102,39 @@ public class QuadsTest {
     String sql;
 
     int i = 0;
-    String expectedResult = Files.lines(Paths.get(RESULT_FILE)).collect(joining("\n")) + "\n";
+    Set<String> expectedResult = new HashSet<>();
+    int k = 0; String a = "";
+    for (String s : Files.lines(Paths.get(RESULT_FILE)).collect(ImmutableCollectors.toList())) {
+      if (k != 0) // skip the number as the order is not preserved
+        a += s;
+      k++;
+      if (k == 5) {
+        expectedResult.add(a);
+        a = "";
+        k = 0;
+      }
+    }
 
     try {
       IQ executableQuery = st.getExecutableQuery(query);
       sql = ((NativeNode) executableQuery.getTree().getChildren().get(0)).getNativeQueryString();
       TupleOWLResultSet rs = st.executeSelectQuery(query);
-      StringBuilder builder = new StringBuilder();
+      Set<String> actualResult = new HashSet<>();
       while (rs.hasNext()) {
         final OWLBindingSet bindingSet = rs.next();
-        builder.append(i).append("\n");
         String graph = stringify(bindingSet.getBinding("g").getValue());
         String subject = stringify(bindingSet.getBinding("subject").getValue());
         String predicate = stringify(bindingSet.getBinding("predicate").getValue());
         String object = stringify(bindingSet.getBinding("object").getValue());
-        builder.append("\t" + "g" + "\t").append(graph).append("\n");
-        builder.append("\t" + "subject" + "\t").append(subject).append("\n");
-        builder.append("\t" + "predicate" + "\t").append(predicate).append("\n");
-        builder.append("\t" + "object" + "\t").append(object).append("\n");
+        String r  = "\t" + "g" + "\t" + graph
+          + "\t" + "subject" + "\t" + subject
+          + "\t" + "predicate" + "\t" + predicate
+          + "\t" + "object" + "\t" + object;
+        actualResult.add(r);
         i++;
       }
       assertEquals(expectedCardinality, i);
-      assertEquals(expectedResult, builder.toString());
+      assertEquals(expectedResult, actualResult);
     }
     finally {
       conn.close();

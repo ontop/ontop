@@ -1,8 +1,11 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.Variable;
+
+import java.util.Optional;
 
 public abstract class QueryNodeImpl implements QueryNode {
 
@@ -25,4 +28,5 @@ public abstract class QueryNodeImpl implements QueryNode {
     public boolean wouldKeepDescendingGroundTermInFilterAbove(Variable variable, boolean isConstant) {
         return false;
     }
+
 }

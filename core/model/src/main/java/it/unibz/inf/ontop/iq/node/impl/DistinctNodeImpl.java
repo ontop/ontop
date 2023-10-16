@@ -111,7 +111,7 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     private ImmutableSet<Variable> inferNewUC(IQTree child) {
-        var dependents = child.inferFunctionalDependencies().stream()
+        ImmutableSet<Variable> dependents = child.inferFunctionalDependencies().stream()
                 .flatMap(e -> e.getValue().stream())
                 .collect(ImmutableCollectors.toSet());
 
@@ -131,7 +131,7 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
         if (childVariableNonRequirement.isEmpty())
             return childVariableNonRequirement;
 
-        var requiredByDistinct = inferNewUC(child);
+        ImmutableSet<Variable> requiredByDistinct = inferNewUC(child);
         if (requiredByDistinct.isEmpty())
             return childVariableNonRequirement;
 
@@ -172,7 +172,7 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        return o != null && getClass() == o.getClass();
+        return o instanceof DistinctNodeImpl;
     }
 
     @Override

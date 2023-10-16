@@ -129,7 +129,7 @@ public class QueryConnectedComponent {
 	
 	public static ImmutableList<QueryConnectedComponent> getConnectedComponents(ImmutableCQ<RDFAtomPredicate> cq) {
 
-		ImmutableSet<Variable> answerVariables = ImmutableSet.copyOf(cq.getAnswerVariables());
+		ImmutableSet<Variable> answerVariables = cq.getAnswerVariables();
 
 		// collect all edges and loops
 		//      an edge is a binary predicate P(t, t') with t \ne t'

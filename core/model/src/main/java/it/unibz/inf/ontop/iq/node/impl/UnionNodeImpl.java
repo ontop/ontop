@@ -45,7 +45,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                           SubstitutionFactory substitutionFactory, TermFactory termFactory,
                           CoreUtilsFactory coreUtilsFactory, IQTreeTools iqTreeTools,
                           NotRequiredVariableRemover notRequiredVariableRemover) {
-        super(substitutionFactory, termFactory, iqFactory);
+        super(substitutionFactory, termFactory, iqFactory, iqTreeTools);
         this.projectedVariables = projectedVariables;
         this.iqTreeTools = iqTreeTools;
         this.coreUtilsFactory = coreUtilsFactory;
@@ -93,16 +93,13 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         ImmutableMap<Variable, ImmutableSet<Variable>> preselectedGroupMap = multimap.asMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
-                        e -> intersect(e.getValue())));
+                        e -> intersectionOfAll(e.getValue())));
 
         ImmutableSet<ImmutableSet<Variable>> nullableGroups = preselectedGroupMap.keySet().stream()
                 .map(v -> computeNullableGroup(v, preselectedGroupMap, variableNullabilities))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSet<Variable> scope = children.stream()
-                .flatMap(c -> c.getVariables().stream())
-                .collect(ImmutableCollectors.toSet());
-
+        ImmutableSet<Variable> scope = iqTreeTools.getChildrenVariables(children);
         return coreUtilsFactory.createVariableNullability(nullableGroups, scope);
     }
 
@@ -111,24 +108,12 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                                                         ImmutableSet<VariableNullability> variableNullabilities) {
         return preselectedGroupMap.get(mainVariable).stream()
                 .filter(v -> mainVariable.equals(v)
-                        || areInterdependent(mainVariable, v, preselectedGroupMap, variableNullabilities))
+                        || preselectedGroupMap.get(v).contains(mainVariable)
+                            && variableNullabilities.stream().allMatch(vn -> vn.isPossiblyNullable(mainVariable) == vn.isPossiblyNullable(v)))
                 .collect(ImmutableCollectors.toSet());
     }
 
-    private boolean areInterdependent(Variable v1, Variable v2,
-                                      ImmutableMap<Variable, ImmutableSet<Variable>> preselectedGroupMap,
-                                      ImmutableSet<VariableNullability> variableNullabilities) {
-        return preselectedGroupMap.get(v2).contains(v1)
-                && variableNullabilities.stream()
-                .allMatch(vn -> {
-                    boolean v1Nullable = vn.isPossiblyNullable(v1);
-                    boolean v2Nullable = vn.isPossiblyNullable(v2);
-
-                    return (v1Nullable && v2Nullable) || ((!v1Nullable) && (!v2Nullable));
-                });
-    }
-
-    private static ImmutableSet<Variable> intersect(Collection<ImmutableSet<Variable>> groups) {
+    private static ImmutableSet<Variable> intersectionOfAll(Collection<ImmutableSet<Variable>> groups) {
         return groups.stream()
                 .reduce((g1, g2) -> Sets.intersection(g1, g2).immutableCopy())
                 .orElseThrow(() -> new IllegalArgumentException("groups must not be empty"));
@@ -176,7 +161,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         if (areGroupDisjoint(compatibilityMap)) {
             // NB: multiple occurrences of the same child are automatically eliminated
-            return makeDistinctDisjointGroups(ImmutableSet.copyOf(compatibilityMap.values()));
+            ImmutableList<IQTree> newChildren = ImmutableSet.copyOf(compatibilityMap.values()).stream()
+                    .map(this::makeDistinctGroup)
+                    .collect(ImmutableCollectors.toList());
+
+            return makeDistinctGroupTree(newChildren);
         }
         /*
          * Fail-back: in the presence of non-disjoint groups of children,
@@ -207,31 +196,19 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         e -> ImmutableSet.copyOf(e.getValue())));
     }
 
-    private IQTree makeDistinctDisjointGroups(ImmutableSet<ImmutableSet<IQTree>> disjointGroups) {
-        ImmutableList<IQTree> newChildren = disjointGroups.stream()
-                .map(this::makeDistinctGroup)
-                .collect(ImmutableCollectors.toList());
-
-        switch (newChildren.size()) {
-            case 0:
-                throw new MinorOntopInternalBugException("Was expecting to have at least one group of Union children");
-            case 1:
-                return newChildren.get(0);
-            default:
-                return iqFactory.createNaryIQTree(this, newChildren);
-        }
+    private IQTree makeDistinctGroup(ImmutableSet<IQTree> childGroup) {
+        return iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
+                makeDistinctGroupTree(ImmutableList.copyOf(childGroup)));
     }
 
-    private IQTree makeDistinctGroup(ImmutableSet<IQTree> childGroup) {
-        switch (childGroup.size()) {
+    private IQTree makeDistinctGroupTree(ImmutableList<IQTree> list) {
+        switch (list.size()) {
             case 0:
                 throw new MinorOntopInternalBugException("Unexpected empty child group");
             case 1:
-                return iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(), childGroup.iterator().next());
+                return list.get(0);
             default:
-                return iqFactory.createUnaryIQTree(
-                        iqFactory.createDistinctNode(),
-                        iqFactory.createNaryIQTree(this, ImmutableList.copyOf(childGroup)));
+                return iqFactory.createNaryIQTree(this, list);
         }
     }
 
@@ -260,7 +237,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     private boolean areDisjointWhenNonNull(ImmutableTerm t1, ImmutableTerm t2, VariableNullability variableNullability) {
         IncrementalEvaluation evaluation = t1.evaluateStrictEq(t2, variableNullability);
-        switch(evaluation.getStatus()) {
+        switch (evaluation.getStatus()) {
             case SIMPLIFIED_EXPRESSION:
                 return evaluation.getNewExpression()
                         .orElseThrow(() -> new MinorOntopInternalBugException("An expression was expected"))
@@ -322,7 +299,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         }
 
         ImmutableSet<Variable> unionVariables = getVariables();
-
         for (IQTree child : children) {
             if (!child.getVariables().equals(unionVariables)) {
                 throw new InvalidIntermediateQueryException("This child " + child
@@ -339,7 +315,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .collect(ImmutableCollectors.toList());
 
         IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChildren.equals(children));
-
         return iqFactory.createNaryIQTree(this, children, newTreeCache);
     }
 
@@ -363,7 +338,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         .allMatch(c -> c.inferUniqueConstraints().contains(uc)))
                 .collect(ImmutableCollectors.partitioningBy(uc -> areDisjoint(children, uc)));
 
-        if(ucsPartitionedByDisjointness.get(false).isEmpty())
+        if (ucsPartitionedByDisjointness.get(false).isEmpty())
             return ImmutableSet.copyOf(ucsPartitionedByDisjointness.get(true));
 
         // By definition not parts of the non-disjoint UCs
@@ -376,7 +351,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 ucsPartitionedByDisjointness.get(true).stream(),
                 ucsPartitionedByDisjointness.get(false).stream()
                         .flatMap(uc -> disjointVariables.stream()
-                                        .map(v -> appendVariable(uc, v)))
+                                        .map(v -> Sets.union(uc, ImmutableSet.of(v)).immutableCopy()))
                 ).collect(ImmutableCollectors.toSet());
     }
 
@@ -396,7 +371,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         ImmutableMap<Boolean, ImmutableList<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>>> fdsPartitionedByDisjointness = mergedDependencies.stream()
                 .collect(ImmutableCollectors.partitioningBy(fd -> areDisjoint(children, fd.getKey())));
 
-        if(fdsPartitionedByDisjointness.get(false).isEmpty())
+        if (fdsPartitionedByDisjointness.get(false).isEmpty())
             return fdsPartitionedByDisjointness.get(true)
                     .stream()
                     .collect(FunctionalDependencies.toFunctionalDependencies());
@@ -415,21 +390,13 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         ).collect(FunctionalDependencies.toFunctionalDependencies());
     }
 
-    private Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>> appendDeterminant(Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>> fd, Variable v) {
+    private static Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>> appendDeterminant(Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>> fd, Variable v) {
+        ImmutableSet<Variable> vSet = ImmutableSet.of(v);
         return Maps.immutableEntry(
-                Stream.concat(
-                    fd.getKey().stream(),
-                    Stream.of(v)).collect(ImmutableCollectors.toSet()
-                ),
-                Sets.difference(fd.getValue(), ImmutableSet.of(v)).immutableCopy()
-        );
+                Sets.union(fd.getKey(), vSet).immutableCopy(),
+                Sets.difference(fd.getValue(), vSet).immutableCopy());
     }
 
-    private ImmutableSet<Variable> appendVariable(ImmutableSet<Variable> uc, Variable v) {
-        return Stream.concat(
-                uc.stream(),
-                Stream.of(v)).collect(ImmutableCollectors.toSet());
-    }
 
     private boolean areDisjoint(ImmutableList<IQTree> children, ImmutableSet<Variable> uc) {
         int childrenCount = children.size();
@@ -474,9 +441,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UnionNodeImpl unionNode = (UnionNodeImpl) o;
-        return projectedVariables.equals(unionNode.projectedVariables);
+        if (o instanceof UnionNodeImpl) {
+            UnionNodeImpl that = (UnionNodeImpl) o;
+            return projectedVariables.equals(that.projectedVariables);
+        }
+        return false;
     }
 
     @Override
@@ -511,7 +480,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
                                               VariableGenerator variableGenerator) {
-        ImmutableSet<Variable> updatedProjectedVariables = iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables);
 
         ImmutableList<IQTree> updatedChildren = children.stream()
                 .map(c -> c.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator))
@@ -520,11 +488,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         switch (updatedChildren.size()) {
             case 0:
-                return iqFactory.createEmptyNode(updatedProjectedVariables);
+                return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables));
             case 1:
                 return updatedChildren.get(0);
             default:
-                UnionNode newRootNode = iqFactory.createUnionNode(updatedProjectedVariables);
+                UnionNode newRootNode = iqFactory.createUnionNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables));
                 return iqFactory.createNaryIQTree(newRootNode, updatedChildren);
         }
     }
@@ -553,7 +521,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         UnionNode newUnionNode = iqFactory.createUnionNode(substitutionFactory.apply(renamingSubstitution, getVariables()));
 
         IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
-
         return iqFactory.createNaryIQTree(newUnionNode, newChildren, newTreeCache);
     }
 
@@ -610,12 +577,12 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .normalizeForOptimization(variableGenerator);
     }
 
-    private ImmutableList<IQTree> flattenChildren(ImmutableList<IQTree> liftedChildren) {
-        ImmutableList<IQTree> flattenedChildren = liftedChildren.stream()
+    private ImmutableList<IQTree> flattenChildren(ImmutableList<IQTree> children) {
+        ImmutableList<IQTree> flattenedChildren = children.stream()
                 .flatMap(this::flattenChild)
                 .collect(ImmutableCollectors.toList());
-        return (liftedChildren.size() == flattenedChildren.size())
-                ? liftedChildren
+        return (children.size() == flattenedChildren.size())
+                ? children
                 : flattenedChildren;
     }
 
@@ -782,7 +749,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 // this construction node
                 .transform(t -> (VariableOrGroundTerm)t)
                 .build();
-
 
         IQTree newChild = liftedChildTree.getChild()
                 .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);
