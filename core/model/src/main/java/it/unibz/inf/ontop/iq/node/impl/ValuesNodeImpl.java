@@ -58,6 +58,9 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     // LAZY
     private ImmutableSet<Substitution<NonVariableTerm>> possibleVariableDefinitions;
 
+    // LAZY
+    private ImmutableSet<ImmutableSet<Variable>> uniqueConstraints;
+
 
     @AssistedInject
     protected ValuesNodeImpl(@Assisted("orderedVariables") ImmutableList<Variable> orderedVariables,
@@ -556,9 +559,30 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
-        // TODO: Worth implementing?
-        return ImmutableSet.of();
+    public synchronized ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
+        if (uniqueConstraints == null) {
+            uniqueConstraints = computeUniqueConstraints();
+        }
+        return uniqueConstraints;
+    }
+
+    /**
+     * Basic implementation: looks first for atomic unique constraints.
+     *  If there is no atomic constraints, looks if the values node is distinct
+     */
+    private ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints() {
+        int count = valueMaps.size();
+        var atomicConstraints = getVariables().stream()
+                .filter(v -> getValueStream(v).distinct().count() == count)
+                .map(ImmutableSet::of)
+                .collect(ImmutableCollectors.toSet());
+
+        if (!atomicConstraints.isEmpty())
+            return atomicConstraints;
+        else if (isDistinct())
+            return ImmutableSet.of(getVariables());
+        else
+            return ImmutableSet.of();
     }
 
     @Override
