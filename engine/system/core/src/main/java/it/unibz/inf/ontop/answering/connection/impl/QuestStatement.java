@@ -230,8 +230,7 @@ public abstract class QuestStatement implements OntopStatement {
 
 		ImmutableMap<String, String> normalizedHttpHeaders = normalizeHttpHeaders(httpHeaders);
 
-		// TODO: use normalizedHttpHeaders
-		QueryLogger queryLogger = queryLoggerFactory.create(httpHeaders);
+		QueryLogger queryLogger = queryLoggerFactory.create(normalizedHttpHeaders);
 		queryLogger.setSparqlQuery(inputQuery.getOriginalString());
 
 		QueryContext queryContext = queryContextFactory.create(normalizedHttpHeaders);
@@ -276,7 +275,7 @@ public abstract class QuestStatement implements OntopStatement {
 	 * without changing the semantics of the message, by appending each subsequent field-value to the first,
 	 * each separated by a comma.
 	 */
-	private ImmutableMap<String, String> normalizeHttpHeaders(ImmutableMultimap<String, String> httpHeaders) {
+	public static ImmutableMap<String, String> normalizeHttpHeaders(ImmutableMultimap<String, String> httpHeaders) {
 		return httpHeaders.asMap().entrySet().stream()
 				.collect(ImmutableCollectors.toMap(
 						e -> e.getKey().toLowerCase(),
@@ -307,9 +306,10 @@ public abstract class QuestStatement implements OntopStatement {
 	}
 
 	@Override
-	public  <R extends OBDAResultSet>  IQ getExecutableQuery(KGQuery<R> inputQuery) throws OntopReformulationException {
-		return engine.reformulateIntoNativeQuery(inputQuery, queryContextFactory.create(ImmutableMap.of()),
-				queryLoggerFactory.create(ImmutableMultimap.of()));
+	public  <R extends OBDAResultSet>  IQ getExecutableQuery(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders) throws OntopReformulationException {
+		ImmutableMap<String, String> normalizedHttpHeaders = normalizeHttpHeaders(httpHeaders);
+		return engine.reformulateIntoNativeQuery(inputQuery, queryContextFactory.create(normalizedHttpHeaders),
+				queryLoggerFactory.create(normalizedHttpHeaders));
 	}
 
 }

@@ -21,6 +21,8 @@ public interface OntopReformulationSettings extends OntopKGQuerySettings {
     boolean isReformulatedQueryIncludedIntoQueryLog();
     boolean areClassesAndPropertiesIncludedIntoQueryLog();
     boolean areTablesIncludedIntoQueryLog();
+    boolean isUserInfoIncludedIntoQueryLog();
+
     boolean isQueryLoggingDecompositionEnabled();
     boolean areQueryLoggingDecompositionAndMergingMutuallyExclusive();
 
@@ -53,6 +55,7 @@ public interface OntopReformulationSettings extends OntopKGQuerySettings {
     String CLASSES_INCLUDED_QUERY_LOGGING = "ontop.queryLogging.includeClassesAndProperties";
     // Includes DB tables/views into the query log
     String TABLES_INCLUDED_QUERY_LOGGING = "ontop.queryLogging.includeTables";
+    String USER_INFO_INCLUDED_QUERY_LOGGING = "ontop.queryLogging.includeUserInfo";
     String HTTP_HEADER_INCLUDED_QUERY_LOGGING_PREFIX = "ontop.queryLogging.includeHttpHeader.";
     String QUERY_TEMPLATE_EXTRACTION = "ontop.queryLogging.extractQueryTemplate";
     String QUERY_LOGGING_DECOMPOSITION = "ontop.queryLogging.decomposition";

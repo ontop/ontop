@@ -607,22 +607,22 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
     }
 
     @Override
-    public String reformulate(String sparql)
+    public String reformulate(String sparql, ImmutableMultimap<String, String> httpHeaders)
             throws RepositoryException {
         try {
             SPARQLQuery<?> sparqlQuery = ontopConnection.getInputQueryFactory().createSPARQLQuery(sparql);
-            return ontopConnection.createStatement().getExecutableQuery(sparqlQuery).toString();
+            return ontopConnection.createStatement().getExecutableQuery(sparqlQuery, httpHeaders).toString();
         } catch (OntopKGQueryException | OntopReformulationException | OntopConnectionException e) {
             throw new RepositoryException(e);
         }
     }
 
     @Override
-    public String reformulateIntoNativeQuery(String sparql)
+    public String reformulateIntoNativeQuery(String sparql, ImmutableMultimap<String, String> httpHeaders)
             throws RepositoryException {
         try {
             SPARQLQuery<?> sparqlQuery = ontopConnection.getInputQueryFactory().createSPARQLQuery(sparql);
-            IQTree executableTree = ontopConnection.createStatement().getExecutableQuery(sparqlQuery)
+            IQTree executableTree = ontopConnection.createStatement().getExecutableQuery(sparqlQuery, httpHeaders)
                     .getTree();
 
             if (executableTree.getRootNode() instanceof ConstructionNode) {

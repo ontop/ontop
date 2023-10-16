@@ -28,10 +28,18 @@ public interface OntopRepositoryConnection extends org.eclipse.rdf4j.repository.
     /**
      * Renders the executable IQ, including the post-processing node and the native query
      */
-    String reformulate(String sparql) throws RepositoryException;
+    String reformulate(String sparql, ImmutableMultimap<String, String> httpHeaders) throws RepositoryException;
+
+    default String reformulate(String sparql) throws RepositoryException {
+        return reformulate(sparql, ImmutableMultimap.of());
+    }
 
     /**
      * Renders the native query
      */
-    String reformulateIntoNativeQuery(String sparql) throws RepositoryException;
+    String reformulateIntoNativeQuery(String sparql, ImmutableMultimap<String, String> httpHeaders) throws RepositoryException;
+
+    default String reformulateIntoNativeQuery(String sparql) throws RepositoryException {
+        return reformulateIntoNativeQuery(sparql, ImmutableMultimap.of());
+    }
 }

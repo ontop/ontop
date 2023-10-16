@@ -58,7 +58,7 @@
     "foreignKeys" : [ {
       "name" : "CONSTRAINT_CAA",
       "from" : {
-        "relation" : ["\"TEACHING\""],
+        "relation" : ["\"PUBLIC\"", "\"TEACHING\""],
         "columns" : [ "\"COURSE_ID\"" ]
       },
       "to" : {

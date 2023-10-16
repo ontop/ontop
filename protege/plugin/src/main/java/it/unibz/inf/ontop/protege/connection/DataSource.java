@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.*;
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -61,26 +60,6 @@ public class DataSource {
 			JDBC_RESULTSETCONCUR, ResultSet.CONCUR_READ_ONLY
 			JDBC_RESULTSETTYPE, ResultSet.TYPE_FORWARD_ONLY
 		 */
-
-
-	public DataSource() {
-		URI id = URI.create(UUID.randomUUID().toString());
-	}
-
-	/**
-	 * Closes the connection quietly
-	 */
-	public void dispose() {
-		try {
-			if (connection != null) {
-				connection.close();
-				connection = null;
-			}
-		}
-		catch (Exception e) {
-			LOGGER.error(e.getMessage());
-		}
-	}
 
 
 	@Nonnull
@@ -118,18 +97,41 @@ public class DataSource {
 		this.driver = driver;
 
 		if (changed) {
-			dispose();
+			closeConnection();
 			listeners.fire(l -> l.changed(this));
 		}
 	}
+
+	public void dispose() {
+		closeConnection();
+	}
+
+	private void closeConnection() {
+		try {
+			if (connection != null) {
+				connection.close();
+				connection = null;
+			}
+		}
+		catch (Exception e) {
+			LOGGER.error(e.getMessage());
+		}
+	}
+
 
 	/**
 	 * Retrieves the connection object.
 	 * If the connection doesn't exist or is dead, it will create a new connection.
 	 */
 	public Connection getConnection() throws SQLException {
-		if (connection == null || connection.isClosed())
-			connection = DriverManager.getConnection(url, username, password);
+		if (connection == null || connection.isClosed()) {
+			// H2: https://www.h2database.com/html/features.html#database_only_if_exists
+			String effectiveUrl = url.startsWith("jdbc:h2:") && !url.contains("IFEXISTS=")
+					? url + ";IFEXISTS=TRUE"
+					: url;
+
+			connection = DriverManager.getConnection(effectiveUrl, username, password);
+		}
 
 		return connection;
 	}
@@ -156,7 +158,7 @@ public class DataSource {
 		url = "";
 		username = "";
 		password = "";
-		connection = null;
+		closeConnection();
 	}
 
 	public ImmutableSet<String> getPropertyKeys() {

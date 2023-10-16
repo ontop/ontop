@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.answering.connection.impl;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSortedSet;
 import it.unibz.inf.ontop.answering.connection.JDBCStatementFinalizer;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
@@ -117,8 +118,8 @@ public class SQLQuestStatement extends QuestStatement {
      * Returns the number of tuples returned by the query
      */
     @Override
-    public  <R extends OBDAResultSet>  int getTupleCount(KGQuery<R> inputQuery) throws OntopReformulationException, OntopQueryEvaluationException {
-        IQ targetQuery = getExecutableQuery(inputQuery);
+    public  <R extends OBDAResultSet>  int getTupleCount(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders) throws OntopReformulationException, OntopQueryEvaluationException {
+        IQ targetQuery = getExecutableQuery(inputQuery, httpHeaders);
         try {
             String sql = extractSQLQuery(targetQuery);
             String newsql = "SELECT count(*) FROM (" + sql + ") t1";

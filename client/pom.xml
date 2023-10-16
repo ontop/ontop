@@ -15,6 +15,7 @@
     <modules>
         <module>cli</module>
         <module>endpoint</module>
+        <module>endpoint-core</module>
     </modules>
 
 </project>

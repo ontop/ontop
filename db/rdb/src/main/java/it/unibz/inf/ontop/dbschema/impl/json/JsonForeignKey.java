@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -30,12 +31,14 @@ public class JsonForeignKey extends JsonOpenObject  {
         this.to = to;
     }
 
-    public JsonForeignKey(ForeignKeyConstraint fk) {
+    public JsonForeignKey(ForeignKeyConstraint fk, Function<NamedRelationDefinition, RelationID> fkRelationIDExtractor) {
         this.name = fk.getName();
         this.from = new Part(fk.getRelation(), fk.getComponents().stream()
-                .map(ForeignKeyConstraint.Component::getAttribute));
+                .map(ForeignKeyConstraint.Component::getAttribute),
+                fkRelationIDExtractor);
         this.to = new Part(fk.getReferencedRelation(), fk.getComponents().stream()
-                .map(ForeignKeyConstraint.Component::getReferencedAttribute));
+                .map(ForeignKeyConstraint.Component::getReferencedAttribute),
+                fkRelationIDExtractor);
     }
 
     public void insert(NamedRelationDefinition relation, MetadataLookup lookup) throws MetadataExtractionException {
@@ -78,8 +81,9 @@ public class JsonForeignKey extends JsonOpenObject  {
             this.columns = columns;
         }
 
-        public Part(NamedRelationDefinition relation, Stream<Attribute> attributes) {
-            this.relation = JsonMetadata.serializeRelationID(relation.getID());
+        public Part(NamedRelationDefinition relation, Stream<Attribute> attributes,
+                    Function<NamedRelationDefinition, RelationID> fkRelationIDExtractor) {
+            this.relation = JsonMetadata.serializeRelationID(fkRelationIDExtractor.apply(relation));
             this.columns = JsonMetadata.serializeAttributeList(attributes);
         }
     }
