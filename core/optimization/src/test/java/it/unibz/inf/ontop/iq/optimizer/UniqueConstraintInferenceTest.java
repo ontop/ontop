@@ -325,7 +325,7 @@ public class UniqueConstraintInferenceTest {
                 DATA_NODE_1);
 
         // Not distinct
-        ValuesNode child3 = IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE, ONE)));
+        ValuesNode child3 = IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE), ImmutableList.of(ONE)));
 
         IQTree tree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
@@ -342,7 +342,7 @@ public class UniqueConstraintInferenceTest {
                 DATA_NODE_1);
 
         // Not distinct
-        ValuesNode child3 = IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE, ONE)));
+        ValuesNode child3 = IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE), ImmutableList.of(ONE)));
 
         IQTree tree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
@@ -371,4 +371,36 @@ public class UniqueConstraintInferenceTest {
                 ImmutableList.of(child1, child2, child2));
         assertEquals(ImmutableSet.of(), tree.inferUniqueConstraints());
     }
+
+    @Test
+    public void testValues1() {
+        ValuesNode values = IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE), ImmutableList.of(ONE)));
+        assertEquals(ImmutableSet.of(), values.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testValues2() {
+        ValuesNode values = IQ_FACTORY.createValuesNode(ImmutableList.of(X, Y),
+                ImmutableList.of(ImmutableList.of(ONE, ONE), ImmutableList.of(ONE, TWO)));
+        assertEquals(ImmutableSet.of(ImmutableSet.of(Y)), values.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testValues3() {
+        ValuesNode values = IQ_FACTORY.createValuesNode(ImmutableList.of(X, Y),
+                ImmutableList.of(ImmutableList.of(ONE, ONE), ImmutableList.of(TWO, TWO)));
+        assertEquals(ImmutableSet.of(ImmutableSet.of(X), ImmutableSet.of(Y)), values.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testValues4() {
+        ValuesNode values = IQ_FACTORY.createValuesNode(ImmutableList.of(X, Y),
+                ImmutableList.of(
+                        ImmutableList.of(ONE, ONE),
+                        ImmutableList.of(TWO, TWO),
+                        ImmutableList.of(ONE, TWO)));
+        assertEquals(ImmutableSet.of(ImmutableSet.of(X,Y)), values.inferUniqueConstraints());
+    }
+
+
 }
