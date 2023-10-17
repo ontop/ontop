@@ -77,7 +77,7 @@
   },
   "ontop.enableValuesNode": {
     "type": "Boolean",
-    "description": "Since 4.2.0. Default value: `true`. If false Union Nodes are used instead of Values Nodes for facts."
+    "description": "REMOVED from 5.2.0 (introduced in 4.2.0). Default value: `true`. If false Union Nodes are used instead of Values Nodes for facts."
   },
   "ontop.enableFactExtractionWithTBox": {
     "type": "Boolean",
