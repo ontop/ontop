@@ -152,7 +152,7 @@
         <versions-maven-plugin.version>2.15.0</versions-maven-plugin.version>
 
         <!-- Dependency versions: core dependencies -->
-        <airline.version>2.8.0</airline.version>
+        <airline.version>2.9.0</airline.version>
         <antlr4.version>4.12.0</antlr4.version>
         <commons-codec.version>1.14</commons-codec.version>
         <commons-collections4.version>4.2</commons-collections4.version>

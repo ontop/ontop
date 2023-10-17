@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.cli;
 import com.github.rvesse.airline.Cli;
 import com.github.rvesse.airline.builder.CliBuilder;
 import com.github.rvesse.airline.parser.errors.*;
+import it.unibz.inf.ontop.cli.utils.EnvCli;
 
 
 public class Ontop {
@@ -61,7 +62,7 @@ public class Ontop {
                 .withCommand(OntopR2RMLPrettify.class)
                 .withCommand(OntopMappingV1ToV3.class);
 
-        return builder.build();
+        return EnvCli.wrap(builder.build());
     }
 
 }
