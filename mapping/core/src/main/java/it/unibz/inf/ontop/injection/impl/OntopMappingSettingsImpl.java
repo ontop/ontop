@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.injection.impl;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.spec.fact.FactExtractor;
-import it.unibz.inf.ontop.spec.mapping.transformer.FactIntoMappingConverter;
 
 import java.util.Properties;
 
@@ -19,22 +18,6 @@ class OntopMappingSettingsImpl extends OntopKGQuerySettingsImpl implements Ontop
     private static Properties loadProperties(Properties userProperties) {
         Properties properties = loadDefaultMappingProperties();
         properties.putAll(userProperties);
-
-        String factConverterKey = FactIntoMappingConverter.class.getCanonicalName();
-        if (!userProperties.containsKey(factConverterKey)) {
-            Boolean withValuesNode = getBoolean(properties, ENABLE_VALUES_NODE)
-                    .orElseThrow(() -> new InvalidOntopConfigurationException
-                            (ENABLE_VALUES_NODE + "is required but missing " + "(must have a default value)"));
-
-            String factConverterValue = withValuesNode
-                    ? properties.getProperty("fact-converter-with-values-nodes")
-                    : properties.getProperty("fact-converter-without-values-nodes");
-
-            if (factConverterValue == null) {
-                throw new InvalidOntopConfigurationException("Missing a default value for constructing the fact converter");
-            }
-            properties.put(factConverterKey, factConverterValue);
-        }
 
         String factExtractorKey = FactExtractor.class.getCanonicalName();
         if (!userProperties.containsKey(factExtractorKey)) {
@@ -78,9 +61,6 @@ class OntopMappingSettingsImpl extends OntopKGQuerySettingsImpl implements Ontop
     public boolean isCanIRIComplete() {
         return getRequiredBoolean(IS_CANONICAL_IRI_COMPLETE);
     }
-
-    @Override
-    public boolean isValuesNodeEnabled() { return getRequiredBoolean(OntopMappingSettings.ENABLE_VALUES_NODE);}
 
     @Override
     public boolean isFactExtractionWithTBoxEnabled() { return getRequiredBoolean(OntopMappingSettings.ENABLE_FACT_EXTRACTION_WITH_TBOX);}
