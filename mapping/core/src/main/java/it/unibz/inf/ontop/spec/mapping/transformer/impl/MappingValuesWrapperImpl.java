@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ValuesNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
@@ -96,15 +97,25 @@ public class MappingValuesWrapperImpl implements MappingValuesWrapper {
         }
 
         protected RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters)  {
+            SingleTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
             var builder = AbstractRelationDefinition.attributeListBuilder();
 
-            var variableNullability = iq.getTree().getVariableNullability();
+            var iqTree = iq.getTree();
+            var variableNullability = iqTree.getVariableNullability();
             var rootType= dbParameters.getDBTypeFactory().getAbstractRootDBType();
 
 
             for (Variable v : iq.getProjectionAtom().getArguments()) {
                 var attributeId = rawQuotedIqFactory.createAttributeID(v.getName());
-                builder.addAttribute(attributeId, rootType, variableNullability.isPossiblyNullable(v));
+                var inferredType = uniqueTermTypeExtractor.extractSingleTermType(v, iqTree)
+                        .orElse(rootType);
+
+                var datatype = (inferredType instanceof DBTermType)
+                        ? (DBTermType) inferredType
+                        // Temporary (as the lenses are unfolded)
+                        : rootType;
+
+                builder.addAttribute(attributeId, datatype, variableNullability.isPossiblyNullable(v));
             }
             return builder;
         }
