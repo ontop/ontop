@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,6 +49,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     private final CoreUtilsFactory coreUtilsFactory;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
+    private final OntopModelSettings settings;
 
     private boolean isNormalized = false;
     // LAZY
@@ -57,6 +59,9 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     // LAZY
     private ImmutableSet<Substitution<NonVariableTerm>> possibleVariableDefinitions;
+
+    // LAZY
+    private ImmutableSet<ImmutableSet<Variable>> uniqueConstraints;
 
 
     @AssistedInject
@@ -78,6 +83,15 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                              @Assisted("valueMaps") ImmutableList<ImmutableMap<Variable, Constant>> valueMaps,
                              IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory,
                              OntopModelSettings settings, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+        this(projectedVariables, valueMaps, null, iqTreeTools, iqFactory, coreUtilsFactory, settings,
+                substitutionFactory, termFactory);
+    }
+
+    private ValuesNodeImpl(ImmutableSet<Variable> projectedVariables,
+                           ImmutableList<ImmutableMap<Variable, Constant>> valueMaps,
+                           @Nullable ImmutableSet<ImmutableSet<Variable>> uniqueConstraints,
+                           IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory,
+                           OntopModelSettings settings, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         super(iqTreeTools, iqFactory);
 
         this.projectedVariables = projectedVariables;
@@ -86,6 +100,8 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         this.coreUtilsFactory = coreUtilsFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
+        this.uniqueConstraints = uniqueConstraints;
+        this.settings = settings;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -245,13 +261,23 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     public ValuesNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
         ImmutableSet<Variable> newVariables = substitutionFactory.apply(freshRenamingSubstitution, projectedVariables);
 
-        return newVariables.equals(projectedVariables)
-                ? this
-                : iqFactory.createValuesNode(newVariables, valueMaps.stream()
-                        .map(tuple -> tuple.entrySet().stream()
-                                .map(e -> Maps.immutableEntry(substitutionFactory.apply(freshRenamingSubstitution, e.getKey()), e.getValue()))
-                                .collect(ImmutableCollectors.toMap()))
-                        .collect(ImmutableCollectors.toList()));
+        if (newVariables.equals(projectedVariables))
+            return this;
+
+        var newUniqueConstraints = uniqueConstraints == null
+                ? null
+                : uniqueConstraints.stream()
+                .map(s -> substitutionFactory.apply(freshRenamingSubstitution, s))
+                .collect(ImmutableCollectors.toSet());
+
+        var newValueMaps =  valueMaps.stream()
+                .map(tuple -> tuple.entrySet().stream()
+                        .map(e -> Maps.immutableEntry(substitutionFactory.apply(freshRenamingSubstitution, e.getKey()), e.getValue()))
+                        .collect(ImmutableCollectors.toMap()))
+                .collect(ImmutableCollectors.toList());
+
+        return new ValuesNodeImpl(newVariables, newValueMaps, newUniqueConstraints, iqTreeTools, iqFactory,
+                coreUtilsFactory, settings, substitutionFactory, termFactory);
     }
 
     @Override
@@ -556,9 +582,30 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
-        // TODO: Worth implementing?
-        return ImmutableSet.of();
+    public synchronized ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
+        if (uniqueConstraints == null) {
+            uniqueConstraints = computeUniqueConstraints();
+        }
+        return uniqueConstraints;
+    }
+
+    /**
+     * Basic implementation: looks first for atomic unique constraints.
+     *  If there is no atomic constraints, looks if the values node is distinct
+     */
+    private ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints() {
+        int count = valueMaps.size();
+        var atomicConstraints = getVariables().stream()
+                .filter(v -> getValueStream(v).distinct().count() == count)
+                .map(ImmutableSet::of)
+                .collect(ImmutableCollectors.toSet());
+
+        if (!atomicConstraints.isEmpty())
+            return atomicConstraints;
+        else if (isDistinct())
+            return ImmutableSet.of(getVariables());
+        else
+            return ImmutableSet.of();
     }
 
     @Override
