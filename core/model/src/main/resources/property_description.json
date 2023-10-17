@@ -198,5 +198,9 @@
   "ontop.authorization": {
     "type": "Boolean",
     "description": "Since 5.2.0. Default value: `false`. If true, extracts user, group and role information from HTTP headers."
+  },
+  "ontop.wrapMappingValuesNodesInLenses": {
+    "type": "Boolean",
+    "description": "Since 5.2.0. Default value: `false`. If true, values nodes found in the mapping may be wrapped into lenses."
   }
 }

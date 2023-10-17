@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.LensImpl;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ValuesNode;
@@ -29,16 +30,23 @@ import java.util.stream.IntStream;
 
 public class MappingValuesWrapperImpl implements MappingValuesWrapper {
 
+    private final OntopMappingSettings settings;
+
     @Inject
-    protected MappingValuesWrapperImpl() {
+    protected MappingValuesWrapperImpl(OntopMappingSettings settings) {
+        this.settings = settings;
     }
 
     @Override
     public ImmutableList<MappingAssertion> normalize(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters) {
-        var transformer = new Transformer(dbParameters);
-        return mapping.stream()
-                .map(transformer::transformMappingAssertion)
-                .collect(ImmutableCollectors.toList());
+        if (settings.isValuesNodesWrapInLensesInMappingEnabled()) {
+            var transformer = new Transformer(dbParameters);
+            return mapping.stream()
+                    .map(transformer::transformMappingAssertion)
+                    .collect(ImmutableCollectors.toList());
+        }
+        else
+            return mapping;
     }
 
     protected static class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

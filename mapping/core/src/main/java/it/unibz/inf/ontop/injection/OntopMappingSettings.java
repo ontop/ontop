@@ -52,6 +52,8 @@ public interface OntopMappingSettings extends OntopKGQuerySettings {
      */
     boolean areSuperClassesOfDomainRangeInferred();
 
+    boolean isValuesNodesWrapInLensesInMappingEnabled();
+
     //--------------------------
     // Keys
     //--------------------------
@@ -63,6 +65,7 @@ public interface OntopMappingSettings extends OntopKGQuerySettings {
     String ENABLE_VALUES_NODE = "ontop.enableValuesNode";
     String ENABLE_FACT_EXTRACTION_WITH_TBOX = "ontop.enableFactExtractionWithTBox";
     String INFER_SUPER_CLASSES_OF_DOMAIN_RANGE = "ontop.querySuperClassesOfDomainRange";
+    String WRAP_MAPPING_VALUES_NODES_IN_LENSES = "ontop.wrapMappingValuesNodesInLenses";
 
     /**
      * Options to specify base IRI.

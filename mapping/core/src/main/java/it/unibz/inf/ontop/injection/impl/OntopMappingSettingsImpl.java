@@ -89,4 +89,9 @@ class OntopMappingSettingsImpl extends OntopKGQuerySettingsImpl implements Ontop
     public boolean areSuperClassesOfDomainRangeInferred() {
         return getRequiredBoolean(OntopMappingSettings.INFER_SUPER_CLASSES_OF_DOMAIN_RANGE);
     }
+
+    @Override
+    public boolean isValuesNodesWrapInLensesInMappingEnabled() {
+        return getRequiredBoolean(OntopMappingSettings.WRAP_MAPPING_VALUES_NODES_IN_LENSES);
+    }
 }
