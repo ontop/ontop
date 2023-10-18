@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -340,5 +341,28 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     @Override
     public boolean isDeclaredAsEmpty() {
         return false;
+    }
+
+    @Override
+    public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions() {
+        if (relationDefinition instanceof Lens) {
+            IQ iq = ((Lens) relationDefinition).getIQ();
+            IQTree iqTree = iq.getTree();
+
+            ImmutableSet<Substitution<NonVariableTerm>> definitions = iqTree.getPossibleVariableDefinitions();
+            if (definitions.isEmpty())
+                return definitions;
+
+            VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(getVariables());
+
+            InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
+                    variableGenerator, iqTree.getKnownVariables());
+
+            var ops = substitutionFactory.onNonVariableTerms();
+            return definitions.stream()
+                    .map(s -> ops.rename(renamingSubstitution, s))
+                    .collect(ImmutableCollectors.toSet());
+        }
+        return ImmutableSet.of();
     }
 }
