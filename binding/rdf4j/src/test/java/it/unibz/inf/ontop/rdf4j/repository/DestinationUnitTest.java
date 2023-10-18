@@ -14,10 +14,11 @@ public class DestinationUnitTest extends AbstractRDF4JTest {
 
     private static final String OBDA_FILE = "/destination/dest-unit.obda";
     private static final String SQL_SCRIPT = "/destination/schema.sql";
+    private static final String PROPERTIES_FILE = "/destination/dest-unit.properties";
 
     @BeforeClass
     public static void before() throws IOException, SQLException {
-        initOBDA(SQL_SCRIPT, OBDA_FILE, null, null);
+        initOBDA(SQL_SCRIPT, OBDA_FILE, null, PROPERTIES_FILE);
     }
 
     @AfterClass
@@ -75,8 +76,7 @@ public class DestinationUnitTest extends AbstractRDF4JTest {
         assertFalse("Should have no unions: "  + sql, sql.toLowerCase().contains("union"));
         assertFalse("Should have no distincts: "  + sql, sql.toLowerCase().contains("distinct"));
     }
-
-    @Ignore("temporarily disabled - will enable it later")
+    
     @Test
     public void testOnlyOneUnitPerResult() {
         try {

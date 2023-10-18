@@ -35,12 +35,6 @@ public interface OntopMappingSettings extends OntopKGQuerySettings {
     boolean isCanIRIComplete();
 
     /**
-     * If false, use Union Node instead of Values Node
-     * If true use Values Node
-     */
-    boolean isValuesNodeEnabled();
-
-    /**
      * If false, do not use the tbox to derive facts
      * If true use tbox saturation
      */
@@ -52,6 +46,8 @@ public interface OntopMappingSettings extends OntopKGQuerySettings {
      */
     boolean areSuperClassesOfDomainRangeInferred();
 
+    boolean isValuesNodesWrapInLensesInMappingEnabled();
+
     //--------------------------
     // Keys
     //--------------------------
@@ -60,9 +56,9 @@ public interface OntopMappingSettings extends OntopKGQuerySettings {
     String INFER_DEFAULT_DATATYPE = "ontop.inferDefaultDatatype";
     String TOLERATE_ABSTRACT_DATATYPE = "ontop.tolerateAbstractDatatype";
     String IS_CANONICAL_IRI_COMPLETE = "ontop.isCanonicalIRIComplete";
-    String ENABLE_VALUES_NODE = "ontop.enableValuesNode";
     String ENABLE_FACT_EXTRACTION_WITH_TBOX = "ontop.enableFactExtractionWithTBox";
     String INFER_SUPER_CLASSES_OF_DOMAIN_RANGE = "ontop.querySuperClassesOfDomainRange";
+    String WRAP_MAPPING_VALUES_NODES_IN_LENSES = "ontop.wrapMappingValuesNodesInLenses";
 
     /**
      * Options to specify base IRI.
