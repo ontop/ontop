@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.collect.ImmutableMap;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
+import javax.annotation.Nullable;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -77,7 +78,7 @@ public interface QuotedIDFactory {
      *                   from the catalog to the table name
      * @return relation ID
      */
-    RelationID createRelationID(String... components);
+    RelationID createRelationID(@Nullable String... components);
 
     /**
      * Returns the quotation string used in the SQL rendering.
