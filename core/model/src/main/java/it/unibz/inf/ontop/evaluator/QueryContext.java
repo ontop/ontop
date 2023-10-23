@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Contextual information that is provided on a per-query basis.
@@ -15,7 +16,7 @@ public interface QueryContext {
 
     ImmutableSet<String> getRolesOrGroups();
 
-    byte[] getSalt();
+    UUID getSalt();
 
     interface Factory {
         QueryContext create(ImmutableMap<String, String> normalizedHttpHeaders);

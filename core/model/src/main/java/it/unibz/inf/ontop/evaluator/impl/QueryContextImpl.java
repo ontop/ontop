@@ -10,9 +10,9 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
-import java.security.SecureRandom;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 public class QueryContextImpl implements QueryContext {
@@ -24,7 +24,7 @@ public class QueryContextImpl implements QueryContext {
     @Nullable
     private final String username;
     private final ImmutableSet<String> rolesOrGroups;
-    private final byte[] salt;
+    private final UUID salt;
 
     @AssistedInject
     protected QueryContextImpl(@Assisted ImmutableMap<String, String> normalizedHttpHeaders,
@@ -43,9 +43,7 @@ public class QueryContextImpl implements QueryContext {
             rolesOrGroups = ImmutableSet.of();
         }
 
-        SecureRandom random = new SecureRandom();
-        this.salt = new byte[20];
-        random.nextBytes(salt);
+        this.salt = UUID.randomUUID();
     }
 
     @Override
@@ -67,7 +65,7 @@ public class QueryContextImpl implements QueryContext {
     }
 
     @Override
-    public byte[] getSalt() {
+    public UUID getSalt() {
         return salt;
     }
 
