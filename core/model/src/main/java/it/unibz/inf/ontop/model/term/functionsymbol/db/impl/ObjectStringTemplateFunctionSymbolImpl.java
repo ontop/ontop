@@ -451,8 +451,13 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             else
                 return IncrementalEvaluation.declareIsFalse();
         }
-        else if (!SafeSeparatorFragment.areCompatible(this.safeSeparatorFragments, SafeSeparatorFragment.split(otherValue)))
-            return IncrementalEvaluation.declareIsFalse();
+        else if (!SafeSeparatorFragment.areCompatible(this.safeSeparatorFragments, SafeSeparatorFragment.split(otherValue))) {
+            return termFactory.getFalseOrNullFunctionalTerm(
+                            terms.stream()
+                                    .map(termFactory::getDBIsNotNull)
+                                    .collect(ImmutableCollectors.toList()))
+                    .evaluate(variableNullability, true);
+        }
 
         return super.evaluateStrictEqWithNonNullConstant(terms, otherTerm, termFactory, variableNullability);
     }

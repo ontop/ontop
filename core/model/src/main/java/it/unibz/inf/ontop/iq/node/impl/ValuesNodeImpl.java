@@ -517,7 +517,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         ImmutableList<ImmutableMap<Variable, Constant>> newValues = valueMaps.stream()
                 .filter(tuple -> !(tuple.entrySet().stream().collect(substitutionFactory.toSubstitution())
                         .apply(constraint))
-                        .evaluate(variableNullability)
+                        .evaluate2VL(variableNullability)
                         .isEffectiveFalse())
                 .collect(ImmutableCollectors.toList());
 
