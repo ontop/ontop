@@ -108,17 +108,26 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                                                      TermFactory termFactory, VariableNullability variableNullability) {
 
         if (newTerms.stream().allMatch(t -> t instanceof DBConstant)) {
-            String value = components.stream()
-                    .map(c -> c.isColumnNameReference()
-                        ? encodeParameter((DBConstant)newTerms.get(c.getIndex()), termFactory, variableNullability)
-                        : c.getComponent())
-                    .collect(Collectors.joining());
-
-            return termFactory.getDBConstant(value, lexicalType);
+            return simplifyWithAllParametersConstant((ImmutableList<DBConstant>)(ImmutableList<?>)newTerms, termFactory, variableNullability);
         }
         else
             return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
+
+    protected ImmutableTerm simplifyWithAllParametersConstant(ImmutableList<DBConstant> newTerms, TermFactory termFactory,
+                                                            VariableNullability variableNullability) {
+        return termFactory.getDBConstant(buildString(newTerms, termFactory, variableNullability), lexicalType);
+    }
+
+    protected String buildString(ImmutableList<DBConstant> newTerms, TermFactory termFactory,
+                                 VariableNullability variableNullability) {
+        return components.stream()
+                .map(c -> c.isColumnNameReference()
+                        ? encodeParameter(newTerms.get(c.getIndex()), termFactory, variableNullability)
+                        : c.getComponent())
+                .collect(Collectors.joining());
+    }
+
 
     private static String encodeParameter(DBConstant constant, TermFactory termFactory, VariableNullability variableNullability) {
         return Optional.of(constant)
