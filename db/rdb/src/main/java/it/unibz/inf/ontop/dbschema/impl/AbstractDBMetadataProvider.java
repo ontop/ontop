@@ -548,7 +548,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         return e.getCause().toString();
     }
 
-    protected abstract RelationID getCanonicalRelationId(RelationID id);
+    protected abstract RelationID getCanonicalRelationId(RelationID id) throws MetadataExtractionException;
 
     protected abstract ImmutableList<RelationID> getAllIDs(RelationID id);
 

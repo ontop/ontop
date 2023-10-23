@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.dbschema.QuotedIDFactory.IDFactoryType;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 
@@ -82,7 +83,7 @@ public class SQLStandardQuotedIDFactory implements QuotedIDFactory {
 	}
 
 	@Override
-	public RelationID createRelationID(String... components) {
+	public RelationID createRelationID(@Nullable String... components) {
 		Objects.requireNonNull(components[components.length - 1]);
 		ImmutableList.Builder<QuotedID> builder = ImmutableList.builder();
 		for (int i = components.length - 1; i >= 0; i--)
