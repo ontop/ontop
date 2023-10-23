@@ -46,10 +46,10 @@ public abstract class DefaultSchemaCatalogDBMetadataProvider extends AbstractDBM
         super(connection, idFactoryProvider, coreSingletons);
         try {
             String[] defaultRelationComponents = defaultsFactory.getDefaultRelationIdComponents(connection);
-            if (defaultRelationComponents == null || defaultRelationComponents.length < CATALOG_INDEX + 1
-                    || defaultRelationComponents[SCHEMA_INDEX] == null)
+            if (defaultRelationComponents == null || defaultRelationComponents.length < 3
+                    || defaultRelationComponents[1] == null)
                 throw new MetadataExtractionException("Unable to obtain the default schema: make sure the connection URL is complete " + Arrays.toString(defaultRelationComponents));
-            if (defaultRelationComponents[CATALOG_INDEX] == null)
+            if (defaultRelationComponents[0] == null)
                 throw new MetadataExtractionException("Unable to obtain the default catalog: make sure the connection URL is complete " + Arrays.toString(defaultRelationComponents));
 
             RelationID id = rawIdFactory.createRelationID(defaultRelationComponents);
