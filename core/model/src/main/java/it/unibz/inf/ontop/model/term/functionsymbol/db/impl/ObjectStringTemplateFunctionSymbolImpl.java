@@ -45,7 +45,11 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     private final Pattern patternForUuid;
 
     protected ObjectStringTemplateFunctionSymbolImpl(ImmutableList<Template.Component> components, TypeFactory typeFactory) {
-        super(getTemplateString(components), createBaseTypes(components, typeFactory));
+        this(components, "", typeFactory);
+    }
+
+    protected ObjectStringTemplateFunctionSymbolImpl(ImmutableList<Template.Component> components, String suffix, TypeFactory typeFactory) {
+        super(getTemplateString(components) + suffix, createBaseTypes(components, typeFactory));
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
         this.components = components;
         this.safeSeparatorFragments = SafeSeparatorFragment.split(TemplateParser.getEncodedTemplateString(components));

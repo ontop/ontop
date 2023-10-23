@@ -1,17 +1,20 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.QueryContextSimplifiableFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import javax.annotation.Nullable;
 import java.util.function.Function;
 
 public class BnodeStringTemplateFunctionSymbolWithoutSalt extends ObjectStringTemplateFunctionSymbolImpl
-        implements BnodeStringTemplateFunctionSymbol {
+        implements BnodeStringTemplateFunctionSymbol, QueryContextSimplifiableFunctionSymbol {
 
     private BnodeStringTemplateFunctionSymbolWithoutSalt(ImmutableList<Template.Component> template, TypeFactory typeFactory) {
         super(template, typeFactory);
@@ -61,5 +64,17 @@ public class BnodeStringTemplateFunctionSymbolWithoutSalt extends ObjectStringTe
     public static BnodeStringTemplateFunctionSymbol createFunctionSymbol(ImmutableList<Template.Component> template,
                                                                          TypeFactory typeFactory) {
         return new BnodeStringTemplateFunctionSymbolWithoutSalt(template, typeFactory);
+    }
+
+    @Override
+    public ImmutableFunctionalTerm simplifyWithContext(ImmutableList<ImmutableTerm> terms, @Nullable QueryContext queryContext, TermFactory termFactory) {
+        if (queryContext == null)
+            return termFactory.getImmutableFunctionalTerm(this, terms);
+
+        var newFunctionSymbol = new BnodeStringTemplateFunctionSymbolWithSalt(getTemplateComponents(),
+                queryContext.getSalt(),
+                termFactory.getTypeFactory());
+
+        return termFactory.getImmutableFunctionalTerm(newFunctionSymbol, terms);
     }
 }

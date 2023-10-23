@@ -16,8 +16,12 @@ import java.util.function.Function;
 public class BnodeStringTemplateFunctionSymbolWithSalt extends ObjectStringTemplateFunctionSymbolImpl
         implements BnodeStringTemplateFunctionSymbol {
 
-    private BnodeStringTemplateFunctionSymbolWithSalt(ImmutableList<Template.Component> template, TypeFactory typeFactory) {
-        super(template, typeFactory);
+    private final byte[] salt;
+
+    protected BnodeStringTemplateFunctionSymbolWithSalt(ImmutableList<Template.Component> template, byte[] salt,
+                                                        TypeFactory typeFactory) {
+        super(template, "-salted", typeFactory);
+        this.salt = salt;
     }
 
     @Override
@@ -25,9 +29,6 @@ public class BnodeStringTemplateFunctionSymbolWithSalt extends ObjectStringTempl
                                                               TermFactory termFactory,
                                                               VariableNullability variableNullability) {
         String originalLabel = buildString(newTerms, termFactory, variableNullability);
-        // TODO: get it from
-        byte[] salt = new byte[20];
-
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-1");
             md.update(salt);
@@ -46,11 +47,5 @@ public class BnodeStringTemplateFunctionSymbolWithSalt extends ObjectStringTempl
                                     TermFactory termFactory) {
         String labelSQLExpression = super.getNativeDBString(terms, termConverter, termFactory);
         throw new RuntimeException("TODO: implement hashing with salt");
-    }
-
-    public static BnodeStringTemplateFunctionSymbol createFunctionSymbol(ImmutableList<Template.Component> template,
-                                                                         TypeFactory typeFactory) {
-        // TODO: add salt
-        return new BnodeStringTemplateFunctionSymbolWithSalt(template, typeFactory);
     }
 }
