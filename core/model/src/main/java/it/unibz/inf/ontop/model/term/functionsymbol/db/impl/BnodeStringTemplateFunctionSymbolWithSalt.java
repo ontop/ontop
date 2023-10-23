@@ -46,18 +46,23 @@ public class BnodeStringTemplateFunctionSymbolWithSalt extends ObjectStringTempl
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter,
                                     TermFactory termFactory) {
-        DBConstant currentTermPlaceholder = termFactory.getDBStringConstant(UUID.randomUUID().toString());
-        String labelSQLExpression = super.getNativeDBString(terms, termConverter, termFactory);
 
-        Function<ImmutableTerm, String> newConverter = t -> t == currentTermPlaceholder
-                ? labelSQLExpression
-                : termConverter.apply(t);
+        var newFunctionSymbol = new ObjectStringTemplateFunctionSymbolImpl(getTemplateComponents(), termFactory.getTypeFactory()) {
+
+            @Override
+            public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+                return super.getNativeDBString(terms, termConverter, termFactory);
+            }
+        };
+
+        var bnodeTemplateBeforeHashing = termFactory.getImmutableFunctionalTerm(newFunctionSymbol, terms);
 
         ImmutableFunctionalTerm newTerm = termFactory.getDBSha256(termFactory.getNullRejectingDBConcatFunctionalTerm(
                 ImmutableList.of(
                         termFactory.getDBStringConstant(salt.toString()),
-                        currentTermPlaceholder)));
+                        bnodeTemplateBeforeHashing)));
 
-        return newConverter.apply(newTerm);
+        return termConverter.apply(newTerm);
     }
 }
