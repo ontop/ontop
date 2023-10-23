@@ -132,13 +132,6 @@ public abstract class AbstractOntopQuery<Q extends ParsedQuery> implements Query
         return initialParsedQuery;
     }
 
-    protected byte[] generateSalt() {
-        SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[20];
-        random.nextBytes(salt);
-        return salt;
-    }
-
     protected ImmutableMultimap<String, String> getHttpHeaders() {
         return httpHeaders;
     }

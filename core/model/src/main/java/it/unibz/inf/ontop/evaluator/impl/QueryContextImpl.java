@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
+import java.security.SecureRandom;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -23,6 +24,7 @@ public class QueryContextImpl implements QueryContext {
     @Nullable
     private final String username;
     private final ImmutableSet<String> rolesOrGroups;
+    private final byte[] salt;
 
     @AssistedInject
     protected QueryContextImpl(@Assisted ImmutableMap<String, String> normalizedHttpHeaders,
@@ -40,6 +42,10 @@ public class QueryContextImpl implements QueryContext {
             username = null;
             rolesOrGroups = ImmutableSet.of();
         }
+
+        SecureRandom random = new SecureRandom();
+        this.salt = new byte[20];
+        random.nextBytes(salt);
     }
 
     @Override
@@ -58,6 +64,11 @@ public class QueryContextImpl implements QueryContext {
         if (o == null || getClass() != o.getClass()) return false;
         QueryContextImpl that = (QueryContextImpl) o;
         return Objects.equals(username, that.username) && Objects.equals(rolesOrGroups, that.rolesOrGroups);
+    }
+
+    @Override
+    public byte[] getSalt() {
+        return salt;
     }
 
     @Override

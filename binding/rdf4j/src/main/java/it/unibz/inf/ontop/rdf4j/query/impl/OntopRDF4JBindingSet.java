@@ -24,12 +24,9 @@ import java.util.stream.Collectors;
 public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingSet {
 
     private final OntopBindingSet ontopBindingSet;
-    private final byte[] salt;
 
-    public OntopRDF4JBindingSet(OntopBindingSet ontopBindingSet,
-                                byte[] salt) {
+    public OntopRDF4JBindingSet(OntopBindingSet ontopBindingSet) {
         this.ontopBindingSet = ontopBindingSet;
-        this.salt = salt;
     }
 
     @Override
@@ -53,7 +50,7 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
             final RDFConstant constant = ontopBindingSet.getConstant(variableName);
             return constant == null?
                     null:
-                    RDF4JHelper.getValue(constant, salt);
+                    RDF4JHelper.getValue(constant);
         } catch (OntopResultConversionException e) {
             throw new RuntimeException(e);
         }
@@ -77,7 +74,7 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
 //        try {
             return new SimpleBinding(
                     ontopBinding.getName(),
-                    RDF4JHelper.getValue(ontopBinding.getValue(), salt)
+                    RDF4JHelper.getValue(ontopBinding.getValue())
             );
 //        } catch (OntopResultConversionException e) {
 //            throw new RuntimeException(e);

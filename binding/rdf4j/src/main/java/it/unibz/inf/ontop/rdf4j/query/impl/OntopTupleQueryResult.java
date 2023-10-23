@@ -13,12 +13,10 @@ import org.eclipse.rdf4j.query.TupleQueryResult;
 
 public class OntopTupleQueryResult implements TupleQueryResult {
 
-	private final byte[] salt;
 	private final TupleResultSet res;
 	private final List<String> signature;
 
-	public OntopTupleQueryResult(TupleResultSet res, List<String> signature, byte[] salt) {
-		this.salt = salt;
+	public OntopTupleQueryResult(TupleResultSet res, List<String> signature) {
 		this.res = Objects.requireNonNull(res);
 		this.signature = signature;
 	}
@@ -44,7 +42,7 @@ public class OntopTupleQueryResult implements TupleQueryResult {
 	@Override
 	public BindingSet next() throws QueryEvaluationException {
         try {
-            return new OntopRDF4JBindingSet(res.next(), salt);
+            return new OntopRDF4JBindingSet(res.next());
         } catch (OntopConnectionException | OntopResultConversionException e) {
             throw new QueryEvaluationException(e);
 		}

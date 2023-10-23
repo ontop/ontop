@@ -15,6 +15,8 @@ public interface QueryContext {
 
     ImmutableSet<String> getRolesOrGroups();
 
+    byte[] getSalt();
+
     interface Factory {
         QueryContext create(ImmutableMap<String, String> normalizedHttpHeaders);
     }

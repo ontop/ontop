@@ -22,11 +22,9 @@ public class OntopOWLBindingSet implements OWLBindingSet {
 
     private final OntopBindingSet ontopBindingSet;
     private final OWLAPIIndividualTranslator translator;
-    private final byte[] salt;
 
-    public OntopOWLBindingSet(OntopBindingSet ontopBindingSet, byte[] salt) {
+    public OntopOWLBindingSet(OntopBindingSet ontopBindingSet) {
         this.ontopBindingSet = ontopBindingSet;
-        this.salt = salt;
         this.translator = new OWLAPIIndividualTranslator();
     }
 
@@ -34,7 +32,7 @@ public class OntopOWLBindingSet implements OWLBindingSet {
     @Nonnull
     public Iterator<OWLBinding> iterator() {
         return Iterators.transform(ontopBindingSet.iterator(),
-                ontopBinding -> new OntopOWLBinding(ontopBinding, translator, salt));
+                ontopBinding -> new OntopOWLBinding(ontopBinding, translator));
     }
 
     @Override
@@ -46,7 +44,7 @@ public class OntopOWLBindingSet implements OWLBindingSet {
     public OWLBinding getBinding(String bindingName) {
         OntopBinding ontopBinding = ontopBindingSet.getBinding(bindingName);
         if (ontopBinding != null) {
-            return new OntopOWLBinding(ontopBinding, translator, salt);
+            return new OntopOWLBinding(ontopBinding, translator);
         }
         return null;
     }
@@ -112,7 +110,7 @@ public class OntopOWLBindingSet implements OWLBindingSet {
 
     private OWLPropertyAssertionObject translate(Constant c) {
         if (c instanceof ObjectConstant)
-            return translator.translate((ObjectConstant) c, salt);
+            return translator.translate((ObjectConstant) c);
         else
             return translator.translate((RDFLiteralConstant) c);
     }
