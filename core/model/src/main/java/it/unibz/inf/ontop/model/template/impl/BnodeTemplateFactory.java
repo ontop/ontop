@@ -15,7 +15,7 @@ public class BnodeTemplateFactory extends ObjectTemplateFactory {
 
     @Override
     public NonVariableTerm getConstant(String constant) {
-        return termFactory.getConstantBNode(constant);
+        throw new IllegalArgumentException("B-node constants should not be constructed in mappings (illegal in R2RML)");
     }
 
     @Override
@@ -25,13 +25,7 @@ public class BnodeTemplateFactory extends ObjectTemplateFactory {
 
     @Override
     public NonVariableTerm getTemplateTerm(ImmutableList<Template.Component> components) {
-        int size = components.size();
-        if (size == 0)
-            return getConstant("");
-
-        if (size == 1 && !components.get(0).isColumnNameReference())
-            return getConstant(components.get(0).getComponent());
-
+        // Bnode constants coming from the mapping (only OBDA; illegal in R2RML) are converted into templates
         return termFactory.getBnodeFunctionalTerm(components, getTemplateTerms(components));
     }
 
