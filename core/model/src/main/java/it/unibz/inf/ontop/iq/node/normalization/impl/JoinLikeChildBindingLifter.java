@@ -79,7 +79,7 @@ public class JoinLikeChildBindingLifter {
         Substitution<VariableOrGroundTerm> descendingSubstitution =
                 substitutionFactory.onVariableOrGroundTerms().compose(
                         expressionResults.getSubstitution(),
-                        substitutionFactory.union(freshRenaming, downPropagableFragment));
+                        substitutionFactory.union(freshRenaming, downPropagableFragment.removeFromDomain(freshRenaming.getDomain())));
 
         return bindingLiftConverter.convert(children, selectedGrandChild, selectedChildPosition, newCondition,
                 naiveAscendingSubstitution, descendingSubstitution);
