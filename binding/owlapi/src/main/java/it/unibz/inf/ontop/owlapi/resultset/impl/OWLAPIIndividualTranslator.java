@@ -28,10 +28,10 @@ public class OWLAPIIndividualTranslator {
 	 * does some approximation: if the property is used like an object property, then declare it as such.
 	 * Otherwise, declares it as a data property.
 	 */
-	public OWLAxiom translate(RDFFact assertion, byte[] salt) {
+	public OWLAxiom translate(RDFFact assertion) {
 		IRIConstant factProperty = assertion.getProperty();
 		ObjectConstant classOrProperty = assertion.getClassOrProperty();
-		OWLIndividual subject = translate(assertion.getSubject(), salt);
+		OWLIndividual subject = translate(assertion.getSubject());
 
 		if (assertion.getGraph().isPresent())
 			throw new MinorOntopInternalBugException("Quads are not supported by OWLAPI so that method " +
@@ -47,7 +47,7 @@ public class OWLAPIIndividualTranslator {
 
 				OWLObjectProperty property = dataFactory.getOWLObjectProperty(
 						IRI.create(factProperty.getIRI().getIRIString()));
-				OWLIndividual object = translate((ObjectConstant) assertionObject, salt);
+				OWLIndividual object = translate((ObjectConstant) assertionObject);
 				return dataFactory.getOWLObjectPropertyAssertionAxiom(property, subject, object);
 			}
 			else {
@@ -71,12 +71,12 @@ public class OWLAPIIndividualTranslator {
 	 * @param constant
 	 * @return
 	 */
-	public OWLIndividual translate(ObjectConstant constant, byte[] salt) {
+	public OWLIndividual translate(ObjectConstant constant) {
 		if (constant instanceof IRIConstant)
 			return dataFactory.getOWLNamedIndividual(IRI.create(((IRIConstant)constant).getIRI().getIRIString()));
 
 		else /*if (constant instanceof BNode)*/ 
-			return dataFactory.getOWLAnonymousIndividual(((BNode) constant).getAnonymizedLabel(salt));
+			return dataFactory.getOWLAnonymousIndividual(((BNode) constant).getLabel());
 	}
 	
 	public OWLLiteral translate(RDFLiteralConstant v) {

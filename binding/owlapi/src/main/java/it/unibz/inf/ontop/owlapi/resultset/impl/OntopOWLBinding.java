@@ -13,13 +13,11 @@ public class OntopOWLBinding implements OWLBinding {
     private final OntopBinding ontopBinding;
 
     private final OWLAPIIndividualTranslator translator;
-    private final byte[] salt;
 
 
-    public OntopOWLBinding(OntopBinding ontopBinding, OWLAPIIndividualTranslator translator, byte[] salt){
+    public OntopOWLBinding(OntopBinding ontopBinding, OWLAPIIndividualTranslator translator){
         this.ontopBinding = ontopBinding;
         this.translator = translator;
-        this.salt = salt;
     }
 
     @Override
@@ -36,7 +34,7 @@ public class OntopOWLBinding implements OWLBinding {
     // TODO(xiao): duplicated code
     private OWLPropertyAssertionObject translate(Constant c) {
         if (c instanceof ObjectConstant)
-            return translator.translate((ObjectConstant) c, salt);
+            return translator.translate((ObjectConstant) c);
         else
             return translator.translate((RDFLiteralConstant) c);
     }

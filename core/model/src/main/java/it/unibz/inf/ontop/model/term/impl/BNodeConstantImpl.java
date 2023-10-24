@@ -39,20 +39,8 @@ public class BNodeConstantImpl extends AbstractNonNullConstant implements BNode 
 	}
 
 	@Override
-	public String getInternalLabel() {
+	public String getLabel() {
 		return name;
-	}
-
-	@Override
-	public String getAnonymizedLabel(byte[] salt) {
-		try {
-			MessageDigest md = MessageDigest.getInstance("SHA-1");
-			md.update(salt);
-			md.update(name.getBytes());
-			return Hex.encodeHexString(md.digest());
-		} catch (NoSuchAlgorithmException e) {
-			throw new MinorOntopInternalBugException(e.getMessage());
-		}
 	}
 
 	@Override

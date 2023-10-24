@@ -580,7 +580,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     @Override
     public BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(ImmutableList<Template.Component> bnodeTemplate) {
         return bnodeTemplateMap.computeIfAbsent(bnodeTemplate,
-                        t -> BnodeStringTemplateFunctionSymbolImpl.createFunctionSymbol(bnodeTemplate, typeFactory));
+                        t -> BnodeStringTemplateFunctionSymbolWithoutSalt.createFunctionSymbol(bnodeTemplate, typeFactory));
     }
 
     @Override
