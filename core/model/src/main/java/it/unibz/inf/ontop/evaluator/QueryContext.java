@@ -16,6 +16,10 @@ public interface QueryContext {
 
     ImmutableSet<String> getRolesOrGroups();
 
+    ImmutableSet<String> getRoles();
+
+    ImmutableSet<String> getGroups();
+
     UUID getSalt();
 
     interface Factory {

@@ -391,6 +391,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol ontopUserSymbol = new OntopUserFunctionSymbolImpl(dbBooleanType);
         builder.put(OntopUserFunctionSymbolImpl.ONTOP_USER, 0, ontopUserSymbol);
 
+        DBFunctionSymbol ontopContainsRoleFunctionSymbol = new OntopContainsRoleFunctionSymbol(dbStringType, dbBooleanType);
+        builder.put(OntopContainsRoleFunctionSymbol.ONTOP_CONTAINS_ROLE, 1, ontopContainsRoleFunctionSymbol);
+
+        DBFunctionSymbol ontopContainsGroupFunctionSymbol = new OntopContainsGroupFunctionSymbol(dbStringType, dbBooleanType);
+        builder.put(OntopContainsGroupFunctionSymbol.ONTOP_CONTAINS_GROUP, 1, ontopContainsGroupFunctionSymbol);
+
         DBFunctionSymbol ontopContainsRoleOrGroupFunctionSymbol = new OntopContainsRoleOrGroupFunctionSymbol(dbStringType,
                 dbBooleanType);
         builder.put(OntopContainsRoleOrGroupFunctionSymbol.ONTOP_CONTAINS_ROLE_OR_GROUP, 1,
@@ -1207,6 +1213,18 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBFunctionSymbol getOntopUser() {
         return getRegularDBFunctionSymbol(OntopUserFunctionSymbolImpl.ONTOP_USER, 0);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getOntopContainsRole() {
+        return (DBBooleanFunctionSymbol)
+                getRegularDBFunctionSymbol(OntopContainsRoleFunctionSymbol.ONTOP_CONTAINS_ROLE, 1);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getOntopContainsGroup() {
+        return (DBBooleanFunctionSymbol)
+                getRegularDBFunctionSymbol(OntopContainsGroupFunctionSymbol.ONTOP_CONTAINS_GROUP, 1);
     }
 
     @Override
