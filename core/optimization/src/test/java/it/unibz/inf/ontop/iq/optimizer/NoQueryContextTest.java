@@ -24,6 +24,30 @@ public class NoQueryContextTest {
     }
 
     @Test
+    public void testRole() {
+        var iqTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(
+                        TERM_FACTORY.getImmutableExpression(
+                                TERM_FACTORY.getDBFunctionSymbolFactory().getOntopContainsRole(),
+                                TERM_FACTORY.getDBStringConstant("admin"))),
+                IQ_FACTORY.createTrueNode());
+
+        optimizeAndCompare(iqTree, iqTree);
+    }
+
+    @Test
+    public void testGroup() {
+        var iqTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(
+                        TERM_FACTORY.getImmutableExpression(
+                                TERM_FACTORY.getDBFunctionSymbolFactory().getOntopContainsGroup(),
+                                TERM_FACTORY.getDBStringConstant("admin"))),
+                IQ_FACTORY.createTrueNode());
+
+        optimizeAndCompare(iqTree, iqTree);
+    }
+
+    @Test
     public void testGroupOrRole() {
         var iqTree = IQ_FACTORY.createUnaryIQTree(
                 IQ_FACTORY.createFilterNode(

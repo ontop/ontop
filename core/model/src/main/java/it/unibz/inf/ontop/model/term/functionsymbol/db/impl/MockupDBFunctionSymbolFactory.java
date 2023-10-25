@@ -670,6 +670,16 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    public DBBooleanFunctionSymbol getOntopContainsRole() {
+        return new OntopContainsRoleFunctionSymbol(dbStringType, dbBooleanType);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getOntopContainsGroup() {
+        return new OntopContainsGroupFunctionSymbol(dbStringType, dbBooleanType);
+    }
+
+    @Override
     public DBBooleanFunctionSymbol getOntopContainsRoleOrGroup() {
         return new OntopContainsRoleOrGroupFunctionSymbol(dbStringType, dbBooleanType);
     }

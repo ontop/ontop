@@ -915,6 +915,24 @@ public class ExpressionParserTest {
     }
 
     @Test
+    public void ontop_contains_role_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE ontop_contains_role('admin')", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getOntopContainsRole(), TERM_FACTORY.getDBStringConstant("admin")), translation.get(0));
+    }
+
+    @Test
+    public void ontop_contains_group_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE ontop_contains_group('admin')", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getOntopContainsGroup(), TERM_FACTORY.getDBStringConstant("admin")), translation.get(0));
+    }
+
+    @Test
     public void ontop_contains_role_or_group_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE ontop_contains_role_or_group('admin')", ImmutableMap.of(

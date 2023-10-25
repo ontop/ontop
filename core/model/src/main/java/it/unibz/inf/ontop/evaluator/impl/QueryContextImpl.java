@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.evaluator.impl;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.QueryContext;
@@ -13,7 +14,6 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 public class QueryContextImpl implements QueryContext {
 
@@ -23,7 +23,8 @@ public class QueryContextImpl implements QueryContext {
 
     @Nullable
     private final String username;
-    private final ImmutableSet<String> rolesOrGroups;
+    private final ImmutableSet<String> roles;
+    private final ImmutableSet<String> groups;
     private final UUID salt;
 
     @AssistedInject
@@ -33,14 +34,18 @@ public class QueryContextImpl implements QueryContext {
             var commaSplitter = Splitter.on(",");
             // TODO: validate user name
             username = normalizedHttpHeaders.get(USER_HTTP_HEADER_LOWERCASE);
-            rolesOrGroups = Stream.of(GROUPS_HTTP_HEADER_LOWERCASE, ROLES_HTTP_HEADER_LOWERCASE)
-                    .flatMap(h -> Optional.ofNullable(normalizedHttpHeaders.get(h)).stream())
+            roles = Optional.ofNullable(normalizedHttpHeaders.get(ROLES_HTTP_HEADER_LOWERCASE)).stream()
+                    .flatMap(commaSplitter::splitToStream)
+                    .collect(ImmutableCollectors.toSet());
+
+            groups = Optional.ofNullable(normalizedHttpHeaders.get(GROUPS_HTTP_HEADER_LOWERCASE)).stream()
                     .flatMap(commaSplitter::splitToStream)
                     .collect(ImmutableCollectors.toSet());
         }
         else {
             username = null;
-            rolesOrGroups = ImmutableSet.of();
+            roles = ImmutableSet.of();
+            groups = ImmutableSet.of();
         }
 
         this.salt = UUID.randomUUID();
@@ -53,7 +58,17 @@ public class QueryContextImpl implements QueryContext {
 
     @Override
     public ImmutableSet<String> getRolesOrGroups() {
-        return rolesOrGroups;
+        return Sets.union(roles, groups).immutableCopy();
+    }
+
+    @Override
+    public ImmutableSet<String> getRoles() {
+        return roles;
+    }
+
+    @Override
+    public ImmutableSet<String> getGroups() {
+        return groups;
     }
 
     @Override
@@ -61,7 +76,7 @@ public class QueryContextImpl implements QueryContext {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         QueryContextImpl that = (QueryContextImpl) o;
-        return Objects.equals(username, that.username) && Objects.equals(rolesOrGroups, that.rolesOrGroups);
+        return Objects.equals(username, that.username) && Objects.equals(roles, that.roles) && Objects.equals(groups, that.groups);
     }
 
     @Override
@@ -71,6 +86,6 @@ public class QueryContextImpl implements QueryContext {
 
     @Override
     public int hashCode() {
-        return Objects.hash(username, rolesOrGroups);
+        return Objects.hash(username, roles, groups);
     }
 }
