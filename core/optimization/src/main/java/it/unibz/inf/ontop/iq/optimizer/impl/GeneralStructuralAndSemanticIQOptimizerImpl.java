@@ -72,11 +72,12 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         IQ current = pushedIntoDistinct;
         do {
             long beginningAuthorizationEvaluation = System.currentTimeMillis();
-            current = authorizationFunctionEvaluator.optimize(current, queryContext);
-
-            LOGGER.debug("New query after evaluation authorization functions ({} ms):\n{}\n",
-                    System.currentTimeMillis() - beginningAuthorizationEvaluation,
-                    current);
+            if (queryContext != null) {
+                current = authorizationFunctionEvaluator.optimize(current, queryContext);
+                LOGGER.debug("New query after evaluation authorization functions ({} ms):\n{}\n",
+                        System.currentTimeMillis() - beginningAuthorizationEvaluation,
+                        current);
+            }
 
             long beginningJoinLike = System.currentTimeMillis();
             current = joinLikeOptimizer.optimize(current);
@@ -100,8 +101,11 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
 
         } while (true);
 
-        IQ queryAfterContextualSimplification = allQueryContextFunctionSymbolEvaluator.optimize(current, queryContext);
-        LOGGER.debug("New query after simplifying using the context:\n{}\n", queryAfterContextualSimplification);
+        IQ queryAfterContextualSimplification = queryContext == null
+                ? current
+                : allQueryContextFunctionSymbolEvaluator.optimize(current, queryContext);
+        if (queryContext != null)
+            LOGGER.debug("New query after simplifying using the context:\n{}\n", queryAfterContextualSimplification);
 
         IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(queryAfterContextualSimplification);
         LOGGER.debug("New query after simplifying the aggregation node:\n{}\n", queryAfterAggregationSimplification);

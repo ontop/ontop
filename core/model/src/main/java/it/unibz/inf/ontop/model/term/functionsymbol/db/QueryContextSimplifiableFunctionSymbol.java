@@ -6,10 +6,14 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 
 public interface QueryContextSimplifiableFunctionSymbol extends FunctionSymbol {
 
-    ImmutableTerm simplifyWithContext(ImmutableList<ImmutableTerm> terms, @Nullable QueryContext queryContext,
-                                                TermFactory termFactory);
+    /**
+     * This simplification is applied only in the presence of the query context.
+     * No query context, no simplification.
+     */
+    ImmutableTerm simplifyWithContext(ImmutableList<ImmutableTerm> terms, @Nonnull QueryContext queryContext,
+                                      TermFactory termFactory);
 }

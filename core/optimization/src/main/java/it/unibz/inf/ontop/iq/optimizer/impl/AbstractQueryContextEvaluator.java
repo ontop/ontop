@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.QueryContextSimplifiableFunctionSymbol;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.Predicate;
 
@@ -27,7 +28,10 @@ public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
     }
 
     @Override
-    public IQ optimize(IQ iq, @Nullable QueryContext queryContext) {
+    public IQ optimize(IQ iq, @Nonnull QueryContext queryContext) {
+        if (queryContext == null)
+            throw new IllegalArgumentException("The query context must not be null");
+
         var transformer = new QueryContextFunctionTransformer(queryContext, coreSingletons, functionSymbolPredicate);
 
         var initialTree = iq.getTree();
@@ -40,11 +44,10 @@ public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
 
     protected static class QueryContextFunctionTransformer extends AbstractExpressionTransformer {
 
-        @Nullable
         private final QueryContext queryContext;
         private final Predicate<FunctionSymbol> functionSymbolPredicate;
 
-        protected QueryContextFunctionTransformer(@Nullable QueryContext queryContext, CoreSingletons coreSingletons,
+        protected QueryContextFunctionTransformer(QueryContext queryContext, CoreSingletons coreSingletons,
                                                   Predicate<FunctionSymbol> functionSymbolPredicate) {
             super(coreSingletons.getIQFactory(), coreSingletons.getUniqueTermTypeExtractor(), coreSingletons.getTermFactory());
             this.queryContext = queryContext;
