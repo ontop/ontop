@@ -380,6 +380,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 abstractRootDBType);
         builder.put(ST_SETSRID, 2, setsridSymbol);
 
+        DBFunctionSymbol transformSymbol = new GeoDBTypedFunctionSymbol(ST_TRANSFORM, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_TRANSFORM, 2, transformSymbol);
+
         DBFunctionSymbol geomfromtextSymbol = new GeoDBTypedFunctionSymbol(ST_GEOMFROMTEXT, 1, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_GEOMFROMTEXT, 1, geomfromtextSymbol);
