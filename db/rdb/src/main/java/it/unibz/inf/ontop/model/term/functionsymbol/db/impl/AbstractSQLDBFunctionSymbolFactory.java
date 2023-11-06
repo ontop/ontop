@@ -328,7 +328,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 abstractRootDBType);
         builder.put(ST_DISTANCE_SPHEROID, 3, distanceSpheroidFunctionSymbol);
 
-        DBFunctionSymbol asTextSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_ASTEXT, 1, dbStringType, false,
+        DBFunctionSymbol asTextSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_ASTEXT, 1, dbStringType, true,
                 abstractRootDBType);
         builder.put(ST_ASTEXT, 1, asTextSymbol);
 

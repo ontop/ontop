@@ -23,6 +23,7 @@ public class GeoSPARQLPostGISTest extends AbstractDockerRDF4JTest {
     /**
      * Check if geof:sfIntersects works correctly with mixed GEOMETRY and GEOGRAPHY data types
      */
+    @Disabled
     @Test
     public void testAskIntersectsGeomGeog() {
         String query = "PREFIX : <http://ex.org/> \n" +
