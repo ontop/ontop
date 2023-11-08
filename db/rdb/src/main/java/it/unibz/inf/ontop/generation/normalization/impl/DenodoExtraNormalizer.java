@@ -15,29 +15,36 @@ public class DenodoExtraNormalizer implements DialectExtraNormalizer {
     private final AlwaysProjectOrderByTermsNormalizer alwaysProjectOrderByTermsNormalizer;
     private final ConvertValuesToUnionNormalizer toUnionNormalizer;
     private final AlwaysPushProjectedOrderByTermsNormalizer pushProjectedOrderByTermsNormalizer;
+    private final SubQueryFromComplexLeftJoinExtraNormalizer complexLeftJoinNormalizer;
+
     @Inject
     protected DenodoExtraNormalizer(AlwaysProjectOrderByTermsNormalizer alwaysProjectOrderByTermsNormalizer,
                                     ConvertValuesToUnionNormalizer toUnionNormalizer, AlwaysPushProjectedOrderByTermsNormalizer pushProjectedOrderByTermsNormalizer,
                                     SplitIsNullOverConjunctionDisjunctionNormalizer splitIsNullOverConjunctionDisjunctionNormalizer,
-                                    EliminateLimitsFromSubQueriesNormalizer eliminateLimitsFromSubQueriesNormalizer) {
+                                    EliminateLimitsFromSubQueriesNormalizer eliminateLimitsFromSubQueriesNormalizer,
+                                    SubQueryFromComplexLeftJoinExtraNormalizer complexLeftJoinNormalizer) {
         this.alwaysProjectOrderByTermsNormalizer = alwaysProjectOrderByTermsNormalizer;
         this.toUnionNormalizer = toUnionNormalizer;
         this.pushProjectedOrderByTermsNormalizer = pushProjectedOrderByTermsNormalizer;
         this.splitIsNullOverConjunctionDisjunctionNormalizer = splitIsNullOverConjunctionDisjunctionNormalizer;
         this.eliminateLimitsFromSubQueriesNormalizer = eliminateLimitsFromSubQueriesNormalizer;
+        this.complexLeftJoinNormalizer = complexLeftJoinNormalizer;
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
         return eliminateLimitsFromSubQueriesNormalizer.transform(
-            splitIsNullOverConjunctionDisjunctionNormalizer.transform(
-                    pushProjectedOrderByTermsNormalizer.transform(
-                            toUnionNormalizer.transform(
-                                    alwaysProjectOrderByTermsNormalizer.transform(tree, variableGenerator),
-                                    variableGenerator),
-                            variableGenerator),
-                    variableGenerator),
-            variableGenerator);
+                splitIsNullOverConjunctionDisjunctionNormalizer.transform(
+                        pushProjectedOrderByTermsNormalizer.transform(
+                                complexLeftJoinNormalizer.transform(
+                                        toUnionNormalizer.transform(
+                                                alwaysProjectOrderByTermsNormalizer.transform(tree, variableGenerator),
+                                                variableGenerator),
+                                        variableGenerator),
+                                variableGenerator),
+                        variableGenerator),
+                variableGenerator);
     }
+
 }
 
