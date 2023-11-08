@@ -1667,6 +1667,13 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                                         label = true;
                                     }
                                 }
+                                ///new added part----------------------------------------------------------
+                                else if((arg_left.get(f) instanceof GroundTerm)&&(arg_right.get(h) instanceof GroundTerm)&&(arg_left.get(f).equals(arg_right.get(h)))){ // new added condition for A(a) JOIN B(a) empty when A(x) JOIN B(x) empty
+                                    if(hints.get(2).contains(name_left+"<>"+name_right+"<>"+f+"<>"+h)||hints.get(2).contains(name_right+"<>"+name_left+"<>"+h+"<>"+f)){
+                                        label = true;
+                                    }
+                                }
+                                ///new added part----------------------------------------------------------
                             }
                         }
                     }
