@@ -18,11 +18,8 @@ public class OntopUserFunctionSymbolImpl extends AbstractDBAuthorizationFunction
     }
 
     @Override
-    public ImmutableTerm simplifyWithContext(ImmutableList<ImmutableTerm> terms, @Nullable QueryContext queryContext,
+    public ImmutableTerm simplifyWithContext(ImmutableList<ImmutableTerm> terms, QueryContext queryContext,
                                         TermFactory termFactory) {
-        if (queryContext == null)
-            return termFactory.getNullConstant();
-
         return queryContext.getUsername()
                 .map(termFactory::getDBStringConstant)
                 .map(c -> (Constant) c)

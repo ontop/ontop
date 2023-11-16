@@ -340,7 +340,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
             if (res != null) {
                 while (res.hasNext()) {
                     RDFFact as = res.next();
-                    Statement st = createStatement(as, salt);
+                    Statement st = createStatement(as);
                     if (st!=null)
                         resultBuilder.add(st);
                 }

@@ -422,5 +422,8 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBDateTrunc(String datePart);
 
     DBFunctionSymbol getOntopUser();
+
+    DBBooleanFunctionSymbol getOntopContainsRole();
+    DBBooleanFunctionSymbol getOntopContainsGroup();
     DBBooleanFunctionSymbol getOntopContainsRoleOrGroup();
 }

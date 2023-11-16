@@ -20,10 +20,8 @@ import java.util.NoSuchElementException;
 public class OntopTupleOWLResultSet implements TupleOWLResultSet {
 
 	private final TupleResultSet res;
-	private final byte[] salt;
 
-	public OntopTupleOWLResultSet(TupleResultSet res, byte[] salt) {
-		this.salt = salt;
+	public OntopTupleOWLResultSet(TupleResultSet res) {
 		if (res == null)
 			throw new IllegalArgumentException("The result set must not be null");
 		this.res = res;
@@ -69,7 +67,7 @@ public class OntopTupleOWLResultSet implements TupleOWLResultSet {
     @Override
     public OWLBindingSet next() throws OWLException {
         try {
-            return new OntopOWLBindingSet(res.next(), salt);
+            return new OntopOWLBindingSet(res.next());
         } catch (OntopConnectionException | OntopResultConversionException | NoSuchElementException e) {
             throw new OntopOWLException(e);
 		}

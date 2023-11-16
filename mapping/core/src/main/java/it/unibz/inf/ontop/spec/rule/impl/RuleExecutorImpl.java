@@ -76,7 +76,7 @@ public class RuleExecutorImpl implements RuleExecutor {
     }
 
     private Optional<IQ> optimize(IQ rule) {
-        IQ optimizedRule = generalStructuralAndSemanticIQOptimizer.optimize(rule);
+        IQ optimizedRule = generalStructuralAndSemanticIQOptimizer.optimize(rule, null);
         if (optimizedRule.getTree().isDeclaredAsEmpty()) {
             LOGGER.warn("The following rule does not produce any result:\n{}", rule);
             return Optional.empty();

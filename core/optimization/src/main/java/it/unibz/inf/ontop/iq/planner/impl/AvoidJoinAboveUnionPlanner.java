@@ -86,7 +86,7 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
         return liftedQuery.equals(query)
                 ? query
                 // Re-applies the structural and semantic optimizations
-                : generalOptimizer.optimize(liftedQuery);
+                : generalOptimizer.optimize(liftedQuery, null);
     }
 
     protected IQ lift(IQ query) {

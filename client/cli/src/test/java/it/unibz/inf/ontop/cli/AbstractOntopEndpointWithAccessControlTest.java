@@ -103,7 +103,7 @@ public abstract class AbstractOntopEndpointWithAccessControlTest {
                 ImmutableMap.of(
                         "x-user", "joe",
                         "x-roles", "reader",
-                        "x-groups", "librarian"
+                        "x-groups", "librarians"
                 ));
         repo.init();
 

@@ -14,6 +14,8 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
+import java.util.Optional;
+
 import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.DistanceUnit.*;
 import static java.lang.Math.PI;
 
@@ -40,7 +42,7 @@ public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolI
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
         DBMathBinaryOperator times = dbFunctionSymbolFactory.getDBMathBinaryOperator("*", dbTypeFactory.getDBDoubleType());
 
-        ImmutableTerm geom = wktLiteralValue.getGeometry();
+        ImmutableTerm geom = unwrapSTAsText(wktLiteralValue.getGeometry());
 
         // ST_AsTexT(ST_BUFFER(geom, distance))
         if (inputUnit == DEGREE && distanceUnit == METRE) {
@@ -80,6 +82,19 @@ public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolI
                             inputUnit, distanceUnit));
         }
 
+    }
+
+    // if term is ST_ASTEXT(arg), returns arg, otherwise the term itself
+    private ImmutableTerm unwrapSTAsText(ImmutableTerm term) {
+        return Optional.of(term)
+                // term is a function
+                .filter(t -> t instanceof ImmutableFunctionalTerm).map(ImmutableFunctionalTerm.class::cast)
+                // the function symbol is ST_ASTEXT
+                .filter(t -> t.getFunctionSymbol().getName().startsWith("ST_ASTEXT"))
+                // extract the 0-th argument
+                .map(t -> t.getTerm(0))
+                // otherwise the term itself
+                .orElse(term);
     }
 
 }

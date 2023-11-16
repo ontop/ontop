@@ -79,6 +79,6 @@ public class DefaultOntopOWLAPIMaterializer implements OntopOWLAPIMaterializer {
 		SecureRandom random = new SecureRandom();
 		byte[] salt = new byte[20];
 		random.nextBytes(salt);
-		return new OntopMaterializedGraphOWLResultSet(graphResultSet, salt);
+		return new OntopMaterializedGraphOWLResultSet(graphResultSet);
 	}
 }
