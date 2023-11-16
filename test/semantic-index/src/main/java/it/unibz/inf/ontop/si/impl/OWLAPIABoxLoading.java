@@ -88,7 +88,11 @@ public class OWLAPIABoxLoading {
             // removing ABox from the current ontology does not remove it from the closure
             // so, the ABox assertions of the closure will remain
             OWLOntology tbox = newManager.copyOntology(ontology, OntologyCopy.SHALLOW);
-            newManager.removeAxioms(tbox, tbox.getABoxAxioms(Imports.EXCLUDED));
+            // FIXME: reimplement this
+            // newManager.removeAxioms has different signature in OWLAPI 4 and 5
+            // in v4: OWLOntologyManager.removeAxioms(OWLOntology, Set<OWLAxiom>)
+            // in v5: OWLOntologyManager.removeAxioms(OWLOntology, Collection<OWLAxiom>)
+            // newManager.removeAxioms(tbox, tbox.getABoxAxioms(Imports.EXCLUDED));
             return  tbox;
         }
         catch (OWLOntologyCreationException e) {
