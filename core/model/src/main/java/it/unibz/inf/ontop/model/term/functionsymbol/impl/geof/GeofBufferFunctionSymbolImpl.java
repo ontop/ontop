@@ -41,6 +41,9 @@ public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolI
         DBFunctionSymbolFactory dbFunctionSymbolFactory = termFactory.getDBFunctionSymbolFactory();
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
         DBMathBinaryOperator times = dbFunctionSymbolFactory.getDBMathBinaryOperator("*", dbTypeFactory.getDBDoubleType());
+        final double EARTH_MEAN_RADIUS_METER = 6370986;
+        final double degree_metre_ratio = 180 / PI / EARTH_MEAN_RADIUS_METER;
+        final double degree_radian_ratio = 180 / PI;
 
         ImmutableTerm geom = unwrapSTAsText(wktLiteralValue.getGeometry());
 
@@ -56,26 +59,31 @@ public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolI
                         .simplify();
             } else {
                 // Less accurate
-                final double EARTH_MEAN_RADIUS_METER = 6370986;
-                final double ratio = 180 / PI / EARTH_MEAN_RADIUS_METER;
-                DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(ratio), dbTypeFactory.getDBDoubleType());
+                DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(degree_metre_ratio), dbTypeFactory.getDBDoubleType());
                 ImmutableFunctionalTerm distanceInDegree = termFactory.getImmutableFunctionalTerm(times, distance, ratioConstant);
                 return termFactory.getDBAsText(
                         termFactory.getDBBuffer(geom, distanceInDegree))
                         .simplify();
             }
-
         } else if (inputUnit == DEGREE && distanceUnit == DEGREE) {
             // ST_BUFFER
             return termFactory.getDBAsText(termFactory.getDBBuffer(geom, distance)).simplify();
         } else if (inputUnit == DEGREE && distanceUnit == RADIAN) {
-            final double ratio = 180 / PI;
-            DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(ratio), dbTypeFactory.getDBDoubleType());
+            DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(degree_radian_ratio), dbTypeFactory.getDBDoubleType());
             ImmutableFunctionalTerm distanceInDegree = termFactory.getImmutableFunctionalTerm(times, distance, ratioConstant);
             return termFactory.getDBAsText(termFactory.getDBBuffer(geom, distanceInDegree)).simplify();
         } else if (inputUnit == METRE && distanceUnit == METRE) {
             // ST_BUFFER
             return termFactory.getDBAsText(termFactory.getDBBuffer(geom, distance)).simplify();
+        } else if (inputUnit == RADIAN && distanceUnit == RADIAN) {
+            return termFactory.getDBAsText(termFactory.getDBBuffer(geom, distance)).simplify();
+        } else if (inputUnit == METRE && distanceUnit == DEGREE) {
+            // Less accurate
+            DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(1.0 / degree_metre_ratio), dbTypeFactory.getDBDoubleType());
+            ImmutableFunctionalTerm distanceInMetre = termFactory.getImmutableFunctionalTerm(times, distance, ratioConstant);
+            return termFactory.getDBAsText(
+                            termFactory.getDBBuffer(geom, distanceInMetre))
+                    .simplify();
         } else {
             throw new IllegalArgumentException(
                     String.format("Unsupported unit combination for geof:buffer. inputUnit=%s, outputUnit=%s ",

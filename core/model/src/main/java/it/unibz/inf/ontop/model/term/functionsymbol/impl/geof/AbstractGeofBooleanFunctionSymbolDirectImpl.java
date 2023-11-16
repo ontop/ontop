@@ -22,9 +22,9 @@ public abstract class AbstractGeofBooleanFunctionSymbolDirectImpl extends Abstra
         WKTLiteralValue v0 = GeoUtils.extractWKTLiteralValue(termFactory, subLexicalTerms.get(0));
         WKTLiteralValue v1 = GeoUtils.extractWKTLiteralValue(termFactory, subLexicalTerms.get(1));
 
-        if (!v0.getSRID().equals(v1.getSRID())) {
+        /*if (!v0.getSRID().equals(v1.getSRID())) {
             throw new IllegalArgumentException(String.format("SRIDs do not match: %s and %s", v0.getSRID(), v1.getSRID()));
-        }
+        }*/
 
         return getDBFunction(termFactory).apply(v0.getGeometry(), v1.getGeometry()).simplify();
     }

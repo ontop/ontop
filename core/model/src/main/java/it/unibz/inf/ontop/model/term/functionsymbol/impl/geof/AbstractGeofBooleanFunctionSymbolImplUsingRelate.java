@@ -22,9 +22,9 @@ public abstract class AbstractGeofBooleanFunctionSymbolImplUsingRelate extends A
         WKTLiteralValue v1 = GeoUtils.extractWKTLiteralValue(termFactory, subLexicalTerms.get(1));
         ImmutableTerm v2 = termFactory.getDBStringConstant(getMatrixPatternString());
 
-        if (!v0.getSRID().equals(v1.getSRID())) {
+/*        if (!v0.getSRID().equals(v1.getSRID())) {
             throw new IllegalArgumentException(String.format("SRIDs do not match: %s and %s", v0.getSRID(), v1.getSRID()));
-        }
+        }*/
 
         return termFactory.getDBRelate(v0.getGeometry(), v1.getGeometry(), v2).simplify();
 

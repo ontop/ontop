@@ -20,6 +20,11 @@ public class GeoDBBooleanFunctionSymbol extends DefaultSQLSimpleDBBooleanFunctio
     @Override
     public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableList<ImmutableTerm> simplifiedTerms = terms.stream().map(this::unwrapSTAsText).collect(ImmutableCollectors.toList());
+        if (simplifiedTerms.stream()
+                .anyMatch(t -> t instanceof ImmutableFunctionalTerm
+                        && ((ImmutableFunctionalTerm) t).getFunctionSymbol().getName().startsWith("ST_ASTEXT"))) {
+            String stop1="stop1";
+        }
         return super.simplify(simplifiedTerms, termFactory, variableNullability);
     }
 

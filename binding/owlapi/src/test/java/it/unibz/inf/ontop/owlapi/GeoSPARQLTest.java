@@ -1441,14 +1441,4 @@ public class GeoSPARQLTest {
             return ind1.getLiteral();
         }
     }
-
-    private Integer runQueryAndReturnIntegerX(String query) throws Exception {
-        try (OWLStatement st = conn.createStatement()) {
-            TupleOWLResultSet rs = st.executeSelectQuery(query);
-            assertTrue(rs.hasNext());
-            final OWLBindingSet bindingSet = rs.next();
-            OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
-            return ind1.parseInteger();
-        }
-    }
 }
