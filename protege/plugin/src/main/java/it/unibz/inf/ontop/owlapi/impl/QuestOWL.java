@@ -466,6 +466,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
     @Override
     public NodeSet<OWLClass> getSubClasses(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO: use ClassifiedTBox
         return structuralReasoner.getSubClasses(ce, direct);
 	}
 
