@@ -1,0 +1,20 @@
+[PrefixDeclaration]
+:		http://ex.org/
+xsd:    http://www.w3.org/2001/XMLSchema#
+geo:    http://www.opengis.net/ont/geosparql#
+geof:   http://www.opengis.net/def/function/geosparql/
+rdfs:   http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	geoms
+target		:geom/{"id"} a :Geom ; geo:asWKT {"geom_wkt"}^^geo:wktLiteral ; rdfs:label {"name"}^^xsd:string .
+source		SELECT id, name, ST_ASTEXT(geom) AS geom_wkt FROM "GEOMS";
+
+mappingId	newgeoms
+target		:newgeom/{"id"} a :NewGeom ; geo:asWKT {"geom_wkt"}^^geo:wktLiteral ; rdfs:label {"name"}^^xsd:string .
+source		SELECT id, name, ST_ASTEXT(geom) AS geom_wkt FROM "NEWGEOMS";
+
+mappingId	geogs
+target		:geog/{"id"} a :Geog ; geo:asWKT {"geog_wkt"}^^geo:wktLiteral ; rdfs:label {"name"}^^xsd:string .
+source		SELECT id, name, ST_ASTEXT(geog) AS geog_wkt FROM "GEOGS";
+]]

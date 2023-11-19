@@ -10,7 +10,7 @@ public class TrinoQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
 	@Override
 	protected QuotedID createFromString(String s) {
-		return createFromString(s, QUOTATION_STRING, i -> i, QUOTATION_STRING, true);
+		return createFromString(s, QUOTATION_STRING, String::toLowerCase, NO_QUOTATION, false);
 	}
 
 }

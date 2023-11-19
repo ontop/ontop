@@ -121,7 +121,7 @@
         <asset-protege.phase-prefix>disabled-</asset-protege.phase-prefix>
 
         <!-- Plugin versions -->
-        <antlr4-maven-plugin.version>4.12.0</antlr4-maven-plugin.version>
+        <antlr4-maven-plugin.version>4.13.1</antlr4-maven-plugin.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <download-maven-plugin.version>1.6.8</download-maven-plugin.version>
         <formatter-maven-plugin.version>2.22.0</formatter-maven-plugin.version>

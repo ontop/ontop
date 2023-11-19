@@ -1501,4 +1501,19 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
         return ImmutableSet.of("\"3\"^^xsd:integer");
     }
 
+    @Test
+    public void testStatisticalAggregates() {
+
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n PREFIX agg: <http://jena.apache.org/ARQ/function/aggregate#>\n"
+                + "SELECT (ROUND((agg:stdev_pop(?p) + agg:var_samp(?p)) / 0.01) / 100.0  AS ?v) WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "}";
+
+        executeAndCompareValues(query, getStatisticalAttributesExpectedResults());
+    }
+
+    protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
+        return ImmutableSet.of("\"215.34\"^^xsd:decimal");
+    }
+
 }

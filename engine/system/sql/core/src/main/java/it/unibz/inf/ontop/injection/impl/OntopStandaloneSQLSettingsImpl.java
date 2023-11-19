@@ -84,6 +84,11 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
+    public boolean isCustomSPARQLFunctionRegistrationEnabled() {
+        return getRequiredBoolean(REGISTER_CUSTON_SPARQL_AGGREGATE_FUNCTIONS);
+    }
+
+    @Override
     public long getQueryCacheMaxSize() {
         return getRequiredLong(QUERY_CACHE_MAX_SIZE);
     }

@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.AGG;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
@@ -157,6 +158,12 @@ public class RDF4JValueExprTranslator {
                 return termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getSPARQLGroupConcatFunctionSymbol(separator, aggExpr.isDistinct()),
                         term);
+            }
+            if (aggExpr instanceof AggregateFunctionCall) {
+                AggregateFunctionCall call = (AggregateFunctionCall) aggExpr;
+                if(call.getIRI().startsWith(AGG.PREFIX)) {
+                    return getAggregateFunctionalTerm(call.getIRI(), aggExpr.isDistinct(), term);
+                }
             }
             throw new RuntimeException("Unreachable: all subclasses covered");
         }

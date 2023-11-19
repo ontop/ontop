@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.dbschema.QuotedIDFactory.IDFactoryType;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -21,12 +22,12 @@ public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
     }
 
     @Override
-    public RelationID createRelationID(String... components) {
+    public RelationID createRelationID(@Nullable String... components) {
         Objects.requireNonNull(components[components.length - 1]);
 
         Stream<String> stream = components.length <= 2
-                ? Arrays.stream(components)
-                : Stream.of(Arrays.stream(components)
+                ? Arrays.stream(components).filter(Objects::nonNull)
+                : Stream.of(Arrays.stream(components).filter(Objects::nonNull)
                         .limit(components.length - 1) // first (N-1) components are the schema
                         .map(name -> name.replace("\"", "")) // remove quotes in-between
                         .collect(Collectors.joining(".")),
