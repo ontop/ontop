@@ -371,6 +371,28 @@ public class OntopEnvVarTest {
         assertEquals("example.json", envVal);
     }
 
+    @Test
+    public void testOntopEndpointWithConstraintEnv() {
+        rule.set("ONTOP_CONSTRAINT_FILE", "constraint.txt");
+        OntopCommand command = getOntopCommandCLI().parse("endpoint",
+                "-m", "example.obda",
+                "-t", "example.owl",
+                "-p", "example.properties");
+        String envVal = getEnvValues(command, "ONTOP_CONSTRAINT_FILE");
+        assertEquals("constraint.txt", envVal);
+    }
+
+    @Test
+    public void testOntopEndpointWithConstraint() {
+        OntopCommand command = getOntopCommandCLI().parse("endpoint",
+                "-m", "example.obda",
+                "-t", "example.owl",
+                "-p", "example.properties",
+                "--constraint", "constraint.txt");
+        String envVal = getEnvValues(command, "ONTOP_CONSTRAINT_FILE");
+        assertEquals("constraint.txt", envVal);
+    }
+
     /**
      * Retrieve the value of a given environment variable
      * @param object The object to retrieve the value from
