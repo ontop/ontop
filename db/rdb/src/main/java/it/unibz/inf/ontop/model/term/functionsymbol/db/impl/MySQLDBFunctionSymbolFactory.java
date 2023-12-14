@@ -208,7 +208,7 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
                                            ImmutableList<? extends ImmutableTerm> terms,
                                            Function<ImmutableTerm, String> termConverter) {
 
-        String dateTimeStringWithoutTz = String.format("REPLACE(CAST(%s AS CHAR(30)),' ', 'T')",
+        String dateTimeStringWithoutTz = String.format("REPLACE(CAST(%s AS CHAR(30) CHARACTER SET utf8),' ', 'T')",
                 termConverter.apply(terms.get(0)));
 
         return dbDateTimestampType.getName().equals(TIMESTAMP_STR)
