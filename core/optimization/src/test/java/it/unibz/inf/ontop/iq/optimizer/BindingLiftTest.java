@@ -1329,16 +1329,20 @@ public class BindingLiftTest {
         IQTree constructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, leftJoinTree);
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, constructionTree);
 
-        Variable prov = TERM_FACTORY.getVariable("prov");
         ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE2_AR2,
-                ImmutableMap.of(0, B, 1, prov));
+                ImmutableMap.of(0, B));
+
+        var subConstructionTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(ImmutableSet.of(B, PROV),
+                        SUBSTITUTION_FACTORY.getSubstitution(PROV, TERM_FACTORY.getProvenanceSpecialConstant())),
+                newDataNode2);
 
         // Expected
         BinaryNonCommutativeIQTree newLeftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
-                IQ_FACTORY.createLeftJoinNode(), dataNode1, newDataNode2);
+                IQ_FACTORY.createLeftJoinNode(), dataNode1, subConstructionTree);
 
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(D, generateIfIsNotNullElseNull(prov, ONE)));
+                SUBSTITUTION_FACTORY.getSubstitution(D, generateIfIsNotNullElseNull(PROV, ONE)));
 
         IQTree newConstructionTree = IQ_FACTORY.createUnaryIQTree(newConstructionNode, newLeftJoinTree);
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newConstructionTree);
@@ -1367,8 +1371,8 @@ public class BindingLiftTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, constructionTree);
 
         // Expected
-        ConstructionNode newRightConstruction = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B, F0),
-                SUBSTITUTION_FACTORY.getSubstitution(F0, TERM_FACTORY.getProvenanceSpecialConstant()));
+        ConstructionNode newRightConstruction = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B, PROV),
+                SUBSTITUTION_FACTORY.getSubstitution(PROV, TERM_FACTORY.getProvenanceSpecialConstant()));
 
         UnaryIQTree newRightTree = IQ_FACTORY.createUnaryIQTree(newRightConstruction, dataNode2);
 
@@ -1376,7 +1380,7 @@ public class BindingLiftTest {
                 IQ_FACTORY.createLeftJoinNode(), dataNode1, newRightTree);
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(D, generateIfIsNotNullElseNull(F0, ONE)));
+                SUBSTITUTION_FACTORY.getSubstitution(D, generateIfIsNotNullElseNull(PROV, ONE)));
 
         IQTree newConstructionTree = IQ_FACTORY.createUnaryIQTree(newRootNode, newLeftJoinTree);
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newConstructionTree);
@@ -1595,8 +1599,6 @@ public class BindingLiftTest {
                 ImmutableMap.of(0, A));
         ExtensionalDataNode dataNode2 = createExtensionalDataNode(table2Ar2, ImmutableList.of(C, D));
 
-        Variable f1 = TERM_FACTORY.getVariable("f1");
-
         UnaryIQTree leftChild = IQ_FACTORY.createUnaryIQTree(
                 IQ_FACTORY.createConstructionNode(
                         ImmutableSet.of(X),
@@ -1627,8 +1629,8 @@ public class BindingLiftTest {
 
         UnaryIQTree newRightChild = IQ_FACTORY.createUnaryIQTree(
                 IQ_FACTORY.createConstructionNode(
-                        ImmutableSet.of(A, f1),
-                        SUBSTITUTION_FACTORY.getSubstitution(f1, TERM_FACTORY.getProvenanceSpecialConstant())),
+                        ImmutableSet.of(A, PROV),
+                        SUBSTITUTION_FACTORY.getSubstitution(PROV, TERM_FACTORY.getProvenanceSpecialConstant())),
                 newDataNode2);
 
         BinaryNonCommutativeIQTree newLeftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
@@ -1642,10 +1644,10 @@ public class BindingLiftTest {
                                 URI_TEMPLATE_STR_1, ImmutableList.of(A)),
                         Y, TERM_FACTORY.getRDFFunctionalTerm(
                                 TERM_FACTORY.getIfElseNull(
-                                        TERM_FACTORY.getDBIsNotNull(f1),
+                                        TERM_FACTORY.getDBIsNotNull(PROV),
                                         TERM_FACTORY.getDBStringConstant("Hi")),
                                 TERM_FACTORY.getIfElseNull(
-                                        TERM_FACTORY.getDBIsNotNull(f1),
+                                        TERM_FACTORY.getDBIsNotNull(PROV),
                                         TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getXsdStringDatatype())))));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(
