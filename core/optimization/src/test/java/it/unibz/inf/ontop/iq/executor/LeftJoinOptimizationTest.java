@@ -1951,7 +1951,6 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
-    @Ignore("TODO: make self-left-join elimination based on FDs robust to nullable columns")
     @Test
     public void testFDOnNullableDeterminant1() {
 
@@ -1977,7 +1976,7 @@ public class LeftJoinOptimizationTest {
                 distinctNode,
                 IQ_FACTORY.createUnaryIQTree(filterNode, leftJoinTree)));
 
-        ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE_CLASSIFICATION, ImmutableMap.of(0, A, 2, B, 3, C, 4, DF0));
+        ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE_CLASSIFICATION, ImmutableMap.of(0, A, 1, B, 2, C, 3, DF0));
 
         var newTree = IQ_FACTORY.createUnaryIQTree(
                         IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
@@ -1989,7 +1988,7 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
-    @Ignore("TODO: make self-left-join elimination based on FDs robust to nullable columns")
+    @Ignore("TODO: be more rigorous with composite unique constraints and nullability")
     @Test
     public void testFDOnNullableDeterminant2() {
 
@@ -2008,7 +2007,7 @@ public class LeftJoinOptimizationTest {
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(distinctNode, leftJoinTree));
 
-        ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE_CLASSIFICATION, ImmutableMap.of(0, A, 2, B, 3, C, 4, DF0));
+        ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE_CLASSIFICATION, ImmutableMap.of(0, A, 1, B, 2, C, 3, DF0));
 
         var newTree = IQ_FACTORY.createUnaryIQTree(
                 IQ_FACTORY.createDistinctNode(),
@@ -2016,6 +2015,38 @@ public class LeftJoinOptimizationTest {
                         IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                                 SUBSTITUTION_FACTORY.getSubstitution(D, TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBIsNotNull(C), DF0))),
                         newDataNode));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newTree);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testFDOnNullableDeterminant3() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(3), ImmutableList.of(A, C, D));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE_CLASSIFICATION, ImmutableMap.of(0, A, 1, ONE, 2, C));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE_CLASSIFICATION, ImmutableMap.of(2, C,3, D));
+
+        BinaryNonCommutativeIQTree leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                dataNode1,
+                dataNode2);
+
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(
+                distinctNode,
+                leftJoinTree));
+
+        ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE_CLASSIFICATION, ImmutableMap.of(0, A, 1, ONE, 2, C, 3, DF0));
+
+        var newTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                        SUBSTITUTION_FACTORY.getSubstitution(D, TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBIsNotNull(C), DF0))),
+                newDataNode);
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newTree);
 
@@ -5018,7 +5049,6 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, IQ_FACTORY.createIQ(projectionAtom, expectedTree));
     }
 
-    @Ignore("TODO: support self-LJ on nullable FDs")
     @Test
     public void testFDOnRight1() {
 
@@ -5052,8 +5082,7 @@ public class LeftJoinOptimizationTest {
 
         optimizeAndCompare(initialIQ, IQ_FACTORY.createIQ(projectionAtom, expectedTree));
     }
-
-    @Ignore("TODO: support self-LJ on nullable FDs")
+    
     @Test
     public void testFDOnRight2() {
 
@@ -5117,7 +5146,6 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, IQ_FACTORY.createIQ(projectionAtom, newDataNode));
     }
 
-    @Ignore("TODO: support self-LJ on nullable FDs")
     @Test
     public void testFDOnRight4() {
 
