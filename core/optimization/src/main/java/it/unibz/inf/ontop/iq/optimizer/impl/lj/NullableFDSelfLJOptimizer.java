@@ -33,7 +33,9 @@ import java.util.stream.Stream;
 
 /**
  * Is cardinality-insensitive.
- * For self-left-joins on nullable determinants of FDs
+ * For self-left-joins on nullable determinants of FDs.
+ * Because some determinants may be null on the left, we cannot perform a join transfer on the left
+ * (this would filter null values of determinants). Hence, the need for a new optimization.
  *
  */
 @Singleton
@@ -295,7 +297,8 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
     }
 
     /**
-     * To be kept in sync with RequiredExtensionalDataNodeExtractor
+     * To be kept in sync with RequiredExtensionalDataNodeExtractor.
+     * Not safe to run in parallel
      */
     private static class DataNodeOnLeftReplacer extends DefaultNonRecursiveIQTreeTransformer {
 
@@ -317,7 +320,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
         }
 
         @Override
-        public synchronized IQTree transformExtensionalData(ExtensionalDataNode dataNode) {
+        public IQTree transformExtensionalData(ExtensionalDataNode dataNode) {
             if ((!found) && dataNode.equals(nodeToBeReplaced)) {
                 found = true;
                 return replacingNode;
