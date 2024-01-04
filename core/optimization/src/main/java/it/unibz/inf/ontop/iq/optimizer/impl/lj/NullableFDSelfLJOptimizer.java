@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerImpl;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -230,7 +231,17 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
         private IQTree replaceNodeOnLeft(IQTree leftChild, ExtensionalDataNode leftNode, ExtensionalDataNode newLeftNode) {
             if (leftChild.equals(leftNode))
                 return newLeftNode;
-            throw new RuntimeException("TODO: implement replacing node in non-trivial case");
+
+            if (leftNode.equals(newLeftNode))
+                return leftChild;
+
+            var replacer = new DataNodeOnLeftReplacer(iqFactory, leftNode, newLeftNode);
+            var newLeft = replacer.transform(leftChild);
+
+            if (!replacer.hasBeenReplaced())
+                throw new MinorOntopInternalBugException(String.format("Could not replace %s on the left", leftNode));
+
+            return newLeft;
         }
 
         @Override
@@ -282,4 +293,61 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
             return iqFactory.createExtensionalDataNode(leftNode.getRelationDefinition(), newArgumentMap);
         }
     }
+
+    /**
+     * To be kept in sync with RequiredExtensionalDataNodeExtractor
+     */
+    private static class DataNodeOnLeftReplacer extends DefaultNonRecursiveIQTreeTransformer {
+
+        private final IntermediateQueryFactory iqFactory;
+        private final ExtensionalDataNode nodeToBeReplaced;
+        private final ExtensionalDataNode replacingNode;
+        private boolean found;
+
+        protected DataNodeOnLeftReplacer(IntermediateQueryFactory iqFactory, ExtensionalDataNode nodeToBeReplaced,
+                                         ExtensionalDataNode replacingNode) {
+            this.iqFactory = iqFactory;
+            this.nodeToBeReplaced = nodeToBeReplaced;
+            this.replacingNode = replacingNode;
+            this.found = false;
+        }
+
+        public boolean hasBeenReplaced() {
+            return found;
+        }
+
+        @Override
+        public synchronized IQTree transformExtensionalData(ExtensionalDataNode dataNode) {
+            if ((!found) && dataNode.equals(nodeToBeReplaced)) {
+                found = true;
+                return replacingNode;
+            }
+            return dataNode;
+        }
+
+        @Override
+        public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+            if (found)
+                return tree;
+            var newLeft = transform(leftChild);
+            return newLeft.equals(leftChild)
+                    ? tree
+                    : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeft, rightChild);
+        }
+
+        @Override
+        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+            if (found)
+                return tree;
+
+            var newChildren = children.stream()
+                    .map(this::transform)
+                    .collect(ImmutableCollectors.toList());
+
+            return newChildren.equals(children)
+                    ? tree
+                    : iqFactory.createNaryIQTree(rootNode, newChildren);
+        }
+    }
+
 }

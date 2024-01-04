@@ -4407,7 +4407,6 @@ public class LeftJoinOptimizationTest {
      *   PK: 0, 1
      *   FD: 2 -> 3,4 (nullable)
      */
-    @Ignore("TODO: make self-left-join elimination based on FDs robust to nullable columns")
     @Test
     public void testProjectionAway12() {
 
