@@ -3690,6 +3690,58 @@ public class NormalizationTest {
         normalizeAndCompare(initialIQ, expectedIQ);
     }
 
+    /**
+     * CONSTRUCT [] []
+     *    SLICE limit=1
+     *       JOIN AND2(RDF_2_DB_BOOL(GEOF_SF_WITHIN(RDF(ST_SETSRID2(THE_GEOM36m2,"4326"^^TEXT),http://www.opengis.net/ont/geosparql#wktLiteral),GEOF_BUFFER(RDF(v25m16,http://www.opengis.net/ont/geosparql#wktLiteral),"3500000"^^xsd:integer,<http://www.opengis.net/def/uom/OGC/1.0/metre>))),IS_NOT_NULL(THE_GEOM36m2))
+     *          EXTENSIONAL "FEATURES"(0:"1"^^INTEGER,1:GID1m5)
+     *          EXTENSIONAL "FEATURES"(0:"2"^^INTEGER,1:GID1m11)
+     *          EXTENSIONAL "FEATURES"(1:GID1m5,2:THE_GEOM36m2)
+     *          DISTINCT
+     *             CONSTRUCT [v25m16, GID1m11] [v25m16/ST_SETSRID2(THE_GEOM36m33,"4326"^^TEXT)]
+     *                FILTER AND2(IS_NOT_NULL(GID1m11),IS_NOT_NULL(THE_GEOM36m33))
+     *                   EXTENSIONAL "FEATURES"(1:GID1m11,2:THE_GEOM36m33)
+     */
+    @Test
+    public void testLimit1AboveJoinBlockingDistinct() {
+
+        var projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(0));
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR2, ImmutableMap.of( 0, A));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE3_AR2, ImmutableMap.of( 0, A, 1, B));
+
+        var joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(
+                    dataNode1,
+                    IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(), dataNode2)));
+
+        var sliceNode = IQ_FACTORY.createSliceNode(0, 1);
+        var constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of());
+
+        var initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        constructionNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                sliceNode,
+                                joinTree
+                        )));
+
+        var newDataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE3_AR2, ImmutableMap.of( 0, A));
+        var newJoinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, newDataNode2));
+
+        var expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        constructionNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                sliceNode,
+                                newJoinTree)));
+
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
 
 
     private static void normalizeAndCompare(IQ initialIQ, IQ expectedIQ) {
