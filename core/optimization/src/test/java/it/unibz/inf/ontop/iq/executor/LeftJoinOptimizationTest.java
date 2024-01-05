@@ -1991,7 +1991,6 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
-    @Ignore("TODO: be more rigorous with composite unique constraints and nullability")
     @Test
     public void testFDOnNullableDeterminant2() {
 
