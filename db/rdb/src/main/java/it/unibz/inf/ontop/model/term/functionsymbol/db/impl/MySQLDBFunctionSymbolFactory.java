@@ -332,11 +332,11 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
         if (isMySQLVersion8OrAbove()) {
-            return String.format("CASE WHEN %1$s NOT REGEXP" + numericPattern +
+            return String.format("CASE WHEN %1$s NOT REGEXP " + numericPattern +
                             " THEN NULL ELSE CAST(%1$s + 0.0 AS DOUBLE) END",
                     term); }
         else {
-            return String.format("CASE WHEN %1$s NOT REGEXP BINARY" + numericPattern +
+            return String.format("CASE WHEN %1$s NOT REGEXP BINARY " + numericPattern +
                             " THEN NULL ELSE %1$s + 0.0 END",
                     term); }
     }
