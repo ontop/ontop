@@ -137,8 +137,15 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
     @Override
     public boolean isDistinct(IQTree tree, IQTree child) {
-        if (!inferUniqueConstraints(child).isEmpty())
-            return true;
+        var ucs = inferUniqueConstraints(child);
+        if (!ucs.isEmpty()) {
+            var variableNullability = tree.getVariableNullability();
+            if (ucs.stream()
+                    .anyMatch(uc -> uc.stream()
+                            .noneMatch(variableNullability::isPossiblyNullable)))
+                return true;
+        }
+
         if (child instanceof TrueNode)
             return true;
 

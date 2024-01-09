@@ -20,14 +20,15 @@ public class DefaultCompositeLeftJoinIQOptimizer implements LeftJoinIQOptimizer 
             CardinalityInsensitiveJoinTransferLJOptimizer cardinalityInsensitiveJoinTransferLJOptimizer,
             LJWithNestingOnRightToInnerJoinOptimizer ljWithNestingOnRightToInnerJoinOptimizer,
             MergeLJOptimizer mergeLJOptimizer,
-            CardinalityInsensitiveLJPruningOptimizer cardinalityInsensitiveLJPruningOptimizer) {
+            CardinalityInsensitiveLJPruningOptimizer cardinalityInsensitiveLJPruningOptimizer,
+            NullableFDSelfLJOptimizer nullableFDOptimizer) {
         this.optimizers = ImmutableList.of(
                 cardinalitySensitiveJoinTransferLJOptimizer,
                 cardinalityInsensitiveJoinTransferLJOptimizer,
                 ljWithNestingOnRightToInnerJoinOptimizer,
                 mergeLJOptimizer,
-                cardinalityInsensitiveLJPruningOptimizer);
-
+                cardinalityInsensitiveLJPruningOptimizer,
+                nullableFDOptimizer);
     }
 
     @Override

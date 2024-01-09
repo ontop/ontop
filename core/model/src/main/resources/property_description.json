@@ -43,6 +43,26 @@
     "type": "Integer",
     "description": "If more than 1, fetch the results by batches of the specified size. Otherwise, relies on the default configuration of the JDBC driver. Default value: 500 for query answering, 50000 for materialization."
   },
+  "jdbc.pool.connectionTimeout": {
+    "type": "Integer",
+    "description": "Default value: 30000. The maximum number of milliseconds that the pool will wait (when there are no available connections) for a connection to be returned before throwing an exception."
+  },
+  "jdbc.pool.initialSize": {
+    "type": "Integer",
+    "description": "Default value: 2. The number of connections that will be established when the connection pool is started."
+  },
+  "jdbc.pool.maxSize": {
+    "type": "Integer",
+    "description": "Default value: 20. The maximum number of active connections that can be allocated from the pool at the same time."
+  },
+  "jdbc.pool.keepAlive": {
+    "type": "Boolean",
+    "description": "Default value: true. If true, sets a validation query to make sure connection is alive but sending the query."
+  },
+  "jdbc.pool.removeAbandoned": {
+    "type": "Boolean",
+    "description": "Default value: false. If true, removes abandoned connections from the pool."
+  },
   "ontop.queryOntologyAnnotation": {
     "type": "Boolean",
     "description": "Default value: `false`. If true, includes annotations about classes and properties in the virtual graph."
