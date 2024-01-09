@@ -36,6 +36,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import org.apache.commons.rdf.api.IRI;
 
+import javax.inject.Named;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -81,21 +82,35 @@ public class DirectMappingAxiomProducer {
      */
     public String getRefSQL(ForeignKeyConstraint fk) {
 
-    	String columns = Stream.concat(
-    				getIdentifyingAttributes(fk.getRelation()).stream(),
-					getIdentifyingAttributes(fk.getReferencedRelation()).stream())
-				.map(a -> getQualifiedColumnName(a) + " AS " + getColumnAlias(a))
+		Optional<String> alias = getFKAlias(fk, fk.getRelation(), FK_SUFFIX);
+		Optional<String> referencedAlias = getFKAlias(fk, fk.getReferencedRelation(), FK_REFERENCED_SUFFIX);
+		String columnPrefix = getFKColumnPrefix(fk, fk.getRelation(), FK_SUFFIX);
+		String referencedColumnPrefix = getFKColumnPrefix(fk, fk.getReferencedRelation(), FK_REFERENCED_SUFFIX);
+
+		String columns = Stream.concat(
+    				getIdentifyingAttributes(fk.getRelation()).stream()
+							.map(a -> getQualifiedColumnName(alias, a) + " AS " + getColumnAlias(columnPrefix, a)),
+					getIdentifyingAttributes(fk.getReferencedRelation()).stream()
+							.map(a -> getQualifiedColumnName(referencedAlias, a) + " AS " + getColumnAlias(referencedColumnPrefix, a)))
 				.collect(Collectors.joining(", "));
 
-		String tables = fk.getRelation().getID().getSQLRendering() +
-				", " + fk.getReferencedRelation().getID().getSQLRendering();
+		String tables = fk.getRelation().getID().getSQLRendering()
+				+ alias.map(a -> " AS " + a).orElse("")
+				+ ", "
+				+ fk.getReferencedRelation().getID().getSQLRendering()
+				+ referencedAlias.map(a -> " AS " + a).orElse("");
 
 		String conditions = fk.getComponents().stream()
-				.map(c -> getQualifiedColumnName(c.getAttribute()) + " = " + getQualifiedColumnName(c.getReferencedAttribute()))
+				.map(c -> getQualifiedColumnName(alias, c.getAttribute())
+						+ " = "
+						+ getQualifiedColumnName(referencedAlias, c.getReferencedAttribute()))
 				.collect(Collectors.joining(" AND "));
 
 		return String.format("SELECT %s FROM %s WHERE %s", columns, tables, conditions);
 	}
+
+	private static final String FK_SUFFIX = "FK";
+	private static final String FK_REFERENCED_SUFFIX = "FKR";
 
 	private static ImmutableList<Attribute> getIdentifyingAttributes(NamedRelationDefinition table) {
 		Optional<UniqueConstraint> pk = table.getPrimaryKey();
@@ -103,18 +118,47 @@ public class DirectMappingAxiomProducer {
 				.orElse(table.getAttributes());
 	}
 
+	private static Optional<String> getFKAlias(ForeignKeyConstraint fk, NamedRelationDefinition relation, String suffix) {
+		return (fk.getRelation() == fk.getReferencedRelation())
+				? Optional.of(getAlias(fk.getRelation().getID(), suffix))
+				: Optional.empty();
+	}
+
+	private static String getAlias(RelationID relationID, String suffix) {
+		// TODO: find a better way of constructing IDs
+		QuotedID nameId = relationID.getComponents().get(RelationID.TABLE_INDEX);
+		String name = nameId.getName();
+		return nameId.getSQLRendering().replace(name, name + "_" + suffix);
+	}
+
+	private static String getFKColumnPrefix(ForeignKeyConstraint fk, NamedRelationDefinition relation, String suffix) {
+		return (fk.getRelation() == fk.getReferencedRelation())
+				? getAliasName(relation.getID(), suffix)
+				: getTableName(relation);
+	}
+
+	private static String getAliasName(RelationID relationID, String suffix) {
+		// TODO: find a better way of constructing IDs
+		QuotedID nameId = relationID.getComponents().get(RelationID.TABLE_INDEX);
+		String name = nameId.getName();
+		return name.replace(name, name + "_" + suffix);
+	}
+
 	private static String getTableName(NamedRelationDefinition relation) {
 		return relation.getID().getComponents().get(RelationID.TABLE_INDEX).getName();
 	}
-	private static String getColumnAlias(Attribute attr) {
+
+	private static String getColumnAlias(String prefix, Attribute attr) {
     	String rendering = attr.getID().getSQLRendering();
     	String name = attr.getID().getName(); // TODO: find a better way of constructing IDs
-    	return rendering.replace(name,
-				getTableName((NamedRelationDefinition)attr.getRelation()) + "_" + name);
+    	return rendering.replace(name, prefix + "_" + name);
 	}
-	
-	private static String getQualifiedColumnName(Attribute attr) {
-		 return new QualifiedAttributeID(((NamedRelationDefinition)attr.getRelation()).getID(), attr.getID()).getSQLRendering();
+
+
+
+	private static String getQualifiedColumnName(Optional<String> alias, Attribute attr) {
+		String tableRef = alias.orElseGet(() -> ((NamedRelationDefinition)attr.getRelation()).getID().getSQLRendering());
+		return tableRef + "." + attr.getID().getSQLRendering();
 	}
 
 
@@ -163,9 +207,9 @@ public class DirectMappingAxiomProducer {
 											  Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 
 		ImmutableTerm sub = generateTerm(fk.getRelation(),
-				getTableName(fk.getRelation()) + "_", bnodeTemplateMap);
+				getFKColumnPrefix(fk, fk.getRelation(), FK_SUFFIX) + "_", bnodeTemplateMap);
 		ImmutableTerm obj = generateTerm(fk.getReferencedRelation(),
-				getTableName(fk.getReferencedRelation()) + "_", bnodeTemplateMap);
+				getFKColumnPrefix(fk, fk.getReferencedRelation(), FK_REFERENCED_SUFFIX) + "_", bnodeTemplateMap);
 
 		TargetAtom atom = targetAtomFactory.getTripleTargetAtom(sub,
 				termFactory.getConstantIRI(getReferencePropertyIRI(fk)),
