@@ -222,12 +222,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>monetdb</groupId>
-            <artifactId>monetdb-jdbc</artifactId>
-            <version>11.19.15</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
             <version>2.7.1</version>
