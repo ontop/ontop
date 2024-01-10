@@ -1326,7 +1326,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 termConverter.apply(terms.get(1)),
                 termConverter.apply(terms.get(0)));
     }
-
+//TODO
+// Give a default serialization
     /**
      * Can be overridden.
      * <p>

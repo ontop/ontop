@@ -324,7 +324,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new GeofUnionFunctionSymbolImpl(GEOF.UNION, wktLiteral, iriType),
                 new GeofRelateFunctionSymbolImpl(GEOF.RELATE, wktLiteral, xsdString, xsdBoolean),
                 new GeofRelateMFunctionSymbolImpl(GEOF.RELATEM, wktLiteral, xsdString),
-
+                //TODO
+                // Add raster function e.g. averageRASTER()
+                // 1. Vocabulary IRI
+                // 2. RDF Input types
+                // 3. Output types
                 /*
                  * Time extension - duration arithmetic
                  */

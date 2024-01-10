@@ -1871,7 +1871,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return new DBFunctionSymbolWithSerializerImpl("DB_SECOND_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
                 this::serializeSecondsBetween);
     }
-
+//TODO
+// create averageRASTER DBFunctionSymbol
+// create a custom serializer
     protected DBFunctionSymbol createMillisBetweenFromDateTimeFunctionSymbol() {
         return new DBFunctionSymbolWithSerializerImpl("DB_MILLIS_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
                 this::serializeMillisBetween);
