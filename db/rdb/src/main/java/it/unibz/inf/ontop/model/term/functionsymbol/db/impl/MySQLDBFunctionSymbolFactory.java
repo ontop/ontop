@@ -318,30 +318,57 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     /**
      * XSD CAST functions
      */
+    // Cast and regex differ in MySQL version 8 and above vs. previous versions
+    private boolean isMySQLVersion5OrBelow() {
+        return databaseInfoSupplier.getDatabaseVersion().isPresent() &&
+                !databaseInfoSupplier.getDatabaseVersion().get().toLowerCase().contains("maria") &&
+                databaseInfoSupplier.getDatabaseVersion()
+                        .map(s -> Integer.parseInt(s.substring(0, s.indexOf("."))))
+                        .filter(s -> s < 8 ).isPresent();
+    }
+
     @Override
     protected String serializeCheckAndConvertDouble(ImmutableList<? extends ImmutableTerm> terms,
                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
-        return String.format("CASE WHEN %1$s NOT REGEXP " + numericPattern +
-                " THEN NULL ELSE CAST(%1$s + 0.0 AS DOUBLE) END", term);
+        if (isMySQLVersion5OrBelow()) {
+            return String.format("CASE WHEN %1$s NOT REGEXP " + numericPattern +
+                    " THEN NULL ELSE %1$s + 0.0 END", term);
+        } else {
+            return String.format("CASE WHEN %1$s NOT REGEXP " + numericPattern +
+                    " THEN NULL ELSE CAST(%1$s AS DOUBLE) END", term);
+        }
     }
 
     @Override
     protected String serializeCheckAndConvertFloat(ImmutableList<? extends ImmutableTerm> terms,
                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
-        return String.format("CASE WHEN %1$s NOT REGEXP " + numericPattern +
-                " THEN NULL ELSE CAST(%1$s + 0.0 AS FLOAT) END", term);
+        if (isMySQLVersion5OrBelow()) {
+            return String.format("CASE WHEN %1$s NOT REGEXP " + numericPattern +
+                    " THEN NULL ELSE %1$s + 0.0 END", term);
+        } else {
+            return String.format("CASE WHEN %1$s NOT REGEXP " + numericPattern +
+                    " THEN NULL ELSE CAST(%1$s AS FLOAT) END", term);
+        }
     }
 
     @Override
     protected String serializeCheckAndConvertFloatFromNonFPNumeric(ImmutableList<? extends ImmutableTerm> terms,
                                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
-        return String.format("CASE WHEN (CAST(%1$s AS DECIMAL(60,30)) NOT BETWEEN -3.40E38 AND -1.18E-38 AND " +
-                        "CAST(%1$s AS DECIMAL(60,30)) NOT BETWEEN 1.18E-38 AND 3.40E38 AND CAST(%1$s AS DECIMAL(60,30)) != 0) THEN NULL " +
-                        "ELSE CAST(%1$s + 0.0 AS FLOAT) END",
-                term);
+        if (isMySQLVersion5OrBelow()) {
+            return String.format("CASE WHEN (CAST(%1$s AS DECIMAL(60,30)) NOT BETWEEN -3.40E38 AND -1.18E-38 AND " +
+                            "CAST(%1$s AS DECIMAL(60,30)) NOT BETWEEN 1.18E-38 AND 3.40E38 AND CAST(%1$s AS DECIMAL(60,30)) != 0) THEN NULL " +
+                            "ELSE %1$s + 0.0 END",
+                    term);
+        } else {
+            return String.format("CASE WHEN (CAST(%1$s AS DECIMAL(60,30)) NOT BETWEEN -3.40E38 AND -1.18E-38 AND " +
+                            "CAST(%1$s AS DECIMAL(60,30)) NOT BETWEEN 1.18E-38 AND 3.40E38 AND CAST(%1$s AS DECIMAL(60,30)) != 0) THEN NULL " +
+                            "ELSE CAST(%1$s AS FLOAT) END",
+                    term);
+        }
+
     }
 
     @Override
