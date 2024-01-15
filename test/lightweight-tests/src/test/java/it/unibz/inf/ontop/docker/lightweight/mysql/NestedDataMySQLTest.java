@@ -5,10 +5,12 @@ import it.unibz.inf.ontop.docker.lightweight.AbstractNestedDataTest;
 import it.unibz.inf.ontop.docker.lightweight.MySQLLightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
+@DisabledIfEnvironmentVariable(named = "MYSQL_VERSION", matches = "5")
 @MySQLLightweightTest
 public class NestedDataMySQLTest extends AbstractNestedDataTest {
 
