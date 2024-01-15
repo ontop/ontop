@@ -5,10 +5,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.docker.lightweight.MySQLLightweightTest;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
@@ -100,5 +98,37 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
     @Override
     protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
         return ImmutableSet.of("\"215.3400\"^^xsd:decimal");
+    }
+
+    /**
+     * MySQL scenarios not fully supported for MySQL v5.x
+     * Method level tag restricts test to MySQL v8.x
+     */
+    @DisabledIfEnvironmentVariable(named = "MYSQL_VERSION", matches = "5")
+    @Override
+    @Test
+    public void testBNODE0() {
+        super.testBNODE0();
+    }
+
+    @DisabledIfEnvironmentVariable(named = "MYSQL_VERSION", matches = "5")
+    @Override
+    @Test
+    public void testBNODE1() {
+        super.testBNODE0();
+    }
+
+    @DisabledIfEnvironmentVariable(named = "MYSQL_VERSION", matches = "5")
+    @Override
+    @Test
+    public void testREPLACE() {
+        super.testREPLACE();
+    }
+
+    @DisabledIfEnvironmentVariable(named = "MYSQL_VERSION", matches = "5")
+    @Override
+    @Test
+    public void testStatisticalAggregates() {
+        super.testStatisticalAggregates();;
     }
 }
