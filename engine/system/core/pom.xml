@@ -6,7 +6,7 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-system</artifactId>
-        <version>5.1.2-SNAPSHOT</version>
+        <version>5.1.2</version>
     </parent>
 
     <artifactId>ontop-system-core</artifactId>
