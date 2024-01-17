@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.NullRejectingDBConca
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.SPARQLFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.vocabulary.GEO;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
@@ -40,7 +41,7 @@ public abstract class AbstractGeofFunctionSymbolImpl extends SPARQLFunctionSymbo
         if (newTerms.stream()
                 .allMatch(t -> isRDFFunctionalTerm(t) || (t instanceof Constant))
                 // Do not simplify to DBFunctionSymbol any variables
-                && checkNoVariablePresent(newTerms, termFactory)) {
+                && isGroundTerm(newTerms, termFactory)) {
 
             ImmutableList<ImmutableTerm> typeTerms = newTerms.stream()
                     .map(t -> extractRDFTermTypeTerm(t, termFactory))
@@ -49,6 +50,12 @@ public abstract class AbstractGeofFunctionSymbolImpl extends SPARQLFunctionSymbo
             ImmutableList<ImmutableTerm> subLexicalTerms = newTerms.stream()
                     .map(t -> extractLexicalTerm(t, termFactory))
                     .collect(ImmutableCollectors.toList());
+
+            // If SRID mismatch do not simplify to DBFunctionSymbol
+            Optional<Boolean> checkMismatchedSRID = misMatchedSRID(subLexicalTerms, termFactory);
+            if (checkMismatchedSRID.isPresent() && checkMismatchedSRID.get()) {
+                return termFactory.getImmutableFunctionalTerm(this, newTerms);
+            }
 
             ImmutableExpression.Evaluation inputTypeErrorEvaluation = evaluateInputTypeError(subLexicalTerms, typeTerms,
                     termFactory, variableNullability);
@@ -125,19 +132,39 @@ public abstract class AbstractGeofFunctionSymbolImpl extends SPARQLFunctionSymbo
                                                      ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability);
 
-
-    private boolean checkNoVariablePresent(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory) {
-        // Check no variables present
-        boolean condition1 = newTerms.stream()
-                .noneMatch(t -> extractLexicalTerm(t, termFactory) instanceof Variable);
-        boolean condition2 = newTerms.stream()
+    /**
+     * Check if the term or recursively check if any of its terminal subterms are not ground
+     */
+    private boolean isGroundTerm(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory) {
+        return newTerms.stream()
                 .map(t -> extractLexicalTerm(t, termFactory))
-                .findFirst()
-                .filter(t -> t instanceof NonGroundFunctionalTerm)
-                .filter(t -> ((NonGroundFunctionalTerm) t).getFunctionSymbol() instanceof NullRejectingDBConcatFunctionSymbol)
-                .filter(t -> ((((NonGroundFunctionalTerm) t)).getTerm(1) instanceof Variable))
-                .isEmpty();
-        return condition1 && condition2;
+                .noneMatch(this::hasNonGroundTerminalSubterm);
+    }
+
+    private boolean hasNonGroundTerminalSubterm(ImmutableTerm term) {
+        if (term instanceof Variable) {
+            return true;
+        }
+        if (term instanceof NonGroundFunctionalTerm) {
+            NonGroundFunctionalTerm nonGroundTerm = (NonGroundFunctionalTerm) term;
+            if (nonGroundTerm.getFunctionSymbol() instanceof NullRejectingDBConcatFunctionSymbol) {
+                return nonGroundTerm.getTerms().stream().anyMatch(this::hasNonGroundTerminalSubterm);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return true and present if the SRIDs of the two geometries are different
+     */
+    private Optional<Boolean> misMatchedSRID(ImmutableList<ImmutableTerm> subLexicalTerms, TermFactory termFactory) {
+        // No check needed for geof functions with arity=1 or GEOF_BUFFER which takes only one geometry as argument
+        if (this.getExpectedBaseTypes().stream().filter(t -> t.equals(GEO.GEO_WKT_LITERAL)).count() > 1) {
+            WKTLiteralValue v0 = GeoUtils.extractWKTLiteralValue(termFactory, subLexicalTerms.get(0));
+            WKTLiteralValue v1 = GeoUtils.extractWKTLiteralValue(termFactory, subLexicalTerms.get(1));
+            return Optional.of((!v0.getSRID().equals(v1.getSRID())));
+        }
+        return Optional.empty();
     }
 
 }

@@ -46,10 +46,6 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
         IRI srid0 = wktLiteralValues.get(0).getSRID();
         IRI srid1 = wktLiteralValues.get(1).getSRID();
 
-//        if (!srid0.equals(srid1)) {
-//            throw new IllegalArgumentException("SRIDs do not match: " + srid0 + ", " + srid1);
-//        }
-
         ImmutableTerm geom0 = wktLiteralValues.get(0).getGeometry();
         ImmutableTerm geom1 = wktLiteralValues.get(1).getGeometry();
 
