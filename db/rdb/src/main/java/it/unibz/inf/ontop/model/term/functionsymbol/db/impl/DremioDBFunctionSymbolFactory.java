@@ -22,6 +22,7 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     private static final String NOT_YET_SUPPORTED_MSG = "Not supported by Dremio yet";
     private static final String POSITION_STR = "POSITION";
+    private static final String RANDOM_STR = "RANDOM";
 
     private DatabaseInfoSupplier databaseInfoSupplier;
 
@@ -171,6 +172,11 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         throw new UnsupportedOperationException(NOT_YET_SUPPORTED_MSG);
+    }
+
+    @Override
+    protected String getRandNameInDialect() {
+        return RANDOM_STR;
     }
 
     /**
