@@ -11,10 +11,12 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
+import java.util.UUID;
 import java.util.function.Function;
 
 
@@ -107,6 +109,22 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("REPLACE(REPLACE(TO_CHAR(%s, 'YYYY-MM-DD\"T\"HH24:MI:SSTZO'), 'UTC', '+00:00'), 'O', '')",
                 termConverter.apply(terms.get(0)));
+    }
+
+    /**
+     * Let Dremio generate the same random values on a given row for a given UUID.
+     * Also allows to avoid RANDOM(), which was causing crashes on some installations.
+     */
+    @Override
+    public NonDeterministicDBFunctionSymbol getDBRand(UUID uuid) {
+        return new DefaultNonDeterministicNullaryFunctionSymbol(getRandNameInDialect(), uuid, dbStringType) {
+            @Override
+            public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter,
+                                            TermFactory termFactory) {
+                // Expecting an int32 (according to Dremio's docs)
+                return String.format("RANDOM(%d)", getUUID().hashCode());
+            }
+        };
     }
 
     @Override
