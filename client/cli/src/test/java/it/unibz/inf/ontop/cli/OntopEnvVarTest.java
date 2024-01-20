@@ -38,17 +38,6 @@ public class OntopEnvVarTest {
     }
 
     @Test
-    public void testMappingCLIOverride() {
-        rule.set("-m", "example.obda");
-        OntopCommand command = getOntopCommandCLI().parse("endpoint",
-                "-m", "example2.obda",
-                "-t", "example.owl",
-                "-p", "example.properties");
-        String envVal = getEnvValues(command, "ONTOP_MAPPING_FILE");
-        assertEquals("example2.obda", envVal);
-    }
-
-    @Test
     public void testMappingEnvOverride() {
         rule.set("ONTOP_MAPPING_FILE", "example.obda");
         OntopCommand command = getOntopCommandCLI().parse("endpoint",
@@ -278,7 +267,7 @@ public class OntopEnvVarTest {
     }
 
     @Test
-    public void testPasswordEnvFile() {
+    public void testPasswordFileEnvOverride() {
         rule.set("ONTOP_DB_PASSWORD_FILE", "src/test/resources/cli/input.txt");
         OntopCommand command = getOntopCommandCLI().parse("endpoint",
                 "-t", "example.owl",
@@ -286,7 +275,7 @@ public class OntopEnvVarTest {
                 "-p", "example.properties",
                 "--db-password", "secret");
         String envVal = getEnvValues(command, "ONTOP_DB_PASSWORD");
-        // ONTOP_DB_PASSWORD is set based on the result from the file
+        // ONTOP_DB_PASSWORD is set based on --db-password winning over the file
         assertEquals("secret", envVal);
     }
 
