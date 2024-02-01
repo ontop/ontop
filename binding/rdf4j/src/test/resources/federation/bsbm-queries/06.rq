@@ -1,0 +1,21 @@
+# BSBM-06: find products having a label that contains a specific string
+# PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# 
+# SELECT ?product ?label
+# {
+#     ?product rdfs:label ?label .
+#     ?product a bsbm:Product .
+#     FILTER contains(?label, "${product_label_word:none}")  # in BSBM: regex(?label, ":word1:")
+# }
+#
+# instantiate sample variables
+PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?product ?label
+{
+    ?product rdfs:label ?label .
+    ?product a bsbm:Product .
+    FILTER contains(?label, "banded")  # product_label_word = banded / in BSBM: regex(?label, ":word1:")
+}

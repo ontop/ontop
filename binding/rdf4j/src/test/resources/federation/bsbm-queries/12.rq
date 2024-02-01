@@ -1,0 +1,41 @@
+# BSBM-12: export information about an offer into another schemata
+# PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+# BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
+# 
+# SELECT
+#     ?productURI ?productlabel ?vendorURI ?vendorname ?vendorhomepage
+#     ?offerURL ?price ?deliveryDays ?validTo
+# {
+#     <dataFromVendor/Offer${offer:none}> bsbm:product ?productURI .
+#     ?productURI rdfs:label ?productlabel .
+#     <dataFromVendor/Offer${offer:none}> bsbm:vendor ?vendorURI .
+#     ?vendorURI rdfs:label ?vendorname .
+#     ?vendorURI foaf:homepage ?vendorhomepage .
+#     <dataFromVendor/Offer${offer:none}> bsbm:offerWebpage ?offerURL .
+#     <dataFromVendor/Offer${offer:none}> bsbm:price ?price .
+#     <dataFromVendor/Offer${offer:none}> bsbm:deliveryDays ?deliveryDays .
+#     <dataFromVendor/Offer${offer:none}> bsbm:validTo ?validTo
+# }
+#
+# instantiate sample variables
+PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
+
+SELECT
+    ?offer ?productURI ?productlabel ?vendorURI ?vendorname
+    ?offerURL ?price ?deliveryDays ?validTo
+{
+    <dataFromVendor/Offer2838> bsbm:product ?productURI .  # offer = 2838
+    ?productURI rdfs:label ?productlabel .
+    <dataFromVendor/Offer2838> bsbm:vendor ?vendorURI .
+    ?vendorURI rdfs:label ?vendorname .
+    ?vendorURI foaf:homepage ?vendorhomepage .
+    <dataFromVendor/Offer2838> bsbm:offerWebpage ?offerURL .
+    <dataFromVendor/Offer2838> bsbm:price ?price .
+    <dataFromVendor/Offer2838> bsbm:deliveryDays ?deliveryDays .
+    <dataFromVendor/Offer2838> bsbm:validTo ?validTo
+}

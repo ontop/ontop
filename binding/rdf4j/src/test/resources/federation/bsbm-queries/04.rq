@@ -1,0 +1,65 @@
+# BSBM-04: find products matching two different sets of features
+# PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
+# 
+# SELECT DISTINCT ?product ?label ?propertyTextual
+# {
+#     {
+#         ?product rdfs:label ?label .
+#         ?product a bsbm:Product .
+#         ?product bsbm:type <ProductType${type:percent}> .  # in BSBM: ?product a %ProductType%
+#         ?product bsbm:productFeature <ProductFeature${feature1:percent}> .
+#         ?product bsbm:productFeature <ProductFeature${feature2:percent}> .
+#         ?product bsbm:productPropertyTextual1 ?propertyTextual .
+#         ?product bsbm:productPropertyNumeric1 ?p1 .
+#         FILTER (?p1 > ${propertynum1_lo:none})
+#     }
+#     UNION
+#     {
+#         ?product rdfs:label ?label .
+#         ?product a bsbm:Product .
+#         ?product bsbm:type <ProductType${type:percent}> .  # in BSBM: ?product a %ProductType%
+#         ?product bsbm:productFeature <ProductFeature${feature1:percent}> .
+#         ?product bsbm:productFeature <ProductFeature${feature3:percent}> .
+#         ?product bsbm:productPropertyTextual1 ?propertyTextual .
+#         ?product bsbm:productPropertyNumeric2 ?p2 .
+#         FILTER (?p2 > ${propertynum2_lo:none})
+#     }
+# }
+# ORDER BY ?label
+# OFFSET 5
+# LIMIT 10
+#
+# instantiate sample variables
+PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
+
+SELECT DISTINCT ?product ?label ?propertyTextual
+{
+    {
+        ?product rdfs:label ?label .
+        ?product a bsbm:Product .
+        ?product bsbm:type <ProductType4> .  # type = 4 / in BSBM: ?product a %ProductType%
+        ?product bsbm:productFeature <ProductFeature90> .  # feature1 = 90
+        ?product bsbm:productFeature <ProductFeature79> .  # feature2 = 79
+        ?product bsbm:productPropertyTextual1 ?propertyTextual .
+        ?product bsbm:productPropertyNumeric1 ?p1 .
+        FILTER( ?p1 > 53 )  # propertynum1_lo = 53
+    }
+    UNION
+    {
+        ?product rdfs:label ?label .
+        ?product a bsbm:Product .
+        ?product bsbm:type <ProductType4> .  # type = 4 / in BSBM: ?product a %ProductType%
+        ?product bsbm:productFeature <ProductFeature90> .  # feature1 = 90
+        ?product bsbm:productFeature <ProductFeature116> .  # feature3 = 116
+        ?product bsbm:productPropertyTextual1 ?propertyTextual .
+        ?product bsbm:productPropertyNumeric2 ?p2 .
+        FILTER ( ?p2 > 134 )  # propertynum2_lo = 134
+    }
+}
+ORDER BY ?label
+OFFSET 5
+LIMIT 10

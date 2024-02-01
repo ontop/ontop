@@ -105,20 +105,29 @@ public class FederationOptimizerTest {
 
     @Test
     public void testFederationOptimizer() throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException, OBDASpecificationException, OntopReformulationException {
+//        set environment variables before running test:
+//        ONTOP_OBDF_OPTIMIZATION_ENABLED=true;
+//        ONTOP_OBDF_SOURCE_FILE=src/test/resources/federation/source_relations.txt;
+//        ONTOP_OBDF_EFF_LABEL_FILE=src/test/resources/federation/source_efficiency_labels.het.txt;
+//        ONTOP_OBDF_HINT_FILE=src/test/resources/federation/hints.denodo-optmatv.txt;
 
         ArrayList<String> queryFiles = new ArrayList<String>();
-//        queryFiles.add("src/test/resources/federation/bsbm-queries/01.SPARQL");
-//        queryFiles.add("src/test/resources/federation/bsbm-queries/02.SPARQL");
-//        queryFiles.add("src/test/resources/federation/bsbm-queries/03.SPARQL");
-//        queryFiles.add("src/test/resources/federation/bsbm-queries/04.SPARQL");
-//        queryFiles.add("src/test/resources/federation/bsbm-queries/05.SPARQL");
-//        queryFiles.add("src/test/resources/federation/bsbm-queries/06.SPARQL");
-        queryFiles.add("src/test/resources/federation/bsbm-queries/07.SPARQL");
-//        queryFiles.add("src/test/resources/federation/bsbm-queries/08.SPARQL");
-//        queryFiles.add("src/test/resources/federation/bsbm-queries/09.SPARQL");
-//        queryFiles.add("src/test/resources/federation/bsbm-queries/10.SPARQL");
-//        queryFiles.add("src/test/resources/federation/bsbm-queries/11.SPARQL");
-//        queryFiles.add("src/test/resources/federation/bsbm-queries/12.SPARQL");
+        queryFiles.add("src/test/resources/federation-test/SPARQL/01.SPARQL");
+        queryFiles.add("src/test/resources/federation/bsbm-queries/01.rq");
+        queryFiles.add("src/test/resources/federation/bsbm-queries/02.rq");
+        queryFiles.add("src/test/resources/federation/bsbm-queries/03.rq");
+        queryFiles.add("src/test/resources/federation/bsbm-queries/04.rq");
+        queryFiles.add("src/test/resources/federation/bsbm-queries/05.rq");
+        queryFiles.add("src/test/resources/federation/bsbm-queries/06.rq");
+        queryFiles.add("src/test/resources/federation/bsbm-queries/07.rq");
+        queryFiles.add("src/test/resources/federation/bsbm-queries/08.rq");
+        queryFiles.add("src/test/resources/federation/bsbm-queries/09.rq");
+        queryFiles.add("src/test/resources/federation/bsbm-queries/10.rq");
+        queryFiles.add("src/test/resources/federation/bsbm-queries/11.rq");
+        queryFiles.add("src/test/resources/federation/bsbm-queries/12.rq");
+        queryFiles.add("src/test/resources/federation/bsbm-queries/13.rq");
+        queryFiles.add("src/test/resources/federation/bsbm-queries/14.rq");
+        queryFiles.add("src/test/resources/federation/bsbm-queries/15.rq");
 
         for (String queryFile : queryFiles) {
             System.out.println("Query file: " + queryFile);
@@ -133,7 +142,7 @@ public class FederationOptimizerTest {
                 BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(queryFile)));
                 String line = null;
                 while((line=br.readLine()) != null ){
-                    sparqlQuery = sparqlQuery + line +" ";
+                    sparqlQuery = sparqlQuery + line +"\n";
                 }
                 br.close();
             } catch (Exception e) {

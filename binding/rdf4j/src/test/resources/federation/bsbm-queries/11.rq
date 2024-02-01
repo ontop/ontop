@@ -1,0 +1,27 @@
+# BSBM-11: get all information about an offer
+# BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
+# 
+# SELECT ?property ?hasValue ?isValueOf
+# {
+#     {
+#         <dataFromVendor/Offer${offer:percent}> ?property ?hasValue
+#     }
+#     UNION
+#     {
+#         ?isValueOf ?property <dataFromVendor/Offer${offer:percent}>
+#     }
+# }
+#
+# instantiate sample variables
+BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
+
+SELECT ?property ?hasValue ?isValueOf
+{
+    {
+        <dataFromVendor/Offer2838> ?property ?hasValue  # offer = 2838
+    }
+    UNION
+    {
+        ?isValueOf ?property <dataFromVendor/Offer2838>
+    }
+}

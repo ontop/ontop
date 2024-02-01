@@ -1,0 +1,55 @@
+# BSBM-02: retrieve basic information about a specific product for display purposes
+# PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# PREFIX dc: <http://purl.org/dc/elements/1.1/>
+# BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
+# 
+# SELECT
+#     ?label ?comment ?producer ?productFeature
+#     ?propertyTextual1 ?propertyTextual2 ?propertyTextual3 ?propertyNumeric1
+#     ?propertyNumeric2 ?propertyTextual4 ?propertyTextual5 ?propertyNumeric4
+# {
+#     <dataFromProducer/Product${product:percent}> rdfs:label ?label .
+#     <dataFromProducer/Product${product:percent}> rdfs:comment ?comment .
+#     <dataFromProducer/Product${product:percent}> bsbm:producer ?p .
+#     ?p rdfs:label ?producer .
+#     <dataFromProducer/Product${product:percent}> dc:publisher ?p .
+#     <dataFromProducer/Product${product:percent}> bsbm:productFeature ?f .
+#     ?f rdfs:label ?productFeature .
+#     <dataFromProducer/Product${product:percent}> bsbm:productPropertyTextual1 ?propertyTextual1 .
+#     <dataFromProducer/Product${product:percent}> bsbm:productPropertyTextual2 ?propertyTextual2 .
+#     <dataFromProducer/Product${product:percent}> bsbm:productPropertyTextual3 ?propertyTextual3 .
+#     <dataFromProducer/Product${product:percent}> bsbm:productPropertyNumeric1 ?propertyNumeric1 .
+#     <dataFromProducer/Product${product:percent}> bsbm:productPropertyNumeric2 ?propertyNumeric2 .
+#     OPTIONAL { <dataFromProducer/Product${product:percent}> bsbm:productPropertyTextual4 ?propertyTextual4 }
+#     OPTIONAL { <dataFromProducer/Product${product:percent}> bsbm:productPropertyTextual5 ?propertyTextual5 }
+#     OPTIONAL { <dataFromProducer/Product${product:percent}> bsbm:productPropertyNumeric4 ?propertyNumeric4 }
+# }
+#
+# instantiate sample variables
+PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
+
+SELECT
+    ?label ?comment ?producer ?productFeature
+    ?propertyTextual1 ?propertyTextual2 ?propertyTextual3 ?propertyNumeric1
+    ?propertyNumeric2 ?propertyTextual4 ?propertyTextual5 ?propertyNumeric4
+{
+    <dataFromProducer/Product94> rdfs:label ?label .  # product = 94
+    <dataFromProducer/Product94> rdfs:comment ?comment .
+    <dataFromProducer/Product94> bsbm:producer ?p .
+    ?p rdfs:label ?producer .
+    <dataFromProducer/Product94> dc:publisher ?p .
+    <dataFromProducer/Product94> bsbm:productFeature ?f .
+    ?f rdfs:label ?productFeature .
+    <dataFromProducer/Product94> bsbm:productPropertyTextual1 ?propertyTextual1 .
+    <dataFromProducer/Product94> bsbm:productPropertyTextual2 ?propertyTextual2 .
+    <dataFromProducer/Product94> bsbm:productPropertyTextual3 ?propertyTextual3 .
+    <dataFromProducer/Product94> bsbm:productPropertyNumeric1 ?propertyNumeric1 .
+    <dataFromProducer/Product94> bsbm:productPropertyNumeric2 ?propertyNumeric2 .
+    OPTIONAL { <dataFromProducer/Product94> bsbm:productPropertyTextual4 ?propertyTextual4 }
+    OPTIONAL { <dataFromProducer/Product94> bsbm:productPropertyTextual5 ?propertyTextual5 }
+    OPTIONAL { <dataFromProducer/Product94> bsbm:productPropertyNumeric4 ?propertyNumeric4 }
+}

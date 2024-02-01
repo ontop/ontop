@@ -1,0 +1,35 @@
+# BSBM-01: find products for a given set of generic features
+# PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
+#
+# SELECT DISTINCT ?product ?label
+# {
+#     ?product rdfs:label ?label .
+#     ?product a bsbm:Product .
+#     ?product bsbm:type <ProductType${type:percent}> .  # in BSBM:  ?product a %ProductType%
+#     ?product bsbm:productFeature <ProductFeature${feature2:percent}> .
+#     ?product bsbm:productFeature <ProductFeature${feature3:percent}> .
+#     ?product bsbm:productPropertyNumeric1 ?value1 .
+#     FILTER (?value1 > ${propertynum1_lo:none})
+# }
+# ORDER BY ?label
+# LIMIT 10
+
+# instantiate sample variables
+PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
+
+SELECT DISTINCT ?product ?label
+{
+    ?product rdfs:label ?label .
+    ?product a bsbm:Product .
+    ?product bsbm:type <ProductType4> .  # type = 4 / in BSBM: ?product a %ProductType%
+    ?product bsbm:productFeature <ProductFeature79> .  # feature2 = 79
+    ?product bsbm:productFeature <ProductFeature116> .  # feature3 = 116
+    ?product bsbm:productPropertyNumeric1 ?value1 .
+    FILTER (?value1 > 53)  # propertynum1_lo = 53
+}
+ORDER BY ?label
+LIMIT 10

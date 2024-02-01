@@ -230,9 +230,9 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                 newAdded.addAll(list);
             }
         }
-        for (int i = 0; i < subTrees.size(); i++) {
-            System.out.println("Subtree (" + i + "): " + subTrees.get(i).toString());
-        }
+//        for (int i = 0; i < subTrees.size(); i++) {
+//            System.out.println("Subtree (" + i + "): " + subTrees.get(i).toString());
+//        }
         return subTrees;
     }
 

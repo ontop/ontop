@@ -1,0 +1,35 @@
+# BSBM-09: get information about a reviewer
+# PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+# PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+# PREFIX rev: <http://purl.org/stuff/rev#>
+# PREFIX dc: <http://purl.org/dc/elements/1.1/>
+# BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
+# 
+# SELECT ?p ?mbox_sha1sum ?country ?r ?product ?title  # in BSBM: DESCRIBE ?p
+# {
+#     <dataFromRatingSite/Review${review:percent}> rev:reviewer ?p .
+#     ?p foaf:name ?name .
+#     ?p foaf:mbox_sha1sum ?mbox_sha1sum .
+#     ?p bsbm:country ?country .
+#     ?r rev:reviewer ?p .
+#     ?r bsbm:reviewFor ?product .
+#     ?r dc:title ?title .
+# }
+#
+# instantiate sample variables
+PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX rev: <http://purl.org/stuff/rev#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
+
+SELECT ?p ?mbox_sha1sum ?country ?r ?product ?title  # in BSBM: DESCRIBE ?p
+{
+    <dataFromRatingSite/Review1356> rev:reviewer ?p .  # review = 1356
+    ?p foaf:name ?name .
+    ?p foaf:mbox_sha1sum ?mbox_sha1sum .
+    ?p bsbm:country ?country .
+    ?r rev:reviewer ?p .
+    ?r bsbm:reviewFor ?product .
+    ?r dc:title ?title .
+}
