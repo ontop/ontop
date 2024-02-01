@@ -1,0 +1,177 @@
+[PrefixDeclaration]
+:		http://obda.inf.unibz.it/ontop/benchmark/bsbm.owl#
+dc:		http://purl.org/dc/elements/1.1/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rev:		http://purl.org/stuff/rev#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+bsbm:		http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/
+foaf:		http://xmlns.com/foaf/0.1/
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+iso3166:	http://downlode.org/rdf/iso-3166/countries#
+bsbm-inst:	http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/
+
+[MappingDeclaration] @collection [[
+
+mappingId	Product11
+target		bsbm-inst:dataFromProducer/Product{nr} a bsbm:Product ; dc:identifier {nr} .
+source		select * from "bsbm"."product"
+
+mappingId	Product12
+target		bsbm-inst:dataFromProducer/Product{nr} bsbm:productPropertyNumeric1 {propertynum1} ; bsbm:productPropertyNumeric2 {propertynum2} ; bsbm:productPropertyNumeric3 {propertynum3} ; bsbm:productPropertyNumeric4 {propertynum4} ; bsbm:productPropertyNumeric5 {propertynum5} ; bsbm:productPropertyNumeric6 {propertynum6} ; bsbm:productPropertyTextual1 {propertytex1} ; bsbm:productPropertyTextual2 {propertytex2} ; bsbm:productPropertyTextual3 {propertytex3} ; bsbm:productPropertyTextual4 {propertytex4} ; bsbm:productPropertyTextual5 {propertytex5} ; bsbm:productPropertyTextual6 {propertytex6} ; dc:date {publishdate} ; bsbm:producer bsbm-inst:dataFromProducer/Producer{producer} .
+source		select * from "bsbm"."product"
+
+mappingId	Product13
+target		bsbm-inst:dataFromProducer/Product{nr} dc:publisher bsbm-inst:dataFromProducer/Producer{producer} .
+source		select * from "bsbm"."product"
+
+mappingId	Product14
+target		bsbm-inst:dataFromProducer/Product{nr} rdfs:label {label} .
+source		select * from "bsbm"."product"
+
+mappingId	Product15
+target		bsbm-inst:dataFromProducer/Product{nr} rdfs:comment {comment} .
+source		select * from "bsbm"."product"
+
+mappingId	Product_has_Product_Feature1
+target		bsbm-inst:dataFromProducer/Product{product} bsbm:productFeature bsbm-inst:ProductFeature{productfeature} .
+source		select * from "bsbm"."productfeatureproduct"
+
+mappingId	Product_has_Product_Type1
+target		bsbm-inst:dataFromProducer/Product{product} bsbm:type bsbm-inst:ProductType{producttype} .
+source		select * from "bsbm"."producttypeproduct"
+
+mappingId	Person
+target		bsbm-inst:dataFromRatingSite/Reviewer{nr} a foaf:Person ; dc:identifier {nr} .
+source		select * from "bsbm"."person"
+
+mappingId	Person2
+target		bsbm-inst:dataFromRatingSite/Reviewer{nr} foaf:name {name} ; foaf:mbox_sha1sum {mbox_sha1sum} ; bsbm:country iso3166:{country} .
+source		select * from "bsbm"."person"
+
+mappingId	Person3
+target		bsbm-inst:dataFromRatingSite/Reviewer{nr} dc:publisher bsbm-inst:dataFromRatingSite/RatingSite{publisher} .
+source		select * from "bsbm"."person"
+
+mappingId	Person4
+target		bsbm-inst:dataFromRatingSite/Reviewer{nr} dc:date {publishdate} .
+source		select * from "bsbm"."person"
+
+mappingId	Review1
+target		bsbm-inst:dataFromRatingSite/Review{nr} a bsbm:Review ; dc:identifier {nr} ; bsbm:reviewDate {reviewdate} .
+source		select * from "bsbm"."review"
+
+mappingId	Review2
+target		bsbm-inst:dataFromRatingSite/Review{nr} dc:title {title} .
+source		select * from "bsbm"."review"
+
+mappingId	Review3
+target		bsbm-inst:dataFromRatingSite/Review{nr} bsbm:rating1 {rating1} ; bsbm:rating2 {rating2} ; bsbm:rating3 {rating3} ; bsbm:rating4 {rating4} .
+source		select * from "bsbm"."review"
+
+mappingId	Review4
+target		bsbm-inst:dataFromRatingSite/Review{nr} bsbm:reviewFor bsbm-inst:dataFromProducer/Product{product} .
+source		select * from "bsbm"."review"
+
+mappingId	Review5
+target		bsbm-inst:dataFromRatingSite/Review{nr} rev:reviewer bsbm-inst:dataFromRatingSite/Reviewer{person} .
+source		select * from "bsbm"."review"
+
+mappingId	Review6
+target		bsbm-inst:dataFromRatingSite/Review{nr} dc:publisher bsbm-inst:dataFromRatingSite/RatingSite{publisher} .
+source		select * from "bsbm"."review"
+
+mappingId	Review7
+target		bsbm-inst:dataFromRatingSite/Review{nr} rev:text {text}; bsbm:language {language} .
+source		select * from "bsbm"."review"
+
+mappingId	Review8
+target		bsbm-inst:dataFromRatingSite/Review{nr} dc:date {publishdate} .
+source		select * from "bsbm"."review"
+
+mappingId	Product_Feature
+target		bsbm-inst:ProductFeature{nr} a bsbm:ProductFeature ; dc:identifier {nr} .
+source		select * from "bsbm"."productfeature"
+
+mappingId	Product_Feature2
+target		bsbm-inst:ProductFeature{nr} rdfs:label {label} .
+source		select * from "bsbm"."productfeature"
+
+mappingId	Product_Feature3
+target		bsbm-inst:ProductFeature{nr} rdfs:comment {comment} .
+source		select * from "bsbm"."productfeature"
+
+mappingId	Product_Feature4
+target		bsbm-inst:ProductFeature{nr} dc:publisher bsbm-inst:StandardizationInstitution{publisher} .
+source		select * from "bsbm"."productfeature"
+
+mappingId	Product_Feature5
+target		bsbm-inst:ProductFeature{nr} dc:date {publishdate} .
+source		select * from "bsbm"."productfeature"
+
+mappingId	Product_Type
+target		bsbm-inst:ProductType{nr} a bsbm:ProductType ; dc:identifier {nr} .
+source		select * from "bsbm"."producttype"
+
+mappingId	Product_Type2
+target		bsbm-inst:ProductType{nr} rdfs:label {label} ; rdfs:comment {comment} .
+source		select * from "bsbm"."producttype"
+
+mappingId	Product_Type3
+target		bsbm-inst:ProductType{nr} dc:publisher bsbm-inst:StandardizationInstitution{publisher} .
+source		select * from "bsbm"."producttype"
+
+mappingId	Product_Type4
+target		bsbm-inst:ProductType{nr} bsbm:subClassOf bsbm-inst:ProductType{parent} .
+source		select * from "bsbm"."producttype"
+
+mappingId	Product_Type5
+target		bsbm-inst:ProductType{nr} dc:date {publishdate} .
+source		select * from "bsbm"."producttype"
+
+mappingId	Offer
+target		bsbm-inst:dataFromVendor/Offer{nr} a bsbm:Offer ; dc:identifier {nr} ; bsbm:price {price} ; bsbm:validFrom {validfrom} ; bsbm:validTo {validto} ; bsbm:deliveryDays {deliverydays} ; bsbm:offerWebpage {offerwebpage} ; dc:date {publishdate} ; bsbm:product bsbm-inst:dataFromProducer/Product{product} ; bsbm:vendor bsbm-inst:dataFromVendor/Vendor{vendor} ; dc:publisher bsbm-inst:dataFromVendor/Vendor{vendor} .
+source		select * from "bsbm"."offer"
+
+mappingId	Producer
+target		bsbm-inst:dataFromProducer/Producer{nr} a bsbm:Producer ; dc:identifier {nr} .
+source		select * from "bsbm"."producer"
+
+mappingId	Producer2
+target		bsbm-inst:dataFromProducer/Producer{nr} rdfs:label {label} ; rdfs:comment {comment} .
+source		select * from "bsbm"."producer"
+
+mappingId	Producer3
+target		bsbm-inst:dataFromProducer/Producer{nr} foaf:homepage {homepage} .
+source		select * from "bsbm"."producer"
+
+mappingId	Producer4
+target		bsbm-inst:dataFromProducer/Producer{nr} bsbm:country iso3166:{country} .
+source		select * from "bsbm"."producer"
+
+mappingId	Producer6
+target		bsbm-inst:dataFromProducer/Producer{nr} dc:date {publishdate} .
+source		select * from "bsbm"."producer"
+
+mappingId	Vendor
+target		bsbm-inst:dataFromVendor/Vendor{nr} a bsbm:Vendor ; dc:identifier {nr} .
+source		select * from "bsbm"."vendor"
+
+mappingId	Vendor2
+target		bsbm-inst:dataFromVendor/Vendor{nr} rdfs:label {label} ; rdfs:comment {comment} .
+source		select * from "bsbm"."vendor"
+
+mappingId	Vendor3
+target		bsbm-inst:dataFromVendor/Vendor{nr} foaf:homepage {homepage} .
+source		select * from "bsbm"."vendor"
+
+mappingId	Vendor4
+target		bsbm-inst:dataFromVendor/Vendor{nr} bsbm:country iso3166:{country} .
+source		select * from "bsbm"."vendor"
+
+mappingId	Vendor6
+target		bsbm-inst:dataFromVendor/Vendor{nr} dc:date {publishdate} .
+source		select * from "bsbm"."vendor"
+]]
