@@ -44,12 +44,12 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import org.junit.experimental.categories.Category;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.sql.Array;
 import java.sql.SQLOutput;
 import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 
 @Category(ObdfTest.class)
 public class FederationOptimizerTest {
@@ -104,7 +104,7 @@ public class FederationOptimizerTest {
     }
 
     @Test
-    public void testFederationOptimizer() throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException, OBDASpecificationException, OntopReformulationException {
+    public void testFederationOptimizer() throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException, OBDASpecificationException, OntopReformulationException, IOException {
 //        set environment variables before running test:
 //        ONTOP_OBDF_OPTIMIZATION_ENABLED=true;
 //        ONTOP_OBDF_SOURCE_FILE=src/test/resources/federation/source_relations.txt;
@@ -112,7 +112,7 @@ public class FederationOptimizerTest {
 //        ONTOP_OBDF_HINT_FILE=src/test/resources/federation/hints.denodo-optmatv.txt;
 
         ArrayList<String> queryFiles = new ArrayList<String>();
-        queryFiles.add("src/test/resources/federation-test/SPARQL/01.SPARQL");
+//        queryFiles.add("src/test/resources/federation-test/SPARQL/01.SPARQL");
         queryFiles.add("src/test/resources/federation/bsbm-queries/01.rq");
         queryFiles.add("src/test/resources/federation/bsbm-queries/02.rq");
         queryFiles.add("src/test/resources/federation/bsbm-queries/03.rq");
@@ -135,20 +135,9 @@ public class FederationOptimizerTest {
         }
     }
 
-    public void testFederationOptimizer(String queryFile) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException, OBDASpecificationException, OntopReformulationException {
-        String sparqlQuery = "";
-        {
-            try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(queryFile)));
-                String line = null;
-                while((line=br.readLine()) != null ){
-                    sparqlQuery = sparqlQuery + line +"\n";
-                }
-                br.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+    public void testFederationOptimizer(String queryFile) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException, OBDASpecificationException, OntopReformulationException, IOException {
+
+        String sparqlQuery = readFile(queryFile);
 
         System.out.println("SPARQL query:\n" + sparqlQuery + "\n");
 
@@ -163,12 +152,46 @@ public class FederationOptimizerTest {
 
         System.out.println("Parsed query converted into IQ:\n" + iq + "\n");
 
+        String parsedQuery = readFile(queryFile.replace("bsbm-queries", "optimized-queries").replace(".rq", "-no-federation-optimization.iq"));
+        assertEquals(parsedQuery, iq.toString());
+
         IQ iqopt = federationOptimizer.optimize(iq);
 
         System.out.println("Optimized IQ:\n" + iqopt + "\n");
 
+        String optimizedQuery = readFile(queryFile.replace("bsbm-queries", "optimized-queries").replace(".rq", "-opt-mat.iq"));
+        assertEquals(optimizedQuery, iqopt.toString());
+
         IQ executableQuery = reformulator.generateExecutableQuery(iqopt);
         System.out.println("Final SQL query:\n" +((NativeNodeImpl)executableQuery.getTree().getChildren().get(0)).getNativeQueryString());
+
+        String optimizedQuerySql = readFile(queryFile.replace("bsbm-queries", "optimized-queries").replace(".rq", "-denodo-opt-mat.sql"));
+        assertEquals(optimizedQuerySql, executableQuery.toString());
+    }
+
+    // Custom method to read text from a file
+    public static String readFile(String filePath) throws IOException {
+        StringBuilder content = new StringBuilder();
+        try (FileInputStream fis = new FileInputStream(filePath);
+             InputStreamReader isr = new InputStreamReader(fis);
+             BufferedReader reader = new BufferedReader(isr)) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append("\n");
+            }
+        }
+        return content.toString();
+    }
+
+    // Custom method to write text to a file
+    public static void writeFile(String filePath, String content) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(filePath);
+             OutputStreamWriter osw = new OutputStreamWriter(fos);
+             BufferedWriter writer = new BufferedWriter(osw)) {
+
+            writer.write(content);
+        }
     }
 
 }
