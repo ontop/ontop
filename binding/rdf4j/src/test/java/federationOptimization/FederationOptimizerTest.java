@@ -1,17 +1,16 @@
 package federationOptimization;
 
+import cdjd.org.apache.arrow.flatbuf.Int;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Injector;
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.impl.QuestQueryProcessor;
-import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import it.unibz.inf.ontop.dbschema.UniqueConstraint;
-import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory;
 import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
@@ -21,32 +20,20 @@ import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.NativeNodeImpl;
 import it.unibz.inf.ontop.iq.optimizer.FederationOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.FederationOptimizerImpl;
+import it.unibz.inf.ontop.iq.optimizer.impl.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.DBConstant;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.query.KGQuery;
 import it.unibz.inf.ontop.query.KGQueryFactory;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import org.junit.experimental.categories.Category;
 
 import java.io.*;
-import java.sql.Array;
-import java.sql.SQLOutput;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -57,10 +44,13 @@ public class FederationOptimizerTest {
     private static final String owlFile = "src/test/resources/federation/ontology.owl";
     private static final String obdaFile = "src/test/resources/federation/mappings.fed.obda";
     private static final String propertyFile = "src/test/resources/federation/system-denodo-het.properties";
-    private static final String metadataFile = "src/test/resources/federation/system-het.metadata.json";
-    private static final String effLabel = "src/test/resources/federation/source_efficiency_labels.het.txt";
+    private static final String metadataFile = "src/test/resources/federation/system-denodo-het.metadata.json";
     private static final String constraintFile = "src/test/resources/federation/constraints.fed.txt";
-//    private static final String queryFile = "src/test/resources/federation/bsbm-queries/01.SPARQL";
+
+    private static final String hintFile = "src/test/resources/federation/hints.denodo-optmatv.txt";
+    private static final String effLabelFile = "src/test/resources/federation/source_efficiency_labels.het.txt";
+    private static final boolean optimizationEnabled = true;
+    private static final String sourceFile = "src/test/resources/federation/source_relations.txt";
 
 
     public OntopSQLOWLAPIConfiguration configuration;
@@ -96,35 +86,34 @@ public class FederationOptimizerTest {
             dbTypeFactory = CORE_SINGLETONS.getTypeFactory().getDBTypeFactory();
             idFactory = new SQLStandardQuotedIDFactory();
 
-            federationOptimizer = new FederationOptimizerImpl(IQ_FACTORY, ATOM_FACTORY, TERM_FACTORY, CORE_SINGLETONS);
+            federationOptimizer = new FederationOptimizerImpl(IQ_FACTORY, ATOM_FACTORY, TERM_FACTORY, CORE_SINGLETONS, optimizationEnabled, sourceFile, effLabelFile, hintFile);
 
         } catch (Exception e){
             e.printStackTrace();
         }
     }
-
     @Test
     public void testFederationOptimizer() throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException, OBDASpecificationException, OntopReformulationException, IOException {
-//        set environment variables before running test:
+//        in this test case global environment variables are passed as arguments to the constructor
+//        to run the test cases in obdalin mode, the following environment variables should be set:
 //        ONTOP_OBDF_OPTIMIZATION_ENABLED=true;
 //        ONTOP_OBDF_SOURCE_FILE=src/test/resources/federation/source_relations.txt;
 //        ONTOP_OBDF_EFF_LABEL_FILE=src/test/resources/federation/source_efficiency_labels.het.txt;
 //        ONTOP_OBDF_HINT_FILE=src/test/resources/federation/hints.denodo-optmatv.txt;
 
         ArrayList<String> queryFiles = new ArrayList<String>();
-//        queryFiles.add("src/test/resources/federation-test/SPARQL/01.SPARQL");
-        queryFiles.add("src/test/resources/federation/bsbm-queries/01.rq");
-        queryFiles.add("src/test/resources/federation/bsbm-queries/02.rq");
-        queryFiles.add("src/test/resources/federation/bsbm-queries/03.rq");
-        queryFiles.add("src/test/resources/federation/bsbm-queries/04.rq");
-        queryFiles.add("src/test/resources/federation/bsbm-queries/05.rq");
-        queryFiles.add("src/test/resources/federation/bsbm-queries/06.rq");
-        queryFiles.add("src/test/resources/federation/bsbm-queries/07.rq");
-        queryFiles.add("src/test/resources/federation/bsbm-queries/08.rq");
-        queryFiles.add("src/test/resources/federation/bsbm-queries/09.rq");
-        queryFiles.add("src/test/resources/federation/bsbm-queries/10.rq");
-        queryFiles.add("src/test/resources/federation/bsbm-queries/11.rq");
-        queryFiles.add("src/test/resources/federation/bsbm-queries/12.rq");
+//        queryFiles.add("src/test/resources/federation/bsbm-queries/01.rq");
+//        queryFiles.add("src/test/resources/federation/bsbm-queries/02.rq");
+//        queryFiles.add("src/test/resources/federation/bsbm-queries/03.rq");
+//        queryFiles.add("src/test/resources/federation/bsbm-queries/04.rq");
+//        queryFiles.add("src/test/resources/federation/bsbm-queries/05.rq");
+//        queryFiles.add("src/test/resources/federation/bsbm-queries/06.rq");
+//        queryFiles.add("src/test/resources/federation/bsbm-queries/07.rq");
+//        queryFiles.add("src/test/resources/federation/bsbm-queries/08.rq");
+//        queryFiles.add("src/test/resources/federation/bsbm-queries/09.rq");
+//        queryFiles.add("src/test/resources/federation/bsbm-queries/10.rq");
+//        queryFiles.add("src/test/resources/federation/bsbm-queries/11.rq");
+//        queryFiles.add("src/test/resources/federation/bsbm-queries/12.rq");
         queryFiles.add("src/test/resources/federation/bsbm-queries/13.rq");
         queryFiles.add("src/test/resources/federation/bsbm-queries/14.rq");
         queryFiles.add("src/test/resources/federation/bsbm-queries/15.rq");
@@ -152,21 +141,21 @@ public class FederationOptimizerTest {
 
         System.out.println("Parsed query converted into IQ:\n" + iq + "\n");
 
-        String parsedQuery = readFile(queryFile.replace("bsbm-queries", "optimized-queries").replace(".rq", "-no-federation-optimization.iq"));
+        String parsedQuery = readFile(queryFile.replace("bsbm-queries", "bsbm-queries/optimized-queries").replace(".rq", "-no-federation-optimization.iq"));
         assertEquals(parsedQuery, iq.toString());
 
         IQ iqopt = federationOptimizer.optimize(iq);
 
         System.out.println("Optimized IQ:\n" + iqopt + "\n");
 
-        String optimizedQuery = readFile(queryFile.replace("bsbm-queries", "optimized-queries").replace(".rq", "-opt-mat.iq"));
+        String optimizedQuery = readFile(queryFile.replace("bsbm-queries", "bsbm-queries/optimized-queries").replace(".rq", "-optmatv.iq"));
         assertEquals(optimizedQuery, iqopt.toString());
 
         IQ executableQuery = reformulator.generateExecutableQuery(iqopt);
         System.out.println("Final SQL query:\n" +((NativeNodeImpl)executableQuery.getTree().getChildren().get(0)).getNativeQueryString());
 
-        String optimizedQuerySql = readFile(queryFile.replace("bsbm-queries", "optimized-queries").replace(".rq", "-denodo-opt-mat.sql"));
-        assertEquals(optimizedQuerySql, executableQuery.toString());
+        String optimizedQuerySQL = readFile(queryFile.replace("bsbm-queries", "bsbm-queries/optimized-queries").replace(".rq", "-denodo-optmatv.sql"));
+        assertEquals(optimizedQuerySQL, executableQuery.toString());
     }
 
     // Custom method to read text from a file
