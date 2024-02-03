@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.query.KGQuery;
 import it.unibz.inf.ontop.query.KGQueryFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-
+@Category(ObdfTest.class)
 public class FederationOptimizerMultipleTest {
 
     public OntopSQLOWLAPIConfiguration configuration;
