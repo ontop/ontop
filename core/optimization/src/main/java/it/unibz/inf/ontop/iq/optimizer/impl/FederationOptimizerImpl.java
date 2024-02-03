@@ -49,13 +49,30 @@ public class FederationOptimizerImpl implements FederationOptimizer {
     public static DBTypeFactory dbTypeFactory;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FederationOptimizerImpl.class);
-
     @Inject
     public FederationOptimizerImpl(IntermediateQueryFactory iqFactory,
                                    AtomFactory atomFactory,
                                    TermFactory termFactory,
                                    CoreSingletons coreSingletons) {
-        enabled = Boolean.parseBoolean(System.getenv().getOrDefault("ONTOP_OBDF_OPTIMIZATION_ENABLED", "false"));
+        this(iqFactory,
+                atomFactory,
+                termFactory,
+                coreSingletons,
+                Boolean.parseBoolean(System.getenv().getOrDefault("ONTOP_OBDF_OPTIMIZATION_ENABLED", "false")),
+                System.getenv().get("ONTOP_OBDF_SOURCE_FILE"),
+                System.getenv().get("ONTOP_OBDF_EFF_LABEL_FILE"),
+                System.getenv().get("ONTOP_OBDF_HINT_FILE"));
+    }
+
+    public FederationOptimizerImpl(IntermediateQueryFactory iqFactory,
+                                   AtomFactory atomFactory,
+                                   TermFactory termFactory,
+                                   CoreSingletons coreSingletons,
+                                   boolean enabled,
+                                   String sourceFile,
+                                   String effLabelFile,
+                                   String hintFile) {
+        this.enabled = enabled;
         if (enabled) {
             try {
 
@@ -80,7 +97,8 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                 hints.add(emptyJoin);
                 hints.add(matViews);
 
-                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(System.getenv().get("ONTOP_OBDF_SOURCE_FILE"))));
+
+                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile)));
                 String line = null;
                 while ((line = br.readLine()) != null) {
                     String[] arr = line.split("-");
@@ -88,14 +106,14 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                 }
                 br.close();
 
-                BufferedReader br_new = new BufferedReader(new InputStreamReader(new FileInputStream(System.getenv().get("ONTOP_OBDF_EFF_LABEL_FILE"))));
+                BufferedReader br_new = new BufferedReader(new InputStreamReader(new FileInputStream(effLabelFile)));
                 while ((line = br_new.readLine()) != null) {
                     String[] arr = line.split("-");
                     labMap.put(arr[0], arr[1]);
                 }
                 br_new.close();
 
-                BufferedReader br_hint = new BufferedReader(new InputStreamReader(new FileInputStream(System.getenv().get("ONTOP_OBDF_HINT_FILE"))));
+                BufferedReader br_hint = new BufferedReader(new InputStreamReader(new FileInputStream(hintFile)));
                 while ((line = br_hint.readLine()) != null) {
                     String[] arr = line.split(":");
                     if (arr[0].startsWith("empty_federated_join")) {
