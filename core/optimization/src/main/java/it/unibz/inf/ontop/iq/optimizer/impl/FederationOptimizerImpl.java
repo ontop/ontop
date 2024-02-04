@@ -1563,7 +1563,8 @@ public class FederationOptimizerImpl implements FederationOptimizer {
         for(UniqueConstraint uc: dataNode.getRelationDefinition().getUniqueConstraints()){
             //if(uc.isPrimaryKey()){
             ImmutableList<Attribute> ats = uc.getAttributes();
-            if(ats.size() == 1){
+            //DO NOT ADD DUPLICATES otherwise you get multiple same filterconditions
+            if(ats.size() == 1 && !index.contains(attrs.indexOf(ats.get(0)))){
                 index.add(attrs.indexOf(ats.get(0)));
             }
             //}
