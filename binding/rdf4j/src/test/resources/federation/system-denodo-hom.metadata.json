@@ -1,1445 +1,2184 @@
 {
-  "relations" : [ {
-    "uniqueConstraints" : [ {
-      "name" : "reviewc_pkey",
-      "determinants" : [ "\"nr\"" ],
-      "isPrimaryKey" : true
-    } ],
-    "foreignKeys" : [ {
-      "name" : "reviewc_person",
-      "from" : {
-        "relation" : [ "\"reviewc\"" ],
-        "columns" : [ "\"person\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"person\"" ],
-        "columns" : [ "\"nr\"" ]
-      }
-    } ],
-    "columns" : [ {
-      "name" : "\"nr\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"product\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"producer\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"person\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"reviewdate\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    }, {
-      "name" : "\"title\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(600)"
-    }, {
-      "name" : "\"text\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(8192)"
-    }, {
-      "name" : "\"language\"",
-      "isNullable" : true,
-      "datatype" : "CHAR(2)"
-    }, {
-      "name" : "\"rating1\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"rating2\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"rating3\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"rating4\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"publisher\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"publishdate\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"reviewc\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"reviewc\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "pkey_matv_s5_productfeatureproduct2_s3_productfeature",
-      "determinants" : [ "\"1_0\"", "\"2_0\"" ],
-      "isPrimaryKey" : true
-    }, {
-      "name" : "idx_matv_s5_productfeatureproduct2_s3_productfeature_2_0_1_0",
-      "determinants" : [ "\"2_0\"", "\"1_0\"" ],
-      "isPrimaryKey" : false
-    } ],
-    "columns" : [ {
-      "name" : "\"1_0\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_1\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_0\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_1\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_2\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_3\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_4\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"matv_s5_productfeatureproduct2_s3_productfeature\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"matv_s5_productfeatureproduct2_s3_productfeature\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "product2_pkey",
-      "determinants" : [ "\"nr\"" ],
-      "isPrimaryKey" : true
-    } ],
-    "foreignKeys" : [ {
-      "name" : "product2_producer",
-      "from" : {
-        "relation" : [ "\"product2\"" ],
-        "columns" : [ "\"producer\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"producer\"" ],
-        "columns" : [ "\"nr\"" ]
-      }
-    } ],
-    "columns" : [ {
-      "name" : "\"nr\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"label\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(100)"
-    }, {
-      "name" : "\"comment\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2000)"
-    }, {
-      "name" : "\"producer\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"propertynum1\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"propertynum2\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"propertynum3\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"propertynum4\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"propertynum5\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"propertynum6\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"propertytex1\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(250)"
-    }, {
-      "name" : "\"propertytex2\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(250)"
-    }, {
-      "name" : "\"propertytex3\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(250)"
-    }, {
-      "name" : "\"propertytex4\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(250)"
-    }, {
-      "name" : "\"propertytex5\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(250)"
-    }, {
-      "name" : "\"propertytex6\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(250)"
-    }, {
-      "name" : "\"publisher\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"publishdate\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"product2\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"product2\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "product1_pkey",
-      "determinants" : [ "\"nr\"" ],
-      "isPrimaryKey" : true
-    } ],
-    "foreignKeys" : [ {
-      "name" : "product1_producer",
-      "from" : {
-        "relation" : [ "\"product1\"" ],
-        "columns" : [ "\"producer\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"producer\"" ],
-        "columns" : [ "\"nr\"" ]
-      }
-    } ],
-    "columns" : [ {
-      "name" : "\"nr\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"label\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(100)"
-    }, {
-      "name" : "\"comment\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2000)"
-    }, {
-      "name" : "\"producer\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"propertynum1\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"propertynum2\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"propertynum3\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"propertynum4\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"propertynum5\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"propertynum6\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"propertytex1\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(250)"
-    }, {
-      "name" : "\"propertytex2\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(250)"
-    }, {
-      "name" : "\"propertytex3\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(250)"
-    }, {
-      "name" : "\"propertytex4\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(250)"
-    }, {
-      "name" : "\"propertytex5\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(250)"
-    }, {
-      "name" : "\"propertytex6\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(250)"
-    }, {
-      "name" : "\"publisher\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"publishdate\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"product1\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"product1\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "pkey_matv_s1_productfeatureproduct1_s3_productfeature",
-      "determinants" : [ "\"1_0\"", "\"2_0\"" ],
-      "isPrimaryKey" : true
-    }, {
-      "name" : "idx_matv_s1_productfeatureproduct1_s3_productfeature_2_0_1_0",
-      "determinants" : [ "\"2_0\"", "\"1_0\"" ],
-      "isPrimaryKey" : false
-    } ],
-    "columns" : [ {
-      "name" : "\"1_0\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_1\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_0\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_1\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_2\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_3\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_4\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"matv_s1_productfeatureproduct1_s3_productfeature\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"matv_s1_productfeatureproduct1_s3_productfeature\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "productfeatureproduct1_pkey",
-      "determinants" : [ "\"product\"", "\"productfeature\"" ],
-      "isPrimaryKey" : true
-    }, {
-      "name" : "idx_productfeatureproduct1_productfeature_product",
-      "determinants" : [ "\"productfeature\"", "\"product\"" ],
-      "isPrimaryKey" : false
-    } ],
-    "foreignKeys" : [ {
-      "name" : "product1_productfeatureproduct1",
-      "from" : {
-        "relation" : [ "\"productfeatureproduct1\"" ],
-        "columns" : [ "\"product\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"product1\"" ],
-        "columns" : [ "\"nr\"" ]
-      }
-    }, {
-      "name" : "productfeatureproduct1_productfeature",
-      "from" : {
-        "relation" : [ "\"productfeatureproduct1\"" ],
-        "columns" : [ "\"product\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"productfeature\"" ],
-        "columns" : [ "\"nr\"" ]
-      }
-    } ],
-    "columns" : [ {
-      "name" : "\"product\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"productfeature\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    } ],
-    "name" : [ "\"productfeatureproduct1\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"productfeatureproduct1\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "productfeatureproduct2_pkey",
-      "determinants" : [ "\"product\"", "\"productfeature\"" ],
-      "isPrimaryKey" : true
-    }, {
-      "name" : "idx_productfeatureproduct2_productfeature_product",
-      "determinants" : [ "\"productfeature\"", "\"product\"" ],
-      "isPrimaryKey" : false
-    } ],
-    "foreignKeys" : [ {
-      "name" : "product2_productfeatureproduct2",
-      "from" : {
-        "relation" : [ "\"productfeatureproduct2\"" ],
-        "columns" : [ "\"product\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"product2\"" ],
-        "columns" : [ "\"nr\"" ]
-      }
-    }, {
-      "name" : "productfeatureproduct2_productfeature",
-      "from" : {
-        "relation" : [ "\"productfeatureproduct2\"" ],
-        "columns" : [ "\"productfeature\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"productfeature\"" ],
-        "columns" : [ "\"nr\"" ]
-      }
-    } ],
-    "columns" : [ {
-      "name" : "\"product\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"productfeature\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    } ],
-    "name" : [ "\"productfeatureproduct2\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"productfeatureproduct2\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "producttype_pkey",
-      "determinants" : [ "\"nr\"" ],
-      "isPrimaryKey" : true
-    } ],
-    "columns" : [ {
-      "name" : "\"nr\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"label\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(100)"
-    }, {
-      "name" : "\"comment\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2000)"
-    }, {
-      "name" : "\"parent\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"publisher\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"publishdate\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"producttype\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"producttype\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "PRIMARY",
-      "determinants" : [ "\"nr\"" ],
-      "isPrimaryKey" : true
-    } ],
-    "foreignKeys" : [ {
-      "name" : "vendor_offer",
-      "from" : {
-        "relation" : [ "\"offer\"" ],
-        "columns" : [ "\"vendor\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"vendor\"" ],
-        "columns" : [ "\"nr\"" ]
-      }
-    } ],
-    "columns" : [ {
-      "name" : "\"nr\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"product\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"producer\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"vendor\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"price\"",
-      "isNullable" : true,
-      "datatype" : "DOUBLE"
-    }, {
-      "name" : "\"validfrom\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    }, {
-      "name" : "\"validto\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    }, {
-      "name" : "\"deliverydays\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"offerwebpage\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(100)"
-    }, {
-      "name" : "\"publisher\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"publishdate\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"offer\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"offer\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "PRIMARY",
-      "determinants" : [ "\"nr\"" ],
-      "isPrimaryKey" : true
-    } ],
-    "foreignKeys" : [ {
-      "name" : "person_review",
-      "from" : {
-        "relation" : [ "\"review\"" ],
-        "columns" : [ "\"person\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"person\"" ],
-        "columns" : [ "\"nr\"" ]
-      }
-    } ],
-    "columns" : [ {
-      "name" : "\"nr\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"product\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"producer\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"person\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"reviewdate\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    }, {
-      "name" : "\"title\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(200)"
-    }, {
-      "name" : "\"text\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(8192)"
-    }, {
-      "name" : "\"language\"",
-      "isNullable" : true,
-      "datatype" : "CHAR(2)"
-    }, {
-      "name" : "\"rating1\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"rating2\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"rating3\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"rating4\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"publisher\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"publishdate\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"review\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"review\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "PRIMARY",
-      "determinants" : [ "\"nr\"" ],
-      "isPrimaryKey" : true
-    } ],
-    "columns" : [ {
-      "name" : "\"nr\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"label\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(100)"
-    }, {
-      "name" : "\"comment\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2000)"
-    }, {
-      "name" : "\"homepage\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(100)"
-    }, {
-      "name" : "\"country\"",
-      "isNullable" : true,
-      "datatype" : "CHAR(2)"
-    }, {
-      "name" : "\"publisher\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"publishdate\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"vendor\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"vendor\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "productfeature_pkey",
-      "determinants" : [ "\"nr\"" ],
-      "isPrimaryKey" : true
-    } ],
-    "columns" : [ {
-      "name" : "\"nr\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"label\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(100)"
-    }, {
-      "name" : "\"comment\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2000)"
-    }, {
-      "name" : "\"publisher\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"publishdate\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"productfeature\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"productfeature\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "pkey_matv_s1_product1_s4_producer",
-      "determinants" : [ "\"1_0\"", "\"2_0\"" ],
-      "isPrimaryKey" : true
-    }, {
-      "name" : "idx_matv_s1_product1_s4_producer_2_0_1_0",
-      "determinants" : [ "\"2_0\"", "\"1_0\"" ],
-      "isPrimaryKey" : false
-    } ],
-    "columns" : [ {
-      "name" : "\"1_0\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_1\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_2\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_3\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_4\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_5\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_6\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_7\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_8\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_9\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_10\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_11\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_12\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_13\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_14\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_15\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_16\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_17\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    }, {
-      "name" : "\"2_0\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_1\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_2\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_3\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_4\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_5\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_6\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"matv_s1_product1_s4_producer\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"matv_s1_product1_s4_producer\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "pkey_matv_s4_offer_s5_product2",
-      "determinants" : [ "\"1_0\"", "\"2_0\"" ],
-      "isPrimaryKey" : true
-    }, {
-      "name" : "idx_matv_s4_offer_s5_product2_2_0_1_0",
-      "determinants" : [ "\"2_0\"", "\"1_0\"" ],
-      "isPrimaryKey" : false
-    } ],
-    "columns" : [ {
-      "name" : "\"1_0\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_1\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_2\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_3\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_4\"",
-      "isNullable" : true,
-      "datatype" : "DOUBLE"
-    }, {
-      "name" : "\"1_5\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    }, {
-      "name" : "\"1_6\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    }, {
-      "name" : "\"1_7\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_8\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_9\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_10\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    }, {
-      "name" : "\"2_0\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_1\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_2\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_3\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_4\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_5\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_6\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_7\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_8\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_9\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_10\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_11\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_12\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_13\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_14\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_15\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_16\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_17\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"matv_s4_offer_s5_product2\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"matv_s4_offer_s5_product2\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "pkey_matv_s5_product2_s4_producer",
-      "determinants" : [ "\"1_0\"", "\"2_0\"" ],
-      "isPrimaryKey" : true
-    }, {
-      "name" : "idx_matv_s5_product2_s4_producer_2_0_1_0",
-      "determinants" : [ "\"2_0\"", "\"1_0\"" ],
-      "isPrimaryKey" : false
-    } ],
-    "columns" : [ {
-      "name" : "\"1_0\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_1\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_2\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_3\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_4\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_5\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_6\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_7\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_8\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_9\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_10\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_11\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_12\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_13\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_14\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_15\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_16\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_17\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    }, {
-      "name" : "\"2_0\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_1\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_2\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_3\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_4\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_5\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_6\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"matv_s5_product2_s4_producer\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"matv_s5_product2_s4_producer\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "pkey_matv_s4_offer_s1_product1",
-      "determinants" : [ "\"1_0\"", "\"2_0\"" ],
-      "isPrimaryKey" : true
-    }, {
-      "name" : "idx_matv_s4_offer_s1_product1_2_0_1_0",
-      "determinants" : [ "\"2_0\"", "\"1_0\"" ],
-      "isPrimaryKey" : false
-    } ],
-    "columns" : [ {
-      "name" : "\"1_0\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_1\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_2\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_3\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_4\"",
-      "isNullable" : true,
-      "datatype" : "DOUBLE"
-    }, {
-      "name" : "\"1_5\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    }, {
-      "name" : "\"1_6\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    }, {
-      "name" : "\"1_7\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_8\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"1_9\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_10\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    }, {
-      "name" : "\"2_0\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_1\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_2\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_3\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_4\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_5\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_6\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_7\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_8\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_9\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_10\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_11\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_12\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_13\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_14\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_15\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_16\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_17\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"matv_s4_offer_s1_product1\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"matv_s4_offer_s1_product1\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "pkey_matv_s5_productfeatureproduct2_s4_offer",
-      "determinants" : [ "\"1_0\"", "\"1_1\"", "\"2_0\"" ],
-      "isPrimaryKey" : true
-    }, {
-      "name" : "idx_matv_s5_productfeatureproduct2_s4_offer_2_0_1_0_1_1",
-      "determinants" : [ "\"2_0\"", "\"1_0\"", "\"1_1\"" ],
-      "isPrimaryKey" : false
-    } ],
-    "columns" : [ {
-      "name" : "\"1_0\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_1\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_0\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_1\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_2\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_3\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_4\"",
-      "isNullable" : true,
-      "datatype" : "DOUBLE"
-    }, {
-      "name" : "\"2_5\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    }, {
-      "name" : "\"2_6\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    }, {
-      "name" : "\"2_7\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_8\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_9\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_10\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"matv_s5_productfeatureproduct2_s4_offer\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"matv_s5_productfeatureproduct2_s4_offer\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "pkey_matv_s1_productfeatureproduct1_s4_offer",
-      "determinants" : [ "\"1_0\"", "\"1_1\"", "\"2_0\"" ],
-      "isPrimaryKey" : true
-    }, {
-      "name" : "idx_matv_s1_productfeatureproduct1_s4_offer_2_0_1_0_1_1",
-      "determinants" : [ "\"2_0\"", "\"1_0\"", "\"1_1\"" ],
-      "isPrimaryKey" : false
-    } ],
-    "columns" : [ {
-      "name" : "\"1_0\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"1_1\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_0\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_1\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_2\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_3\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_4\"",
-      "isNullable" : true,
-      "datatype" : "DOUBLE"
-    }, {
-      "name" : "\"2_5\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    }, {
-      "name" : "\"2_6\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    }, {
-      "name" : "\"2_7\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_8\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2147483647)"
-    }, {
-      "name" : "\"2_9\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"2_10\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"matv_s1_productfeatureproduct1_s4_offer\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"matv_s1_productfeatureproduct1_s4_offer\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "PRIMARY",
-      "determinants" : [ "\"nr\"" ],
-      "isPrimaryKey" : true
-    } ],
-    "columns" : [ {
-      "name" : "\"nr\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"name\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(30)"
-    }, {
-      "name" : "\"mbox_sha1sum\"",
-      "isNullable" : true,
-      "datatype" : "CHAR(40)"
-    }, {
-      "name" : "\"country\"",
-      "isNullable" : true,
-      "datatype" : "CHAR(2)"
-    }, {
-      "name" : "\"publisher\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"publishdate\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"person\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"person\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "producttypeproduct1_pkey",
-      "determinants" : [ "\"product\"", "\"producttype\"" ],
-      "isPrimaryKey" : true
-    }, {
-      "name" : "idx_producttypeproduct1_producttype_product",
-      "determinants" : [ "\"producttype\"", "\"product\"" ],
-      "isPrimaryKey" : false
-    } ],
-    "foreignKeys" : [ {
-      "name" : "product1_producttypeproduct1",
-      "from" : {
-        "relation" : [ "\"producttypeproduct1\"" ],
-        "columns" : [ "\"product\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"product1\"" ],
-        "columns" : [ "\"nr\"" ]
-      }
-    }, {
-      "name" : "producttypeproduct1_producttype",
-      "from" : {
-        "relation" : [ "\"producttypeproduct1\"" ],
-        "columns" : [ "\"producttype\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"producttype\"" ],
-        "columns" : [ "\"nr\"" ]
-      }
-    } ],
-    "columns" : [ {
-      "name" : "\"product\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"producttype\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    } ],
-    "name" : [ "\"producttypeproduct1\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"producttypeproduct1\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "PRIMARY",
-      "determinants" : [ "\"nr\"" ],
-      "isPrimaryKey" : true
-    } ],
-    "columns" : [ {
-      "name" : "\"nr\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"label\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(100)"
-    }, {
-      "name" : "\"comment\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(2000)"
-    }, {
-      "name" : "\"homepage\"",
-      "isNullable" : true,
-      "datatype" : "VARCHAR(100)"
-    }, {
-      "name" : "\"country\"",
-      "isNullable" : true,
-      "datatype" : "CHAR(2)"
-    }, {
-      "name" : "\"publisher\"",
-      "isNullable" : true,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"publishdate\"",
-      "isNullable" : true,
-      "datatype" : "DATE"
-    } ],
-    "name" : [ "\"producer\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"producer\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "producttypeproduct2_pkey",
-      "determinants" : [ "\"product\"", "\"producttype\"" ],
-      "isPrimaryKey" : true
-    }, {
-      "name" : "idx_producttypeproduct2_producttype_product",
-      "determinants" : [ "\"producttype\"", "\"product\"" ],
-      "isPrimaryKey" : false
-    } ],
-    "foreignKeys" : [ {
-      "name" : "product2_producttypeproduct2",
-      "from" : {
-        "relation" : [ "\"producttypeproduct2\"" ],
-        "columns" : [ "\"product\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"product2\"" ],
-        "columns" : [ "\"nr\"" ]
-      }
-    }, {
-      "name" : "producttypeproduct2_producttype",
-      "from" : {
-        "relation" : [ "\"producttypeproduct2\"" ],
-        "columns" : [ "\"producttype\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"producttype\"" ],
-        "columns" : [ "\"nr\"" ]
-      }
-    } ],
-    "columns" : [ {
-      "name" : "\"product\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"producttype\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    } ],
-    "name" : [ "\"producttypeproduct2\"" ],
-    "otherNames" : [ [ "\"bsbm\"", "\"producttypeproduct2\"" ] ]
-  } ],
-  "metadata" : {
-    "dbmsProductName" : "Virtual DataPort",
-    "dbmsVersion" : "8.0 20230301",
-    "driverName" : "com.denodo.vdp.jdbc.Driver",
-    "driverVersion" : "8.0 20230301",
-    "quotationString" : "\"",
-    "extractionTime" : "2024-01-24T15:50:11",
-    "idFactoryType" : "POSTGRESQL"
+  "relations": [
+    {
+      "uniqueConstraints": [
+        {
+          "name": "reviewc_pkey",
+          "determinants": [
+            "\"nr\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "reviewc_person",
+          "from": {
+            "relation": [
+              "\"reviewc\""
+            ],
+            "columns": [
+              "\"person\""
+            ]
+          },
+          "to": {
+            "relation": [
+              "\"person\""
+            ],
+            "columns": [
+              "\"nr\""
+            ]
+          }
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"nr\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"product\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"producer\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"person\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"reviewdate\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        },
+        {
+          "name": "\"title\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(600)"
+        },
+        {
+          "name": "\"text\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(8192)"
+        },
+        {
+          "name": "\"language\"",
+          "isNullable": true,
+          "datatype": "CHAR(2)"
+        },
+        {
+          "name": "\"rating1\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"rating2\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"rating3\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"rating4\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"publisher\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"publishdate\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"reviewc\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"reviewc\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "pkey_matv_s5_productfeatureproduct2_s3_productfeature",
+          "determinants": [
+            "\"1_0\"",
+            "\"2_0\""
+          ],
+          "isPrimaryKey": true
+        },
+        {
+          "name": "idx_matv_s5_productfeatureproduct2_s3_productfeature_2_0_1_0",
+          "determinants": [
+            "\"2_0\"",
+            "\"1_0\""
+          ],
+          "isPrimaryKey": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"1_0\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_1\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_0\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_1\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_2\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_3\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_4\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"matv_s5_productfeatureproduct2_s3_productfeature\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"matv_s5_productfeatureproduct2_s3_productfeature\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "product2_pkey",
+          "determinants": [
+            "\"nr\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "product2_producer",
+          "from": {
+            "relation": [
+              "\"product2\""
+            ],
+            "columns": [
+              "\"producer\""
+            ]
+          },
+          "to": {
+            "relation": [
+              "\"producer\""
+            ],
+            "columns": [
+              "\"nr\""
+            ]
+          }
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"nr\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"label\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(100)"
+        },
+        {
+          "name": "\"comment\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2000)"
+        },
+        {
+          "name": "\"producer\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"propertynum1\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"propertynum2\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"propertynum3\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"propertynum4\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"propertynum5\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"propertynum6\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"propertytex1\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(250)"
+        },
+        {
+          "name": "\"propertytex2\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(250)"
+        },
+        {
+          "name": "\"propertytex3\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(250)"
+        },
+        {
+          "name": "\"propertytex4\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(250)"
+        },
+        {
+          "name": "\"propertytex5\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(250)"
+        },
+        {
+          "name": "\"propertytex6\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(250)"
+        },
+        {
+          "name": "\"publisher\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"publishdate\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"product2\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"product2\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "product1_pkey",
+          "determinants": [
+            "\"nr\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "product1_producer",
+          "from": {
+            "relation": [
+              "\"product1\""
+            ],
+            "columns": [
+              "\"producer\""
+            ]
+          },
+          "to": {
+            "relation": [
+              "\"producer\""
+            ],
+            "columns": [
+              "\"nr\""
+            ]
+          }
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"nr\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"label\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(100)"
+        },
+        {
+          "name": "\"comment\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2000)"
+        },
+        {
+          "name": "\"producer\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"propertynum1\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"propertynum2\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"propertynum3\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"propertynum4\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"propertynum5\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"propertynum6\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"propertytex1\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(250)"
+        },
+        {
+          "name": "\"propertytex2\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(250)"
+        },
+        {
+          "name": "\"propertytex3\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(250)"
+        },
+        {
+          "name": "\"propertytex4\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(250)"
+        },
+        {
+          "name": "\"propertytex5\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(250)"
+        },
+        {
+          "name": "\"propertytex6\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(250)"
+        },
+        {
+          "name": "\"publisher\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"publishdate\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"product1\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"product1\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "pkey_matv_s1_productfeatureproduct1_s3_productfeature",
+          "determinants": [
+            "\"1_0\"",
+            "\"2_0\""
+          ],
+          "isPrimaryKey": true
+        },
+        {
+          "name": "idx_matv_s1_productfeatureproduct1_s3_productfeature_2_0_1_0",
+          "determinants": [
+            "\"2_0\"",
+            "\"1_0\""
+          ],
+          "isPrimaryKey": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"1_0\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_1\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_0\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_1\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_2\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_3\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_4\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"matv_s1_productfeatureproduct1_s3_productfeature\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"matv_s1_productfeatureproduct1_s3_productfeature\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "productfeatureproduct1_pkey",
+          "determinants": [
+            "\"product\"",
+            "\"productfeature\""
+          ],
+          "isPrimaryKey": true
+        },
+        {
+          "name": "idx_productfeatureproduct1_productfeature_product",
+          "determinants": [
+            "\"productfeature\"",
+            "\"product\""
+          ],
+          "isPrimaryKey": false
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "product1_productfeatureproduct1",
+          "from": {
+            "relation": [
+              "\"productfeatureproduct1\""
+            ],
+            "columns": [
+              "\"product\""
+            ]
+          },
+          "to": {
+            "relation": [
+              "\"product1\""
+            ],
+            "columns": [
+              "\"nr\""
+            ]
+          }
+        },
+        {
+          "name": "productfeatureproduct1_productfeature",
+          "from": {
+            "relation": [
+              "\"productfeatureproduct1\""
+            ],
+            "columns": [
+              "\"product\""
+            ]
+          },
+          "to": {
+            "relation": [
+              "\"productfeature\""
+            ],
+            "columns": [
+              "\"nr\""
+            ]
+          }
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"product\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"productfeature\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        }
+      ],
+      "name": [
+        "\"productfeatureproduct1\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"productfeatureproduct1\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "productfeatureproduct2_pkey",
+          "determinants": [
+            "\"product\"",
+            "\"productfeature\""
+          ],
+          "isPrimaryKey": true
+        },
+        {
+          "name": "idx_productfeatureproduct2_productfeature_product",
+          "determinants": [
+            "\"productfeature\"",
+            "\"product\""
+          ],
+          "isPrimaryKey": false
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "product2_productfeatureproduct2",
+          "from": {
+            "relation": [
+              "\"productfeatureproduct2\""
+            ],
+            "columns": [
+              "\"product\""
+            ]
+          },
+          "to": {
+            "relation": [
+              "\"product2\""
+            ],
+            "columns": [
+              "\"nr\""
+            ]
+          }
+        },
+        {
+          "name": "productfeatureproduct2_productfeature",
+          "from": {
+            "relation": [
+              "\"productfeatureproduct2\""
+            ],
+            "columns": [
+              "\"productfeature\""
+            ]
+          },
+          "to": {
+            "relation": [
+              "\"productfeature\""
+            ],
+            "columns": [
+              "\"nr\""
+            ]
+          }
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"product\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"productfeature\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        }
+      ],
+      "name": [
+        "\"productfeatureproduct2\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"productfeatureproduct2\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "producttype_pkey",
+          "determinants": [
+            "\"nr\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"nr\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"label\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(100)"
+        },
+        {
+          "name": "\"comment\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2000)"
+        },
+        {
+          "name": "\"parent\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"publisher\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"publishdate\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"producttype\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"producttype\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "PRIMARY",
+          "determinants": [
+            "\"nr\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "vendor_offer",
+          "from": {
+            "relation": [
+              "\"offer\""
+            ],
+            "columns": [
+              "\"vendor\""
+            ]
+          },
+          "to": {
+            "relation": [
+              "\"vendor\""
+            ],
+            "columns": [
+              "\"nr\""
+            ]
+          }
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"nr\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"product\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"producer\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"vendor\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"price\"",
+          "isNullable": true,
+          "datatype": "DOUBLE"
+        },
+        {
+          "name": "\"validfrom\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        },
+        {
+          "name": "\"validto\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        },
+        {
+          "name": "\"deliverydays\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"offerwebpage\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(100)"
+        },
+        {
+          "name": "\"publisher\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"publishdate\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"offer\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"offer\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "PRIMARY",
+          "determinants": [
+            "\"nr\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "person_review",
+          "from": {
+            "relation": [
+              "\"review\""
+            ],
+            "columns": [
+              "\"person\""
+            ]
+          },
+          "to": {
+            "relation": [
+              "\"person\""
+            ],
+            "columns": [
+              "\"nr\""
+            ]
+          }
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"nr\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"product\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"producer\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"person\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"reviewdate\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        },
+        {
+          "name": "\"title\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(200)"
+        },
+        {
+          "name": "\"text\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(8192)"
+        },
+        {
+          "name": "\"language\"",
+          "isNullable": true,
+          "datatype": "CHAR(2)"
+        },
+        {
+          "name": "\"rating1\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"rating2\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"rating3\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"rating4\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"publisher\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"publishdate\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"review\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"review\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "PRIMARY",
+          "determinants": [
+            "\"nr\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"nr\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"label\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(100)"
+        },
+        {
+          "name": "\"comment\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2000)"
+        },
+        {
+          "name": "\"homepage\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(100)"
+        },
+        {
+          "name": "\"country\"",
+          "isNullable": true,
+          "datatype": "CHAR(2)"
+        },
+        {
+          "name": "\"publisher\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"publishdate\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"vendor\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"vendor\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "productfeature_pkey",
+          "determinants": [
+            "\"nr\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"nr\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"label\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(100)"
+        },
+        {
+          "name": "\"comment\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2000)"
+        },
+        {
+          "name": "\"publisher\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"publishdate\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"productfeature\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"productfeature\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "pkey_matv_s1_product1_s4_producer",
+          "determinants": [
+            "\"1_0\"",
+            "\"2_0\""
+          ],
+          "isPrimaryKey": true
+        },
+        {
+          "name": "idx_matv_s1_product1_s4_producer_2_0_1_0",
+          "determinants": [
+            "\"2_0\"",
+            "\"1_0\""
+          ],
+          "isPrimaryKey": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"1_0\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_1\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_2\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_3\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_4\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_5\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_6\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_7\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_8\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_9\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_10\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_11\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_12\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_13\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_14\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_15\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_16\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_17\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        },
+        {
+          "name": "\"2_0\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_1\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_2\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_3\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_4\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_5\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_6\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"matv_s1_product1_s4_producer\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"matv_s1_product1_s4_producer\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "pkey_matv_s4_offer_s5_product2",
+          "determinants": [
+            "\"1_0\"",
+            "\"2_0\""
+          ],
+          "isPrimaryKey": true
+        },
+        {
+          "name": "idx_matv_s4_offer_s5_product2_2_0_1_0",
+          "determinants": [
+            "\"2_0\"",
+            "\"1_0\""
+          ],
+          "isPrimaryKey": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"1_0\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_1\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_2\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_3\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_4\"",
+          "isNullable": true,
+          "datatype": "DOUBLE"
+        },
+        {
+          "name": "\"1_5\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        },
+        {
+          "name": "\"1_6\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        },
+        {
+          "name": "\"1_7\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_8\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_9\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_10\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        },
+        {
+          "name": "\"2_0\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_1\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_2\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_3\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_4\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_5\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_6\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_7\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_8\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_9\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_10\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_11\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_12\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_13\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_14\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_15\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_16\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_17\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"matv_s4_offer_s5_product2\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"matv_s4_offer_s5_product2\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "pkey_matv_s5_product2_s4_producer",
+          "determinants": [
+            "\"1_0\"",
+            "\"2_0\""
+          ],
+          "isPrimaryKey": true
+        },
+        {
+          "name": "idx_matv_s5_product2_s4_producer_2_0_1_0",
+          "determinants": [
+            "\"2_0\"",
+            "\"1_0\""
+          ],
+          "isPrimaryKey": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"1_0\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_1\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_2\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_3\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_4\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_5\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_6\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_7\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_8\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_9\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_10\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_11\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_12\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_13\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_14\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_15\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_16\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_17\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        },
+        {
+          "name": "\"2_0\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_1\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_2\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_3\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_4\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_5\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_6\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"matv_s5_product2_s4_producer\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"matv_s5_product2_s4_producer\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "pkey_matv_s4_offer_s1_product1",
+          "determinants": [
+            "\"1_0\"",
+            "\"2_0\""
+          ],
+          "isPrimaryKey": true
+        },
+        {
+          "name": "idx_matv_s4_offer_s1_product1_2_0_1_0",
+          "determinants": [
+            "\"2_0\"",
+            "\"1_0\""
+          ],
+          "isPrimaryKey": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"1_0\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_1\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_2\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_3\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_4\"",
+          "isNullable": true,
+          "datatype": "DOUBLE"
+        },
+        {
+          "name": "\"1_5\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        },
+        {
+          "name": "\"1_6\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        },
+        {
+          "name": "\"1_7\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_8\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"1_9\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_10\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        },
+        {
+          "name": "\"2_0\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_1\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_2\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_3\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_4\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_5\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_6\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_7\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_8\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_9\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_10\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_11\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_12\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_13\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_14\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_15\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_16\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_17\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"matv_s4_offer_s1_product1\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"matv_s4_offer_s1_product1\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "pkey_matv_s5_productfeatureproduct2_s4_offer",
+          "determinants": [
+            "\"1_0\"",
+            "\"1_1\"",
+            "\"2_0\""
+          ],
+          "isPrimaryKey": true
+        },
+        {
+          "name": "idx_matv_s5_productfeatureproduct2_s4_offer_2_0_1_0_1_1",
+          "determinants": [
+            "\"2_0\"",
+            "\"1_0\"",
+            "\"1_1\""
+          ],
+          "isPrimaryKey": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"1_0\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_1\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_0\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_1\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_2\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_3\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_4\"",
+          "isNullable": true,
+          "datatype": "DOUBLE"
+        },
+        {
+          "name": "\"2_5\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        },
+        {
+          "name": "\"2_6\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        },
+        {
+          "name": "\"2_7\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_8\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_9\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_10\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"matv_s5_productfeatureproduct2_s4_offer\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"matv_s5_productfeatureproduct2_s4_offer\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "pkey_matv_s1_productfeatureproduct1_s4_offer",
+          "determinants": [
+            "\"1_0\"",
+            "\"1_1\"",
+            "\"2_0\""
+          ],
+          "isPrimaryKey": true
+        },
+        {
+          "name": "idx_matv_s1_productfeatureproduct1_s4_offer_2_0_1_0_1_1",
+          "determinants": [
+            "\"2_0\"",
+            "\"1_0\"",
+            "\"1_1\""
+          ],
+          "isPrimaryKey": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"1_0\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"1_1\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_0\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_1\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_2\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_3\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_4\"",
+          "isNullable": true,
+          "datatype": "DOUBLE"
+        },
+        {
+          "name": "\"2_5\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        },
+        {
+          "name": "\"2_6\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        },
+        {
+          "name": "\"2_7\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_8\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2147483647)"
+        },
+        {
+          "name": "\"2_9\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"2_10\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"matv_s1_productfeatureproduct1_s4_offer\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"matv_s1_productfeatureproduct1_s4_offer\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "PRIMARY",
+          "determinants": [
+            "\"nr\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"nr\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"name\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(30)"
+        },
+        {
+          "name": "\"mbox_sha1sum\"",
+          "isNullable": true,
+          "datatype": "CHAR(40)"
+        },
+        {
+          "name": "\"country\"",
+          "isNullable": true,
+          "datatype": "CHAR(2)"
+        },
+        {
+          "name": "\"publisher\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"publishdate\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"person\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"person\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "producttypeproduct1_pkey",
+          "determinants": [
+            "\"product\"",
+            "\"producttype\""
+          ],
+          "isPrimaryKey": true
+        },
+        {
+          "name": "idx_producttypeproduct1_producttype_product",
+          "determinants": [
+            "\"producttype\"",
+            "\"product\""
+          ],
+          "isPrimaryKey": false
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "product1_producttypeproduct1",
+          "from": {
+            "relation": [
+              "\"producttypeproduct1\""
+            ],
+            "columns": [
+              "\"product\""
+            ]
+          },
+          "to": {
+            "relation": [
+              "\"product1\""
+            ],
+            "columns": [
+              "\"nr\""
+            ]
+          }
+        },
+        {
+          "name": "producttypeproduct1_producttype",
+          "from": {
+            "relation": [
+              "\"producttypeproduct1\""
+            ],
+            "columns": [
+              "\"producttype\""
+            ]
+          },
+          "to": {
+            "relation": [
+              "\"producttype\""
+            ],
+            "columns": [
+              "\"nr\""
+            ]
+          }
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"product\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"producttype\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        }
+      ],
+      "name": [
+        "\"producttypeproduct1\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"producttypeproduct1\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "PRIMARY",
+          "determinants": [
+            "\"nr\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"nr\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"label\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(100)"
+        },
+        {
+          "name": "\"comment\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(2000)"
+        },
+        {
+          "name": "\"homepage\"",
+          "isNullable": true,
+          "datatype": "VARCHAR(100)"
+        },
+        {
+          "name": "\"country\"",
+          "isNullable": true,
+          "datatype": "CHAR(2)"
+        },
+        {
+          "name": "\"publisher\"",
+          "isNullable": true,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"publishdate\"",
+          "isNullable": true,
+          "datatype": "DATE"
+        }
+      ],
+      "name": [
+        "\"producer\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"producer\""
+        ]
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "producttypeproduct2_pkey",
+          "determinants": [
+            "\"product\"",
+            "\"producttype\""
+          ],
+          "isPrimaryKey": true
+        },
+        {
+          "name": "idx_producttypeproduct2_producttype_product",
+          "determinants": [
+            "\"producttype\"",
+            "\"product\""
+          ],
+          "isPrimaryKey": false
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "product2_producttypeproduct2",
+          "from": {
+            "relation": [
+              "\"producttypeproduct2\""
+            ],
+            "columns": [
+              "\"product\""
+            ]
+          },
+          "to": {
+            "relation": [
+              "\"product2\""
+            ],
+            "columns": [
+              "\"nr\""
+            ]
+          }
+        },
+        {
+          "name": "producttypeproduct2_producttype",
+          "from": {
+            "relation": [
+              "\"producttypeproduct2\""
+            ],
+            "columns": [
+              "\"producttype\""
+            ]
+          },
+          "to": {
+            "relation": [
+              "\"producttype\""
+            ],
+            "columns": [
+              "\"nr\""
+            ]
+          }
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"product\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        },
+        {
+          "name": "\"producttype\"",
+          "isNullable": false,
+          "datatype": "INTEGER"
+        }
+      ],
+      "name": [
+        "\"producttypeproduct2\""
+      ],
+      "otherNames": [
+        [
+          "\"bsbm\"",
+          "\"producttypeproduct2\""
+        ]
+      ]
+    }
+  ],
+  "metadata": {
+    "dbmsProductName": "Virtual DataPort",
+    "dbmsVersion": "8.0 20230301",
+    "driverName": "com.denodo.vdp.jdbc.Driver",
+    "driverVersion": "8.0 20230301",
+    "quotationString": "\"",
+    "extractionTime": "2024-01-24T15:50:11",
+    "idFactoryType": "POSTGRESQL"
   }
 }
