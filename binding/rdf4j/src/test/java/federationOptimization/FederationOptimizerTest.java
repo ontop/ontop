@@ -1,5 +1,7 @@
 package federationOptimization;
 
+import cdjd.com.fasterxml.jackson.databind.JsonNode;
+import cdjd.com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Injector;
@@ -30,7 +32,12 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import org.junit.experimental.categories.Category;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 
@@ -40,6 +47,7 @@ public class FederationOptimizerTest {
     private static final String owlFile = "src/test/resources/federation/ontology.owl";
     private static final String obdaFile = "src/test/resources/federation/mappings.fed.obda";
     private static final String propertyFile = "src/test/resources/federation/system-denodo-het.properties";
+//    private static final String metadataFile = null;
     private static final String metadataFile = "src/test/resources/federation/system-denodo-het.metadata.json";
     private static final String constraintFile = "src/test/resources/federation/constraints.fed.txt";
 
@@ -122,8 +130,12 @@ public class FederationOptimizerTest {
 
     public void testFederationOptimizer(String queryFile) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException, OBDASpecificationException, OntopReformulationException, IOException {
 
-        String sparqlQuery = readFile(queryFile);
+        String inputIQFile = queryFile.replace("bsbm-queries/", "bsbm-queries/optimized-queries/").replace(".rq","-denodo-het-optmatv--no-opt.iq") ;
+        String outputIQFile = queryFile.replace("bsbm-queries/", "bsbm-queries/optimized-queries/").replace(".rq","-denodo-het-optmatv--fed-opt.iq") ;
+        String executableIQFile = queryFile.replace("bsbm-queries/", "bsbm-queries/optimized-queries/").replace(".rq","-denodo-het-optmatv--exec.iq") ;
+        String outputSQLFile = queryFile.replace("bsbm-queries/", "bsbm-queries/optimized-queries/").replace(".rq","-denodo-het-optmatv.sql") ;
 
+        String sparqlQuery = Files.readString(Path.of(queryFile));
         System.out.println("SPARQL query:\n" + sparqlQuery + "\n");
 
         QuestQueryProcessor.returnPlannedQuery = true;
@@ -135,48 +147,105 @@ public class FederationOptimizerTest {
         IQ iq = reformulator.reformulateIntoNativeQuery(query, emptyQueryContext, queryLogger);
         QuestQueryProcessor.returnPlannedQuery = false;
 
+        // check if parsing of the query by Ontop is correct
         System.out.println("Parsed query converted into IQ:\n" + iq + "\n");
-
-        String parsedQuery = readFile(queryFile.replace("bsbm-queries", "bsbm-queries/optimized-queries").replace(".rq", "-no-federation-optimization.iq"));
+        String parsedQuery = Files.readString(Path.of(inputIQFile));
         assertEquals(parsedQuery, iq.toString());
 
+        // Check if optimization of the query is correct
         IQ iqopt = federationOptimizer.optimize(iq);
+        // Check if multiple application of normalizeForOptimization and optimize lead to a better query
+//        IQ iqoptnew = iqopt.normalizeForOptimization();
+//        int i=0;
+//        while(!iqopt.toString().equals(iqoptnew.toString())) {
+//            iqopt = federationOptimizer.optimize(iqoptnew);
+//            iqoptnew = iqopt.normalizeForOptimization();
+//            i++;
+//            System.out.println("HALLO"+i);
+//        }
 
         System.out.println("Optimized IQ:\n" + iqopt + "\n");
+        String optimizedQuery = Files.readString(Path.of(outputIQFile));
+//        assertEquals(optimizedQuery, iqopt.toString());
 
-        String optimizedQuery = readFile(queryFile.replace("bsbm-queries", "bsbm-queries/optimized-queries").replace(".rq", "-optmatv.iq"));
-        assertEquals(optimizedQuery, iqopt.toString());
+        // Check if the executable query is correct
+        // The executable query is the query that contains the CONSTRUCT instructions for the VKG and the SQL query for the sources
+        IQ iqexec = reformulator.generateExecutableQuery(iqopt);
+        System.out.println("Executable IQ:\n" + iqexec + "\n");
+        String executableQuery = Files.readString(Path.of(executableIQFile));
+        assertEquals(executableQuery, iqexec.toString());
 
-        IQ executableQuery = reformulator.generateExecutableQuery(iqopt);
-        System.out.println("Final SQL query:\n" +((NativeNodeImpl)executableQuery.getTree().getChildren().get(0)).getNativeQueryString());
-
-        String optimizedQuerySQL = readFile(queryFile.replace("bsbm-queries", "bsbm-queries/optimized-queries").replace(".rq", "-denodo-optmatv.sql"));
-        assertEquals(optimizedQuerySQL, executableQuery.toString());
+        // Check if the SQL query is correct
+        String querysql = ((NativeNodeImpl) iqexec.getTree().getChildren().get(0)).getNativeQueryString();
+        System.out.println("Final SQL query:\n" + querysql);
+        String optimizedQuerySQL = Files.readString(Path.of(outputSQLFile));
+        assertEquals(optimizedQuerySQL, querysql);
     }
 
-    // Custom method to read text from a file
-    public static String readFile(String filePath) throws IOException {
-        StringBuilder content = new StringBuilder();
-        try (FileInputStream fis = new FileInputStream(filePath);
-             InputStreamReader isr = new InputStreamReader(fis);
-             BufferedReader reader = new BufferedReader(isr)) {
+    @Test
+    public void testExtractSQLFromLogFile() throws IOException {
+        // Assuming the log file path is correct and accessible
+        Path path = Path.of("src/test/resources/federation/mixer_200_denodo-het_optmatv.log");
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                content.append(line).append("\n");
-            }
-        }
-        return content.toString();
-    }
-
-    // Custom method to write text to a file
-    public static void writeFile(String filePath, String content) throws IOException {
-        try (FileOutputStream fos = new FileOutputStream(filePath);
-             OutputStreamWriter osw = new OutputStreamWriter(fos);
-             BufferedWriter writer = new BufferedWriter(osw)) {
-
-            writer.write(content);
+        // Reading the file line by line
+        try (Stream<String> lines = Files.lines(path)) {
+            lines.forEach(line -> {
+                if (line.contains("reformulatedQuery")) {
+                    extractSQLFromLog(line);
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
+    public String extractSQLFromLog(String inputString) {
+        if (!inputString.contains("reformulatedQuery") || !inputString.contains("sparqlQuery") || !inputString.contains("payload")) {
+            return null;
+        }
+
+        // Initialize ObjectMapper for parsing JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // Find the start of the JSON data
+        int jsonStartPos = inputString.indexOf('{');
+        String jsonString = inputString.substring(jsonStartPos);
+
+        try {
+            // Parse the JSON string into a JsonNode
+            JsonNode rootNode = objectMapper.readTree(jsonString);
+
+            // Navigate through the JSON to extract the "reformulatedQuery"
+            JsonNode reformulatedQueryNode = rootNode.path("payload").path("reformulatedQuery");
+            String reformulatedQuery = reformulatedQueryNode.asText();
+
+            int bsbmNumber = extractNumberFromSparqlQuery(rootNode.path("payload").path("sparqlQuery").asText());
+
+            // Print the extracted SQL query for demonstration
+            System.out.println("BSBM Query " + bsbmNumber + ":\nReformulated SQL Query:");
+            System.out.println(reformulatedQuery);
+
+            Files.writeString(Path.of("src/test/resources/federation/bsbm-queries/obdalin/"+ String.format("%02d", bsbmNumber) + "-denodo-het_optmatv--exec.iq"), reformulatedQuery);
+
+            return reformulatedQuery;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static int extractNumberFromSparqlQuery(String inputString) {
+        // Regular expression to find "BSBM-" followed by any number
+        Pattern pattern = Pattern.compile("BSBM-(\\d+):");
+        Matcher matcher = pattern.matcher(inputString);
+
+        if (matcher.find()) {
+            // Return the first group (the number following "BSBM-")
+            return Integer.parseInt(matcher.group(1));
+        }
+
+        // Return a default value or throw an exception if not found
+        return -1; // Indicates not found or you can handle it differently
+    }
 }
