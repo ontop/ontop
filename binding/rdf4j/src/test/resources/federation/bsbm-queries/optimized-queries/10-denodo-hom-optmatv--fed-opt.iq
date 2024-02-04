@@ -1,0 +1,7 @@
+ans1(offer, price)
+CONSTRUCT [offer, price] [offer/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor/Offer{}(INTEGERToTEXT(nr1m5)),IRI), price/RDF(DOUBLEToTEXT(price1m34),xsd:double)]
+   SLICE limit=10
+      ORDER BY [ASC(DOUBLEToDOUBLE PRECISION(price1m34))]
+         JOIN AND5(DATE_GT(validto1m39,"2008-06-13"^^DATE),NUM_LTE(INTEGERToBIGINT(deliverydays1m33),"3"^^BIGINT),IS_NOT_NULL(deliverydays1m33),IS_NOT_NULL(price1m34),IS_NOT_NULL(validto1m39))
+            EXTENSIONAL "offer"(0:nr1m5,1:"94"^^INTEGER,3:vendor1m8,4:price1m34,6:validto1m39,7:deliverydays1m33)
+            EXTENSIONAL "vendor"(0:vendor1m8,4:"US"^^CHAR)

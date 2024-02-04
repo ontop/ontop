@@ -1,0 +1,66 @@
+ans1(product, label, propertyTextual)
+CONSTRUCT [product, label, propertyTextual] [product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product{}(INTEGERToSTRING(nr0m12)),IRI), label/RDF(label10m13,xsd:string), propertyTextual/RDF(propertytex1m14,xsd:string)]
+   SLICE offset=5 limit=10
+      DISTINCT
+         ORDER BY [ASC(label10m13)]
+            UNION [nr0m12, label10m13, propertytex1m14]
+               CONSTRUCT [nr0m12, label10m13, propertytex1m14] []
+                  DISTINCT
+                     JOIN NUM_GT(INTEGERToBIGINT(propertynum1m36),"53"^^BIGINT)
+                        UNION [label10m13, nr0m12]
+                           FILTER IS_NOT_NULL(label10m13)
+                              EXTENSIONAL "s1"."product1"(0:nr0m12,1:label10m13)
+                           FILTER IS_NOT_NULL(label10m13)
+                              EXTENSIONAL "s5"."product2"(0:nr0m12,1:label10m13)
+                        UNION [nr0m12]
+                           EXTENSIONAL "s1"."product1"(0:nr0m12)
+                           EXTENSIONAL "s5"."product2"(0:nr0m12)
+                        UNION [nr0m12]
+                           EXTENSIONAL "s1"."producttypeproduct1"(0:nr0m12,1:"4"^^INTEGER)
+                           EXTENSIONAL "s5"."producttypeproduct2"(0:nr0m12,1:"4"^^INTEGER)
+                        UNION [nr0m12]
+                           EXTENSIONAL "s1"."productfeatureproduct1"(0:nr0m12,1:"90"^^INTEGER)
+                           EXTENSIONAL "s5"."productfeatureproduct2"(0:nr0m12,1:"90"^^INTEGER)
+                        UNION [nr0m12]
+                           EXTENSIONAL "s1"."productfeatureproduct1"(0:nr0m12,1:"79"^^INTEGER)
+                           EXTENSIONAL "s5"."productfeatureproduct2"(0:nr0m12,1:"79"^^INTEGER)
+                        UNION [nr0m12, propertytex1m14]
+                           FILTER IS_NOT_NULL(propertytex1m14)
+                              EXTENSIONAL "s1"."product1"(0:nr0m12,10:propertytex1m14)
+                           FILTER IS_NOT_NULL(propertytex1m14)
+                              EXTENSIONAL "s5"."product2"(0:nr0m12,10:propertytex1m14)
+                        UNION [nr0m12, propertynum1m36]
+                           FILTER IS_NOT_NULL(propertynum1m36)
+                              EXTENSIONAL "s1"."product1"(0:nr0m12,4:propertynum1m36)
+                           FILTER IS_NOT_NULL(propertynum1m36)
+                              EXTENSIONAL "s5"."product2"(0:nr0m12,4:propertynum1m36)
+               CONSTRUCT [nr0m12, label10m13, propertytex1m14] []
+                  DISTINCT
+                     JOIN NUM_GT(INTEGERToBIGINT(propertynum1m35),"134"^^BIGINT)
+                        UNION [label10m13, nr0m12]
+                           FILTER IS_NOT_NULL(label10m13)
+                              EXTENSIONAL "s1"."product1"(0:nr0m12,1:label10m13)
+                           FILTER IS_NOT_NULL(label10m13)
+                              EXTENSIONAL "s5"."product2"(0:nr0m12,1:label10m13)
+                        UNION [nr0m12]
+                           EXTENSIONAL "s1"."product1"(0:nr0m12)
+                           EXTENSIONAL "s5"."product2"(0:nr0m12)
+                        UNION [nr0m12]
+                           EXTENSIONAL "s1"."producttypeproduct1"(0:nr0m12,1:"4"^^INTEGER)
+                           EXTENSIONAL "s5"."producttypeproduct2"(0:nr0m12,1:"4"^^INTEGER)
+                        UNION [nr0m12]
+                           EXTENSIONAL "s1"."productfeatureproduct1"(0:nr0m12,1:"90"^^INTEGER)
+                           EXTENSIONAL "s5"."productfeatureproduct2"(0:nr0m12,1:"90"^^INTEGER)
+                        UNION [nr0m12]
+                           EXTENSIONAL "s1"."productfeatureproduct1"(0:nr0m12,1:"116"^^INTEGER)
+                           EXTENSIONAL "s5"."productfeatureproduct2"(0:nr0m12,1:"116"^^INTEGER)
+                        UNION [nr0m12, propertytex1m14]
+                           FILTER IS_NOT_NULL(propertytex1m14)
+                              EXTENSIONAL "s1"."product1"(0:nr0m12,10:propertytex1m14)
+                           FILTER IS_NOT_NULL(propertytex1m14)
+                              EXTENSIONAL "s5"."product2"(0:nr0m12,10:propertytex1m14)
+                        UNION [nr0m12, propertynum1m35]
+                           FILTER IS_NOT_NULL(propertynum1m35)
+                              EXTENSIONAL "s1"."product1"(0:nr0m12,5:propertynum1m35)
+                           FILTER IS_NOT_NULL(propertynum1m35)
+                              EXTENSIONAL "s5"."product2"(0:nr0m12,5:propertynum1m35)

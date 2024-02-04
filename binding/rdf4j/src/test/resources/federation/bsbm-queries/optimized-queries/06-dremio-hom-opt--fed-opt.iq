@@ -1,0 +1,8 @@
+ans1(product, label)
+CONSTRUCT [product, label] [product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product{}(INTEGERToVARCHAR(nr0m49)),IRI), label/RDF(CHARACTER VARYINGToVARCHAR(label10m40),xsd:string)]
+   DISTINCT
+      UNION [label10m40, nr0m49]
+         FILTER AND2(DB_CONTAINS(CHARACTER VARYINGToVARCHAR(label10m40),"banded"^^VARCHAR),AND3(IS_NOT_NULL(nr0m49),IS_NOT_NULL(label10m40),IS_NOT_NULL(nr0m49)))
+            EXTENSIONAL "bsbm"."product1"(0:nr0m49,1:label10m40)
+         FILTER AND2(DB_CONTAINS(CHARACTER VARYINGToVARCHAR(label10m40),"banded"^^VARCHAR),AND3(IS_NOT_NULL(nr0m49),IS_NOT_NULL(label10m40),IS_NOT_NULL(nr0m49)))
+            EXTENSIONAL "bsbm"."product2"(0:nr0m49,1:label10m40)

@@ -1,0 +1,34 @@
+ans1(property, hasValue, isValueOf)
+CONSTRUCT [property, hasValue, isValueOf] [isValueOf/NULL, property/RDF(v9,IRI), hasValue/RDF(v25,v26)]
+   UNION [v9, v25, v26]
+      CONSTRUCT [v9, v25, v26] [v9/"http://www.w3.org/1999/02/22-rdf-syntax-ns#type"^^TEXT, v25/"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Offer"^^TEXT, v26/IRI]
+         EXTENSIONAL "offer"(0:"2838"^^INTEGER)
+      CONSTRUCT [v9, v25, v26] [v9/"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/product"^^TEXT, v25/http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product{}(INTEGERToTEXT(product1m5)), v26/IRI]
+         FILTER IS_NOT_NULL(product1m5)
+            EXTENSIONAL "offer"(0:"2838"^^INTEGER,1:product1m5)
+      CONSTRUCT [v9, v25, v26] [v9/"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/vendor"^^TEXT, v25/http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor/Vendor{}(INTEGERToTEXT(vendor1m8)), v26/IRI]
+         FILTER IS_NOT_NULL(vendor1m8)
+            EXTENSIONAL "offer"(0:"2838"^^INTEGER,3:vendor1m8)
+      CONSTRUCT [v9, v25, v26] [v9/"http://purl.org/dc/elements/1.1/publisher"^^TEXT, v25/http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor/Vendor{}(INTEGERToTEXT(vendor1m10)), v26/IRI]
+         FILTER IS_NOT_NULL(vendor1m10)
+            EXTENSIONAL "offer"(0:"2838"^^INTEGER,3:vendor1m10)
+      CONSTRUCT [v9, v25, v26] [v9/"http://purl.org/dc/elements/1.1/identifier"^^TEXT, v25/"2838"^^TEXT, v26/xsd:integer]
+         EXTENSIONAL "offer"(0:"2838"^^INTEGER)
+      CONSTRUCT [v9, v25, v26] [v9/"http://purl.org/dc/elements/1.1/date"^^TEXT, v25/DATEToTEXT(publishdate20m20), v26/xsd:date]
+         FILTER IS_NOT_NULL(publishdate20m20)
+            EXTENSIONAL "offer"(0:"2838"^^INTEGER,10:publishdate20m20)
+      CONSTRUCT [v9, v25, v26] [v9/"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/offerWebpage"^^TEXT, v25/VARCHARToTEXT(offerwebpage1m21), v26/xsd:string]
+         FILTER IS_NOT_NULL(offerwebpage1m21)
+            EXTENSIONAL "offer"(0:"2838"^^INTEGER,8:offerwebpage1m21)
+      CONSTRUCT [v9, v25, v26] [v9/"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/deliveryDays"^^TEXT, v25/INTEGERToTEXT(deliverydays1m33), v26/xsd:integer]
+         FILTER IS_NOT_NULL(deliverydays1m33)
+            EXTENSIONAL "offer"(0:"2838"^^INTEGER,7:deliverydays1m33)
+      CONSTRUCT [v9, v25, v26] [v9/"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/price"^^TEXT, v25/DOUBLEToTEXT(price1m34), v26/xsd:double]
+         FILTER IS_NOT_NULL(price1m34)
+            EXTENSIONAL "offer"(0:"2838"^^INTEGER,4:price1m34)
+      CONSTRUCT [v9, v25, v26] [v9/"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/validFrom"^^TEXT, v25/DATEToTEXT(validfrom1m38), v26/xsd:date]
+         FILTER IS_NOT_NULL(validfrom1m38)
+            EXTENSIONAL "offer"(0:"2838"^^INTEGER,5:validfrom1m38)
+      CONSTRUCT [v9, v25, v26] [v9/"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/validTo"^^TEXT, v25/DATEToTEXT(validto1m39), v26/xsd:date]
+         FILTER IS_NOT_NULL(validto1m39)
+            EXTENSIONAL "offer"(0:"2838"^^INTEGER,6:validto1m39)

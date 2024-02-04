@@ -1,0 +1,103 @@
+{
+  "effLabelFile" : "src/test/resources/federation/source_efficiency_labels.het.txt",
+  "hintFile" : "src/test/resources/federation/hints.teiid-optmatv.txt",
+  "propertyFile" : "src/test/resources/federation/system-teiid-het.properties",
+  "metadataFile" : null,
+  "owlFile" : "src/test/resources/federation/ontology.owl",
+  "name" : "teiid_het_optmatv",
+  "constraintFile" : "src/test/resources/federation/constraints.fed.txt",
+  "sourceFile" : "src/test/resources/federation/source_relations.txt",
+  "queries" : [ {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/01.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/01-teiid-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/01-teiid-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/01-teiid-het-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/01-teiid-het--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/02.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/02-teiid-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/02-teiid-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/02-teiid-het-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/02-teiid-het--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/03.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/03-teiid-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/03-teiid-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/03-teiid-het-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/03-teiid-het--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/04.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/04-teiid-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/04-teiid-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/04-teiid-het-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/04-teiid-het--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/05.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/05-teiid-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/05-teiid-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/05-teiid-het-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/05-teiid-het--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/06.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/06-teiid-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/06-teiid-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/06-teiid-het-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/06-teiid-het--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/07.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/07-teiid-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/07-teiid-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/07-teiid-het-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/07-teiid-het--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/08.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/08-teiid-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/08-teiid-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/08-teiid-het-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/08-teiid-het--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/09.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/09-teiid-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/09-teiid-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/09-teiid-het-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/09-teiid-het--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/10.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/10-teiid-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/10-teiid-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/10-teiid-het-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/10-teiid-het--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/11.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/11-teiid-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/11-teiid-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/11-teiid-het-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/11-teiid-het--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/12.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/12-teiid-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/12-teiid-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/12-teiid-het-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/12-teiid-het--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/13.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/13-teiid-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/13-teiid-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/13-teiid-het-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/13-teiid-het--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/14.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/14-teiid-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/14-teiid-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/14-teiid-het-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/14-teiid-het--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/15.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/15-teiid-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/15-teiid-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/15-teiid-het-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/15-teiid-het--no-opt.iq"
+  } ],
+  "obdaFile" : "src/test/resources/federation/mappings.fed.teiid.obda",
+  "optimizationEnabled" : true
+}

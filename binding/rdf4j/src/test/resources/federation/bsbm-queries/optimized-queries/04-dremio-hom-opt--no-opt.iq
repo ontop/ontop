@@ -1,0 +1,82 @@
+ans1(product, label, propertyTextual)
+CONSTRUCT [product, label, propertyTextual] [product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product{}(INTEGERToVARCHAR(nr0m12)),IRI), label/RDF(CHARACTER VARYINGToVARCHAR(label10m13),xsd:string), propertyTextual/RDF(CHARACTER VARYINGToVARCHAR(propertytex1m14),xsd:string)]
+   SLICE offset=5 limit=10
+      DISTINCT
+         ORDER BY [ASC(CHARACTER VARYINGToVARCHAR(label10m13))]
+            UNION [nr0m12, label10m13, propertytex1m14]
+               CONSTRUCT [nr0m12, label10m13, propertytex1m14] []
+                  DISTINCT
+                     JOIN NUM_GT(INTEGERToBIGINT(propertynum1m36),"53"^^BIGINT)
+                        UNION [label10m13, nr0m12]
+                           FILTER AND2(IS_NOT_NULL(nr0m12),IS_NOT_NULL(label10m13))
+                              EXTENSIONAL "bsbm"."product1"(0:nr0m12,1:label10m13)
+                           FILTER AND2(IS_NOT_NULL(nr0m12),IS_NOT_NULL(label10m13))
+                              EXTENSIONAL "bsbm"."product2"(0:nr0m12,1:label10m13)
+                        UNION [nr0m12]
+                           FILTER IS_NOT_NULL(nr0m12)
+                              EXTENSIONAL "bsbm"."product1"(0:nr0m12)
+                           FILTER IS_NOT_NULL(nr0m12)
+                              EXTENSIONAL "bsbm"."product2"(0:nr0m12)
+                        UNION [nr0m12]
+                           FILTER IS_NOT_NULL(nr0m12)
+                              EXTENSIONAL "bsbm"."producttypeproduct1"(0:nr0m12,1:"4"^^INTEGER)
+                           FILTER IS_NOT_NULL(nr0m12)
+                              EXTENSIONAL "bsbm"."producttypeproduct2"(0:nr0m12,1:"4"^^INTEGER)
+                        UNION [nr0m12]
+                           FILTER IS_NOT_NULL(nr0m12)
+                              EXTENSIONAL "bsbm"."productfeatureproduct1"(0:nr0m12,1:"90"^^INTEGER)
+                           FILTER IS_NOT_NULL(nr0m12)
+                              EXTENSIONAL "bsbm"."productfeatureproduct2"(0:nr0m12,1:"90"^^INTEGER)
+                        UNION [nr0m12]
+                           FILTER IS_NOT_NULL(nr0m12)
+                              EXTENSIONAL "bsbm"."productfeatureproduct1"(0:nr0m12,1:"79"^^INTEGER)
+                           FILTER IS_NOT_NULL(nr0m12)
+                              EXTENSIONAL "bsbm"."productfeatureproduct2"(0:nr0m12,1:"79"^^INTEGER)
+                        UNION [nr0m12, propertytex1m14]
+                           FILTER AND2(IS_NOT_NULL(nr0m12),IS_NOT_NULL(propertytex1m14))
+                              EXTENSIONAL "bsbm"."product1"(0:nr0m12,10:propertytex1m14)
+                           FILTER AND2(IS_NOT_NULL(nr0m12),IS_NOT_NULL(propertytex1m14))
+                              EXTENSIONAL "bsbm"."product2"(0:nr0m12,10:propertytex1m14)
+                        UNION [nr0m12, propertynum1m36]
+                           FILTER AND2(IS_NOT_NULL(nr0m12),IS_NOT_NULL(propertynum1m36))
+                              EXTENSIONAL "bsbm"."product1"(0:nr0m12,4:propertynum1m36)
+                           FILTER AND2(IS_NOT_NULL(nr0m12),IS_NOT_NULL(propertynum1m36))
+                              EXTENSIONAL "bsbm"."product2"(0:nr0m12,4:propertynum1m36)
+               CONSTRUCT [nr0m12, label10m13, propertytex1m14] []
+                  DISTINCT
+                     JOIN NUM_GT(INTEGERToBIGINT(propertynum1m35),"134"^^BIGINT)
+                        UNION [label10m13, nr0m12]
+                           FILTER AND2(IS_NOT_NULL(nr0m12),IS_NOT_NULL(label10m13))
+                              EXTENSIONAL "bsbm"."product1"(0:nr0m12,1:label10m13)
+                           FILTER AND2(IS_NOT_NULL(nr0m12),IS_NOT_NULL(label10m13))
+                              EXTENSIONAL "bsbm"."product2"(0:nr0m12,1:label10m13)
+                        UNION [nr0m12]
+                           FILTER IS_NOT_NULL(nr0m12)
+                              EXTENSIONAL "bsbm"."product1"(0:nr0m12)
+                           FILTER IS_NOT_NULL(nr0m12)
+                              EXTENSIONAL "bsbm"."product2"(0:nr0m12)
+                        UNION [nr0m12]
+                           FILTER IS_NOT_NULL(nr0m12)
+                              EXTENSIONAL "bsbm"."producttypeproduct1"(0:nr0m12,1:"4"^^INTEGER)
+                           FILTER IS_NOT_NULL(nr0m12)
+                              EXTENSIONAL "bsbm"."producttypeproduct2"(0:nr0m12,1:"4"^^INTEGER)
+                        UNION [nr0m12]
+                           FILTER IS_NOT_NULL(nr0m12)
+                              EXTENSIONAL "bsbm"."productfeatureproduct1"(0:nr0m12,1:"90"^^INTEGER)
+                           FILTER IS_NOT_NULL(nr0m12)
+                              EXTENSIONAL "bsbm"."productfeatureproduct2"(0:nr0m12,1:"90"^^INTEGER)
+                        UNION [nr0m12]
+                           FILTER IS_NOT_NULL(nr0m12)
+                              EXTENSIONAL "bsbm"."productfeatureproduct1"(0:nr0m12,1:"116"^^INTEGER)
+                           FILTER IS_NOT_NULL(nr0m12)
+                              EXTENSIONAL "bsbm"."productfeatureproduct2"(0:nr0m12,1:"116"^^INTEGER)
+                        UNION [nr0m12, propertytex1m14]
+                           FILTER AND2(IS_NOT_NULL(nr0m12),IS_NOT_NULL(propertytex1m14))
+                              EXTENSIONAL "bsbm"."product1"(0:nr0m12,10:propertytex1m14)
+                           FILTER AND2(IS_NOT_NULL(nr0m12),IS_NOT_NULL(propertytex1m14))
+                              EXTENSIONAL "bsbm"."product2"(0:nr0m12,10:propertytex1m14)
+                        UNION [nr0m12, propertynum1m35]
+                           FILTER AND2(IS_NOT_NULL(nr0m12),IS_NOT_NULL(propertynum1m35))
+                              EXTENSIONAL "bsbm"."product1"(0:nr0m12,5:propertynum1m35)
+                           FILTER AND2(IS_NOT_NULL(nr0m12),IS_NOT_NULL(propertynum1m35))
+                              EXTENSIONAL "bsbm"."product2"(0:nr0m12,5:propertynum1m35)

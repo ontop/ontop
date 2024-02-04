@@ -1,0 +1,13 @@
+SELECT DISTINCT v13."label10m40" AS "label10m40", v13."nr0m49" AS "nr0m49", v13."v12" AS "v12"
+FROM (SELECT v11."label10m40" AS "label10m40", v11."nr0m49" AS "nr0m49", v11."label10m40" AS "v12"
+FROM ((SELECT v1."label" AS "label10m40", v1."nr" AS "nr0m49"
+FROM "product1" v1, "producttypeproduct1" v2, "productfeatureproduct1" v3, "productfeatureproduct1" v4
+WHERE ((v1."propertynum1" > 53) AND v1."label" IS NOT NULL AND v1."propertynum1" IS NOT NULL AND v1."nr" = v2."product" AND v1."nr" = v3."product" AND v1."nr" = v4."product" AND 4 = v2."producttype" AND 79 = v3."productfeature" AND 116 = v4."productfeature")
+)UNION ALL 
+(SELECT v6."label" AS "label10m40", v6."nr" AS "nr0m49"
+FROM "product2" v6, "producttypeproduct2" v7, "productfeatureproduct2" v8, "productfeatureproduct2" v9
+WHERE ((v6."propertynum1" > 53) AND v6."label" IS NOT NULL AND v6."propertynum1" IS NOT NULL AND v6."nr" = v7."product" AND v6."nr" = v8."product" AND v6."nr" = v9."product" AND 4 = v7."producttype" AND 79 = v8."productfeature" AND 116 = v9."productfeature")
+)) v11
+) v13
+ORDER BY v13."v12" ASC NULLS FIRST
+LIMIT 10

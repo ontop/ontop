@@ -1,0 +1,36 @@
+ans1(product, label, propertyTextual)
+CONSTRUCT [product, label, propertyTextual] [product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product{}(INTEGERToSTRING(nr0m12)),IRI), label/RDF(label10m13,xsd:string), propertyTextual/RDF(propertytex1m14,xsd:string)]
+   SLICE offset=5 limit=10
+      DISTINCT
+         ORDER BY [ASC(label10m13)]
+            UNION [nr0m12, label10m13, propertytex1m14]
+               CONSTRUCT [nr0m12, label10m13, propertytex1m14] []
+                  DISTINCT
+                     UNION [nr0m12, propertynum1m36, propertytex1m14, label10m13]
+                        JOIN NUM_GT(INTEGERToBIGINT(propertynum1m36),"53"^^BIGINT)
+                           FILTER AND3(IS_NOT_NULL(label10m13),IS_NOT_NULL(propertytex1m14),IS_NOT_NULL(propertynum1m36))
+                              EXTENSIONAL "s1"."product1"(0:nr0m12,1:label10m13,10:propertytex1m14,4:propertynum1m36)
+                           EXTENSIONAL "s1"."producttypeproduct1"(0:nr0m12,1:"4"^^INTEGER)
+                           EXTENSIONAL "s1"."productfeatureproduct1"(0:nr0m12,1:"90"^^INTEGER)
+                           EXTENSIONAL "s1"."productfeatureproduct1"(0:nr0m12,1:"79"^^INTEGER)
+                        JOIN NUM_GT(INTEGERToBIGINT(propertynum1m36),"53"^^BIGINT)
+                           FILTER AND3(IS_NOT_NULL(label10m13),IS_NOT_NULL(propertytex1m14),IS_NOT_NULL(propertynum1m36))
+                              EXTENSIONAL "s5"."product2"(0:nr0m12,1:label10m13,10:propertytex1m14,4:propertynum1m36)
+                           EXTENSIONAL "s5"."producttypeproduct2"(0:nr0m12,1:"4"^^INTEGER)
+                           EXTENSIONAL "s5"."productfeatureproduct2"(0:nr0m12,1:"90"^^INTEGER)
+                           EXTENSIONAL "s5"."productfeatureproduct2"(0:nr0m12,1:"79"^^INTEGER)
+               CONSTRUCT [nr0m12, label10m13, propertytex1m14] []
+                  DISTINCT
+                     UNION [nr0m12, propertytex1m14, propertynum1m35, label10m13]
+                        JOIN NUM_GT(INTEGERToBIGINT(propertynum1m35),"134"^^BIGINT)
+                           FILTER AND3(IS_NOT_NULL(label10m13),IS_NOT_NULL(propertytex1m14),IS_NOT_NULL(propertynum1m35))
+                              EXTENSIONAL "s1"."product1"(0:nr0m12,1:label10m13,10:propertytex1m14,5:propertynum1m35)
+                           EXTENSIONAL "s1"."producttypeproduct1"(0:nr0m12,1:"4"^^INTEGER)
+                           EXTENSIONAL "s1"."productfeatureproduct1"(0:nr0m12,1:"90"^^INTEGER)
+                           EXTENSIONAL "s1"."productfeatureproduct1"(0:nr0m12,1:"116"^^INTEGER)
+                        JOIN NUM_GT(INTEGERToBIGINT(propertynum1m35),"134"^^BIGINT)
+                           FILTER AND3(IS_NOT_NULL(label10m13),IS_NOT_NULL(propertytex1m14),IS_NOT_NULL(propertynum1m35))
+                              EXTENSIONAL "s5"."product2"(0:nr0m12,1:label10m13,10:propertytex1m14,5:propertynum1m35)
+                           EXTENSIONAL "s5"."producttypeproduct2"(0:nr0m12,1:"4"^^INTEGER)
+                           EXTENSIONAL "s5"."productfeatureproduct2"(0:nr0m12,1:"90"^^INTEGER)
+                           EXTENSIONAL "s5"."productfeatureproduct2"(0:nr0m12,1:"116"^^INTEGER)

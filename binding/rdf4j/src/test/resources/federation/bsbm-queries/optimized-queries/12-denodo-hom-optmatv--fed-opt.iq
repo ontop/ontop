@@ -1,0 +1,13 @@
+ans1(productURI, productlabel, vendorURI, vendorname, vendorhomepage, offerURL, price, deliveryDays, validTo)
+CONSTRUCT [productURI, productlabel, vendorURI, vendorname, vendorhomepage, offerURL, price, deliveryDays, validTo] [vendorURI/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor/Vendor{}(INTEGERToTEXT(vendor1m8)),IRI), productURI/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product{}(INTEGERToTEXT(product1m5)),IRI), productlabel/RDF(VARCHARToTEXT(label10m40),xsd:string), offerURL/RDF(VARCHARToTEXT(offerwebpage1m21),xsd:string), deliveryDays/RDF(INTEGERToTEXT(deliverydays1m33),xsd:integer), price/RDF(DOUBLEToTEXT(price1m34),xsd:double), vendorhomepage/RDF(VARCHARToTEXT(homepage2m42),xsd:string), vendorname/RDF(VARCHARToTEXT(label10m4),xsd:string), validTo/RDF(DATEToTEXT(validto1m39),xsd:date)]
+   DISTINCT
+      FILTER AND6(IS_NOT_NULL(label10m4),IS_NOT_NULL(homepage2m42),IS_NOT_NULL(offerwebpage1m21),IS_NOT_NULL(price1m34),IS_NOT_NULL(deliverydays1m33),IS_NOT_NULL(validto1m39))
+         UNION [label10m40, product1m5, vendor1m8, price1m34, validto1m39, deliverydays1m33, offerwebpage1m21, label10m4, homepage2m42]
+            JOIN IS_NOT_NULL(label10m40)
+               FILTER IS_NOT_NULL(label10m40)
+                  EXTENSIONAL "matv_s4_offer_s1_product1"(0:"2838"^^INTEGER,1:product1m5,3:vendor1m8,4:price1m34,6:validto1m39,7:deliverydays1m33,8:offerwebpage1m21,12:label10m40)
+               EXTENSIONAL "vendor"(0:vendor1m8,1:label10m4,3:homepage2m42)
+            JOIN IS_NOT_NULL(label10m40)
+               FILTER IS_NOT_NULL(label10m40)
+                  EXTENSIONAL "matv_s4_offer_s5_product2"(0:"2838"^^INTEGER,1:product1m5,3:vendor1m8,4:price1m34,6:validto1m39,7:deliverydays1m33,8:offerwebpage1m21,12:label10m40)
+               EXTENSIONAL "vendor"(0:vendor1m8,1:label10m4,3:homepage2m42)

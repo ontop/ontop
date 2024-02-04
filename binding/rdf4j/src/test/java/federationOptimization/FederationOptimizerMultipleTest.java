@@ -27,34 +27,42 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.query.KGQuery;
 import it.unibz.inf.ontop.query.KGQueryFactory;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+
 @Category(ObdfTest.class)
 public class FederationOptimizerMultipleTest {
 
-    public OntopSQLOWLAPIConfiguration configuration;
     public static IntermediateQueryFactory IQ_FACTORY;
     public static AtomFactory ATOM_FACTORY;
     public static TermFactory TERM_FACTORY;
     public static CoreSingletons CORE_SINGLETONS;
     public static QuotedIDFactory idFactory;
     public static DBTypeFactory dbTypeFactory;
-    public static FederationOptimizer federationOptimizer;
+    private FederationOptimizer federationOptimizer;
+    private OntopSQLOWLAPIConfiguration configuration;
+    private QueryReformulator reformulator;
+    private KGQueryFactory kgQueryFactory;
 
     public void setUp(String owlFile, String obdaFile, String propertyFile, String metadataFile, String constraintFile, boolean optimizationEnabled, String sourceFile, String effLabelFile, String hintFile) {
         try {
-            OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration.defaultBuilder().ontologyFile(owlFile)
+            OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration
+                    .defaultBuilder().ontologyFile(owlFile)
                     //.lensesFile(lenseFile)
-                    .basicImplicitConstraintFile(constraintFile).nativeOntopMappingFile(obdaFile).propertyFile(propertyFile).enableTestMode();
+                    .basicImplicitConstraintFile(constraintFile)
+                    .nativeOntopMappingFile(obdaFile)
+                    .propertyFile(propertyFile)
+                    .enableTestMode();
             if (metadataFile != null) {
                 builder = builder.dbMetadataFile(metadataFile);
             }
@@ -68,6 +76,10 @@ public class FederationOptimizerMultipleTest {
             dbTypeFactory = CORE_SINGLETONS.getTypeFactory().getDBTypeFactory();
             idFactory = new SQLStandardQuotedIDFactory();
 
+            // Creata a kgQueryFactory to parse SPARQL queries
+            kgQueryFactory = configuration.getKGQueryFactory();
+            // Create a reformulator for transforming SPARQL queries into IQs
+            reformulator = configuration.loadQueryReformulator();
             federationOptimizer = new FederationOptimizerImpl(IQ_FACTORY, ATOM_FACTORY, TERM_FACTORY, CORE_SINGLETONS, optimizationEnabled, sourceFile, effLabelFile, hintFile);
 
         } catch (Exception e) {
@@ -80,131 +92,208 @@ public class FederationOptimizerMultipleTest {
     }
 
     @Test
-    public void testFederationOptimizerWithJson() throws OBDASpecificationException, OntopUnsupportedKGQueryException, OntopReformulationException, IOException, OntopInvalidKGQueryException {
-        Map<String, Object> config = createDefaultTestConfiguration(FederationEngine.DENODO, FederationSetting.HET, FederationOptimization.OPTMATV);
-        testFederationOptimizer(config);
-    }
+    public void testFederationOptimizerWithJson() throws Exception {
+        for (FederationEngine federationEngine : FederationEngine.values()) {
+//            if(federationEngine == FederationEngine.DREMIO) continue;
+//            if(federationEngine == FederationEngine.TEIID) continue;
+//            if(federationEngine == FederationEngine.DENODO) continue;
+            for (FederationSetting federationSetting : FederationSetting.values()) {
+//                if(federationSetting == FederationSetting.HOM) continue;
+//                if(federationSetting == FederationSetting.HET) continue;
+                for (FederationOptimization federationOptimization : FederationOptimization.values()) {
+                    System.out.println("****************************************************************************************");
+                    System.out.println("Federation Engine: " + federationEngine);
+                    System.out.println("Federation Setting: " + federationSetting);
+                    System.out.println("Federation Optimization: " + federationOptimization);
+                    System.out.println("****************************************************************************************");
 
-    public void testFederationOptimizer(Map<String, Object> config) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException, OBDASpecificationException, OntopReformulationException, IOException {
+                    Map<String, Object> config = createDefaultBSBMTestConfiguration(federationEngine, federationSetting, federationOptimization);
+                    setup(config);
+                    for (Map<String, String> queryInfo : ((List<Map<String, String>>) config.get("queries"))) {
+//                        if(queryInfo.get("queryFile").contains("01")) continue;
+//                        if(queryInfo.get("queryFile").contains("02")) continue;
+//                        if(queryInfo.get("queryFile").contains("03")) continue;
+//                        if(queryInfo.get("queryFile").contains("04")) continue;
+//                        if(queryInfo.get("queryFile").contains("08")) continue;
+//                        if(queryInfo.get("queryFile").contains("11")) continue;
+//                        if(queryInfo.get("queryFile").contains("12")) continue;
+//                        if(queryInfo.get("queryFile").contains("13")) continue;
 
-        setup(config);
-
-        for (Map<String, String> queryInfo : ((List<Map<String, String>>) config.get("queries"))) {
-
-            String queryFile = queryInfo.get("queryFile");
-            String inputIQFile = queryInfo.get("inputIQFile");
-            String outputIQFile = queryInfo.get("outputIQFile");
-            String outputSQLFile = queryInfo.get("outputSQLFile");
-
-            String sparqlQuery = this.readFile(queryFile);
-
-            System.out.println("SPARQL query:\n" + sparqlQuery + "\n");
-
-            KGQueryFactory kgQueryFactory = configuration.getKGQueryFactory();
-            KGQuery<?> query = kgQueryFactory.createSPARQLQuery(sparqlQuery);
-            QueryReformulator reformulator = configuration.loadQueryReformulator();
-            QueryLogger queryLogger = reformulator.getQueryLoggerFactory().create(ImmutableMultimap.of());
-            QueryContext emptyQueryContext = reformulator.getQueryContextFactory().create(ImmutableMap.of());
-            QuestQueryProcessor.returnPlannedQuery = true;
-            IQ iq = reformulator.reformulateIntoNativeQuery(query, emptyQueryContext, queryLogger);
-            QuestQueryProcessor.returnPlannedQuery = false;
-
-            System.out.println("Parsed query converted into IQ:\n" + iq + "\n");
-
-            String parsedQuery = this.readFile(inputIQFile);
-            assertEquals(parsedQuery, iq.toString());
-
-            IQ iqopt = federationOptimizer.optimize(iq);
-
-            System.out.println("Optimized IQ:\n" + iqopt + "\n");
-
-            String optimizedQuery = this.readFile(outputIQFile);
-            assertEquals(optimizedQuery, iqopt.toString());
-
-            IQ executableQuery = reformulator.generateExecutableQuery(iqopt);
-            System.out.println("Final SQL query:\n" + ((NativeNodeImpl) executableQuery.getTree().getChildren().get(0)).getNativeQueryString());
-
-            String optimizedQuerySQL = this.readFile(outputSQLFile);
-            assertEquals(optimizedQuerySQL, executableQuery.toString());
-        }
-    }
-
-    // Custom method to read text from a file
-    public String readFile(String filePath) throws IOException {
-        StringBuilder content = new StringBuilder();
-        try (FileInputStream fis = new FileInputStream(filePath); InputStreamReader isr = new InputStreamReader(fis); BufferedReader reader = new BufferedReader(isr)) {
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                content.append(line).append("\n");
+//                        if(queryInfo.get("queryFile").contains("05")) continue;
+//                        if(queryInfo.get("queryFile").contains("06")) continue;
+//                        if(queryInfo.get("queryFile").contains("07")) continue;
+//                        if(queryInfo.get("queryFile").contains("09")) continue;
+//                        if(queryInfo.get("queryFile").contains("10")) continue;
+//                        if(queryInfo.get("queryFile").contains("14")) continue;
+//                        if(queryInfo.get("queryFile").contains("15")) continue;
+//                        testFederationOptimizer(queryInfo, true, federationEngine, federationSetting, federationOptimization);
+                        testFederationOptimizer(queryInfo);
+                    }
+                }
             }
         }
-        return content.toString();
     }
 
-    // Custom method to write text to a file
-    public void writeFile(String filePath, String content) throws IOException {
-        try (FileOutputStream fos = new FileOutputStream(filePath); OutputStreamWriter osw = new OutputStreamWriter(fos); BufferedWriter writer = new BufferedWriter(osw)) {
-            writer.write(content);
+    public void testFederationOptimizer(Map<String, String> queryInfo, boolean writeToFile, FederationEngine federationEngine, FederationSetting federationSetting, FederationOptimization federationOptimization) throws Exception {
+
+        String queryFile = queryInfo.get("queryFile");
+        String inputIQFile = queryInfo.get("inputIQFile");
+        String outputIQFile = queryInfo.get("outputIQFile");
+        String executableIQFile = queryInfo.get("executableIQFile");
+        String outputSQLFile = queryInfo.get("outputSQLFile");
+
+        String sparqlQuery = Files.readString(Path.of(queryFile));
+        System.out.println("SPARQL query:\n" + sparqlQuery + "\n");
+
+        // check if parsing of the query by Ontop is correct
+        IQ iq = getIQFromSPARQL(sparqlQuery);
+        System.out.println("Parsed query converted into IQ:\n" + iq + "\n");
+        if (writeToFile) {
+            writeToFileCheckOverwrite(inputIQFile, iq.toString());
         }
+        String parsedQuery = Files.readString(Path.of(inputIQFile));
+        assertEquals(parsedQuery, iq.toString());
+
+        // Check if optimization of the query is correct
+        IQ iqopt = federationOptimizer.optimize(iq);
+        System.out.println("Optimized IQ:\n" + iqopt + "\n");
+        if (writeToFile) {
+            writeToFileCheckOverwrite(outputIQFile, iqopt.toString());
+        }
+        String optimizedQuery = Files.readString(Path.of(outputIQFile));
+        assertEquals(optimizedQuery, iqopt.toString());
+
+        // Check if the executable query is correct
+        // The executable query is the query that contains the CONSTRUCT instructions for the VKG and the SQL query for the sources
+        IQ iqexec = reformulator.generateExecutableQuery(iqopt);
+        System.out.println("Executable IQ:\n" + iqexec + "\n");
+        if (writeToFile) {
+            writeToFileCheckOverwrite(executableIQFile, iqexec.toString());
+        }
+        String executableQuery = Files.readString(Path.of(executableIQFile));
+        assertEquals(executableQuery, iqexec.toString());
+
+        // Check if the SQL query is correct
+        String querysql = ((NativeNodeImpl) iqexec.getTree().getChildren().get(0)).getNativeQueryString();
+        System.out.println("Final SQL query:\n" + querysql);
+        if (writeToFile) {
+            writeToFileCheckOverwrite(outputSQLFile, querysql);
+        }
+        String optimizedQuerySQL = Files.readString(Path.of(outputSQLFile));
+        assertEquals(optimizedQuerySQL, querysql);
+    }
+
+    public static void writeToFileCheckOverwrite(String filePath, String content) throws Exception {
+        Path path = Path.of(filePath);
+
+        if (Files.exists(path)) {
+            String fileContent = Files.readString(path);
+            if(!fileContent.equals(content)) {
+                throw new Exception("File already exists and content is different");
+            }
+        } else {
+            // Overwrite the file or create a new one if it doesn't exist
+            Files.writeString(path, content);
+        }
+    }
+
+    public void testFederationOptimizer(Map<String, String> queryInfo) throws Exception {
+        testFederationOptimizer(queryInfo, false, null, null, null);
+    }
+
+    private IQ getIQFromSPARQL(String sparqlQuery) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException, OntopReformulationException {
+        // Parse the SPARQL query into an IQ
+        KGQuery<?> query = kgQueryFactory.createSPARQLQuery(sparqlQuery);
+        QueryLogger queryLogger = reformulator.getQueryLoggerFactory().create(ImmutableMultimap.of());
+        QueryContext emptyQueryContext = reformulator.getQueryContextFactory().create(ImmutableMap.of());
+        QuestQueryProcessor.returnPlannedQuery = true;
+        IQ iq = reformulator.reformulateIntoNativeQuery(query, emptyQueryContext, queryLogger);
+        QuestQueryProcessor.returnPlannedQuery = false;
+        return iq;
     }
 
     @Test
-    public void testTestConfiguration() throws IOException {
-        try {
-            Map<String, Object> testConfig = createDefaultTestConfiguration(FederationEngine.DENODO, FederationSetting.HET, FederationOptimization.OPTMATV);
+    public void testCreateDefaultBSBMTestConfiguration() throws Exception {
+        for (FederationEngine federationEngine : FederationEngine.values()) {
+            for (FederationSetting federationSetting : FederationSetting.values()) {
+                for (FederationOptimization federationOptimization : FederationOptimization.values()) {
+                    Map<String, Object> testConfig = createDefaultBSBMTestConfiguration(federationEngine, federationSetting, federationOptimization);
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-            String json = objectMapper.writeValueAsString(testConfig);
-            this.writeFile("src/test/resources/federation/config-files/test-config.json", json);
-//            System.out.println("Serialized JSON:\n" + json);
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+                    String json = objectMapper.writeValueAsString(testConfig);
+//                    In case of an update of the test configuration, the following line can be used to write the JSON to a file
+                    writeToFileCheckOverwrite("src/test/resources/federation/config-files/test-config-" + federationEngine.name().toLowerCase() + "-" + federationSetting.name().toLowerCase() + "-" + federationOptimization.name().toLowerCase() + ".json", json);
+                    System.out.println("Serialized JSON:\n" + json);
 
-            json = this.readFile("src/test/resources/federation/test-config.json");
-            // Deserialize JSON back into a Map
-            Map<String, Object> deserializedMap = objectMapper.readValue(json, Map.class);
-            System.out.println("Deserialized Map:\n" + deserializedMap);
-        } catch (Exception e) {
-            e.printStackTrace();
+                    json = Files.readString(Path.of("src/test/resources/federation/config-files/test-config-" + federationEngine.name().toLowerCase() + "-" + federationSetting.name().toLowerCase() + "-" + federationOptimization.name().toLowerCase() + ".json"));
+                    // Deserialize JSON back into a Map
+                    Map<String, Object> deserializedMap = objectMapper.readValue(json, Map.class);
+                    System.out.println("Deserialized Map:\n" + deserializedMap);
+
+                    assertEquals(testConfig, deserializedMap);
+                }
+            }
         }
     }
 
-    public static Map<String, Object> createDefaultTestConfiguration(FederationEngine enum1, FederationSetting enum2, FederationOptimization enum3, List<Integer> bsbm_queries) {
+    public static Map<String, Object> createDefaultTestConfiguration(FederationEngine federationEngine, FederationSetting federationSetting, FederationOptimization federationOptimization) {
+        String federationEngineStr = federationEngine.name().toLowerCase();
+        String federationSettingStr = federationSetting.name().toLowerCase();
+        String federationOptimizationStr = federationOptimization.name().toLowerCase();
+
         Map<String, Object> testConfiguration = new HashMap<>();
-        testConfiguration.put("name", enum1.name().toLowerCase() + "_" + enum2.name().toLowerCase() + "_" + enum3.name().toLowerCase());
+        testConfiguration.put("name", federationEngineStr + "_" + federationSettingStr + "_" + federationOptimizationStr);
         testConfiguration.put("owlFile", "src/test/resources/federation/ontology.owl");
-        testConfiguration.put("obdaFile", "src/test/resources/federation/mappings.fed.obda");
-        testConfiguration.put("propertyFile", "src/test/resources/federation/system-" + enum1.name().toLowerCase() + "-" + enum2.name().toLowerCase() + ".properties");
-        testConfiguration.put("metadataFile", "src/test/resources/federation/system-" + enum1.name().toLowerCase() + "-" + enum2.name().toLowerCase() + ".metadata.json");
+        // obdaFile is different for Teiid
+        testConfiguration.put("obdaFile", "src/test/resources/federation/mappings.fed" + (federationEngine == FederationEngine.TEIID ? ".teiid" : "") + ".obda");
+        testConfiguration.put("propertyFile", "src/test/resources/federation/system-" + federationEngineStr + "-" + federationSettingStr + ".properties");
+        // metadata currently only supported for Denodo, else null
+        testConfiguration.put("metadataFile", (federationEngine == FederationEngine.DENODO ? "src/test/resources/federation/system-" + federationEngineStr + "-" + federationSettingStr + ".metadata.json" : null));
+//        testConfiguration.put("metadataFile", null);
         testConfiguration.put("constraintFile", "src/test/resources/federation/constraints.fed.txt");
-        testConfiguration.put("hintFile", "src/test/resources/federation/hints." + enum1.name().toLowerCase() + "-" + enum3.name().toLowerCase() + ".txt");
-        testConfiguration.put("effLabelFile", "src/test/resources/federation/source_efficiency_labels." + enum2.name().toLowerCase() + ".txt");
+        testConfiguration.put("hintFile", "src/test/resources/federation/hints." + federationEngineStr + "-" + federationOptimizationStr + ".txt");
+        testConfiguration.put("effLabelFile", "src/test/resources/federation/source_efficiency_labels." + federationSettingStr + ".txt");
         testConfiguration.put("optimizationEnabled", true);
         testConfiguration.put("sourceFile", "src/test/resources/federation/source_relations.txt");
 
-        // Create a list to store query information
-        List<Map<String, String>> queries = new ArrayList<>();
-        for (Integer queryNumber : bsbm_queries) {
-            Map<String, String> queryInfo = new HashMap<>();
-            String formattedI = String.format("%02d", queryNumber);
-            queryInfo.put("queryFile", "src/test/resources/federation/bsbm-queries/" + formattedI + ".rq");
-            queryInfo.put("inputIQFile", "src/test/resources/federation/bsbm-queries/optimized-queries/" + formattedI + "-no-federation-optimization.iq");
-            queryInfo.put("outputIQFile", "src/test/resources/federation/bsbm-queries/optimized-queries/" + formattedI + "-optmatv.iq");
-            queryInfo.put("outputSQLFile", "src/test/resources/federation/bsbm-queries/optimized-queries/" + formattedI + "-" + enum1.name().toLowerCase() + "-optmatv.sql");
-            queries.add(queryInfo);
-        }
-
-        testConfiguration.put("queries", queries);
+        testConfiguration.put("queries", null);
 
         return testConfiguration;
     }
 
-    public static Map<String, Object> createDefaultTestConfiguration(FederationEngine enum1, FederationSetting enum2, FederationOptimization enum3) {
+
+    public static Map<String, Object> createDefaultBSBMTestConfiguration(FederationEngine federationEngine, FederationSetting federationSetting, FederationOptimization federationOptimization, List<Integer> bsbm_queries) {
+
+        Map<String, Object> testConfiguration = createDefaultTestConfiguration(federationEngine, federationSetting, federationOptimization);
+
+        if (bsbm_queries != null) {
+            // Create a list to store query information
+            List<Map<String, String>> queries = new ArrayList<>();
+            for (Integer queryNumber : bsbm_queries) {
+                Map<String, String> queryInfo = new HashMap<>();
+                String formattedI = String.format("%02d", queryNumber);
+                queryInfo.put("queryFile", "src/test/resources/federation/bsbm-queries/" + formattedI + ".rq");
+                queryInfo.put("inputIQFile", "src/test/resources/federation/bsbm-queries/optimized-queries/" + formattedI + "-" + federationEngine.name().toLowerCase() + "-" + federationSetting.name().toLowerCase() + "-" + federationOptimization.name().toLowerCase() + "--no-opt.iq");
+                queryInfo.put("outputIQFile", "src/test/resources/federation/bsbm-queries/optimized-queries/" + formattedI + "-" + federationEngine.name().toLowerCase() + "-" + federationSetting.name().toLowerCase() + "-" + federationOptimization.name().toLowerCase() + "--fed-opt.iq");
+                queryInfo.put("executableIQFile", "src/test/resources/federation/bsbm-queries/optimized-queries/" + formattedI + "-" + federationEngine.name().toLowerCase() + "-" + federationSetting.name().toLowerCase() + "-" + federationOptimization.name().toLowerCase() + "--exec.iq");
+                queryInfo.put("outputSQLFile", "src/test/resources/federation/bsbm-queries/optimized-queries/" + formattedI + "-" + federationEngine.name().toLowerCase() + "-" + federationSetting.name().toLowerCase() + "-" + federationOptimization.name().toLowerCase() + ".sql");
+                queries.add(queryInfo);
+            }
+            testConfiguration.put("queries", queries);
+        } else {
+            testConfiguration.put("queries", null);
+        }
+        return testConfiguration;
+    }
+
+    public static Map<String, Object> createDefaultBSBMTestConfiguration(FederationEngine federationEngine, FederationSetting federationSetting, FederationOptimization federationOptimization) {
         List<Integer> bsbm_queries = new ArrayList<>();
         for (int i = 1; i <= 15; i++) {
             bsbm_queries.add(i);
         }
-        return createDefaultTestConfiguration(enum1, enum2, enum3, bsbm_queries);
+
+        return createDefaultBSBMTestConfiguration(federationEngine, federationSetting, federationOptimization, bsbm_queries);
     }
 
     enum FederationEngine {

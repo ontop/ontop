@@ -1,0 +1,103 @@
+{
+  "effLabelFile" : "src/test/resources/federation/source_efficiency_labels.hom.txt",
+  "hintFile" : "src/test/resources/federation/hints.dremio-optmatv.txt",
+  "propertyFile" : "src/test/resources/federation/system-dremio-hom.properties",
+  "metadataFile" : null,
+  "owlFile" : "src/test/resources/federation/ontology.owl",
+  "name" : "dremio_hom_optmatv",
+  "constraintFile" : "src/test/resources/federation/constraints.fed.txt",
+  "sourceFile" : "src/test/resources/federation/source_relations.txt",
+  "queries" : [ {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/01.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/01-dremio-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/01-dremio-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/01-dremio-hom-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/01-dremio-hom--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/02.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/02-dremio-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/02-dremio-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/02-dremio-hom-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/02-dremio-hom--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/03.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/03-dremio-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/03-dremio-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/03-dremio-hom-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/03-dremio-hom--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/04.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/04-dremio-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/04-dremio-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/04-dremio-hom-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/04-dremio-hom--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/05.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/05-dremio-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/05-dremio-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/05-dremio-hom-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/05-dremio-hom--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/06.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/06-dremio-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/06-dremio-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/06-dremio-hom-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/06-dremio-hom--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/07.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/07-dremio-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/07-dremio-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/07-dremio-hom-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/07-dremio-hom--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/08.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/08-dremio-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/08-dremio-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/08-dremio-hom-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/08-dremio-hom--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/09.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/09-dremio-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/09-dremio-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/09-dremio-hom-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/09-dremio-hom--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/10.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/10-dremio-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/10-dremio-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/10-dremio-hom-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/10-dremio-hom--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/11.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/11-dremio-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/11-dremio-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/11-dremio-hom-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/11-dremio-hom--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/12.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/12-dremio-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/12-dremio-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/12-dremio-hom-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/12-dremio-hom--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/13.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/13-dremio-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/13-dremio-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/13-dremio-hom-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/13-dremio-hom--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/14.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/14-dremio-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/14-dremio-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/14-dremio-hom-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/14-dremio-hom--no-opt.iq"
+  }, {
+    "queryFile" : "src/test/resources/federation/bsbm-queries/15.rq",
+    "executableIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/15-dremio-optmatv--exec.iq",
+    "outputSQLFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/15-dremio-optmatv.sql",
+    "outputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/15-dremio-hom-optmatv.iq",
+    "inputIQFile" : "src/test/resources/federation/bsbm-queries/optimized-queries/15-dremio-hom--no-opt.iq"
+  } ],
+  "obdaFile" : "src/test/resources/federation/mappings.fed.obda",
+  "optimizationEnabled" : true
+}

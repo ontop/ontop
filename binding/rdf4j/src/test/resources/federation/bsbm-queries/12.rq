@@ -26,7 +26,7 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
 
 SELECT
-    ?offer ?productURI ?productlabel ?vendorURI ?vendorname
+    ?productURI ?productlabel ?vendorURI ?vendorname ?vendorhomepage
     ?offerURL ?price ?deliveryDays ?validTo
 {
     <dataFromVendor/Offer2838> bsbm:product ?productURI .  # offer = 2838

@@ -1,0 +1,26 @@
+ans1(p, mbox_sha1sum, country, r, product, title)
+CONSTRUCT [p, mbox_sha1sum, country, r, product, title] [p/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite/Reviewer{}(INTEGERToVARCHAR(person2m7)),IRI), country/RDF(http://downlode.org/rdf/iso-3166/countries#{}(CHARACTER VARYINGToVARCHAR(country3m1)),IRI), product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product{}(INTEGERToVARCHAR(product2m4)),IRI), r/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite/Review{}(INTEGERToVARCHAR(nr0m4)),IRI), mbox_sha1sum/RDF(CHARACTER VARYINGToVARCHAR(mbox_sha1sum1m41),xsd:string), title/RDF(CHARACTER VARYINGToVARCHAR(title2m11),xsd:string)]
+   DISTINCT
+      JOIN AND3(IS_NOT_NULL(name1m12),IS_NOT_NULL(mbox_sha1sum1m41),IS_NOT_NULL(country3m1))
+         UNION [person2m7, name1m12, mbox_sha1sum1m41, country3m1]
+            JOIN
+               EXTENSIONAL "bsbm"."reviewc"(0:"1356"^^INTEGER,3:person2m7)
+               EXTENSIONAL "bsbm"."person"(0:person2m7,1:name1m12,2:mbox_sha1sum1m41,3:country3m1)
+            JOIN
+               EXTENSIONAL "bsbm"."review"(0:"1356"^^INTEGER,3:person2m7)
+               EXTENSIONAL "bsbm"."person"(0:person2m7,1:name1m12,2:mbox_sha1sum1m41,3:country3m1)
+         UNION [nr0m4, person2m7]
+            FILTER AND2(IS_NOT_NULL(nr0m4),IS_NOT_NULL(person2m7))
+               EXTENSIONAL "bsbm"."reviewc"(0:nr0m4,3:person2m7)
+            FILTER AND2(IS_NOT_NULL(nr0m4),IS_NOT_NULL(person2m7))
+               EXTENSIONAL "bsbm"."review"(0:nr0m4,3:person2m7)
+         UNION [nr0m4, product2m4]
+            FILTER AND2(IS_NOT_NULL(nr0m4),IS_NOT_NULL(product2m4))
+               EXTENSIONAL "bsbm"."reviewc"(0:nr0m4,1:product2m4)
+            FILTER AND2(IS_NOT_NULL(nr0m4),IS_NOT_NULL(product2m4))
+               EXTENSIONAL "bsbm"."review"(0:nr0m4,1:product2m4)
+         UNION [nr0m4, title2m11]
+            FILTER AND2(IS_NOT_NULL(nr0m4),IS_NOT_NULL(title2m11))
+               EXTENSIONAL "bsbm"."reviewc"(0:nr0m4,5:title2m11)
+            FILTER AND2(IS_NOT_NULL(nr0m4),IS_NOT_NULL(title2m11))
+               EXTENSIONAL "bsbm"."review"(0:nr0m4,5:title2m11)
