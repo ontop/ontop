@@ -1,7 +1,7 @@
 package federationOptimization;
 
-import cdjd.com.fasterxml.jackson.databind.JsonNode;
-import cdjd.com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Injector;
