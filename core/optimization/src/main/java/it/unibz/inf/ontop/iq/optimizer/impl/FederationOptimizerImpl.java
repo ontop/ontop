@@ -140,12 +140,24 @@ public class FederationOptimizerImpl implements FederationOptimizer {
         if (!enabled) {
             return query;
         }
-        LOGGER.debug("My optimized query input:\n{}\n", query);
-        IQTree iqTree = query.getTree();
-        IQTree iqTreeOptimized = rewriteIQTree(iqTree);
         try {
+            LOGGER.debug("My optimized query input:\n{}\n", query);
+
+            IQTree iqTree = query.getTree();
+            IQTree iqTreeOptimized = rewriteIQTree(iqTree);
             DistinctVariableOnlyDataAtom project_original = query.getProjectionAtom();
+
             IQ iqOptimized = IQTreeToIQ(project_original, iqTreeOptimized);
+            //should be included in final production to reach a fix point in optimization
+//            IQ iqOptimizedNew = iqOptimized.normalizeForOptimization();
+//            while(!iqOptimized.toString().equals(iqOptimizedNew.toString())) {
+//                iqTree = iqOptimizedNew.getTree();
+//                iqTreeOptimized = rewriteIQTree(iqTree);
+//                project_original = query.getProjectionAtom();
+//                iqOptimized = IQTreeToIQ(project_original, iqTreeOptimized);
+//                iqOptimizedNew = iqOptimized.normalizeForOptimization();
+//            }
+
             LOGGER.debug("My optimized query output:\n{}\n", iqOptimized);
             return iqOptimized;
         } catch (Exception e){
