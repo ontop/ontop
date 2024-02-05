@@ -166,7 +166,7 @@ public class FederationOptimizerTest {
 
         System.out.println("Optimized IQ:\n" + iqopt + "\n");
         String optimizedQuery = Files.readString(Path.of(outputIQFile));
-//        assertEquals(optimizedQuery, iqopt.toString());
+        assertEquals(optimizedQuery, iqopt.toString());
 
         // Check if the executable query is correct
         // The executable query is the query that contains the CONSTRUCT instructions for the VKG and the SQL query for the sources
