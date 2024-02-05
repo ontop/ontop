@@ -6,23 +6,21 @@ CONSTRUCT [product, label] [product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bs
             ORDER BY [ASC(VARCHARToTEXT(label10m40))]
                FILTER AND3(IS_NULL(label10m11),NUM_LT(INTEGERToBIGINT(propertynum1m23),"1874"^^BIGINT),NUM_GT(INTEGERToBIGINT(propertynum1m36),"53"^^BIGINT))
                   UNION [label10m40, nr0m49, propertynum1m36, propertynum1m23, label10m11]
-                     LJ
-                        JOIN
-                           FILTER AND3(IS_NOT_NULL(label10m40),IS_NOT_NULL(propertynum1m36),IS_NOT_NULL(propertynum1m23))
+                     FILTER AND3(IS_NOT_NULL(label10m40),IS_NOT_NULL(propertynum1m36),IS_NOT_NULL(propertynum1m23))
+                        LJ IS_NOT_NULL(label10m11)
+                           JOIN
                               EXTENSIONAL "product1"(0:nr0m49,1:label10m40,4:propertynum1m36,6:propertynum1m23)
-                           EXTENSIONAL "producttypeproduct1"(0:nr0m49,1:"4"^^INTEGER)
-                           EXTENSIONAL "productfeatureproduct1"(0:nr0m49,1:"79"^^INTEGER)
-                        JOIN
-                           EXTENSIONAL "productfeatureproduct1"(0:nr0m49,1:"814"^^INTEGER)
-                           FILTER IS_NOT_NULL(label10m11)
+                              EXTENSIONAL "producttypeproduct1"(0:nr0m49,1:"4"^^INTEGER)
+                              EXTENSIONAL "productfeatureproduct1"(0:nr0m49,1:"79"^^INTEGER)
+                           JOIN
+                              EXTENSIONAL "productfeatureproduct1"(0:nr0m49,1:"814"^^INTEGER)
                               EXTENSIONAL "product1"(0:nr0m49,1:label10m11)
-                     LJ
-                        JOIN
-                           FILTER AND3(IS_NOT_NULL(label10m40),IS_NOT_NULL(propertynum1m36),IS_NOT_NULL(propertynum1m23))
+                     FILTER AND3(IS_NOT_NULL(label10m40),IS_NOT_NULL(propertynum1m36),IS_NOT_NULL(propertynum1m23))
+                        LJ IS_NOT_NULL(label10m11)
+                           JOIN
                               EXTENSIONAL "product2"(0:nr0m49,1:label10m40,4:propertynum1m36,6:propertynum1m23)
-                           EXTENSIONAL "producttypeproduct2"(0:nr0m49,1:"4"^^INTEGER)
-                           EXTENSIONAL "productfeatureproduct2"(0:nr0m49,1:"79"^^INTEGER)
-                        JOIN
-                           EXTENSIONAL "productfeatureproduct2"(0:nr0m49,1:"814"^^INTEGER)
-                           FILTER IS_NOT_NULL(label10m11)
+                              EXTENSIONAL "producttypeproduct2"(0:nr0m49,1:"4"^^INTEGER)
+                              EXTENSIONAL "productfeatureproduct2"(0:nr0m49,1:"79"^^INTEGER)
+                           JOIN
+                              EXTENSIONAL "productfeatureproduct2"(0:nr0m49,1:"814"^^INTEGER)
                               EXTENSIONAL "product2"(0:nr0m49,1:label10m11)

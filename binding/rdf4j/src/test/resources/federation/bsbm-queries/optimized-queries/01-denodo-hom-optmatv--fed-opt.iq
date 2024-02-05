@@ -2,18 +2,17 @@ ans1(product, label)
 CONSTRUCT [product, label] [product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product{}(INTEGERToTEXT(nr0m49)),IRI), label/RDF(VARCHARToTEXT(label10m40),xsd:string)]
    SLICE limit=10
       DISTINCT
-         CONSTRUCT [nr0m49, label10m40] []
-            ORDER BY [ASC(VARCHARToTEXT(label10m40))]
-               UNION [label10m40, nr0m49, propertynum1m36]
-                  JOIN NUM_GT(INTEGERToBIGINT(propertynum1m36),"53"^^BIGINT)
-                     FILTER AND2(IS_NOT_NULL(label10m40),IS_NOT_NULL(propertynum1m36))
-                        EXTENSIONAL "product1"(0:nr0m49,4:propertynum1m36,1:label10m40)
+         ORDER BY [ASC(VARCHARToTEXT(label10m40))]
+            UNION [label10m40, nr0m49]
+               CONSTRUCT [label10m40, nr0m49] []
+                  JOIN AND3(NUM_GT(INTEGERToBIGINT(propertynum1m36),"53"^^BIGINT),IS_NOT_NULL(label10m40),IS_NOT_NULL(propertynum1m36))
+                     EXTENSIONAL "product1"(0:nr0m49,4:propertynum1m36,1:label10m40)
                      EXTENSIONAL "producttypeproduct1"(0:nr0m49,1:"4"^^INTEGER)
                      EXTENSIONAL "productfeatureproduct1"(0:nr0m49,1:"79"^^INTEGER)
                      EXTENSIONAL "productfeatureproduct1"(0:nr0m49,1:"116"^^INTEGER)
-                  JOIN NUM_GT(INTEGERToBIGINT(propertynum1m36),"53"^^BIGINT)
-                     FILTER AND2(IS_NOT_NULL(label10m40),IS_NOT_NULL(propertynum1m36))
-                        EXTENSIONAL "product2"(0:nr0m49,4:propertynum1m36,1:label10m40)
+               CONSTRUCT [label10m40, nr0m49] []
+                  JOIN AND3(NUM_GT(INTEGERToBIGINT(propertynum1m36),"53"^^BIGINT),IS_NOT_NULL(label10m40),IS_NOT_NULL(propertynum1m36))
+                     EXTENSIONAL "product2"(0:nr0m49,4:propertynum1m36,1:label10m40)
                      EXTENSIONAL "producttypeproduct2"(0:nr0m49,1:"4"^^INTEGER)
                      EXTENSIONAL "productfeatureproduct2"(0:nr0m49,1:"79"^^INTEGER)
                      EXTENSIONAL "productfeatureproduct2"(0:nr0m49,1:"116"^^INTEGER)

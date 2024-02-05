@@ -4,5 +4,5 @@ CONSTRUCT [product, label] [product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bs
       UNION [label10m40, nr0m49]
          FILTER AND2(DB_CONTAINS(VARCHARToTEXT(label10m40),"banded"^^TEXT),IS_NOT_NULL(label10m40))
             EXTENSIONAL "product1"(0:nr0m49,1:label10m40)
-         FILTER AND2(DB_CONTAINS(VARCHARToTEXT(label10m40),"banded"^^TEXT),AND3(IS_NOT_NULL(nr0m49),IS_NOT_NULL(label10m40),IS_NOT_NULL(nr0m49)))
+         FILTER AND3(DB_CONTAINS(VARCHARToTEXT(label10m40),"banded"^^TEXT),IS_NOT_NULL(nr0m49),IS_NOT_NULL(label10m40))
             EXTENSIONAL "product2"(0:nr0m49,1:label10m40)

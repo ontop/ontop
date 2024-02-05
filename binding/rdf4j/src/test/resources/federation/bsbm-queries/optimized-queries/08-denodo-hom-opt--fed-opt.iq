@@ -1,10 +1,6 @@
 ans1(title, text, reviewDate, reviewer, reviewerName, rating1, rating2, rating3, rating4)
 CONSTRUCT [title, text, reviewDate, reviewer, reviewerName, rating1, rating2, rating3, rating4] [reviewerName/RDF(VARCHARToTEXT(name1m12),xsd:string), rating1/RDF(INTEGERToTEXT(rating1m16),IF_ELSE_NULL(IS_NOT_NULL(rating1m16),xsd:integer)), rating2/RDF(INTEGERToTEXT(rating1m17),IF_ELSE_NULL(IS_NOT_NULL(rating1m17),xsd:integer)), reviewDate/RDF(DATEToTEXT(reviewdate2m37),xsd:date), rating3/RDF(INTEGERToTEXT(rating1m13),IF_ELSE_NULL(IS_NOT_NULL(rating1m13),xsd:integer)), rating4/RDF(INTEGERToTEXT(rating1m15),IF_ELSE_NULL(IS_NOT_NULL(rating1m15),xsd:integer)), reviewer/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite/Reviewer{}(INTEGERToTEXT(person2m7)),IRI), text/RDF(VARCHARToTEXT(text2m14),xsd:string), title/RDF(VARCHARToTEXT(title2m11),xsd:string)]
-   DISTINCT
-      CONSTRUCT [nr0m4, title2m11, text2m14, reviewdate2m37, person2m7, name1m12, v7, rating1m16, rating1m17, v12, v15, rating1m13, v19, rating1m15] [v19/IF_ELSE_NULL(IS_NOT_NULL(rating1m15),nr0m4), v7/IF_ELSE_NULL(IS_NOT_NULL(rating1m16),nr0m4), v12/IF_ELSE_NULL(IS_NOT_NULL(rating1m17),nr0m4), v15/IF_ELSE_NULL(IS_NOT_NULL(rating1m13),nr0m4)]
-         ORDER BY [DESC(reviewdate2m37)]
-            FILTER IS_NOT_NULL(name1m12)
-               JOIN
-                  FILTER AND3(IS_NOT_NULL(title2m11),IS_NOT_NULL(text2m14),IS_NOT_NULL(reviewdate2m37))
-                     EXTENSIONAL "review"(0:nr0m4,1:"94"^^INTEGER,3:person2m7,4:reviewdate2m37,5:title2m11,6:text2m14,7:"en"^^CHAR,8:rating1m16,9:rating1m17,10:rating1m13,11:rating1m15)
-                  EXTENSIONAL "person"(0:person2m7,1:name1m12)
+   ORDER BY [DESC(reviewdate2m37)]
+      JOIN AND4(IS_NOT_NULL(name1m12),IS_NOT_NULL(title2m11),IS_NOT_NULL(text2m14),IS_NOT_NULL(reviewdate2m37))
+         EXTENSIONAL "review"(1:"94"^^INTEGER,3:person2m7,4:reviewdate2m37,5:title2m11,6:text2m14,7:"en"^^CHAR,8:rating1m16,9:rating1m17,10:rating1m13,11:rating1m15)
+         EXTENSIONAL "person"(0:person2m7,1:name1m12)

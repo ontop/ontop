@@ -3,11 +3,9 @@ CONSTRUCT [label, comment, producer, productFeature, propertyTextual1, propertyT
    DISTINCT
       FILTER AND2(IS_NOT_NULL(label10m6),IS_NOT_NULL(label10m18))
          UNION [propertytex1m30, propertytex1m31, label10m18, propertynum1m36, label10m6, label10m40, comment10m19, productfeature2m2, propertynum1m35, propertytex1m27, propertynum1m22, producer2m9, propertytex1m29, propertytex1m28]
-            JOIN
-               FILTER AND8(IS_NOT_NULL(label10m40),IS_NOT_NULL(comment10m19),IS_NOT_NULL(producer2m9),IS_NOT_NULL(propertytex1m31),IS_NOT_NULL(propertytex1m30),IS_NOT_NULL(propertytex1m29),IS_NOT_NULL(propertynum1m36),IS_NOT_NULL(propertynum1m35))
-                  EXTENSIONAL "smatv"."matv_s1_product1_s4_producer"(0:"94"^^INTEGER,1:label10m40,2:comment10m19,3:producer2m9,4:propertynum1m36,5:propertynum1m35,7:propertynum1m22,10:propertytex1m31,11:propertytex1m30,12:propertytex1m29,13:propertytex1m28,14:propertytex1m27,19:label10m6)
+            JOIN AND8(IS_NOT_NULL(label10m40),IS_NOT_NULL(comment10m19),IS_NOT_NULL(producer2m9),IS_NOT_NULL(propertytex1m31),IS_NOT_NULL(propertytex1m30),IS_NOT_NULL(propertytex1m29),IS_NOT_NULL(propertynum1m36),IS_NOT_NULL(propertynum1m35))
+               EXTENSIONAL "smatv"."matv_s1_product1_s4_producer"(0:"94"^^INTEGER,1:label10m40,2:comment10m19,3:producer2m9,4:propertynum1m36,5:propertynum1m35,7:propertynum1m22,10:propertytex1m31,11:propertytex1m30,12:propertytex1m29,13:propertytex1m28,14:propertytex1m27,19:label10m6)
                EXTENSIONAL "smatv"."matv_s1_productfeatureproduct1_s3_productfeature"(0:"94"^^INTEGER,1:productfeature2m2,3:label10m18)
-            JOIN
-               FILTER AND8(IS_NOT_NULL(label10m40),IS_NOT_NULL(comment10m19),IS_NOT_NULL(producer2m9),IS_NOT_NULL(propertytex1m31),IS_NOT_NULL(propertytex1m30),IS_NOT_NULL(propertytex1m29),IS_NOT_NULL(propertynum1m36),IS_NOT_NULL(propertynum1m35))
-                  EXTENSIONAL "smatv"."matv_s5_product2_s4_producer"(0:"94"^^INTEGER,1:label10m40,2:comment10m19,3:producer2m9,4:propertynum1m36,5:propertynum1m35,7:propertynum1m22,10:propertytex1m31,11:propertytex1m30,12:propertytex1m29,13:propertytex1m28,14:propertytex1m27,19:label10m6)
+            JOIN AND8(IS_NOT_NULL(label10m40),IS_NOT_NULL(comment10m19),IS_NOT_NULL(producer2m9),IS_NOT_NULL(propertytex1m31),IS_NOT_NULL(propertytex1m30),IS_NOT_NULL(propertytex1m29),IS_NOT_NULL(propertynum1m36),IS_NOT_NULL(propertynum1m35))
+               EXTENSIONAL "smatv"."matv_s5_product2_s4_producer"(0:"94"^^INTEGER,1:label10m40,2:comment10m19,3:producer2m9,4:propertynum1m36,5:propertynum1m35,7:propertynum1m22,10:propertytex1m31,11:propertytex1m30,12:propertytex1m29,13:propertytex1m28,14:propertytex1m27,19:label10m6)
                EXTENSIONAL "smatv"."matv_s5_productfeatureproduct2_s3_productfeature"(0:"94"^^INTEGER,1:productfeature2m2,3:label10m18)
