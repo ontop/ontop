@@ -154,16 +154,6 @@ public class FederationOptimizerTest {
 
         // Check if optimization of the query is correct
         IQ iqopt = federationOptimizer.optimize(iq);
-        // Check if multiple application of normalizeForOptimization and optimize lead to a better query
-//        IQ iqoptnew = iqopt.normalizeForOptimization();
-//        int i=0;
-//        while(!iqopt.toString().equals(iqoptnew.toString())) {
-//            iqopt = federationOptimizer.optimize(iqoptnew);
-//            iqoptnew = iqopt.normalizeForOptimization();
-//            i++;
-//            System.out.println("HALLO"+i);
-//        }
-
         System.out.println("Optimized IQ:\n" + iqopt + "\n");
         String optimizedQuery = Files.readString(Path.of(outputIQFile));
         assertEquals(optimizedQuery, iqopt.toString());
