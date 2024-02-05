@@ -140,17 +140,16 @@ public class FederationOptimizerImpl implements FederationOptimizer {
         if (!enabled) {
             return query;
         }
+
         // Call optimizeAndNormalize until the query stops changing
         // Quick fix should be replaced by proper implementation in rewriteIQTree
-        String previousState;
-        String currentState = query.toString();
-        IQ result = query;
+        IQ previousIQ;
+        IQ currentIQ = query;
         do {
-            previousState = currentState;
-            result = optimizeAndNormalize(result);
-            currentState = result.toString();
-        } while (!currentState.equals(previousState));
-        return result;
+            previousIQ = currentIQ;
+            currentIQ = optimizeAndNormalize(currentIQ);
+        } while (!currentIQ.equals(previousIQ));
+        return currentIQ;
     }
 
     public IQ optimizeAndNormalize(IQ query) {
