@@ -215,7 +215,7 @@ public class FederationOptimizerTest {
             System.out.println("BSBM Query " + bsbmNumber + ":\nReformulated SQL Query:");
             System.out.println(reformulatedQuery);
 
-            Files.writeString(Path.of("src/test/resources/federation/bsbm-queries/obdalin/"+ String.format("%02d", bsbmNumber) + "-denodo-het_optmatv--exec.iq"), reformulatedQuery);
+            Files.writeString(Path.of("src/test/resources/federation/bsbm-queries/obdalin/"+ String.format("%02d", bsbmNumber) + "-denodo-het-optmatv--exec.iq"), reformulatedQuery);
 
             return reformulatedQuery;
         } catch (IOException e) {
