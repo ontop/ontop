@@ -15,12 +15,19 @@ import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLConnection;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.utils.VersionInfo;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.rdf4j.RDF4J;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
+import org.semanticweb.owlapi.reasoner.impl.OWLClassNode;
+import org.semanticweb.owlapi.reasoner.impl.OWLClassNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLReasonerBase;
 import org.semanticweb.owlapi.reasoner.structural.StructuralReasoner;
 import org.semanticweb.owlapi.util.Version;
@@ -31,6 +38,7 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The OBDAOWLReformulationPlatform implements the OWL reasoner interface and is
@@ -467,7 +475,48 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
     public NodeSet<OWLClass> getSubClasses(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
 		// TODO: use ClassifiedTBox
-        return structuralReasoner.getSubClasses(ce, direct);
+		if(ce instanceof OWLClass){
+			String iriString = ((OWLClass) ce).getIRI().toString();
+			RDF rdf = new RDF4J();
+			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+			OWLDataFactory factory = manager.getOWLDataFactory();
+			
+			org.apache.commons.rdf.api.IRI iri = rdf.createIRI(iriString);
+			EquivalencesDAG<ClassExpression> classesDag = classifiedTBox.classesDAG();
+			OClass oClass = classifiedTBox.classes().get(iri);
+			Equivalences<ClassExpression> eq = new Equivalences<>(ImmutableSet.of(oClass));
+			ImmutableSet<Equivalences<ClassExpression>> sub = classesDag.getSub(eq);
+			
+			Set<Node<OWLClass>> classes;
+            classes = sub.stream()
+					.flatMap(x -> x.getMembers().stream())
+                    .filter(x -> x instanceof OClass)
+                    .map(x -> (OClass) x)
+                    .map(x -> x.getIRI().getIRIString())
+                    .map(x -> factory.getOWLClass(org.semanticweb.owlapi.model.IRI.create(x)))
+                    .map(OWLClassNode::new)
+                    .collect(Collectors.toSet());
+            OWLClassNodeSet nodes = new OWLClassNodeSet(classes);
+
+//			Equivalences<ClassExpression> subClassEq = sub.stream().iterator().next();
+//			ClassExpression classExpression = subClassEq.getRepresentative();
+//			String subIRI = ((OClass) classExpression).getIRI().getIRIString();
+//			OWLClass subClass = factory.getOWLClass(org.semanticweb.owlapi.model.IRI.create(subIRI));
+//			sub.stream().iterator().forEachRemaining(
+//					eq1 -> eq1.getMembers().forEach(
+//                            System.out::println
+//					)
+//			);
+
+//			OWLClassNodeSet nodes = new OWLClassNodeSet(subClass);
+			return nodes;
+		} else {
+			return null;
+		}
+
+
+
+		//return structuralReasoner.getSubClasses(ce, direct);
 	}
 
 	@Nonnull
