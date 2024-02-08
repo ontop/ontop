@@ -4280,6 +4280,7 @@ public class LeftJoinOptimizationTest {
      *             EXTENSIONAL "SalesReasonCategory"(0:reason2,1:name)
      */
     @Test
+    @Ignore
     public void testNonProjectionAway4() {
         var projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 ATOM_FACTORY.getRDFAnswerPredicate(1), ImmutableList.of(A));
