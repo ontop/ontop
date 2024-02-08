@@ -4269,6 +4269,46 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
+    /**
+     * CONSTRUCT [name] []
+     *    DISTINCT
+     *       CONSTRUCT [name, order_id] []
+     *          LJ
+     *             LJ
+     *                EXTENSIONAL "Order"(0:order_id)
+     *                EXTENSIONAL "reason"(0:order_id,1:reason2)
+     *             EXTENSIONAL "SalesReasonCategory"(0:reason2,1:name)
+     */
+    @Test
+    public void testNonProjectionAway4() {
+        var projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(1), ImmutableList.of(A));
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, B));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE3, ImmutableMap.of(0, B, 1, C));
+        var dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE5, ImmutableMap.of(0, C, 1, A));
+
+        var subLJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(), dataNode1, dataNode2);
+
+        var ljTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(), subLJTree, dataNode3);
+
+        var distinctTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createDistinctNode(),
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B)),
+                        ljTree));
+
+        var initialTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(projectionAtom.getVariables()),
+                distinctTree);
+
+        var initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        optimizeAndCompare(initialIQ, initialIQ);
+    }
+
     @Test
     public void testKeepConstraint1() {
 

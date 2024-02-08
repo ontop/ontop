@@ -103,7 +103,7 @@ public class IgnoreInvalidMappingEntriesTest extends AbstractRDF4JTest {
         String dbExtract = "/ignore-invalid-mapping-entries/test.db-extract.json";
         ImmutableSet<Lens> lenses = loadLensesH2(AbstractRDF4JTest.class.getResource(lens).getPath(),
                 AbstractRDF4JTest.class.getResource(dbExtract).getPath());
-        assertEquals(2, lenses.size());
+        assertEquals(7, lenses.size());
     }
 
     @Test

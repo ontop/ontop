@@ -261,7 +261,7 @@ jobs:
       - name: Run CI for SQLServer docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="mssqllighttests" -DskipTests=false --fail-at-end
 
-  run-mysql:
+  run-mysql-v8:
     needs: [run-mssql]
     runs-on: ubuntu-latest
     strategy:
@@ -282,13 +282,43 @@ jobs:
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
-          docker-compose -f "docker-compose.lightweight.yml" up -d mysql
+          docker-compose -f "docker-compose.lightweight.yml" up -d mysql-v8
       # Runs all tests specific to a db engine
       - name: Run CI for MySQL docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="mysqllighttests" -DskipTests=false --fail-at-end
 
+  run-mysql-v5:
+    needs: [ run-mssql ]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        jdk: [ 11 ]
+
+    steps:
+      # Checks-out ontop repository under $GITHUB_WORKSPACE
+      - uses: actions/checkout@v3
+      # Set up the java versions
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: ${{ matrix.jdk }}
+          cache: maven
+      - name: Set maven opts
+        run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - name: Set up docker
+        run: cd test/lightweight-tests/lightweight-db-test-images &&
+          docker-compose -f "docker-compose.lightweight.yml" up -d mysql-v5
+      # Runs all tests specific to a db engine
+      - name: Set Environment Variable for MySQL 5 # Needed to skip tests
+        run: echo "MYSQL_VERSION=5" >> $GITHUB_ENV
+      - name: Run CI for MySQL v5.x docker tests
+        run: cd test/lightweight-tests && ../../mvnw install -Dgroups="mysqllighttests" -DskipTests=false --fail-at-end
+        env:
+          MYSQL_VERSION: ${{ env.MYSQL_VERSION }}
+
   run-mariadb:
-    needs: [run-mysql]
+    needs: [run-mysql-v8]
     runs-on: ubuntu-latest
     strategy:
       matrix:
