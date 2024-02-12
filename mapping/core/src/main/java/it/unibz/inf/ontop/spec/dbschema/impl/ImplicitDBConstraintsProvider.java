@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Iterables;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DelegatingMetadataProvider;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
@@ -9,8 +10,11 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.AbstractMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -28,15 +32,27 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImplicitDBConstraintsProvider.class);
 
+    private final ImmutableMultimap<RelationID, QuotedID> notNullConstraints;
     private final ImmutableMultimap<RelationID, DatabaseRelationDescriptor> uniqueConstraints;
+    private final ImmutableMultimap<RelationID, DatabaseRelationDescriptor> primaryKeyConstraints;
     private final ImmutableMultimap<RelationID, Map.Entry<DatabaseRelationDescriptor, DatabaseRelationDescriptor>> foreignKeys;
 
     ImplicitDBConstraintsProvider(MetadataProvider provider,
+                                  ImmutableList<DatabaseRelationDescriptor> notNullConstraints,
                                   ImmutableList<DatabaseRelationDescriptor> uniqueConstraints,
+                                  ImmutableList<DatabaseRelationDescriptor> primaryKeyConstraints,
                                   ImmutableList<Map.Entry<DatabaseRelationDescriptor, DatabaseRelationDescriptor>> foreignKeys) {
         super(provider);
 
+        this.notNullConstraints = Stream
+                .concat(notNullConstraints.stream(), primaryKeyConstraints.stream())
+                .flatMap(c -> c.attributeIds.stream().map(id -> new AbstractMap.SimpleEntry<>(c.tableId, id)))
+                .collect(ImmutableCollectors.toMultimap(Map.Entry::getKey, Map.Entry::getValue));
+
         this.uniqueConstraints = uniqueConstraints.stream()
+                .collect(ImmutableCollectors.toMultimap(c -> c.tableId, Function.identity()));
+
+        this.primaryKeyConstraints = primaryKeyConstraints.stream()
                 .collect(ImmutableCollectors.toMultimap(c -> c.tableId, Function.identity()));
 
         this.foreignKeys = foreignKeys.stream()
@@ -55,9 +71,29 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
         try {
             int counter = 0; // id of the generated constraint
 
-            for (DatabaseRelationDescriptor uc : relation.getAllIDs().stream()
-                    .flatMap(id -> uniqueConstraints.get(id).stream())
-                    .collect(ImmutableCollectors.toList())) {
+            List<QuotedID> nns = getConstraints(relation, notNullConstraints);
+            List<DatabaseRelationDescriptor> pks = getConstraints(relation, primaryKeyConstraints);
+            List<DatabaseRelationDescriptor> ucs = getConstraints(relation, uniqueConstraints);
+            List<Map.Entry<DatabaseRelationDescriptor, DatabaseRelationDescriptor>> fks = getConstraints(relation, foreignKeys);
+
+            if (!nns.isEmpty()) {
+                Attribute[] notNullAttributes = new Attribute[nns.size()];
+                for (int i = 0; i < nns.size(); ++ i) {
+                    notNullAttributes[i] = relation.getAttribute(nns.get(i));
+                }
+                relation.addNotNullConstraint(notNullAttributes);
+            }
+
+            if (!pks.isEmpty() && relation.getPrimaryKey().isEmpty()) {
+                DatabaseRelationDescriptor pk = pks.remove(pks.size() - 1); // choose last PK, others will end up as UCs
+                String name = getTableName(relation) + "_USER_PK_" + counter++;
+                UniqueConstraint.Builder builder = UniqueConstraint.primaryKeyBuilder(relation, name);
+                for (QuotedID a : pk.attributeIds)
+                    builder.addDeterminant(a);
+                builder.build();
+            }
+
+            for (DatabaseRelationDescriptor uc : Iterables.concat(pks, ucs)) {
                 String name = getTableName(relation) + "_USER_UC_" + counter++;
                 UniqueConstraint.Builder builder = UniqueConstraint.builder(relation, name);
                 for (QuotedID a : uc.attributeIds)
@@ -65,9 +101,7 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
                 builder.build();
             }
 
-            for (Map.Entry<DatabaseRelationDescriptor, DatabaseRelationDescriptor> fkc : relation.getAllIDs().stream()
-                    .flatMap(id -> foreignKeys.get(id).stream())
-                    .collect(ImmutableCollectors.toList())) {
+            for (Map.Entry<DatabaseRelationDescriptor, DatabaseRelationDescriptor> fkc : fks) {
                 NamedRelationDefinition referencedRelation;
                 try {
                     referencedRelation = metadataLookup.getRelation(fkc.getValue().tableId);
@@ -90,6 +124,12 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
 
     private static String getTableName(NamedRelationDefinition relation) {
         return relation.getID().getComponents().get(RelationID.TABLE_INDEX).getName();
+    }
+
+    private static <T> List<T> getConstraints(NamedRelationDefinition relation, ImmutableMultimap<RelationID, T> constraints) {
+        return relation.getAllIDs().stream()
+                .flatMap(id -> constraints.get(id).stream())
+                .collect(Collectors.toList());
     }
 
     static final class DatabaseRelationDescriptor {

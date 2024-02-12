@@ -22,4 +22,7 @@ public interface NamedRelationDefinition extends RelationDefinition {
 	void addFunctionalDependency(FunctionalDependency constraint);
 
 	void addForeignKeyConstraint(ForeignKeyConstraint fk);
+
+	void addNotNullConstraint(Attribute... attributes);
+
 }

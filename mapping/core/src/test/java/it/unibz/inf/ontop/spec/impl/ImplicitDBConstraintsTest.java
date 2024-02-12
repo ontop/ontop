@@ -15,7 +15,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
+import static it.unibz.inf.ontop.utils.MappingTestingTools.createMetadataProviderBuilder;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ImplicitDBConstraintsTest {
@@ -33,11 +33,14 @@ public class ImplicitDBConstraintsTest {
 		DBTermType stringDBType = builder.getDBTypeFactory().getDBStringType();
 
 		builder.createDatabaseRelation("TABLENAME",
-			"KEYNAME", stringDBType, false);
+				"KEYNAME", stringDBType, false,
+				"ATTR1", stringDBType, false, // not null from metadata, not touched by constraint file
+				"ATTR2", stringDBType, true, // nullable in metadata, not null in constraint file
+				"ATTR3", stringDBType, true); // nullable in metadata, not touched by constraint file
 
-		builder.createDatabaseRelation( "TABLE2",
-			"KEY1", stringDBType, false,
-			"KEY2", stringDBType, false);
+		builder.createDatabaseRelation("TABLE2",
+				"KEY1", stringDBType, false,
+				"KEY2", stringDBType, false);
 
 		md = builder.build();
 	}
@@ -115,4 +118,47 @@ public class ImplicitDBConstraintsTest {
 				() -> assertEquals(md.getQuotedIDFactory().createAttributeID("KEY1"), ref.getID()),
 				() -> assertEquals(ImmutableList.of(table.getAttribute(1)), table.getUniqueConstraints().get(0).getAttributes()));
 	}
+
+	@Test
+	public void testAddConstraintsExtendedSyntax() throws MetadataExtractionException {
+		QuotedIDFactory idf = md.getQuotedIDFactory();
+		MetadataProvider mp = CONSTRAINT_EXTRACTOR.extract(Optional.of(new File(DIR + "all_constraints_extended_syntax.lst")), md);
+		NamedRelationDefinition table = mp.getRelation(mp.getQuotedIDFactory().createRelationID("TABLENAME"));
+		NamedRelationDefinition table2 = mp.getRelation(mp.getQuotedIDFactory().createRelationID("TABLE2"));
+		mp.insertIntegrityConstraints(table, mp);
+		mp.insertIntegrityConstraints(table2, mp);
+
+		// Check for TABLENAME attribute nullability: ATTR1 not null (metadata), ATTR2 not null (constraint file), ATTR3 nullable (metadata)
+		assertAll(
+				() -> assertFalse(table.getAttribute(idf.createAttributeID("ATTR1")).isNullable()),
+				() -> assertFalse(table.getAttribute(idf.createAttributeID("ATTR2")).isNullable()),
+				() -> assertTrue(table.getAttribute(idf.createAttributeID("ATTR3")).isNullable()));
+
+		// Check for unique constraint TABLE2(KEY1,KEY2)
+		List<UniqueConstraint> ucs = table2.getUniqueConstraints();
+		assertAll(
+				() -> assertEquals(1, ucs.size()),
+				() -> assertFalse(ucs.get(0).isPrimaryKey()),
+				() -> assertEquals(2, ucs.get(0).getAttributes().size()),
+				() -> assertEquals(idf.createAttributeID("KEY1"), ucs.get(0).getAttributes().get(0).getID()),
+				() -> assertEquals(idf.createAttributeID("KEY2"), ucs.get(0).getAttributes().get(1).getID()));
+
+		// Check for primary key TABLENAME(KEYNAME)
+		UniqueConstraint pk = table.getPrimaryKey().orElse(null);
+		assertNotNull(pk);
+		assertAll(
+				() -> assertTrue(pk.isPrimaryKey()),
+				() -> assertEquals(1, pk.getAttributes().size()),
+				() -> assertEquals(idf.createAttributeID("KEYNAME"), pk.getAttributes().get(0).getID()));
+
+		// Check for (exactly one) foreign key TABLENAME(KEYNAME) REFERENCES TABLE2(KEY1)
+		List<ForeignKeyConstraint> fks = table.getForeignKeys();
+		assertAll(
+				() -> assertEquals(1, fks.size()),
+				() -> assertEquals(1, fks.get(0).getComponents().size()),
+				() -> assertEquals(idf.createRelationID("TABLE2"), fks.get(0).getReferencedRelation().getID()),
+				() -> assertEquals(idf.createAttributeID("KEY1"), fks.get(0).getComponents().get(0).getReferencedAttribute().getID()),
+				() -> assertEquals(idf.createAttributeID("KEYNAME"), fks.get(0).getComponents().get(0).getAttribute().getID()));
+	}
+
 }
