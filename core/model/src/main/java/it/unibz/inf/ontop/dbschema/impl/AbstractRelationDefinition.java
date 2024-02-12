@@ -16,14 +16,12 @@ import java.util.function.Function;
 
 public abstract class AbstractRelationDefinition implements RelationDefinition  {
 
-    private final ImmutableList<Attribute> attributes;
-    private final ImmutableMap<QuotedID, Attribute> map;
+    private ImmutableList<Attribute> attributes;
+    private ImmutableMap<QuotedID, Attribute> map;
     private final RelationPredicate predicate;
 
     protected AbstractRelationDefinition(String predicateName, RelationDefinition.AttributeListBuilder builder) {
-        this.attributes = builder.build(this);
-        this.map = attributes.stream()
-                .collect(ImmutableCollectors.toMap(Attribute::getID, Function.identity()));
+        setAttributes(builder.build(this));
         this.predicate = new RelationPredicateImpl(predicateName);
     }
 
@@ -58,6 +56,18 @@ public abstract class AbstractRelationDefinition implements RelationDefinition  
      */
     @JsonProperty("columns")
     public ImmutableList<Attribute> getAttributes() { return attributes; }
+
+    /**
+     * Sets the attributes of the relation. This protected method is called at initialization time and is provided to
+     * revising the attribute list (e.g., changing nullability based on external constraint file) in subclasses.
+     *
+     * @param attributes the attributes to set, not null, with attribute index correctly set starting from 1
+     */
+    protected void setAttributes(List<Attribute> attributes) {
+        this.attributes = ImmutableList.copyOf(attributes);
+        this.map = attributes.stream()
+                .collect(ImmutableCollectors.toMap(Attribute::getID, Function.identity()));
+    }
 
     @JsonIgnore
     public RelationPredicate getAtomPredicate() { return predicate; }

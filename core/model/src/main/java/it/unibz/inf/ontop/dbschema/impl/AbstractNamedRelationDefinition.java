@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import it.unibz.inf.ontop.dbschema.*;
 
 import java.util.ArrayList;
@@ -95,6 +96,31 @@ public abstract class AbstractNamedRelationDefinition extends AbstractRelationDe
     @Override
     public ImmutableList<ForeignKeyConstraint> getForeignKeys() {
         return ImmutableList.copyOf(foreignKeys);
+    }
+
+    /**
+     * Sets the listed attributes as not null (if not so already). Listed attributes must already be part of the
+     * relation signature (i.e., they should come from relation.getAttributes() and their getRelation() should return
+     * this relation).
+     *
+     * @param attributes the attributes to set as not null
+     */
+    @Override
+    public void addNotNullConstraint(Attribute... attributes) {
+        List<Attribute> newAttributes = null;
+        for (Attribute a : attributes) {
+            if (a.getRelation() != this) {
+                throw new IllegalArgumentException("Attribute " + a.getID() + " does not belong to relation " + this.getID());
+            }
+            if (getAttribute(a.getIndex()).isNullable()) {
+                newAttributes = newAttributes != null ? newAttributes : Lists.newArrayList(getAttributes());
+                newAttributes.set(a.getIndex() - 1, new AttributeImpl(this, a.getID(), a.getIndex(),
+                        ((AttributeImpl) a).getSQLTypeName(), a.getTermType(), false));
+            }
+        }
+        if (newAttributes != null) {
+            this.setAttributes(newAttributes);
+        }
     }
 
 }
