@@ -27,8 +27,11 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.query.KGQuery;
 import it.unibz.inf.ontop.query.KGQueryFactory;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 
 import java.io.*;
@@ -41,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 
 @Tag("obdf")
 public class FederationOptimizerMultipleTest {
@@ -57,8 +59,16 @@ public class FederationOptimizerMultipleTest {
     private QueryReformulator reformulator;
     private KGQueryFactory kgQueryFactory;
 
-    String expectedOutput;
-    String actualOutput;
+    private String expectedOutput;
+    private String actualOutput;
+    private List<Executable> assertions;
+
+    @BeforeEach
+    public void setupTest() {
+        assertions = new ArrayList<>();
+        expectedOutput = "";
+        actualOutput = "";
+    }
 
     public void setUp(String owlFile, String obdaFile, String propertyFile, String metadataFile, String constraintFile, boolean optimizationEnabled, String sourceFile, String effLabelFile, String hintFile) {
         try {
@@ -99,46 +109,44 @@ public class FederationOptimizerMultipleTest {
 
     @Test
     public void testFederationOptimizerWithJson() throws Exception {
-        expectedOutput = "";
-        actualOutput = "";
+
         for (FederationEngine federationEngine : FederationEngine.values()) {
-//            if(federationEngine == FederationEngine.DREMIO) continue;
-//            if(federationEngine == FederationEngine.TEIID) continue;
-//            if(federationEngine == FederationEngine.DENODO) continue;
+            // Skip specific Federation Engines
+            // if(federationEngine == FederationEngine.DREMIO) continue;
+            // if(federationEngine == FederationEngine.TEIID) continue;
+            // if(federationEngine == FederationEngine.DENODO) continue;
+
             for (FederationSetting federationSetting : FederationSetting.values()) {
-//                if(federationSetting == FederationSetting.HOM) continue;
-//                if(federationSetting == FederationSetting.HET) continue;
+                // Skip specific Federation Settings
+                // if(federationSetting == FederationSetting.HOM) continue;
+                // if(federationSetting == FederationSetting.HET) continue;
+
                 for (FederationOptimization federationOptimization : FederationOptimization.values()) {
-//                    if(federationOptimization == FederationOptimization.OPT) continue;
-//                    if(federationOptimization == FederationOptimization.OPTMATV) continue;
+                    // Skip specific Federation Optimizations
+                    // if(federationOptimization == FederationOptimization.OPT) continue;
+                    // if(federationOptimization == FederationOptimization.OPTMATV) continue;
 
-                    String headerFooter = "****************************************************************************************";
-                    String details = "\nFederation Engine: " + federationEngine +
-                            "\nFederation Setting: " + federationSetting +
-                            "\nFederation Optimization: " + federationOptimization +
-                            "\n";
+                    // Build and log the header detail
+                    logAndRecordOutput(buildDetails(federationEngine, federationSetting, federationOptimization));
 
-                    System.out.println(headerFooter + details + headerFooter);
-                    expectedOutput += headerFooter + details + headerFooter;
-                    actualOutput += headerFooter + details + headerFooter;
-
+                    // Setup configuration and process queries
                     Map<String, Object> config = createDefaultBSBMTestConfiguration(federationEngine, federationSetting, federationOptimization);
                     setup(config);
                     for (Map<String, String> queryInfo : ((List<Map<String, String>>) config.get("queries"))) {
+                        // Conditional skipping of specific queries based on file name patterns
 //                        if(queryInfo.get("queryFile").contains("01")) continue;
 //                        if(queryInfo.get("queryFile").contains("02")) continue;
 //                        if(queryInfo.get("queryFile").contains("03")) continue;
 //                        if(queryInfo.get("queryFile").contains("04")) continue;
-//                        if(queryInfo.get("queryFile").contains("08")) continue;
-//                        if(queryInfo.get("queryFile").contains("11")) continue;
-//                        if(queryInfo.get("queryFile").contains("12")) continue;
-//                        if(queryInfo.get("queryFile").contains("13")) continue;
-//
 //                        if(queryInfo.get("queryFile").contains("05")) continue;
 //                        if(queryInfo.get("queryFile").contains("06")) continue;
 //                        if(queryInfo.get("queryFile").contains("07")) continue;
+//                        if(queryInfo.get("queryFile").contains("08")) continue;
 //                        if(queryInfo.get("queryFile").contains("09")) continue;
 //                        if(queryInfo.get("queryFile").contains("10")) continue;
+//                        if(queryInfo.get("queryFile").contains("11")) continue;
+//                        if(queryInfo.get("queryFile").contains("12")) continue;
+//                        if(queryInfo.get("queryFile").contains("13")) continue;
 //                        if(queryInfo.get("queryFile").contains("14")) continue;
 //                        if(queryInfo.get("queryFile").contains("15")) continue;
 //                        testFederationOptimizer(queryInfo, true, federationEngine, federationSetting, federationOptimization);
@@ -148,82 +156,68 @@ public class FederationOptimizerMultipleTest {
             }
         }
         assertEquals(expectedOutput, actualOutput);
+//        assertAll("Federation Optimization Tests", assertions);
+    }
+
+    private String buildDetails(FederationEngine federationEngine, FederationSetting federationSetting, FederationOptimization federationOptimization) {
+        return "\n****************************************************************************************\n" +
+                "Federation Engine: " + federationEngine + "\n" +
+                "Federation Setting: " + federationSetting + "\n" +
+                "Federation Optimization: " + federationOptimization + "\n" +
+                "****************************************************************************************\n";
+    }
+
+    private void logAndRecordOutput(String output) {
+        System.out.println(output);
+        expectedOutput += output;
+        actualOutput += output;
     }
 
     public void testFederationOptimizer(Map<String, String> queryInfo, boolean writeToFile, FederationEngine federationEngine, FederationSetting federationSetting, FederationOptimization federationOptimization) throws Exception {
-
         String queryFile = queryInfo.get("queryFile");
         String inputIQFile = queryInfo.get("inputIQFile");
         String outputIQFile = queryInfo.get("outputIQFile");
         String executableIQFile = queryInfo.get("executableIQFile");
         String outputSQLFile = queryInfo.get("outputSQLFile");
 
-        String queryInfoString = "\n" + federationEngine + " " + federationSetting + " " + federationOptimization + " " + Paths.get(queryFile).getFileName().toString() + "\n";
+        String queryInfoString = "\n" + federationEngine + " " + federationSetting + " " + federationOptimization + " " + Paths.get(queryFile).getFileName() + "\n";
+
+        // Load and process SPARQL query
         String sparqlQuery = Files.readString(Path.of(queryFile));
-        System.out.println(queryInfoString + "SPARQL query:\n" + sparqlQuery + "\n");
-        expectedOutput += queryInfoString + "\nSPARQL query:\n" + sparqlQuery + "\n";
-        actualOutput += queryInfoString + "\nSPARQL query:\n" + sparqlQuery + "\n";
+        logStep("SPARQL query:", sparqlQuery, queryInfoString, writeToFile, queryFile);
 
-        // check if parsing of the query by Ontop is correct
-        IQ iq = getIQFromSPARQL(sparqlQuery);
-        System.out.println(queryInfoString + "Parsed query converted into IQ:\n" + iq + "\n");
+        // Processing IQ from SPARQL, optimization, and executable query generation
+        IQ inputIQ = getIQFromSPARQL(sparqlQuery);
+        logStep("Parsed query converted into IQ:", inputIQ.toString(), queryInfoString, writeToFile, inputIQFile);
+
+        IQ optimizedIQ = federationOptimizer.optimize(inputIQ);
+        logStep("Optimized IQ:", optimizedIQ.toString(), queryInfoString, writeToFile, outputIQFile);
+
+        IQ executableIQ = reformulator.generateExecutableQuery(optimizedIQ);
+        logStep("Executable IQ:", executableIQ.toString(), queryInfoString, writeToFile, executableIQFile);
+
+        // Handling final SQL query
+        String finalSQLQuery = ((NativeNodeImpl) executableIQ.getTree().getChildren().get(0)).getNativeQueryString(); // Implement this method as needed
+        logStep("Final SQL query:", finalSQLQuery.toString(), queryInfoString, writeToFile, outputSQLFile);
+    }
+
+    private void logStep(String stepDescription, String data, String queryInfoString, boolean writeToFile, String filePath) throws IOException {
+        System.out.println(queryInfoString + stepDescription + "\n" + data);
         if (writeToFile) {
-            writeToFileCheckOverwrite(inputIQFile, iq.toString());
+            Files.writeString(Path.of(filePath), data);
         }
-        String parsedQuery = Files.readString(Path.of(inputIQFile));
-//        assertEquals(parsedQuery, iq.toString());
-        if (!parsedQuery.equals(iq.toString())) {
+        compareWithFileContent(data, Files.readString(Path.of(filePath)), stepDescription, queryInfoString);
+    }
+
+    private void compareWithFileContent(String data, String fileContent, String description, String queryInfoString) {
+        if (!fileContent.equals(data)) {
             expectedOutput += "\nAssertionError detected check below\n";
             actualOutput += "\nAssertionError detected check below\n";
         }
-        expectedOutput += queryInfoString + "\nParsed query converted into IQ:\n" + parsedQuery + "\n";
-        actualOutput += queryInfoString + "\nParsed query converted into IQ:\n" + iq + "\n";
+        expectedOutput += queryInfoString + description + fileContent + "\n";
+        actualOutput += queryInfoString + description + data + "\n";
 
-        // Check if optimization of the query is correct
-        IQ iqopt = federationOptimizer.optimize(iq);
-        System.out.println(queryInfoString + "Optimized IQ:\n" + iqopt + "\n");
-        if (writeToFile) {
-            writeToFileCheckOverwrite(outputIQFile, iqopt.toString());
-        }
-        String optimizedQuery = Files.readString(Path.of(outputIQFile));
-//        assertEquals(optimizedQuery, iqopt.toString());
-        if (!optimizedQuery.equals(iqopt.toString())) {
-            expectedOutput += "\nAssertionError detected check below\n";
-            actualOutput += "\nAssertionError detected check below\n";
-        }
-        expectedOutput += queryInfoString + "\nOptimized IQ:\n" + parsedQuery + "\n";
-        actualOutput += queryInfoString + "\nOptimized IQ:\n" + iq + "\n";
-
-        // Check if the executable query is correct
-        // The executable query is the query that contains the CONSTRUCT instructions for the VKG and the SQL query for the sources
-        IQ iqexec = reformulator.generateExecutableQuery(iqopt);
-        System.out.println(queryInfoString + "Executable IQ:\n" + iqexec + "\n");
-        if (writeToFile) {
-            writeToFileCheckOverwrite(executableIQFile, iqexec.toString());
-        }
-        String executableQuery = Files.readString(Path.of(executableIQFile));
-//        assertEquals(executableQuery, iqexec.toString());
-        if (!executableQuery.equals(iqexec.toString())) {
-            expectedOutput += "\nAssertionError detected check below\n";
-            actualOutput += "\nAssertionError detected check below\n";
-        }
-        expectedOutput += queryInfoString + "\nExecutable IQ:\n" + executableQuery + "\n";
-        actualOutput += queryInfoString + "\nExecutable IQ:\n" + iqexec + "\n";
-
-        // Check if the SQL query is correct
-        String querysql = ((NativeNodeImpl) iqexec.getTree().getChildren().get(0)).getNativeQueryString();
-        System.out.println(queryInfoString + "Final SQL query:\n" + querysql);
-        if (writeToFile) {
-            writeToFileCheckOverwrite(outputSQLFile, querysql);
-        }
-        String optimizedQuerySQL = Files.readString(Path.of(outputSQLFile));
-//        assertEquals(optimizedQuerySQL, querysql);
-        if (!optimizedQuerySQL.equals(querysql)) {
-            expectedOutput += "\nAssertionError detected check below\n";
-            actualOutput += "\nAssertionError detected check below\n";
-        }
-        expectedOutput += queryInfoString + "\nFinal SQL query:\n" + optimizedQuerySQL + "\n";
-        actualOutput += queryInfoString + "\nFinal SQL query:\n" + querysql + "\n";
+        assertions.add(() -> Assertions.assertEquals(fileContent, data, "\nAssertionError detected check below\n" + queryInfoString + description + fileContent));
     }
 
     public static void writeToFileCheckOverwrite(String filePath, String content) throws Exception {
@@ -304,7 +298,6 @@ public class FederationOptimizerMultipleTest {
 
         return testConfiguration;
     }
-
 
     public static Map<String, Object> createDefaultBSBMTestConfiguration(FederationEngine federationEngine, FederationSetting federationSetting, FederationOptimization federationOptimization, List<Integer> bsbm_queries) {
 
