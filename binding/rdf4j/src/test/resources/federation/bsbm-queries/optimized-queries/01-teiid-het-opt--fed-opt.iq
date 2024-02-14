@@ -5,13 +5,13 @@ CONSTRUCT [product, label] [product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bs
          ORDER BY [ASC(label10m40)]
             UNION [label10m40, nr0m49]
                CONSTRUCT [label10m40, nr0m49] []
-                  JOIN AND3(NUM_GT(INTEGERToBIGINT(propertynum1m36),"53"^^BIGINT),IS_NOT_NULL(label10m40),IS_NOT_NULL(propertynum1m36))
+                  JOIN NUM_GT(INTEGERToBIGINT(propertynum1m36),"53"^^BIGINT)
                      EXTENSIONAL "s1"."product1"(0:nr0m49,4:propertynum1m36,1:label10m40)
                      EXTENSIONAL "s1"."producttypeproduct1"(0:nr0m49,1:"4"^^INTEGER)
                      EXTENSIONAL "s1"."productfeatureproduct1"(0:nr0m49,1:"79"^^INTEGER)
                      EXTENSIONAL "s1"."productfeatureproduct1"(0:nr0m49,1:"116"^^INTEGER)
                CONSTRUCT [label10m40, nr0m49] []
-                  JOIN AND3(NUM_GT(INTEGERToBIGINT(propertynum1m36),"53"^^BIGINT),IS_NOT_NULL(label10m40),IS_NOT_NULL(propertynum1m36))
+                  JOIN NUM_GT(INTEGERToBIGINT(propertynum1m36),"53"^^BIGINT)
                      EXTENSIONAL "s5"."product2"(0:nr0m49,4:propertynum1m36,1:label10m40)
                      EXTENSIONAL "s5"."producttypeproduct2"(0:nr0m49,1:"4"^^INTEGER)
                      EXTENSIONAL "s5"."productfeatureproduct2"(0:nr0m49,1:"79"^^INTEGER)

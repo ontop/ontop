@@ -2,7 +2,7 @@ ans1(product, label)
 CONSTRUCT [product, label] [product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product{}(INTEGERToSTRING(nr0m49)),IRI), label/RDF(label10m40,xsd:string)]
    DISTINCT
       UNION [label10m40, nr0m49]
-         FILTER AND2(DB_CONTAINS(label10m40,"banded"^^STRING),IS_NOT_NULL(label10m40))
+         FILTER DB_CONTAINS(label10m40,"banded"^^STRING)
             EXTENSIONAL "s1"."product1"(0:nr0m49,1:label10m40)
-         FILTER AND2(DB_CONTAINS(label10m40,"banded"^^STRING),IS_NOT_NULL(label10m40))
+         FILTER DB_CONTAINS(label10m40,"banded"^^STRING)
             EXTENSIONAL "s5"."product2"(0:nr0m49,1:label10m40)

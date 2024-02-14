@@ -3,57 +3,50 @@ CONSTRUCT [title, text, reviewDate, reviewer, reviewerName, rating1, rating2, ra
    DISTINCT
       CONSTRUCT [nr0m4, title2m11, text2m14, reviewdate2m37, person2m7, name1m12, v7, rating1m16, rating1m17, v12, v15, rating1m13, v19, rating1m15] [v19/IF_ELSE_NULL(IS_NOT_NULL(rating1m15),nr0m4), v7/IF_ELSE_NULL(IS_NOT_NULL(rating1m16),nr0m4), v12/IF_ELSE_NULL(IS_NOT_NULL(rating1m17),nr0m4), v15/IF_ELSE_NULL(IS_NOT_NULL(rating1m13),nr0m4)]
          ORDER BY [DESC(reviewdate2m37)]
-            FILTER IS_NOT_NULL(name1m12)
+            LJ
                LJ
                   LJ
                      LJ
-                        LJ
-                           JOIN
-                              UNION [nr0m4]
-                                 EXTENSIONAL "s1"."reviewc"(0:nr0m4,1:"94"^^INTEGER)
-                                 EXTENSIONAL "s2"."review"(0:nr0m4,1:"94"^^INTEGER)
-                              UNION [nr0m4, title2m11]
-                                 FILTER IS_NOT_NULL(title2m11)
-                                    EXTENSIONAL "s1"."reviewc"(0:nr0m4,5:title2m11)
-                                 FILTER IS_NOT_NULL(title2m11)
-                                    EXTENSIONAL "s2"."review"(0:nr0m4,5:title2m11)
-                              UNION [nr0m4, text2m14]
-                                 FILTER IS_NOT_NULL(text2m14)
-                                    EXTENSIONAL "s1"."reviewc"(0:nr0m4,6:text2m14)
-                                 FILTER IS_NOT_NULL(text2m14)
-                                    EXTENSIONAL "s2"."review"(0:nr0m4,6:text2m14)
-                              UNION [nr0m4]
-                                 EXTENSIONAL "s1"."reviewc"(0:nr0m4,7:"en"^^STRING)
-                                 EXTENSIONAL "s2"."review"(0:nr0m4,7:"en"^^STRING)
-                              UNION [nr0m4, reviewdate2m37]
-                                 FILTER IS_NOT_NULL(reviewdate2m37)
-                                    EXTENSIONAL "s1"."reviewc"(0:nr0m4,4:reviewdate2m37)
-                                 FILTER IS_NOT_NULL(reviewdate2m37)
-                                    EXTENSIONAL "s2"."review"(0:nr0m4,4:reviewdate2m37)
-                              UNION [nr0m4, person2m7, name1m12]
-                                 JOIN
-                                    EXTENSIONAL "s1"."reviewc"(0:nr0m4,3:person2m7)
-                                    EXTENSIONAL "s2"."person"(0:person2m7,1:name1m12)
-                                 JOIN
-                                    EXTENSIONAL "s2"."review"(0:nr0m4,3:person2m7)
-                                    EXTENSIONAL "s2"."person"(0:person2m7,1:name1m12)
-                           UNION [nr0m4, rating1m16]
-                              FILTER IS_NOT_NULL(rating1m16)
-                                 EXTENSIONAL "s1"."reviewc"(0:nr0m4,8:rating1m16)
-                              FILTER IS_NOT_NULL(rating1m16)
-                                 EXTENSIONAL "s2"."review"(0:nr0m4,8:rating1m16)
-                        UNION [nr0m4, rating1m17]
-                           FILTER IS_NOT_NULL(rating1m17)
-                              EXTENSIONAL "s1"."reviewc"(0:nr0m4,9:rating1m17)
-                           FILTER IS_NOT_NULL(rating1m17)
-                              EXTENSIONAL "s2"."review"(0:nr0m4,9:rating1m17)
-                     UNION [nr0m4, rating1m13]
-                        FILTER IS_NOT_NULL(rating1m13)
-                           EXTENSIONAL "s1"."reviewc"(0:nr0m4,10:rating1m13)
-                        FILTER IS_NOT_NULL(rating1m13)
-                           EXTENSIONAL "s2"."review"(0:nr0m4,10:rating1m13)
-                  UNION [nr0m4, rating1m15]
-                     FILTER IS_NOT_NULL(rating1m15)
-                        EXTENSIONAL "s1"."reviewc"(0:nr0m4,11:rating1m15)
-                     FILTER IS_NOT_NULL(rating1m15)
-                        EXTENSIONAL "s2"."review"(0:nr0m4,11:rating1m15)
+                        JOIN
+                           UNION [nr0m4]
+                              EXTENSIONAL "s1"."reviewc"(0:nr0m4,1:"94"^^INTEGER)
+                              EXTENSIONAL "s2"."review"(0:nr0m4,1:"94"^^INTEGER)
+                           UNION [nr0m4, title2m11]
+                              EXTENSIONAL "s1"."reviewc"(0:nr0m4,5:title2m11)
+                              EXTENSIONAL "s2"."review"(0:nr0m4,5:title2m11)
+                           UNION [nr0m4, text2m14]
+                              EXTENSIONAL "s1"."reviewc"(0:nr0m4,6:text2m14)
+                              EXTENSIONAL "s2"."review"(0:nr0m4,6:text2m14)
+                           UNION [nr0m4]
+                              EXTENSIONAL "s1"."reviewc"(0:nr0m4,7:"en"^^STRING)
+                              EXTENSIONAL "s2"."review"(0:nr0m4,7:"en"^^STRING)
+                           UNION [nr0m4, reviewdate2m37]
+                              EXTENSIONAL "s1"."reviewc"(0:nr0m4,4:reviewdate2m37)
+                              EXTENSIONAL "s2"."review"(0:nr0m4,4:reviewdate2m37)
+                           UNION [nr0m4, person2m7, name1m12]
+                              JOIN
+                                 EXTENSIONAL "s1"."reviewc"(0:nr0m4,3:person2m7)
+                                 EXTENSIONAL "s2"."person"(0:person2m7,1:name1m12)
+                              JOIN
+                                 EXTENSIONAL "s2"."review"(0:nr0m4,3:person2m7)
+                                 EXTENSIONAL "s2"."person"(0:person2m7,1:name1m12)
+                        UNION [nr0m4, rating1m16]
+                           FILTER IS_NOT_NULL(rating1m16)
+                              EXTENSIONAL "s1"."reviewc"(0:nr0m4,8:rating1m16)
+                           FILTER IS_NOT_NULL(rating1m16)
+                              EXTENSIONAL "s2"."review"(0:nr0m4,8:rating1m16)
+                     UNION [nr0m4, rating1m17]
+                        FILTER IS_NOT_NULL(rating1m17)
+                           EXTENSIONAL "s1"."reviewc"(0:nr0m4,9:rating1m17)
+                        FILTER IS_NOT_NULL(rating1m17)
+                           EXTENSIONAL "s2"."review"(0:nr0m4,9:rating1m17)
+                  UNION [nr0m4, rating1m13]
+                     FILTER IS_NOT_NULL(rating1m13)
+                        EXTENSIONAL "s1"."reviewc"(0:nr0m4,10:rating1m13)
+                     FILTER IS_NOT_NULL(rating1m13)
+                        EXTENSIONAL "s2"."review"(0:nr0m4,10:rating1m13)
+               UNION [nr0m4, rating1m15]
+                  FILTER IS_NOT_NULL(rating1m15)
+                     EXTENSIONAL "s1"."reviewc"(0:nr0m4,11:rating1m15)
+                  FILTER IS_NOT_NULL(rating1m15)
+                     EXTENSIONAL "s2"."review"(0:nr0m4,11:rating1m15)

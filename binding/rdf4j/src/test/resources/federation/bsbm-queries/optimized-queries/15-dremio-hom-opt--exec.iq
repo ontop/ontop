@@ -4,10 +4,10 @@ CONSTRUCT [offer, product, productlabel, vendor, vendorname, offerURL, price, de
 SELECT DISTINCT v9."deliverydays1m33" AS "deliverydays1m33", v9."homepage2m42" AS "homepage2m42", v9."label10m4" AS "label10m4", v9."label10m40" AS "label10m40", v9."nr1m5" AS "nr1m5", v9."nr20m18" AS "nr20m18", v9."offerwebpage1m21" AS "offerwebpage1m21", v9."price1m34" AS "price1m34", v9."validto1m39" AS "validto1m39", v9."vendor1m8" AS "vendor1m8"
 FROM ((SELECT v2."deliverydays" AS "deliverydays1m33", v3."homepage" AS "homepage2m42", v3."label" AS "label10m4", v1."label" AS "label10m40", v2."nr" AS "nr1m5", v1."nr" AS "nr20m18", v2."offerwebpage" AS "offerwebpage1m21", v2."price" AS "price1m34", v2."validto" AS "validto1m39", v2."vendor" AS "vendor1m8"
 FROM "bsbm"."product1" v1, "bsbm"."offer" v2, "bsbm"."vendor" v3
-WHERE ((1 <= v1."nr") AND (v1."nr" <= 500) AND v3."label" IS NOT NULL AND v3."homepage" IS NOT NULL AND v2."offerwebpage" IS NOT NULL AND v2."price" IS NOT NULL AND v2."deliverydays" IS NOT NULL AND v2."validto" IS NOT NULL AND v2."nr" IS NOT NULL AND v1."label" IS NOT NULL AND v1."nr" = v2."product" AND v2."vendor" = v3."nr")
+WHERE ((1 <= v1."nr") AND (v1."nr" <= 500) AND v1."nr" = v2."product" AND v2."vendor" = v3."nr")
 )UNION ALL 
 (SELECT v6."deliverydays" AS "deliverydays1m33", v7."homepage" AS "homepage2m42", v7."label" AS "label10m4", v5."label" AS "label10m40", v6."nr" AS "nr1m5", v5."nr" AS "nr20m18", v6."offerwebpage" AS "offerwebpage1m21", v6."price" AS "price1m34", v6."validto" AS "validto1m39", v6."vendor" AS "vendor1m8"
 FROM "bsbm"."product2" v5, "bsbm"."offer" v6, "bsbm"."vendor" v7
-WHERE ((1 <= v5."nr") AND (v5."nr" <= 500) AND v7."label" IS NOT NULL AND v7."homepage" IS NOT NULL AND v6."offerwebpage" IS NOT NULL AND v6."price" IS NOT NULL AND v6."deliverydays" IS NOT NULL AND v6."validto" IS NOT NULL AND v6."nr" IS NOT NULL AND v5."label" IS NOT NULL AND v5."nr" = v6."product" AND v6."vendor" = v7."nr")
+WHERE ((1 <= v5."nr") AND (v5."nr" <= 500) AND v5."nr" = v6."product" AND v6."vendor" = v7."nr")
 )) v9
 

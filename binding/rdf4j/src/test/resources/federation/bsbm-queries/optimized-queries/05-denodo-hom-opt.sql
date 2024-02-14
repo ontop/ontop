@@ -2,18 +2,18 @@ SELECT DISTINCT v16."label10m40" AS "label10m40", v16."product0m4" AS "product0m
 FROM (SELECT v7."label10m40" AS "label10m40", v7."product0m4" AS "product0m4", v7."label10m40" AS "v7"
 FROM ((SELECT v1."label" AS "label10m40", v1."nr" AS "product0m4", v2."productfeature" AS "productfeature2m2", v1."propertynum1" AS "propertynum1m10", v1."propertynum2" AS "propertynum1m15"
 FROM "product1" v1, "productfeatureproduct1" v2
-WHERE (v1."label" IS NOT NULL AND v1."propertynum1" IS NOT NULL AND v1."propertynum2" IS NOT NULL AND v1."nr" <> 94 AND v1."nr" = v2."product")
+WHERE (v1."nr" <> 94 AND v1."nr" = v2."product")
 )UNION ALL 
 (SELECT v4."label" AS "label10m40", v4."nr" AS "product0m4", v5."productfeature" AS "productfeature2m2", v4."propertynum1" AS "propertynum1m10", v4."propertynum2" AS "propertynum1m15"
 FROM "product2" v4, "productfeatureproduct2" v5
-WHERE (v4."label" IS NOT NULL AND v4."propertynum1" IS NOT NULL AND v4."propertynum2" IS NOT NULL AND v4."nr" <> 94 AND v4."nr" = v5."product")
+WHERE (v4."nr" <> 94 AND v4."nr" = v5."product")
 )) v7, ((SELECT v8."productfeature" AS "productfeature2m0", v9."propertynum2" AS "propertynum1m35", v9."propertynum1" AS "propertynum1m36"
 FROM "productfeatureproduct1" v8, "product1" v9
-WHERE (v9."propertynum1" IS NOT NULL AND v9."propertynum2" IS NOT NULL AND 94 = v8."product" AND 94 = v9."nr")
+WHERE (94 = v8."product" AND 94 = v9."nr")
 )UNION ALL 
 (SELECT v11."productfeature" AS "productfeature2m0", v12."propertynum2" AS "propertynum1m35", v12."propertynum1" AS "propertynum1m36"
 FROM "productfeatureproduct2" v11, "product2" v12
-WHERE (v12."propertynum1" IS NOT NULL AND v12."propertynum2" IS NOT NULL AND 94 = v11."product" AND 94 = v12."nr")
+WHERE (94 = v11."product" AND 94 = v12."nr")
 )) v14
 WHERE ((v7."propertynum1m15" < (v14."propertynum1m35" + 170)) AND (v7."propertynum1m15" > (v14."propertynum1m35" - 170)) AND (v7."propertynum1m10" < (v14."propertynum1m36" + 120)) AND (v7."propertynum1m10" > (v14."propertynum1m36" - 120)) AND v7."productfeature2m2" = v14."productfeature2m0")
 ) v16

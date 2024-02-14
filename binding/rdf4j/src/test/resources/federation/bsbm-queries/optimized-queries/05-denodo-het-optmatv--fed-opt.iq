@@ -6,16 +6,16 @@ CONSTRUCT [product, productLabel] [productLabel/RDF(VARCHARToTEXT(label10m40),xs
             ORDER BY [ASC(VARCHARToTEXT(label10m40))]
                JOIN AND5(NUM_LT(INTEGERToBIGINT(propertynum1m15),BIGINT+(INTEGERToBIGINT(propertynum1m35),"170"^^BIGINT)),NUM_GT(INTEGERToBIGINT(propertynum1m15),BIGINT-(INTEGERToBIGINT(propertynum1m35),"170"^^BIGINT)),NUM_LT(INTEGERToBIGINT(propertynum1m10),BIGINT+(INTEGERToBIGINT(propertynum1m36),"120"^^BIGINT)),NUM_GT(INTEGERToBIGINT(propertynum1m10),BIGINT-(INTEGERToBIGINT(propertynum1m36),"120"^^BIGINT)),STRICT_NEQ2(product0m4,"94"^^INTEGER))
                   UNION [label10m40, product0m4, productfeature2m2, propertynum1m15, propertynum1m10]
-                     JOIN AND3(IS_NOT_NULL(label10m40),IS_NOT_NULL(propertynum1m10),IS_NOT_NULL(propertynum1m15))
+                     JOIN
                         EXTENSIONAL "product1"(0:product0m4,1:label10m40,4:propertynum1m10,5:propertynum1m15)
                         EXTENSIONAL "productfeatureproduct1"(0:product0m4,1:productfeature2m2)
-                     JOIN AND4(IS_NOT_NULL(label10m40),IS_NOT_NULL(propertynum1m10),IS_NOT_NULL(propertynum1m15),IS_NOT_NULL(productfeature2m2))
+                     JOIN
                         EXTENSIONAL "product2"(0:product0m4,1:label10m40,4:propertynum1m10,5:propertynum1m15)
                         EXTENSIONAL "productfeatureproduct2"(0:product0m4,1:productfeature2m2)
                   UNION [productfeature2m2, propertynum1m36, propertynum1m35]
-                     JOIN AND2(IS_NOT_NULL(propertynum1m36),IS_NOT_NULL(propertynum1m35))
+                     JOIN
                         EXTENSIONAL "productfeatureproduct1"(0:"94"^^INTEGER,1:productfeature2m2)
                         EXTENSIONAL "product1"(0:"94"^^INTEGER,4:propertynum1m36,5:propertynum1m35)
-                     JOIN AND3(IS_NOT_NULL(productfeature2m2),IS_NOT_NULL(propertynum1m36),IS_NOT_NULL(propertynum1m35))
+                     JOIN
                         EXTENSIONAL "productfeatureproduct2"(0:"94"^^INTEGER,1:productfeature2m2)
                         EXTENSIONAL "product2"(0:"94"^^INTEGER,4:propertynum1m36,5:propertynum1m35)

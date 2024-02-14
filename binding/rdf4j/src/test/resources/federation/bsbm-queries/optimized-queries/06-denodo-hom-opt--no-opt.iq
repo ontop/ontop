@@ -3,10 +3,8 @@ CONSTRUCT [product, label] [product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bs
    DISTINCT
       JOIN DB_CONTAINS(VARCHARToTEXT(label10m40),"banded"^^TEXT)
          UNION [label10m40, nr0m49]
-            FILTER IS_NOT_NULL(label10m40)
-               EXTENSIONAL "product1"(0:nr0m49,1:label10m40)
-            FILTER IS_NOT_NULL(label10m40)
-               EXTENSIONAL "product2"(0:nr0m49,1:label10m40)
+            EXTENSIONAL "product1"(0:nr0m49,1:label10m40)
+            EXTENSIONAL "product2"(0:nr0m49,1:label10m40)
          UNION [nr0m49]
             EXTENSIONAL "product1"(0:nr0m49)
             EXTENSIONAL "product2"(0:nr0m49)

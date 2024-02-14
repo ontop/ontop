@@ -2,9 +2,9 @@ ans1(offer, product, productlabel, vendor, vendorname, offerURL, price, delivery
 CONSTRUCT [offer, product, productlabel, vendor, vendorname, offerURL, price, deliveryDays, validTo] [offer/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor/Offer{}(INTEGERToSTRING(nr1m5)),IRI), productlabel/RDF(label10m40,xsd:string), product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product{}(INTEGERToSTRING(nr20m18)),IRI), offerURL/RDF(offerwebpage1m21,xsd:string), deliveryDays/RDF(INTEGERToSTRING(deliverydays1m33),xsd:integer), vendor/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor/Vendor{}(INTEGERToSTRING(vendor1m8)),IRI), price/RDF(DOUBLEToSTRING(price1m34),xsd:double), vendorname/RDF(label10m4,xsd:string), validTo/RDF(DATEToSTRING(validto1m39),xsd:date)]
    DISTINCT
       UNION [vendor1m8, label10m40, homepage2m42, validto1m39, nr1m5, deliverydays1m33, price1m34, offerwebpage1m21, nr20m18, label10m4]
-         JOIN AND9(NUM_LTE("1"^^BIGINT,INTEGERToBIGINT(nr20m18)),NUM_LTE(INTEGERToBIGINT(nr20m18),"500"^^BIGINT),IS_NOT_NULL(label10m4),IS_NOT_NULL(homepage2m42),IS_NOT_NULL(offerwebpage1m21),IS_NOT_NULL(price1m34),IS_NOT_NULL(deliverydays1m33),IS_NOT_NULL(validto1m39),IS_NOT_NULL(label10m40))
+         JOIN AND2(NUM_LTE("1"^^BIGINT,INTEGERToBIGINT(nr20m18)),NUM_LTE(INTEGERToBIGINT(nr20m18),"500"^^BIGINT))
             EXTENSIONAL "smatv"."matv_s4_offer_s1_product1"(0:nr1m5,1:nr20m18,3:vendor1m8,4:price1m34,6:validto1m39,7:deliverydays1m33,8:offerwebpage1m21,12:label10m40)
             EXTENSIONAL "s4"."vendor"(0:vendor1m8,1:label10m4,3:homepage2m42)
-         JOIN AND9(NUM_LTE("1"^^BIGINT,INTEGERToBIGINT(nr20m18)),NUM_LTE(INTEGERToBIGINT(nr20m18),"500"^^BIGINT),IS_NOT_NULL(label10m4),IS_NOT_NULL(homepage2m42),IS_NOT_NULL(offerwebpage1m21),IS_NOT_NULL(price1m34),IS_NOT_NULL(deliverydays1m33),IS_NOT_NULL(validto1m39),IS_NOT_NULL(label10m40))
+         JOIN AND2(NUM_LTE("1"^^BIGINT,INTEGERToBIGINT(nr20m18)),NUM_LTE(INTEGERToBIGINT(nr20m18),"500"^^BIGINT))
             EXTENSIONAL "smatv"."matv_s4_offer_s5_product2"(0:nr1m5,1:nr20m18,3:vendor1m8,4:price1m34,6:validto1m39,7:deliverydays1m33,8:offerwebpage1m21,12:label10m40)
             EXTENSIONAL "s4"."vendor"(0:vendor1m8,1:label10m4,3:homepage2m42)

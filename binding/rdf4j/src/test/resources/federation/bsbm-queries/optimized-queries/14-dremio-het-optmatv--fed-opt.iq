@@ -2,13 +2,13 @@ ans1(offer, product, price)
 CONSTRUCT [offer, product, price] [offer/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor/Offer{}(INTEGERToVARCHAR(nr1m5)),IRI), product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product{}(INTEGERToVARCHAR(nr20m18)),IRI), price/RDF(DOUBLEToVARCHAR(price1m34),xsd:double)]
    DISTINCT
       CONSTRUCT [nr1m5, nr20m18, price1m34] []
-         FILTER AND7(NUM_LTE(INTEGERToBIGINT(deliverydays1m33),"3"^^BIGINT),NUM_LTE("1"^^BIGINT,INTEGERToBIGINT(nr20m18)),NUM_LTE(INTEGERToBIGINT(nr20m18),"500"^^BIGINT),IS_NOT_NULL(deliverydays1m33),IS_NOT_NULL(price1m34),IS_NOT_NULL(validto1m39),IS_NOT_NULL(nr1m5))
-            UNION [nr20m18, nr1m5, price1m34, validto1m39, deliverydays1m33]
-               CONSTRUCT [nr20m18, nr1m5, price1m34, validto1m39, deliverydays1m33] []
+         FILTER AND3(NUM_LTE(INTEGERToBIGINT(deliverydays1m33),"3"^^BIGINT),NUM_LTE("1"^^BIGINT,INTEGERToBIGINT(nr20m18)),NUM_LTE(INTEGERToBIGINT(nr20m18),"500"^^BIGINT))
+            UNION [nr20m18, nr1m5, price1m34, deliverydays1m33]
+               CONSTRUCT [nr20m18, nr1m5, price1m34, deliverydays1m33] []
                   JOIN
-                     EXTENSIONAL "bsbm"."matv_s4_offer_s1_product1"(0:nr1m5,1:nr20m18,3:vendor1m8,4:price1m34,6:validto1m39,7:deliverydays1m33)
+                     EXTENSIONAL "bsbm"."matv_s4_offer_s1_product1"(0:nr1m5,1:nr20m18,3:vendor1m8,4:price1m34,7:deliverydays1m33)
                      EXTENSIONAL "bsbm"."vendor"(0:vendor1m8,4:"US"^^CHARACTER VARYING)
-               CONSTRUCT [nr20m18, nr1m5, price1m34, validto1m39, deliverydays1m33] []
+               CONSTRUCT [nr20m18, nr1m5, price1m34, deliverydays1m33] []
                   JOIN
-                     EXTENSIONAL "bsbm"."matv_s4_offer_s5_product2"(0:nr1m5,1:nr20m18,3:vendor1m8,4:price1m34,6:validto1m39,7:deliverydays1m33)
+                     EXTENSIONAL "bsbm"."matv_s4_offer_s5_product2"(0:nr1m5,1:nr20m18,3:vendor1m8,4:price1m34,7:deliverydays1m33)
                      EXTENSIONAL "bsbm"."vendor"(0:vendor1m8,4:"US"^^CHARACTER VARYING)

@@ -6,10 +6,8 @@ CONSTRUCT [product, label] [product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bs
             ORDER BY [ASC(VARCHARToTEXT(label10m40))]
                JOIN NUM_GT(INTEGERToBIGINT(propertynum1m36),"53"^^BIGINT)
                   UNION [label10m40, nr0m49]
-                     FILTER IS_NOT_NULL(label10m40)
-                        EXTENSIONAL "product1"(0:nr0m49,1:label10m40)
-                     FILTER IS_NOT_NULL(label10m40)
-                        EXTENSIONAL "product2"(0:nr0m49,1:label10m40)
+                     EXTENSIONAL "product1"(0:nr0m49,1:label10m40)
+                     EXTENSIONAL "product2"(0:nr0m49,1:label10m40)
                   UNION [nr0m49]
                      EXTENSIONAL "product1"(0:nr0m49)
                      EXTENSIONAL "product2"(0:nr0m49)
@@ -23,7 +21,5 @@ CONSTRUCT [product, label] [product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bs
                      EXTENSIONAL "productfeatureproduct1"(0:nr0m49,1:"116"^^INTEGER)
                      EXTENSIONAL "productfeatureproduct2"(0:nr0m49,1:"116"^^INTEGER)
                   UNION [nr0m49, propertynum1m36]
-                     FILTER IS_NOT_NULL(propertynum1m36)
-                        EXTENSIONAL "product1"(0:nr0m49,4:propertynum1m36)
-                     FILTER IS_NOT_NULL(propertynum1m36)
-                        EXTENSIONAL "product2"(0:nr0m49,4:propertynum1m36)
+                     EXTENSIONAL "product1"(0:nr0m49,4:propertynum1m36)
+                     EXTENSIONAL "product2"(0:nr0m49,4:propertynum1m36)

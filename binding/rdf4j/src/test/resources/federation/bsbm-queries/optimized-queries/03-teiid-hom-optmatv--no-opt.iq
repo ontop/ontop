@@ -8,10 +8,8 @@ CONSTRUCT [product, label] [product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bs
                   LJ
                      JOIN
                         UNION [label10m40, nr0m49]
-                           FILTER IS_NOT_NULL(label10m40)
-                              EXTENSIONAL "s1"."product1"(0:nr0m49,1:label10m40)
-                           FILTER IS_NOT_NULL(label10m40)
-                              EXTENSIONAL "s5"."product2"(0:nr0m49,1:label10m40)
+                           EXTENSIONAL "s1"."product1"(0:nr0m49,1:label10m40)
+                           EXTENSIONAL "s5"."product2"(0:nr0m49,1:label10m40)
                         UNION [nr0m49]
                            EXTENSIONAL "s1"."product1"(0:nr0m49)
                            EXTENSIONAL "s5"."product2"(0:nr0m49)
@@ -22,21 +20,15 @@ CONSTRUCT [product, label] [product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bs
                            EXTENSIONAL "s1"."productfeatureproduct1"(0:nr0m49,1:"79"^^INTEGER)
                            EXTENSIONAL "s5"."productfeatureproduct2"(0:nr0m49,1:"79"^^INTEGER)
                         UNION [nr0m49, propertynum1m36]
-                           FILTER IS_NOT_NULL(propertynum1m36)
-                              EXTENSIONAL "s1"."product1"(0:nr0m49,4:propertynum1m36)
-                           FILTER IS_NOT_NULL(propertynum1m36)
-                              EXTENSIONAL "s5"."product2"(0:nr0m49,4:propertynum1m36)
+                           EXTENSIONAL "s1"."product1"(0:nr0m49,4:propertynum1m36)
+                           EXTENSIONAL "s5"."product2"(0:nr0m49,4:propertynum1m36)
                         UNION [nr0m49, propertynum1m23]
-                           FILTER IS_NOT_NULL(propertynum1m23)
-                              EXTENSIONAL "s1"."product1"(0:nr0m49,6:propertynum1m23)
-                           FILTER IS_NOT_NULL(propertynum1m23)
-                              EXTENSIONAL "s5"."product2"(0:nr0m49,6:propertynum1m23)
+                           EXTENSIONAL "s1"."product1"(0:nr0m49,6:propertynum1m23)
+                           EXTENSIONAL "s5"."product2"(0:nr0m49,6:propertynum1m23)
                      JOIN
                         UNION [nr0m49]
                            EXTENSIONAL "s1"."productfeatureproduct1"(0:nr0m49,1:"814"^^INTEGER)
                            EXTENSIONAL "s5"."productfeatureproduct2"(0:nr0m49,1:"814"^^INTEGER)
                         UNION [label10m11, nr0m49]
-                           FILTER IS_NOT_NULL(label10m11)
-                              EXTENSIONAL "s1"."product1"(0:nr0m49,1:label10m11)
-                           FILTER IS_NOT_NULL(label10m11)
-                              EXTENSIONAL "s5"."product2"(0:nr0m49,1:label10m11)
+                           EXTENSIONAL "s1"."product1"(0:nr0m49,1:label10m11)
+                           EXTENSIONAL "s5"."product2"(0:nr0m49,1:label10m11)

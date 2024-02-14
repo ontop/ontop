@@ -4,11 +4,11 @@ FROM "s1"."product1" v1
  JOIN 
 "s1"."producttypeproduct1" v2 ON 1 = 1 
  JOIN 
-"s1"."productfeatureproduct1" v3 ON (v1."label" IS NOT NULL AND v1."propertynum1" IS NOT NULL AND v1."propertynum3" IS NOT NULL AND (v1."propertynum3" < 1874) AND (v1."propertynum1" > 53) AND v1."nr" = v2."product" AND v1."nr" = v3."product" AND 4 = v2."producttype" AND 79 = v3."productfeature") 
+"s1"."productfeatureproduct1" v3 ON ((v1."propertynum3" < 1874) AND (v1."propertynum1" > 53) AND v1."nr" = v2."product" AND v1."nr" = v3."product" AND 4 = v2."producttype" AND 79 = v3."productfeature") 
  LEFT OUTER JOIN 
 "s1"."productfeatureproduct1" v4
  JOIN 
-"s1"."product1" v5 ON (v5."label" IS NOT NULL AND v4."product" = v5."nr" AND 814 = v4."productfeature")  ON v1."nr" = v4."product" 
+"s1"."product1" v5 ON (v4."product" = v5."nr" AND 814 = v4."productfeature")  ON v1."nr" = v4."product" 
 WHERE v5."label" IS NULL
 )UNION ALL 
 (SELECT v11."label" AS "label10m11", v7."label" AS "label10m40", v7."nr" AS "nr0m49", v7."propertynum3" AS "propertynum1m23", v7."propertynum1" AS "propertynum1m36"
@@ -16,11 +16,11 @@ FROM "s5"."product2" v7
  JOIN 
 "s5"."producttypeproduct2" v8 ON 1 = 1 
  JOIN 
-"s5"."productfeatureproduct2" v9 ON (v7."label" IS NOT NULL AND v7."propertynum1" IS NOT NULL AND v7."propertynum3" IS NOT NULL AND (v7."propertynum3" < 1874) AND (v7."propertynum1" > 53) AND v7."nr" = v8."product" AND v7."nr" = v9."product" AND 4 = v8."producttype" AND 79 = v9."productfeature") 
+"s5"."productfeatureproduct2" v9 ON ((v7."propertynum3" < 1874) AND (v7."propertynum1" > 53) AND v7."nr" = v8."product" AND v7."nr" = v9."product" AND 4 = v8."producttype" AND 79 = v9."productfeature") 
  LEFT OUTER JOIN 
 "s5"."productfeatureproduct2" v10
  JOIN 
-"s5"."product2" v11 ON (v11."label" IS NOT NULL AND v10."product" = v11."nr" AND 814 = v10."productfeature")  ON v7."nr" = v10."product" 
+"s5"."product2" v11 ON (v10."product" = v11."nr" AND 814 = v10."productfeature")  ON v7."nr" = v10."product" 
 WHERE v11."label" IS NULL
 )) v13
 ORDER BY v13."label10m40" NULLS FIRST

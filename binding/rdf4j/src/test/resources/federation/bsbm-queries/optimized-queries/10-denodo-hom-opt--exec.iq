@@ -4,7 +4,7 @@ CONSTRUCT [offer, price] [offer/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v
 SELECT v4."deliverydays1m33" AS "deliverydays1m33", v4."nr1m5" AS "nr1m5", v4."price1m34" AS "price1m34", v4."v3" AS "v3", v4."validto1m39" AS "validto1m39", v4."vendor1m8" AS "vendor1m8"
 FROM (SELECT v1."deliverydays" AS "deliverydays1m33", v1."nr" AS "nr1m5", v1."price" AS "price1m34", CAST(v1."price" AS DOUBLE PRECISION) AS "v3", v1."validto" AS "validto1m39", v1."vendor" AS "vendor1m8"
 FROM "offer" v1, "vendor" v2
-WHERE ((v1."validto" > '2008-06-13') AND (v1."deliverydays" <= 3) AND v1."deliverydays" IS NOT NULL AND v1."price" IS NOT NULL AND v1."validto" IS NOT NULL AND v1."vendor" = v2."nr" AND 94 = v1."product" AND 'US' = v2."country")
+WHERE ((v1."validto" > '2008-06-13') AND (v1."deliverydays" <= 3) AND v1."vendor" = v2."nr" AND 94 = v1."product" AND 'US' = v2."country")
 ) v4
 ORDER BY v4."v3" ASC NULLS FIRST
 LIMIT 10

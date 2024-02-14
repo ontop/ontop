@@ -1,9 +1,9 @@
 SELECT DISTINCT v7."comment10m19" AS "comment10m19", v7."label10m18" AS "label10m18", v7."label10m40" AS "label10m40", v7."label10m6" AS "label10m6", v7."producer2m9" AS "producer2m9", v7."productfeature2m2" AS "productfeature2m2", v7."propertynum1m22" AS "propertynum1m22", v7."propertynum1m35" AS "propertynum1m35", v7."propertynum1m36" AS "propertynum1m36", v7."propertytex1m27" AS "propertytex1m27", v7."propertytex1m28" AS "propertytex1m28", v7."propertytex1m29" AS "propertytex1m29", v7."propertytex1m30" AS "propertytex1m30", v7."propertytex1m31" AS "propertytex1m31"
 FROM ((SELECT v1."1_2" AS "comment10m19", v2."2_1" AS "label10m18", v1."1_1" AS "label10m40", v1."2_1" AS "label10m6", v1."1_3" AS "producer2m9", v2."1_1" AS "productfeature2m2", v1."1_7" AS "propertynum1m22", v1."1_5" AS "propertynum1m35", v1."1_4" AS "propertynum1m36", v1."1_14" AS "propertytex1m27", v1."1_13" AS "propertytex1m28", v1."1_12" AS "propertytex1m29", v1."1_11" AS "propertytex1m30", v1."1_10" AS "propertytex1m31"
 FROM "bsbm"."matv_s1_product1_s4_producer" v1, "bsbm"."matv_s1_productfeatureproduct1_s3_productfeature" v2
-WHERE (v1."1_1" IS NOT NULL AND v1."1_2" IS NOT NULL AND v1."1_3" IS NOT NULL AND v1."1_10" IS NOT NULL AND v1."1_11" IS NOT NULL AND v1."1_12" IS NOT NULL AND v1."1_4" IS NOT NULL AND v1."1_5" IS NOT NULL AND v1."2_1" IS NOT NULL AND v2."2_1" IS NOT NULL AND 94 = v1."1_0" AND 94 = v2."1_0")
+WHERE (94 = v1."1_0" AND 94 = v2."1_0")
 )UNION ALL 
 (SELECT v4."1_2" AS "comment10m19", v5."2_1" AS "label10m18", v4."1_1" AS "label10m40", v4."2_1" AS "label10m6", v4."1_3" AS "producer2m9", v5."1_1" AS "productfeature2m2", v4."1_7" AS "propertynum1m22", v4."1_5" AS "propertynum1m35", v4."1_4" AS "propertynum1m36", v4."1_14" AS "propertytex1m27", v4."1_13" AS "propertytex1m28", v4."1_12" AS "propertytex1m29", v4."1_11" AS "propertytex1m30", v4."1_10" AS "propertytex1m31"
 FROM "bsbm"."matv_s5_product2_s4_producer" v4, "bsbm"."matv_s5_productfeatureproduct2_s3_productfeature" v5
-WHERE (v4."1_1" IS NOT NULL AND v4."1_2" IS NOT NULL AND v4."1_3" IS NOT NULL AND v4."1_10" IS NOT NULL AND v4."1_11" IS NOT NULL AND v4."1_12" IS NOT NULL AND v4."1_4" IS NOT NULL AND v4."1_5" IS NOT NULL AND v4."2_1" IS NOT NULL AND v5."2_1" IS NOT NULL AND 94 = v4."1_0" AND 94 = v5."1_0")
+WHERE (94 = v4."1_0" AND 94 = v5."1_0")
 )) v7
