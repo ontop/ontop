@@ -5,7 +5,7 @@
 # PREFIX dc: <http://purl.org/dc/elements/1.1/>
 # BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
 # 
-# SELECT ?p ?mbox_sha1sum ?country ?r ?product ?title  # in BSBM: DESCRIBE ?p
+# SELECT ?p ?name ?mbox_sha1sum ?country ?r ?product ?title  # in BSBM: DESCRIBE ?p
 # {
 #     <dataFromRatingSite/Review${review:percent}> rev:reviewer ?p .
 #     ?p foaf:name ?name .
@@ -23,7 +23,7 @@ PREFIX rev: <http://purl.org/stuff/rev#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
 
-SELECT ?p ?mbox_sha1sum ?country ?r ?product ?title  # in BSBM: DESCRIBE ?p
+SELECT ?p ?name ?mbox_sha1sum ?country ?r ?product ?title  # in BSBM: DESCRIBE ?p
 {
     <dataFromRatingSite/Review1356> rev:reviewer ?p .  # review = 1356
     ?p foaf:name ?name .
