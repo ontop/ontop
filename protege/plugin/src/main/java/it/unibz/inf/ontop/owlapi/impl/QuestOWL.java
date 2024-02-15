@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -476,21 +477,25 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	@Override
 	public Node<OWLClass> getBottomClassNode() {
 		OntologyVocabularyCategory<OClass> oClasses = classifiedTBox.classes();
-		OWLClass bottomClass = owlDataFactory.getOWLNothing();
+		OWLClass nothing = owlDataFactory.getOWLNothing();
 
+		Set<OWLClass> bottoms = new HashSet<>();
+		//bottoms.add(nothing);
+		
 		for (OClass oClass : oClasses) {
 			boolean isBottom = oClass.isBottom();
 
 			if (isBottom) {
 				String iriString = oClass.getIRI().getIRIString();
 				org.semanticweb.owlapi.model.IRI OWLiri = org.semanticweb.owlapi.model.IRI.create(iriString);
-				bottomClass = owlDataFactory.getOWLClass(OWLiri);
+				bottoms.add(owlDataFactory.getOWLClass(OWLiri));
+				//bottomClass = owlDataFactory.getOWLClass(OWLiri);
 
-				return new OWLClassNode(bottomClass);
+				//return new OWLClassNode(bottomClass);
 			}
 		}
 
-		return new OWLClassNode(bottomClass);
+		return new OWLClassNode(bottoms);
 //		return structuralReasoner.getBottomClassNode();
 	}
 

@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 
 import java.util.Properties;
@@ -24,6 +25,8 @@ public class TBoxClassificationTest {
     private final OWLClass Male = Class(IRI.create(prefix + "Male"));
     private final OWLClass Female = Class(IRI.create(prefix + "Female"));
     private final OWLClass Person = Class(IRI.create(prefix + "Person"));
+
+    private final OWLClass Bottom = Class(IRI.create(prefix + "Bottom"));
 
     private final OWLClass A = Class(IRI.create(prefix + "A"));
     private final OWLClass B = Class(IRI.create(prefix + "B"));
@@ -73,6 +76,7 @@ public class TBoxClassificationTest {
         startReasoner();
     }
 
+
     @Test
     public void testSimple() throws Exception {
         manager.addAxiom(ontology, SubClassOf(Male, Person));
@@ -83,7 +87,7 @@ public class TBoxClassificationTest {
         assertTrue(subClasses.containsEntity(Female));
         assertTrue(subClasses.containsEntity(OWLNothing()));
     }
-
+    
     @Test
     public void testSubsumptionWithSomeValues() throws Exception {
         // A subClassOf (\exists r1)
@@ -101,4 +105,16 @@ public class TBoxClassificationTest {
         assertTrue(subClasses.containsEntity(D));
         assertTrue(subClasses.containsEntity(A));
     }
+
+    @Test
+    public void testBottom() throws Exception {
+        OWLClass owlNothing = manager.getOWLDataFactory().getOWLNothing();
+        manager.addAxiom(ontology, SubClassOf(Bottom, owlNothing));
+        startReasoner();
+        Node<OWLClass> bottomNode = reasoner.getBottomClassNode();
+        assertTrue(bottomNode.contains(owlNothing));
+        assertTrue(bottomNode.contains(Bottom));
+    }
+
+
 }
