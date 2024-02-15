@@ -48,7 +48,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 	private final StructuralReasoner structuralReasoner;
 
-    private final Version version;
+	private final Version version;
 
 	private final ReasonerProgressMonitor pm;
 
@@ -56,7 +56,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	private boolean isOntopConnectionInitialized = false;
 
 	private boolean questready = false;
-	
+
 	private Object inconsistent = null;
 
 	private Exception questException = null;
@@ -73,12 +73,20 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	private final OntopQueryEngine queryEngine;
 	private final KGQueryFactory kgQueryFactory;
 
+	/*
+	 * Used to handle conversion to and from OWL API and Internal APIs in order to
+	 * support reasoning capabilities via the classifiedTBox.
+	 * */
+	private final OWLOntologyManager owlOntologyManager = OWLManager.createOWLOntologyManager();;
+	private final OWLDataFactory owlDataFactory = owlOntologyManager.getOWLDataFactory();
+	private final RDF rdfFactory = new RDF4J();
+
 	/**
 	 * End-users: use the QuestOWLFactory instead
-     */
-    protected QuestOWL(OWLOntology rootOntology, QuestOWLConfiguration owlConfiguration)
+	 */
+	protected QuestOWL(OWLOntology rootOntology, QuestOWLConfiguration owlConfiguration)
 			throws IllegalConfigurationException {
-        super(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
+		super(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
 		OntopSystemConfiguration ontopConfiguration = owlConfiguration.getOntopConfiguration();
 
@@ -91,7 +99,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			throw new IllegalConfigurationException(e.getMessage(), e, owlConfiguration);
 		}
 
-        this.structuralReasoner = new StructuralReasoner(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
+		this.structuralReasoner = new StructuralReasoner(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
 		try {
 			OBDASpecification obdaSpecification = ontopConfiguration.loadSpecification();
@@ -114,7 +122,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 		prepareReasoner();
 
-    }
+	}
 
 
 	/**
@@ -140,7 +148,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	}
 
 	@Override
-    public void flush() {
+	public void flush() {
 		prepared = false;
 		super.flush();
 		prepareReasoner();
@@ -197,15 +205,15 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			throw new ReasonerInternalException(e);
 		}
 	}
-	
+
 	@Nonnull
-    @Override
+	@Override
 	public String getReasonerName() {
 		return "Quest";
 	}
 
 	@Nonnull
-    @Override
+	@Override
 	public FreshEntityPolicy getFreshEntityPolicy() {
 		return structuralReasoner.getFreshEntityPolicy();
 	}
@@ -213,23 +221,23 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	/**
 	 * Gets the IndividualNodeSetPolicy in use by this reasoner. The policy is
 	 * set at reasoner creation time.
-	 * 
+	 *
 	 * @return The policy.
 	 */
 	@Nonnull
-    @Override
+	@Override
 	public IndividualNodeSetPolicy getIndividualNodeSetPolicy() {
-        return structuralReasoner.getIndividualNodeSetPolicy();
+		return structuralReasoner.getIndividualNodeSetPolicy();
 	}
 
 	/**
 	 * Gets the version of this reasoner.
-	 * 
+	 *
 	 * @return The version of this reasoner. Not <code>null</code>.
 	 */
 	@Override
-    @Nonnull
-    public Version getReasonerVersion() {
+	@Nonnull
+	public Version getReasonerVersion() {
 		return version;
 	}
 
@@ -240,7 +248,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	}
 
 	@Override
-    public void interrupt() {
+	public void interrupt() {
 		/* interrupted = true; */
 	}
 
@@ -254,9 +262,9 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		pm.reasonerTaskStarted("Classifying...");
 		pm.reasonerTaskBusy();
 
-        structuralReasoner.prepareReasoner();
+		structuralReasoner.prepareReasoner();
 
-        try {
+		try {
 			questready = false;
 			questException = null;
 			try {
@@ -279,7 +287,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 	}
 
-    @Override
+	@Override
 	public void precomputeInferences(@Nonnull InferenceType... inferenceTypes) throws ReasonerInterruptedException, TimeOutException,
 			InconsistentOntologyException {
 		// System.out.println("precomputeInferences");
@@ -288,38 +296,38 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	}
 
 	@Override
-    public boolean isPrecomputed(@Nonnull InferenceType inferenceType) {
+	public boolean isPrecomputed(@Nonnull InferenceType inferenceType) {
 		// return true;
 		return prepared;
 	}
 
 	@Override
-    @Nonnull
-    public Set<InferenceType> getPrecomputableInferenceTypes() {
-        return structuralReasoner.getPrecomputableInferenceTypes();
+	@Nonnull
+	public Set<InferenceType> getPrecomputableInferenceTypes() {
+		return structuralReasoner.getPrecomputableInferenceTypes();
 	}
 
 	@Override
-    public boolean isConsistent() throws ReasonerInterruptedException, TimeOutException {
+	public boolean isConsistent() throws ReasonerInterruptedException, TimeOutException {
 		try {
 			return isDisjointAxiomsConsistent() && isFunctionalPropertyAxiomsConsistent();
 		} catch (OWLException e) {
 			throw new ReasonerInterruptedException(e);
 		}
 	}
-	
+
 	//info to return which axiom was inconsistent during the check
 	@Override
 	public Object getInconsistentAxiom() {
 		return inconsistent;
 	}
-	
+
 	private boolean isDisjointAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException, OWLException {
 
 		//deal with disjoint classes
 		{
 			final String strQueryClass = "ASK {?x a <%s>; a <%s> }";
-			
+
 			for (NaryAxiom<ClassExpression> dda : classifiedTBox.disjointClasses()) {
 				// TODO: handle complex class expressions and many pairs of disjoint classes
 				Collection<ClassExpression> disj = dda.getComponents();
@@ -327,7 +335,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 				ClassExpression s1 = classIterator.next();
 				ClassExpression s2 = classIterator.next();
 				String strQuery = String.format(strQueryClass, s1, s2);
-				
+
 				boolean isConsistent = executeConsistencyQuery(strQuery);
 				if (!isConsistent) {
 					inconsistent = dda;
@@ -335,20 +343,20 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 				}
 			}
 		}
-		
+
 		//deal with disjoint properties
 		{
 			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
 
 			for(NaryAxiom<ObjectPropertyExpression> dda
-						: classifiedTBox.disjointObjectProperties()) {
+					: classifiedTBox.disjointObjectProperties()) {
 				// TODO: handle role inverses and multiple arguments			
 				Collection<ObjectPropertyExpression> props = dda.getComponents();
 				Iterator<ObjectPropertyExpression> iterator = props.iterator();
 				ObjectPropertyExpression p1 = iterator.next();
 				ObjectPropertyExpression p2 = iterator.next();
 				String strQuery = String.format(strQueryProp, p1, p2);
-				
+
 				boolean isConsistent = executeConsistencyQuery(strQuery);
 				if (!isConsistent) {
 					inconsistent = dda;
@@ -356,19 +364,19 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 				}
 			}
 		}
-		
+
 		{
 			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
 
 			for(NaryAxiom<DataPropertyExpression> dda
-						: classifiedTBox.disjointDataProperties()) {
+					: classifiedTBox.disjointDataProperties()) {
 				// TODO: handle role inverses and multiple arguments			
 				Collection<DataPropertyExpression> props = dda.getComponents();
 				Iterator<DataPropertyExpression> iterator = props.iterator();
 				DataPropertyExpression p1 = iterator.next();
 				DataPropertyExpression p2 = iterator.next();
 				String strQuery = String.format(strQueryProp, p1, p2);
-				
+
 				boolean isConsistent = executeConsistencyQuery(strQuery);
 				if (!isConsistent) {
 					inconsistent = dda;
@@ -376,42 +384,42 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 				}
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	private boolean isFunctionalPropertyAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException, OWLException {
-		
+
 		//deal with functional properties
 
 		final String strQueryFunc = "ASK { ?x <%s> ?y; <%s> ?z. FILTER (?z != ?y) }";
-		
+
 		for (ObjectPropertyExpression pfa : classifiedTBox.functionalObjectProperties()) {
 			// TODO: handle inverses
 			String propFunc = pfa.getIRI().getIRIString();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
-			
+
 			boolean isConsistent = executeConsistencyQuery(strQuery);
 			if (!isConsistent) {
 				inconsistent = pfa;
 				return false;
 			}
 		}
-		
+
 		for (DataPropertyExpression pfa : classifiedTBox.functionalDataProperties()) {
 			String propFunc = pfa.getIRI().getIRIString();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
-			
+
 			boolean isConsistent = executeConsistencyQuery(strQuery);
 			if (!isConsistent) {
 				inconsistent = pfa;
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	private boolean executeConsistencyQuery(String strQuery) throws OWLException {
 		try (OntopConnection connection = queryEngine.getConnection();
 			 OntopStatement st = connection.createStatement()) {
@@ -430,73 +438,90 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	}
 
 	@Override
-    public boolean isSatisfiable(@Nonnull OWLClassExpression classExpression) throws ReasonerInterruptedException, TimeOutException,
+	public boolean isSatisfiable(@Nonnull OWLClassExpression classExpression) throws ReasonerInterruptedException, TimeOutException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, InconsistentOntologyException {
-        return structuralReasoner.isSatisfiable(classExpression);
+		return structuralReasoner.isSatisfiable(classExpression);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLClass> getUnsatisfiableClasses() throws ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getUnsatisfiableClasses();
+	@Override
+	public Node<OWLClass> getUnsatisfiableClasses() throws ReasonerInterruptedException, TimeOutException {
+		return structuralReasoner.getUnsatisfiableClasses();
 	}
 
 	@Override
-    public boolean isEntailed(@Nonnull OWLAxiom axiom) throws ReasonerInterruptedException, UnsupportedEntailmentTypeException, TimeOutException,
+	public boolean isEntailed(@Nonnull OWLAxiom axiom) throws ReasonerInterruptedException, UnsupportedEntailmentTypeException, TimeOutException,
 			AxiomNotInProfileException, FreshEntitiesException, InconsistentOntologyException {
-        return structuralReasoner.isEntailed(axiom);
+		return structuralReasoner.isEntailed(axiom);
 	}
 
 	@Override
-    public boolean isEntailed(@Nonnull Set<? extends OWLAxiom> axioms) throws ReasonerInterruptedException, UnsupportedEntailmentTypeException,
+	public boolean isEntailed(@Nonnull Set<? extends OWLAxiom> axioms) throws ReasonerInterruptedException, UnsupportedEntailmentTypeException,
 			TimeOutException, AxiomNotInProfileException, FreshEntitiesException, InconsistentOntologyException {
-        return structuralReasoner.isEntailed(axioms);
+		return structuralReasoner.isEntailed(axioms);
 	}
 
 	@Override
-    public boolean isEntailmentCheckingSupported(@Nonnull AxiomType<?> axiomType) {
-        return structuralReasoner.isEntailmentCheckingSupported(axiomType);
+	public boolean isEntailmentCheckingSupported(@Nonnull AxiomType<?> axiomType) {
+		return structuralReasoner.isEntailmentCheckingSupported(axiomType);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLClass> getTopClassNode() {
-        return structuralReasoner.getTopClassNode();
+	@Override
+	public Node<OWLClass> getTopClassNode() {
+		return structuralReasoner.getTopClassNode();
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLClass> getBottomClassNode() {
-        return structuralReasoner.getBottomClassNode();
+	@Override
+	public Node<OWLClass> getBottomClassNode() {
+		OntologyVocabularyCategory<OClass> oClasses = classifiedTBox.classes();
+		OWLClass bottomClass = owlDataFactory.getOWLNothing();
+
+		for (OClass oClass : oClasses) {
+			boolean isBottom = oClass.isBottom();
+
+			if (isBottom) {
+				String iriString = oClass.getIRI().getIRIString();
+				org.semanticweb.owlapi.model.IRI OWLiri = org.semanticweb.owlapi.model.IRI.create(iriString);
+				bottomClass = owlDataFactory.getOWLClass(OWLiri);
+
+				return new OWLClassNode(bottomClass);
+			}
+		}
+
+		return new OWLClassNode(bottomClass);
+//		return structuralReasoner.getBottomClassNode();
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLClass> getSubClasses(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException,
+	@Override
+	public NodeSet<OWLClass> getSubClasses(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
 		// TODO: use ClassifiedTBox
 		if(ce instanceof OWLClass){
-			String iriString = ((OWLClass) ce).getIRI().toString();
-			RDF rdf = new RDF4J();
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			OWLDataFactory factory = manager.getOWLDataFactory();
-			
-			org.apache.commons.rdf.api.IRI iri = rdf.createIRI(iriString);
+
+			// Moved stuff up as field variables - should be in constructor?
+
+			String iriString = ce.asOWLClass().getIRI().toString(); // Got rid of the cast here
+
+			IRI iri = rdfFactory.createIRI(iriString);
 			EquivalencesDAG<ClassExpression> classesDag = classifiedTBox.classesDAG();
 			OClass oClass = classifiedTBox.classes().get(iri);
 			Equivalences<ClassExpression> eq = new Equivalences<>(ImmutableSet.of(oClass));
 			ImmutableSet<Equivalences<ClassExpression>> sub = classesDag.getSub(eq);
-			
+
+			// Should perhaps switch out flatMap.
 			Set<Node<OWLClass>> classes;
-            classes = sub.stream()
+			classes = sub.stream()
 					.flatMap(x -> x.getMembers().stream())
-                    .filter(x -> x instanceof OClass)
-                    .map(x -> (OClass) x)
-                    .map(x -> x.getIRI().getIRIString())
-                    .map(x -> factory.getOWLClass(org.semanticweb.owlapi.model.IRI.create(x)))
-                    .map(OWLClassNode::new)
-                    .collect(Collectors.toSet());
-            OWLClassNodeSet nodes = new OWLClassNodeSet(classes);
+					.filter(x -> x instanceof OClass)
+					.map(x -> (OClass) x)
+					.map(x -> x.getIRI().getIRIString())
+					.map(x -> owlDataFactory.getOWLClass(org.semanticweb.owlapi.model.IRI.create(x)))
+					.map(OWLClassNode::new)
+					.collect(Collectors.toSet());
+			OWLClassNodeSet nodes = new OWLClassNodeSet(classes);
 
 //			Equivalences<ClassExpression> subClassEq = sub.stream().iterator().next();
 //			ClassExpression classExpression = subClassEq.getRepresentative();
@@ -511,7 +536,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 //			OWLClassNodeSet nodes = new OWLClassNodeSet(subClass);
 			return nodes;
 		} else {
-			return null;
+			return new OWLClassNodeSet(); // Replaced null with empty set
 		}
 
 
@@ -520,177 +545,177 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLClass> getSuperClasses(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException,
+	@Override
+	public NodeSet<OWLClass> getSuperClasses(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getSuperClasses(ce, direct);
+		return structuralReasoner.getSuperClasses(ce, direct);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLClass> getEquivalentClasses(@Nonnull OWLClassExpression ce) throws InconsistentOntologyException,
+	@Override
+	public Node<OWLClass> getEquivalentClasses(@Nonnull OWLClassExpression ce) throws InconsistentOntologyException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getEquivalentClasses(ce);
+		return structuralReasoner.getEquivalentClasses(ce);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLClass> getDisjointClasses(@Nonnull OWLClassExpression ce) {
-        return structuralReasoner.getDisjointClasses(ce);
+	@Override
+	public NodeSet<OWLClass> getDisjointClasses(@Nonnull OWLClassExpression ce) {
+		return structuralReasoner.getDisjointClasses(ce);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLObjectPropertyExpression> getTopObjectPropertyNode() {
-        return structuralReasoner.getTopObjectPropertyNode();
+	@Override
+	public Node<OWLObjectPropertyExpression> getTopObjectPropertyNode() {
+		return structuralReasoner.getTopObjectPropertyNode();
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLObjectPropertyExpression> getBottomObjectPropertyNode() {
-        return structuralReasoner.getBottomObjectPropertyNode();
+	@Override
+	public Node<OWLObjectPropertyExpression> getBottomObjectPropertyNode() {
+		return structuralReasoner.getBottomObjectPropertyNode();
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLObjectPropertyExpression> getSubObjectProperties(@Nonnull OWLObjectPropertyExpression pe, boolean direct)
+	@Override
+	public NodeSet<OWLObjectPropertyExpression> getSubObjectProperties(@Nonnull OWLObjectPropertyExpression pe, boolean direct)
 			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getSubObjectProperties(pe, direct);
+		return structuralReasoner.getSubObjectProperties(pe, direct);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLObjectPropertyExpression> getSuperObjectProperties(@Nonnull OWLObjectPropertyExpression pe, boolean direct)
+	@Override
+	public NodeSet<OWLObjectPropertyExpression> getSuperObjectProperties(@Nonnull OWLObjectPropertyExpression pe, boolean direct)
 			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getSuperObjectProperties(pe, direct);
+		return structuralReasoner.getSuperObjectProperties(pe, direct);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLObjectPropertyExpression> getEquivalentObjectProperties(@Nonnull OWLObjectPropertyExpression pe)
+	@Override
+	public Node<OWLObjectPropertyExpression> getEquivalentObjectProperties(@Nonnull OWLObjectPropertyExpression pe)
 			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getEquivalentObjectProperties(pe);
+		return structuralReasoner.getEquivalentObjectProperties(pe);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLObjectPropertyExpression> getDisjointObjectProperties(@Nonnull OWLObjectPropertyExpression pe)
+	@Override
+	public NodeSet<OWLObjectPropertyExpression> getDisjointObjectProperties(@Nonnull OWLObjectPropertyExpression pe)
 			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getDisjointObjectProperties(pe);
+		return structuralReasoner.getDisjointObjectProperties(pe);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLObjectPropertyExpression> getInverseObjectProperties(@Nonnull OWLObjectPropertyExpression pe)
+	@Override
+	public Node<OWLObjectPropertyExpression> getInverseObjectProperties(@Nonnull OWLObjectPropertyExpression pe)
 			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getInverseObjectProperties(pe);
+		return structuralReasoner.getInverseObjectProperties(pe);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLClass> getObjectPropertyDomains(@Nonnull OWLObjectPropertyExpression pe, boolean direct) throws InconsistentOntologyException,
+	@Override
+	public NodeSet<OWLClass> getObjectPropertyDomains(@Nonnull OWLObjectPropertyExpression pe, boolean direct) throws InconsistentOntologyException,
 			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getObjectPropertyDomains(pe, direct);
+		return structuralReasoner.getObjectPropertyDomains(pe, direct);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLClass> getObjectPropertyRanges(@Nonnull OWLObjectPropertyExpression pe, boolean direct) throws InconsistentOntologyException,
+	@Override
+	public NodeSet<OWLClass> getObjectPropertyRanges(@Nonnull OWLObjectPropertyExpression pe, boolean direct) throws InconsistentOntologyException,
 			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getObjectPropertyRanges(pe, direct);
+		return structuralReasoner.getObjectPropertyRanges(pe, direct);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLDataProperty> getTopDataPropertyNode() {
-        return structuralReasoner.getTopDataPropertyNode();
+	@Override
+	public Node<OWLDataProperty> getTopDataPropertyNode() {
+		return structuralReasoner.getTopDataPropertyNode();
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLDataProperty> getBottomDataPropertyNode() {
-        return structuralReasoner.getBottomDataPropertyNode();
+	@Override
+	public Node<OWLDataProperty> getBottomDataPropertyNode() {
+		return structuralReasoner.getBottomDataPropertyNode();
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLDataProperty> getSubDataProperties(@Nonnull OWLDataProperty pe, boolean direct) throws InconsistentOntologyException,
+	@Override
+	public NodeSet<OWLDataProperty> getSubDataProperties(@Nonnull OWLDataProperty pe, boolean direct) throws InconsistentOntologyException,
 			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getSubDataProperties(pe, direct);
+		return structuralReasoner.getSubDataProperties(pe, direct);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLDataProperty> getSuperDataProperties(@Nonnull OWLDataProperty pe, boolean direct) throws InconsistentOntologyException,
+	@Override
+	public NodeSet<OWLDataProperty> getSuperDataProperties(@Nonnull OWLDataProperty pe, boolean direct) throws InconsistentOntologyException,
 			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getSuperDataProperties(pe, direct);
+		return structuralReasoner.getSuperDataProperties(pe, direct);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLDataProperty> getEquivalentDataProperties(@Nonnull OWLDataProperty pe) throws InconsistentOntologyException,
+	@Override
+	public Node<OWLDataProperty> getEquivalentDataProperties(@Nonnull OWLDataProperty pe) throws InconsistentOntologyException,
 			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getEquivalentDataProperties(pe);
+		return structuralReasoner.getEquivalentDataProperties(pe);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLDataProperty> getDisjointDataProperties(@Nonnull OWLDataPropertyExpression pe) throws InconsistentOntologyException,
+	@Override
+	public NodeSet<OWLDataProperty> getDisjointDataProperties(@Nonnull OWLDataPropertyExpression pe) throws InconsistentOntologyException,
 			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getDisjointDataProperties(pe);
+		return structuralReasoner.getDisjointDataProperties(pe);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLClass> getDataPropertyDomains(@Nonnull OWLDataProperty pe, boolean direct) throws InconsistentOntologyException,
+	@Override
+	public NodeSet<OWLClass> getDataPropertyDomains(@Nonnull OWLDataProperty pe, boolean direct) throws InconsistentOntologyException,
 			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getDataPropertyDomains(pe, direct);
+		return structuralReasoner.getDataPropertyDomains(pe, direct);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLClass> getTypes(@Nonnull OWLNamedIndividual ind, boolean direct) throws InconsistentOntologyException, FreshEntitiesException,
+	@Override
+	public NodeSet<OWLClass> getTypes(@Nonnull OWLNamedIndividual ind, boolean direct) throws InconsistentOntologyException, FreshEntitiesException,
 			ReasonerInterruptedException, TimeOutException {
 		return structuralReasoner.getTypes(ind, direct);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLNamedIndividual> getInstances(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException,
+	@Override
+	public NodeSet<OWLNamedIndividual> getInstances(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getInstances(ce, direct);
+		return structuralReasoner.getInstances(ce, direct);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLNamedIndividual> getObjectPropertyValues(@Nonnull OWLNamedIndividual ind, @Nonnull OWLObjectPropertyExpression pe)
+	@Override
+	public NodeSet<OWLNamedIndividual> getObjectPropertyValues(@Nonnull OWLNamedIndividual ind, @Nonnull OWLObjectPropertyExpression pe)
 			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getObjectPropertyValues(ind, pe);
+		return structuralReasoner.getObjectPropertyValues(ind, pe);
 	}
 
 
 	@Nonnull
-    @Override
-    public Set<OWLLiteral> getDataPropertyValues(@Nonnull OWLNamedIndividual ind, @Nonnull OWLDataProperty pe) throws InconsistentOntologyException,
+	@Override
+	public Set<OWLLiteral> getDataPropertyValues(@Nonnull OWLNamedIndividual ind, @Nonnull OWLDataProperty pe) throws InconsistentOntologyException,
 			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-	    return structuralReasoner.getDataPropertyValues(ind, pe);
+		return structuralReasoner.getDataPropertyValues(ind, pe);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLNamedIndividual> getSameIndividuals(@Nonnull OWLNamedIndividual ind) throws InconsistentOntologyException,
+	@Override
+	public Node<OWLNamedIndividual> getSameIndividuals(@Nonnull OWLNamedIndividual ind) throws InconsistentOntologyException,
 			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getSameIndividuals(ind);
+		return structuralReasoner.getSameIndividuals(ind);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLNamedIndividual> getDifferentIndividuals(@Nonnull OWLNamedIndividual ind) throws InconsistentOntologyException,
+	@Override
+	public NodeSet<OWLNamedIndividual> getDifferentIndividuals(@Nonnull OWLNamedIndividual ind) throws InconsistentOntologyException,
 			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getDifferentIndividuals(ind);
+		return structuralReasoner.getDifferentIndividuals(ind);
 	}
 
-    @Override
+	@Override
 	public void close() {
 		dispose();
 	}
