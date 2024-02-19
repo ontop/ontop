@@ -137,11 +137,13 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
             throw new RuntimeException(e);
         }
 
-        System.out.println("NR of TRIPLES: " + tripleCount);
+        if (outputFile != null)
+            System.out.println("NR of TRIPLES: " + tripleCount);
 
         final long endTime = System.currentTimeMillis();
         final long time = endTime - startTime;
-        System.out.println("Elapsed time to materialize: " + time + " {ms}");
+        if (outputFile != null)
+            System.out.println("Elapsed time to materialize: " + time + " {ms}");
     }
 
     private void runWithSeparateFiles(RDF4JMaterializer materializer) {
@@ -223,11 +225,14 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
             fileCount++;
         }
 
-        System.out.println("NR of TRIPLES: " + tripleCount);
+        if (outputFile != null)
+            System.out.println("NR of TRIPLES: " + tripleCount);
 
         final long endTime = System.currentTimeMillis();
         final long time = endTime - startTime;
-        System.out.println("Elapsed time to materialize: " + time + " {ms}");
+
+        if (outputFile != null)
+            System.out.println("Elapsed time to materialize: " + time + " {ms}");
     }
 
     // We need direct access to the writer to close it (cannot be done via the RDFHandler)
