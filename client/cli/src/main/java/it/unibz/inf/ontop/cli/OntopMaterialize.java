@@ -119,7 +119,7 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
     }
 
     private void runWithSingleFile(RDF4JMaterializer materializer) {
-        int tripleCount = 0;
+        long tripleCount = 0;
 
         final long startTime = System.currentTimeMillis();
 
@@ -204,7 +204,7 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
         System.err.println(String.format("Materializing %s (%d/%d)", predicateIRI, index, total));
         System.err.println("Starts writing triples into files.");
 
-        int tripleCount = 0;
+        long tripleCount = 0;
         int fileCount = 0;
 
         String fileSubstring = predicateIRI.toString().replaceAll("[^a-zA-Z0-9]", "_")
@@ -249,8 +249,8 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
      * Serializes a batch of triples into one file.
      * Upper bound: TRIPLE_LIMIT_PER_FILE.
      */
-    private int serializeTripleBatch(GraphQueryResult result, Optional<Integer> limitPerFile, BufferedWriter writer, RDFHandler handler) throws IOException {
-        int tripleCount = 0;
+    private long serializeTripleBatch(GraphQueryResult result, Optional<Integer> limitPerFile, BufferedWriter writer, RDFHandler handler) throws IOException {
+        long tripleCount = 0;
         handler.startRDF();
         while (result.hasNext() && (!limitPerFile.isPresent() || tripleCount < limitPerFile.get())) {
             handler.handleStatement(result.next());
