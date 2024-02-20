@@ -1485,77 +1485,77 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     protected DBFunctionSymbol createYearFromDatetimeFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_YEAR_FROM_DATETIME", rootDBType, dbIntegerType, false,
+        return new ExtractFromDateOrTimestampFunctionSymbolImpl("DB_YEAR_FROM_DATETIME", rootDBType, dbIntegerType,
                 this::serializeYearFromDatetime);
     }
 
     protected DBFunctionSymbol createYearFromDateFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_YEAR_FROM_DATE", rootDBType, dbIntegerType, false,
+        return new ExtractFromDateOrTimestampFunctionSymbolImpl("DB_YEAR_FROM_DATE", rootDBType, dbIntegerType,
                 this::serializeYearFromDate);
     }
 
     protected DBFunctionSymbol createMonthFromDatetimeFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_MONTH_FROM_DATETIME", rootDBType, dbIntegerType, false,
+        return new ExtractFromDateOrTimestampFunctionSymbolImpl("DB_MONTH_FROM_DATETIME", rootDBType, dbIntegerType,
                 this::serializeMonthFromDatetime);
     }
 
     protected DBFunctionSymbol createMonthFromDateFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_MONTH_FROM_DATE", rootDBType, dbIntegerType, false,
+        return new ExtractFromDateOrTimestampFunctionSymbolImpl("DB_MONTH_FROM_DATE", rootDBType, dbIntegerType,
                 this::serializeMonthFromDate);
     }
 
     protected DBFunctionSymbol createDayFromDatetimeFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_DAY_FROM_DATETIME", rootDBType, dbIntegerType, false,
+        return new ExtractFromDateOrTimestampFunctionSymbolImpl("DB_DAY_FROM_DATETIME", rootDBType, dbIntegerType,
                 this::serializeDayFromDatetime);
     }
 
     protected DBFunctionSymbol createDayFromDateFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_DAY_FROM_DATE", rootDBType, dbIntegerType, false,
+        return new ExtractFromDateOrTimestampFunctionSymbolImpl("DB_DAY_FROM_DATE", rootDBType, dbIntegerType,
                 this::serializeDayFromDate);
     }
 
     protected DBFunctionSymbol createHoursFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_HOURS", rootDBType, dbIntegerType, false,
+        return new ExtractFromDateOrTimestampFunctionSymbolImpl("DB_HOURS", rootDBType, dbIntegerType,
                 this::serializeHours);
     }
 
     protected DBFunctionSymbol createMinutesFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_MINUTES", rootDBType, dbIntegerType, false,
+        return new ExtractFromDateOrTimestampFunctionSymbolImpl("DB_MINUTES", rootDBType, dbIntegerType,
                 this::serializeMinutes);
     }
 
     protected DBFunctionSymbol createWeekFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_WEEK", rootDBType, dbIntegerType, false,
+        return new ExtractFromDateOrTimestampFunctionSymbolImpl("DB_WEEK", rootDBType, dbIntegerType,
                 this::serializeWeek);
     }
 
     protected DBFunctionSymbol createQuarterFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_QUARTER", rootDBType, dbIntegerType, false,
+        return new ExtractFromDateOrTimestampFunctionSymbolImpl("DB_QUARTER", rootDBType, dbIntegerType,
                 this::serializeQuarter);
     }
 
     protected DBFunctionSymbol createDecadeFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_DECADE", rootDBType, dbIntegerType, false,
+        return new ExtractFromDateOrTimestampFunctionSymbolImpl("DB_DECADE", rootDBType, dbIntegerType,
                 this::serializeDecade);
     }
 
     protected DBFunctionSymbol createCenturyFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_CENTURY", rootDBType, dbIntegerType, false,
+        return new ExtractFromDateOrTimestampFunctionSymbolImpl("DB_CENTURY", rootDBType, dbIntegerType,
                 this::serializeCentury);
     }
 
     protected DBFunctionSymbol createMillenniumFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_MILLENNIUM", rootDBType, dbIntegerType, false,
+        return new ExtractFromDateOrTimestampFunctionSymbolImpl("DB_MILLENNIUM", rootDBType, dbIntegerType,
                 this::serializeMillennium);
     }
 
     protected DBFunctionSymbol createMillisecondsFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_MILLISECONDS", rootDBType, dbDecimalType, false,
+        return new ExtractFromDateOrTimestampFunctionSymbolImpl("DB_MILLISECONDS", rootDBType, dbDecimalType,
                 this::serializeMilliseconds);
     }
 
     protected DBFunctionSymbol createMicrosecondsFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_MICROSECONDS", rootDBType, dbIntegerType, false,
+        return new ExtractFromDateOrTimestampFunctionSymbolImpl("DB_MICROSECONDS", rootDBType, dbIntegerType,
                 this::serializeMicroseconds);
     }
 
