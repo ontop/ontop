@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.DECIMAL;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
@@ -22,7 +21,6 @@ public class TrinoDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String INT8_STR = "INT8";
     protected static final String FLOAT4_STR = "FLOAT4";
     protected static final String FLOAT8_STR = "FLOAT8";
-    public static final String TIMESTAMPTZ_STR = "TIMESTAMP WITH TIME ZONE";
     public static final String TIMETZ_STR = "TIME WITH TIME ZONE";
     public static final String BOOL_STR = "BOOL";
     public static final String UUID_STR = "UUID";
@@ -81,10 +79,6 @@ public class TrinoDBTypeFactory extends DefaultSQLDBTypeFactory {
         TermTypeAncestry rootAncestry = rootTermType.getAncestry();
         RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
 
-        // TODO: shall we map it to xsd.datetimeStamp ? (would not follow strictly R2RML but be more precise)
-        DatetimeDBTermType timestampTz = new DatetimeDBTermType(TIMESTAMPTZ_STR, rootTermType.getAncestry(),
-                typeFactory.getXsdDatetimeDatatype());
-
         DBTermType timeTzType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIMETZ_STR, rootAncestry,
                 typeFactory.getDatatype(XSD.TIME), NOTHING);
 
@@ -106,7 +100,6 @@ public class TrinoDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(FLOAT4_STR, map.get(REAL_STR));
         map.put(FLOAT8_STR, map.get(DOUBLE_PREC_STR));
         map.put(DEFAULT_DECIMAL_STR, defaultDecimalType);
-        map.put(TIMESTAMPTZ_STR, timestampTz);
         map.put(TIMETZ_STR, timeTzType);
         map.put(DATE_STR, dateType);
         map.put(BOOL_STR, map.get(BOOLEAN_STR));
@@ -128,7 +121,7 @@ public class TrinoDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static ImmutableMap<DefaultTypeCode, String> createTrinoCodeMap() {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
         map.put(DefaultTypeCode.DOUBLE, DOUBLE_PREC_STR);
-        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMPTZ_STR);
+        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMP_WITH_TIME_ZONE_STR);
         map.put(DefaultTypeCode.HEXBINARY, VARBINARY_STR);
         map.put(DefaultTypeCode.STRING, VARCHAR_STR);
         map.put(DefaultTypeCode.GEOMETRY, GEOMETRY_STR);

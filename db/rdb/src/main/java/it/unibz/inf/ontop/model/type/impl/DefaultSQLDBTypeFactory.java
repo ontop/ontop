@@ -159,6 +159,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new DateDBTermType(DATE_STR, rootAncestry, typeFactory.getDatatype(XSD.DATE)),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME)),
                     new DatetimeDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype()),
+                    // TODO: shall we map it to xsd.datetimeStamp ? (would not follow strictly R2RML but be more precise)
                     new DatetimeDBTermType(TIMESTAMP_WITH_TIME_ZONE_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype())
                 )
                 .collect(Collectors.toMap(
