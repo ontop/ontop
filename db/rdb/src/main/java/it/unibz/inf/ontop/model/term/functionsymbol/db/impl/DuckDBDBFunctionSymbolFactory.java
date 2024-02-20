@@ -12,9 +12,8 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import java.util.UUID;
 import java.util.function.Function;
 
-import static it.unibz.inf.ontop.model.type.impl.SnowflakeDBTypeFactory.TIMESTAMP_LOCAL_TZ_STR;
-import static it.unibz.inf.ontop.model.type.impl.SnowflakeDBTypeFactory.TIMESTAMP_NO_TZ_STR;
-import static it.unibz.inf.ontop.model.type.impl.DuckDBDBTypeFactory.DEFAULT_DECIMAL_STR;
+import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TIMESTAMP_STR;
+import static it.unibz.inf.ontop.model.type.impl.DuckDBDBTypeFactory.*;
 
 public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
@@ -65,8 +64,8 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
 
-        // NB: TIMESTAMP_TZ_STR is the default, already done.
-        for (String timestampTypeString : ImmutableList.of(TIMESTAMP_LOCAL_TZ_STR, TIMESTAMP_NO_TZ_STR)) {
+        // NB: TIMESTAMP WITH TIME ZONE is the default, already done.
+        for (String timestampTypeString : ImmutableList.of(TIMESTAMP_STR, TIMESTAMP_S_STR, TIMESTAMP_MS_STR)) {
             DBTermType timestampType = dbTypeFactory.getDBTermType(timestampTypeString);
 
             DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(timestampType);

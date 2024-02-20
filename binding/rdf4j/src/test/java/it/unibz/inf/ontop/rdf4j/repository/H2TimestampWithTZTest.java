@@ -30,6 +30,6 @@ public class H2TimestampWithTZTest extends AbstractRDF4JTest {
                 "WHERE {\n" +
                 " ?x :birthday_with_timezone ?v . \n" +
                 "}";
-        runQueryAndCompare(query, ImmutableSet.of("1981-06-04 14:41:05+02", "1991-06-04 14:41:05+02", "2001-06-04 14:41:05+02"));
+        runQueryAndCompare(query, ImmutableSet.of("1981-06-04T14:41:05.000+02:00", "1991-06-04T14:41:05.000+02:00", "2001-06-04T14:41:05.000+02:00"));
     }
 }
