@@ -27,6 +27,8 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String FLOAT8_STR = "FLOAT8";
     protected static final String BPCHAR_STR = "BPCHAR";
     public static final String TIMETZ_STR = "TIME WITH TIME ZONE";
+    public static final String TIMESTAMP_MS_STR = "TIMESTAMP_MS";
+    public static final String TIMESTAMP_S_STR = "TIMESTAMP_S";
     public static final String BOOL_STR = "BOOL";
     public static final String UUID_STR = "UUID";
     public static final String JSON_STR = "JSON";
@@ -84,6 +86,10 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
         NumberDBTermType defaultDecimalType = new NumberDBTermType(DEFAULT_DECIMAL_STR, rootAncestry,
                 typeFactory.getXsdDecimalDatatype(), DECIMAL);
 
+
+        DBTermType timestampMs = new DatetimeDBTermType(TIMESTAMP_MS_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype());
+        DBTermType timestampS = new DatetimeDBTermType(TIMESTAMP_S_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype());
+
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(INT2_STR, map.get(SMALLINT_STR));
         map.put(INT4_STR, map.get(INTEGER_STR));
@@ -100,6 +106,8 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(BOOL_STR, map.get(BOOLEAN_STR));
         map.put(UUID_STR, uuidType);
         map.put(BYTEA_STR, byteAType);
+        map.put(TIMESTAMP_MS_STR, timestampMs);
+        map.put(TIMESTAMP_S_STR, timestampS);
 
         /*
          * JSON
