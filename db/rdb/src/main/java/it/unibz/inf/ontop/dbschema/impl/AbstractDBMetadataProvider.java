@@ -507,8 +507,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             attributes = ImmutableList.copyOf(attrs.keySet());
         }
         catch (JSQLParserException e) {
-            // TODO: LOGGER.warn() should be instead after revising the logging policy
-            System.out.printf("FAILED TO PARSE: %s %s\n", query, getJSQLParserErrorMessage(query, e));
+            LOGGER.info("FAILED TO PARSE: {} {}", query, getJSQLParserErrorMessage(query, e));
 
             ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(getQuotedIDFactory());
             attributes = sqae.getAttributes(query);
