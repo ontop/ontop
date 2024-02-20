@@ -33,7 +33,6 @@ public class OracleDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String BINARY_FLOAT_STR = "BINARY_FLOAT";
     public static final String BINARY_DOUBLE_STR = "BINARY_DOUBLE";
     public static final String TIMESTAMP_LOCAL_TZ_STR = "TIMESTAMP WITH LOCAL TIME ZONE";
-    public static final String TIMESTAMP_TZ_STR = "TIMESTAMP WITH TIME ZONE";
 
     @AssistedInject
     private OracleDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
@@ -58,7 +57,6 @@ public class OracleDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
         DatetimeDBTermType timestampLTZType = new DatetimeDBTermType(TIMESTAMP_LOCAL_TZ_STR, rootAncestry, xsdDatetime);
-        DatetimeDBTermType timestampTZType = new DatetimeDBTermType(TIMESTAMP_TZ_STR, rootAncestry, xsdDatetime);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(NUMBER_STR, numberType);
@@ -68,7 +66,6 @@ public class OracleDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(BINARY_FLOAT_STR, binaryFloatType);
         map.put(BINARY_DOUBLE_STR, binaryDoubleType);
         map.put(TIMESTAMP_LOCAL_TZ_STR, timestampLTZType);
-        map.put(TIMESTAMP_TZ_STR, timestampTZType);
         return map;
     }
 
@@ -77,7 +74,7 @@ public class OracleDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DefaultTypeCode.DECIMAL, NUMBER_STR);
         map.put(DefaultTypeCode.LARGE_INTEGER, NUMBER_19_STR);
         map.put(DefaultTypeCode.DOUBLE, BINARY_DOUBLE_STR);
-        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMP_TZ_STR);
+        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMP_WITH_TIME_ZONE_STR);
         // NB: Conversions to VARCHAR2 use the TO_CHAR(...) function
         map.put(DefaultTypeCode.STRING, VARCHAR2_STR);
         return ImmutableMap.copyOf(map);

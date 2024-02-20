@@ -26,7 +26,6 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String FLOAT4_STR = "FLOAT4";
     protected static final String FLOAT8_STR = "FLOAT8";
     protected static final String BPCHAR_STR = "BPCHAR";
-    public static final String TIMESTAMPTZ_STR = "TIMESTAMP WITH TIME ZONE";
     public static final String TIMETZ_STR = "TIME WITH TIME ZONE";
     public static final String BOOL_STR = "BOOL";
     public static final String UUID_STR = "UUID";
@@ -67,10 +66,6 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         StringDBTermType bpCharType = new StringDBTermType(BPCHAR_STR, rootAncestry, xsdString);
 
-        // TODO: shall we map it to xsd.datetimeStamp ? (would not follow strictly R2RML but be more precise)
-        DatetimeDBTermType timestampTz = new DatetimeDBTermType(TIMESTAMPTZ_STR, rootTermType.getAncestry(),
-                typeFactory.getXsdDatetimeDatatype());
-
         DBTermType timeTzType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIMETZ_STR, rootAncestry,
                 typeFactory.getDatatype(XSD.TIME), NOTHING);
 
@@ -100,7 +95,6 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(STRING_STR, stringType);
 
         map.put(BPCHAR_STR, bpCharType);
-        map.put(TIMESTAMPTZ_STR, timestampTz);
         map.put(TIMETZ_STR, timeTzType);
         map.put(DATE_STR, dateType);
         map.put(BOOL_STR, map.get(BOOLEAN_STR));
@@ -118,7 +112,7 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static ImmutableMap<DefaultTypeCode, String> createDuckDBCodeMap() {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
         map.put(DefaultTypeCode.DOUBLE, DOUBLE_PREC_STR);
-        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMPTZ_STR);
+        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMP_WITH_TIME_ZONE_STR);
         map.put(DefaultTypeCode.HEXBINARY, BYTEA_STR);
         map.put(DefaultTypeCode.STRING, VARCHAR_STR);
         map.put(DefaultTypeCode.JSON, JSON_STR);
