@@ -112,7 +112,7 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static ImmutableMap<DefaultTypeCode, String> createDuckDBCodeMap() {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
         map.put(DefaultTypeCode.DOUBLE, DOUBLE_PREC_STR);
-        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMPTZ_STR);
+        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMP_WITH_TIME_ZONE_STR);
         map.put(DefaultTypeCode.HEXBINARY, BYTEA_STR);
         map.put(DefaultTypeCode.STRING, VARCHAR_STR);
         map.put(DefaultTypeCode.JSON, JSON_STR);
