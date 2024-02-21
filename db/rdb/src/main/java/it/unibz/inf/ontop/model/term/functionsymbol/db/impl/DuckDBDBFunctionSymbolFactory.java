@@ -153,6 +153,11 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     @Override
+    protected String serializeDateTimeNormNoTZ(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("STRFTIME(%s, '%%xT%%X')", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches2() {
         return (DBBooleanFunctionSymbol) this.regexpLikeFunctionSymbol;
     }
@@ -163,7 +168,7 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     @Override
-    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+    protected String serializeDateTimeNormWithTZ(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         /* DuckDB STRFTIME formats a timestamp:
             %x: ISO date representation
             %X: ISO time representation
@@ -173,8 +178,7 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
            However, we want the string to end with +HH:MM instead. So we split it before the last
            two characters and add a ':' in-between.
          */
-        return String.format("STRFTIME(CAST(%s as TIMESTAMP WITH TIME ZONE), '%%xT%%X%%z')",
-                termConverter.apply(terms.get(0)),
+        return String.format("regexp_replace(regexp_replace(strftime(%s,'%%xT%%X%%z'),'(\\d\\d)(\\d\\d)$','\\1:\\2'),'([+-]\\d\\d)$','\\1:00')",
                 termConverter.apply(terms.get(0)));
     }
 

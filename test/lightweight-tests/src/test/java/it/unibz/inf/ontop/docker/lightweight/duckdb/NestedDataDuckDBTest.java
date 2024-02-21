@@ -33,12 +33,4 @@ public class NestedDataDuckDBTest extends AbstractNestedDataTest {
                 "\"Bob: 17666.666666666668\"^^xsd:string");
     }
 
-    @Override
-    protected ImmutableMultiset getFlattenTimestampExpectedValues() {
-        return ImmutableMultiset.of( "\"2023-01-01 18:00:00.0\"^^xsd:dateTime", "\"2023-01-15 18:00:00.0\"^^xsd:dateTime", "\"2023-01-29 12:00:00.0\"^^xsd:dateTime",
-                "\"2023-02-12 18:00:00.0\"^^xsd:dateTime", "\"2023-02-26 18:00:00.0\"^^xsd:dateTime",
-                "\"2023-03-12 18:00:00.0\"^^xsd:dateTime", "\"2023-03-26 18:00:00.0\"^^xsd:dateTime");
-    }
-
-
 }

@@ -175,7 +175,7 @@ public class CDataDynamoDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionS
     }
 
     @Override
-    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+    protected String serializeDateTimeNormWithTZ(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("STUFF(FORMAT(%s, 'YYYY-MM-dd\\'T\\'HH:mm:ssz'), LEN(FORMAT(%s, 'YYYY-MM-dd\\'T\\'HH:mm:ssz')) - 1, 0, ':')", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
     }
 
