@@ -87,8 +87,12 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
                 typeFactory.getXsdDecimalDatatype(), DECIMAL);
 
 
-        DBTermType timestampMs = new DatetimeDBTermType(TIMESTAMP_MS_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype());
-        DBTermType timestampS = new DatetimeDBTermType(TIMESTAMP_S_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype());
+        DBTermType timestampMs = new DatetimeDBTermType(TIMESTAMP_MS_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype(), false);
+        DBTermType timestampS = new DatetimeDBTermType(TIMESTAMP_S_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype(), false);
+
+        // Overrides the default definition of timestamp (temporary)
+        DBTermType timestamp = new DatetimeDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype(), false);
+
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(INT2_STR, map.get(SMALLINT_STR));
@@ -108,6 +112,7 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(BYTEA_STR, byteAType);
         map.put(TIMESTAMP_MS_STR, timestampMs);
         map.put(TIMESTAMP_S_STR, timestampS);
+        map.put(TIMESTAMP_STR, timestamp);
 
         /*
          * JSON

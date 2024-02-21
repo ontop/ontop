@@ -153,6 +153,11 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     @Override
+    protected String serializeDateTimeNormNoTZ(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("STRFTIME(%s, '%%xT%%X')", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches2() {
         return (DBBooleanFunctionSymbol) this.regexpLikeFunctionSymbol;
     }
@@ -163,7 +168,7 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     @Override
-    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+    protected String serializeDateTimeNormWithTZ(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         /* DuckDB STRFTIME formats a timestamp:
             %x: ISO date representation
             %X: ISO time representation

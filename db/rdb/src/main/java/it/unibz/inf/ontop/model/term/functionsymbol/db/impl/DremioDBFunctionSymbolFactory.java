@@ -106,7 +106,7 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     @Override
-    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+    protected String serializeDateTimeNormWithTZ(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("REPLACE(REPLACE(TO_CHAR(%s, 'YYYY-MM-DD\"T\"HH24:MI:SSTZO'), 'UTC', '+00:00'), 'O', '')",
                 termConverter.apply(terms.get(0)));
     }
