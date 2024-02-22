@@ -40,11 +40,6 @@ public class CastDuckDBTest extends AbstractCastFunctionsTest {
         super.testCastDateTimeFromDate3();
     }
 
-    @Disabled("TODO: re-enable it when the serialization of the timestamp with tz is pushed to the SQL query")
-    @Override
-    public void testCastDateTimeFromString() {
-    }
-
     @Override
     protected ImmutableMultiset<String> getCastFloatFromDecimal1ExpectedValues() {
         return ImmutableMultiset.of("\"0.2\"^^xsd:float", "\"0.25\"^^xsd:float", "\"0.2\"^^xsd:float",
@@ -83,9 +78,12 @@ public class CastDuckDBTest extends AbstractCastFunctionsTest {
         return ImmutableSet.of("\"2.000000000000000000\"^^xsd:decimal");
     }
 
-    @Disabled("TODO: re-enable it when the serialization of the timestamp with tz is pushed to the SQL query")
     @Override
-    public void testCastDateTimeFromDate1() {
-        super.testCastDateTimeFromDate1();
+    protected ImmutableSet<String> getCastDateTimeFromDate1ExpectedValues() {
+        return ImmutableSet.of("\"1999-12-14T00:00Z\"^^xsd:dateTime");
+    }
+
+    protected ImmutableSet<String> getCastDateTimeFromStringExpectedValues() {
+        return ImmutableSet.of("\"1999-12-14T09:30:00+00:00\"^^xsd:dateTime");
     }
 }

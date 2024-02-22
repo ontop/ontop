@@ -290,6 +290,31 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                 term);
     }
 
+    /**
+     * DuckDB automatically converts timestamps to local timezones with CAST. We specify serialization to avoid this.
+     */
+    @Override
+    protected String serializeCheckAndConvertDateTimeFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String timestampSerialization = serializeDateTimeNormWithTZ(terms, termConverter, termFactory).replaceAll("%", "%%");
+        // Must add TIMESTAMP to the string input otherwise stfrtime function will not work
+        return String.format("TRY_CAST(" + timestampSerialization.replace("strftime(", "strftime(TIMESTAMP") +
+                        " AS " + TIMESTAMP_WITH_TIME_ZONE_STR + ")",
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDateTimeFromString(ImmutableList<? extends ImmutableTerm> terms,
+                                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String timestampSerialization = serializeDateTimeNormWithTZ(terms, termConverter, termFactory).replaceAll("%", "%%");
+        // Must add TIMESTAMP to the string input otherwise stfrtime function will not work
+        return String.format("CASE WHEN TRY_CAST(%1$s AS TIMESTAMP WITH TIME ZONE) IS NOT NULL THEN " +
+                        timestampSerialization.replace("strftime(", "strftime(TIMESTAMP")  +
+                        " ELSE NULL " +
+                        "END",
+                termConverter.apply(terms.get(0)));
+    }
+
     @Override
     protected DBFunctionSymbol createDBSample(DBTermType termType) {
         return new DBSampleFunctionSymbolImpl(termType, "FIRST");
