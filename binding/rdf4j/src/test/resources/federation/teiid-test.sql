@@ -1,0 +1,92 @@
+SELECT "label10m40", "product0m4"
+FROM (
+
+SELECT
+  DISTINCT v7."label10m40" AS "label10m40",
+  v7."product0m4" AS "product0m4",
+  1 AS "__dummy__"
+FROM
+  (
+    (
+      SELECT
+        v1."label" AS "label10m40",
+        v1."nr" AS "product0m4",
+        v2."productfeature" AS "productfeature2m2",
+        v1."propertynum1" AS "propertynum1m10",
+        v1."propertynum2" AS "propertynum1m15"
+      FROM
+        "s1"."product1" v1,
+        "s1"."productfeatureproduct1" v2
+      WHERE
+        (
+          v1."nr" <> 83376
+          AND v1."nr" = v2."product"
+        )
+    )
+    UNION ALL
+    (
+      SELECT
+        v4."label" AS "label10m40",
+        v4."nr" AS "product0m4",
+        v5."productfeature" AS "productfeature2m2",
+        v4."propertynum1" AS "propertynum1m10",
+        v4."propertynum2" AS "propertynum1m15"
+      FROM
+        "s5"."product2" v4,
+        "s5"."productfeatureproduct2" v5
+      WHERE
+        (
+          v4."nr" <> 83376
+          AND v4."nr" = v5."product"
+        )
+    )
+  ) v7,
+  (
+    (
+      SELECT
+        v8."productfeature" AS "productfeature2m0",
+        v9."propertynum2" AS "propertynum1m35",
+        v9."propertynum1" AS "propertynum1m36"
+      FROM
+        "s1"."productfeatureproduct1" v8,
+        "s1"."product1" v9
+      WHERE
+        (
+          83376 = v8."product"
+          AND 83376 = v9."nr"
+        )
+    )
+    UNION ALL
+    (
+      SELECT
+        v11."productfeature" AS "productfeature2m0",
+        v12."propertynum2" AS "propertynum1m35",
+        v12."propertynum1" AS "propertynum1m36"
+      FROM
+        "s5"."productfeatureproduct2" v11,
+        "s5"."product2" v12
+      WHERE
+        (
+          83376 = v11."product"
+          AND 83376 = v12."nr"
+        )
+    )
+  ) v14
+WHERE
+  (
+    (v7."propertynum1m15" < (v14."propertynum1m35" + 170))
+    AND (
+      v7."propertynum1m15" > (v14."propertynum1m35" - 170)
+    )
+    AND (v7."propertynum1m10" < (v14."propertynum1m36" + 120))
+    AND (
+      v7."propertynum1m10" > (v14."propertynum1m36" - 120)
+    )
+    AND v7."productfeature2m2" = v14."productfeature2m0"
+  )
+) AS t
+
+ORDER BY
+  "label10m40" NULLS FIRST
+LIMIT
+  5
