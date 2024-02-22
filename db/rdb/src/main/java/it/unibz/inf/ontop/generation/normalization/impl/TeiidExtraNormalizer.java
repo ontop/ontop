@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.DBConstant;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -123,8 +124,11 @@ public final class TeiidExtraNormalizer implements DialectExtraNormalizer {
             ImmutableSet<Variable> innerConstructVars = Stream
                     .concat(constructNode.getVariables().stream(), Stream.of(dummyVar))
                     .collect(ImmutableSet.toImmutableSet());
-            Substitution<DBConstant> innerConstructSubstitution = substitutionFactory.getSubstitution(dummyVar,
+            Substitution<ImmutableTerm> innerConstructSubstitution = substitutionFactory.getSubstitution(dummyVar,
                     termFactory.getDBConstant("", termFactory.getTypeFactory().getDBTypeFactory().getDBStringType()));
+            if (constructNode.getSubstitution() != null) {
+                innerConstructSubstitution = substitutionFactory.union(constructNode.getSubstitution(), innerConstructSubstitution);
+            }
             ConstructionNode innerConstructNode = iqFactory.createConstructionNode(innerConstructVars, innerConstructSubstitution);
 
             // Create tree SLICE( CONSTRUCT( ORDER BY( DISTINCT( 'inner' CONSTRUCT( ... ) ) ) ) )
