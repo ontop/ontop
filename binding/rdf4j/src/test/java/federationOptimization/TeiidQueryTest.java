@@ -23,6 +23,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.query.KGQuery;
 import it.unibz.inf.ontop.query.KGQueryFactory;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -34,6 +35,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.StreamSupport;
 
+@Category(ObdfTest.class)
 public class TeiidQueryTest {
 
     private static final String PLACEHOLDER_TEXT = "83376";
