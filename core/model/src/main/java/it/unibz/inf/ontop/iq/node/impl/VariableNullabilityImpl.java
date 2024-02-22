@@ -240,10 +240,14 @@ public class VariableNullabilityImpl implements VariableNullability {
                         .map(SplitImmutableFunctionalTerm::getSubstitution)
                         .reduce(substitutionFactory.getSubstitution(), substitutionFactory::union);
 
+        Stream<Substitution<Variable>> var2varSubstitution = Optional.of(substitution.restrictRangeTo(Variable.class))
+                .filter(s -> !s.isEmpty())
+                .stream();
+
         return Stream.concat(
                 // Recursive
                 splitSubstitution(childSubstitution, variableGenerator),
-                Stream.of(parentSubstitution));
+                Stream.concat(Stream.of(parentSubstitution), var2varSubstitution));
     }
 
     private final class SplitImmutableFunctionalTerm {
