@@ -1,0 +1,107 @@
+@prefix : <http://noi.example.org/ontology/issueN/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://noi.example.org/ontology/issueN/> .
+
+<http://noi.example.org/ontology/issueN> rdf:type owl:Ontology .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://purl.obolibrary.org/obo/BFO_0000051
+<http://purl.obolibrary.org/obo/BFO_0000051> rdf:type owl:ObjectProperty ,
+                                                      owl:TransitiveProperty ;
+                                             rdfs:comment "a core relation that holds between a whole and its part"@en ;
+                                             rdfs:isDefinedBy "http://purl.obolibrary.org/obo/iao.owl" ;
+                                             rdfs:label "has part"@en .
+
+
+###  http://purl.obolibrary.org/obo/IAO_0000039
+<http://purl.obolibrary.org/obo/IAO_0000039> rdf:type owl:ObjectProperty ;
+                                             rdfs:subPropertyOf <http://purl.obolibrary.org/obo/BFO_0000051> ;
+                                             rdf:type owl:FunctionalProperty ;
+                                             rdfs:range <http://purl.obolibrary.org/obo/IAO_0000003> ;
+                                             rdfs:isDefinedBy "http://purl.obolibrary.org/obo/iao.owl" ;
+                                             rdfs:label "has measurement unit label"@en .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://purl.obolibrary.org/obo/BFO_0000001
+<http://purl.obolibrary.org/obo/BFO_0000001> rdf:type owl:Class ;
+                                             rdfs:subClassOf owl:Thing ;
+                                             rdfs:isDefinedBy <http://purl.obolibrary.org/obo/bfo.owl> ;
+                                             rdfs:label "entity"@en .
+
+
+###  http://purl.obolibrary.org/obo/BFO_0000002
+<http://purl.obolibrary.org/obo/BFO_0000002> rdf:type owl:Class ;
+                                             rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000001> ;
+                                             rdfs:isDefinedBy <http://purl.obolibrary.org/obo/bfo.owl> ;
+                                             rdfs:label "continuant"@en .
+
+
+###  http://purl.obolibrary.org/obo/BFO_0000031
+<http://purl.obolibrary.org/obo/BFO_0000031> rdf:type owl:Class ;
+                                             rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000002> ;
+                                             rdfs:isDefinedBy <http://purl.obolibrary.org/obo/bfo.owl> ;
+                                             rdfs:label "generically dependent continuant"@en .
+
+
+###  http://purl.obolibrary.org/obo/IAO_0000003
+<http://purl.obolibrary.org/obo/IAO_0000003> rdf:type owl:Class ;
+                                             rdfs:subClassOf <http://purl.obolibrary.org/obo/IAO_0000009> ;
+                                             rdfs:comment "A measurement unit label is as a label that is part of a scalar measurement datum and denotes a unit of measure."@en ;
+                                             rdfs:isDefinedBy "http://purl.obolibrary.org/obo/iao.owl" ;
+                                             rdfs:label "measurement unit label"@en .
+
+
+###  http://purl.obolibrary.org/obo/IAO_0000009
+<http://purl.obolibrary.org/obo/IAO_0000009> rdf:type owl:Class ;
+                                             rdfs:subClassOf <http://purl.obolibrary.org/obo/IAO_0000030> ;
+                                             rdfs:comment "A label is a symbol that is part of some other datum and is used to either partially define  the denotation of that datum or to provide a means for identifying the datum as a member of the set of data with the same label"@en ;
+                                             rdfs:isDefinedBy "http://purl.obolibrary.org/obo/iao.owl" ;
+                                             rdfs:label "datum label"@en .
+
+
+###  http://purl.obolibrary.org/obo/IAO_0000027
+<http://purl.obolibrary.org/obo/IAO_0000027> rdf:type owl:Class ;
+                                             rdfs:subClassOf <http://purl.obolibrary.org/obo/IAO_0000030> ;
+                                             rdfs:isDefinedBy "http://purl.obolibrary.org/obo/iao.owl" ;
+                                             rdfs:label "data item"@en .
+
+
+###  http://purl.obolibrary.org/obo/IAO_0000030
+<http://purl.obolibrary.org/obo/IAO_0000030> rdf:type owl:Class ;
+                                             rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000031> ;
+                                             rdfs:isDefinedBy "http://purl.obolibrary.org/obo/iao.owl" ;
+                                             rdfs:label "information content entity"@en .
+
+
+###  http://purl.obolibrary.org/obo/IAO_0000032
+<http://purl.obolibrary.org/obo/IAO_0000032> rdf:type owl:Class ;
+                                             rdfs:subClassOf <http://purl.obolibrary.org/obo/IAO_0000109> ,
+                                                             [ rdf:type owl:Restriction ;
+                                                               owl:onProperty <http://purl.obolibrary.org/obo/IAO_0000039> ;
+                                                               owl:someValuesFrom <http://purl.obolibrary.org/obo/IAO_0000032>
+                                                             ] ;
+                                             rdfs:comment "A scalar measurement datum is a measurement datum that is composed of two parts, numerals and a unit label."@en ;
+                                             rdfs:isDefinedBy "http://purl.obolibrary.org/obo/iao.owl" ;
+                                             rdfs:label "scalar measurement datum"@en .
+
+
+###  http://purl.obolibrary.org/obo/IAO_0000109
+<http://purl.obolibrary.org/obo/IAO_0000109> rdf:type owl:Class ;
+                                             rdfs:subClassOf <http://purl.obolibrary.org/obo/IAO_0000027> ;
+                                             rdfs:comment "A measurement datum is an information content entity that is a recording of the output of a measurement such as produced by a device."@en ;
+                                             rdfs:isDefinedBy "http://purl.obolibrary.org/obo/iao.owl" ;
+                                             rdfs:label "measurement datum"@en .
+
+
+###  Generated by the OWL API (version 4.5.25.2023-02-15T19:15:49Z) https://github.com/owlcs/owlapi

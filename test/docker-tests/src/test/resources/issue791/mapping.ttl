@@ -1,0 +1,51 @@
+@prefix isc:  <http://resource.geosciml.org/classifier/ics/ischart/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rr:   <http://www.w3.org/ns/r2rml#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix obo:  <http://purl.obolibrary.org/obo/> .
+
+<Mapping:IAO_0000032_weight>
+    a               rr:TriplesMap ;
+    rr:logicalTable [ a           rr:R2RMLView ;
+                      rr:sqlQuery "select \"id\" from \"weight_measurement\" where \"weight\" is not null" ] ;
+    rr:subjectMap   [ a           rr:SubjectMap, rr:TermMap ;
+                      rr:class    obo:IAO_0000032 ;
+                      rr:template "http://purl.obolibrary.org/obo/IAO_0000032/{\"id\"}" ;
+                      rr:termType rr:IRI ] .
+
+<Mapping:IAO_0000003_kg>
+    a               rr:TriplesMap ;
+    rr:logicalTable [ a           rr:R2RMLView ;
+                      rr:sqlQuery "select 'kg' as \"unit\"" ] ;
+    rr:subjectMap   [ a           rr:SubjectMap, rr:TermMap ;
+                      rr:class    obo:IAO_0000003 ;
+                      rr:template "http://purl.obolibrary.org/obo/IAO_0000003/{\"unit\"}" ;
+                      rr:termType rr:IRI ] .
+
+<Mapping:IAO_0000032_height>
+    a               rr:TriplesMap ;
+    rr:logicalTable [ a           rr:R2RMLView ;
+                      rr:sqlQuery "select \"id\" from \"height_measurement\" where \"height\" is not null" ] ;
+    rr:subjectMap   [ a           rr:SubjectMap, rr:TermMap ;
+                      rr:class    obo:IAO_0000032 ;
+                      rr:template "http://purl.obolibrary.org/obo/IAO_0000032/{\"id\"}" ;
+                      rr:termType rr:IRI ] .
+
+<Mapping:IAO_0000003_height_label>
+    a               rr:TriplesMap ;
+    rr:logicalTable [a           rr:R2RMLView ;
+                     rr:sqlQuery "select \"unit\" from \"height_measurement\" where \"unit\" is not null" ] ;
+    rr:subjectMap   [ a           rr:SubjectMap, rr:TermMap ;
+                      rr:class    obo:IAO_0000003 ;
+                      rr:template "http://purl.obolibrary.org/obo/IAO_0000003/{\"unit\"}" ;
+                      rr:termType rr:IRI ] .
+
+# The following definition should result in a cross-join between IAO_0000032_weight logicalTable's and 'kg' as the label
+<Mapping:IAO_0000032_weight>
+    rr:predicateObjectMap [ rr:predicate obo:IAO_0000039 ;
+                            rr:objectMap [ rr:parentTriplesMap <Mapping:IAO_0000003_kg> ] ] .
+
+# The following definition should result in a cross-join between IAO_0000032_height logicalTable's and IAO_0000003_height_label
+<Mapping:IAO_0000032_height>
+    rr:predicateObjectMap [ rr:predicate obo:IAO_0000039 ;
+                            rr:objectMap [ rr:parentTriplesMap <Mapping:IAO_0000003_height_label> ] ] .

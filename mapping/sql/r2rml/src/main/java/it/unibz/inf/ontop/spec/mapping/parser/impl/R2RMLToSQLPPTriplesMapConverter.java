@@ -197,10 +197,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 		InjectiveSubstitution<Variable> sub, ob;
 		String sourceQuery;
 
-		if (robm.getJoinConditions().isEmpty()) {
-			if (!parent.getLogicalTable().getSQLQuery().trim().equals(tm.getLogicalTable().getSQLQuery().trim()))
-				throw new IllegalArgumentException("No rr:joinCondition, but the two SQL queries are distinct: " +
-						tm.getLogicalTable().getSQLQuery() + " and " + parent.getLogicalTable().getSQLQuery());
+		if (robm.getJoinConditions().isEmpty() && parent.getLogicalTable().getSQLQuery().trim().equals(tm.getLogicalTable().getSQLQuery().trim())) {
 
 			sub = ob = Stream.of(Stream.of(extractedSubject, extractedObject),
 							extractedPredicates.stream(), extractedGraphs.stream())
@@ -215,6 +212,11 @@ public class R2RMLToSQLPPTriplesMapConverter {
 					Stream.of());
 		}
 		else {
+			if (!parent.getLogicalTable().getSQLQuery().trim().equals(tm.getLogicalTable().getSQLQuery().trim()))
+				LOGGER.warn(String.format(
+						"No rr:joinCondition with two SQL queries are distinct will result in cross join: %s and %s",
+						tm.getLogicalTable().getSQLQuery(), parent.getLogicalTable().getSQLQuery()));
+
 			sub = Stream.of(Stream.of(extractedSubject), extractedPredicates.stream(), extractedGraphs.stream())
 					.flatMap(s -> s)
 					.flatMap(ImmutableTerm::getVariableStream)
