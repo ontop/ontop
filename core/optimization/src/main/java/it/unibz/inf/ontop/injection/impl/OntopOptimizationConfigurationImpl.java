@@ -1,9 +1,11 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 
+import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.Properties;
@@ -14,6 +16,10 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
 
     protected OntopOptimizationConfigurationImpl(OntopOptimizationSettings settings, OntopOptimizationOptions options) {
         super(settings, options.getModelOptions());
+    }
+
+    protected OntopOptimizationConfigurationImpl(OntopOptimizationSettings settings, OntopOptimizationOptions options, Supplier<Injector> injectorSupplier) {
+        super(settings, options.getModelOptions(), injectorSupplier);
     }
 
     public static class OntopOptimizationOptions {

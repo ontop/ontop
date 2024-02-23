@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
@@ -8,6 +9,7 @@ import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllSettings;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.OBDASpecification;
+import java.util.function.Supplier;
 import org.apache.commons.rdf.api.Graph;
 
 import javax.annotation.Nonnull;
@@ -27,6 +29,12 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
 
     OntopMappingSQLAllConfigurationImpl(OntopMappingSQLAllSettings settings, OntopMappingSQLAllOptions options) {
         super(settings, options.mappingSQLOptions);
+        this.settings = settings;
+        this.options = options;
+    }
+
+    OntopMappingSQLAllConfigurationImpl(OntopMappingSQLAllSettings settings, OntopMappingSQLAllOptions options, Supplier<Injector> injectorSupplier) {
+        super(settings, options.mappingSQLOptions, injectorSupplier);
         this.settings = settings;
         this.options = options;
     }
