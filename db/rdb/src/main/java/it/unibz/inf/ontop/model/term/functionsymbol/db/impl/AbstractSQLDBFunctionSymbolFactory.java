@@ -1379,10 +1379,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected String serializeCheckAndConvertBoolean(ImmutableList<? extends ImmutableTerm> terms,
                                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
-        return String.format("(CASE WHEN CAST(%1$s AS DECIMAL) = 0 THEN 'false' " +
-                        "WHEN %1$s = '' THEN 'false' " +
-                        "WHEN %1$s = 'NaN' THEN 'false' " +
-                        "ELSE 'true' " +
+        return String.format("(CASE WHEN CAST(%1$s AS DECIMAL) = 0 THEN FALSE " +
+                        "WHEN %1$s = '' THEN FALSE " +
+                        "WHEN %1$s = 'NaN' THEN FALSE " +
+                        "ELSE TRUE " +
                         "END)",
                 term);
     }
@@ -1392,10 +1392,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected String serializeCheckAndConvertBooleanFromString(ImmutableList<? extends ImmutableTerm> terms,
                                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
-        return String.format("CASE WHEN %1$s='1' THEN 'true' " +
-                        "WHEN UPPER(%1$s) LIKE 'TRUE' THEN 'true' " +
-                        "WHEN %1$s='0' THEN 'false' " +
-                        "WHEN UPPER(%1$s) LIKE 'FALSE' THEN 'false' " +
+        return String.format("CASE WHEN %1$s='1' THEN TRUE " +
+                        "WHEN UPPER(%1$s) LIKE 'TRUE' THEN TRUE " +
+                        "WHEN %1$s='0' THEN FALSE " +
+                        "WHEN UPPER(%1$s) LIKE 'FALSE' THEN FALSE " +
                         "ELSE NULL " +
                         "END",
                 term);

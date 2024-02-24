@@ -1036,7 +1036,7 @@ public abstract class AbstractCastFunctionsTest extends AbstractDockerRDF4JTest 
     }
 
     protected ImmutableSet<String> getCastDateTimeFromDate1ExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14 00:00:00\"^^xsd:dateTime");
+        return ImmutableSet.of("\"1999-12-14T00:00:00\"^^xsd:dateTime");
     }
 
     @Test
@@ -1051,7 +1051,7 @@ public abstract class AbstractCastFunctionsTest extends AbstractDockerRDF4JTest 
     }
 
     protected ImmutableSet<String> getCastDateTimeFromDate2ExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14 00:00:00\"^^xsd:dateTime");
+        return ImmutableSet.of("\"1999-12-14T00:00:00\"^^xsd:dateTime");
     }
 
     @Test
@@ -1066,7 +1066,7 @@ public abstract class AbstractCastFunctionsTest extends AbstractDockerRDF4JTest 
     }
 
     protected ImmutableSet<String> getCastDateTimeFromDate3ExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14 01:00:00\"^^xsd:dateTime");
+        return ImmutableSet.of("\"1999-12-14T01:00:00\"^^xsd:dateTime");
     }
 
     @Test
@@ -1081,7 +1081,7 @@ public abstract class AbstractCastFunctionsTest extends AbstractDockerRDF4JTest 
     }
 
     protected ImmutableSet<String> getCastDateTimeFromStringExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14 09:30:00\"^^xsd:dateTime");
+        return ImmutableSet.of("\"1999-12-14T09:30:00\"^^xsd:dateTime");
     }
 
     @Test

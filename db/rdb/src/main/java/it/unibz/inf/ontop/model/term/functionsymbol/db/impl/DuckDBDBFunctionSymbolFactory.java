@@ -296,23 +296,15 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     protected String serializeCheckAndConvertDateTimeFromDate(ImmutableList<? extends ImmutableTerm> terms,
                                                               Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String timestampSerialization = serializeDateTimeNormWithTZ(terms, termConverter, termFactory).replaceAll("%", "%%");
-        // Must add TIMESTAMP to the string input otherwise stfrtime function will not work
-        return String.format("TRY_CAST(" + timestampSerialization.replace("strftime(", "strftime(TIMESTAMP") +
-                        " AS " + TIMESTAMP_WITH_TIME_ZONE_STR + ")",
-                termConverter.apply(terms.get(0)));
+        // The TIMESTAMP clause checks whether input is valid e.g. even if date/month or hour/minute is out of range
+        // CAST to TIMESTAMP is redundant
+        return String.format("TIMESTAMP " + termConverter.apply(terms.get(0)));
     }
 
     @Override
     protected String serializeCheckAndConvertDateTimeFromString(ImmutableList<? extends ImmutableTerm> terms,
                                                                 Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String timestampSerialization = serializeDateTimeNormWithTZ(terms, termConverter, termFactory).replaceAll("%", "%%");
-        // Must add TIMESTAMP to the string input otherwise stfrtime function will not work
-        return String.format("CASE WHEN TRY_CAST(%1$s AS TIMESTAMP WITH TIME ZONE) IS NOT NULL THEN " +
-                        timestampSerialization.replace("strftime(", "strftime(TIMESTAMP")  +
-                        " ELSE NULL " +
-                        "END",
-                termConverter.apply(terms.get(0)));
+        return serializeCheckAndConvertDateTimeFromDate(terms, termConverter, termFactory);
     }
 
     @Override

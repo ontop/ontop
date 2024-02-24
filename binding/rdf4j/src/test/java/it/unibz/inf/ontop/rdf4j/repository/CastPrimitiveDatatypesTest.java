@@ -1596,6 +1596,7 @@ public class CastPrimitiveDatatypesTest extends AbstractRDF4JTest {
     }
 
 
+    @Ignore("Query result retrieves local system timezone")
     @Test
     public void testCastDateTimeFromDate1() {
 
@@ -1612,6 +1613,7 @@ public class CastPrimitiveDatatypesTest extends AbstractRDF4JTest {
     }
 
 
+    @Ignore("Query result retrieves local system timezone")
     @Test
     public void testCastDateTimeFromDate2() {
 
@@ -1665,6 +1667,7 @@ public class CastPrimitiveDatatypesTest extends AbstractRDF4JTest {
     }
 
 
+    @Ignore("Query result retrieves local system timezone")
     @Test
     public void testCastDateTimeFromString2() {
 

@@ -29,7 +29,7 @@ public class CastSparkSQLTest extends AbstractCastFunctionsTest {
 
     @Override
     protected ImmutableSet<String> getCastDateTimeFromDate1ExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14 00:00:00.0\"^^xsd:dateTime");
+        return ImmutableSet.of("\"1999-12-14T00:00:00.000+00:00\"^^xsd:dateTime");
     }
 
     @Override
@@ -76,7 +76,7 @@ public class CastSparkSQLTest extends AbstractCastFunctionsTest {
 
     @Override
     protected ImmutableSet<String> getCastDateTimeFromStringExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14 09:30:00.0\"^^xsd:dateTime");
+        return ImmutableSet.of("\"1999-12-14T09:30:00.000+00:00\"^^xsd:dateTime");
     }
 
     //TODO: Add DateDenormFunctionSymbol for SparkSQL

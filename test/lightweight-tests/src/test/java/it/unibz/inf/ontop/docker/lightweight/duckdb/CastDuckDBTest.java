@@ -80,7 +80,7 @@ public class CastDuckDBTest extends AbstractCastFunctionsTest {
 
     @Override
     protected ImmutableSet<String> getCastDateTimeFromDate1ExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14T00:00Z\"^^xsd:dateTime");
+        return ImmutableSet.of("\"1999-12-14T00:00:00+00:00\"^^xsd:dateTime");
     }
 
     protected ImmutableSet<String> getCastDateTimeFromStringExpectedValues() {

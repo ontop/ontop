@@ -106,7 +106,7 @@ public class CastAthenaTest extends AbstractCastFunctionsTest {
 
     @Override
     protected ImmutableSet<String> getCastDateTimeFromDate1ExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14 00:00:00.000 UTC\"^^xsd:dateTime");
+        return ImmutableSet.of("\"1999-12-14T00:00:00.000Z\"^^xsd:dateTime");
     }
 
     @Override

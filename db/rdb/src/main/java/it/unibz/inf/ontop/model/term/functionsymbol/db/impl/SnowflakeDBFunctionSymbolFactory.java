@@ -163,9 +163,9 @@ public class SnowflakeDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     protected String serializeCheckAndConvertBoolean(ImmutableList<? extends ImmutableTerm> terms,
                                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("(CASE WHEN %s IS NULL THEN NULL " +
-                        "WHEN CAST(%s AS " + NUMBER_38_10_STR + ") = 0 THEN '0' " +
-                        "WHEN %s = '' THEN '0' " +
-                        "ELSE '1' " +
+                        "WHEN CAST(%s AS " + NUMBER_38_10_STR + ") = 0 THEN FALSE " +
+                        "WHEN %s = '' THEN FALSE " +
+                        "ELSE TRUE " +
                         "END)",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(0)),
@@ -175,10 +175,10 @@ public class SnowflakeDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     protected String serializeCheckAndConvertBooleanFromString(ImmutableList<? extends ImmutableTerm> terms,
                                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("CASE WHEN %s='1' THEN 1 " +
-                        "WHEN UPPER(%s) LIKE 'TRUE' THEN 1 " +
-                        "WHEN %s='0' THEN 0 " +
-                        "WHEN UPPER(%s) LIKE 'FALSE' THEN 0 " +
+        return String.format("CASE WHEN %s='1' THEN TRUE " +
+                        "WHEN UPPER(%s) LIKE 'TRUE' THEN TRUE " +
+                        "WHEN %s='0' THEN FALSE " +
+                        "WHEN UPPER(%s) LIKE 'FALSE' THEN FALSE " +
                         "ELSE NULL " +
                         "END",
                 termConverter.apply(terms.get(0)),

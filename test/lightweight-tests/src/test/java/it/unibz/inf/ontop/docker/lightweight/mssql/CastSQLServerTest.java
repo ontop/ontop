@@ -64,47 +64,6 @@ public class CastSQLServerTest extends AbstractCastFunctionsTest {
     }
 
     @Override
-    protected ImmutableSet<String> getCastBooleanFromFloatExpectedValues() {
-        return ImmutableSet.of("\"1\"^^xsd:boolean");
-    }
-
-    @Override
-    protected ImmutableSet<String> getCastBooleanFromDoubleExpectedValues() {
-        return ImmutableSet.of("\"0\"^^xsd:boolean");
-    }
-
-    @Override
-    protected ImmutableMultiset<String> getCastBooleanFromDecimalExpectedValues() {
-        return ImmutableMultiset.of("\"1\"^^xsd:boolean", "\"1\"^^xsd:boolean",
-                "\"1\"^^xsd:boolean", "\"1\"^^xsd:boolean");
-    }
-
-    @Override
-    protected ImmutableSet<String> getCastBooleanFromIntegerExpectedValues() {
-        return ImmutableSet.of("\"1\"^^xsd:boolean");
-    }
-
-    @Override
-    protected ImmutableSet<String> getCastBooleanFromString3ExpectedValues() {
-        return ImmutableSet.of("\"1\"^^xsd:boolean");
-    }
-
-    @Override
-    protected ImmutableSet<String> getCastBooleanFromString4ExpectedValues() {
-        return ImmutableSet.of("\"0\"^^xsd:boolean");
-    }
-
-    @Override
-    protected ImmutableSet<String> getCastDateTimeFromDate1ExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14 00:00:00.0\"^^xsd:dateTime");
-    }
-
-    @Override
-    protected ImmutableSet<String> getCastDateTimeFromDate2ExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14 00:00:00.0\"^^xsd:dateTime");
-    }
-
-    @Override
     @Disabled("Unsupported cast format for SQL Server")
     @Test
     public void testCastDateTimeFromDate3() {
@@ -113,6 +72,6 @@ public class CastSQLServerTest extends AbstractCastFunctionsTest {
 
     @Override
     protected ImmutableSet<String> getCastDateTimeFromStringExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14 09:30:00.0\"^^xsd:dateTime");
+        return ImmutableSet.of("\"1999-12-14T09:30:00\"^^xsd:dateTime");
     }
 }

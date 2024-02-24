@@ -523,10 +523,10 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     protected String serializeCheckAndConvertBoolean(ImmutableList<? extends ImmutableTerm> terms,
                                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
-        return String.format("(CASE WHEN CAST(%1$s AS DECIMAL) = 0 THEN 'false' " +
-                        "WHEN %1$s = '' THEN 'false' " +
-                        "WHEN CAST(%1$s AS DECIMAL) = 'NaN'::NUMERIC THEN 'false' " +
-                        "ELSE 'true' " +
+        return String.format("(CASE WHEN CAST(%1$s AS DECIMAL) = 0 THEN FALSE " +
+                        "WHEN %1$s = '' THEN FALSE " +
+                        "WHEN CAST(%1$s AS DECIMAL) = 'NaN'::NUMERIC THEN FALSE " +
+                        "ELSE TRUE " +
                         "END)",
                 term);
     }

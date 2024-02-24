@@ -90,16 +90,16 @@ public class CastPrestoTest extends AbstractCastFunctionsTest {
 
     @Override
     protected ImmutableSet<String> getCastDateTimeFromDate1ExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14 00:00:00.000 UTC\"^^xsd:dateTime");
+        return ImmutableSet.of("\"1999-12-14T00:00:00.000Z\"^^xsd:dateTime");
     }
 
     @Override
     protected ImmutableSet<String> getCastDateTimeFromDate2ExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14 00:00:00.000 UTC\"^^xsd:dateTime");
+        return ImmutableSet.of("\"1999-12-14T00:00:00.000Z\"^^xsd:dateTime");
     }
 
     @Override
     protected ImmutableSet<String> getCastDateTimeFromDate3ExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14 00:00:00.000 +01:00\"^^xsd:dateTime");
+        return ImmutableSet.of("\"1999-12-14T00:00:00.000+01:00\"^^xsd:dateTime");
     }
 }
