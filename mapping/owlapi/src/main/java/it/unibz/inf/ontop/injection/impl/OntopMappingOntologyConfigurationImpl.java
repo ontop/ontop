@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharStreams;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.OntopMappingOntologyConfiguration;
@@ -14,6 +15,7 @@ import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.spec.ontology.impl.RDFFactImpl;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import java.util.function.Supplier;
 import org.apache.commons.rdf.simple.SimpleRDF;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
@@ -40,6 +42,13 @@ public class OntopMappingOntologyConfigurationImpl extends OntopMappingConfigura
 
     protected OntopMappingOntologyConfigurationImpl(OntopMappingSettings settings, OntopMappingOntologyOptions options) {
         super(settings, options.mappingOptions);
+        this.options = options;
+        this.owlOntology = Optional.empty();
+        this.factsFile = Optional.empty();
+    }
+
+    protected OntopMappingOntologyConfigurationImpl(OntopMappingSettings settings, OntopMappingOntologyOptions options, Supplier<Injector> injectorSupplier) {
+        super(settings, options.mappingOptions, injectorSupplier);
         this.options = options;
         this.owlOntology = Optional.empty();
         this.factsFile = Optional.empty();
