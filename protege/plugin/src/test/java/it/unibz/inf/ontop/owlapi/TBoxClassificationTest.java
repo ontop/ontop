@@ -32,7 +32,9 @@ public class TBoxClassificationTest {
     private final OWLClass B = Class(IRI.create(prefix + "B"));
     private final OWLClass C = Class(IRI.create(prefix + "C"));
     private final OWLClass D = Class(IRI.create(prefix + "D"));
-    
+    private final OWLClass E = Class(IRI.create(prefix + "E"));
+    private final OWLClass F = Class(IRI.create(prefix + "F"));
+    private final OWLClass G = Class(IRI.create(prefix + "G"));
     private final OWLObjectProperty r1 = ObjectProperty(IRI.create(prefix + "r1"));
     private final OWLObjectProperty r2 = ObjectProperty(IRI.create(prefix + "r2"));
 
@@ -104,6 +106,24 @@ public class TBoxClassificationTest {
         assertTrue(subClasses.containsEntity(C));
         assertTrue(subClasses.containsEntity(D));
         assertTrue(subClasses.containsEntity(A));
+        assertTrue(subClasses.containsEntity(OWLNothing())); //Maybe add it to QuestOWL??
+    }
+
+    @Test
+    public void testSubsumptionWithSomeValues1() throws Exception {
+        // A subClassOf (\exists r1)
+        manager.addAxiom(ontology, SubClassOf(A, ObjectSomeValuesFrom(r1, OWLThing())));
+        // (\exists r1) subClassOf B
+        manager.addAxiom(ontology, SubClassOf(ObjectSomeValuesFrom(r1, OWLThing()), B));
+
+        manager.addAxiom(ontology, SubClassOf(D, C));
+        manager.addAxiom(ontology, SubClassOf(C, B));
+
+        startReasoner();
+        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(ObjectSomeValuesFrom(r1, OWLThing()), false);
+        //subClasses.forEach(System.out::println);
+        assertTrue(subClasses.containsEntity(A));
+        assertTrue(subClasses.containsEntity(OWLNothing())); //Maybe add it to QuestOWL??
     }
 
     @Test
@@ -116,5 +136,31 @@ public class TBoxClassificationTest {
         assertTrue(bottomNode.contains(Bottom));
     }
 
+    @Test
+    public void testDisjointClasses() throws Exception {
+        manager.addAxiom(ontology, DisjointClasses(A, B, C));
+        manager.addAxiom(ontology, DisjointClasses(D, E, F));
+        manager.addAxiom(ontology, DisjointClasses(A, G));
 
+
+        startReasoner();
+        NodeSet<OWLClass> disjointClasses = reasoner.getDisjointClasses(A);
+        assertTrue(disjointClasses.containsEntity(B));
+        assertTrue(disjointClasses.containsEntity(C));
+        assertTrue(disjointClasses.containsEntity(G));
+    }
+
+    @Test
+    public void testEquivalentClasses() throws Exception {
+        manager.addAxiom(ontology, EquivalentClasses(A, B, C));
+        manager.addAxiom(ontology, EquivalentClasses(D, E, F));
+        manager.addAxiom(ontology, EquivalentClasses(A, G));
+
+
+        startReasoner();
+        Node<OWLClass> equivalentClasses = reasoner.getEquivalentClasses(A);
+        assertTrue(equivalentClasses.contains(B));
+        assertTrue(equivalentClasses.contains(C));
+        assertTrue(equivalentClasses.contains(G));
+    }
 }
