@@ -92,6 +92,26 @@ public class OntopMaterializeTest {
     }
 
     @Test
+    public void testOntopMaterializeNTriplesZip (){
+        Ontop.main("materialize", "-m", "src/test/resources/books/exampleBooks.obda",
+                "-t", "src/test/resources/books/exampleBooks.owl",
+                "-p", "src/test/resources/books/exampleBooks.properties",
+                "-f", "ntriples",
+                "-o", "src/test/resources/output/exampleBooks-materialized",
+                "--compression", "zip");
+    }
+
+    @Test
+    public void testOntopMaterializeNTriplesGZip(){
+        Ontop.main("materialize", "-m", "src/test/resources/books/exampleBooks.obda",
+                "-t", "src/test/resources/books/exampleBooks.owl",
+                "-p", "src/test/resources/books/exampleBooks.properties",
+                "-f", "ntriples",
+                "-o", "src/test/resources/output/exampleBooks-materialized",
+                "--compression", "gzip");
+    }
+
+    @Test
     public void testOntopMaterializeJsonLD (){
         Ontop.main("materialize", "-m", "src/test/resources/books/exampleBooks.obda",
                 "-t", "src/test/resources/books/exampleBooks.owl",

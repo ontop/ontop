@@ -73,7 +73,7 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
     @AllowedEnumValues(RDFFormatTypes.class)
     public RDFFormatTypes format = RDFFormatTypes.rdfxml;
 
-    @Option(type = OptionType.COMMAND, name = {"-c", "--compression"}, title = "output compression",
+    @Option(type = OptionType.COMMAND, name = {"--compression"}, title = "output compression",
             description = "The compression format of the materialized RDF graph. " +
                     "Default: no compression")
     @AllowedEnumValues(Compression.class)
@@ -238,25 +238,30 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
     private BufferedWriter createWriter(Optional<String> prefixExtension) throws IOException {
         OutputStream outputStream;
         if (outputFile != null) {
-            String basename = removeExtension(outputFile);
+            String prefix = removeExtension(outputFile);
             String suffix = format.getExtension() + compression.getExtension();
-            var fileOutputStream = Files.newOutputStream(prefixExtension
-                            .map(s -> Paths.get(basename, s + suffix))
-                            .orElseGet(() -> Paths.get(basename + suffix)));
-            outputStream = getCompressingOutputStream(fileOutputStream, basename);
+            var path = prefixExtension
+                    .map(s -> Paths.get(prefix, s + suffix))
+                    .orElseGet(() -> Paths.get(prefix + suffix));
+            var fileOutputStream = Files.newOutputStream(path);
+            var fileName = path.getFileName().toString();
+            outputStream = getCompressingOutputStream(fileOutputStream,
+                    compression == Compression.no_compression
+                            ? fileName
+                            : removeExtension(fileName));
         }
         else
-            outputStream = getCompressingOutputStream(System.out, "data");
+            outputStream = getCompressingOutputStream(System.out, "data" + compression.getExtension());
         return new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
     }
 
-    private OutputStream getCompressingOutputStream(OutputStream outputStream, String basename) throws IOException {
+    private OutputStream getCompressingOutputStream(OutputStream outputStream, String fileName) throws IOException {
         switch(compression) {
             case gzip:
                 return new GZIPOutputStream(outputStream);
             case zip:
                 var zipOutputStream = new ZipOutputStream(outputStream);
-                zipOutputStream.putNextEntry(new ZipEntry(basename + format.getExtension()));
+                zipOutputStream.putNextEntry(new ZipEntry(fileName));
                 return zipOutputStream;
             case no_compression:
             default:
