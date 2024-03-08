@@ -17,18 +17,9 @@ import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
 import org.apache.commons.rdf.api.IRI;
 import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.rio.RDFHandler;
-import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
-import org.eclipse.rdf4j.rio.jsonld.JSONLDWriter;
-import org.eclipse.rdf4j.rio.nquads.NQuadsWriter;
-import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
-import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
-import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
-import org.eclipse.rdf4j.rio.trig.TriGWriter;
 
 import javax.annotation.Nullable;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,7 +28,9 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static it.unibz.inf.ontop.injection.OntopSQLCoreSettings.JDBC_URL;
 import static it.unibz.inf.ontop.injection.OntopSQLCredentialSettings.JDBC_PASSWORD;
@@ -73,12 +66,18 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
     //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     private String outputFile;
 
-    @Option(type = OptionType.COMMAND, name = {"-f", "--format"}, title = "outputFormat",
-            description = "The format of the materialized ontology. " +
+    @Option(type = OptionType.COMMAND, name = {"-f", "--format"}, title = "output format",
+            description = "The format of the materialized RDF graph. " +
                     //" Options: rdfxml, turtle. " +
                     "Default: rdfxml")
     @AllowedEnumValues(RDFFormatTypes.class)
     public RDFFormatTypes format = RDFFormatTypes.rdfxml;
+
+    @Option(type = OptionType.COMMAND, name = {"--compression"}, title = "output compression",
+            description = "The compression format of the materialized RDF graph. " +
+                    "Default: no compression")
+    @AllowedEnumValues(Compression.class)
+    public Compression compression = Compression.no_compression;
 
     @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "output to separate files",
             description = "generating separate files for different classes/properties. This is useful for" +
@@ -237,17 +236,37 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
 
     // We need direct access to the writer to close it (cannot be done via the RDFHandler)
     private BufferedWriter createWriter(Optional<String> prefixExtension) throws IOException {
+        OutputStream outputStream;
         if (outputFile != null) {
             String prefix = removeExtension(outputFile);
-            String suffix = format.getExtension();
-            return Files.newBufferedWriter(
-                    prefixExtension
-                            .map(s -> Paths.get(prefix, s + suffix))
-                            .orElseGet(() -> Paths.get(prefix + suffix)),
-                    StandardCharsets.UTF_8
-            );
+            String suffix = format.getExtension() + compression.getExtension();
+            var path = prefixExtension
+                    .map(s -> Paths.get(prefix, s + suffix))
+                    .orElseGet(() -> Paths.get(prefix + suffix));
+            var fileOutputStream = Files.newOutputStream(path);
+            var fileName = path.getFileName().toString();
+            outputStream = getCompressingOutputStream(fileOutputStream,
+                    compression == Compression.no_compression
+                            ? fileName
+                            : removeExtension(fileName));
         }
-        return new BufferedWriter(new OutputStreamWriter(System.out, StandardCharsets.UTF_8));
+        else
+            outputStream = getCompressingOutputStream(System.out, "data" + compression.getExtension());
+        return new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
+    }
+
+    private OutputStream getCompressingOutputStream(OutputStream outputStream, String fileName) throws IOException {
+        switch(compression) {
+            case gzip:
+                return new GZIPOutputStream(outputStream);
+            case zip:
+                var zipOutputStream = new ZipOutputStream(outputStream);
+                zipOutputStream.putNextEntry(new ZipEntry(fileName));
+                return zipOutputStream;
+            case no_compression:
+            default:
+                return outputStream;
+        }
     }
 
     /**
