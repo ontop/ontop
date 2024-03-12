@@ -54,7 +54,7 @@ public class FederationOptimizerTest {
     private static final String hintFile = "src/test/resources/federation/hints.denodo-optmatv.txt";
     private static final String effLabelFile = "src/test/resources/federation/source_efficiency_labels.het.txt";
     private static final boolean optimizationEnabled = true;
-    private static final String sourceFile = "src/test/resources/federation/source_relations.txt";
+    private static final String sourceFile = "src/test/resources/federation/source_relations.het.txt";
 
 
     public OntopSQLOWLAPIConfiguration configuration;

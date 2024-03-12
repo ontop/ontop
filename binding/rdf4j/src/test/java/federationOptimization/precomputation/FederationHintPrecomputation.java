@@ -16,11 +16,13 @@ import net.sf.jsqlparser.util.TablesNamesFinder;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
+import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.sql.*;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 //import net.sf.jsqlparser.statement.Statement;
@@ -39,6 +41,21 @@ public class FederationHintPrecomputation {
             sourceLab.put(arr[0], arr[1]);
         }
         return sourceLab;
+    }
+
+    public Map<String, String> getSourcesOfRelations(String sourceRelationsFile) throws Exception {
+        Map<String, String> sourcesOfRelations = new HashMap<>();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(sourceRelationsFile)))) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                String[] arr = line.split("-");
+                if (arr[1].startsWith("\"")) {
+                    arr[1] = arr[1].substring(1, arr[1].length() - 1);
+                }
+                sourcesOfRelations.put(arr[0], arr[1]);
+            }
+        }
+        return sourcesOfRelations;
     }
 
     public String getIRIFunction(ImmutableTerm it){
@@ -80,16 +97,12 @@ public class FederationHintPrecomputation {
      * @param sourceLab
      * @return
      */
-    public boolean dynamicSourceCheck(List<String> tables, Map<String, String> sourceLab){
+    public boolean dynamicSourceCheck(List<String> tables, Map<String, String> sourceLab, @Nullable Map<String, String> sourceOfRelations){
+        // Original code based on schema component of relation full name
         boolean b = false;
-        for(String t: tables){
-            String source = "";
-            if(t.startsWith("\"")){
-                source = t.substring(1, t.indexOf("."));
-            } else {
-                source = t.substring(0, t.indexOf("."));
-            }
-            if(sourceLab.get(source).equals(SourceLab.DYNAMIC.toString())){
+        for (String t : tables) {
+            String source = getSourceOfRelation(t, sourceOfRelations);
+            if (sourceLab.get(source).equals(SourceLab.DYNAMIC.toString())) {
                 return true;
             }
         }
@@ -136,27 +149,39 @@ public class FederationHintPrecomputation {
      * @return
      */
 
-    public boolean differentSourceCheck(List<String> tables_1, List<String> tables_2){
+    public boolean differentSourceCheck(List<String> tables_1, List<String> tables_2, @Nullable Map<String, String> sourceOfRelations){
         boolean b = true;
         Set<String> sources_1 = new HashSet<String>();
         Set<String> sources_2 = new HashSet<String>();
 
-        for(String t: tables_1){
-            sources_1.add(t.substring(0, t.indexOf(".")));
+        for (String t : tables_1) {
+            // sources_1.add(t.substring(0, t.indexOf(".")));
+            sources_1.add(getSourceOfRelation(t, sourceOfRelations));
         }
 
-        for(String t: tables_2){
-            sources_2.add(t.substring(0, t.indexOf(".")));
+        for (String t : tables_2) {
+            // sources_2.add(t.substring(0, t.indexOf(".")));
+            sources_2.add(getSourceOfRelation(t, sourceOfRelations));
         }
 
-        if( (sources_1.size()>1) || (sources_2.size()>1) ){
+        if ((sources_1.size() > 1) || (sources_2.size() > 1)) {
             return true;
         } else {
-            if(sources_1.equals(sources_2)){
+            if (sources_1.equals(sources_2)) {
                 return false;
             }
         }
         return b;
+    }
+
+    private String getSourceOfRelation(String rel, @Nullable Map<String, String> sourceOfRelations) {
+        if (sourceOfRelations == null) {
+            return rel.substring(rel.startsWith("\"") ? 1 : 0, rel.indexOf("."));
+        } else {
+            int idx = rel.lastIndexOf('.');
+            String relName = idx < 0 ? rel : rel.substring(idx + 1);
+            return Objects.requireNonNull(sourceOfRelations.get(relName));
+        }
     }
 
     public Connection getConnectionOfDB(String DBPropertyFile) throws Exception{
@@ -187,7 +212,7 @@ public class FederationHintPrecomputation {
         Set<String> ans1 = new HashSet<String>();
         Set<String> ans2 = new HashSet<String>();
 
-        ResultSet rs1 = stmt.executeQuery(relation1);
+        ResultSet rs1 = stmt.executeQuery(relation1.replace(" language ", " \"language\" ")); // TODO
         ResultSetMetaData rsmd1 = rs1.getMetaData();
         int column_count1 = rsmd1.getColumnCount();
 
@@ -204,7 +229,7 @@ public class FederationHintPrecomputation {
         rs1.close();
         rs1 = null;
 
-        ResultSet rs2 = stmt.executeQuery(relation2);
+        ResultSet rs2 = stmt.executeQuery(relation2.replace(" language ", " \"language\" ")); // TODO
         ResultSetMetaData rsmd2 = rs2.getMetaData();
         int column_count2 = rsmd2.getColumnCount();
 
@@ -293,7 +318,7 @@ public class FederationHintPrecomputation {
      * @param labFile
      * @return
      */
-    public SourceHints detectCandidateHints(String owlFile, String obdaFile, String propertyFile, String labFile) throws Exception{
+    public SourceHints detectCandidateHints(String owlFile, String obdaFile, String propertyFile, String labFile, @Nullable String sourceRelationFiles) throws Exception{
         long start_time = System.currentTimeMillis();
 
         SourceHints candidateHints = new SourceHints();
@@ -306,6 +331,8 @@ public class FederationHintPrecomputation {
                 .build();
 
         Map<String, String> labOfSources = getLabsOfSources(labFile);
+
+        Map<String, String> sourceOfRelations = sourceRelationFiles == null ? null : getSourcesOfRelations(sourceRelationFiles);
 
         Map<String, Set<AttributeSQL>> classfication_IRIFunction = new HashMap<String, Set<AttributeSQL>>();
 
@@ -378,13 +405,13 @@ public class FederationHintPrecomputation {
             Set<AttributeSQL> set = classfication_IRIFunction.get(IRIFunction);
             for(AttributeSQL as1: set){
                 List<String> tables1 = getTableNamesFromSQL(as1.sourceSQL);
-                if(dynamicSourceCheck(tables1, labOfSources)){
+                if(dynamicSourceCheck(tables1, labOfSources, sourceOfRelations)){
                     continue;
                 }
                 for(AttributeSQL as2: set){
                     List<String> tables2 = getTableNamesFromSQL(as2.sourceSQL);
-                    if(as2.sourceSQL.equals(as1.sourceSQL) || dynamicSourceCheck(tables2, labOfSources)
-                            || !differentSourceCheck(tables1, tables2)){
+                    if(as2.sourceSQL.equals(as1.sourceSQL) || dynamicSourceCheck(tables2, labOfSources, sourceOfRelations)
+                            || !differentSourceCheck(tables1, tables2, sourceOfRelations)){
                         continue;
                     }
                     EmptyFederatedJoin candidate = null;  //下面是为了固定输出，所增加的部分
@@ -408,13 +435,13 @@ public class FederationHintPrecomputation {
         for(String cla: classfication_class.keySet()){
             for(ClassMap cm1: classfication_class.get(cla)){
                 List<String> tables1 = getTableNamesFromSQL(cm1.sourceSQL);
-                if(dynamicSourceCheck(tables1, labOfSources)){
+                if(dynamicSourceCheck(tables1, labOfSources, sourceOfRelations)){
                     continue;
                 }
                 for(ClassMap cm2: classfication_class.get(cla)){
                     List<String> tables2 = getTableNamesFromSQL(cm2.sourceSQL);
-                    if(dynamicSourceCheck(tables2, labOfSources) || cm2.sourceSQL.equals(cm1.sourceSQL) ||
-                            !cm2.IRIFunction.equals(cm1.IRIFunction) || !differentSourceCheck(tables1, tables2)){
+                    if(dynamicSourceCheck(tables2, labOfSources, sourceOfRelations) || cm2.sourceSQL.equals(cm1.sourceSQL) ||
+                            !cm2.IRIFunction.equals(cm1.IRIFunction) || !differentSourceCheck(tables1, tables2, sourceOfRelations)){
                         continue;
                     }
 
@@ -446,14 +473,14 @@ public class FederationHintPrecomputation {
         for(String pro: classfication_property.keySet()){
             for(PropertyMap cm1: classfication_property.get(pro)){
                 List<String> tables1 = getTableNamesFromSQL(cm1.sourceSQL);
-                if(dynamicSourceCheck(tables1, labOfSources)){
+                if(dynamicSourceCheck(tables1, labOfSources, sourceOfRelations)){
                     continue;
                 }
                 for(PropertyMap cm2: classfication_property.get(pro)){
                     List<String> tables2 = getTableNamesFromSQL(cm2.sourceSQL);
-                    if(dynamicSourceCheck(tables2, labOfSources) || cm2.sourceSQL.equals(cm1.sourceSQL)
+                    if(dynamicSourceCheck(tables2, labOfSources, sourceOfRelations) || cm2.sourceSQL.equals(cm1.sourceSQL)
                             ||!cm2.subjectIRIFunction.equals(cm1.subjectIRIFunction) || !cm2.objectIRIFunction.equals(cm1.objectIRIFunction) || !cm2.objectDataType.equals(cm1.objectDataType)
-                            ||!differentSourceCheck(tables1, tables2)){
+                            ||!differentSourceCheck(tables1, tables2, sourceOfRelations)){
                         continue;
                     }
                     String sql1 = "", sql2 = "";
@@ -505,15 +532,19 @@ public class FederationHintPrecomputation {
      * @throws Exception
      */
 
-    public SourceHints computeSourceHints(SourceHints candidateHints, String federationSystemPropertyFile, String matvDBPropertyFile) throws Exception {
+    public SourceHints computeSourceHints(SourceHints candidateHints, String federationSystemPropertyFile, @Nullable String matvDBPropertyFile) throws Exception {
        long start_time = System.currentTimeMillis();
 
         SourceHints computedHints = new SourceHints();
         Connection conn_federation = getConnectionOfDB(federationSystemPropertyFile);
         Statement stmt_federation = conn_federation.createStatement();
 
-        Connection conn_matvDB = getConnectionOfDB(matvDBPropertyFile);
-        Statement stmt_matvDB = conn_matvDB.createStatement();
+        Connection conn_matvDB = null;
+        Statement stmt_matvDB = null;
+        if (matvDBPropertyFile != null) {
+            conn_matvDB = getConnectionOfDB(matvDBPropertyFile);
+            stmt_matvDB = conn_matvDB.createStatement();
+        }
 
         int matv_count = 0;
 
@@ -644,7 +675,9 @@ public class FederationHintPrecomputation {
                         }
                     }
 
-                    materializeData(conn_matvDB,stmt_matvDB, rs,viewName,attributes);
+                    if (matvDBPropertyFile != null) {
+                        materializeData(conn_matvDB, stmt_matvDB, rs, viewName, attributes);
+                    }
 
                     MaterializedView mv = new MaterializedView();
                     mv.table = viewName;
@@ -672,8 +705,10 @@ public class FederationHintPrecomputation {
         printComputedHintsInGeneralForm(computedHints);
         printComputedHintsInTheFormNeedByCurrentImplementation(conn_federation, computedHints);
 
-        stmt_matvDB.close();
-        conn_matvDB.close();
+        if (matvDBPropertyFile != null) {
+            stmt_matvDB.close();
+            conn_matvDB.close();
+        }
         stmt_federation.close();
         conn_federation.close();
 
@@ -924,16 +959,40 @@ public class FederationHintPrecomputation {
     @Test
     public void myTest() throws Exception {
 
+        String setting = "hom";
+
         SourceHints sh = detectCandidateHints("src/test/resources/federation-test/bsbm-ontology.owl",
-                "src/test/resources/federation-test/bsbm-mappings-hom-het.obda",
-                "src/test/resources/federation-test/teiid-local.properties",
-                "src/test/resources/federation-test/SourceLab.txt");
+                "src/test/resources/federation-test/teiid/bsbm-mappings-hom-het.obda",
+                "src/test/resources/federation-test/teiid/system-" + setting + ".properties",
+                "src/test/resources/federation-test/teiid/SourceLab.txt",
+                null);
 
         System.out.println("start computing: ");
 
         SourceHints sh_new = computeSourceHints(sh,
-                "src/test/resources/federation-test/teiid-local.properties",
-                "src/test/resources/federation-test/matvDB-property.txt");
+                "src/test/resources/federation-test/teiid/system-" + setting + ".properties",
+                null); // "src/test/resources/federation-test/matvDB-property.txt");
+
+//        List<String> tables = getTableNamesFromSQL("select nr, label, comment, producer, propertynum1, propertynum2, propertynum3, propertynum4, propertynum5, propertynum6, propertytex1, propertytex2, propertytex3, propertytex4, propertytex5, publisher, propertytex6, publishdate from ss5.product2");
+//        System.out.println(tables);
+    }
+
+    @Test
+    public void myTestWithUpdatedConfig() throws Exception {
+
+        String setting = "hom";
+
+        SourceHints sh = detectCandidateHints("src/test/resources/federation/ontology.owl",
+                "src/test/resources/federation/mappings.fed.teiid.obda",
+                "src/test/resources/federation/system-teiid-" + setting + ".properties",
+                "src/test/resources/federation/source_dynamicity_labels." + setting + ".txt",
+                "src/test/resources/federation/source_relations." + setting + ".txt");
+
+        System.out.println("start computing: ");
+
+        SourceHints sh_new = computeSourceHints(sh,
+                "src/test/resources/federation/system-teiid-" + setting + ".properties",
+                null);
 
 //        List<String> tables = getTableNamesFromSQL("select nr, label, comment, producer, propertynum1, propertynum2, propertynum3, propertynum4, propertynum5, propertynum6, propertytex1, propertytex2, propertytex3, propertytex4, propertytex5, publisher, propertytex6, publishdate from ss5.product2");
 //        System.out.println(tables);

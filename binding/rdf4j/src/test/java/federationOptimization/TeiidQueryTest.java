@@ -131,7 +131,7 @@ public class TeiidQueryTest {
                 null,
                 "src/test/resources/federation/constraints.fed.txt",
                 true,
-                "src/test/resources/federation/source_relations.txt",
+                "src/test/resources/federation/source_relations.hom.txt",
                 "src/test/resources/federation/source_efficiency_labels.hom.txt",
                 "src/test/resources/federation/hints.teiid-opt.txt"
         );

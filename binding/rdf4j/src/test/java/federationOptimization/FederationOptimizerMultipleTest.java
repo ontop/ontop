@@ -292,7 +292,7 @@ public class FederationOptimizerMultipleTest {
         testConfiguration.put("hintFile", "src/test/resources/federation/hints." + federationEngineStr + "-" + federationOptimizationStr + ".txt");
         testConfiguration.put("effLabelFile", "src/test/resources/federation/source_efficiency_labels." + federationSettingStr + ".txt");
         testConfiguration.put("optimizationEnabled", true);
-        testConfiguration.put("sourceFile", "src/test/resources/federation/source_relations.txt");
+        testConfiguration.put("sourceFile", "src/test/resources/federation/source_relations." + federationSettingStr + ".txt");
 
         testConfiguration.put("queries", null);
 
