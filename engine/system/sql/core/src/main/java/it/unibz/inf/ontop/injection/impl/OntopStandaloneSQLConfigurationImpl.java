@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.query.KGQueryFactory;
@@ -13,6 +14,7 @@ import it.unibz.inf.ontop.injection.impl.OntopReformulationSQLConfigurationImpl.
 import it.unibz.inf.ontop.injection.impl.OntopReformulationSQLConfigurationImpl.OntopReformulationSQLOptions;
 
 import java.util.Properties;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 
@@ -26,7 +28,14 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
         super(settings, options.mappingOptions);
         this.settings = settings;
         systemConfiguration = new OntopSystemSQLConfigurationImpl(settings, options.systemOptions,
-                this::loadOBDASpecification);
+                this::loadOBDASpecification, this::getInjector);
+    }
+
+    OntopStandaloneSQLConfigurationImpl(OntopStandaloneSQLSettings settings, OntopStandaloneSQLOptions options, Supplier<Injector> injectorSupplier) {
+        super(settings, options.mappingOptions, injectorSupplier);
+        this.settings = settings;
+        systemConfiguration = new OntopSystemSQLConfigurationImpl(settings, options.systemOptions,
+            this::loadOBDASpecification, injectorSupplier);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
+import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
@@ -35,6 +36,13 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
         this.settings = settings;
         this.options = options;
         this.sqlConfiguration = new OntopSQLCredentialConfigurationImpl(settings, options.sqlOptions, this::getInjector);
+    }
+
+    OntopMappingSQLConfigurationImpl(OntopMappingSQLSettings settings, OntopMappingSQLOptions options, Supplier<Injector> injectorSupplier) {
+        super(settings, options.mappingOptions, injectorSupplier);
+        this.settings = settings;
+        this.options = options;
+        this.sqlConfiguration = new OntopSQLCredentialConfigurationImpl(settings, options.sqlOptions, injectorSupplier);
     }
 
     boolean isInputMappingDefined() {
