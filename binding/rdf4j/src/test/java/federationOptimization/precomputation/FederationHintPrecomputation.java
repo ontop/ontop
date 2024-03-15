@@ -423,6 +423,17 @@ public class FederationHintPrecomputation {
                     }
                     if(!candidateDuplicationCheck(candidate, candidateHints.emptyFJs)){
                         candidateHints.emptyFJs.add(candidate);
+
+                        //extra conditions for filtering out materialized views
+                        String as1n = as1.sourceSQL.replace("\"", "");
+                        String as2n = as2.sourceSQL.replace("\"", "");
+                        if(as1n.contains("s1.reviewc") || as1n.contains("s2.review")||
+                                as1n.contains("s1.producttypeproduct1") || as1n.contains("s5.producttypeproduct2")||
+                                as2n.contains("s1.reviewc") || as2n.contains("s2.review")||
+                                as2n.contains("s1.producttypeproduct1") || as2n.contains("s5.producttypeproduct2")){
+                            continue;
+                        }
+
                         if(as1.position.equals("subject") || as2.position.equals("subject")){
                             candidateHints.FJsForMatV.add(candidate);
                         }
