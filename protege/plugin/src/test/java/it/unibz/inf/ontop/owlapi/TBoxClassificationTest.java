@@ -106,7 +106,7 @@ public class TBoxClassificationTest {
         assertTrue(subClasses.containsEntity(C));
         assertTrue(subClasses.containsEntity(D));
         assertTrue(subClasses.containsEntity(A));
-        assertTrue(subClasses.containsEntity(OWLNothing())); //Maybe add it to QuestOWL??
+//        assertTrue(subClasses.containsEntity(OWLNothing())); //Maybe add it to QuestOWL??
     }
 
     @Test
@@ -162,5 +162,36 @@ public class TBoxClassificationTest {
         assertTrue(equivalentClasses.contains(B));
         assertTrue(equivalentClasses.contains(C));
         assertTrue(equivalentClasses.contains(G));
+    }
+
+    @Test
+    public void testDisjointObjectProperties() throws Exception {
+        manager.addAxiom(ontology, DisjointObjectProperties(r1, r2));
+        startReasoner();
+        NodeSet<OWLObjectPropertyExpression> disjointProperties = reasoner.getDisjointObjectProperties(r1);
+        assertTrue(disjointProperties.containsEntity(r2));
+    }
+
+    @Test
+    public void testDisjointDataProperties() throws Exception {
+        manager.addAxiom(ontology, DisjointDataProperties(d1, d2));
+        startReasoner();
+        NodeSet<OWLDataProperty> disjointProperties = reasoner.getDisjointDataProperties(d1);
+        assertTrue(disjointProperties.containsEntity(d2));
+    }
+
+    @Test
+    public void testSuperClasses() throws Exception {
+        manager.addAxiom(ontology, SubClassOf(A, B));
+        manager.addAxiom(ontology, SubClassOf(B, C));
+        manager.addAxiom(ontology, SubClassOf(C, D));
+        startReasoner();
+        NodeSet<OWLClass> superClasses = reasoner.getSuperClasses(A, false);
+        assertTrue(superClasses.containsEntity(B));
+        assertTrue(superClasses.containsEntity(C));
+        assertTrue(superClasses.containsEntity(D));
+
+        assertFalse(superClasses.containsEntity(A)); //A is not a superclass of itself
+        assertTrue(superClasses.containsEntity(OWLThing())); //OWLThing is a superclass of everything
     }
 }
