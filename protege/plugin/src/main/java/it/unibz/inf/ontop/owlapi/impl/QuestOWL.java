@@ -79,8 +79,8 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	 * Used to handle conversion to and from OWL API and Internal APIs in order to
 	 * support reasoning capabilities via the classifiedTBox.
 	 * */
-	private final OWLOntologyManager owlOntologyManager = OWLManager.createOWLOntologyManager();;
-	private final OWLDataFactory owlDataFactory = owlOntologyManager.getOWLDataFactory();
+	private final OWLOntologyManager owlOntologyManager = getRootOntology().getOWLOntologyManager();
+	private final OWLDataFactory owlDataFactory = getOWLDataFactory();
 	private final RDF rdfFactory = new RDF4J();
 
 	/**
