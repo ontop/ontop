@@ -223,9 +223,6 @@ public interface TermFactory {
 	 */
 	Optional<DBConstant> getDoubleNaN();
 
-	/**
-	 * TODO: explain
-	 */
 	DBConstant getProvenanceSpecialConstant();
 
 	/**
@@ -515,10 +512,6 @@ public interface TermFactory {
 	 */
 	<T extends ImmutableTerm> Substitution<T> getSubstitution(ImmutableMap<Variable, T> map);
 
-	/**
-	 * TODO: find a better name
-	 *
-	 */
 	ImmutableFunctionalTerm getBinaryNumericLexicalFunctionalTerm(String dbNumericOperationName,
 																  ImmutableTerm lexicalTerm1,
 																  ImmutableTerm lexicalTerm2,
@@ -566,7 +559,13 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBMinutes(ImmutableTerm dbDatetimeTerm);
 	ImmutableFunctionalTerm getDBSeconds(ImmutableTerm dbDatetimeTerm);
 	ImmutableFunctionalTerm getDBTz(ImmutableTerm dbDatetimeTerm);
-	ImmutableFunctionalTerm getDBNow();
+
+    ImmutableFunctionalTerm getDBNow();
+//TODO
+// Add ImmutableFunctionalTerm for each new raster functions -------------------[STEP 05]--------------------
+	ImmutableFunctionalTerm getRasterMetadata(ImmutableTerm dbrasterID, ImmutableTerm dbRasterName);
+	ImmutableFunctionalTerm getRasterSpatialAverage(ImmutableTerm dbRasterName, ImmutableTerm dbRegionGeom, ImmutableTerm TimeSnap, ImmutableTerm ScaleFactor);
+	ImmutableFunctionalTerm getClipRaster(ImmutableTerm dbRasterName, ImmutableTerm dbRegionGeom, ImmutableTerm TimeSnap);
 
 	ImmutableFunctionalTerm getDBRowUniqueStr();
 

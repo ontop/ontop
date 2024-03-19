@@ -250,7 +250,12 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBSeconds();
     DBFunctionSymbol getDBTz();
     DBFunctionSymbol getDBNow();
-
+    //TODO
+    // Add DBFunctionSymbol
+    // ---------------------------[STEP 06]--------------------------------------
+    DBFunctionSymbol getRasterSpatialAverage();
+    DBFunctionSymbol getRasterMetadata();
+    DBFunctionSymbol getClipRaster();
     DBFunctionSymbol getExtractFunctionSymbol(String component);
     DBFunctionSymbol getCurrentDateTimeSymbol(String type);
 
@@ -330,7 +335,7 @@ public interface DBFunctionSymbolFactory {
      *
      * For instance DB_IDX(1, "roger", "francis", "ernest") returns "francis"
      *
-     * TODO: find a better name
+     *
      *
      */
     DBFunctionSymbol getDBIntIndex(int nbValues);

@@ -10,6 +10,7 @@ import java.sql.SQLException;
 public class RasDaManConnectionCheckTest extends AbstractDockerRDF4JTest {
     private static final String PROPERTIES_FILE = "/rasdaman/rasdaman.properties";
     private static final String OBDA_FILE = "/rasdaman/rasdamanConn.obda";
+
 //  private static final String LENS_FILE = "/nested/postgresql/nested-lenses-array.json";
     private static final String OWL_FILE = "/rasdaman/rasdaman.owl";
 
@@ -36,7 +37,7 @@ public class RasDaManConnectionCheckTest extends AbstractDockerRDF4JTest {
 
         String query1 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
                 + "SELECT * {\n"
-                + "?x rdfs:label ?v .\n"
+                + "?x hasConnection ?v .\n"
                 + "}\n";
 
             executeAndCompareValues(query1, ImmutableList.of("\"RasDaMan is connected\"^^xsd:string"));

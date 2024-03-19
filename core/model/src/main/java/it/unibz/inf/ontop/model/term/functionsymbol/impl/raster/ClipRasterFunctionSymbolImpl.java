@@ -3,20 +3,17 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl.raster;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-public class RasterAverageFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl {
+public class ClipRasterFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl {
+    //    protected final FunctionSymbolFactory functionSymbolFactory;
 
-//    protected final FunctionSymbolFactory functionSymbolFactory;
-
-    public RasterAverageFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType, RDFDatatype xsdIntegerDatatype, RDFDatatype xsdDoubleType) {
-        super("RAS_SPATIAL_AVERAGE", functionIRI, ImmutableList.of(xsdStringDatatype, wktLiteralType, xsdIntegerDatatype, xsdDoubleType),
-                xsdDoubleType);
+    public ClipRasterFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType, RDFDatatype xsdIntegerDatatype) {
+        super("RAS_CLIP_RASTER_SPATIAL", functionIRI, ImmutableList.of(xsdStringDatatype, wktLiteralType, xsdIntegerDatatype), xsdStringDatatype);
         //this.functionSymbolFactory = functionSymbolFactory;
     }
 
@@ -29,9 +26,8 @@ public class RasterAverageFunctionSymbolImpl extends AbstractRasterFunctionSymbo
         // return termFactory.getRESPECTIVEDBFUNCTIONSymbols;  --------------------------------[STEP 04b]-----------------------------------
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
-        return termFactory.getRasterSpatialAverage(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2), subLexicalTerms.get(3));
+        return termFactory.getClipRaster(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2));
 //        return null;
 
     }
-
 }

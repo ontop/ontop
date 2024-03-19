@@ -19,9 +19,9 @@ mappingId	mapping_region_name
 target		:region/{gid} rdfs:label {region_name}^^xsd:string .
 source		select gid, name_2 as region_name from region_bavaria;
 
-mappingId	mapping_region_geom
-target		:region/{gid} geo:asWKT {geom}^^geo:wktLiteral .
-source		select gid, geom from region_bavaria;
+mappingId	mapping_region_geometry
+target		:region/{gid} geo:asWKT {geometry}^^geo:wktLiteral .
+source		select gid, st_astext((st_dump(geom)).geom) as geometry from region_bavaria
 
 mappingId	mapping_rastername
 target		:raster/{raster_id} rasdb:hasRasterName {raster_name}^^xsd:string .
@@ -31,9 +31,13 @@ mappingId	mapping_datetime
 target		:raster/{raster_id} rasdb:hasStartTime {dom_lower_bound}^^xsd:integer ; rasdb:hasEndTime {dom_upper_bound}^^xsd:integer .
 source		select raster_id, dom_lower_bound, dom_upper_bound from petascopedb01;
 
-mappingId	averageRASTER
-target		:{gid} :averageRASTER {output}^^xsd:double .
-source		SELECT  m.gid AS gid, rasdaman_op.query2numeric(CONCAT('select avg_cells(clip((c[100, 0:* , 0:*]*0.02) - 273.15,',rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(m.geom)).geom)),')) from Baveria_Temperature_MODIS_1km AS c')) AS output
+mappingId	mapping_scale_factor
+target		:raster/{raster_id} rasdb:hasScaleFactor {scale_factor}^^xsd:integer .
+source		select raster_id, scale_factor from petascopedb01;
+
+mappingId	mapping_averageRASTER
+target		:{gid} :averageRASTER {avg_temp}^^xsd:double .
+source		SELECT  m.gid AS gid, rasdaman_op.query2numeric(CONCAT('select avg_cells(clip((c[100, 0:* , 0:*]*0.02) - 273.15,',rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(m.geom)).geom)),')) from Baveria_Temperature_MODIS_1km AS c')) AS avg_temp
 			FROM    region_bavaria as m
 			WHERE   m.name_2 = 'Deggendorf'
 ]]

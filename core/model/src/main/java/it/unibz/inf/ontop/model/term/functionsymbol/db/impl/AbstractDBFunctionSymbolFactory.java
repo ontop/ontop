@@ -164,6 +164,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBFunctionSymbol checkAndConvertDateTimeFromStringFunctionSymbol;
     private DBFunctionSymbol checkAndConvertDateFromDateTimeFunctionSymbol;
     private DBFunctionSymbol checkAndConvertDateFromStringFunctionSymbol;
+    //TODO
+    // Add Raster Function DB Symbol
+    // ------------------------------------[STEP 03]-----------------------------------
+    private DBFunctionSymbol getRasterSpatialAverageFunctionSymbol;
+    private DBFunctionSymbol getRasterMetadataFunctionSymbol;
+    private DBFunctionSymbol getClipRasterFunctionSymbol;
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
@@ -485,9 +491,15 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         secondsBetweenFromDateTimeFunctionSymbol = createSecondsBetweenFromDateTimeFunctionSymbol();
         millisBetweenFromDateTimeFunctionSymbol = createMillisBetweenFromDateTimeFunctionSymbol();
 
+        //TODO
+        // Add Raster Function Symbol
+        // ------------------------------------[STEP 03a]-----------------------------------
+        getRasterSpatialAverageFunctionSymbol = createRasterSpatialAverageFunctionSymbol();
+        getRasterMetadataFunctionSymbol = createRasterMetadataFunctionSymbol();
+        getClipRasterFunctionSymbol = createClipRasterFunctionSymbol();
+
         nonDistinctGroupConcat = createDBGroupConcat(dbStringType, false);
         distinctGroupConcat = createDBGroupConcat(dbStringType, true);
-
         rowUniqueStrFct = createDBRowUniqueStr();
         rowNumberFct = createDBRowNumber();
         rowNumberWithOrderByFct = createDBRowNumberWithOrderBy();
@@ -1245,7 +1257,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBFunctionSymbol getDBIntIndex(int nbValues) {
-        // TODO: cache it
         return new DBIntIndexFunctionSymbolImpl(dbIntegerType, rootDBType, nbValues);
     }
 
@@ -1331,6 +1342,15 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBFunctionSymbol checkAndConvertDateFromString() { return checkAndConvertDateFromStringFunctionSymbol; }
+
+    //TODO
+    // Add Raster DBFunction Symbol
+    // ------------------------------------[STEP 03b]-----------------------------------
+    public DBFunctionSymbol getRasterSpatialAverage(){return getRasterSpatialAverageFunctionSymbol;}
+
+    public DBFunctionSymbol getRasterMetadata(){return getRasterMetadataFunctionSymbol;}
+
+    public DBFunctionSymbol getClipRaster(){return getClipRasterFunctionSymbol;}
 
     @Override
     public DBFunctionSymbol getDBArrayAccess() {
@@ -1871,9 +1891,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return new DBFunctionSymbolWithSerializerImpl("DB_SECOND_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
                 this::serializeSecondsBetween);
     }
-//TODO
-// create averageRASTER DBFunctionSymbol
-// create a custom serializer
+
     protected DBFunctionSymbol createMillisBetweenFromDateTimeFunctionSymbol() {
         return new DBFunctionSymbolWithSerializerImpl("DB_MILLIS_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
                 this::serializeMillisBetween);
@@ -1894,6 +1912,40 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected DBBooleanFunctionSymbol createJsonIsScalar(DBTermType dbType) {
         throw new UnsupportedOperationException("Unsupported JSON-like datatype: " + dbType.getName());
     }
+
+    /**
+     * Raster Function Extension
+     */
+//TODO
+// create RasterSpatialAverage DBFunctionSymbol
+// ---------------------------------------[STEP 03c]---------------------------------
+    protected DBFunctionSymbol createRasterMetadataFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_METADATA", ImmutableList.of(dbIntegerType, dbStringType), dbStringType, false,
+                this::serializeRAS_GET_META);
+    }
+    protected DBFunctionSymbol createRasterSpatialAverageFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_AVERAGE", ImmutableList.of(dbDoubleType, rootDBType, dbIntegerType, dbDoubleType), dbDoubleType, false,
+                this::serializeRAS_SPATIAL_AVERAGE);
+    }
+
+    protected DBFunctionSymbol createClipRasterFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_CLIP_RASTER_SPATIAL", ImmutableList.of(dbStringType, rootDBType, dbIntegerType), dbStringType, false,
+                this::serializeRAS_CLIP_RASTER_SPATIAL);
+    }
+    //TODO
+    // create a custom serializer like serializeRAS_GET_META
+    // ---------------------------------------[STEP 03d]------------------------------
+    protected abstract String serializeRAS_GET_META(ImmutableList<? extends ImmutableTerm> terms,
+                                                           Function<ImmutableTerm, String> termConverter,
+                                                           TermFactory termFactory);
+    protected abstract String serializeRAS_SPATIAL_AVERAGE(ImmutableList<? extends ImmutableTerm> terms,
+                                                           Function<ImmutableTerm, String> termConverter,
+                                                           TermFactory termFactory);
+
+    protected abstract String serializeRAS_CLIP_RASTER_SPATIAL(ImmutableList<? extends ImmutableTerm> terms,
+                                                           Function<ImmutableTerm, String> termConverter,
+                                                           TermFactory termFactory);
+
 
     /**
      * SPARQL XSD cast functions

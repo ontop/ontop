@@ -12,10 +12,12 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.ofn.OfnMultitypedInputBinarySPARQLFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.ofn.OfnSimpleBinarySPARQLFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterAverageFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMetadataFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.ClipRasterFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.*;
 import org.apache.commons.rdf.api.IRI;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -324,11 +326,25 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new GeofUnionFunctionSymbolImpl(GEOF.UNION, wktLiteral, iriType),
                 new GeofRelateFunctionSymbolImpl(GEOF.RELATE, wktLiteral, xsdString, xsdBoolean),
                 new GeofRelateMFunctionSymbolImpl(GEOF.RELATEM, wktLiteral, xsdString),
+
+                /*
+                 * Raster Functions
+                 */
+
                 //TODO
                 // Add raster function e.g. averageRASTER()
                 // 1. Vocabulary IRI
                 // 2. RDF Input types
                 // 3. Output types
+                // --------------------------------------------[STEP 02]--------------------------------------------
+
+                new RasterMetadataFunctionSymbolImpl(RASDB.RAS_GET_META, xsdInteger, xsdString),
+
+                new RasterAverageFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE, xsdString, wktLiteral, xsdInteger, xsdDouble),
+
+                new ClipRasterFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL, xsdString, wktLiteral, xsdInteger),
+
+
                 /*
                  * Time extension - duration arithmetic
                  */
