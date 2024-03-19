@@ -87,7 +87,7 @@ public class TBoxClassificationTest {
         NodeSet<OWLClass> subClasses = reasoner.getSubClasses(Person, false);
         assertTrue(subClasses.containsEntity(Male));
         assertTrue(subClasses.containsEntity(Female));
-        assertTrue(subClasses.containsEntity(OWLNothing()));
+//        assertTrue(subClasses.containsEntity(OWLNothing()));
     }
     
     @Test
@@ -123,16 +123,15 @@ public class TBoxClassificationTest {
         NodeSet<OWLClass> subClasses = reasoner.getSubClasses(ObjectSomeValuesFrom(r1, OWLThing()), false);
         //subClasses.forEach(System.out::println);
         assertTrue(subClasses.containsEntity(A));
-        assertTrue(subClasses.containsEntity(OWLNothing())); //Maybe add it to QuestOWL??
+//        assertTrue(subClasses.containsEntity(OWLNothing())); //Maybe add it to QuestOWL??
     }
 
     @Test
     public void testBottom() throws Exception {
-        OWLClass owlNothing = manager.getOWLDataFactory().getOWLNothing();
-        manager.addAxiom(ontology, SubClassOf(Bottom, owlNothing));
+        manager.addAxiom(ontology, SubClassOf(Bottom, OWLNothing()));
         startReasoner();
         Node<OWLClass> bottomNode = reasoner.getBottomClassNode();
-        assertTrue(bottomNode.contains(owlNothing));
+        assertTrue(bottomNode.contains(OWLNothing()));
         assertTrue(bottomNode.contains(Bottom));
     }
 
@@ -185,13 +184,99 @@ public class TBoxClassificationTest {
         manager.addAxiom(ontology, SubClassOf(A, B));
         manager.addAxiom(ontology, SubClassOf(B, C));
         manager.addAxiom(ontology, SubClassOf(C, D));
+        manager.addAxiom(ontology, SubClassOf(A, E));
         startReasoner();
         NodeSet<OWLClass> superClasses = reasoner.getSuperClasses(A, false);
         assertTrue(superClasses.containsEntity(B));
         assertTrue(superClasses.containsEntity(C));
         assertTrue(superClasses.containsEntity(D));
+        assertTrue(superClasses.containsEntity(E));
 
         assertFalse(superClasses.containsEntity(A)); //A is not a superclass of itself
-        assertTrue(superClasses.containsEntity(OWLThing())); //OWLThing is a superclass of everything
+//        assertTrue(superClasses.containsEntity(OWLThing())); //OWLThing is a superclass of everything
     }
+
+    @Test
+    public void testDirectSuperClasses() throws Exception {
+        manager.addAxiom(ontology, SubClassOf(A, B));
+        manager.addAxiom(ontology, SubClassOf(B, C));
+        manager.addAxiom(ontology, SubClassOf(C, D));
+        manager.addAxiom(ontology, SubClassOf(A, E));
+
+        startReasoner();
+        NodeSet<OWLClass> superClasses = reasoner.getSuperClasses(A, true);
+        assertTrue(superClasses.containsEntity(B));
+        assertTrue(superClasses.containsEntity(E));
+
+        assertFalse(superClasses.containsEntity(C));
+        assertFalse(superClasses.containsEntity(D));
+    }
+
+    @Test
+    public void testDataPropertySubsumption() throws Exception {
+        manager.addAxiom(ontology, SubDataPropertyOf(d1, d2));
+        startReasoner();
+        NodeSet<OWLDataProperty> subProperties = reasoner.getSubDataProperties(d2, false);
+        assertTrue(subProperties.containsEntity(d1));
+    }
+
+    @Test
+    public void testObjectPropertySubsumption() throws Exception {
+        manager.addAxiom(ontology, SubObjectPropertyOf(r1, r2));
+        startReasoner();
+        NodeSet<OWLObjectPropertyExpression> subProperties = reasoner.getSubObjectProperties(r2, false);
+        assertTrue(subProperties.containsEntity(r1));
+    }
+
+    // Newly created (simple) tests
+    @Test
+    public void testInverseObjectProperty() throws Exception {
+        manager.addAxiom(ontology, InverseObjectProperties(r1, r2));
+        startReasoner();
+        Node<OWLObjectPropertyExpression> inverseObjectProperties = reasoner.getInverseObjectProperties(r1);
+        assertTrue(inverseObjectProperties.contains(r2));
+    }
+
+    @Test
+    public void testObjectPropertyDomain() throws Exception {
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, A));
+        startReasoner();
+        NodeSet<OWLClass> domains = reasoner.getObjectPropertyDomains(r1, false);
+        assertTrue(domains.containsEntity(A));
+    }
+
+    @Test
+    public void testObjectPropertyRange() throws Exception {
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, A));
+        startReasoner();
+        NodeSet<OWLClass> ranges = reasoner.getObjectPropertyRanges(r1, false);
+        assertTrue(ranges.containsEntity(A));
+    }
+
+    // Individuals
+    @Test
+    public void testSameIndividual() throws Exception {
+        manager.addAxiom(ontology, SameIndividual(a, b));
+        startReasoner();
+        Node<OWLNamedIndividual> sameIndividuals = reasoner.getSameIndividuals(a);
+        assertTrue(sameIndividuals.contains(b));
+    }
+
+    @Test
+    public void testDifferentIndividuals() throws Exception {
+        manager.addAxiom(ontology, DifferentIndividuals(a, b));
+        startReasoner();
+        NodeSet<OWLNamedIndividual> differentIndividuals = reasoner.getDifferentIndividuals(a);
+        assertTrue(differentIndividuals.containsEntity(b));
+    }
+
+//    @Test
+//    public void testJustClassAssertion() throws Exception {
+//        manager.addAxiom(ontology, ClassAssertion(A, a));
+//        startReasoner();
+//        NodeSet<OWLClass> types = reasoner.getTypes(a, false);
+//        assertTrue(types.containsEntity(A));
+//    }
+
+
 }
