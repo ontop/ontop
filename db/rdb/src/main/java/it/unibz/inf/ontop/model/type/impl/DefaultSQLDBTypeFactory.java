@@ -56,6 +56,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     public static final String DATE_STR = "DATE";
     public static final String TIME_STR = "TIME";
     public static final String TIMESTAMP_STR = "TIMESTAMP";
+    public static final String TIMESTAMP_WITH_TIME_ZONE_STR = "TIMESTAMP WITH TIME ZONE";
     public static final String BINARY_STR = "BINARY";
     public static final String BINARY_VAR_STR = "BINARY VARYING";
     public static final String VARBINARY_STR = "VARBINARY";
@@ -157,7 +158,9 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new BooleanDBTermType(BOOLEAN_STR, rootTermType.getAncestry(), xsdBoolean),
                     new DateDBTermType(DATE_STR, rootAncestry, typeFactory.getDatatype(XSD.DATE)),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME)),
-                    new DatetimeDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype())
+                    new DatetimeDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype()),
+                    // TODO: shall we map it to xsd.datetimeStamp ? (would not follow strictly R2RML but be more precise)
+                    new DatetimeDBTermType(TIMESTAMP_WITH_TIME_ZONE_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype())
                 )
                 .collect(Collectors.toMap(
                         DBTermType::getName,

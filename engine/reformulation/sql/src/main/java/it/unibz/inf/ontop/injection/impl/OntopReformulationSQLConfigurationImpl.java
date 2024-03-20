@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLConfiguration;
@@ -7,6 +8,7 @@ import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.DefaultOntopSQLCoreBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.OntopSQLCoreOptions;
 
+import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -23,7 +25,7 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
                                            SpecificationLoader specificationLoader) {
         super(settings, options.reformulationOptions, specificationLoader);
         this.settings = settings;
-        this.sqlConfiguration = new OntopSQLCoreConfigurationImpl(settings, options.sqlOptions);
+        this.sqlConfiguration = new OntopSQLCoreConfigurationImpl(settings, options.sqlOptions, this::getInjector);
     }
 
     /**
@@ -33,7 +35,22 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
                                            OntopReformulationSQLOptions options) {
         super(settings, options.reformulationOptions);
         this.settings = settings;
-        this.sqlConfiguration = new OntopSQLCoreConfigurationImpl(settings, options.sqlOptions);
+        this.sqlConfiguration = new OntopSQLCoreConfigurationImpl(settings, options.sqlOptions, this::getInjector);
+    }
+
+    OntopReformulationSQLConfigurationImpl(OntopReformulationSQLSettings settings,
+        OntopReformulationSQLOptions options,
+        SpecificationLoader specificationLoader,
+        Supplier<Injector> injectorSupplier) {
+        super(settings, options.reformulationOptions, specificationLoader, injectorSupplier);
+        this.settings = settings;
+        this.sqlConfiguration = new OntopSQLCoreConfigurationImpl(settings, options.sqlOptions, injectorSupplier);
+    }
+
+    OntopReformulationSQLConfigurationImpl(OntopReformulationSQLSettings settings, OntopReformulationSQLOptions options, Supplier<Injector> injectorSupplier) {
+      super(settings, options.reformulationOptions, injectorSupplier);
+      this.settings = settings;
+      this.sqlConfiguration = new OntopSQLCoreConfigurationImpl(settings, options.sqlOptions, injectorSupplier);
     }
 
     @Override

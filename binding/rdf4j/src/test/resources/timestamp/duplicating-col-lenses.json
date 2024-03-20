@@ -1,0 +1,23 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"", "\"professors\""],
+      "baseRelation": ["professors"],
+      "columns": {
+        "added": [
+          {
+            "name": "dup_birthday_without_timezone",
+            "expression": "birthday_without_timezone"
+          },
+          {
+            "name": "double_upper_first_name",
+            "expression": "concat(ucase(first_name), ucase(first_name))"
+          }
+        ],
+        "hidden": [
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}

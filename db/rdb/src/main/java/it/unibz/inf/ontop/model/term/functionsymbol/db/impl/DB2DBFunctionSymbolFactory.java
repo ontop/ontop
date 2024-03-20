@@ -93,8 +93,8 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
      * TODO: handle the timezone!
      */
     @Override
-    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
-                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+    protected String serializeDateTimeNormWithTZ(ImmutableList<? extends ImmutableTerm> terms,
+                                                 Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("REPLACE(VARCHAR_FORMAT(%s,'YYYY-MM-DD HH24:MI:SS.FF'),' ','T')",
                 termConverter.apply(terms.get(0)));
     }

@@ -9,6 +9,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.type.impl.DateDBTermType;
+import it.unibz.inf.ontop.model.type.impl.DatetimeDBTermType;
 
 import java.util.Map;
 import java.util.Optional;
@@ -813,16 +815,31 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType) {
+        DBFunctionSymbolSerializer serializer = (dbDateTimestampType instanceof DatetimeDBTermType)
+                && ((DatetimeDBTermType) dbDateTimestampType).hasTimeZone()
+                .filter(b -> !b)
+                .isPresent()
+                ? this::serializeDateTimeNormNoTZ
+                : this::serializeDateTimeNormWithTZ;
+
         // TODO: check if it is safe to allow the decomposition
         return new DecomposeStrictEqualitySQLTimestampISONormFunctionSymbol(
                 dbDateTimestampType,
                 dbStringType,
-                this::serializeDateTimeNorm);
+                serializer);
+    }
+
+    /**
+     * TODO: make it abstract
+     */
+    protected String serializeDateTimeNormNoTZ(ImmutableList<? extends ImmutableTerm> terms,
+                                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializeDateTimeNormWithTZ(terms, termConverter, termFactory);
     }
 
 
-    protected abstract String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
-                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory);
+    protected abstract String serializeDateTimeNormWithTZ(ImmutableList<? extends ImmutableTerm> terms,
+                                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory);
 
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {

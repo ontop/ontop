@@ -26,8 +26,9 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String FLOAT4_STR = "FLOAT4";
     protected static final String FLOAT8_STR = "FLOAT8";
     protected static final String BPCHAR_STR = "BPCHAR";
-    public static final String TIMESTAMPTZ_STR = "TIMESTAMP WITH TIME ZONE";
     public static final String TIMETZ_STR = "TIME WITH TIME ZONE";
+    public static final String TIMESTAMP_MS_STR = "TIMESTAMP_MS";
+    public static final String TIMESTAMP_S_STR = "TIMESTAMP_S";
     public static final String BOOL_STR = "BOOL";
     public static final String UUID_STR = "UUID";
     public static final String JSON_STR = "JSON";
@@ -67,10 +68,6 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         StringDBTermType bpCharType = new StringDBTermType(BPCHAR_STR, rootAncestry, xsdString);
 
-        // TODO: shall we map it to xsd.datetimeStamp ? (would not follow strictly R2RML but be more precise)
-        DatetimeDBTermType timestampTz = new DatetimeDBTermType(TIMESTAMPTZ_STR, rootTermType.getAncestry(),
-                typeFactory.getXsdDatetimeDatatype());
-
         DBTermType timeTzType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIMETZ_STR, rootAncestry,
                 typeFactory.getDatatype(XSD.TIME), NOTHING);
 
@@ -89,6 +86,14 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
         NumberDBTermType defaultDecimalType = new NumberDBTermType(DEFAULT_DECIMAL_STR, rootAncestry,
                 typeFactory.getXsdDecimalDatatype(), DECIMAL);
 
+
+        DBTermType timestampMs = new DatetimeDBTermType(TIMESTAMP_MS_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype(), false);
+        DBTermType timestampS = new DatetimeDBTermType(TIMESTAMP_S_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype(), false);
+
+        // Overrides the default definition of timestamp (temporary)
+        DBTermType timestamp = new DatetimeDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype(), false);
+
+
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(INT2_STR, map.get(SMALLINT_STR));
         map.put(INT4_STR, map.get(INTEGER_STR));
@@ -100,12 +105,14 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(STRING_STR, stringType);
 
         map.put(BPCHAR_STR, bpCharType);
-        map.put(TIMESTAMPTZ_STR, timestampTz);
         map.put(TIMETZ_STR, timeTzType);
         map.put(DATE_STR, dateType);
         map.put(BOOL_STR, map.get(BOOLEAN_STR));
         map.put(UUID_STR, uuidType);
         map.put(BYTEA_STR, byteAType);
+        map.put(TIMESTAMP_MS_STR, timestampMs);
+        map.put(TIMESTAMP_S_STR, timestampS);
+        map.put(TIMESTAMP_STR, timestamp);
 
         /*
          * JSON
@@ -118,7 +125,7 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static ImmutableMap<DefaultTypeCode, String> createDuckDBCodeMap() {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
         map.put(DefaultTypeCode.DOUBLE, DOUBLE_PREC_STR);
-        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMPTZ_STR);
+        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMP_WITH_TIME_ZONE_STR);
         map.put(DefaultTypeCode.HEXBINARY, BYTEA_STR);
         map.put(DefaultTypeCode.STRING, VARCHAR_STR);
         map.put(DefaultTypeCode.JSON, JSON_STR);

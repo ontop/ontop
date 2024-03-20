@@ -4,14 +4,29 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeAncestry;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class DatetimeDBTermType extends DBTermTypeImpl {
     private final RDFDatatype rdfDatatype;
 
+    @Nullable
+    private final Boolean hasTimeZone;
+
     protected DatetimeDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype) {
         super(name, parentAncestry, false, Category.DATETIME);
         this.rdfDatatype = rdfDatatype;
+        this.hasTimeZone = null;
+    }
+
+    protected DatetimeDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype, boolean hasTimeZone) {
+        super(name, parentAncestry, false, Category.DATETIME);
+        this.rdfDatatype = rdfDatatype;
+        this.hasTimeZone = hasTimeZone;
+    }
+
+    public Optional<Boolean> hasTimeZone() {
+        return Optional.ofNullable(hasTimeZone);
     }
 
     @Override

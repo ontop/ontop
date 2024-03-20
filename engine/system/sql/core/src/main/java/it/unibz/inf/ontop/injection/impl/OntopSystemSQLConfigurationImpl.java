@@ -1,12 +1,15 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSystemSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopSQLCredentialConfigurationImpl.DefaultOntopSQLCredentialBuilderFragment;
 
 import java.util.Properties;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 
@@ -23,6 +26,16 @@ public class OntopSystemSQLConfigurationImpl extends OntopReformulationSQLConfig
 
     OntopSystemSQLConfigurationImpl(OntopSystemSQLSettings settings, OntopSystemSQLOptions options) {
         super(settings, options.sqlTranslationOptions);
+        this.settings = settings;
+    }
+
+    OntopSystemSQLConfigurationImpl(OntopStandaloneSQLSettings settings, OntopSystemSQLOptions options, SpecificationLoader specificationLoader, Supplier<Injector> injectorSupplier) {
+        super(settings, options.sqlTranslationOptions, specificationLoader, injectorSupplier);
+        this.settings = settings;
+    }
+
+    OntopSystemSQLConfigurationImpl(OntopSystemSQLSettings settings, OntopSystemSQLOptions options, Supplier<Injector> injectorSupplier) {
+        super(settings, options.sqlTranslationOptions, injectorSupplier);
         this.settings = settings;
     }
 

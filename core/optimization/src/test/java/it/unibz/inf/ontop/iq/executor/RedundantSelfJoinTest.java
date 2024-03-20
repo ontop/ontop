@@ -665,11 +665,11 @@ public class RedundantSelfJoinTest {
 
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(O,
-                        TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBIsNotNull(F0), M)));
+                        TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBIsNotNull(PROV), M)));
         LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(N, M));
         ConstructionNode rightConstruction = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(F0, M),
-                SUBSTITUTION_FACTORY.getSubstitution(F0, TERM_FACTORY.getProvenanceSpecialConstant()));
+                ImmutableSet.of(PROV, M),
+                SUBSTITUTION_FACTORY.getSubstitution(PROV, TERM_FACTORY.getProvenanceSpecialConstant()));
         ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE1, ImmutableList.of(M, M, M));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
@@ -776,11 +776,11 @@ public class RedundantSelfJoinTest {
 
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(M,
-                        TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBIsNotNull(F0), O)));
+                        TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBIsNotNull(PROV), O)));
         LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(N, O));
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(F0, O),
-                SUBSTITUTION_FACTORY.getSubstitution(F0, TERM_FACTORY.getProvenanceSpecialConstant()));
+                ImmutableSet.of(PROV, O),
+                SUBSTITUTION_FACTORY.getSubstitution(PROV, TERM_FACTORY.getProvenanceSpecialConstant()));
         ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE1, ImmutableList.of(O, O, O));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
