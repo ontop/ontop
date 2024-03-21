@@ -49,7 +49,7 @@ public class RasDaManRasterFunctionsTest extends AbstractDockerRDF4JTest {
 //                + "?r geo:asWKT ?regionBBOX .\n"
     //            + "?x rasdb:hasRasterName ?raster_name .\n"
     //            + ?x rasdb:hasRasterBBOX /\n"
-//                + "BIND (rasdb:rasCheckBBOX(?regionBBOX, ?rasterBBOX) AS ?v)"
+//                + "BIND (rasdb:rasCheckBBOX(Raster?regionBBOX, ?rasterBBOX) AS ?v)"
 //                + "}\n";
 //
 //        executeAndCompareValues(query2, ImmutableList.of("\"array\"^^xsd:string"));
@@ -81,14 +81,14 @@ public class RasDaManRasterFunctionsTest extends AbstractDockerRDF4JTest {
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
                 + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
-                + "SELECT * {\n"
+                + "SELECT ?v {\n"
                 + "?r rdfs:label ?region_name .\n"
                 + "?x rasdb:hasRasterName ?raster_name .\n"
                 + "?x rasdb:hasScaleFactor ?ras_sf .\n"
                 + "?r geo:asWKT ?region .\n"
                 + "FILTER (?region_name = 'Deggendorf'\n)"
 //                + "FILTER (contains(?ras_table,'Bavaria')) .\n"
-                + "BIND (rasdb:rasSpatialAverage(?raster_name, ?region, 100, ?ras_sf) AS ?v)"
+                + "BIND (rasdb:rasSpatialAverage('100'^^xsd:integer, ?ras_sf, ?region, ?raster_name) AS ?v)"
                 + "}\n";
 
         executeAndCompareValues(query3, ImmutableList.of("\"7.989\"^^xsd:double"));

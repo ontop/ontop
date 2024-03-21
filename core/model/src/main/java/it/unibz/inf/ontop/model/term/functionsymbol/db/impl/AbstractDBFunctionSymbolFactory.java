@@ -1345,7 +1345,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     //TODO
     // Add Raster DBFunction Symbol
-    // ------------------------------------[STEP 03b]-----------------------------------
+    // ------------------------------------[STEP 03b]------------------------------------
     public DBFunctionSymbol getRasterSpatialAverage(){return getRasterSpatialAverageFunctionSymbol;}
 
     public DBFunctionSymbol getRasterMetadata(){return getRasterMetadataFunctionSymbol;}
@@ -1918,13 +1918,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
 //TODO
 // create RasterSpatialAverage DBFunctionSymbol
-// ---------------------------------------[STEP 03c]---------------------------------
+// ---------------------------------------[STEP 03c]------------------------------------
     protected DBFunctionSymbol createRasterMetadataFunctionSymbol() {
         return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_METADATA", ImmutableList.of(dbIntegerType, dbStringType), dbStringType, false,
                 this::serializeRAS_GET_META);
     }
     protected DBFunctionSymbol createRasterSpatialAverageFunctionSymbol() {
-        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_AVERAGE", ImmutableList.of(dbDoubleType, rootDBType, dbIntegerType, dbDoubleType), dbDoubleType, false,
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_AVERAGE", ImmutableList.of(dbIntegerType, dbDoubleType, rootDBType, dbStringType), dbDoubleType, false,
                 this::serializeRAS_SPATIAL_AVERAGE);
     }
 
@@ -1934,7 +1934,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
     //TODO
     // create a custom serializer like serializeRAS_GET_META
-    // ---------------------------------------[STEP 03d]------------------------------
+    // ---------------------------------------[STEP 03d]--------------------------------
     protected abstract String serializeRAS_GET_META(ImmutableList<? extends ImmutableTerm> terms,
                                                            Function<ImmutableTerm, String> termConverter,
                                                            TermFactory termFactory);

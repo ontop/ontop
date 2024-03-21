@@ -565,8 +565,8 @@ public class TermFactoryImpl implements TermFactory {
 	//TODO
 	// Add Terms for newly added raster functions -------------------------------------[STEP 04]-------------------------------------------
 	@Override
-	public ImmutableFunctionalTerm getRasterSpatialAverage(ImmutableTerm dbRasterName, ImmutableTerm dbRegionGeom, ImmutableTerm TimeSnap, ImmutableTerm ScaleFactor){
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialAverage(), (ImmutableTerm) typeFactory.getDBTypeFactory().getDBDoubleType());
+	public ImmutableFunctionalTerm getRasterSpatialAverage(ImmutableTerm TimeSnap, ImmutableTerm ScaleFactor, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName ){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialAverage(), ImmutableList.of(TimeSnap, ScaleFactor, dbRegionGeom, dbRasterName));
 	}
 
 	@Override
@@ -576,7 +576,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableFunctionalTerm getClipRaster(ImmutableTerm dbRasterName, ImmutableTerm dbRegionGeom, ImmutableTerm TimeSnap){
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getClipRaster(), (ImmutableTerm) typeFactory.getDBTypeFactory().getDBStringType());
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getClipRaster(), ImmutableList.of(dbRasterName, dbRegionGeom, TimeSnap));
 	}
 
     @Override

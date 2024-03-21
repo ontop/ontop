@@ -32,12 +32,12 @@ target		:raster/{raster_id} rasdb:hasStartTime {dom_lower_bound}^^xsd:integer ; 
 source		select raster_id, dom_lower_bound, dom_upper_bound from petascopedb01;
 
 mappingId	mapping_scale_factor
-target		:raster/{raster_id} rasdb:hasScaleFactor {scale_factor}^^xsd:integer .
+target		:raster/{raster_id} rasdb:hasScaleFactor {scale_factor}^^xsd:double .
 source		select raster_id, scale_factor from petascopedb01;
 
 mappingId	mapping_averageRASTER
 target		:{gid} :averageRASTER {avg_temp}^^xsd:double .
-source		SELECT  m.gid AS gid, rasdaman_op.query2numeric(CONCAT('select avg_cells(clip((c[100, 0:* , 0:*]*0.02) - 273.15,',rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(m.geom)).geom)),')) from Baveria_Temperature_MODIS_1km AS c')) AS avg_temp
+source		SELECT  m.gid AS gid, rasdaman_op.query2numeric(CONCAT('select avg_cells(clip((c[100, 0:* , 0:*]*0.02) - 273.15,',rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(geom)).geom)),')) from Baveria_Temperature_MODIS_1km AS c')) AS avg_temp
 			FROM    region_bavaria as m
 			WHERE   m.name_2 = 'Deggendorf'
 ]]

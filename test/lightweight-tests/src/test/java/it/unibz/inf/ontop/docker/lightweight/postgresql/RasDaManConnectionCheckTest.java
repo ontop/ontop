@@ -37,7 +37,7 @@ public class RasDaManConnectionCheckTest extends AbstractDockerRDF4JTest {
 
         String query1 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
                 + "SELECT * {\n"
-                + "?x hasConnection ?v .\n"
+                + "?x :hasConnection ?v .\n"
                 + "}\n";
 
             executeAndCompareValues(query1, ImmutableList.of("\"RasDaMan is connected\"^^xsd:string"));

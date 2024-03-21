@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl.raster;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import org.apache.commons.rdf.api.IRI;
@@ -14,8 +13,8 @@ public class RasterAverageFunctionSymbolImpl extends AbstractRasterFunctionSymbo
 
 //    protected final FunctionSymbolFactory functionSymbolFactory;
 
-    public RasterAverageFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType, RDFDatatype xsdIntegerDatatype, RDFDatatype xsdDoubleType) {
-        super("RAS_SPATIAL_AVERAGE", functionIRI, ImmutableList.of(xsdStringDatatype, wktLiteralType, xsdIntegerDatatype, xsdDoubleType),
+    public RasterAverageFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdIntegerDatatype, RDFDatatype xsdDoubleType, RDFDatatype wktLiteralType, RDFDatatype xsdStringDatatype) {
+        super("RAS_SPATIAL_AVERAGE", functionIRI, ImmutableList.of(xsdIntegerDatatype, xsdDoubleType, wktLiteralType, xsdStringDatatype),
                 xsdDoubleType);
         //this.functionSymbolFactory = functionSymbolFactory;
     }
