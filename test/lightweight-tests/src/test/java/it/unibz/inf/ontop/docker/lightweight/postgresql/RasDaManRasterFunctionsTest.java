@@ -68,7 +68,7 @@ public class RasDaManRasterFunctionsTest extends AbstractDockerRDF4JTest {
                 + "?x rasdb:hasRasterName ?raster_name .\n"
                 + "?x rasdb:hasScaleFactor ?ras_sf .\n"
                 + "?r geo:asWKT ?region .\n"
-                + "FILTER (?region_name = 'Deggendorf'\n)"
+                + "FILTER (?region_name = 'Kelheim'\n)"
 //                + "FILTER (contains(?ras_table,'Bavaria')) .\n" Regen Erding Kelheim
                 + "BIND (rasdb:rasSpatialAverage(100, ?ras_sf, ?region, ?raster_name) AS ?v)"
                 + "}\n";
@@ -114,23 +114,23 @@ public class RasDaManRasterFunctionsTest extends AbstractDockerRDF4JTest {
         executeAndCompareValues(query5, ImmutableList.of("\"263.9\"^^xsd:double"));
     }
 
-//    @Test
-//    public void clipRaster() {
-//
-//        String query2 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
-//                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
-//                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-//                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
-//                + "SELECT ?v {\n"
-//                + "?r rdfs:label ?region_name .\n"
-//                + "?x rasdb:hasRasterName ?raster_name .\n"
-//                + "?r geo:asWKT ?region .\n"
-//                + "FILTER (?region_name = 'Deggendorf'\n)"
-//                + "BIND (rasdb:rasClipRaster(100, ?region, ?raster_name) AS ?v)"
-//                + "}\n";
-//
-//        executeAndCompareValues(query2, ImmutableList.of("\"array\"^^xsd:string"));
-//    }
+    @Test
+    public void clipRaster() {
+
+        String query2 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
+                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
+                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "SELECT ?v {\n"
+                + "?r rdfs:label ?region_name .\n"
+                + "?x rasdb:hasRasterName ?raster_name .\n"
+                + "?r geo:asWKT ?region .\n"
+                + "FILTER (?region_name = 'Deggendorf'\n)"
+                + "BIND (rasdb:rasClipRaster(100, ?region, ?raster_name) AS ?v)"
+                + "}\n";
+
+        executeAndCompareValues(query2, ImmutableList.of("\"array\"^^xsd:string")); //xsd:array is not availabel
+    }
 //
 //
 //        @Test
