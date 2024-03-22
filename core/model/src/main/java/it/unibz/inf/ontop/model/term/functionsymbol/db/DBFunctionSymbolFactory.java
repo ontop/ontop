@@ -254,6 +254,8 @@ public interface DBFunctionSymbolFactory {
     // Add DBFunctionSymbol
     // ---------------------------[STEP 06]--------------------------------------
     DBFunctionSymbol getRasterSpatialAverage();
+    DBFunctionSymbol getRasterSpatialMaximum();
+    DBFunctionSymbol getRasterSpatialMinimum();
     DBFunctionSymbol getRasterMetadata();
     DBFunctionSymbol getClipRaster();
     DBFunctionSymbol getExtractFunctionSymbol(String component);

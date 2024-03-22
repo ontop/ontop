@@ -12,7 +12,12 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.ofn.OfnMultitypedInputBinarySPARQLFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.ofn.OfnSimpleBinarySPARQLFunctionSymbolImpl;
+//TODO
+// Add raster function's import e.g. raster.RasterAverageFunctionSymbolImpl;
+// --------------------------------------------[STEP 02]---------------------------------------------
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterAverageFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMaximumFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMinimumFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMetadataFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.ClipRasterFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.*;
@@ -332,15 +337,19 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                  */
 
                 //TODO
-                // Add raster function e.g. averageRASTER()
+                // Add raster function e.g. averageRASTERSpatial()
                 // 1. Vocabulary IRI
                 // 2. RDF Input types
                 // 3. Output types
-                // --------------------------------------------[STEP 02]--------------------------------------------
+                // --------------------------------------------[STEP 02a]---------------------------------------------
 
                 new RasterMetadataFunctionSymbolImpl(RASDB.RAS_GET_META, xsdInteger, xsdString),
 
                 new RasterAverageFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE, xsdInteger, xsdDouble, wktLiteral, xsdString),
+
+                new RasterMaximumFunctionSymbolImpl(RASDB.RAS_SPATIAL_MAXIMUM, xsdInteger, xsdDouble, wktLiteral, xsdString),
+
+                new RasterMinimumFunctionSymbolImpl(RASDB.RAS_SPATIAL_MINIMUM, xsdInteger, xsdDouble, wktLiteral, xsdString),
 
                 new ClipRasterFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL, xsdString, wktLiteral, xsdInteger),
 

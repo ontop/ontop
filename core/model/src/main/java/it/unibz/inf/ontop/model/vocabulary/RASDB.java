@@ -7,7 +7,7 @@ public class RASDB {
     //TODO
     // Add raster functions like GEOF
     // Use the vocabulary
-    // ------------------------------------[STEP 01]---------------------------------------------------
+    // ------------------------------------[STEP 01]------------------------------------------
     public static final String PREFIX = "http://www.semanticweb.org/RasterDataCube/";
 
     // Prefix for properties
@@ -23,6 +23,10 @@ public class RASDB {
 
     // Raster Aggregation Functions
     public static final IRI RAS_SPATIAL_AVERAGE;
+
+    public static final IRI RAS_SPATIAL_MAXIMUM;
+
+    public static final IRI RAS_SPATIAL_MINIMUM;
 
     public static final IRI RAS_SPATIAL_TEMPORAL_AVERAGE;
 
@@ -45,7 +49,12 @@ public class RASDB {
 
         RAS_SPATIAL_AVERAGE = factory.createIRI(PREFIX + "rasSpatialAverage");
 
+        RAS_SPATIAL_MAXIMUM = factory.createIRI(PREFIX + "rasSpatialMaximum");
+
+        RAS_SPATIAL_MINIMUM = factory.createIRI(PREFIX + "rasSpatialMinimum");
+
         RAS_SPATIAL_TEMPORAL_AVERAGE = factory.createIRI(PREFIX + "rasSpatialTemporalAverage");
+
 
         // Raster Filter Array Functions
 

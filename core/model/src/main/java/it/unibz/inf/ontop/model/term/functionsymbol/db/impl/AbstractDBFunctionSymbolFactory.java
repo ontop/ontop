@@ -165,9 +165,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBFunctionSymbol checkAndConvertDateFromDateTimeFunctionSymbol;
     private DBFunctionSymbol checkAndConvertDateFromStringFunctionSymbol;
     //TODO
-    // Add Raster Function DB Symbol
+    // Add Raster Function DB Symbol (same as separate new java class file)
     // ------------------------------------[STEP 03]-----------------------------------
     private DBFunctionSymbol getRasterSpatialAverageFunctionSymbol;
+    private DBFunctionSymbol getRasterSpatialMaximumFunctionSymbol;
+    private DBFunctionSymbol getRasterSpatialMinimumFunctionSymbol;
     private DBFunctionSymbol getRasterMetadataFunctionSymbol;
     private DBFunctionSymbol getClipRasterFunctionSymbol;
 
@@ -495,6 +497,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         // Add Raster Function Symbol
         // ------------------------------------[STEP 03a]-----------------------------------
         getRasterSpatialAverageFunctionSymbol = createRasterSpatialAverageFunctionSymbol();
+        getRasterSpatialMaximumFunctionSymbol = createRasterSpatialMaximumFunctionSymbol();
+        getRasterSpatialMinimumFunctionSymbol = createRasterSpatialMinimumFunctionSymbol();
         getRasterMetadataFunctionSymbol = createRasterMetadataFunctionSymbol();
         getClipRasterFunctionSymbol = createClipRasterFunctionSymbol();
 
@@ -1345,8 +1349,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     //TODO
     // Add Raster DBFunction Symbol
-    // ------------------------------------[STEP 03b]------------------------------------
+    // ------------------------------------[STEP 03b]-------------------------------------
     public DBFunctionSymbol getRasterSpatialAverage(){return getRasterSpatialAverageFunctionSymbol;}
+
+    public DBFunctionSymbol getRasterSpatialMaximum(){return getRasterSpatialMaximumFunctionSymbol;}
+
+    public DBFunctionSymbol getRasterSpatialMinimum(){return getRasterSpatialMinimumFunctionSymbol;}
 
     public DBFunctionSymbol getRasterMetadata(){return getRasterMetadataFunctionSymbol;}
 
@@ -1918,7 +1926,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
 //TODO
 // create RasterSpatialAverage DBFunctionSymbol
-// ---------------------------------------[STEP 03c]------------------------------------
+// ---------------------------------------[STEP 03c]-------------------------------------
     protected DBFunctionSymbol createRasterMetadataFunctionSymbol() {
         return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_METADATA", ImmutableList.of(dbIntegerType, dbStringType), dbStringType, false,
                 this::serializeRAS_GET_META);
@@ -1928,17 +1936,34 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 this::serializeRAS_SPATIAL_AVERAGE);
     }
 
+    protected DBFunctionSymbol createRasterSpatialMaximumFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_MAXIMUM", ImmutableList.of(dbIntegerType, dbDoubleType, rootDBType, dbStringType), dbDoubleType, false,
+                this::serializeRAS_SPATIAL_MAXIMUM);
+    }
+
+    protected DBFunctionSymbol createRasterSpatialMinimumFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_MINIMUM", ImmutableList.of(dbIntegerType, dbDoubleType, rootDBType, dbStringType), dbDoubleType, false,
+                this::serializeRAS_SPATIAL_MINIMUM);
+    }
     protected DBFunctionSymbol createClipRasterFunctionSymbol() {
         return new DBFunctionSymbolWithSerializerImpl("DB_CLIP_RASTER_SPATIAL", ImmutableList.of(dbStringType, rootDBType, dbIntegerType), dbStringType, false,
                 this::serializeRAS_CLIP_RASTER_SPATIAL);
     }
     //TODO
     // create a custom serializer like serializeRAS_GET_META
-    // ---------------------------------------[STEP 03d]--------------------------------
+    // ---------------------------------------[STEP 03d]---------------------------------
     protected abstract String serializeRAS_GET_META(ImmutableList<? extends ImmutableTerm> terms,
                                                            Function<ImmutableTerm, String> termConverter,
                                                            TermFactory termFactory);
     protected abstract String serializeRAS_SPATIAL_AVERAGE(ImmutableList<? extends ImmutableTerm> terms,
+                                                           Function<ImmutableTerm, String> termConverter,
+                                                           TermFactory termFactory);
+
+    protected abstract String serializeRAS_SPATIAL_MAXIMUM(ImmutableList<? extends ImmutableTerm> terms,
+                                                           Function<ImmutableTerm, String> termConverter,
+                                                           TermFactory termFactory);
+
+    protected abstract String serializeRAS_SPATIAL_MINIMUM(ImmutableList<? extends ImmutableTerm> terms,
                                                            Function<ImmutableTerm, String> termConverter,
                                                            TermFactory termFactory);
 

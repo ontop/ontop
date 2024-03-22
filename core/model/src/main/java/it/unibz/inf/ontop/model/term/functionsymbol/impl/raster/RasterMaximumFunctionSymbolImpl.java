@@ -9,12 +9,11 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-public class ClipRasterFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl {
-    //    protected final FunctionSymbolFactory functionSymbolFactory;
+public class RasterMaximumFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
 
-    public ClipRasterFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdIntegerDatatype, RDFDatatype wktLiteralType, RDFDatatype xsdStringDatatype) {
-        super("RAS_CLIP_RASTER_SPATIAL", functionIRI, ImmutableList.of(xsdIntegerDatatype, wktLiteralType, xsdStringDatatype), xsdStringDatatype);
-        //this.functionSymbolFactory = functionSymbolFactory;
+    public RasterMaximumFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdIntegerDatatype, RDFDatatype xsdDoubleType, RDFDatatype wktLiteralType, RDFDatatype xsdStringDatatype) {
+        super("RAS_SPATIAL_MAXIMUM", functionIRI, ImmutableList.of(xsdIntegerDatatype, xsdDoubleType, wktLiteralType, xsdStringDatatype),
+                xsdDoubleType);
     }
 
     @Override
@@ -23,8 +22,8 @@ public class ClipRasterFunctionSymbolImpl extends AbstractRasterFunctionSymbolIm
         // return termFactory.getRESPECTIVEDBFUNCTIONSymbols;  --------------------------------[STEP 04b]-----------------------------------
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
-        return termFactory.getClipRaster(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2));
-//        return null;
+        return termFactory.getRasterSpatialMaximum(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2), subLexicalTerms.get(3));
 
     }
+
 }

@@ -562,10 +562,15 @@ public interface TermFactory {
 
     ImmutableFunctionalTerm getDBNow();
 //TODO
-// Add ImmutableFunctionalTerm for each new raster functions -------------------[STEP 05]--------------------
+// Add ImmutableFunctionalTerm for each new raster functions -------------------[STEP 05]--------------------------
 	ImmutableFunctionalTerm getRasterMetadata(ImmutableTerm dbrasterID, ImmutableTerm dbRasterName);
 	ImmutableFunctionalTerm getRasterSpatialAverage(ImmutableTerm TimeSnap, ImmutableTerm ScaleFactor, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
-	ImmutableFunctionalTerm getClipRaster(ImmutableTerm dbRasterName, ImmutableTerm dbRegionGeom, ImmutableTerm TimeSnap);
+
+	ImmutableFunctionalTerm getRasterSpatialMaximum(ImmutableTerm TimeSnap, ImmutableTerm ScaleFactor, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getRasterSpatialMinimum(ImmutableTerm TimeSnap, ImmutableTerm ScaleFactor, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getClipRaster(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
 
 	ImmutableFunctionalTerm getDBRowUniqueStr();
 

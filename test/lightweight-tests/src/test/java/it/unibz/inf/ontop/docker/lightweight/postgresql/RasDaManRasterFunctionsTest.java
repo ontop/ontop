@@ -55,27 +55,9 @@ public class RasDaManRasterFunctionsTest extends AbstractDockerRDF4JTest {
 //        executeAndCompareValues(query2, ImmutableList.of("\"array\"^^xsd:string"));
 //    }
 
-    //    @Test
-//    public void clipRaster() {
-//
-//        String query2 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
-//                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
-//                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-//                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
-//                + "SELECT * {\n"
-////                + "?r rdfs:label ?region_name .\n"
-//                + "?x rasdb:hasRasterName ?raster_name .\n"
-//                + "?r geo:asWKT ?region .\n"
-////                + "FILTER (?region_name = 'Deggendorf'\n)"
-////                + "FILTER (contains(?raster_name,'Bavaria')) .\n"
-//                + "BIND (rasdb:rasClipRaster(?raster_name, ?region, 100) AS ?v)"
-//                + "}\n";
-//
-//        executeAndCompareValues(query2, ImmutableList.of("\"array\"^^xsd:string"));
-//    }
 
     @Test
-    public void averageRaster() {
+    public void averageRasterSPATIAL() {
 
         String query3 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
@@ -87,33 +69,85 @@ public class RasDaManRasterFunctionsTest extends AbstractDockerRDF4JTest {
                 + "?x rasdb:hasScaleFactor ?ras_sf .\n"
                 + "?r geo:asWKT ?region .\n"
                 + "FILTER (?region_name = 'Deggendorf'\n)"
-//                + "FILTER (contains(?ras_table,'Bavaria')) .\n"
+//                + "FILTER (contains(?ras_table,'Bavaria')) .\n" Regen Erding Kelheim
                 + "BIND (rasdb:rasSpatialAverage(100, ?ras_sf, ?region, ?raster_name) AS ?v)"
                 + "}\n";
 
         executeAndCompareValues(query3, ImmutableList.of("\"275.462\"^^xsd:double"));
     }
 
+    @Test
+    public void maxRasterSPATIAL() {
+
+        String query4 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
+                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
+                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "SELECT ?v {\n"
+                + "?r rdfs:label ?region_name .\n"
+                + "?x rasdb:hasRasterName ?raster_name .\n"
+                + "?x rasdb:hasScaleFactor ?ras_sf .\n"
+                + "?r geo:asWKT ?region .\n"
+                + "FILTER (?region_name = 'Deggendorf'\n)"
+                + "BIND (rasdb:rasSpatialMaximum(100, ?ras_sf, ?region, ?raster_name) AS ?v)"
+                + "}\n";
+
+        executeAndCompareValues(query4, ImmutableList.of("\"277.82\"^^xsd:double"));
+    }
+
+    @Test
+    public void minRasterSPATIAL() {
+
+        String query5 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
+                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
+                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "SELECT ?v {\n"
+                + "?r rdfs:label ?region_name .\n"
+                + "?x rasdb:hasRasterName ?raster_name .\n"
+                + "?x rasdb:hasScaleFactor ?ras_sf .\n"
+                + "?r geo:asWKT ?region .\n"
+                + "FILTER (?region_name = 'Deggendorf'\n)"
+                + "BIND (rasdb:rasSpatialMinimum(100, ?ras_sf, ?region, ?raster_name) AS ?v)"
+                + "}\n";
+
+        executeAndCompareValues(query5, ImmutableList.of("\"263.9\"^^xsd:double"));
+    }
+
 //    @Test
-//    public void averageRaster() {
+//    public void clipRaster() {
 //
-//        String query4 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+//        String query2 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
 //                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
 //                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
 //                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
-//                + "SELECT * {\n"
-//                + "?r rdfs:label ?region_id .\n"
-//                + "?x rasdb:hasRasterName ?ras_table .\n"
-//                + "?x rasdb:hasScaleFactor ?ras_sf .\n"
+//                + "SELECT ?v {\n"
+//                + "?r rdfs:label ?region_name .\n"
+//                + "?x rasdb:hasRasterName ?raster_name .\n"
 //                + "?r geo:asWKT ?region .\n"
-//                + "FILTER (?region_id = 'Deggendorf'\n)"
-//                + "FILTER (contains(?ras_table,'Bavaria')) .\n"
-//                + "BIND (rasdb:rasSpatialAverage(?ras_table, ?region, 100, ?ras_sf) AS ?v)"
+//                + "FILTER (?region_name = 'Deggendorf'\n)"
+//                + "BIND (rasdb:rasClipRaster(100, ?region, ?raster_name) AS ?v)"
 //                + "}\n";
 //
-//        executeAndCompareValues(query4, ImmutableList.of("\"66\"^^xsd:double"));
+//        executeAndCompareValues(query2, ImmutableList.of("\"array\"^^xsd:string"));
 //    }
 //
+//
+//        @Test
+//    public void getRasterArraySmall() {
+//
+//        String query1 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+//                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
+//                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
+//                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+//                + "SELECT ?v {\n"
+//                + "?x rasdb:hasRasterName ?raster_name .\n"
+//                + "?x rasdb:hasStartTime ?start_time; rasdb:hasEndTime ?end_time .\n"
+//                + "BIND (rasdb:rasClipRaster(?start_time,?end_time, ?raster_name) AS ?v)" //%s %s %s
+//                + "}\n";
+//
+//        executeAndCompareValues(query1, ImmutableList.of("\"{{{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0}}}\"^^xsd:string")); //Array issue in RDF @Diego
+//    }
 //    @Test
 //    public void getRasterArray() {
 //
@@ -128,7 +162,7 @@ public class RasDaManRasterFunctionsTest extends AbstractDockerRDF4JTest {
 //                + "BIND (rasdb:getArray(?ras_table, ?start_time, ?end_time) AS ?v)"
 //                + "}\n";
 //
-//        executeAndCompareValues(query1, ImmutableList.of("\"array\"^^xsd:string")); //Array issue in RDF @Diego
+//        executeAndCompareValues(query1, ImmutableList.of("\"{{{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0}}}\"^^xsd:string")); //Array issue in RDF @Diego
 //    }
 
 }

@@ -9,7 +9,7 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-public class RasterAverageFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl {
+public class RasterAverageFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
 
 //    protected final FunctionSymbolFactory functionSymbolFactory;
 
