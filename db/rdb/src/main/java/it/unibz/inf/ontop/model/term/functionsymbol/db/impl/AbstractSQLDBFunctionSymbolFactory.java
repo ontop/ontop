@@ -1581,9 +1581,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 //TODO
 // String Manipulation for scale factor and time in rasql
 // -----------------------------------[Step 07c]----------------------------------
-        //return String.format("RAS_SPATIAL_AVERAGE(%s, %s, avg_cells(clip((c[%s,0,0], %s)", rasterdb_name, region, time, sf);
-        //return String.format("RAS_SPATIAL_AVERAGE(avg_cells(clip((c[%s, 0:* , 0:*]*%s),',rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),')) from %s as c')))", raster_name, region, time, sf);
-        return String.format("rasdaman_op.query2numeric(CONCAT('select avg_cells(clip((c[%s, 0:* , 0:*] *\',"+ "%s"+"),',rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),')) from %s as c'))",time,sf,region,raster_name);
+        //return String.format("rasdaman_op.query2numeric(CONCAT('select avg_cells(clip((c[%s, 0:* , 0:*] *\',"+ "%s"+"),',rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),')) from %s as c'))",time,sf,region,raster_name);
+        return String.format("rasdaman_op.query2numeric(CONCAT('select avg_cells(clip((c[' , %s, ', 0:* , 0:*] * ', %s, '),' , " + "rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),')) from ', %s, ' as c'))", time,sf,region,raster_name);
     }
 
     protected String serializeRAS_GET_META(ImmutableList<? extends ImmutableTerm> terms,

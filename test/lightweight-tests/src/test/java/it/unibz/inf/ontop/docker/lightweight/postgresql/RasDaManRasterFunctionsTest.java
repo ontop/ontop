@@ -88,10 +88,10 @@ public class RasDaManRasterFunctionsTest extends AbstractDockerRDF4JTest {
                 + "?r geo:asWKT ?region .\n"
                 + "FILTER (?region_name = 'Deggendorf'\n)"
 //                + "FILTER (contains(?ras_table,'Bavaria')) .\n"
-                + "BIND (rasdb:rasSpatialAverage('100'^^xsd:integer, ?ras_sf, ?region, ?raster_name) AS ?v)"
+                + "BIND (rasdb:rasSpatialAverage(100, ?ras_sf, ?region, ?raster_name) AS ?v)"
                 + "}\n";
 
-        executeAndCompareValues(query3, ImmutableList.of("\"7.989\"^^xsd:double"));
+        executeAndCompareValues(query3, ImmutableList.of("\"275.462\"^^xsd:double"));
     }
 
 //    @Test

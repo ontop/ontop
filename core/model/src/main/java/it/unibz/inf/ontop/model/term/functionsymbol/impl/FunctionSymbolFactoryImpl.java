@@ -340,7 +340,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
                 new RasterMetadataFunctionSymbolImpl(RASDB.RAS_GET_META, xsdInteger, xsdString),
 
-                new RasterAverageFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE, xsdString, wktLiteral, xsdInteger, xsdDouble),
+                new RasterAverageFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE, xsdInteger, xsdDouble, wktLiteral, xsdString),
 
                 new ClipRasterFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL, xsdString, wktLiteral, xsdInteger),
 
