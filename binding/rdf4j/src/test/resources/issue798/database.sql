@@ -1,0 +1,1 @@
+create table sales (tran_guid text, value_usd integer);

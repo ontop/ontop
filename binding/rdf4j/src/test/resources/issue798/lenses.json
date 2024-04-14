@@ -1,0 +1,23 @@
+{
+  "relations": [
+    {
+      "name": ["lenses", "transactions"],
+      "query": "SELECT tran_guid, COUNT(1) AS line_item_ct, SUM(value_usd) AS VALUE_USD FROM SALES GROUP BY tran_guid",
+      "type": "SQLLens",
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "uc",
+            "determinants": ["tran_guid"]
+          }
+        ]
+      },
+      "nonNullConstraints": {
+        "added": [
+          "tran_guid",
+          "line_item_ct",
+          "value_usd"
+        ]
+      }
+    }
+  ]}

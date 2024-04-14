@@ -1,0 +1,8 @@
+[PrefixDeclaration]
+: http://example.org/
+
+[MappingDeclaration] @collection [[
+mappingId	transactions
+target          :transaction/{tran_guid} a :Transaction; :line_item_ct {line_item_ct}^^xsd:int ; :revenue {value_usd}^^xsd:float .
+source          SELECT tran_guid, line_item_ct, value_usd FROM lenses.transactions
+]]
