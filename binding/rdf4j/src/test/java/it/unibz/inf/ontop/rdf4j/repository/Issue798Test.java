@@ -14,10 +14,11 @@ public class Issue798Test extends AbstractRDF4JTest {
     private static final String LENSES_FILE = "/issue798/lenses.json";
     private static final String OBDA_FILE = "/issue798/mapping.obda";
     private static final String SQL_SCRIPT = "/issue798/database.sql";
+    private static final String PROPERTIES = "/issue798/issue798.properties";
 
     @BeforeClass
     public static void before() throws IOException, SQLException {
-        initOBDA(SQL_SCRIPT, OBDA_FILE, null, null, LENSES_FILE);
+        initOBDA(SQL_SCRIPT, OBDA_FILE, null, PROPERTIES, LENSES_FILE);
     }
 
     @AfterClass
