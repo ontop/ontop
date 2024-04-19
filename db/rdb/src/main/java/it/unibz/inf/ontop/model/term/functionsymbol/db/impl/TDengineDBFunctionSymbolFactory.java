@@ -129,10 +129,15 @@ public class TDengineDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
         return new NullToleratingDBConcatFunctionSymbol("CONCAT", arity, dbStringType, abstractRootDBType, false);
     }
 
-    // TODO-SCAFFOLD: Implement DateTimeNorm serialization in ISO 8601 Format 'YYYY-MM-DDTHH:MM:SS+HH:MM'
     @Override
+    protected String serializeDateTimeNormWithTZ(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("This function (serializeDateTimeNormWithTZ) was not yet implemented.");
+    }
+
+    // TODO-SCAFFOLD: Implement DateTimeNorm serialization in ISO 8601 Format 'YYYY-MM-DDTHH:MM:SS+HH:MM'
+    //@Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new UnsupportedOperationException("This function was not yet implemented.");
+        throw new UnsupportedOperationException("This function (serializeDateTimeNorm) was not yet implemented.");
     }
 
     // TODO-SCAFFOLD: Modify this default name, if necessary

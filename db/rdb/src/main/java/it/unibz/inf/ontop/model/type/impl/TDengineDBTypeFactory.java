@@ -18,6 +18,7 @@ public class TDengineDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String BYTEA_STR = "BYTEA";
     private static final String DEFAULT_DECIMAL_STR = "DECIMAL(38, 18)";
     public static final String UUID_STR = "UUID";
+    public static final String TEXT_STR = "TEXT";
 
 
     protected TDengineDBTypeFactory(Map<String, DBTermType> typeMap, ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap) {
@@ -81,6 +82,8 @@ public class TDengineDBTypeFactory extends DefaultSQLDBTypeFactory {
          *-------------------------------------------------------------------
          *      map.put(DefaultTypeCode.CODE, "TYPE_NAME");
          */
+
+        map.put(DefaultTypeCode.TEXT, VARCHAR_STR);
 
         return ImmutableMap.copyOf(map);
     }

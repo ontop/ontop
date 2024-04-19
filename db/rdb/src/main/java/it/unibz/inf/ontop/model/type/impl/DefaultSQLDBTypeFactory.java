@@ -77,7 +77,8 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
         GEOMETRY,
         GEOGRAPHY,
         ARRAY,
-        JSON
+        JSON,
+        TEXT
     }
 
     // MUTABLE
