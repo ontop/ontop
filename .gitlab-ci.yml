@@ -1,4 +1,4 @@
-image: maven
+image: maven:3.9
 
 all-test:
   script:
