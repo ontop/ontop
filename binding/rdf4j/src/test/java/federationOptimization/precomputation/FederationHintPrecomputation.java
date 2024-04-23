@@ -1,5 +1,6 @@
 package federationOptimization.precomputation;
 
+import com.google.common.collect.ImmutableList;
 import federationOptimization.ObdfTest;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -524,12 +525,12 @@ public class FederationHintPrecomputation {
 
     public void printDetectedHints(SourceHints candidates){
         System.out.println("number of detected federated joins for empty checking or materialization: "+candidates.emptyFJs.size());
-        for(EmptyFederatedJoin efj: candidates.emptyFJs){
+        for(EmptyFederatedJoin efj: ImmutableList.sortedCopyOf(EmptyFederatedJoin.COMPARATOR, candidates.emptyFJs)){
             efj.print();
         }
 
         System.out.println("number of detected relation pairs for redundancy checking: "+candidates.redundancy.size());
-        for(Redundancy rd: candidates.redundancy){
+        for(Redundancy rd: ImmutableList.sortedCopyOf(Redundancy.COMPARATOR, candidates.redundancy)){
             rd.print();
         }
     }
@@ -560,7 +561,7 @@ public class FederationHintPrecomputation {
         int matv_count = 0;
 
         //first redundancy checking, then checking candidate federated joins to filter out some candidates
-        for(Redundancy candidate: candidateHints.redundancy){
+        for(Redundancy candidate: ImmutableList.sortedCopyOf(Redundancy.COMPARATOR, candidateHints.redundancy)){
             long start = System.currentTimeMillis();
             System.out.println("checking: ");
             System.out.println("relation1: "+candidate.relation1);
@@ -579,7 +580,7 @@ public class FederationHintPrecomputation {
             System.out.println("");
         }
 
-        for(EmptyFederatedJoin candidate: candidateHints.emptyFJs){
+        for(EmptyFederatedJoin candidate: ImmutableList.sortedCopyOf(EmptyFederatedJoin.COMPARATOR, candidateHints.emptyFJs)){
             //check whether exists duplication with candidate redundancy;
             long start = System.currentTimeMillis();
             if(! checkDuplicationAmongCandidateRedundancyAndJoins(computedHints.redundancy, candidate)){

@@ -51,7 +51,7 @@ public class FederationOptimizerTest {
     private static final String metadataFile = "src/test/resources/federation/system-denodo-het.metadata.json";
     private static final String constraintFile = "src/test/resources/federation/constraints.fed.txt";
 
-    private static final String hintFile = "src/test/resources/federation/hints.denodo-optmatv.txt";
+    private static final String hintFile = "src/test/resources/federation/hints.denodo-optmatv.hom.txt";
     private static final String effLabelFile = "src/test/resources/federation/source_efficiency_labels.het.txt";
     private static final boolean optimizationEnabled = true;
     private static final String sourceFile = "src/test/resources/federation/source_relations.het.txt";
@@ -103,7 +103,7 @@ public class FederationOptimizerTest {
 //        ONTOP_OBDF_OPTIMIZATION_ENABLED=true;
 //        ONTOP_OBDF_SOURCE_FILE=src/test/resources/federation/source_relations.txt;
 //        ONTOP_OBDF_EFF_LABEL_FILE=src/test/resources/federation/source_efficiency_labels.het.txt;
-//        ONTOP_OBDF_HINT_FILE=src/test/resources/federation/hints.denodo-optmatv.txt;
+//        ONTOP_OBDF_HINT_FILE=src/test/resources/federation/hints.denodo-optmatv.hom.txt;
 
         ArrayList<String> queryFiles = new ArrayList<String>();
         queryFiles.add("src/test/resources/federation/bsbm-queries/01.rq");

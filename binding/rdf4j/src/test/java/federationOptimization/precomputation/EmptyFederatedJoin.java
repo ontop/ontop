@@ -1,5 +1,10 @@
 package federationOptimization.precomputation;
 
+import com.google.common.collect.ImmutableList;
+
+import java.util.Comparator;
+import java.util.List;
+
 public class EmptyFederatedJoin {
     String relation1;
     String relation2;
@@ -17,6 +22,12 @@ public class EmptyFederatedJoin {
         System.out.println("relation_1: "+relation1);
         System.out.println("relation_2: "+relation2);
         System.out.println("condition: "+joinCondition);
-        System.out.println("");
+        System.out.println();
     }
+
+    static final Comparator<EmptyFederatedJoin> COMPARATOR = Comparator
+            .comparing((EmptyFederatedJoin h) -> h.relation1)
+            .thenComparing(h -> h.relation2)
+            .thenComparing(h -> h.joinCondition);
+
 }

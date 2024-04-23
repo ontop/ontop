@@ -1,5 +1,10 @@
 package federationOptimization.precomputation;
 
+import com.google.common.collect.ImmutableList;
+
+import java.util.Comparator;
+import java.util.List;
+
 public class Redundancy {
     String relation1;
     String relation2;
@@ -19,4 +24,10 @@ public class Redundancy {
         System.out.println("redundant_relation: "+redundancyRelation);
         System.out.println("");
     }
+
+    static final Comparator<Redundancy> COMPARATOR = Comparator
+                .comparing((Redundancy h) -> h.relation1)
+                .thenComparing(h -> h.relation2)
+                .thenComparing(h -> h.redundancyRelation);
+
 }

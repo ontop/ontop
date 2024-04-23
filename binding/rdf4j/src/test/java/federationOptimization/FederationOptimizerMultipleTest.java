@@ -289,7 +289,8 @@ public class FederationOptimizerMultipleTest {
 //        testConfiguration.put("metadataFile", (federationEngine == FederationEngine.DENODO ? "src/test/resources/federation/system-" + federationEngineStr + "-" + federationSettingStr + ".metadata.json" : null));
         testConfiguration.put("metadataFile", null);
         testConfiguration.put("constraintFile", "src/test/resources/federation/constraints.fed.txt");
-        testConfiguration.put("hintFile", "src/test/resources/federation/hints." + federationEngineStr + "-" + federationOptimizationStr + ".txt");
+        testConfiguration.put("hintFile", "src/test/resources/federation/hints." + federationEngineStr + "-" + federationOptimizationStr
+                + (federationOptimization == FederationOptimization.OPTMATV ? "." + federationSettingStr : "") + ".txt");
         testConfiguration.put("effLabelFile", "src/test/resources/federation/source_efficiency_labels." + federationSettingStr + ".txt");
         testConfiguration.put("optimizationEnabled", true);
         testConfiguration.put("sourceFile", "src/test/resources/federation/source_relations." + federationSettingStr + ".txt");
