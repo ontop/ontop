@@ -11,7 +11,7 @@ sosa:		http://www.w3.org/ns/sosa/
 rasdb:		http://www.semanticweb.org/RasterDataCube/
 
 [MappingDeclaration] @collection [[
-mappingId	check_rasdaman_conn
-target		:conn/{gid} :hasConnection {conn}^^xsd:string .
+mappingId	mapping_checkConn
+target		:conn/{gid} rasdb:hasConnection {conn}^^xsd:string .
 source		select 404 as gid, rasdaman_op.check_rasdaman_conn() as conn
 ]]

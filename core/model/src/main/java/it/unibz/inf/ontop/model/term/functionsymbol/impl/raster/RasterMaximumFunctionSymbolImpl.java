@@ -19,7 +19,7 @@ public class RasterMaximumFunctionSymbolImpl extends AbstractRasterFunctionSymbo
     @Override
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
         //TODO
-        // return termFactory.getRESPECTIVEDBFUNCTIONSymbols;  --------------------------------[STEP 04b]-----------------------------------
+        // return termFactory.getRESPECTIVEDBFUNCTIONSymbols;  --------------------------------[STEP 01b]-----------------------------------
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
         return termFactory.getRasterSpatialMaximum(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2), subLexicalTerms.get(3));

@@ -23,7 +23,7 @@ public class RasterMetadataFunctionSymbolImpl extends AbstractRasterFunctionSymb
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
         //TODO
         // Created new class for the newly added function name
-        // return termFactory.getRESPECTIVEDBFUNCTIONSymbols; --------------------------------[STEP 04a]-----------------------------------
+        // return termFactory.getRESPECTIVEDBFUNCTIONSymbols; --------------------------------[STEP 01b]-----------------------------------
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
         return termFactory.getRasterMetadata(subLexicalTerms.get(0), subLexicalTerms.get(1)); // return rasterId and rasterName

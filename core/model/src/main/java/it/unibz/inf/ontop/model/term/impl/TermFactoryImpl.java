@@ -563,7 +563,7 @@ public class TermFactoryImpl implements TermFactory {
     }
 
 	//TODO
-	// Add Terms for newly added raster functions -------------------------------------[STEP 04]-------------------------------------------
+	// Add Terms for newly added raster functions -------------------------------------[STEP 05]-------------------------------------------
 	@Override
 	public ImmutableFunctionalTerm getRasterSpatialAverage(ImmutableTerm TimeSnap, ImmutableTerm ScaleFactor, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName ){
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialAverage(), ImmutableList.of(TimeSnap, ScaleFactor, dbRegionGeom, dbRasterName));
@@ -580,8 +580,24 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getRasterSpatialMinimumX(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbMinLon, ImmutableTerm dbMaxLat, ImmutableTerm dbXscale, ImmutableTerm dbYscale, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialMinimumX(), ImmutableList.of(TimeSnap, dbRegionGeom, dbMinLon, dbMaxLat, dbXscale, dbYscale, dbRasterName));
+	}
+
+
+	@Override
 	public ImmutableFunctionalTerm getRasterMetadata(ImmutableTerm dbRasterId, ImmutableTerm dbRasterName){
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterMetadata(), (ImmutableTerm) typeFactory.getDBTypeFactory().getDBDoubleType());
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getRasterSmallArrayTemp(ImmutableTerm StartTime,ImmutableTerm EndTime, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSmallArrayTemp(), ImmutableList.of(StartTime, EndTime, dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getRasterSmallArraySpatial(ImmutableTerm StartTime, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSmallArraySpatial(), ImmutableList.of(StartTime, dbRasterName));
 	}
 
 	@Override

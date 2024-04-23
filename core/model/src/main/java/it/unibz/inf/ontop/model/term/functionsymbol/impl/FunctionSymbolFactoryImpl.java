@@ -18,8 +18,12 @@ import it.unibz.inf.ontop.model.term.functionsymbol.impl.ofn.OfnSimpleBinarySPAR
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterAverageFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMaximumFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMinimumFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMinimumXFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMetadataFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.ClipRasterFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterSmallArrayTempFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterSmallArraySpatialFunctionSymbolImpl;
+
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.*;
 import org.apache.commons.rdf.api.IRI;
@@ -351,7 +355,14 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
                 new RasterMinimumFunctionSymbolImpl(RASDB.RAS_SPATIAL_MINIMUM, xsdInteger, xsdDouble, wktLiteral, xsdString),
 
-                new ClipRasterFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL, xsdString, wktLiteral, xsdInteger),
+                new RasterMinimumXFunctionSymbolImpl(RASDB.RAS_SPATIAL_MINIMUM_X, xsdInteger, wktLiteral, xsdDouble, xsdDouble, xsdDouble, xsdDouble, xsdString),
+
+                new ClipRasterFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL, xsdInteger, wktLiteral, xsdString),
+
+                new RasterSmallArrayTempFunctionSymbolImpl(RASDB.RAS_CLIP_SMALL_ARRAY_TEMPORAL, xsdInteger, xsdInteger, xsdString),
+
+                new RasterSmallArraySpatialFunctionSymbolImpl(RASDB.RAS_CLIP_SMALL_ARRAY_SPATIAL, xsdInteger, xsdString),
+
 
 
                 /*

@@ -9,10 +9,11 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-public class ClipRasterFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl {
+public class RasterSmallArraySpatialFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
 
-    public ClipRasterFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdIntegerDatatype, RDFDatatype wktLiteralType, RDFDatatype xsdStringDatatype) {
-        super("RAS_CLIP_RASTER_SPATIAL", functionIRI, ImmutableList.of(xsdIntegerDatatype, wktLiteralType, xsdStringDatatype), xsdStringDatatype);
+    public RasterSmallArraySpatialFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdIntegerDatatype, RDFDatatype xsdStringDatatype) {
+        super("RAS_CLIP_SMALL_ARRAY_SPATIAL", functionIRI, ImmutableList.of(xsdIntegerDatatype, xsdStringDatatype),
+                xsdStringDatatype);
     }
 
     @Override
@@ -20,9 +21,8 @@ public class ClipRasterFunctionSymbolImpl extends AbstractRasterFunctionSymbolIm
         //TODO
         // return termFactory.getRESPECTIVEDBFUNCTIONSymbols;  --------------------------------[STEP 01b]-----------------------------------
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
-
-        return termFactory.getClipRaster(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2));
-//        return null;
+        return termFactory.getRasterSmallArraySpatial(subLexicalTerms.get(0), subLexicalTerms.get(1));
 
     }
+
 }

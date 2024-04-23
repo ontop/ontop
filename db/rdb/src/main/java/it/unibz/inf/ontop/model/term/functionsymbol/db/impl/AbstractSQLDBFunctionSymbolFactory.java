@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.model.type.impl.DateDBTermType;
 import it.unibz.inf.ontop.model.type.impl.DatetimeDBTermType;
 
 import java.util.Map;
@@ -1344,32 +1343,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 termConverter.apply(terms.get(0)));
     }
 
-//    @Override
-//    protected String serializeRasterMetadata(ImmutableList<? extends ImmutableTerm> terms,
-//                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-//        return String.format("rasdaman_op.geo2grid(" + %s + ", "%s" .....)", //rasdaman_op, plpython fx
-//                termConverter.apply(terms.get(1)),
-//                termConverter.apply(terms.get(0)));
-//    }
-
-//    @Override
-//    protected String serializeRAS_SPATIAL_AVERAGE(ImmutableList<? extends ImmutableTerm> terms,
-//                                                       Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-//        return String.format("rasdaman_op.query2numeric(CONCAT('select avg_cells(clip(c[%s, 0:* , 0:*],',rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),')) from %s AS c'))",
-//                termConverter.apply(terms.get(2)),
-//                termConverter.apply(terms.get(1)),
-//                termConverter.apply(terms.get(0)));
-//    }
-
-//    @Override
-//    protected String serializeClipRaster(ImmutableList<? extends ImmutableTerm> terms,
-//                                                       Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-//        return String.format("rasdaman_op.query2array(CONCAT('select clip(c[%s, 0:* , 0:*],',rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(m.%s)).geom)),') from %s AS c'))",
-//                termConverter.apply(terms.get(1)),
-//                termConverter.apply(terms.get(0)));
-//}
-
-
 /**
      * Can be overridden.
      * <p>
@@ -1562,20 +1535,17 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
 //TODO
-// Give a default serialization
+// Give a default serialization and construct RaSQL query string that will exceyred rasdapy API within PostgreSQL
 // -----------------------------------[Step 07]----------------------------------
     protected String serializeRAS_SPATIAL_AVERAGE(ImmutableList<? extends ImmutableTerm> terms,
                                                   Function<ImmutableTerm, String> termConverter,
                                                   TermFactory termFactory) {
         String raster_name = termConverter.apply(terms.get(3));
         String region = termConverter.apply(terms.get(2));
-        String time = termConverter.apply(terms.get(0)).replace("\'","");
-//        Integer temp0 = Integer.parseInt(time);
         String sf = termConverter.apply(terms.get(1));
+        String time = termConverter.apply(terms.get(0)).replace("\'","");
 
-//TODO
-// String Manipulation for scale factor and time in rasql
-// -----------------------------------[Step 07a]----------------------------------
+
         //return String.format("rasdaman_op.query2numeric(CONCAT('select avg_cells(clip((c[%s, 0:* , 0:*] *\',"+ "%s"+"),',rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),')) from %s as c'))",time,sf,region,raster_name);
         return String.format("rasdaman_op.query2numeric(CONCAT('select avg_cells(clip((c[' , %s, ', 0:* , 0:*] * ', %s, '),' , " + "rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),')) from ', %s, ' as c'))", time,sf,region,raster_name);
     }
@@ -1585,8 +1555,9 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                                                   TermFactory termFactory) {
         String raster_name = termConverter.apply(terms.get(3));
         String region = termConverter.apply(terms.get(2));
-        String time = termConverter.apply(terms.get(0)).replace("\'","");
         String sf = termConverter.apply(terms.get(1));
+        String time = termConverter.apply(terms.get(0)).replace("\'","");
+
 
         return String.format("rasdaman_op.query2numeric(CONCAT('select max_cells(clip((c[' , %s, ', 0:* , 0:*] * ', %s, '),' , " + "rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),')) from ', %s, ' as c'))", time,sf,region,raster_name);
     }
@@ -1596,10 +1567,25 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                                                   TermFactory termFactory) {
         String raster_name = termConverter.apply(terms.get(3));
         String region = termConverter.apply(terms.get(2));
-        String time = termConverter.apply(terms.get(0)).replace("\'","");
         String sf = termConverter.apply(terms.get(1));
+        String time = termConverter.apply(terms.get(0)).replace("\'","");
 
-        return String.format("rasdaman_op.query2numeric(CONCAT('select min_cells(clip((c[' , %s, ', 0:* , 0:*] * ', %s, '),' , " + "rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),')) from ', %s, ' as c'))", time,sf,region,raster_name);
+
+            return String.format("rasdaman_op.query2numeric(CONCAT('select min_cells(clip((c[' , %s, ', 0:* , 0:*] * ', %s, '),' , " + "rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),')) from ', %s, ' as c'))", time,sf,region,raster_name);
+    }
+
+    protected String serializeRAS_SPATIAL_MINIMUM_X(ImmutableList<? extends ImmutableTerm> terms,
+                                                  Function<ImmutableTerm, String> termConverter,
+                                                  TermFactory termFactory) {
+        String time = termConverter.apply(terms.get(0)).replace("\'","");
+        String region = termConverter.apply(terms.get(1));
+        String min_lon = termConverter.apply(terms.get(2));
+        String max_lat = termConverter.apply(terms.get(3));
+        String x_scale = termConverter.apply(terms.get(4));
+        String y_scale = termConverter.apply(terms.get(5));
+        String raster_name = termConverter.apply(terms.get(6));
+
+        return String.format("rasdaman_op.query2numeric(CONCAT('select min_cells(clip((c[' , %s, ', 0:* , 0:*]),' , " + "rasdaman_op.geo2grid_final(ST_AsText((ST_Dump(%s)).geom), ', %s, ' , ', %s, ' , ', %s, ' , ', %s, '),')) from ', %s, ' as c'))",time,region,min_lon,max_lat,x_scale,y_scale,raster_name);
     }
 
     protected String serializeRAS_GET_META(ImmutableList<? extends ImmutableTerm> terms,
@@ -1611,20 +1597,36 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         //return String.format("RAS_CLIP_RASTER_SPATIAL(clip((c[%s, 0:* , 0:*]*0.02),',rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),')) from %s as c')))",time, region, raster_name02);
 
     }
+
+    protected String serializeRAS_CLIP_SMALL_ARRAY_SPATIAL(ImmutableList<? extends ImmutableTerm> terms,
+                                                            Function<ImmutableTerm, String> termConverter,
+                                                            TermFactory termFactory){
+        String raster_name05 = termConverter.apply(terms.get(1));
+        String start_time_01 = termConverter.apply(terms.get(0)).replace("\'","");
+
+        return String.format("rasdaman_op.query2array(CONCAT('select c[' , %s, ', 0:2 , 0:2] from ',%s,' as c'))", start_time_01, raster_name05);
+    }
+
+    protected String serializeRAS_CLIP_SMALL_ARRAY_TEMPORAL(ImmutableList<? extends ImmutableTerm> terms,
+                                                      Function<ImmutableTerm, String> termConverter,
+                                                      TermFactory termFactory){
+        String raster_name04 = termConverter.apply(terms.get(2));
+        String end_time = termConverter.apply(terms.get(1));
+        String start_time = termConverter.apply(terms.get(0));
+
+        //return String.format("rasdaman_op.query2array(CONCAT('select clip(c[' , %s, ', 0:* , 0:*],',rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),') from ', %s, ' as c'))",time_, region_name, raster_name03);
+        return String.format("rasdaman_op.query2array(CONCAT('select m[' , %s, ' : ' , %s, ', 0:2 , 0:2] from ', %s, ' as m'))", start_time, end_time, raster_name04);
+    }
+
     protected String serializeRAS_CLIP_RASTER_SPATIAL(ImmutableList<? extends ImmutableTerm> terms,
                                                       Function<ImmutableTerm, String> termConverter,
                                                       TermFactory termFactory){
             String raster_name03 = termConverter.apply(terms.get(2));
-            String region_name = termConverter.apply(terms.get(1));
-            String time_ = termConverter.apply(terms.get(0));
+            String region_name03 = termConverter.apply(terms.get(1));
+            String time03 = termConverter.apply(terms.get(0)).replace("\'","");
 
-            //return String.format("RAS_CLIP_RASTER_SPATIAL(%s, %s, clip(c[%s,0,0])", raster_name03, region_name, time_);
-            return String.format("rasdaman_op.query2array(CONCAT('select clip(c[' , %s, ', 0:* , 0:*],',rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),') from ', %s, ' as c'))",time_, region_name, raster_name03);
-
+            return String.format("rasdaman_op.query2array(CONCAT('select clip(m[' , %s, ', 0:* , 0:*],' , " + "rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),') from ', %s, ' as m'))",time03, region_name03, raster_name03);
     }
-
-
-
 
 
 

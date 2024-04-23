@@ -984,7 +984,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     //TODO
-    // Add serializerRAS_funcionname in MockUP --------------------------------[STEP 08]---------------------------------------------
+    // Add "serializerRAS_funcionname" in MockUP --------------------------------[STEP 08]---------------------------------------------
     @Override
     protected String serializeRAS_SPATIAL_AVERAGE(ImmutableList<? extends ImmutableTerm> terms,
                                                            Function<ImmutableTerm, String> termConverter,
@@ -1004,9 +1004,27 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
+    protected String serializeRAS_SPATIAL_MINIMUM_X(ImmutableList<? extends ImmutableTerm> terms,
+                                                  Function<ImmutableTerm, String> termConverter,
+                                                  TermFactory termFactory){
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
     protected String serializeRAS_GET_META(ImmutableList<? extends ImmutableTerm> terms,
                                                   Function<ImmutableTerm, String> termConverter,
                                                   TermFactory termFactory){
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    protected String serializeRAS_CLIP_SMALL_ARRAY_TEMPORAL(ImmutableList<? extends ImmutableTerm> terms,
+                                                      Function<ImmutableTerm, String> termConverter,
+                                                      TermFactory termFactory){
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    protected String serializeRAS_CLIP_SMALL_ARRAY_SPATIAL(ImmutableList<? extends ImmutableTerm> terms,
+                                                            Function<ImmutableTerm, String> termConverter,
+                                                            TermFactory termFactory){
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 

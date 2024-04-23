@@ -21,16 +21,28 @@ public class RASDB {
 
     public static final IRI RAS_GET_META;
 
+
+
     // Raster Aggregation Functions
+
     public static final IRI RAS_SPATIAL_AVERAGE;
 
     public static final IRI RAS_SPATIAL_MAXIMUM;
 
     public static final IRI RAS_SPATIAL_MINIMUM;
 
+    public static final IRI RAS_SPATIAL_MINIMUM_X;
+
     public static final IRI RAS_SPATIAL_TEMPORAL_AVERAGE;
 
+
+
     // Raster Filter Array Functions
+
+    public static final IRI RAS_CLIP_SMALL_ARRAY_SPATIAL;
+
+    public static final IRI RAS_CLIP_SMALL_ARRAY_TEMPORAL;
+
     public static final IRI RAS_CLIP_RASTER_SPATIAL;
 
     static {
@@ -46,6 +58,10 @@ public class RASDB {
 
 
         // Raster Aggregation Functions
+        //TODO
+        // Add raster functions like GEOF
+        // Use the vocabulary
+        // ------------------------------------[STEP 01a]------------------------------------------
 
         RAS_SPATIAL_AVERAGE = factory.createIRI(PREFIX + "rasSpatialAverage");
 
@@ -53,12 +69,18 @@ public class RASDB {
 
         RAS_SPATIAL_MINIMUM = factory.createIRI(PREFIX + "rasSpatialMinimum");
 
+        RAS_SPATIAL_MINIMUM_X = factory.createIRI(PREFIX + "rasSpatialMinimumX");
+
         RAS_SPATIAL_TEMPORAL_AVERAGE = factory.createIRI(PREFIX + "rasSpatialTemporalAverage");
 
 
         // Raster Filter Array Functions
 
         RAS_CLIP_RASTER_SPATIAL = factory.createIRI(PREFIX + "rasClipRaster");
+
+        RAS_CLIP_SMALL_ARRAY_SPATIAL = factory.createIRI(PREFIX + "rasSmallRasterArraySpatial");
+
+        RAS_CLIP_SMALL_ARRAY_TEMPORAL = factory.createIRI(PREFIX + "rasSmallRasterArrayTemp");
 
     }
 }
