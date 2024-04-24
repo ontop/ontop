@@ -584,12 +584,6 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialMinimumX(), ImmutableList.of(TimeSnap, dbRegionGeom, dbMinLon, dbMaxLat, dbXscale, dbYscale, dbRasterName));
 	}
 
-
-	@Override
-	public ImmutableFunctionalTerm getRasterMetadata(ImmutableTerm dbRasterId, ImmutableTerm dbRasterName){
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterMetadata(), (ImmutableTerm) typeFactory.getDBTypeFactory().getDBDoubleType());
-	}
-
 	@Override
 	public ImmutableFunctionalTerm getRasterSmallArrayTemp(ImmutableTerm StartTime,ImmutableTerm EndTime, ImmutableTerm dbRasterName){
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSmallArrayTemp(), ImmutableList.of(StartTime, EndTime, dbRasterName));
@@ -605,7 +599,12 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getClipRaster(), ImmutableList.of(TimeSnap, dbRegionGeom, dbRasterName));
 	}
 
-    @Override
+	@Override
+	public ImmutableFunctionalTerm getClipRasterAnyGeom(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getClipRasterAnyGeom(), ImmutableList.of(TimeSnap, dbRegionGeom, dbRasterName));
+	}
+
+	@Override
     public ImmutableFunctionalTerm getDBNow() {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBNow());
     }

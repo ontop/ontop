@@ -257,8 +257,8 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getRasterSpatialMaximum();
     DBFunctionSymbol getRasterSpatialMinimum();
     DBFunctionSymbol getRasterSpatialMinimumX();
-    DBFunctionSymbol getRasterMetadata();
     DBFunctionSymbol getClipRaster();
+    DBFunctionSymbol getClipRasterAnyGeom();
     DBFunctionSymbol getRasterSmallArrayTemp();
     DBFunctionSymbol getRasterSmallArraySpatial();
     DBFunctionSymbol getExtractFunctionSymbol(String component);

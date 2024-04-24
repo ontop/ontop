@@ -19,8 +19,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterAverageFun
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMaximumFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMinimumFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMinimumXFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMetadataFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.ClipRasterFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.ClipRasterAnyGeomFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterSmallArrayTempFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterSmallArraySpatialFunctionSymbolImpl;
 
@@ -48,7 +48,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final Map<Integer, SPARQLFunctionSymbol> coalesceMap;
     private final Map<String, SPARQLAggregationFunctionSymbol> distinctSparqlGroupConcatMap;
     private final Map<String, SPARQLAggregationFunctionSymbol> nonDistinctSparqlGroupConcatMap;
-    // TODO: use a cache with a limited budget
     private final Map<IRI, SPARQLFunctionSymbol> sparqlIRIMap;
     private final Map<RDFTermType, BooleanFunctionSymbol> isAMap;
     private final Map<InequalityLabel, BooleanFunctionSymbol> lexicalInequalityFunctionSymbolMap;
@@ -347,17 +346,19 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 // 3. Output types
                 // --------------------------------------------[STEP 02a]---------------------------------------------
 
-                new RasterMetadataFunctionSymbolImpl(RASDB.RAS_GET_META, xsdInteger, xsdString),
-
                 new RasterAverageFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE, xsdInteger, xsdDouble, wktLiteral, xsdString),
 
                 new RasterMaximumFunctionSymbolImpl(RASDB.RAS_SPATIAL_MAXIMUM, xsdInteger, xsdDouble, wktLiteral, xsdString),
 
                 new RasterMinimumFunctionSymbolImpl(RASDB.RAS_SPATIAL_MINIMUM, xsdInteger, xsdDouble, wktLiteral, xsdString),
 
-                new RasterMinimumXFunctionSymbolImpl(RASDB.RAS_SPATIAL_MINIMUM_X, xsdInteger, wktLiteral, xsdDouble, xsdDouble, xsdDouble, xsdDouble, xsdString),
+           /*     new RasterMinimumXFunctionSymbolImpl(RASDB.RAS_SPATIAL_MINIMUM_X, xsdInteger, wktLiteral, xsdDouble, xsdDouble, xsdDouble, xsdDouble, xsdString),
+*/
+                new RasterMinimumXFunctionSymbolImpl(RASDB.RAS_SPATIAL_MINIMUM_X, xsdInteger, wktLiteral, xsdDouble, xsdString),
 
                 new ClipRasterFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL, xsdInteger, wktLiteral, xsdString),
+
+                new ClipRasterAnyGeomFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL_ANY_GEOM, xsdInteger, xsdString, xsdString),
 
                 new RasterSmallArrayTempFunctionSymbolImpl(RASDB.RAS_CLIP_SMALL_ARRAY_TEMPORAL, xsdInteger, xsdInteger, xsdString),
 

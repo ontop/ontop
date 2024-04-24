@@ -13,15 +13,8 @@ public class RASDB {
     // Prefix for properties
     public static final String PREFIX_PROP = "http://www.semanticweb.org/RasterDataCube/";
 
-    // Simple Feature functions
-    public static final IRI SF_EQUALS;
-
     // Simple Raster Functions
     public static final IRI RAS_CONNECTION;
-
-    public static final IRI RAS_GET_META;
-
-
 
     // Raster Aggregation Functions
 
@@ -45,16 +38,13 @@ public class RASDB {
 
     public static final IRI RAS_CLIP_RASTER_SPATIAL;
 
+    public static final IRI RAS_CLIP_RASTER_SPATIAL_ANY_GEOM;
+
     static {
         org.apache.commons.rdf.api.RDF factory = new SimpleRDF();
 
-        // Simple Feature functions
-        SF_EQUALS = factory.createIRI(PREFIX + "sfEquals");
-
         // Simple Raster Functions
         RAS_CONNECTION = factory.createIRI(PREFIX + "rasConnection");
-
-        RAS_GET_META = factory.createIRI(PREFIX + "rasGetMeta");
 
 
         // Raster Aggregation Functions
@@ -78,9 +68,13 @@ public class RASDB {
 
         RAS_CLIP_RASTER_SPATIAL = factory.createIRI(PREFIX + "rasClipRaster");
 
+        RAS_CLIP_RASTER_SPATIAL_ANY_GEOM = factory.createIRI(PREFIX + "rasClipRasterAnyGeom");
+
         RAS_CLIP_SMALL_ARRAY_SPATIAL = factory.createIRI(PREFIX + "rasSmallRasterArraySpatial");
 
         RAS_CLIP_SMALL_ARRAY_TEMPORAL = factory.createIRI(PREFIX + "rasSmallRasterArrayTemp");
+
+
 
     }
 }
