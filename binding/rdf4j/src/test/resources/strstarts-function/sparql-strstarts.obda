@@ -1,0 +1,22 @@
+[PrefixDeclaration]
+owl: http://www.w3.org/2002/07/owl#
+rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml: http://www.w3.org/XML/1998/namespace
+xsd: http://www.w3.org/2001/XMLSchema#
+rdfs: http://www.w3.org/2000/01/rdf-schema#
+schema: http://www.schema.org#
+sosa: http://www.w3.org/ns/sosa#
+
+[MappingDeclaration] @collection [[
+mappingId   mapping1
+target	    <http://www.schema.org/Person/{person_id}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.schema.org/Person>. <http://www.schema.org/Person/{person_id}> <http://www.schema.org/givenName> {first_name}.
+source	    SELECT * FROM person
+
+mappingId   mapping2
+target	    <http://www.schema.org/House/{house_id}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.schema.org/House>. <http://www.schema.org/House/{house_id}> <http://www.schema.org/address> {address}. <http://www.schema.org/House/{house_id}> <http://www.schema.org/belongs>  <http://www.schema.org/Person/{owner}> .
+source      SELECT * FROM house
+
+mappingId   mapping3
+target	    <http://www.w3.org/ns/sosa/Result/{sensor_id}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/sosa/Result> .  <http://www.w3.org/ns/sosa/Result/{sensor_id}> <http://www.w3.org/ns/sosa/hasSimpleResult> {timestamp}^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+source	    SELECT * FROM sensor
+]]
