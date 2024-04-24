@@ -128,45 +128,59 @@ public class StrStartsFunctionTest extends AbstractRDF4JTest{
                 " OPTIONAL { \n"+
                 "  ?s schema:belongs ?person. \n" +
                 " } \n" +
-                " BIND( COALESCE(STRSTARTS(STR(?person), \"http://www.schema.org\"), \"null\") AS ?res) \n"+
+                " BIND( COALESCE(STRSTARTS(STR(?person), \"http://www.schema.org\"), \"default\") AS ?res) \n"+
                 "}";
 
         ImmutableList<ImmutableMap<String, String>> result = executeQuery(query);
-        assertTrue(result.stream().anyMatch(r -> Objects.equals(r.get("res"), "null")));
+        assertTrue(result.stream().anyMatch(r -> Objects.equals(r.get("res"), "default")));
     }
 
     @Test
-    @Ignore("No optimization done for concat function")
+    @Ignore("Optimization missing for concat function")
     public void testStrStartsConcat() {
         String query = "PREFIX schema: <http://www.schema.org/>\n" +
                 "PREFIX sosa: <http://www.w3.org/ns/sosa/>\n" +
                 "SELECT DISTINCT ?s \n" +
                 "WHERE {\n" +
-                "?s ?p ?o" +
-                " FILTER (STRSTARTS(CONCAT(STR(?o), \"a\"), \"http://www.schema.org\"))\n"+
+                "?s ?p ?o. \n" +
+                "?s a schema:Person. \n" +
+                " FILTER (STRSTARTS(CONCAT(STR(?s), \"a\"), \"http://www.schema.org\"))\n"+
                 "}";
+        String reformulatedQuery = reformulateIntoNativeQuery(query).toLowerCase();
+        assertFalse(reformulatedQuery.contains("substring"));
+
         ImmutableList<ImmutableMap<String, String>> result = executeQuery(query);
-        assertEquals(result, ImmutableList.of());
+        assertEquals(result, ImmutableList.of(
+                ImmutableMap.of("s", "http://www.schema.org/Person/1"),
+                ImmutableMap.of("s", "http://www.schema.org/Person/2"),
+                ImmutableMap.of("s", "http://www.schema.org/Person/3"),
+                ImmutableMap.of("s", "http://www.schema.org/Person/4"))
+        );
     }
 
     @Test
-    @Ignore("No optimization done for concat function")
+    @Ignore("Optimization missing for concat function")
     public void testStrStartsConcatNull() {
         String query = "PREFIX schema: <http://www.schema.org/>\n" +
                 "PREFIX sosa: <http://www.w3.org/ns/sosa#>\n" +
-                "SELECT ?person ?name \n" +
+                "SELECT ?person ?res \n" +
                 "WHERE {\n" +
                 " ?person a schema:Person.\n" +
                 " OPTIONAL {"+
                 "  ?person schema:givenName ?name.\n" +
-                "  FILTER (STRSTARTS(CONCAT(?name, \"a\"), \"Ma\"))\n"+
-                "}}";
+                "}" +
+                " BIND( COALESCE(STRSTARTS(" +
+                "                STR(CONCAT(?name, \"a\")), " +
+                "                \"http://www.schema.org\"), " +
+                "       \"default\") " +
+                " AS ?res) \n"+
+                "}";
         ImmutableList<ImmutableMap<String, String>> result = executeQuery(query);
         assertEquals(result, ImmutableList.of(
-                ImmutableMap.of("person", "http://www.schema.org/Person/2"),
-                ImmutableMap.of("person", "http://www.schema.org/Person/3"),
-                ImmutableMap.of("person", "http://www.schema.org/Person/4"),
-                ImmutableMap.of("person", "http://www.schema.org/Person/1", "name", "Mary"))
+                ImmutableMap.of("person", "http://www.schema.org/Person/3", "res", "default"),
+                ImmutableMap.of("person", "http://www.schema.org/Person/4", "res", "false"),
+                ImmutableMap.of("person", "http://www.schema.org/Person/2", "res", "false"),
+                ImmutableMap.of("person", "http://www.schema.org/Person/1", "res", "false"))
         );
     }
 

@@ -45,22 +45,21 @@ public class DefaultDBStrStartsWithFunctionSymbol extends DBBooleanFunctionSymbo
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory, VariableNullability variableNullability) {
         if (newTerms.get(1) instanceof DBConstant) {
-            DBConstant pattern = (DBConstant) newTerms.get(1);
+            String prefixString = ((DBConstant) newTerms.get(1)).getValue();
 
             if (newTerms.get(0) instanceof DBConstant) {
-                DBConstant value = (DBConstant) newTerms.get(0);
-                return value.getValue().startsWith(pattern.getValue())
-                        ? termFactory.getTrueOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNotNull(value)))
-                        : termFactory.getFalseOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNull(value)));
+                DBConstant firstConstant = (DBConstant) newTerms.get(0);
+                return termFactory.getDBBooleanConstant(firstConstant.getValue().startsWith(prefixString));
             }
 
             if (newTerms.get(0) instanceof ImmutableFunctionalTerm) {
-                ImmutableFunctionalTerm value = (ImmutableFunctionalTerm) newTerms.get(0);
-                if (value.getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol) {
-                    IRIStringTemplateFunctionSymbol iriTemplate = (IRIStringTemplateFunctionSymbol) value.getFunctionSymbol();
-                    return iriTemplate.getTemplate().startsWith(pattern.getValue())
-                            ? termFactory.getTrueOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNotNull(value)))
-                            : termFactory.getFalseOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNull(value)));
+                ImmutableFunctionalTerm firstNonFunctionalTerm = (ImmutableFunctionalTerm) newTerms.get(0);
+                if (firstNonFunctionalTerm.getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol) {
+                    IRIStringTemplateFunctionSymbol iriTemplate = (IRIStringTemplateFunctionSymbol) firstNonFunctionalTerm.getFunctionSymbol();
+                    ImmutableTerm simplifiedTerm = iriTemplate.getTemplate().startsWith(prefixString)
+                            ? termFactory.getTrueOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNotNull(firstNonFunctionalTerm)))
+                            : termFactory.getFalseOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNull(firstNonFunctionalTerm)));
+                    return simplifiedTerm.simplify(variableNullability);
                 }
 
             }
