@@ -11,8 +11,7 @@ import org.semanticweb.owlapi.reasoner.NodeSet;
 
 import java.util.Properties;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.*;
 
 public class TBoxClassificationTest {
@@ -120,9 +119,60 @@ public class TBoxClassificationTest {
         manager.addAxiom(ontology, SubClassOf(C, B));
 
         startReasoner();
-        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(ObjectSomeValuesFrom(r1, OWLThing()), false);
+        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(ObjectSomeValuesFrom(r1, OWLThing()), false); //Also add test for inverse
         //subClasses.forEach(System.out::println);
         assertTrue(subClasses.containsEntity(A));
+//        assertTrue(subClasses.containsEntity(OWLNothing())); //Maybe add it to QuestOWL??
+    }
+
+    @Test
+    public void testSubsumptionWithSomeValues2() throws Exception {
+        // reset/recreate the ontology in each test
+        manager.addAxiom(ontology, SubClassOf(A, C));
+        manager.addAxiom(ontology, SubClassOf(B, C));
+        manager.addAxiom(ontology, EquivalentClasses(A, B));
+
+        startReasoner();
+        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(C, false);
+        //subClasses.forEach(System.out::println);
+        assertTrue(subClasses.containsEntity(A));
+        assertTrue(subClasses.containsEntity(B));
+        assertEquals(1, subClasses.getNodes().size()); //Flatmap means we dont get a node for each equivalent class
+//        assertTrue(subClasses.containsEntity(OWLNothing())); //Maybe add it to QuestOWL??
+    }
+
+    @Test
+    public void testSubsumptionWithSomeValues3() throws Exception {
+        // reset/recreate the ontology in each test
+        manager.addAxiom(ontology, SubClassOf(A, C));
+        manager.addAxiom(ontology, SubClassOf(B, C));
+        manager.addAxiom(ontology, EquivalentClasses(A, B));
+        manager.addAxiom(ontology, EquivalentClasses(C, D));
+
+        startReasoner();
+        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(C, false);
+        //subClasses.forEach(System.out::println);
+        assertTrue(subClasses.containsEntity(A));
+        assertTrue(subClasses.containsEntity(B));
+        assertEquals(1, subClasses.getNodes().size()); //Flatmap means we dont get a node for each equivalent class
+//        assertTrue(subClasses.containsEntity(OWLNothing())); //Maybe add it to QuestOWL??
+    }
+
+    @Test
+    public void testSubsumptionWithSomeValues4() throws Exception {
+        // reset/recreate the ontology in each test
+        manager.addAxiom(ontology, SubClassOf(A, C));
+        manager.addAxiom(ontology, SubClassOf(B, C));
+        manager.addAxiom(ontology, EquivalentClasses(A, B));
+        manager.addAxiom(ontology, EquivalentClasses(C, D));
+        manager.addAxiom(ontology, EquivalentClasses(ObjectSomeValuesFrom(r1, OWLThing()), B));
+
+        startReasoner();
+        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(C, false);
+        //subClasses.forEach(System.out::println);
+        assertTrue(subClasses.containsEntity(A));
+        assertTrue(subClasses.containsEntity(B));
+        assertEquals(1, subClasses.getNodes().size()); //Flatmap means we dont get a node for each equivalent class
 //        assertTrue(subClasses.containsEntity(OWLNothing())); //Maybe add it to QuestOWL??
     }
 
@@ -226,6 +276,45 @@ public class TBoxClassificationTest {
         startReasoner();
         NodeSet<OWLObjectPropertyExpression> subProperties = reasoner.getSubObjectProperties(r2, false);
         assertTrue(subProperties.containsEntity(r1));
+    }
+
+//    10:30:02 From Guohui Xiao to Everyone:
+//    Some(r1) subClassOf Some(r2)
+//            10:30:26 From Guohui Xiao to Everyone:
+//    Give me all the subClassesOf Some(r2-)
+//10:30:33 From Guohui Xiao to Everyone:
+//    Some(r1-)
+//10:30:54 From Guohui Xiao to Everyone:
+//    Some(r1-) subClassOf Some(r2-)
+//            10:31:37 From Guohui Xiao to Everyone:
+//    Some(r3) subClassOf Some(r4-)
+//            10:46:11 From Guohui Xiao to Everyone:
+//    Test1:
+//            10:46:21 From Guohui Xiao to Everyone:
+//    A1 subClassOf B
+//10:46:26 From Guohui Xiao to Everyone:
+//    A2 subClassOf B
+//10:46:34 From Guohui Xiao to Everyone:
+//    A1 = A2
+//10:46:52 From Guohui Xiao to Everyone:
+//    getSubClassesof(B) = {A1, A2}
+
+    @Test
+    public void testObjectPropertySubsumption1() throws Exception {
+        //FIXME: still work in progress
+//        OWLObjectProperty r1Inverse = ObjectProperty(IRI.create(prefix + "r1Inverse"));
+        manager.addAxiom(ontology, SubClassOf(ObjectSomeValuesFrom(r1, OWLThing()), ObjectSomeValuesFrom(r2, OWLThing())));
+
+
+        OWLObjectPropertyExpression r2Inverse = r2.getInverseProperty();
+
+//        manager.addAxiom(ontology, InverseObjectProperties(r1, r1Inverse));
+//        manager.addAxiom(ontology, SubObjectPropertyOf(r1, r2));
+
+        startReasoner();
+        NodeSet<OWLObjectPropertyExpression> subProperties = reasoner.getSubObjectProperties(r2Inverse, false);
+//        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(ObjectSomeValuesFrom(r2Inverse, OWLThing()), false);
+//        assertTrue(subClasses.containsEntity(r1));
     }
 
     // Newly created (simple) tests

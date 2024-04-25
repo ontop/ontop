@@ -213,7 +213,8 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	@Nonnull
 	@Override
 	public FreshEntityPolicy getFreshEntityPolicy() {
-		return structuralReasoner.getFreshEntityPolicy();
+		// FIXME: Copied from StructuralReasoner.
+		return FreshEntityPolicy.ALLOW;
 	}
 
 	/**
@@ -225,7 +226,8 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	@Nonnull
 	@Override
 	public IndividualNodeSetPolicy getIndividualNodeSetPolicy() {
-		return structuralReasoner.getIndividualNodeSetPolicy();
+		// FIXME: Copied from StructuralReasoner.
+		return IndividualNodeSetPolicy.BY_NAME;
 	}
 
 	/**
@@ -438,7 +440,9 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	@Override
 	public boolean isSatisfiable(@Nonnull OWLClassExpression classExpression) throws ReasonerInterruptedException, TimeOutException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, InconsistentOntologyException {
-		return structuralReasoner.isSatisfiable(classExpression);
+		// FIXME: Copied from StructuralReasoner.
+		return !classExpression.isAnonymous() && !getEquivalentClasses(classExpression.asOWLClass())
+				.contains(owlDataFactory.getOWLNothing());
 	}
 
 	@Nonnull
@@ -450,56 +454,35 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	@Override
 	public boolean isEntailed(@Nonnull OWLAxiom axiom) throws ReasonerInterruptedException, UnsupportedEntailmentTypeException, TimeOutException,
 			AxiomNotInProfileException, FreshEntitiesException, InconsistentOntologyException {
+		// TODO: Need to look into, can become quite complex
 		return structuralReasoner.isEntailed(axiom);
 	}
 
 	@Override
 	public boolean isEntailed(@Nonnull Set<? extends OWLAxiom> axioms) throws ReasonerInterruptedException, UnsupportedEntailmentTypeException,
 			TimeOutException, AxiomNotInProfileException, FreshEntitiesException, InconsistentOntologyException {
+		// TODO: Need to look into, can become quite complex
 		return structuralReasoner.isEntailed(axioms);
 	}
 
 	@Override
 	public boolean isEntailmentCheckingSupported(@Nonnull AxiomType<?> axiomType) {
+		// TODO: Switch cases where we put our supported axioms?
 		return structuralReasoner.isEntailmentCheckingSupported(axiomType);
 	}
 
 	@Nonnull
 	@Override
 	public Node<OWLClass> getTopClassNode() {
-		return structuralReasoner.getTopClassNode();
+		OWLClass owlThing = owlDataFactory.getOWLThing();
+		return getEquivalentClasses(owlThing);
 	}
 
 	@Nonnull
 	@Override
 	public Node<OWLClass> getBottomClassNode() {
-
 		OWLClass owlNothing = owlDataFactory.getOWLNothing();
-
-		return getEquivalentClasses((OWLClassExpression) owlNothing);
-
-//		OntologyVocabularyCategory<OClass> oClasses = classifiedTBox.classes();
-//		OWLClass nothing = owlDataFactory.getOWLNothing();
-//
-//		Set<OWLClass> bottoms = new HashSet<>();
-//		//bottoms.add(nothing);
-//
-//		//TODO: ClassifiedTBox implementation may be incomplete - must go through this with supervisor
-//		for (OClass oClass : oClasses) {
-//			boolean isBottom = oClass.isBottom();
-//
-//			if (isBottom) {
-//				String iriString = oClass.getIRI().getIRIString();
-//				org.semanticweb.owlapi.model.IRI OWLiri = org.semanticweb.owlapi.model.IRI.create(iriString);
-//				bottoms.add(owlDataFactory.getOWLClass(OWLiri));
-//				//bottomClass = owlDataFactory.getOWLClass(OWLiri);
-//
-//				//return new OWLClassNode(bottomClass);
-//			}
-//		}
-//
-//		return new OWLClassNode(bottoms);
-//		return structuralReasoner.getBottomClassNode();
+		return getEquivalentClasses(owlNothing);
 	}
 
 	@Nonnull
@@ -517,13 +500,20 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 						: classifiedTBox.classesDAG().getSub(equivalences);
 
 				Set<Node<OWLClass>> classes;
+
 				classes = subClasses.stream()
-						.flatMap(x -> x.getMembers().stream())
-						.filter(y -> y != oClass)
-						.filter(x -> x instanceof OClass)
-						.map(x -> oClassAsOWLClass((OClass) x))
+						.filter(y -> !y.contains(oClass))
+						.map(this::equivalencesAsOWLClassSet)
 						.map(OWLClassNode::new)
 						.collect(Collectors.toSet());
+
+//				classes = subClasses.stream()
+//						.flatMap(x -> x.getMembers().stream()) // Need to replace the use of flatMap
+//						.filter(y -> y != oClass)
+//						.filter(x -> x instanceof OClass)
+//						.map(x -> oClassAsOWLClass((OClass) x))
+//						.map(OWLClassNode::new)
+//						.collect(Collectors.toSet());
 				return new OWLClassNodeSet(classes);
 			case OBJECT_SOME_VALUES_FROM:
 				OWLObjectSomeValuesFrom owlSomeValuesFrom = (OWLObjectSomeValuesFrom) ce;
@@ -538,9 +528,9 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 					// This is another way to maybe do it?
 //					property.getInverseProperty().getNamedProperty();
 
-					if(propertyExpression.isAnonymous()) {
-						objectPropertyExpression = objectPropertyExpression.getInverse();
-					}
+//					if(propertyExpression.isAnonymous()) {
+//						objectPropertyExpression = objectPropertyExpression.getInverse();
+//					}
 
 					ObjectSomeValuesFrom oSomeValuesFrom = objectPropertyExpression.getDomain();
 
@@ -587,6 +577,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 				return new OWLClassNodeSet();
 		}
 	}
+
 
 	@Nonnull
 	@Override
@@ -667,13 +658,13 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	@Nonnull
 	@Override
 	public Node<OWLObjectPropertyExpression> getTopObjectPropertyNode() {
-		return structuralReasoner.getTopObjectPropertyNode();
+		return getEquivalentObjectProperties(owlDataFactory.getOWLTopObjectProperty());
 	}
 
 	@Nonnull
 	@Override
 	public Node<OWLObjectPropertyExpression> getBottomObjectPropertyNode() {
-		return structuralReasoner.getBottomObjectPropertyNode();
+		return getEquivalentObjectProperties(owlDataFactory.getOWLBottomObjectProperty());
 	}
 
 	@Nonnull
@@ -733,6 +724,14 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	@Override
 	public NodeSet<OWLClass> getObjectPropertyDomains(@Nonnull OWLObjectPropertyExpression pe, boolean direct) throws InconsistentOntologyException,
 			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+
+		ObjectPropertyExpression objectPropertyExpression = owlObjectPropertyAsExpression(pe.asOWLObjectProperty());
+		ObjectSomeValuesFrom domain = objectPropertyExpression.getDomain();
+
+		classExpressionToOWL(domain);
+
+//		getEquivalentClasses(domain);
+
 		return structuralReasoner.getObjectPropertyDomains(pe, direct);
 	}
 
@@ -746,20 +745,20 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	@Nonnull
 	@Override
 	public Node<OWLDataProperty> getTopDataPropertyNode() {
-		return structuralReasoner.getTopDataPropertyNode();
+		return getEquivalentDataProperties(owlDataFactory.getOWLTopDataProperty());
 	}
 
 	@Nonnull
 	@Override
 	public Node<OWLDataProperty> getBottomDataPropertyNode() {
-		return structuralReasoner.getBottomDataPropertyNode();
+		return getEquivalentDataProperties(owlDataFactory.getOWLBottomDataProperty());
 	}
 
 	@Nonnull
 	@Override
 	public NodeSet<OWLDataProperty> getSubDataProperties(@Nonnull OWLDataProperty pe, boolean direct) throws InconsistentOntologyException,
 			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-		OWLDataProperty owlDataProperty = pe.asOWLDataProperty();
+		OWLDataProperty owlDataProperty = pe.asOWLDataProperty(); // This is the same as the input pe ?? Redundant
 
 		DataPropertyExpression dataPropertyExpression = owlDataPropertyAsExpression(owlDataProperty);
 		Equivalences<DataPropertyExpression> equivalences = dataPropertyExpressionToEquivalences(dataPropertyExpression);
@@ -782,7 +781,23 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	@Override
 	public NodeSet<OWLDataProperty> getSuperDataProperties(@Nonnull OWLDataProperty pe, boolean direct) throws InconsistentOntologyException,
 			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-		return structuralReasoner.getSuperDataProperties(pe, direct);
+		DataPropertyExpression dataPropertyExpression = owlDataPropertyAsExpression(pe);
+		Equivalences<DataPropertyExpression> equivalences = dataPropertyExpressionToEquivalences(dataPropertyExpression);
+
+		ImmutableSet<Equivalences<DataPropertyExpression>> superDataProperties = direct
+				? classifiedTBox.dataPropertiesDAG().getDirectSuper(equivalences)
+				: classifiedTBox.dataPropertiesDAG().getSuper(equivalences);
+
+		Set<Node<OWLDataProperty>> collect = superDataProperties.stream()
+				.flatMap(x -> x.getMembers().stream())
+				.filter(y -> y != dataPropertyExpression)
+				.map(this::expressionAsOWLDataProperty)
+				.map(OWLDataPropertyNode::new)
+				.collect(Collectors.toSet());
+
+		return new OWLDataPropertyNodeSet(collect);
+
+//		return structuralReasoner.getSuperDataProperties(pe, direct);
 	}
 
 	@Nonnull
@@ -819,6 +834,8 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
 		return structuralReasoner.getInstances(ce, direct);
 	}
+
+	// FIXME: Should I concern myself with the below methods?
 
 	@Nonnull
 	@Override
@@ -868,9 +885,36 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		return classifiedTBox.classes().get(iri);
 	}
 
+	private Set<OWLClass> equivalencesAsOWLClassSet(Equivalences<ClassExpression> equiv) {
+		return equiv.getMembers().stream()
+				.filter(x -> x instanceof OClass)
+				.map((ClassExpression oClass) -> oClassAsOWLClass((OClass) oClass))
+				.collect(Collectors.toSet());
+	}
+
+
 	private OWLClass oClassAsOWLClass(OClass oClass) {
 		String iriString = oClass.getIRI().getIRIString();
 		return owlDataFactory.getOWLClass(org.semanticweb.owlapi.model.IRI.create(iriString));
+	}
+
+	private OWLClassExpression classExpressionToOWL(ClassExpression ce) {
+		if (ce instanceof OClass) {
+			OClass oClass = (OClass) ce;
+			String iriString = oClass.getIRI().getIRIString();
+			return owlDataFactory.getOWLClass(org.semanticweb.owlapi.model.IRI.create(iriString));
+		}
+		if (ce instanceof ObjectSomeValuesFrom) {
+			ObjectSomeValuesFrom objectSomeValuesFrom = (ObjectSomeValuesFrom) ce;
+
+			ObjectPropertyExpression property = objectSomeValuesFrom.getProperty();
+
+			OWLObjectProperty owlObjectProperty = expressionAsOWLObjectProperty(property);
+
+//			OWLClassExpression filler = objectSomeValuesFrom.getFiller();
+			return owlDataFactory.getOWLObjectSomeValuesFrom(owlObjectProperty, owlDataFactory.getOWLThing());
+		}
+		return null;
 	}
 
 	private ObjectPropertyExpression owlObjectPropertyAsExpression(OWLObjectProperty property) {
