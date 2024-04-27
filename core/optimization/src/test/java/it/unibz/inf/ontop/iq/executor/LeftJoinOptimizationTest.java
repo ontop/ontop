@@ -5738,6 +5738,56 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(IQ_FACTORY.createIQ(projectionAtom, distinctTree), IQ_FACTORY.createIQ(projectionAtom, newTree));
     }
 
+    @Test
+    public void testSelfLeftJoinWithProvenanceBlockedByDistinct3() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(A, C));
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of());
+
+        var substitution = SUBSTITUTION_FACTORY.getSubstitution(C, TERM_FACTORY.getProvenanceSpecialConstant());
+
+        var leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                dataNode1,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(C), substitution),
+                        dataNode2));
+
+        var distinctTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createDistinctNode(),
+                leftJoinTree);
+
+        var newTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(), substitution),
+                dataNode1);
+
+        optimizeAndCompare(IQ_FACTORY.createIQ(projectionAtom, distinctTree), IQ_FACTORY.createIQ(projectionAtom, newTree));
+    }
+
+
+    @Test
+    public void testSelfLeftJoinSameVarsDistinct1() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(A, B));
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 2, B));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(2, B));
+
+        var leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                dataNode1,
+                dataNode2);
+
+        var distinctTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createDistinctNode(),
+                leftJoinTree);
+
+
+        optimizeAndCompare(IQ_FACTORY.createIQ(projectionAtom, distinctTree), IQ_FACTORY.createIQ(projectionAtom, dataNode1));
+    }
+
 
     private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
         LOGGER.debug("Initial query: "+ initialIQ);

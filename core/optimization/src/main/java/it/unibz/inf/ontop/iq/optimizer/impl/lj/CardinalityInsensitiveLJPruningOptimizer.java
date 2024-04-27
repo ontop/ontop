@@ -15,9 +15,15 @@ import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerIm
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Prunes right children when their variables are not used outside the LJ
@@ -58,6 +64,9 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
         private final CoreSingletons coreSingletons;
         private final ImmutableSet<Variable> variablesUsedByAncestors;
         private final IntermediateQueryFactory iqFactory;
+        private final TermFactory termFactory;
+        private final DBConstant provConstant;
+        private final SubstitutionFactory substitutionFactory;
 
         protected CardinalityInsensitiveLJPruningTransformer(IQTreeTransformer lookForDistinctTransformer,
                                                              CoreSingletons coreSingletons,
@@ -66,6 +75,9 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
             this.coreSingletons = coreSingletons;
             this.variablesUsedByAncestors = variablesUsedByAncestors;
             this.iqFactory = coreSingletons.getIQFactory();
+            this.termFactory = coreSingletons.getTermFactory();
+            this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+            this.provConstant = termFactory.getProvenanceSpecialConstant();
         }
 
         @Override
@@ -115,9 +127,16 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
 
             var leftVariables = leftChild.getVariables();
 
-            if (treeVariables.isEmpty() || leftVariables.containsAll(Sets.intersection(variablesUsedByAncestors, treeVariables)))
+            var usedVariables = Sets.intersection(variablesUsedByAncestors, treeVariables);
+
+            if (treeVariables.isEmpty() || leftVariables.containsAll(usedVariables))
                 // Prunes the right child
                 return leftChild.acceptTransformer(this);
+
+            var provVariables = extractProvenanceVariables(rightChild);
+            if ((!provVariables.isEmpty()) && leftVariables.containsAll(Sets.difference(usedVariables, provVariables)))
+                return liftProvenanceAndPruneRightChild(leftChild, rightChild, provVariables, treeVariables);
+
 
             var commonVariables = Sets.intersection(leftVariables, rightChild.getVariables());
 
@@ -137,6 +156,46 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
             return newLeft.equals(leftChild) && newRight.equals(rightChild)
                     ? tree
                     : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeft, newRight);
+        }
+
+        private IQTree liftProvenanceAndPruneRightChild(IQTree leftChild, IQTree rightChild,
+                                                        ImmutableSet<Variable> provVariables,
+                                                        ImmutableSet<Variable> treeVariables) {
+            var leftVariables = leftChild.getVariables();
+            var commonVariables = Sets.intersection(leftVariables, rightChild.getVariables());
+            var commonProvVariables = Sets.intersection(commonVariables, provVariables);
+
+            var condition = termFactory.getConjunction(Stream.concat(
+                    commonVariables.stream()
+                            .map(termFactory::getDBIsNotNull),
+                    // Should not happen in practice, but just in case
+                    commonProvVariables.stream()
+                            .map(v -> termFactory.getStrictEquality(v, provConstant)
+                    )));
+
+            var constructionNode = condition
+                    .map(c -> provVariables.stream().collect(
+                            substitutionFactory.toSubstitution(v -> termFactory.getIfElseNull(c, provConstant))))
+                    .map(s -> iqFactory.createConstructionNode(treeVariables, s));
+
+            var newLeftChild = leftChild.acceptTransformer(this);
+
+            return constructionNode
+                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newLeftChild))
+                    .orElse(newLeftChild);
+        }
+
+        private ImmutableSet<Variable> extractProvenanceVariables(IQTree rightChild) {
+            var rootNode = rightChild.getRootNode();
+            if (rootNode instanceof ConstructionNode) {
+                var substitution = ((ConstructionNode) rootNode).getSubstitution();
+                return substitution.stream()
+                        .filter(e -> e.getValue().equals(provConstant))
+                        .map(Map.Entry::getKey)
+                        .collect(ImmutableSet.toImmutableSet());
+            }
+            else
+                return ImmutableSet.of();
         }
 
         @Override
