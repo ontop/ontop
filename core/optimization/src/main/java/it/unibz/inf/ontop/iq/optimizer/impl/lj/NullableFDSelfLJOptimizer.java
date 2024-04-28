@@ -118,10 +118,6 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
                             .containsAll(rightArgumentMap.keySet()))
                     .collect(ImmutableCollectors.toList());
 
-            // TODO: relax for trivial FDs
-            if (nullableCoveringFDs.isEmpty())
-                return Optional.empty();
-
             var transfer = requiredDataNodeExtractor.extractSomeRequiredNodes(leftChild, true)
                     .flatMap(left -> tryToTransfer(left, rightNode, nullableCoveringFDs).stream())
                     .findAny();
@@ -166,7 +162,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
                     .filter(fd -> fd.getDeterminants().stream().allMatch(a -> commonArgumentMap.containsKey(a.getIndex() - 1)))
                     .findAny();
 
-            return selectedFD.map(fd -> {
+            var fdTransfer = selectedFD.map(fd -> {
                 var dependentIndexes = fd.getDependents().stream()
                         .map(a -> a.getIndex() - 1)
                         .collect(ImmutableCollectors.toSet());
@@ -181,6 +177,20 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
                         .filter(e -> dependentIndexes.contains(e.getKey()))
                         .collect(ImmutableCollectors.toMap()));
             });
+
+            if (fdTransfer.isPresent())
+                return fdTransfer;
+
+            // Trivial FD case (same dependents as determinants)
+            if (rightArgumentMap.equals(commonArgumentMap)) {
+                var determinantVariables = commonArgumentMap.values().stream()
+                        .filter(t -> t instanceof Variable)
+                        .map(t -> (Variable) t)
+                        .collect(ImmutableCollectors.toSet());
+
+                return Optional.of(new Transfer(leftNode, determinantVariables, ImmutableMap.of()));
+            }
+            return Optional.empty();
         }
 
         private IQTree updateLeftTree(Transfer transfer, IQTree leftChild, Optional<ImmutableExpression> optionalFilterCondition,
