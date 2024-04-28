@@ -5767,6 +5767,35 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(IQ_FACTORY.createIQ(projectionAtom, distinctTree), IQ_FACTORY.createIQ(projectionAtom, newTree));
     }
 
+    @Test
+    public void testSelfLeftJoinWithProvenanceBlockedByDistinct4() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(A, C));
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 2, ONE));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(2, ONE));
+
+        var substitution = SUBSTITUTION_FACTORY.getSubstitution(C, TERM_FACTORY.getProvenanceSpecialConstant());
+
+        var leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                dataNode1,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(C), substitution),
+                        dataNode2));
+
+        var distinctTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createDistinctNode(),
+                leftJoinTree);
+
+        var newTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(), substitution),
+                dataNode1);
+
+
+        optimizeAndCompare(IQ_FACTORY.createIQ(projectionAtom, distinctTree), IQ_FACTORY.createIQ(projectionAtom, newTree));
+    }
+
 
     @Test
     public void testSelfLeftJoinWithProvenanceBlockedByDistinct8() {
