@@ -11,6 +11,11 @@ sosa:		http://www.w3.org/ns/sosa/
 rasdb:		http://www.semanticweb.org/RasterDataCube/
 
 [MappingDeclaration] @collection [[
+
+mappingId	mapping_checkConn
+target		:conn/{gid} rasdb:hasConnection {conn}^^xsd:string .
+source		select 404 as gid, rasdaman_op.check_rasdaman_conn() as conn
+
 mappingId	mapping_region_class
 target		:region/{gid} a :region .
 source		select gid from region_bavaria;

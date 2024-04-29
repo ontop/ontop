@@ -23,13 +23,17 @@ mappingId	mapping_region_geometry
 target		:region/{gid} geo:asWKT {geometry}^^geo:wktLiteral .
 source		select gid, st_astext((st_dump(geom)).geom) as geometry from four_regions
 
-mappingId	mapping_checkConn
-target		:conn/{gid} rasdb:hasConnection {conn}^^xsd:string .
-source		SELECT 404 AS gid, rasdaman_op.check_rasdaman_conn() AS conn
 
-mappingId	mapping_rastername_lookup
+mappingId	mapping_rastername_based_on_vector_region_lookup
 target		:raster/{raster_id} rasdb:hasRasterName {raster_name}^^xsd:string .
-source		SELECT DISTINCT id AS raster_id, coverage_id AS raster_name FROM lookup_main
+source		SELECT DISTINCT id as raster_id, coverage_id as raster_name
+            FROM lookup_main
+            WHERE max_lat > (SELECT  ST_YMax(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM four_regions as m
+            WHERE   m.name_2 = 'Stockholm') AND min_lat < (SELECT  ST_YMin(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM four_regions as m
+            WHERE   m.name_2 = 'Stockholm') AND max_long > (SELECT  ST_XMax(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM four_regions as m
+            WHERE   m.name_2 = 'Stockholm') AND min_long < (SELECT  ST_XMin(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM four_regions as m
+            WHERE   m.name_2 = 'Stockholm')
+
 
 mappingId	mapping_get_raster_spatial_extent_lookup
 target		:raster/{raster_id} rasdb:hasMaxLatitude {max_lat}^^xsd:double ; rasdb:hasMinLatitude {min_lat}^^xsd:double ; rasdb:hasMaxLongitude {max_long}^^xsd:double ; rasdb:hasMinLongitude {min_long}^^xsd:double .

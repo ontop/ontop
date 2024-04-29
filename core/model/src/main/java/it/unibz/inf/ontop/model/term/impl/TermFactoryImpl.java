@@ -580,6 +580,12 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getRasterSpatialMaximumX(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbMinLon, ImmutableTerm dbMaxLat, ImmutableTerm dbXscale, ImmutableTerm dbYscale, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialMaximumX(), ImmutableList.of(TimeSnap, dbRegionGeom, dbMinLon, dbMaxLat, dbXscale, dbYscale, dbRasterName));
+	}
+
+
+	@Override
 	public ImmutableFunctionalTerm getRasterSpatialMinimumX(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbMinLon, ImmutableTerm dbMaxLat, ImmutableTerm dbXscale, ImmutableTerm dbYscale, ImmutableTerm dbRasterName){
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialMinimumX(), ImmutableList.of(TimeSnap, dbRegionGeom, dbMinLon, dbMaxLat, dbXscale, dbYscale, dbRasterName));
 	}

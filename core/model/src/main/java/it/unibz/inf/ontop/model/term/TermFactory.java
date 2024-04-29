@@ -572,6 +572,8 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getRasterSpatialMinimum(ImmutableTerm TimeSnap, ImmutableTerm ScaleFactor, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
 
+	ImmutableFunctionalTerm getRasterSpatialMaximumX(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbMinLon, ImmutableTerm dbMaxLat, ImmutableTerm dbXscale, ImmutableTerm dbYscale, ImmutableTerm dbRasterName);
+
 	ImmutableFunctionalTerm getRasterSpatialMinimumX(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbMinLon, ImmutableTerm dbMaxLat, ImmutableTerm dbXscale, ImmutableTerm dbYscale, ImmutableTerm dbRasterName);
 
 	ImmutableFunctionalTerm getClipRaster(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
