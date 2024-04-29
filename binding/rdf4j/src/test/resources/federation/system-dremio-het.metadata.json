@@ -1,0 +1,3836 @@
+{
+  "relations" : [ {
+    "columns" : [ {
+      "name" : "\"product\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"productfeature\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    } ],
+    "name" : [ "\"s5p\"", "\"productfeatureproduct2.csv.gz\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"smatv.main\"", "\"matv_s5_productfeatureproduct2_s3_productfeature\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"matv_s5_productfeatureproduct2_s3_productfeature\"" ],
+    "otherNames" : [ [ "\"matv_s5_productfeatureproduct2_s3_productfeature\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"policy_category_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"mandate_database_subscriptions\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"syspolicy_policy_categories\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"label\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"comment\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"producer\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum6\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertytex1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex3\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex4\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex5\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex6\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"product2\"" ],
+    "otherNames" : [ [ "\"product2\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"label\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"comment\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"producer\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum6\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertytex1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex3\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex4\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex5\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex6\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"s1.public\"", "\"product1\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"label\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"comment\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"producer\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertynum6\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"propertytex1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex3\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex4\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex5\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex6\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"product1\"" ],
+    "otherNames" : [ [ "\"product1\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"smatv.main\"", "\"matv_s1_productfeatureproduct1_s3_productfeature\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"matv_s1_productfeatureproduct1_s3_productfeature\"" ],
+    "otherNames" : [ [ "\"matv_s1_productfeatureproduct1_s3_productfeature\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"product\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"productfeature\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"s1.public\"", "\"productfeatureproduct1\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"product\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"productfeature\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"bsbm\"", "\"productfeatureproduct1\"" ],
+    "otherNames" : [ [ "\"productfeatureproduct1\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"restore_history_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"restore_date\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"destination_database_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"user_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"backup_set_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"restore_type\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"replace\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"recovery\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"restart\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"stop_at\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"device_count\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"stop_at_mark_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"stop_before\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"restorehistory\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"product\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"productfeature\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"bsbm\"", "\"productfeatureproduct2\"" ],
+    "otherNames" : [ [ "\"productfeatureproduct2\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"product\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"producer\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"vendor\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"price\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"validfrom\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"validto\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"deliverydays\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"offerwebpage\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"offer\"" ],
+    "otherNames" : [ [ "\"offer\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"_id\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"product\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"producer\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"person\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"reviewdate\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"title\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"text\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"language\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"rating2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"rating3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"rating1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"rating4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"s2p.s2p\"", "\"review\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"product\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"producer\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"person\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"reviewdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"title\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"text\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"language\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"rating1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"rating2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"rating3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"rating4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"review\"" ],
+    "otherNames" : [ [ "\"review\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"target_set_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"object_set_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"type_skeleton\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"type\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"enabled\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"syspolicy_target_sets\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"product\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"producer\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"vendor\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"price\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"validfrom\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"validto\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"deliverydays\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"offerwebpage\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    } ],
+    "name" : [ "\"s4p\"", "\"offer.csv.gz\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"detail_id\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"history_id\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"target_query_expression\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"execution_date\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"result\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"result_detail\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"exception_message\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"exception\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"syspolicy_policy_execution_history_details\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"start_time\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"completion_time\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"ag_id\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"ag_db_id\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"ag_remote_replica_id\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"operation_id\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"is_source\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"current_state\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"performed_seeding\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"failure_state\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"failure_state_desc\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"error_code\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"number_of_attempts\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"dm_hadr_automatic_seeding_history\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"history_id\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"policy_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"start_date\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"end_date\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"result\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"exception_message\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"exception\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"syspolicy_policy_execution_history\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"current_value\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"syspolicy_configuration\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"label\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"comment\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"homepage\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"country\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"vendor\"" ],
+    "otherNames" : [ [ "\"vendor\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"label\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"comment\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"s3.s3.dbo\"", "\"productfeature\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"label\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"comment\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"productfeature\"" ],
+    "otherNames" : [ [ "\"productfeature\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"condition_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"date_created\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"description\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"created_by\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"modified_by\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"date_modified\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"is_name_condition\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"facet\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"expression\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"obj_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"is_system\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"syspolicy_conditions\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_8\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_10\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_11\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_12\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_13\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_14\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_15\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_16\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_17\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"smatv.main\"", "\"matv_s5_productfeatureproduct2_s5_product2\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_8\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_10\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_11\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_12\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_13\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_14\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_15\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_16\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_17\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"matv_s5_productfeatureproduct2_s5_product2\"" ],
+    "otherNames" : [ [ "\"matv_s5_productfeatureproduct2_s5_product2\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_6\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_8\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_10\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_11\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_12\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_13\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_14\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_15\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_16\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_17\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"smatv.main\"", "\"matv_s5_product2_s4_producer\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_6\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_8\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_10\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_11\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_12\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_13\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_14\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_15\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_16\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_17\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"matv_s5_product2_s4_producer\"" ],
+    "otherNames" : [ [ "\"matv_s5_product2_s4_producer\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"backup_set_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"first_family_number\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"first_media_number\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"filegroup_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"page_size\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"file_number\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(10)"
+    }, {
+      "name" : "\"backed_up_page_count\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(10)"
+    }, {
+      "name" : "\"file_type\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"source_file_block_size\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(10)"
+    }, {
+      "name" : "\"file_size\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(20)"
+    }, {
+      "name" : "\"logical_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"physical_drive\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"physical_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"state\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"state_desc\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"create_lsn\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(25)"
+    }, {
+      "name" : "\"drop_lsn\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(25)"
+    }, {
+      "name" : "\"file_guid\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"read_only_lsn\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(25)"
+    }, {
+      "name" : "\"read_write_lsn\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(25)"
+    }, {
+      "name" : "\"differential_base_lsn\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(25)"
+    }, {
+      "name" : "\"differential_base_guid\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"backup_size\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(20)"
+    }, {
+      "name" : "\"filegroup_guid\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"is_readonly\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"is_present\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"backupfile\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_4\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"1_5\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"1_6\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"1_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_8\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_10\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_8\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_10\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_11\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_12\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_13\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_14\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_15\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_16\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_17\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"smatv.main\"", "\"matv_s4_offer_s1_product1\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_4\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"1_5\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"1_6\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"1_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_8\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_10\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_8\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_10\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_11\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_12\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_13\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_14\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_15\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_16\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_17\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"matv_s4_offer_s1_product1\"" ],
+    "otherNames" : [ [ "\"matv_s4_offer_s1_product1\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"media_set_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"media_uuid\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"media_family_count\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"description\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"software_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"software_vendor_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"MTF_major_version\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"mirror_count\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"is_password_protected\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"is_compressed\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"is_encrypted\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"backupmediaset\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"target_set_level_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"target_set_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"type_skeleton\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"condition_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"level_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"syspolicy_target_set_levels\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"xserver_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"xdttm_ins\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"xdttm_last_ins_upd\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"xfallback_vstart\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"dbid\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"segmap\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"lstart\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"sizepg\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"vstart\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"s3.master.dbo\"", "\"spt_fallback_usg\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"object_set_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"object_set_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"facet_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"facet_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"is_system\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"syspolicy_object_sets\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"xserver_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"xdttm_ins\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"xdttm_last_ins_upd\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"xfallback_dbid\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"dbid\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"status\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"version\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"s3.master.dbo\"", "\"spt_fallback_db\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"label\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"comment\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"homepage\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"country\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    } ],
+    "name" : [ "\"s4p\"", "\"vendor.csv.gz\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_3\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_4\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_6\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_8\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_10\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"smatv.main\"", "\"matv_s4_vendor_s4_offer\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_3\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_4\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_6\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_8\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_10\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"matv_s4_vendor_s4_offer\"" ],
+    "otherNames" : [ [ "\"matv_s4_vendor_s4_offer\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"product\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"producer\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"person\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"reviewdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"title\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"text\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"language\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"rating1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"rating2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"rating3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"rating4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"s1.public\"", "\"reviewc\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"product\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"producer\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"person\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"reviewdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"title\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"text\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"language\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"rating1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"rating2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"rating3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"rating4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"reviewc\"" ],
+    "otherNames" : [ [ "\"reviewc\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"database_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"mark_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"description\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"user_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"lsn\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(25)"
+    }, {
+      "name" : "\"mark_time\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"logmarkhistory\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"label\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"comment\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"parent\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"s3.s3.dbo\"", "\"producttype\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"label\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"comment\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"parent\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"producttype\"" ],
+    "otherNames" : [ [ "\"producttype\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"instance_id\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"instance_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"type_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"type_version\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"description\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"type_stream\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"date_created\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"created_by\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"database_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"sysdac_instances\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"ManagedBackupVersion\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"IsAlwaysOn\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"IsDropped\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"IsEnabled\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"RetentionPeriod\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"EncryptionAlgorithm\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"SchedulingOption\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"DayOfWeek\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"DatabaseCount\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"autoadmin_backup_configuration_summary\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_6\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_8\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_10\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_11\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_12\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_13\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_14\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_15\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_16\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_17\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"smatv.main\"", "\"matv_s1_product1_s4_producer\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_6\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_8\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_10\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_11\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_12\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_13\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_14\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_15\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_16\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_17\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"matv_s1_product1_s4_producer\"" ],
+    "otherNames" : [ [ "\"matv_s1_product1_s4_producer\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"policy_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"condition_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"root_condition_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"date_created\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"execution_mode\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"policy_category_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"schedule_uid\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"description\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"help_text\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"help_link\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"object_set_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"is_enabled\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"job_id\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"created_by\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"modified_by\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"date_modified\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"is_system\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"syspolicy_policies\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"xserver_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"xdttm_ins\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"xdttm_last_ins_upd\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"xfallback_low\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"xfallback_drive\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"low\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"high\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"status\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"phyname\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    } ],
+    "name" : [ "\"s3.master.dbo\"", "\"spt_fallback_dev\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"backup_set_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"backup_set_uuid\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"media_set_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"first_family_number\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"first_media_number\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"last_family_number\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"last_media_number\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"catalog_family_number\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"catalog_media_number\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"position\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"expiration_date\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"software_vendor_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"description\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"user_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"software_major_version\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"software_minor_version\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"software_build_version\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"time_zone\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"mtf_minor_version\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"first_lsn\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(25)"
+    }, {
+      "name" : "\"last_lsn\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(25)"
+    }, {
+      "name" : "\"checkpoint_lsn\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(25)"
+    }, {
+      "name" : "\"database_backup_lsn\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(25)"
+    }, {
+      "name" : "\"database_creation_date\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"backup_start_date\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"backup_finish_date\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"type\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"sort_order\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"code_page\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"compatibility_level\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"database_version\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"backup_size\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(20)"
+    }, {
+      "name" : "\"database_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"server_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"machine_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"flags\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"unicode_locale\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"unicode_compare_style\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"collation_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"is_password_protected\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"recovery_model\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"has_bulk_logged_data\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"is_snapshot\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"is_readonly\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"is_single_user\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"has_backup_checksums\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"is_damaged\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"begins_log_chain\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"has_incomplete_metadata\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"is_force_offline\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"is_copy_only\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"first_recovery_fork_guid\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"last_recovery_fork_guid\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"fork_point_lsn\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(25)"
+    }, {
+      "name" : "\"database_guid\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"family_guid\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"differential_base_lsn\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(25)"
+    }, {
+      "name" : "\"differential_base_guid\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"compressed_backup_size\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(20)"
+    }, {
+      "name" : "\"key_algorithm\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"encryptor_thumbprint\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"encryptor_type\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"backupset\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_8\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_10\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"smatv.main\"", "\"matv_s5_productfeatureproduct2_s4_offer\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_8\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_10\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"matv_s5_productfeatureproduct2_s4_offer\"" ],
+    "otherNames" : [ [ "\"matv_s5_productfeatureproduct2_s4_offer\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"label\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"comment\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"homepage\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"country\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    } ],
+    "name" : [ "\"s4p\"", "\"producer.csv.gz\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"_id\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"mbox_sha1sum\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"country\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    } ],
+    "name" : [ "\"s2p.s2p\"", "\"person\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"mbox_sha1sum\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"country\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"person\"" ],
+    "otherNames" : [ [ "\"person\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"product\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"producttype\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"s1.public\"", "\"producttypeproduct1\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"restore_history_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"file_number\"",
+      "isNullable" : true,
+      "datatype" : "DECIMAL(10)"
+    }, {
+      "name" : "\"destination_phys_drive\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"destination_phys_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"restorefile\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"product\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"producttype\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"bsbm\"", "\"producttypeproduct1\"" ],
+    "otherNames" : [ [ "\"producttypeproduct1\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"database_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"file_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"page_id\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"event_type\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"error_count\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"last_update_date\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"suspect_pages\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"label\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"comment\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"homepage\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"country\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"producer\"" ],
+    "otherNames" : [ [ "\"producer\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"nr\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"label\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"comment\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"producer\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertynum1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertynum2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertynum3\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertynum4\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertynum5\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertynum6\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex3\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex4\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex5\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"propertytex6\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publisher\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"publishdate\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    } ],
+    "name" : [ "\"s5p\"", "\"product2.csv.gz\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"product\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"producttype\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"bsbm\"", "\"producttypeproduct2\"" ],
+    "otherNames" : [ [ "\"producttypeproduct2\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"product\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"producttype\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    } ],
+    "name" : [ "\"s5p\"", "\"producttypeproduct2.csv.gz\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"policy_category_subscription_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"target_type\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"target_object\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"policy_category_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"syspolicy_policy_category_subscriptions\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_4\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"1_5\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"1_6\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"1_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_8\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_10\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_8\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_10\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_11\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_12\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_13\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_14\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_15\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_16\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_17\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"smatv.main\"", "\"matv_s4_offer_s5_product2\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_4\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"1_5\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"1_6\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"1_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_8\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"1_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_10\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_8\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_10\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_11\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_12\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_13\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_14\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_15\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_16\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_17\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"matv_s4_offer_s5_product2\"" ],
+    "otherNames" : [ [ "\"matv_s4_offer_s5_product2\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"number\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"type\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"low\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"high\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"status\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"s3.master.dbo\"", "\"spt_values\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"restore_history_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"filegroup_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"restorefilegroup\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"lastrun\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"cpu_busy\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"io_busy\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"idle\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"pack_received\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"pack_sent\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"connections\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"pack_errors\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"total_read\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"total_write\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"total_errors\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"s3.master.dbo\"", "\"spt_monitor\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_8\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_10\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"smatv.main\"", "\"matv_s1_productfeatureproduct1_s4_offer\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_8\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"2_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_10\"",
+      "isNullable" : true,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"bsbm\"", "\"matv_s1_productfeatureproduct1_s4_offer\"" ],
+    "otherNames" : [ [ "\"matv_s1_productfeatureproduct1_s4_offer\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"health_state_id\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"policy_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"last_run_date\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"target_query_expression_with_id\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"target_query_expression\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"result\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"syspolicy_system_health_state\"" ]
+  }, {
+    "columns" : [ {
+      "name" : "\"media_set_id\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"family_sequence_number\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"media_family_id\"",
+      "isNullable" : true,
+      "datatype" : "BINARY VARYING"
+    }, {
+      "name" : "\"media_count\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"logical_device_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"physical_device_name\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(65536)"
+    }, {
+      "name" : "\"device_type\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"physical_block_size\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"mirror\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"s3.msdb.dbo\"", "\"backupmediafamily\"" ]
+  } ],
+  "metadata" : {
+    "dbmsProductName" : "Dremio Server",
+    "dbmsVersion" : "24.0.0-202302100528110223-3a169b7c",
+    "driverName" : "Dremio JDBC Driver",
+    "driverVersion" : "24.0.0-202302100528110223-3a169b7c",
+    "quotationString" : "\"",
+    "extractionTime" : "2024-04-29T13:12:01",
+    "idFactoryType" : "DREMIO"
+  }
+}
