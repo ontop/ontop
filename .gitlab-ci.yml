@@ -1,8 +1,25 @@
 image: maven:3.9
 
 all-test:
+  variables:
+    SETTINGS_XML: >-
+      <settings>
+        <proxies>
+          <proxy>
+            <id>code-proxy</id>
+            <active>true</active>
+            <protocol>http</protocol>
+            <host>${CODE_PROXY_HOST}</host>
+            <port>${CODE_PROXY_PORT}</port>
+            <nonProxyHosts>${CODE_NO_PROXY_JVM}</nonProxyHosts>
+          </proxy>
+        </proxies>
+      </settings>
   script:
       #- export JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
+      - echo "$SETTINGS_XML" > code-settings.xml
       - set MAVEN_OPTS="-Xms6000m -Xmx8000m"
-      - ./mvnw install --fail-at-end
+      - ./mvnw -s code-settings.xml install --fail-at-end
       - cd test/docker-tests && ../../mvnw install -Ddocker.url=tom.inf.unibz.it -DskipTests=false --fail-at-end
+  tags:
+    - DOCKER
