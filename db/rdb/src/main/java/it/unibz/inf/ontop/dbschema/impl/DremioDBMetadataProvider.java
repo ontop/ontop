@@ -43,6 +43,24 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
         defaultSchema = localDefaultSchema;
     }
 
+    protected boolean isRelationExcluded(RelationID id) {
+        try {
+            // Check if we can access the table columns, as for some (system?) tables this operation fails in Dremio
+            ResultSet rs = metadata.getColumns(
+                    getRelationCatalog(id),
+                    escapeRelationIdComponentPattern(getRelationSchema(id)),
+                    escapeRelationIdComponentPattern(getRelationName(id)),
+                    null);
+            rs.close();
+        } catch(SQLException ex) {
+            // If not, discard the table
+            return true;
+        }
+
+        // If yes, apply parent exclusion criteria (if any)
+        return super.isRelationExcluded(id);
+    }
+
     @Override
     protected RelationID getCanonicalRelationId(RelationID id) {
         return (defaultSchema == null || id.getComponents().size() > SCHEMA_INDEX)
