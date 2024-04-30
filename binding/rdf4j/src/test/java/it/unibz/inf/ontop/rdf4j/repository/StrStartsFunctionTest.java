@@ -29,11 +29,10 @@ public class StrStartsFunctionTest extends AbstractRDF4JTest{
 
     @Test
     public void testStrStartsConstants() {
-        String query = "PREFIX schema: <http://www.schema.org/>\n" +
-                "PREFIX sosa: <http://www.w3.org/ns/sosa/>\n" +
+        String query = "PREFIX ex: <http://www.example.org/>\n" +
                 "SELECT ?s\n" +
                 "WHERE {\n" +
-                "?s a schema:Result.\n" +
+                "?s a ex:Result.\n" +
                 "FILTER (STRSTARTS(\"name\", \"x\"))\n"+
                 "}";
         ImmutableList<ImmutableMap<String, String>> result = executeQuery(query);
@@ -42,13 +41,12 @@ public class StrStartsFunctionTest extends AbstractRDF4JTest{
 
     @Test
     public void testStrStartsPredicate() {
-        String query = "PREFIX schema: <http://www.schema.org/>\n" +
-                "PREFIX sosa: <http://www.w3.org/ns/sosa/>\n" +
-                "SELECT DISTINCT ?s\n" +
+        String query = "PREFIX ex: <http://www.example.org/>\n" +
+                "SELECT ?s\n" +
                 "WHERE {\n" +
                 " ?s ?p ?o. \n" +
-                " ?s a schema:Person. \n" +
-                " FILTER (STRSTARTS(str(?p), \"http://www.schema.org/givenName\"))\n"+
+                " ?s a ex:Person. \n" +
+                " FILTER (STRSTARTS(str(?p), \"http://www.example.org/givenName\"))\n"+
                 "}";
         // predicates are constants so they can be optimized
         String reformulatedQuery = reformulateIntoNativeQuery(query).toLowerCase();
@@ -56,20 +54,19 @@ public class StrStartsFunctionTest extends AbstractRDF4JTest{
 
         ImmutableList<ImmutableMap<String, String>> result = executeQuery(query);
         assertEquals(result, ImmutableList.of(
-                ImmutableMap.of("s", "http://www.schema.org/Person/1"),
-                ImmutableMap.of("s", "http://www.schema.org/Person/2"),
-                ImmutableMap.of("s", "http://www.schema.org/Person/4")
-        ));
+                ImmutableMap.of("s", "http://www.example.org/Person/1"),
+                ImmutableMap.of("s", "http://www.example.org/Person/2"),
+                ImmutableMap.of("s", "http://www.example.org/Person/4")
+                ));
     }
 
     @Test
     public void testStrStartsIRI() {
-        String query = "PREFIX schema: <http://www.schema.org/>\n" +
-                "PREFIX sosa: <http://www.w3.org/ns/sosa/>\n" +
+        String query = "PREFIX ex: <http://www.example.org/>\n" +
                 "SELECT DISTINCT ?s\n" +
                 "WHERE {\n" +
                 "?s ?p ?o.\n" +
-                " FILTER (STRSTARTS(STR(?s), \"http://www.w3\"))\n"+
+                " FILTER (STRSTARTS(STR(?s), \"http://www.example.org/Re\"))\n"+
                 "}";
 
         String reformulatedQuery = reformulateIntoNativeQuery(query).toLowerCase();
@@ -77,18 +74,17 @@ public class StrStartsFunctionTest extends AbstractRDF4JTest{
 
         ImmutableList<ImmutableMap<String, String>> result = executeQuery(query);
         assertEquals(result, ImmutableList.of(
-                ImmutableMap.of("s", "http://www.w3.org/ns/sosa/Result/1"),
-                ImmutableMap.of("s", "http://www.w3.org/ns/sosa/Result/2")));
+                ImmutableMap.of("s", "http://www.example.org/Result/1"),
+                ImmutableMap.of("s", "http://www.example.org/Result/2")));
     }
 
     @Test
     public void testStrStartsObject() {
-        String query = "PREFIX schema: <http://www.schema.org/>\n" +
-                "PREFIX sosa: <http://www.w3.org/ns/sosa/>\n" +
-                "SELECT DISTINCT ?s\n" +
+        String query = "PREFIX ex: <http://www.example.org/>\n" +
+                "SELECT ?s\n" +
                 "WHERE {\n" +
                 "?s ?p ?o.\n" +
-                "?s a sosa:Result. \n" +
+                "?s a ex:Result. \n" +
                 " FILTER (STRSTARTS(STR(?o), \"2024\"))\n"+
                 "}";
         String reformulatedQuery = reformulateIntoNativeQuery(query).toLowerCase();
@@ -98,12 +94,11 @@ public class StrStartsFunctionTest extends AbstractRDF4JTest{
 
     @Test
     public void testStrStartsComplex() {
-        String query = "PREFIX schema: <http://www.schema.org/>\n" +
-                "PREFIX sosa: <http://www.w3.org/ns/sosa/>\n" +
+        String query = "PREFIX ex: <http://www.example.org/>\n" +
                 "SELECT DISTINCT ?o\n" +
                 "WHERE {\n" +
                 "?s ?p ?o.\n" +
-                " FILTER (STRSTARTS(STR(?o), \"http://www.schema.org\"))\n"+
+                " FILTER (STRSTARTS(STR(?o), \"http://www.example.org\"))\n"+
                 "}";
         String reformulatedQuery = reformulateIntoNativeQuery(query).toLowerCase();
         // some of the objects are iri templates while others aren't
@@ -111,24 +106,24 @@ public class StrStartsFunctionTest extends AbstractRDF4JTest{
 
         ImmutableList<ImmutableMap<String, String>> result = executeQuery(query);
         assertEquals(result, ImmutableList.of(
-                ImmutableMap.of("o", "http://www.schema.org/House"),
-                ImmutableMap.of("o", "http://www.schema.org/Person"),
-                ImmutableMap.of("o", "http://www.schema.org/Person/1"),
-                ImmutableMap.of("o", "http://www.schema.org/Person/2")
-        ));
+                ImmutableMap.of("o", "http://www.example.org/House"),
+                ImmutableMap.of("o", "http://www.example.org/Person"),
+                ImmutableMap.of("o", "http://www.example.org/Person/1"),
+                ImmutableMap.of("o", "http://www.example.org/Person/2"),
+                ImmutableMap.of("o", "http://www.example.org/Result")
+                ));
     }
 
     @Test
     public void testStrStartsNull() {
-        String query = "PREFIX schema: <http://www.schema.org/>\n" +
-                "PREFIX sosa: <http://www.w3.org/ns/sosa/>\n" +
+        String query = "PREFIX ex: <http://www.example.org/>\n" +
                 "SELECT ?res\n" +
                 "WHERE {\n" +
-                " ?s a schema:House.\n" +
+                " ?s a ex:House.\n" +
                 " OPTIONAL { \n"+
-                "  ?s schema:belongs ?person. \n" +
+                "  ?s ex:belongs ?person. \n" +
                 " } \n" +
-                " BIND( COALESCE(STRSTARTS(STR(?person), \"http://www.schema.org\"), \"default\") AS ?res) \n"+
+                " BIND( COALESCE(STRSTARTS(STR(?person), \"http://www.example.org\"), \"default\") AS ?res) \n"+
                 "}";
 
         ImmutableList<ImmutableMap<String, String>> result = executeQuery(query);
@@ -138,49 +133,46 @@ public class StrStartsFunctionTest extends AbstractRDF4JTest{
     @Test
     @Ignore("Optimization missing for concat function")
     public void testStrStartsConcat() {
-        String query = "PREFIX schema: <http://www.schema.org/>\n" +
-                "PREFIX sosa: <http://www.w3.org/ns/sosa/>\n" +
-                "SELECT DISTINCT ?s \n" +
+        String query = "PREFIX ex: <http://www.example.org/>\n" +
+                "SELECT ?s \n" +
                 "WHERE {\n" +
-                "?s ?p ?o. \n" +
-                "?s a schema:Person. \n" +
-                " FILTER (STRSTARTS(CONCAT(STR(?s), \"a\"), \"http://www.schema.org\"))\n"+
+                "?s a ex:Person. \n" +
+                " FILTER (STRSTARTS(CONCAT(STR(?s), \"a\"), \"http://www.example.org\"))\n"+
                 "}";
         String reformulatedQuery = reformulateIntoNativeQuery(query).toLowerCase();
         assertFalse(reformulatedQuery.contains("substring"));
 
         ImmutableList<ImmutableMap<String, String>> result = executeQuery(query);
         assertEquals(result, ImmutableList.of(
-                ImmutableMap.of("s", "http://www.schema.org/Person/1"),
-                ImmutableMap.of("s", "http://www.schema.org/Person/2"),
-                ImmutableMap.of("s", "http://www.schema.org/Person/3"),
-                ImmutableMap.of("s", "http://www.schema.org/Person/4"))
+                ImmutableMap.of("s", "http://www.example.org/Person/1"),
+                ImmutableMap.of("s", "http://www.example.org/Person/2"),
+                ImmutableMap.of("s", "http://www.example.org/Person/3"),
+                ImmutableMap.of("s", "http://www.example.org/Person/4"))
         );
     }
 
     @Test
     @Ignore("Optimization missing for concat function")
     public void testStrStartsConcatNull() {
-        String query = "PREFIX schema: <http://www.schema.org/>\n" +
-                "PREFIX sosa: <http://www.w3.org/ns/sosa#>\n" +
+        String query = "PREFIX ex: <http://www.example.org/>\n" +
                 "SELECT ?person ?res \n" +
                 "WHERE {\n" +
-                " ?person a schema:Person.\n" +
+                " ?person a ex:Person.\n" +
                 " OPTIONAL {"+
-                "  ?person schema:givenName ?name.\n" +
+                "  ?person ex:givenName ?name.\n" +
                 "}" +
                 " BIND( COALESCE(STRSTARTS(" +
                 "                STR(CONCAT(?name, \"a\")), " +
-                "                \"http://www.schema.org\"), " +
+                "                \"http://www.example.org\"), " +
                 "       \"default\") " +
                 " AS ?res) \n"+
                 "}";
         ImmutableList<ImmutableMap<String, String>> result = executeQuery(query);
         assertEquals(result, ImmutableList.of(
-                ImmutableMap.of("person", "http://www.schema.org/Person/3", "res", "default"),
-                ImmutableMap.of("person", "http://www.schema.org/Person/4", "res", "false"),
-                ImmutableMap.of("person", "http://www.schema.org/Person/2", "res", "false"),
-                ImmutableMap.of("person", "http://www.schema.org/Person/1", "res", "false"))
+                ImmutableMap.of("person", "http://www.example.org/Person/1", "res", "false"),
+                ImmutableMap.of("person", "http://www.example.org/Person/2", "res", "false"),
+                ImmutableMap.of("person", "http://www.example.org/Person/3", "res", "default"),
+                ImmutableMap.of("person", "http://www.example.org/Person/4", "res", "false"))
         );
     }
 

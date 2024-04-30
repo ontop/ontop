@@ -53,12 +53,12 @@ public class DefaultDBStrStartsWithFunctionSymbol extends DBBooleanFunctionSymbo
             }
 
             if (newTerms.get(0) instanceof ImmutableFunctionalTerm) {
-                ImmutableFunctionalTerm firstNonFunctionalTerm = (ImmutableFunctionalTerm) newTerms.get(0);
-                if (firstNonFunctionalTerm.getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol) {
-                    IRIStringTemplateFunctionSymbol iriTemplate = (IRIStringTemplateFunctionSymbol) firstNonFunctionalTerm.getFunctionSymbol();
+                ImmutableFunctionalTerm firstFunctionalTerm = (ImmutableFunctionalTerm) newTerms.get(0);
+                if (firstFunctionalTerm.getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol) {
+                    IRIStringTemplateFunctionSymbol iriTemplate = (IRIStringTemplateFunctionSymbol) firstFunctionalTerm.getFunctionSymbol();
                     ImmutableTerm simplifiedTerm = iriTemplate.getTemplate().startsWith(prefixString)
-                            ? termFactory.getTrueOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNotNull(firstNonFunctionalTerm)))
-                            : termFactory.getFalseOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNull(firstNonFunctionalTerm)));
+                            ? termFactory.getTrueOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNotNull(firstFunctionalTerm)))
+                            : termFactory.getFalseOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNull(firstFunctionalTerm)));
                     return simplifiedTerm.simplify(variableNullability);
                 }
 
