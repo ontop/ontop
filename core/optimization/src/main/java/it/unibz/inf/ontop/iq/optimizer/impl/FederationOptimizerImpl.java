@@ -171,6 +171,7 @@ public class FederationOptimizerImpl implements FederationOptimizer {
     public IQTree rewriteIQTree(IQTree iqt){
         //check the possibility of applying the hints in advance
         LOGGER.debug("the IQ tree before hint-based optimization:\n{}\n", iqt);
+
         if(hints.get(0).size()>0){
             iqt = removeStrictRedundancy(iqt);
         }
@@ -178,14 +179,17 @@ public class FederationOptimizerImpl implements FederationOptimizer {
             iqt = removeEquivalentRedundancy(iqt);
         }
         LOGGER.debug("the IQ tree after removing redundancy:\n{}\n", iqt);
+
         if(hints.get(2).size()>0){
             iqt = rewriteInnerJoin(iqt);
             iqt = rewriteLeftJoin(iqt);
         }
+
         if(hint_matv.size()>0){
             iqt = rewriteInnerJoinBasedOnMatV(iqt);
         }
         LOGGER.debug("the IQ tree after hint-based optimization:\n{}\n", iqt);
+
         return iqt;
     }
 
@@ -1675,6 +1679,10 @@ public class FederationOptimizerImpl implements FederationOptimizer {
             return ER;
         }
 
+        if((left_part.size()>1) && (right_part.size()==1)){
+            return ER;
+        }
+
         Map<Integer, Integer> index = new HashMap<Integer, Integer>(); // Ai JOIN Bj not empty
 
         for(int i=0; i<left_part.size(); i++){
@@ -1782,10 +1790,10 @@ public class FederationOptimizerImpl implements FederationOptimizer {
 
         }
 
-        if(index.size() == left_part.size()){
+        if(index.size() == left_part.size()){   //rewrite into union of left joins
             List<IQTree> subtrees = new ArrayList<IQTree>();
             for(int i: index.keySet()){
-                int j = index.get(i);
+                int j = index.get(i);     //generate Ai LJ Bj
                 if(right_part.get(j).dataElement.size()==1){
                     boolean b = false; //self-left-join check
                     int ind_i = 0;
@@ -1867,7 +1875,18 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                             return ER;
                         }
                         LeftJoinNode root_subtree = root; //make a copy of root
-                        subtrees.add(IQ_FACTORY.createBinaryNonCommutativeIQTree(root_subtree, left.getChildren().get(i), right.getChildren().get(j)));
+
+                        IQTree left_part_new = left;
+                        if(left.getChildren().size()>0){
+                            left_part_new = left.getChildren().get(i);
+                        }
+                        IQTree right_part_new = right;
+                        if(right.getChildren().size()>0){
+                            right_part_new = right.getChildren().get(j);
+                        }
+
+                        //subtrees.add(IQ_FACTORY.createBinaryNonCommutativeIQTree(root_subtree, left.getChildren().get(i), right.getChildren().get(j)));
+                        subtrees.add(IQ_FACTORY.createBinaryNonCommutativeIQTree(root_subtree, left_part_new, right_part_new));
                     }
                 } else {
                     LeftJoinNode root_subtree = root; //make a copy of root
@@ -1890,6 +1909,7 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                 vars.addAll(right.getVariables());
                 UnionNode root_new = IQ_FACTORY.createUnionNode(ImmutableSet.copyOf(vars));
                 ER.newRewritten = IQ_FACTORY.createNaryIQTree(root_new, ImmutableList.copyOf(subtrees));
+
             }
         }
 
