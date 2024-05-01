@@ -27,7 +27,7 @@ public class RasDaManRegionBasedRasterSearch extends AbstractDockerRDF4JTest {
     }
 
     @Test
-    public void regionBasedRasterSearch() {
+    public void I_PolygonRegionBasedRasterSearch() {
 
         String query1 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
@@ -41,11 +41,106 @@ public class RasDaManRegionBasedRasterSearch extends AbstractDockerRDF4JTest {
                 + "?x rasdb:hasMaxLatitude ?max_lat .\n"
                 + "?x rasdb:hasSpatialResolution_lon ?x_res .\n"
                 + "?x rasdb:hasSpatialResolution_lat ?y_res .\n"
-                + "FILTER (?region_name = 'Stockholm'\n)" //Vector region = München (13938), Deggendorf, Stockholm (14432), Linköping, Ultimo (13791), Bolzano
+                + "FILTER (?region_name = 'Stockholm'\n)" //Vector region = München (14623), Deggendorf, Stockholm (14432), Linköping, Ultimo (13791), Bolzano
                 + "BIND (100 AS ?time\n)"
                 + "BIND (rasdb:rasSpatialMaximumX(?time, ?region, ?min_lon, ?max_lat, ?x_res, ?y_res, ?raster_name) AS ?v)"
                 + "}\n";
 
         executeAndCompareValues(query1, ImmutableList.of("\"14432\"^^xsd:integer"));
-    }
+    }  //München (14623)
+
+    @Test
+    public void II_PolygonRegionBasedRasterSearch() {
+
+        String query1 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
+                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
+                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "SELECT ?v {\n"
+                + "?r rdfs:label ?region_name .\n"
+                + "?r geo:asWKT ?region .\n"
+                + "?x rasdb:hasRasterName ?raster_name .\n"
+                + "?x rasdb:hasMinLongitude ?min_lon .\n"
+                + "?x rasdb:hasMaxLatitude ?max_lat .\n"
+                + "?x rasdb:hasSpatialResolution_lon ?x_res .\n"
+                + "?x rasdb:hasSpatialResolution_lat ?y_res .\n"
+                + "FILTER (?region_name = 'Würzburg'\n)" //Vector region = Würzburg II (14356),
+                + "BIND (273 AS ?time\n)"
+                + "BIND (rasdb:rasSpatialMaximumX(?time, ?region, ?min_lon, ?max_lat, ?x_res, ?y_res, ?raster_name) AS ?v)"
+                + "} LIMIT 1\n";
+
+        executeAndCompareValues(query1, ImmutableList.of("\"14356\"^^xsd:integer"));
+    } // Würzburg (14356)
+
+    @Test
+    public void III_PolygonRegionBasedRasterSearch() {
+
+        String query1 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
+                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
+                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "SELECT ?v {\n"
+                + "?r rdfs:label ?region_name .\n"
+                + "?r geo:asWKT ?region .\n"
+                + "?x rasdb:hasRasterName ?raster_name .\n"
+                + "?x rasdb:hasMinLongitude ?min_lon .\n"
+                + "?x rasdb:hasMaxLatitude ?max_lat .\n"
+                + "?x rasdb:hasSpatialResolution_lon ?x_res .\n"
+                + "?x rasdb:hasSpatialResolution_lat ?y_res .\n"
+                + "FILTER (?region_name = 'Bayreuth'\n)" //Vector region = Bayreuth III (14286),
+                + "BIND (273 AS ?time\n)"
+                + "BIND (rasdb:rasSpatialMaximumX(?time, ?region, ?min_lon, ?max_lat, ?x_res, ?y_res, ?raster_name) AS ?v)"
+                + "} LIMIT 1\n";
+
+        executeAndCompareValues(query1, ImmutableList.of("\"14286\"^^xsd:integer"));
+    } // Bayreuth III (14286)
+
+    @Test
+    public void IV_MultiPolygonRegionBasedRasterSearch() {
+
+        String query1 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
+                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
+                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "SELECT ?v {\n"
+                + "?r rdfs:label ?region_name .\n"
+                + "?r geo:asWKT ?region .\n"
+                + "?x rasdb:hasRasterName ?raster_name .\n"
+                + "?x rasdb:hasMinLongitude ?min_lon .\n"
+                + "?x rasdb:hasMaxLatitude ?max_lat .\n"
+                + "?x rasdb:hasSpatialResolution_lon ?x_res .\n"
+                + "?x rasdb:hasSpatialResolution_lat ?y_res .\n"
+                + "FILTER (?region_name = 'Göteborg'\n)" //Vector region = Göteborg IV (14422), Umeå IV (14392)
+                + "BIND (100 AS ?time\n)"
+                + "BIND (rasdb:rasSpatialMaximumX(?time, ?region, ?min_lon, ?max_lat, ?x_res, ?y_res, ?raster_name) AS ?v)"
+                + "} LIMIT 1\n";
+
+        executeAndCompareValues(query1, ImmutableList.of("\"14422\"^^xsd:integer"));
+    } // Göteborg (14422)
+
+    @Test
+    public void V_MultiPolygonRegionBasedRasterSearch() {
+
+            String query1 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+                    + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
+                    + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
+                    + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                    + "SELECT ?v {\n"
+                    + "?r rdfs:label ?region_name .\n"
+                    + "?r geo:asWKT ?region .\n"
+                    + "?x rasdb:hasRasterName ?raster_name .\n"
+                    + "?x rasdb:hasMinLongitude ?min_lon .\n"
+                    + "?x rasdb:hasMaxLatitude ?max_lat .\n"
+                    + "?x rasdb:hasSpatialResolution_lon ?x_res .\n"
+                    + "?x rasdb:hasSpatialResolution_lat ?y_res .\n"
+                    + "FILTER (?region_name = 'Rosenheim'\n)" //Vector region = Rosenheim V (13853),
+                    + "BIND (100 AS ?time\n)"
+                    + "BIND (rasdb:rasSpatialMaximumX(?time, ?region, ?min_lon, ?max_lat, ?x_res, ?y_res, ?raster_name) AS ?v)"
+                    + "} LIMIT 1\n";
+
+            executeAndCompareValues(query1, ImmutableList.of("\"13853\"^^xsd:integer"));
+    } // Rosenheim (13853)
 }
+
+
+
