@@ -357,7 +357,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
                 new RasterMaximumXFunctionSymbolImpl(RASDB.RAS_SPATIAL_MAXIMUM_X, xsdInteger, wktLiteral, xsdDouble, xsdString),
 
-                new ClipRasterFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL, xsdInteger, wktLiteral, xsdString),
+                new ClipRasterFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL, xsdInteger, wktLiteral, xsdDouble, xsdString),
 
                 new ClipRasterAnyGeomFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL_ANY_GEOM, xsdInteger, xsdString, xsdString),
 

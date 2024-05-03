@@ -41,12 +41,12 @@ public class RasDaManRegionBasedRasterSearch extends AbstractDockerRDF4JTest {
                 + "?x rasdb:hasMaxLatitude ?max_lat .\n"
                 + "?x rasdb:hasSpatialResolution_lon ?x_res .\n"
                 + "?x rasdb:hasSpatialResolution_lat ?y_res .\n"
-                + "FILTER (?region_name = 'Stockholm'\n)" //Vector region = München (14623), Deggendorf, Stockholm (14432), Linköping, Ultimo (13791), Bolzano
+                + "FILTER (?region_name = 'München'\n)" //Vector region = München (14623), Deggendorf, Stockholm (14432), Linköping, Ultimo (13791), Bolzano
                 + "BIND (100 AS ?time\n)"
                 + "BIND (rasdb:rasSpatialMaximumX(?time, ?region, ?min_lon, ?max_lat, ?x_res, ?y_res, ?raster_name) AS ?v)"
                 + "}\n";
 
-        executeAndCompareValues(query1, ImmutableList.of("\"14432\"^^xsd:integer"));
+        executeAndCompareValues(query1, ImmutableList.of("\"13938\"^^xsd:integer"));
     }  //München (14623)
 
     @Test
@@ -64,7 +64,7 @@ public class RasDaManRegionBasedRasterSearch extends AbstractDockerRDF4JTest {
                 + "?x rasdb:hasMaxLatitude ?max_lat .\n"
                 + "?x rasdb:hasSpatialResolution_lon ?x_res .\n"
                 + "?x rasdb:hasSpatialResolution_lat ?y_res .\n"
-                + "FILTER (?region_name = 'Würzburg'\n)" //Vector region = Würzburg II (14356),
+                + "FILTER (?region_name = 'Würzburg'\n)" //Vector region = Würzburg (14356),
                 + "BIND (273 AS ?time\n)"
                 + "BIND (rasdb:rasSpatialMaximumX(?time, ?region, ?min_lon, ?max_lat, ?x_res, ?y_res, ?raster_name) AS ?v)"
                 + "} LIMIT 1\n";
@@ -93,7 +93,7 @@ public class RasDaManRegionBasedRasterSearch extends AbstractDockerRDF4JTest {
                 + "} LIMIT 1\n";
 
         executeAndCompareValues(query1, ImmutableList.of("\"14286\"^^xsd:integer"));
-    } // Bayreuth III (14286)
+    } // Bayreuth (14286)
 
     @Test
     public void IV_MultiPolygonRegionBasedRasterSearch() {

@@ -1620,17 +1620,21 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         String start_time = termConverter.apply(terms.get(0));
 
         //return String.format("rasdaman_op.query2array(CONCAT('select clip(c[' , %s, ', 0:* , 0:*],',rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),') from ', %s, ' as c'))",time_, region_name, raster_name03);
-        return String.format("rasdaman_op.query2array(CONCAT('select m[' , %s, ' : ' , %s, ', 0:2 , 0:2] from ', %s, ' as m'))", start_time, end_time, raster_name04);
+        return String.format("rasdaman_op.query2array(CONCAT('select c[' , %s, ' : ' , %s, ', 0:2 , 0:2] from ', %s, ' as c'))", start_time, end_time, raster_name04);
     }
 
     protected String serializeRAS_CLIP_RASTER_SPATIAL(ImmutableList<? extends ImmutableTerm> terms,
                                                       Function<ImmutableTerm, String> termConverter,
                                                       TermFactory termFactory){
-            String raster_name03 = termConverter.apply(terms.get(2));
-            String region_name03 = termConverter.apply(terms.get(1));
-            String time03 = termConverter.apply(terms.get(0));
+        String time = termConverter.apply(terms.get(0));
+        String region = termConverter.apply(terms.get(1));
+        String min_lon = termConverter.apply(terms.get(2));
+        String max_lat = termConverter.apply(terms.get(3));
+        String x_res = termConverter.apply(terms.get(4));
+        String y_res = termConverter.apply(terms.get(5));
+        String raster_name = termConverter.apply(terms.get(6));
 
-            return String.format("rasdaman_op.query2array(CONCAT('select clip(m[' , %s, ', 0:* , 0:*],' , " + "rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),') from ', %s, ' as m'))",time03, region_name03, raster_name03);
+        return String.format("rasdaman_op.query2array(CONCAT('select clip(c[' , %s, ', 0:* , 0:*],' , " + "rasdaman_op.geo2grid_final(ST_AsText((ST_Dump(%s)).geom), cast(%s as double precision), cast(%s as double precision), cast(%s as double precision), cast(%s as double precision)),')) from ', %s, ' as c'))",time, region, min_lon, max_lat, x_res, y_res, raster_name);
     }
 
     protected String serializeRAS_CLIP_RASTER_SPATIAL_ANY_GEOM(ImmutableList<? extends ImmutableTerm> terms,

@@ -11,8 +11,8 @@ import javax.annotation.Nonnull;
 
 public class ClipRasterFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl {
 
-    public ClipRasterFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdIntegerDatatype, RDFDatatype wktLiteralType, RDFDatatype xsdStringDatatype) {
-        super("RAS_CLIP_RASTER_SPATIAL", functionIRI, ImmutableList.of(xsdIntegerDatatype, wktLiteralType, xsdStringDatatype), xsdStringDatatype);
+    public ClipRasterFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdIntegerDatatype, RDFDatatype wktLiteralType, RDFDatatype xsdDoubleType, RDFDatatype xsdStringDatatype) {
+        super("RAS_CLIP_RASTER_SPATIAL", functionIRI, ImmutableList.of(xsdIntegerDatatype, wktLiteralType, xsdDoubleType, xsdDoubleType, xsdDoubleType, xsdDoubleType, xsdStringDatatype), xsdStringDatatype);
     }
 
     @Override
@@ -21,7 +21,7 @@ public class ClipRasterFunctionSymbolImpl extends AbstractRasterFunctionSymbolIm
         // return termFactory.getRESPECTIVEDBFUNCTIONSymbols;  --------------------------------[STEP 01b]-----------------------------------
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
-        return termFactory.getClipRaster(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2));
+        return termFactory.getClipRaster(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2), subLexicalTerms.get(3), subLexicalTerms.get(4), subLexicalTerms.get(5), subLexicalTerms.get(6));
 //        return null;
 
     }

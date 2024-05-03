@@ -1970,7 +1970,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     protected DBFunctionSymbol createClipRasterFunctionSymbol() {
-        return new DBFunctionSymbolWithSerializerImpl("DB_CLIP_RASTER_SPATIAL", ImmutableList.of(dbIntegerType, rootDBType, dbStringType), dbStringType, false,
+        return new DBFunctionSymbolWithSerializerImpl("DB_CLIP_RASTER_SPATIAL", ImmutableList.of(dbIntegerType, rootDBType, dbDoubleType, dbDoubleType, dbDoubleType, dbDoubleType, dbStringType), dbStringType, false,
                 this::serializeRAS_CLIP_RASTER_SPATIAL);
     }
 
