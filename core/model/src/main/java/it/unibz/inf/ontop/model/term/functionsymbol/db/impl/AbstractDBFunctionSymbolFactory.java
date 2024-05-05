@@ -172,6 +172,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBFunctionSymbol getRasterSpatialMinimumFunctionSymbol;
     private DBFunctionSymbol getRasterSpatialMaximumXFunctionSymbol;
     private DBFunctionSymbol getRasterSpatialMinimumXFunctionSymbol;
+    private DBFunctionSymbol getRasterSpatialAverageXFunctionSymbol;
     private DBFunctionSymbol getClipRasterFunctionSymbol;
     private DBFunctionSymbol getClipRasterAnyGeomFunctionSymbol;
     private DBFunctionSymbol getRasterSmallArrayTempFunctionSymbol;
@@ -505,6 +506,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         getRasterSpatialMinimumFunctionSymbol = createRasterSpatialMinimumFunctionSymbol();
         getRasterSpatialMinimumXFunctionSymbol = createRasterSpatialMinimumXFunctionSymbol();
         getRasterSpatialMaximumXFunctionSymbol = createRasterSpatialMaximumXFunctionSymbol();
+        getRasterSpatialAverageXFunctionSymbol = createRasterSpatialAverageXFunctionSymbol();
         getClipRasterFunctionSymbol = createClipRasterFunctionSymbol();
         getClipRasterAnyGeomFunctionSymbol = createClipRasterAnyGeomFunctionSymbol();
         getRasterSmallArrayTempFunctionSymbol = createRasterSmallArrayTempFunctionSymbol();
@@ -1369,6 +1371,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     public DBFunctionSymbol getRasterSpatialMinimumX(){return getRasterSpatialMinimumXFunctionSymbol;}
 
+    public DBFunctionSymbol getRasterSpatialAverageX(){return getRasterSpatialAverageXFunctionSymbol;}
+
     public DBFunctionSymbol getClipRaster(){return getClipRasterFunctionSymbol;}
 
     public DBFunctionSymbol getClipRasterAnyGeom(){return getClipRasterAnyGeomFunctionSymbol;}
@@ -1969,6 +1973,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 this::serializeRAS_SPATIAL_MINIMUM_X);
     }
 
+    protected DBFunctionSymbol createRasterSpatialAverageXFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_AVERAGE_X", ImmutableList.of(dbIntegerType, rootDBType, dbDoubleType, dbDoubleType, dbDoubleType, dbDoubleType,  dbStringType), dbIntegerType, false,
+                this::serializeRAS_SPATIAL_AVERAGE_X);
+    }
+
     protected DBFunctionSymbol createClipRasterFunctionSymbol() {
         return new DBFunctionSymbolWithSerializerImpl("DB_CLIP_RASTER_SPATIAL", ImmutableList.of(dbIntegerType, rootDBType, dbDoubleType, dbDoubleType, dbDoubleType, dbDoubleType, dbStringType), dbStringType, false,
                 this::serializeRAS_CLIP_RASTER_SPATIAL);
@@ -2014,6 +2023,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract String serializeRAS_SPATIAL_MINIMUM_X(ImmutableList<? extends ImmutableTerm> terms,
                                                            Function<ImmutableTerm, String> termConverter,
                                                            TermFactory termFactory);
+
+    protected abstract String serializeRAS_SPATIAL_AVERAGE_X(ImmutableList<? extends ImmutableTerm> terms,
+                                                             Function<ImmutableTerm, String> termConverter,
+                                                             TermFactory termFactory);
 
     protected abstract String serializeRAS_CLIP_RASTER_SPATIAL(ImmutableList<? extends ImmutableTerm> terms,
                                                            Function<ImmutableTerm, String> termConverter,

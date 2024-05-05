@@ -1,0 +1,92 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/arkaghosh/OntoRaster/
+geo:		http://www.opengis.net/ont/geosparql#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+sosa:		http://www.w3.org/ns/sosa/
+rasdb:		http://www.semanticweb.org/RasterDataCube/
+
+[MappingDeclaration] @collection [[
+mappingId	mapping_checkConn
+target		:conn/{gid} rasdb:hasConnection {conn}^^xsd:string .
+source		SELECT 404 AS gid, rasdaman_op.check_rasdaman_conn() AS conn
+
+; ---------------- Mapping for Sample Region of Interests -----------------
+
+;mappingId	mapping_region_class
+;target		:vector_region/demo/{region_id} a :region .
+;source		SELECT region_id from sample_regions_of_interest
+
+;mappingId	mapping_region_name
+;target		:vector_region/demo/{region_id} rdfs:label {region_name}^^xsd:string .
+;source		SELECT region_id, name_2 AS region_name from sample_regions_of_interest
+
+;mappingId	mapping_region_geometry
+;target		:vector_region/demo/{region_id} geo:asWKT {geometry}^^geo:wktLiteral .
+;source		SELECT region_id, st_astext((st_dump(geom)).geom) AS geometry from sample_regions_of_interest
+
+; ---------------- Mapping for All Regions in Sweden -----------------
+
+mappingId	Get_region_class_table_sweden
+target		:vector_region/sweden/{gid} a :region .
+source		SELECT gid from region_sweden
+
+mappingId	mapping_region_name_sweden
+target		:vector_region/sweden/{gid} rdfs:label {region_name}^^xsd:string .
+source		SELECT gid, name_2 AS region_name from region_sweden
+
+mappingId	mapping_region_geometry_wkt_sweden
+target		:vector_region/sweden/{gid} geo:asWKT {geometry}^^geo:wktLiteral .
+source		SELECT gid, st_astext((st_dump(geom)).geom) AS geometry from region_sweden
+
+; ---------------- Mapping for All Regions in Bavaria -----------------
+
+mappingId	Get_region_class_table_bavaria
+target		:vector_region/bavaria/{gid} a :region .
+source		SELECT gid from region_bavaria
+
+mappingId	mapping_region_name_bavaria
+target		:vector_region/bavaria/{gid} rdfs:label {region_name}^^xsd:string .
+source		SELECT gid, name_2 AS region_name from region_bavaria
+
+mappingId	mapping_region_geometry_wkt_bavaria
+target		:vector_region/bavaria/{gid} geo:asWKT {geometry}^^geo:wktLiteral .
+source		SELECT gid, st_astext((st_dump(geom)).geom) AS geometry from region_bavaria
+
+; ---------------- Mapping for All Regions in South Tyrol -----------------
+
+mappingId	Get_region_class_table_south_tyrol
+target		:vector_region/tyrol/{gid} a :region .
+source		SELECT gid from region_south_tyrol
+
+mappingId	mapping_region_name_south_tyrol
+target		:vector_region/tyrol/{gid} rdfs:label {region_name}^^xsd:string .
+source		SELECT gid, name_3 AS region_name from region_south_tyrol
+
+mappingId	mapping_region_geometry_wkt_south_tyrol
+target		:vector_region/tyrol/{gid} geo:asWKT {geometry}^^geo:wktLiteral .
+source		SELECT gid, st_astext((st_dump(geom)).geom) AS geometry from region_south_tyrol
+
+
+; ---------------- Mapping for Raster Metadata Lookup Table -----------------
+
+mappingId	mapping_rastername_lookup
+target		:raster/{raster_id} rasdb:hasRasterName {raster_name}^^xsd:string .
+source		SELECT raster_id, raster_name FROM sample_lookup_x1
+
+mappingId	mapping_get_temporal_dimension_lookup
+target		:raster/{raster_id} rasdb:hasStartTime {start_time}^^xsd:string ; rasdb:hasEndTime {end_time}^^xsd:string ; rasdb:hasStartTimeGrid {start_time_grid}^^xsd:integer ; rasdb:hasEndTimeGrid {end_time_grid}^^xsd:integer ; rasdb:hasTemporalResolution {res_time}^^xsd:double .
+source		SELECT raster_id, raster_name, start_time, end_time, start_time_grid, end_time_grid, res_time FROM sample_lookup_x1
+
+mappingId	Get_spatial_dimension_(X)_from_lookup_for_domain_raster
+target		:raster/{raster_id} rasdb:hasMinLongitude {min_lon}^^xsd:double ; rasdb:hasMaxLongitude {max_lon}^^xsd:double ; rasdb:hasSpatialResolution_lon {res_lon}^^xsd:double .
+source		SELECT raster_id, raster_name, min_lon, max_lon, res_lon FROM sample_lookup_x1
+
+mappingId	Get_spatial_dimension_(Y)_from_lookup_for_domain_raster
+target		:raster/{raster_id} rasdb:hasMinLatitude {min_lat}^^xsd:double ; rasdb:hasMaxLatitude {max_lat}^^xsd:double ; rasdb:hasSpatialResolution_lat {res_lat}^^xsd:double .
+source		SELECT raster_id, raster_name, min_lat, max_lat, res_lat FROM sample_lookup_x1
+]]

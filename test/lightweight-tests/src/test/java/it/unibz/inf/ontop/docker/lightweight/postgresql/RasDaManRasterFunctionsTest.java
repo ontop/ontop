@@ -11,7 +11,7 @@ import java.sql.SQLException;
 
 public class RasDaManRasterFunctionsTest extends AbstractDockerRDF4JTest {
     private static final String PROPERTIES_FILE = "/rasdaman/rasdaman.properties";
-    private static final String OBDA_FILE = "/rasdaman/OntoRaster.obda";
+    private static final String OBDA_FILE = "/rasdaman/OntoRasterDemo.obda";
     private static final String OWL_FILE = "/rasdaman/rasdaman.owl";
 
     @BeforeAll
