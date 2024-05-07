@@ -14,7 +14,7 @@
     <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
     <Prefix name="obda" IRI="https://w3id.org/obda/vocabulary#"/>
     <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
-    <Prefix name="rasdb" IRI="http://www.semanticweb.org/OntologyRasterDataCube/"/>
+    <Prefix name="rasdb" IRI="http://www.semanticweb.org/RasterDataCube/"/>
 <!--     <Import>http://www.opengis.net/ont/geosparql/1.1</Import> -->
 <!--     <Import>http://www.opengis.net/ont/sf/1.1</Import> -->
 <!--     <Import>https://www.w3.org/ns/sosa/</Import> -->
@@ -37,22 +37,13 @@
         <ObjectProperty abbreviatedIRI="rdfs:member"/>
     </Declaration>
     <Declaration>
-        <DataProperty IRI="averageRASTER"/>
-    </Declaration>
-    <Declaration>
         <DataProperty IRI="getArray"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="hasCode"/>
     </Declaration>
     <Declaration>
-        <DataProperty IRI="raptor"/>
-    </Declaration>
-    <Declaration>
-        <DataProperty IRI="raster_aggregation"/>
-    </Declaration>
-    <Declaration>
-        <DataProperty IRI="tempC"/>
+        <DataProperty abbreviatedIRI="rasdb:hasRasterName"/>
     </Declaration>
     <Declaration>
         <DataProperty abbreviatedIRI="rdfs:label"/>

@@ -74,6 +74,10 @@ source		SELECT gid, st_astext((st_dump(geom)).geom) AS geometry from region_sout
 
 ; ---------------- Mapping for Raster Metadata Lookup Table -----------------
 
+;mappingId	mapping_rasterid_lookup
+;target		:raster/{raster_id} a :Raster .
+;source		SELECT raster_id FROM sample_lookup_x1
+
 mappingId	mapping_rastername_lookup
 target		:raster/{raster_id} rasdb:hasRasterName {raster_name}^^xsd:string .
 source		SELECT raster_id, raster_name FROM sample_lookup_x1

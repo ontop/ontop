@@ -167,12 +167,14 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     //TODO
     // Add Raster Function DB Symbol (same as separate new java class file)
     // ------------------------------------[STEP 03]-----------------------------------
+    private DBFunctionSymbol getDate2GridFunctionSymbol;
     private DBFunctionSymbol getRasterSpatialAverageFunctionSymbol;
     private DBFunctionSymbol getRasterSpatialMaximumFunctionSymbol;
     private DBFunctionSymbol getRasterSpatialMinimumFunctionSymbol;
     private DBFunctionSymbol getRasterSpatialMaximumXFunctionSymbol;
     private DBFunctionSymbol getRasterSpatialMinimumXFunctionSymbol;
     private DBFunctionSymbol getRasterSpatialAverageXFunctionSymbol;
+    private DBFunctionSymbol getRasterSpatialAverageFinalFunctionSymbol;
     private DBFunctionSymbol getClipRasterFunctionSymbol;
     private DBFunctionSymbol getClipRasterAnyGeomFunctionSymbol;
     private DBFunctionSymbol getRasterSmallArrayTempFunctionSymbol;
@@ -501,12 +503,14 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         //TODO
         // Add Raster Function Symbol
         // ------------------------------------[STEP 03a]-----------------------------------
+        getDate2GridFunctionSymbol = createDate2GridFunctionSymbol();
         getRasterSpatialAverageFunctionSymbol = createRasterSpatialAverageFunctionSymbol();
         getRasterSpatialMaximumFunctionSymbol = createRasterSpatialMaximumFunctionSymbol();
         getRasterSpatialMinimumFunctionSymbol = createRasterSpatialMinimumFunctionSymbol();
         getRasterSpatialMinimumXFunctionSymbol = createRasterSpatialMinimumXFunctionSymbol();
         getRasterSpatialMaximumXFunctionSymbol = createRasterSpatialMaximumXFunctionSymbol();
         getRasterSpatialAverageXFunctionSymbol = createRasterSpatialAverageXFunctionSymbol();
+        getRasterSpatialAverageFinalFunctionSymbol = createRasterSpatialAverageFinalFunctionSymbol();
         getClipRasterFunctionSymbol = createClipRasterFunctionSymbol();
         getClipRasterAnyGeomFunctionSymbol = createClipRasterAnyGeomFunctionSymbol();
         getRasterSmallArrayTempFunctionSymbol = createRasterSmallArrayTempFunctionSymbol();
@@ -1361,6 +1365,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     //TODO
     // Add Raster DBFunction Symbol
     // ------------------------------------[STEP 03b]-------------------------------------
+    public DBFunctionSymbol getDate2Grid(){return getDate2GridFunctionSymbol;}
+
     public DBFunctionSymbol getRasterSpatialAverage(){return getRasterSpatialAverageFunctionSymbol;}
 
     public DBFunctionSymbol getRasterSpatialMaximum(){return getRasterSpatialMaximumFunctionSymbol;}
@@ -1372,6 +1378,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     public DBFunctionSymbol getRasterSpatialMinimumX(){return getRasterSpatialMinimumXFunctionSymbol;}
 
     public DBFunctionSymbol getRasterSpatialAverageX(){return getRasterSpatialAverageXFunctionSymbol;}
+
+    public DBFunctionSymbol getRasterSpatialAverageFinal(){return getRasterSpatialAverageFinalFunctionSymbol;}
 
     public DBFunctionSymbol getClipRaster(){return getClipRasterFunctionSymbol;}
 
@@ -1948,6 +1956,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 //TODO
 // create RasterSpatialAverage DBFunctionSymbol
 // ---------------------------------------[STEP 03c]-------------------------------------
+
+    protected DBFunctionSymbol createDate2GridFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("RAS_DATE_TO_GRID", ImmutableList.of(dbStringType, dbIntegerType), dbIntegerType, false,
+                this::serializeRAS_DATE_TO_GRID);
+    }
+
     protected DBFunctionSymbol createRasterSpatialAverageFunctionSymbol() {
         return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_AVERAGE", ImmutableList.of(dbIntegerType, dbDoubleType, rootDBType, dbStringType), dbDoubleType, false,
                 this::serializeRAS_SPATIAL_AVERAGE);
@@ -1974,8 +1988,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     protected DBFunctionSymbol createRasterSpatialAverageXFunctionSymbol() {
-        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_AVERAGE_X", ImmutableList.of(dbIntegerType, rootDBType, dbDoubleType, dbDoubleType, dbDoubleType, dbDoubleType,  dbStringType), dbIntegerType, false,
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_AVERAGE_X", ImmutableList.of(dbIntegerType, rootDBType, dbDoubleType, dbDoubleType, dbDoubleType, dbDoubleType,  dbStringType), dbDoubleType, false,
                 this::serializeRAS_SPATIAL_AVERAGE_X);
+    }
+
+    protected DBFunctionSymbol createRasterSpatialAverageFinalFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_AVERAGE_FINAL", ImmutableList.of(dbStringType, rootDBType, dbStringType), dbDoubleType, false,
+                this::serializeRAS_SPATIAL_AVERAGE_FINAL);
     }
 
     protected DBFunctionSymbol createClipRasterFunctionSymbol() {
@@ -2004,6 +2023,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // create a custom serializer like serializeRAS_SPATIAL_AVERAGE
     // ---------------------------------------[STEP 03d]---------------------------------
 
+    protected abstract String serializeRAS_DATE_TO_GRID(ImmutableList<? extends ImmutableTerm> terms,
+                                                           Function<ImmutableTerm, String> termConverter,
+                                                           TermFactory termFactory);
+
     protected abstract String serializeRAS_SPATIAL_AVERAGE(ImmutableList<? extends ImmutableTerm> terms,
                                                            Function<ImmutableTerm, String> termConverter,
                                                            TermFactory termFactory);
@@ -2025,6 +2048,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                                                            TermFactory termFactory);
 
     protected abstract String serializeRAS_SPATIAL_AVERAGE_X(ImmutableList<? extends ImmutableTerm> terms,
+                                                             Function<ImmutableTerm, String> termConverter,
+                                                             TermFactory termFactory);
+
+    protected abstract String serializeRAS_SPATIAL_AVERAGE_FINAL(ImmutableList<? extends ImmutableTerm> terms,
                                                              Function<ImmutableTerm, String> termConverter,
                                                              TermFactory termFactory);
 

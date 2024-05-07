@@ -565,6 +565,11 @@ public class TermFactoryImpl implements TermFactory {
 	//TODO
 	// Add Terms for newly added raster functions -------------------------------------[STEP 05]-------------------------------------------
 	@Override
+	public ImmutableFunctionalTerm getDate2Grid(ImmutableTerm TimeSnap, ImmutableTerm dbRasterId){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDate2Grid(), ImmutableList.of(TimeSnap, dbRasterId));
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getRasterSpatialAverage(ImmutableTerm TimeSnap, ImmutableTerm ScaleFactor, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName ){
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialAverage(), ImmutableList.of(TimeSnap, ScaleFactor, dbRegionGeom, dbRasterName));
 	}
@@ -593,6 +598,11 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableFunctionalTerm getRasterSpatialAverageX(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbMinLon, ImmutableTerm dbMaxLat, ImmutableTerm dbXscale, ImmutableTerm dbYscale, ImmutableTerm dbRasterName){
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialAverageX(), ImmutableList.of(TimeSnap, dbRegionGeom, dbMinLon, dbMaxLat, dbXscale, dbYscale, dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getRasterSpatialAverageFinal(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialAverageFinal(), ImmutableList.of(TimeSnap, dbRegionGeom, dbRasterName));
 	}
 
 

@@ -253,12 +253,14 @@ public interface DBFunctionSymbolFactory {
     //TODO
     // Add DBFunctionSymbol
     // ----------------------------------[STEP 04]--------------------------------------
+    DBFunctionSymbol getDate2Grid();
     DBFunctionSymbol getRasterSpatialAverage();
     DBFunctionSymbol getRasterSpatialMaximum();
     DBFunctionSymbol getRasterSpatialMinimum();
     DBFunctionSymbol getRasterSpatialMaximumX();
     DBFunctionSymbol getRasterSpatialMinimumX();
     DBFunctionSymbol getRasterSpatialAverageX();
+    DBFunctionSymbol getRasterSpatialAverageFinal();
     DBFunctionSymbol getClipRaster();
     DBFunctionSymbol getClipRasterAnyGeom();
     DBFunctionSymbol getRasterSmallArrayTemp();

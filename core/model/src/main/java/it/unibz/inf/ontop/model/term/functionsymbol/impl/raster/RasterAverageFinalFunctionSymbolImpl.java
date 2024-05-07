@@ -9,11 +9,11 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-public class RasterAverageXFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
+public class RasterAverageFinalFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
 
-    public RasterAverageXFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdIntegerDatatype, RDFDatatype wktLiteralType, RDFDatatype xsdDoubleType, RDFDatatype xsdStringDatatype) {
-        super("RAS_SPATIAL_AVERAGE_X", functionIRI, ImmutableList.of(xsdIntegerDatatype, wktLiteralType, xsdDoubleType, xsdDoubleType, xsdDoubleType, xsdDoubleType, xsdStringDatatype),
-                xsdDoubleType);
+    public RasterAverageFinalFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType) {
+        super("RAS_SPATIAL_AVERAGE_FINAL", functionIRI, ImmutableList.of(xsdStringDatatype,  wktLiteralType, xsdStringDatatype),
+                xsdStringDatatype);
     }
 
     @Override
@@ -22,7 +22,7 @@ public class RasterAverageXFunctionSymbolImpl extends AbstractRasterFunctionSymb
         // return termFactory.getRESPECTIVEDBFUNCTIONSymbols;  --------------------------------[STEP 01b]-----------------------------------
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
-        return termFactory.getRasterSpatialAverageX(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2), subLexicalTerms.get(3), subLexicalTerms.get(4), subLexicalTerms.get(5), subLexicalTerms.get(6));
+        return termFactory.getRasterSpatialAverageFinal(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2));
     }
 
 }

@@ -16,6 +16,8 @@ public class RASDB {
     // Simple Raster Functions
     public static final IRI RAS_CONNECTION;
 
+    public static final IRI RAS_DATE_TO_GRID;
+
     // Raster Aggregation Functions
 
     public static final IRI RAS_SPATIAL_AVERAGE;
@@ -29,6 +31,8 @@ public class RASDB {
     public static final IRI RAS_SPATIAL_MAXIMUM_X;
 
     public static final IRI RAS_SPATIAL_AVERAGE_X;
+
+    public static final IRI RAS_SPATIAL_AVERAGE_FINAL;
 
     public static final IRI RAS_SPATIAL_TEMPORAL_AVERAGE;
 
@@ -50,6 +54,8 @@ public class RASDB {
         // Simple Raster Functions
         RAS_CONNECTION = factory.createIRI(PREFIX + "rasConnection");
 
+        RAS_DATE_TO_GRID = factory.createIRI(PREFIX + "rasDate2Grid");
+
 
         // Raster Aggregation Functions
         //TODO
@@ -68,6 +74,8 @@ public class RASDB {
         RAS_SPATIAL_MAXIMUM_X = factory.createIRI(PREFIX + "rasSpatialMaximumX");
 
         RAS_SPATIAL_AVERAGE_X = factory.createIRI(PREFIX + "rasSpatialAverageX");
+
+        RAS_SPATIAL_AVERAGE_FINAL = factory.createIRI(PREFIX + "rasSpatialAverageFINAL");
 
         RAS_SPATIAL_TEMPORAL_AVERAGE = factory.createIRI(PREFIX + "rasSpatialTemporalAverage");
 
