@@ -177,6 +177,29 @@ public class TBoxClassificationTest {
     }
 
     @Test
+    public void testSubsumptionWithOWLThing() throws Exception {
+//        manager.addAxiom(ontology, SubClassOf(A, OWLThing()));
+        manager.addAxiom(ontology, SubClassOf(Male, Person));
+        manager.addAxiom(ontology, SubClassOf(Female, Person));
+        startReasoner();
+        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(OWLThing(), false);
+        assertTrue(subClasses.containsEntity(Male));
+        assertTrue(subClasses.containsEntity(Female));
+        assertTrue(subClasses.containsEntity(Person));
+    }
+
+    @Test
+    public void testSubsumptionWithSomeValues5() throws Exception {
+        // A subclass of R some OWLThing
+        manager.addAxiom(ontology, SubClassOf(A, ObjectSomeValuesFrom(r1, OWLThing())));
+        // Domain(r1) is B
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, B));
+        startReasoner();
+        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(B, false);
+        assertTrue(subClasses.containsEntity(A));
+    }
+
+    @Test
     public void testBottom() throws Exception {
         manager.addAxiom(ontology, SubClassOf(Bottom, OWLNothing()));
         startReasoner();
@@ -247,6 +270,15 @@ public class TBoxClassificationTest {
     }
 
     @Test
+    public void testSuperClassesWithOWLNothing() throws Exception {
+        manager.addAxiom(ontology, SubClassOf(A, B));
+        startReasoner();
+        NodeSet<OWLClass> superClasses = reasoner.getSuperClasses(OWLNothing(), false);
+        assertTrue(superClasses.containsEntity(A));
+        assertTrue(superClasses.containsEntity(B));
+    }
+
+    @Test
     public void testDirectSuperClasses() throws Exception {
         manager.addAxiom(ontology, SubClassOf(A, B));
         manager.addAxiom(ontology, SubClassOf(B, C));
@@ -303,16 +335,19 @@ public class TBoxClassificationTest {
     public void testObjectPropertySubsumption1() throws Exception {
         //FIXME: still work in progress
 //        OWLObjectProperty r1Inverse = ObjectProperty(IRI.create(prefix + "r1Inverse"));
-        manager.addAxiom(ontology, SubClassOf(ObjectSomeValuesFrom(r1, OWLThing()), ObjectSomeValuesFrom(r2, OWLThing())));
+        OWLObjectSomeValuesFrom someR1 = ObjectSomeValuesFrom(r1, OWLThing());
+        OWLObjectSomeValuesFrom someR2 = ObjectSomeValuesFrom(r2, OWLThing());
+
+        manager.addAxiom(ontology, SubClassOf(someR1, someR2));
 
 
-        OWLObjectPropertyExpression r2Inverse = r2.getInverseProperty();
+//        OWLObjectPropertyExpression r2Inverse = r2.getInverseProperty();
 
 //        manager.addAxiom(ontology, InverseObjectProperties(r1, r1Inverse));
 //        manager.addAxiom(ontology, SubObjectPropertyOf(r1, r2));
 
         startReasoner();
-        NodeSet<OWLObjectPropertyExpression> subProperties = reasoner.getSubObjectProperties(r2Inverse, false);
+        NodeSet<OWLObjectPropertyExpression> subProperties = reasoner.getSubObjectProperties(r2, false);
 //        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(ObjectSomeValuesFrom(r2Inverse, OWLThing()), false);
 //        assertTrue(subClasses.containsEntity(r1));
     }

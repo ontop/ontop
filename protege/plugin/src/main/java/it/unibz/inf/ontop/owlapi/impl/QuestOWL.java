@@ -474,23 +474,41 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	@Nonnull
 	@Override
 	public Node<OWLClass> getTopClassNode() {
-		OWLClass owlThing = owlDataFactory.getOWLThing();
-		return getEquivalentClasses(owlThing);
+		return structuralReasoner.getTopClassNode();
 	}
 
 	@Nonnull
 	@Override
 	public Node<OWLClass> getBottomClassNode() {
-		OWLClass owlNothing = owlDataFactory.getOWLNothing();
-		return getEquivalentClasses(owlNothing);
+		return structuralReasoner.getBottomClassNode();
 	}
 
 	@Nonnull
 	@Override
 	public NodeSet<OWLClass> getSubClasses(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+//		return structuralReasoner.getSubClasses(ce, direct);
+
 		switch (ce.getClassExpressionType()) {
 			case OWL_CLASS:
+				if (ce.isOWLNothing()) {
+					return new OWLClassNodeSet();
+				}
+
+				// Return all subclasses, whole hierarchy
+				// TODO: This causes the inferred class hierarchy to be filled with redundant subclass relationships?
+				if (ce.isOWLThing()) {
+					Set<Node<OWLClass>> collect = classifiedTBox.classesDAG()
+							.stream()
+							.flatMap(x -> x.getMembers().stream())
+							.filter(x -> x instanceof OClass)
+							.map(x -> oClassAsOWLClass((OClass) x))
+							.map(OWLClassNode::new)
+							.collect(Collectors.toSet());
+
+					return new OWLClassNodeSet(collect);
+				}
+
 				OWLClass owlClass = ce.asOWLClass();
 				OClass oClass = owlClassAsOClass(owlClass);
 				Equivalences<ClassExpression> equivalences = classExpressionToEquivalences(oClass);
@@ -502,18 +520,12 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 				Set<Node<OWLClass>> classes;
 
 				classes = subClasses.stream()
-						.filter(y -> !y.contains(oClass))
+						.filter(x -> !x.contains(oClass))
+						.filter(x -> x.getRepresentative() instanceof OClass)
 						.map(this::equivalencesAsOWLClassSet)
 						.map(OWLClassNode::new)
 						.collect(Collectors.toSet());
 
-//				classes = subClasses.stream()
-//						.flatMap(x -> x.getMembers().stream()) // Need to replace the use of flatMap
-//						.filter(y -> y != oClass)
-//						.filter(x -> x instanceof OClass)
-//						.map(x -> oClassAsOWLClass((OClass) x))
-//						.map(OWLClassNode::new)
-//						.collect(Collectors.toSet());
 				return new OWLClassNodeSet(classes);
 			case OBJECT_SOME_VALUES_FROM:
 				OWLObjectSomeValuesFrom owlSomeValuesFrom = (OWLObjectSomeValuesFrom) ce;
@@ -542,10 +554,9 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 					Set<Node<OWLClass>> classes1;
 					classes1 = subClasses1.stream()
-							.flatMap(x -> x.getMembers().stream())
-							.filter(y -> y != oSomeValuesFrom)
-							.filter(x -> x instanceof OClass)
-							.map(x -> oClassAsOWLClass((OClass) x))
+							.filter(x -> !x.contains(oSomeValuesFrom))
+							.filter(x -> x.getRepresentative() instanceof OClass)
+							.map(this::equivalencesAsOWLClassSet)
 							.map(OWLClassNode::new)
 							.collect(Collectors.toSet());
 					return new OWLClassNodeSet(classes1);
@@ -585,6 +596,24 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
 		switch (ce.getClassExpressionType()) {
 			case OWL_CLASS:
+				// TODO: This is called by Protege, what should we do here?
+				if (ce.isOWLThing()) {
+					return new OWLClassNodeSet();
+				}
+
+				// TODO: Return all subclasses, whole hierarchy -- EDIT: Does not seem to be called by Protege??
+				if (ce.isOWLNothing()) {
+					Set<Node<OWLClass>> collect = classifiedTBox.classesDAG()
+							.stream()
+							.flatMap(x -> x.getMembers().stream())
+							.filter(x -> x instanceof OClass)
+							.map(x -> oClassAsOWLClass((OClass) x))
+							.map(OWLClassNode::new)
+							.collect(Collectors.toSet());
+
+					return new OWLClassNodeSet(collect);
+				}
+
 				OWLClass owlClass = ce.asOWLClass();
 				OClass oClass = owlClassAsOClass(owlClass);
 
@@ -616,6 +645,19 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	@Override
 	public Node<OWLClass> getEquivalentClasses(@Nonnull OWLClassExpression ce) throws InconsistentOntologyException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+//		return structuralReasoner.getEquivalentClasses(ce);
+
+		// TODO
+		if (ce.isOWLThing()) {
+			return new OWLClassNode(owlDataFactory.getOWLThing());
+		}
+
+		// TODO
+		if (ce.isOWLNothing()) {
+			return new OWLClassNode(owlDataFactory.getOWLNothing());
+		}
+
+
 		OClass oClass = owlClassAsOClass(ce.asOWLClass());
 		Equivalences<ClassExpression> equivalences = classExpressionToEquivalences(oClass);
 
@@ -658,19 +700,27 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	@Nonnull
 	@Override
 	public Node<OWLObjectPropertyExpression> getTopObjectPropertyNode() {
-		return getEquivalentObjectProperties(owlDataFactory.getOWLTopObjectProperty());
+		return structuralReasoner.getTopObjectPropertyNode();
 	}
 
 	@Nonnull
 	@Override
 	public Node<OWLObjectPropertyExpression> getBottomObjectPropertyNode() {
-		return getEquivalentObjectProperties(owlDataFactory.getOWLBottomObjectProperty());
+		return structuralReasoner.getBottomObjectPropertyNode();
 	}
 
 	@Nonnull
 	@Override
 	public NodeSet<OWLObjectPropertyExpression> getSubObjectProperties(@Nonnull OWLObjectPropertyExpression pe, boolean direct)
 			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+//		return structuralReasoner.getSubObjectProperties(pe, direct);
+
+		// TODO
+		if (pe.isOWLTopObjectProperty()) {
+			// Return all object properties, whole hierarchy
+			return new OWLObjectPropertyNodeSet();
+		}
+
 		OWLObjectProperty owlObjectProperty = pe.asOWLObjectProperty();
 
 		ObjectPropertyExpression objectPropertyExpression = owlObjectPropertyAsExpression(owlObjectProperty);
@@ -688,8 +738,6 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 				.collect(Collectors.toSet());
 
 		return new OWLObjectPropertyNodeSet(collect);
-
-//		return structuralReasoner.getSubObjectProperties(pe, direct);
 	}
 
 	@Nonnull
@@ -745,13 +793,13 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	@Nonnull
 	@Override
 	public Node<OWLDataProperty> getTopDataPropertyNode() {
-		return getEquivalentDataProperties(owlDataFactory.getOWLTopDataProperty());
+		return structuralReasoner.getTopDataPropertyNode();
 	}
 
 	@Nonnull
 	@Override
 	public Node<OWLDataProperty> getBottomDataPropertyNode() {
-		return getEquivalentDataProperties(owlDataFactory.getOWLBottomDataProperty());
+		return structuralReasoner.getBottomDataPropertyNode();
 	}
 
 	@Nonnull
@@ -941,6 +989,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 	private Equivalences<ClassExpression> classExpressionToEquivalences(ClassExpression expression) {
 		EquivalencesDAG<ClassExpression> classesDag = classifiedTBox.classesDAG();
+//		new Equivalences<>(ImmutableSet.of(expression))
 		return classesDag.getVertex(expression);
 	}
 
