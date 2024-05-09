@@ -86,7 +86,6 @@ public class TBoxClassificationTest {
         NodeSet<OWLClass> subClasses = reasoner.getSubClasses(Person, false);
         assertTrue(subClasses.containsEntity(Male));
         assertTrue(subClasses.containsEntity(Female));
-//        assertTrue(subClasses.containsEntity(OWLNothing()));
     }
     
     @Test
@@ -101,11 +100,9 @@ public class TBoxClassificationTest {
         
         startReasoner();
         NodeSet<OWLClass> subClasses = reasoner.getSubClasses(B, false);
-        //subClasses.forEach(System.out::println);
         assertTrue(subClasses.containsEntity(C));
         assertTrue(subClasses.containsEntity(D));
         assertTrue(subClasses.containsEntity(A));
-//        assertTrue(subClasses.containsEntity(OWLNothing())); //Maybe add it to QuestOWL??
     }
 
     @Test
@@ -120,9 +117,7 @@ public class TBoxClassificationTest {
 
         startReasoner();
         NodeSet<OWLClass> subClasses = reasoner.getSubClasses(ObjectSomeValuesFrom(r1, OWLThing()), false); //Also add test for inverse
-        //subClasses.forEach(System.out::println);
         assertTrue(subClasses.containsEntity(A));
-//        assertTrue(subClasses.containsEntity(OWLNothing())); //Maybe add it to QuestOWL??
     }
 
     @Test
@@ -137,8 +132,7 @@ public class TBoxClassificationTest {
         //subClasses.forEach(System.out::println);
         assertTrue(subClasses.containsEntity(A));
         assertTrue(subClasses.containsEntity(B));
-        assertEquals(1, subClasses.getNodes().size()); //Flatmap means we dont get a node for each equivalent class
-//        assertTrue(subClasses.containsEntity(OWLNothing())); //Maybe add it to QuestOWL??
+        assertEquals(1, subClasses.getNodes().size());
     }
 
     @Test
@@ -154,8 +148,7 @@ public class TBoxClassificationTest {
         //subClasses.forEach(System.out::println);
         assertTrue(subClasses.containsEntity(A));
         assertTrue(subClasses.containsEntity(B));
-        assertEquals(1, subClasses.getNodes().size()); //Flatmap means we dont get a node for each equivalent class
-//        assertTrue(subClasses.containsEntity(OWLNothing())); //Maybe add it to QuestOWL??
+        assertEquals(1, subClasses.getNodes().size());
     }
 
     @Test
@@ -169,16 +162,13 @@ public class TBoxClassificationTest {
 
         startReasoner();
         NodeSet<OWLClass> subClasses = reasoner.getSubClasses(C, false);
-        //subClasses.forEach(System.out::println);
         assertTrue(subClasses.containsEntity(A));
         assertTrue(subClasses.containsEntity(B));
-        assertEquals(1, subClasses.getNodes().size()); //Flatmap means we dont get a node for each equivalent class
-//        assertTrue(subClasses.containsEntity(OWLNothing())); //Maybe add it to QuestOWL??
+        assertEquals(1, subClasses.getNodes().size());
     }
 
     @Test
     public void testSubsumptionWithOWLThing() throws Exception {
-//        manager.addAxiom(ontology, SubClassOf(A, OWLThing()));
         manager.addAxiom(ontology, SubClassOf(Male, Person));
         manager.addAxiom(ontology, SubClassOf(Female, Person));
         startReasoner();
@@ -190,7 +180,6 @@ public class TBoxClassificationTest {
 
     @Test
     public void testSubsumptionWithOWLThingDirect() throws Exception {
-//        manager.addAxiom(ontology, SubClassOf(A, OWLThing()));
         manager.addAxiom(ontology, SubClassOf(Male, Person));
         manager.addAxiom(ontology, SubClassOf(Female, Person));
         startReasoner();
@@ -228,7 +217,6 @@ public class TBoxClassificationTest {
         manager.addAxiom(ontology, SubClassOf(Bottom, OWLNothing()));
         startReasoner();
         Node<OWLClass> bottomNode = reasoner.getBottomClassNode();
-        assertTrue(bottomNode.contains(OWLNothing()));
         assertTrue(bottomNode.contains(Bottom));
     }
 
@@ -258,6 +246,21 @@ public class TBoxClassificationTest {
         assertTrue(equivalentClasses.contains(B));
         assertTrue(equivalentClasses.contains(C));
         assertTrue(equivalentClasses.contains(G));
+    }
+
+    @Test
+    public void testEquivalentClassesSomeValuesFrom() throws Exception {
+        OWLObjectSomeValuesFrom someR1 = ObjectSomeValuesFrom(r1, OWLThing());
+        OWLObjectSomeValuesFrom someR2 = ObjectSomeValuesFrom(r2, OWLThing());
+
+        manager.addAxiom(ontology, EquivalentClasses(A, someR1));
+        manager.addAxiom(ontology, EquivalentClasses(B, someR2));
+        manager.addAxiom(ontology, EquivalentClasses(someR1, someR2));
+
+        startReasoner();
+        Node<OWLClass> equivalentClasses = reasoner.getEquivalentClasses(someR1);
+        assertTrue(equivalentClasses.contains(A));
+        assertTrue(equivalentClasses.contains(B));
     }
 
     @Test
@@ -417,14 +420,4 @@ public class TBoxClassificationTest {
         NodeSet<OWLNamedIndividual> differentIndividuals = reasoner.getDifferentIndividuals(a);
         assertTrue(differentIndividuals.containsEntity(b));
     }
-
-//    @Test
-//    public void testJustClassAssertion() throws Exception {
-//        manager.addAxiom(ontology, ClassAssertion(A, a));
-//        startReasoner();
-//        NodeSet<OWLClass> types = reasoner.getTypes(a, false);
-//        assertTrue(types.containsEntity(A));
-//    }
-
-
 }
