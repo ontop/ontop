@@ -19,10 +19,13 @@ import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.impl.EquivalencesDAGImpl;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.rdf4j.RDF4J;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
@@ -487,46 +490,54 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	@Override
 	public NodeSet<OWLClass> getSubClasses(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-//		return structuralReasoner.getSubClasses(ce, direct);
-
 		switch (ce.getClassExpressionType()) {
 			case OWL_CLASS:
 				if (ce.isOWLNothing()) {
 					return new OWLClassNodeSet();
 				}
 
-				// Return all subclasses, whole hierarchy
-				// TODO: This causes the inferred class hierarchy to be filled with redundant subclass relationships?
-				if (ce.isOWLThing()) {
-					Set<Node<OWLClass>> collect = classifiedTBox.classesDAG()
-							.stream()
-							.flatMap(x -> x.getMembers().stream())
-							.filter(x -> x instanceof OClass)
-							.map(x -> oClassAsOWLClass((OClass) x))
-							.map(OWLClassNode::new)
-							.collect(Collectors.toSet());
-
-					return new OWLClassNodeSet(collect);
-				}
-
-				OWLClass owlClass = ce.asOWLClass();
-				OClass oClass = owlClassAsOClass(owlClass);
-				Equivalences<ClassExpression> equivalences = classExpressionToEquivalences(oClass);
-
-				ImmutableSet<Equivalences<ClassExpression>> subClasses = direct
-						? classifiedTBox.classesDAG().getDirectSub(equivalences)
-						: classifiedTBox.classesDAG().getSub(equivalences);
-
 				Set<Node<OWLClass>> classes;
 
-				classes = subClasses.stream()
-						.filter(x -> !x.contains(oClass))
-						.filter(x -> x.getRepresentative() instanceof OClass)
-						.map(this::equivalencesAsOWLClassSet)
-						.map(OWLClassNode::new)
-						.collect(Collectors.toSet());
+				// Return all subclasses, whole hierarchy
+				if (ce.isOWLThing()) {
+					EquivalencesDAG<ClassExpression> dag = classifiedTBox.classesDAG();
 
+					if (direct) {
+						classes = dag.getDirectSubOfTop()
+								.stream()
+								.filter(x -> x.getRepresentative() instanceof OClass)
+								.map(this::equivalencesAsOWLClassSet)
+								.map(OWLClassNode::new)
+								.collect(Collectors.toSet());
+					} else {
+						classes = dag
+								.stream()
+								.flatMap(x -> x.getMembers().stream())
+								.filter(x -> x instanceof OClass)
+								.map(x -> oClassAsOWLClass((OClass) x))
+								.map(OWLClassNode::new)
+								.collect(Collectors.toSet());
+					}
+
+					return new OWLClassNodeSet(classes);
+				} else {
+					OWLClass owlClass = ce.asOWLClass();
+					OClass oClass = owlClassAsOClass(owlClass);
+					Equivalences<ClassExpression> equivalences = classExpressionToEquivalences(oClass);
+
+					ImmutableSet<Equivalences<ClassExpression>> subClasses = direct
+							? classifiedTBox.classesDAG().getDirectSub(equivalences)
+							: classifiedTBox.classesDAG().getSub(equivalences);
+
+					classes = subClasses.stream()
+							.filter(x -> !x.contains(oClass))
+							.filter(x -> x.getRepresentative() instanceof OClass)
+							.map(this::equivalencesAsOWLClassSet)
+							.map(OWLClassNode::new)
+							.collect(Collectors.toSet());
+				}
 				return new OWLClassNodeSet(classes);
+
 			case OBJECT_SOME_VALUES_FROM:
 				OWLObjectSomeValuesFrom owlSomeValuesFrom = (OWLObjectSomeValuesFrom) ce;
 
@@ -536,14 +547,6 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 				if (filler.isOWLThing()) {
 					OWLObjectProperty property = propertyExpression.getNamedProperty();
 					ObjectPropertyExpression objectPropertyExpression = owlObjectPropertyAsExpression(property);
-
-					// This is another way to maybe do it?
-//					property.getInverseProperty().getNamedProperty();
-
-//					if(propertyExpression.isAnonymous()) {
-//						objectPropertyExpression = objectPropertyExpression.getInverse();
-//					}
-
 					ObjectSomeValuesFrom oSomeValuesFrom = objectPropertyExpression.getDomain();
 
 					Equivalences<ClassExpression> equivalences1 = classExpressionToEquivalences(oSomeValuesFrom);
@@ -559,36 +562,17 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 							.map(this::equivalencesAsOWLClassSet)
 							.map(OWLClassNode::new)
 							.collect(Collectors.toSet());
-					return new OWLClassNodeSet(classes1);
-//					if (propertyExpression.isNamed()) {
-//						// propertyExpression = property
-//						ObjectSomeValuesFrom oSomeValuesFrom = objectPropertyExpression.getDomain();
-//						Equivalences<ClassExpression> objectSomeValuesFromEquivalences = new Equivalences<>(ImmutableSet.of(oSomeValuesFrom));
-//						ImmutableSet<Equivalences<ClassExpression>> sub = classifiedTBox.classesDAG().getSub(objectSomeValuesFromEquivalences);
-////						Set<OWLClassNode> collect = objectPropSub.stream()
-////								.flatMap(x -> x.getMembers().stream())
-////								.filter(x -> x instanceof OClass)
-////								.map(x -> (OClass) x)
-////								.map(x -> x.getIRI().getIRIString())
-////								.map(x -> owlDataFactory.getOWLClass(org.semanticweb.owlapi.model.IRI.create(x)))
-////								.map(OWLClassNode::new)
-////								.collect(Collectors.toSet());
-//					} else {
-//						// propertyExpression = inv(property)
-//						objectPropertyExpression = objectPropertyExpression.getInverse();
-//
-//						// Do the same thing as the above block?
-//					}
 
+					return new OWLClassNodeSet(classes1);
 				} else {
 					// TODO: If filler is not thing, then what?
 					return new OWLClassNodeSet();
 				}
+
 			default:
 				return new OWLClassNodeSet();
 		}
 	}
-
 
 	@Nonnull
 	@Override

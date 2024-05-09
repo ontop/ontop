@@ -104,10 +104,17 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 		
 		return vs.getRepresentative();		
 	}
-	
+
 	/**
-	 * 
+	 * Gets the equivalences of the top vertex of the DAG with no incoming edges
 	 */
+	@Override
+	public ImmutableSet<Equivalences<T>> getDirectSubOfTop(){
+		return dag.vertexSet().stream()
+				.filter(v -> dag.outDegreeOf(v) == 0)
+				.collect(ImmutableCollectors.toSet());
+	}
+
 	@Override
 	public ImmutableSet<Equivalences<T>> getDirectSub(Equivalences<T> v) {
 		return dag.incomingEdgesOf(v).stream()

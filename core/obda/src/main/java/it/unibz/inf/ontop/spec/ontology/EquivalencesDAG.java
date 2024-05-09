@@ -15,15 +15,11 @@ public interface EquivalencesDAG<T> extends Iterable<Equivalences<T>> {
 	 */
 	
 	T getCanonicalForm(T v);
-	
+
+	ImmutableSet<Equivalences<T>> getDirectSubOfTop();
+
 	ImmutableSet<Equivalences<T>> getDirectSub(Equivalences<T> v);
 
-	/**
-	 * Reflexive and transitive closure of the sub-description relation
-	 * @param v: an equivalence set of a description (a property or a class)
-	 * @return equivalence sets for all sub-descriptions (including v)
-	 */
-	
 	ImmutableSet<Equivalences<T>> getSub(Equivalences<T> v);
 
 	ImmutableSet<Equivalences<T>> getDirectSuper(Equivalences<T> v);

@@ -189,6 +189,18 @@ public class TBoxClassificationTest {
     }
 
     @Test
+    public void testSubsumptionWithOWLThingDirect() throws Exception {
+//        manager.addAxiom(ontology, SubClassOf(A, OWLThing()));
+        manager.addAxiom(ontology, SubClassOf(Male, Person));
+        manager.addAxiom(ontology, SubClassOf(Female, Person));
+        startReasoner();
+        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(OWLThing(), true);
+        assertFalse(subClasses.containsEntity(Male));
+        assertFalse(subClasses.containsEntity(Female));
+        assertTrue(subClasses.containsEntity(Person));
+    }
+
+    @Test
     public void testSubsumptionWithSomeValues5() throws Exception {
         // A subclass of R some OWLThing
         manager.addAxiom(ontology, SubClassOf(A, ObjectSomeValuesFrom(r1, OWLThing())));
@@ -196,6 +208,18 @@ public class TBoxClassificationTest {
         manager.addAxiom(ontology, ObjectPropertyDomain(r1, B));
         startReasoner();
         NodeSet<OWLClass> subClasses = reasoner.getSubClasses(B, false);
+        assertTrue(subClasses.containsEntity(A));
+    }
+
+    @Test
+    public void testSubsumptionWithSomeValues6() throws Exception {
+        // FIXME: Not complete
+        // A subclass of R some OWLThing
+        manager.addAxiom(ontology, SubClassOf(A, ObjectSomeValuesFrom(r1, OWLThing())));
+        // Domain(r1) is B
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, B));
+        startReasoner();
+        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(ObjectSomeValuesFrom(r1, OWLThing()), false);
         assertTrue(subClasses.containsEntity(A));
     }
 
