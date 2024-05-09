@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.sql.Connection;
@@ -19,6 +21,8 @@ import java.util.Objects;
 import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 
 public class SparkSQLDBMetadataProvider extends AbstractDBMetadataProvider {
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(SparkSQLDBMetadataProvider.class);
 
     protected static final int SCHEMA_INDEX = 1;
     protected static final int CATALOG_INDEX = 2;
@@ -33,7 +37,7 @@ public class SparkSQLDBMetadataProvider extends AbstractDBMetadataProvider {
         try {
             String catalog = connection.getCatalog();
             String schema = connection.getSchema();
-            System.out.println("OBTAINED FROM SPARK JDBC DRIVER: " + catalog + ", " + schema);
+            LOGGER.info("OBTAINED FROM SPARK JDBC DRIVER: " + catalog + ", " + schema);
             if (catalog.isEmpty())
                 catalog = null;
 

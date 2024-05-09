@@ -47,12 +47,6 @@ public class BindWithFunctionsDuckDBTest extends AbstractBindTestWithFunctions {
     }
 
     @Override
-    protected ImmutableList<String> getStrExpectedValues() {
-        return ImmutableList.of("\"1970-11-05 07:50:00.0\"^^xsd:string", "\"2011-12-08 11:30:00.0\"^^xsd:string",
-                "\"2014-06-05 16:47:52.0\"^^xsd:string", "\"2015-09-21 09:23:06.0\"^^xsd:string");
-    }
-
-    @Override
     protected ImmutableList<String> getConstantIntegerDivideExpectedResults() {
         return ImmutableList.of("\"0.5\"^^xsd:decimal");
     }
@@ -121,13 +115,4 @@ public class BindWithFunctionsDuckDBTest extends AbstractBindTestWithFunctions {
         super.testHashSHA512();
     }
 
-    @Override
-    protected ImmutableSet<String> getDateTruncGroupByExpectedValues() {
-        return ImmutableSet.of("\"1970-01-01T00:00:00+01: 1\"^^xsd:string", "\"2010-01-01T00:00:00+01: 3\"^^xsd:string");
-    }
-
-    @Override
-    protected ImmutableSet<String> getSimpleDateTrunkExpectedValues() {
-        return ImmutableSet.of("\"1970-01-01T00:00:00+01\"^^xsd:dateTime", "\"2011-01-01T00:00:00+01\"^^xsd:dateTime", "\"2014-01-01T00:00:00+01\"^^xsd:dateTime", "\"2015-01-01T00:00:00+01\"^^xsd:dateTime");
-    }
 }

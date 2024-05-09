@@ -141,7 +141,6 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
         // connection sofar.
         if (isActive()) {
             try {
-                // System.out.println("QuestConn commit..");
                 ontopConnection.commit();
                 this.isActive = false;
             } catch (OntopConnectionException e) {

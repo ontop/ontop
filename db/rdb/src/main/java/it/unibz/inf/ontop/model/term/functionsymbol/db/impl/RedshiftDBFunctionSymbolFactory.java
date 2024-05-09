@@ -113,7 +113,7 @@ public class RedshiftDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     }
 
     @Override
-    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+    protected String serializeDateTimeNormWithTZ(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("TO_CHAR(%s, 'YYYY-MM-DD\"T\"HH24:MI:SSOF')", termConverter.apply(terms.get(0)));
     }
 

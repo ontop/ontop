@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import static it.unibz.inf.ontop.model.type.DBTermType.Category.INTEGER;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.SAME_TYPE_NO_CONSTANT;
 
@@ -34,6 +35,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String TIMETZ_STR = "TIMETZ";
     public static final String BOOL_STR = "BOOL";
     public static final String UUID_STR = "UUID";
+    public static final String OID_STR = "OID";
     public static final String JSON_STR = "JSON";
     public static final String JSONB_STR = "JSONB";
     public static final String ARRAY_STR = "T[]";
@@ -108,11 +110,14 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         DBTermType uuidType = new UUIDDBTermType(UUID_STR, rootTermType.getAncestry(), xsdString);
 
+        DBTermType oidType = new NumberDBTermType(OID_STR, rootAncestry, typeFactory.getDatatype(XSD.INTEGER), INTEGER);
+
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(BIT_STR, bitType);
         map.put(INT2_STR, map.get(SMALLINT_STR));
         map.put(INT4_STR, map.get(INTEGER_STR));
         map.put(INT8_STR, map.get(BIGINT_STR));
+        map.put(OID_STR, oidType);
         map.put(VARBIT_STR, varBitType);
         map.put(FLOAT4_STR, map.get(REAL_STR));
         map.put(FLOAT8_STR, map.get(DOUBLE_PREC_STR));
