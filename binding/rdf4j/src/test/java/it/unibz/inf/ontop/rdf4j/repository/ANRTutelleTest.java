@@ -62,8 +62,7 @@ public class ANRTutelleTest extends AbstractRDF4JTest {
         var sql = reformulateIntoNativeQuery(query).toLowerCase();
         assertFalse("The left-join should have been optimized out:\n " + sql,sql.contains("left"));
     }
-
-    @Ignore("TODO: enable it")
+    
     @Test
     public void testLJ3() {
         var query = "prefix ex: <http://example.org/>\n" +
@@ -96,6 +95,23 @@ public class ANRTutelleTest extends AbstractRDF4JTest {
                 "     ?cat ex:name ?name \n" +
                 "    }\n" +
                 " # }\n" +
+                "}";
+        int count = runQueryAndCount(query);
+        assertEquals(1, count);
+
+        var sql = reformulateIntoNativeQuery(query).toLowerCase();
+        assertFalse("The left-join should have been optimized out:\n " + sql,sql.contains("left"));
+    }
+
+    @Test
+    public void testLJ5() {
+        var query = "prefix ex: <http://example.org/>\n" +
+                "\n" +
+                "select * where {\n" +
+                "  ?t ex:category ?cat . \n" +
+                "  OPTIONAL { \n" +
+                "     ?cat ex:name ?name \n" +
+                "  }\n" +
                 "}";
         int count = runQueryAndCount(query);
         assertEquals(1, count);
