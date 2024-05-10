@@ -328,11 +328,11 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     }
 
     @Override
-    protected boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
-                                                           VariableNullability variableNullability,
-                                                           ImmutableList<? extends ImmutableTerm> otherTerms) {
+    protected Decomposability testDecomposabilityIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
+                                                         VariableNullability variableNullability,
+                                                         ImmutableList<? extends ImmutableTerm> otherTerms) {
         if (isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms())
-            return canBeSafelyDecomposedIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
+            return testDecomposabilityIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
 
         ImmutableSet<Integer> columnPositions = IntStream.range(0, components.size())
                 .filter(i -> components.get(i).isColumnNameReference())
@@ -341,7 +341,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
         // Needs to have a separator between variables
         if (columnPositions.stream().anyMatch(i -> columnPositions.contains(i+1)))
-            return false;
+            return Decomposability.CANNOT_BE_DECOMPOSED;
 
         ImmutableSet<Integer> separatorPositions = IntStream.range(0, components.size())
                 .filter(i -> !components.get(i).isColumnNameReference())
@@ -351,16 +351,16 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         // TODO: remove this restriction and tolerates consecutive separators
         if (IntStream.range(0, components.size() - 1)
                 .anyMatch(i -> separatorPositions.contains(i) && separatorPositions.contains(i+1)))
-            return false;
+            return Decomposability.CANNOT_BE_DECOMPOSED;
 
         if (separatorPositions.stream()
                 // Only those separating columns
                 .filter(i -> columnPositions.contains(i-1) && columnPositions.contains(i+1))
                 .allMatch(i -> isSafelySeparating(i, terms, otherTerms))) {
-            return canBeSafelyDecomposedIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
+            return testDecomposabilityIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
         }
 
-        return false;
+        return Decomposability.CANNOT_BE_DECOMPOSED;
     }
 
     private boolean isSafelySeparating(int separatorIndex, ImmutableList<? extends ImmutableTerm> terms,

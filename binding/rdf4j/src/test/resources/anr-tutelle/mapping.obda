@@ -1,0 +1,12 @@
+[PrefixDeclaration]
+ex: http://example.org/
+
+[MappingDeclaration] @collection [[
+mappingId	map1
+target		ex:partner/{partner_id} ex:tutelle ex:tutelle/{tutelle_name}/{tutelle_category} .
+source		SELECT * FROM tutelle
+
+mappingId	map2
+target		ex:tutelle/{tutelle_name}/{tutelle_category} ex:name {tutelle_name} .
+source		SELECT * FROM tutelle
+]]
