@@ -7,6 +7,10 @@ target		ex:partner/{partner_id} ex:tutelle ex:tutelle/{tutelle_name}/{tutelle_ca
 source		SELECT * FROM tutelle
 
 mappingId	map2
-target		ex:tutelle/{tutelle_name}/{tutelle_category} ex:name {tutelle_name} .
+target		ex:tutelle/{tutelle_name}/{tutelle_category} a ex:Tutelle ; ex:name {tutelle_name} ; ex:category ex:category/{tutelle_category} .
 source		SELECT * FROM tutelle
+
+mappingId	map3
+target		ex:category/{tutelle_category} ex:name {tutelle_category} .
+source		SELECT * FROM category
 ]]
