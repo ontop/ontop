@@ -9,15 +9,14 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -65,6 +64,7 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
 
     protected static class Transformer extends AbstractJoinTransferLJTransformer {
         private final TermFactory termFactory;
+        private NonNullConstant provenanceConstant;
 
         protected Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
                               VariableGenerator variableGenerator, RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
@@ -72,6 +72,7 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
                               CoreSingletons coreSingletons, JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
             super(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor, rightProvenanceNormalizer, variableNullabilityTools, coreSingletons);
             this.termFactory = coreSingletons.getTermFactory();
+            this.provenanceConstant = termFactory.getProvenanceSpecialConstant();
         }
 
 
@@ -109,6 +110,22 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
                             .map(Optional::get))
                     .findAny()
                     .map(indexes -> new SelectedNode(indexes, rightDataNode));
+        }
+
+        /**
+         * Passes through construction nodes that are only here for placing provenance constants
+         */
+        @Override
+        public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+            Substitution<ImmutableTerm> substitution = rootNode.getSubstitution();
+            ImmutableSet<Variable> provVariables = substitution.getPreImage(v -> v.equals(provenanceConstant));
+
+            if ((!provVariables.isEmpty())
+                    && substitution.getDomain().equals(provVariables)
+                    && rootNode.getVariables().equals(Sets.union(child.getVariables(), provVariables))) {
+                return transformUnaryNode(tree, rootNode, child, this::transform);
+            }
+            return super.transformConstruction(tree, rootNode, child);
         }
 
         @Override
