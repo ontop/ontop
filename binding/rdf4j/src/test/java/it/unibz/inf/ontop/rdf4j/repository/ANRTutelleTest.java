@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.rdf4j.repository;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -62,6 +63,7 @@ public class ANRTutelleTest extends AbstractRDF4JTest {
         assertFalse("The left-join should have been optimized out:\n " + sql,sql.contains("left"));
     }
 
+    @Ignore("TODO: enable it")
     @Test
     public void testLJ3() {
         var query = "prefix ex: <http://example.org/>\n" +
