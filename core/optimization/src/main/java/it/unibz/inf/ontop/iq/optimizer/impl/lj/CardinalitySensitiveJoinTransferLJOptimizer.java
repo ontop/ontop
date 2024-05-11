@@ -64,7 +64,6 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
 
     protected static class Transformer extends AbstractJoinTransferLJTransformer {
         private final TermFactory termFactory;
-        private NonNullConstant provenanceConstant;
 
         protected Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
                               VariableGenerator variableGenerator, RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
@@ -72,7 +71,6 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
                               CoreSingletons coreSingletons, JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
             super(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor, rightProvenanceNormalizer, variableNullabilityTools, coreSingletons);
             this.termFactory = coreSingletons.getTermFactory();
-            this.provenanceConstant = termFactory.getProvenanceSpecialConstant();
         }
 
 
@@ -113,24 +111,24 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
         }
 
         /**
-         * Passes through construction nodes that are only here for placing provenance constants
+         * Keeps passing the non-nullability constraints down below the construction node
          */
         @Override
         public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
-            Substitution<ImmutableTerm> substitution = rootNode.getSubstitution();
-            ImmutableSet<Variable> provVariables = substitution.getPreImage(v -> v.equals(provenanceConstant));
+            var childVariableNullabilitySupplier = computeChildVariableNullabilityFromConstructionParent(tree, rootNode, child);
 
-            if ((!provVariables.isEmpty())
-                    && substitution.getDomain().equals(provVariables)
-                    && rootNode.getVariables().equals(Sets.union(child.getVariables(), provVariables))) {
-                return transformUnaryNode(tree, rootNode, child, this::transform);
-            }
-            return super.transformConstruction(tree, rootNode, child);
+            return transformUnaryNode(tree, rootNode, child,
+                    t -> transformBySearchingWithNewVariableNullabilitySupplier(t, childVariableNullabilitySupplier));
         }
 
         @Override
         protected IQTree transformBySearchingFromScratch(IQTree tree) {
-            Transformer newTransformer = new Transformer(tree::getVariableNullability, variableGenerator, requiredDataNodeExtractor,
+            return transformBySearchingWithNewVariableNullabilitySupplier(tree, tree::getVariableNullability);
+        }
+
+        protected IQTree transformBySearchingWithNewVariableNullabilitySupplier(IQTree tree,
+                                                                                Supplier<VariableNullability> variableNullabilitySupplier) {
+            Transformer newTransformer = new Transformer(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor,
                     rightProvenanceNormalizer, coreSingletons, variableNullabilityTools);
             return tree.acceptTransformer(newTransformer);
         }
