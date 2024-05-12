@@ -15,6 +15,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.impl.ofn.OfnSimpleBinarySPAR
 //TODO
 // Add raster function's import e.g. raster.RasterAverageFunctionSymbolImpl;
 // --------------------------------------------[STEP 02]---------------------------------------------
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterDimensionFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.ProcessRasterArrayCellFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.Date2GridFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterAverageFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMaximumFunctionSymbolImpl;
@@ -350,6 +352,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 // 3. Output types
                 // --------------------------------------------[STEP 02a]---------------------------------------------
 
+                new RasterDimensionFunctionSymbolImpl(RASDB.RAS_GET_DIMENSION, xsdString),
+
+                new ProcessRasterArrayCellFunctionSymbolImpl(RASDB.RAS_PROCESS_RASTER_ARRAY, xsdString, xsdDouble),
+
                 new Date2GridFunctionSymbolImpl(RASDB.RAS_DATE_TO_GRID, xsdString, xsdInteger),
 
                 new RasterAverageFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE, xsdInteger, xsdDouble, wktLiteral, xsdString),
@@ -366,7 +372,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
                 new RasterAverageFinalFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE_FINAL, xsdString, wktLiteral),
 
-                new ClipRasterFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL, xsdInteger, wktLiteral, xsdDouble, xsdString),
+                new ClipRasterFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL, xsdString, wktLiteral),
 
                 new ClipRasterAnyGeomFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL_ANY_GEOM, xsdInteger, xsdString, xsdString),
 

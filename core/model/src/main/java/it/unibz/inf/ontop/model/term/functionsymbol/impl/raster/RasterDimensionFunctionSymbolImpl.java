@@ -9,10 +9,11 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-public class ClipRasterFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl {
+public class RasterDimensionFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
 
-    public ClipRasterFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType) {
-        super("RAS_CLIP_RASTER_SPATIAL", functionIRI, ImmutableList.of(xsdStringDatatype, wktLiteralType, xsdStringDatatype), xsdStringDatatype);
+    public RasterDimensionFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdStringDatatype) {
+        super("RAS_GET_DIMENSION", functionIRI, ImmutableList.of(xsdStringDatatype),
+                xsdStringDatatype);
     }
 
     @Override
@@ -21,8 +22,7 @@ public class ClipRasterFunctionSymbolImpl extends AbstractRasterFunctionSymbolIm
         // return termFactory.getRESPECTIVEDBFUNCTIONSymbols;  --------------------------------[STEP 01b]-----------------------------------
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
-        return termFactory.getClipRaster(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2));
-//        return null;
-
+        return termFactory.getRasterDimension(subLexicalTerms.get(0));
     }
+
 }

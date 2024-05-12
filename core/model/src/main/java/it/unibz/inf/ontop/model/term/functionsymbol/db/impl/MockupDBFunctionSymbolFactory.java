@@ -986,6 +986,19 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     //TODO
     // Add "serializerRAS_funcionname" in MockUP --------------------------------[STEP 08]---------------------------------------------
     @Override
+    protected String serializeRAS_GET_DIMENSION(ImmutableList<? extends ImmutableTerm> terms,
+                                                  Function<ImmutableTerm, String> termConverter,
+                                                  TermFactory termFactory){
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeRAS_PROCESS_RASTER_ARRAY(ImmutableList<? extends ImmutableTerm> terms,
+                                                  Function<ImmutableTerm, String> termConverter,
+                                                  TermFactory termFactory){
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+    @Override
     protected String serializeRAS_SPATIAL_AVERAGE(ImmutableList<? extends ImmutableTerm> terms,
                                                            Function<ImmutableTerm, String> termConverter,
                                                            TermFactory termFactory){

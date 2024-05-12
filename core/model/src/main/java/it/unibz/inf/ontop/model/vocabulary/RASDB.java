@@ -18,6 +18,12 @@ public class RASDB {
 
     public static final IRI RAS_DATE_TO_GRID;
 
+    public static final IRI RAS_GET_DIMENSION;
+
+    public static final IRI RAS_PROCESS_RASTER_ARRAY;
+
+
+
     // Raster Aggregation Functions
 
     public static final IRI RAS_SPATIAL_AVERAGE;
@@ -55,6 +61,10 @@ public class RASDB {
         RAS_CONNECTION = factory.createIRI(PREFIX + "rasConnection");
 
         RAS_DATE_TO_GRID = factory.createIRI(PREFIX + "rasDate2Grid");
+
+        RAS_GET_DIMENSION = factory.createIRI(PREFIX + "rasDimension");
+
+        RAS_PROCESS_RASTER_ARRAY = factory.createIRI(PREFIX + "rasProcessRasterOp");
 
 
         // Raster Aggregation Functions

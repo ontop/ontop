@@ -253,6 +253,8 @@ public interface DBFunctionSymbolFactory {
     //TODO
     // Add DBFunctionSymbol
     // ----------------------------------[STEP 04]--------------------------------------
+    DBFunctionSymbol getRasterDimension();
+    DBFunctionSymbol getProcessRasterArrayCell();
     DBFunctionSymbol getDate2Grid();
     DBFunctionSymbol getRasterSpatialAverage();
     DBFunctionSymbol getRasterSpatialMaximum();

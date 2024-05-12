@@ -167,6 +167,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     //TODO
     // Add Raster Function DB Symbol (same as separate new java class file)
     // ------------------------------------[STEP 03]-----------------------------------
+    private DBFunctionSymbol getRasterDimensionFunctionSymbol;
+    private DBFunctionSymbol getProcessRasterArrayCellFunctionSymbol;
     private DBFunctionSymbol getDate2GridFunctionSymbol;
     private DBFunctionSymbol getRasterSpatialAverageFunctionSymbol;
     private DBFunctionSymbol getRasterSpatialMaximumFunctionSymbol;
@@ -503,6 +505,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         //TODO
         // Add Raster Function Symbol
         // ------------------------------------[STEP 03a]-----------------------------------
+        getRasterDimensionFunctionSymbol = createRasterDimensionFunctionSymbol();
+        getProcessRasterArrayCellFunctionSymbol = createProcessRasterArrayCellFunctionSymbol();
         getDate2GridFunctionSymbol = createDate2GridFunctionSymbol();
         getRasterSpatialAverageFunctionSymbol = createRasterSpatialAverageFunctionSymbol();
         getRasterSpatialMaximumFunctionSymbol = createRasterSpatialMaximumFunctionSymbol();
@@ -1365,6 +1369,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     //TODO
     // Add Raster DBFunction Symbol
     // ------------------------------------[STEP 03b]-------------------------------------
+    public DBFunctionSymbol getRasterDimension(){return getRasterDimensionFunctionSymbol;}
+
+    public DBFunctionSymbol getProcessRasterArrayCell(){return getProcessRasterArrayCellFunctionSymbol;}
+
     public DBFunctionSymbol getDate2Grid(){return getDate2GridFunctionSymbol;}
 
     public DBFunctionSymbol getRasterSpatialAverage(){return getRasterSpatialAverageFunctionSymbol;}
@@ -1957,6 +1965,17 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 // create RasterSpatialAverage DBFunctionSymbol
 // ---------------------------------------[STEP 03c]-------------------------------------
 
+    protected DBFunctionSymbol createRasterDimensionFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("RAS_GET_DIMENSION", ImmutableList.of(dbStringType), dbStringType, false,
+                this::serializeRAS_GET_DIMENSION);
+    }
+
+    protected DBFunctionSymbol createProcessRasterArrayCellFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("RAS_PROCESS_RASTER_ARRAY", ImmutableList.of(dbStringType, dbStringType, dbDoubleType, dbStringType), dbStringType, false,
+                this::serializeRAS_PROCESS_RASTER_ARRAY);
+    }
+
+
     protected DBFunctionSymbol createDate2GridFunctionSymbol() {
         return new DBFunctionSymbolWithSerializerImpl("RAS_DATE_TO_GRID", ImmutableList.of(dbStringType, dbIntegerType), dbIntegerType, false,
                 this::serializeRAS_DATE_TO_GRID);
@@ -1998,7 +2017,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     protected DBFunctionSymbol createClipRasterFunctionSymbol() {
-        return new DBFunctionSymbolWithSerializerImpl("DB_CLIP_RASTER_SPATIAL", ImmutableList.of(dbIntegerType, rootDBType, dbDoubleType, dbDoubleType, dbDoubleType, dbDoubleType, dbStringType), dbStringType, false,
+        return new DBFunctionSymbolWithSerializerImpl("DB_CLIP_RASTER_SPATIAL", ImmutableList.of(dbStringType, rootDBType, dbStringType), dbStringType, false,
                 this::serializeRAS_CLIP_RASTER_SPATIAL);
     }
 
@@ -2022,6 +2041,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     //TODO
     // create a custom serializer like serializeRAS_SPATIAL_AVERAGE
     // ---------------------------------------[STEP 03d]---------------------------------
+
+    protected abstract String serializeRAS_GET_DIMENSION(ImmutableList<? extends ImmutableTerm> terms,
+                                                        Function<ImmutableTerm, String> termConverter,
+                                                        TermFactory termFactory);
+    protected abstract String serializeRAS_PROCESS_RASTER_ARRAY(ImmutableList<? extends ImmutableTerm> terms,
+                                                         Function<ImmutableTerm, String> termConverter,
+                                                         TermFactory termFactory);
 
     protected abstract String serializeRAS_DATE_TO_GRID(ImmutableList<? extends ImmutableTerm> terms,
                                                            Function<ImmutableTerm, String> termConverter,

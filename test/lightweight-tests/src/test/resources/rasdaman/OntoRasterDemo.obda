@@ -26,8 +26,8 @@ source		SELECT 404 AS gid, rasdaman_op.check_rasdaman_conn() AS conn
 ;source		SELECT region_id, name_2 AS region_name from sample_regions_of_interest
 
 ;mappingId	mapping_region_geometry
-;target		:vector_region/demo/{region_id} geo:asWKT {geometry}^^geo:wktLiteral .
-;source		SELECT region_id, st_astext((st_dump(geom)).geom) AS geometry from sample_regions_of_interest
+;target		:vector_region/demo/{region_id} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
+;source		SELECT region_id, st_astext((st_dump(geom)).geom) AS geometry_wkt from sample_regions_of_interest
 
 ; ---------------- Mapping for All Regions in Sweden -----------------
 
@@ -40,8 +40,8 @@ target		:vector_region/sweden/{gid} rdfs:label {region_name}^^xsd:string .
 source		SELECT gid, name_2 AS region_name from region_sweden
 
 mappingId	mapping_region_geometry_wkt_sweden
-target		:vector_region/sweden/{gid} geo:asWKT {geometry}^^geo:wktLiteral .
-source		SELECT gid, st_astext((st_dump(geom)).geom) AS geometry from region_sweden
+target		:vector_region/sweden/{gid} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
+source		SELECT gid, st_astext(geom) AS geometry_wkt from region_sweden
 
 ; ---------------- Mapping for All Regions in Bavaria -----------------
 
@@ -54,8 +54,8 @@ target		:vector_region/bavaria/{gid} rdfs:label {region_name}^^xsd:string .
 source		SELECT gid, name_2 AS region_name from region_bavaria
 
 mappingId	mapping_region_geometry_wkt_bavaria
-target		:vector_region/bavaria/{gid} geo:asWKT {geometry}^^geo:wktLiteral .
-source		SELECT gid, st_astext((st_dump(geom)).geom) AS geometry from region_bavaria
+target		:vector_region/bavaria/{gid} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
+source		SELECT gid, st_astext(geom) AS geometry_wkt from region_bavaria
 
 ; ---------------- Mapping for All Regions in South Tyrol -----------------
 
@@ -68,8 +68,8 @@ target		:vector_region/tyrol/{gid} rdfs:label {region_name}^^xsd:string .
 source		SELECT gid, name_3 AS region_name from region_south_tyrol
 
 mappingId	mapping_region_geometry_wkt_south_tyrol
-target		:vector_region/tyrol/{gid} geo:asWKT {geometry}^^geo:wktLiteral .
-source		SELECT gid, st_astext((st_dump(geom)).geom) AS geometry from region_south_tyrol
+target		:vector_region/tyrol/{gid} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
+source		SELECT gid, st_astext(geom) AS geometry_wkt from region_south_tyrol
 
 
 ; ---------------- Mapping for Raster Metadata Lookup Table -----------------

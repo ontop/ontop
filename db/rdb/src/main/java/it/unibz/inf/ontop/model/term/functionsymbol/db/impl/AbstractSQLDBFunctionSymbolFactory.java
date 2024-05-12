@@ -1535,8 +1535,30 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
 //TODO
-// Give a default serialization and construct RaSQL query string that will exceyred rasdapy API within PostgreSQL
+// Give a default serialization and construct RaSQL query string that will be exeuted within PostgreSQL through rasdapy API
 // -----------------------------------[Step 07]----------------------------------
+
+    protected String serializeRAS_GET_DIMENSION(ImmutableList<? extends ImmutableTerm> terms,
+                                                  Function<ImmutableTerm, String> termConverter,
+                                                  TermFactory termFactory) {
+        String raster_name = termConverter.apply(terms.get(0));
+
+
+        return String.format("rasdaman_op.query2string(CONCAT('select sdom(c)[0] from ', %s, ' as c'))", raster_name);
+    }
+
+    protected String serializeRAS_PROCESS_RASTER_ARRAY(ImmutableList<? extends ImmutableTerm> terms,
+                                                Function<ImmutableTerm, String> termConverter,
+                                                TermFactory termFactory) {
+        String time = termConverter.apply(terms.get(0));
+        String operator = termConverter.apply(terms.get(1));
+        String value = termConverter.apply(terms.get(2));
+        String raster_name = termConverter.apply(terms.get(3));
+
+
+        return String.format("rasdaman_op.query2array(CONCAT('select c[',rasdaman_op.timestamp2grid(%s, %s),', 0:* , 0:*] %s  %s from ', %s, ' as c'))", time, raster_name, operator, value, raster_name);
+    }
+
     protected String serializeRAS_SPATIAL_AVERAGE(ImmutableList<? extends ImmutableTerm> terms,
                                                   Function<ImmutableTerm, String> termConverter,
                                                   TermFactory termFactory) {
@@ -1678,13 +1700,16 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                                                       TermFactory termFactory){
         String time = termConverter.apply(terms.get(0));
         String region = termConverter.apply(terms.get(1));
-        String min_lon = termConverter.apply(terms.get(2));
-        String max_lat = termConverter.apply(terms.get(3));
-        String x_res = termConverter.apply(terms.get(4));
-        String y_res = termConverter.apply(terms.get(5));
-        String raster_name = termConverter.apply(terms.get(6));
-
-        return String.format("rasdaman_op.query2array(CONCAT('select clip(c[' , %s, ', 0:* , 0:*],' , " + "rasdaman_op.geo2grid_final(ST_AsText((ST_Dump(%s)).geom), cast(%s as double precision), cast(%s as double precision), cast(%s as double precision), cast(%s as double precision)),')) from ', %s, ' as c'))",time, region, min_lon, max_lat, x_res, y_res, raster_name);
+//        String min_lon = termConverter.apply(terms.get(2));
+//        String max_lat = termConverter.apply(terms.get(3));
+//        String x_res = termConverter.apply(terms.get(4));
+//        String y_res = termConverter.apply(terms.get(5));
+        String raster_name = termConverter.apply(terms.get(2));
+        return String.format("rasdaman_op.query2array(CONCAT('select clip(c[',rasdaman_op.timestamp2grid(%s, %s),', 0:* , 0:*],' , "
+                        + "rasdaman_op.geo2grid_final(ST_AsText((ST_Dump(%s)).geom), rasdaman_op.get_min_longitude(%s), rasdaman_op.get_max_latitude(%s)," +
+                        " rasdaman_op.get_res_lon(%s), rasdaman_op.get_res_lat(%s)),') from ', %s, ' as c'))",
+                time, raster_name, region, raster_name, raster_name, raster_name, raster_name, raster_name);
+//        return String.format("rasdaman_op.query2array(CONCAT('select clip(c[' , %s, ', 0:* , 0:*],' , " + "rasdaman_op.geo2grid_final(ST_AsText((ST_Dump(%s)).geom), cast(%s as double precision), cast(%s as double precision), cast(%s as double precision), cast(%s as double precision)),')) from ', %s, ' as c'))",time, region, min_lon, max_lat, x_res, y_res, raster_name);
     }
 
     protected String serializeRAS_CLIP_RASTER_SPATIAL_ANY_GEOM(ImmutableList<? extends ImmutableTerm> terms,

@@ -564,6 +564,17 @@ public class TermFactoryImpl implements TermFactory {
 
 	//TODO
 	// Add Terms for newly added raster functions -------------------------------------[STEP 05]-------------------------------------------
+
+	@Override
+	public ImmutableFunctionalTerm getRasterDimension(ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterDimension(), ImmutableList.of(dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getProcessRasterArrayCell(ImmutableTerm TimeSnap, ImmutableTerm dbOperator, ImmutableTerm dbValue,  ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getProcessRasterArrayCell(), ImmutableList.of(TimeSnap, dbOperator, dbValue, dbRasterName));
+	}
+
 	@Override
 	public ImmutableFunctionalTerm getDate2Grid(ImmutableTerm TimeSnap, ImmutableTerm dbRasterId){
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDate2Grid(), ImmutableList.of(TimeSnap, dbRasterId));
@@ -617,8 +628,8 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getClipRaster(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbMinLon, ImmutableTerm dbMaxLat, ImmutableTerm dbXscale, ImmutableTerm dbYscale, ImmutableTerm dbRasterName){
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getClipRaster(), ImmutableList.of(TimeSnap, dbRegionGeom, dbMinLon, dbMaxLat, dbXscale, dbYscale, dbRasterName));
+	public ImmutableFunctionalTerm getClipRaster(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getClipRaster(), ImmutableList.of(TimeSnap, dbRegionGeom, dbRasterName));
 	}
 
 	@Override

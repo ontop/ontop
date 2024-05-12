@@ -567,7 +567,11 @@ public interface TermFactory {
 	// Raster Functions
 	//-----------------
 
-	ImmutableFunctionalTerm getDate2Grid(ImmutableTerm TimeSnap, ImmutableTerm dbRasterId);
+	ImmutableFunctionalTerm getRasterDimension(ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getProcessRasterArrayCell(ImmutableTerm TimeSnap, ImmutableTerm dbOperator, ImmutableTerm dbValue,  ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getDate2Grid(ImmutableTerm TimeSnap,ImmutableTerm dbRasterId);
 
 	ImmutableFunctionalTerm getRasterSpatialAverage(ImmutableTerm TimeSnap, ImmutableTerm ScaleFactor, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
 
@@ -583,7 +587,7 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getRasterSpatialAverageFinal(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
 
-	ImmutableFunctionalTerm getClipRaster(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbMinLon, ImmutableTerm dbMaxLat, ImmutableTerm dbXscale, ImmutableTerm dbYscale, ImmutableTerm dbRasterName);
+	ImmutableFunctionalTerm getClipRaster(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
 
 	ImmutableFunctionalTerm getClipRasterAnyGeom(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
 
