@@ -11,8 +11,8 @@ import javax.annotation.Nonnull;
 
 public class ClipRasterAnyGeomFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl {
 
-    public ClipRasterAnyGeomFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdIntegerDatatype, RDFDatatype wktLiteralType, RDFDatatype xsdStringDatatype) {
-        super("RAS_CLIP_RASTER_SPATIAL_ANY_GEOM", functionIRI, ImmutableList.of(xsdIntegerDatatype, wktLiteralType, xsdStringDatatype), xsdStringDatatype);
+    public ClipRasterAnyGeomFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdStringDatatype) {
+        super("RAS_CLIP_RASTER_SPATIAL_ANY_GEOM", functionIRI, ImmutableList.of(xsdStringDatatype, xsdStringDatatype, xsdStringDatatype), xsdStringDatatype);
     }
 
     @Override

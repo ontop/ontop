@@ -2022,7 +2022,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     protected DBFunctionSymbol createClipRasterAnyGeomFunctionSymbol() {
-        return new DBFunctionSymbolWithSerializerImpl("RAS_CLIP_RASTER_SPATIAL_ANY_GEOM", ImmutableList.of(dbIntegerType, rootDBType, dbStringType), dbStringType, false,
+        return new DBFunctionSymbolWithSerializerImpl("RAS_CLIP_RASTER_SPATIAL_ANY_GEOM", ImmutableList.of(dbStringType, dbStringType, dbStringType), dbStringType, false,
                 this::serializeRAS_CLIP_RASTER_SPATIAL_ANY_GEOM);
     }
 

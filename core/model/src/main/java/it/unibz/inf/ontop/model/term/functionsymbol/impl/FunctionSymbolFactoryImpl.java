@@ -370,11 +370,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
                 new RasterAverageXFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE_X, xsdInteger, wktLiteral, xsdDouble, xsdString),
 
-                new RasterAverageFinalFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE_FINAL, xsdString, wktLiteral),
+                new RasterAverageFinalFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE_FINAL, xsdString),
 
                 new ClipRasterFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL, xsdString, wktLiteral),
 
-                new ClipRasterAnyGeomFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL_ANY_GEOM, xsdInteger, xsdString, xsdString),
+                new ClipRasterAnyGeomFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL_ANY_GEOM, xsdString),
 
                 new RasterSmallArrayTempFunctionSymbolImpl(RASDB.RAS_CLIP_SMALL_ARRAY_TEMPORAL, xsdInteger, xsdInteger, xsdString),
 
