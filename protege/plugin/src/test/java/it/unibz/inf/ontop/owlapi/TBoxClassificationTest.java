@@ -12,6 +12,7 @@ import org.semanticweb.owlapi.reasoner.NodeSet;
 import java.util.Properties;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.*;
 
 public class TBoxClassificationTest {
@@ -189,6 +190,23 @@ public class TBoxClassificationTest {
         assertTrue(subClasses.containsEntity(Person));
     }
 
+//    @Test
+//    public void testSubsumptionWithOWLThingDirect1() throws Exception {
+//        // FIXME: Analyzing the resulting DAG displays weird results.
+//        // Sub of A contains many elements. VertexIndex also now includes OWLThing.
+//
+//        manager.addAxiom(ontology, SubClassOf(Male, Person));
+//        manager.addAxiom(ontology, SubClassOf(Female, Person));
+//        manager.addAxiom(ontology, EquivalentClasses(A, OWLThing()));
+//        startReasoner();
+//        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(OWLThing(), true);
+//        assertTrue(subClasses.containsEntity(A));
+//        assertTrue(subClasses.containsEntity(OWLThing()));
+//        assertFalse(subClasses.containsEntity(Person));
+//        assertFalse(subClasses.containsEntity(Male));
+//        assertFalse(subClasses.containsEntity(Female));
+//    }
+
     @Test
     public void testSubsumptionWithSomeValues5() throws Exception {
         // A subclass of R some OWLThing
@@ -233,6 +251,21 @@ public class TBoxClassificationTest {
         assertTrue(disjointClasses.containsEntity(C));
         assertTrue(disjointClasses.containsEntity(G));
     }
+
+//    @Test
+//    public void testDisjointClassesSomeValuesFrom() throws Exception {
+//        OWLObjectSomeValuesFrom someR1 = ObjectSomeValuesFrom(r1, OWLThing());
+//        OWLObjectSomeValuesFrom someR2 = ObjectSomeValuesFrom(r2, OWLThing());
+//
+//        manager.addAxiom(ontology, DisjointClasses(A, B, C));
+//        manager.addAxiom(ontology, DisjointClasses(D, E, F));
+//        manager.addAxiom(ontology, DisjointClasses(A, G));
+//        manager.addAxiom(ontology, DisjointClasses(someR1, someR2));
+//
+//        startReasoner();
+//        NodeSet<OWLClass> disjointClasses = reasoner.getDisjointClasses(someR1);
+//        assertTrue(disjointClasses.containsEntity(someR2));
+//    }
 
     @Test
     public void testEquivalentClasses() throws Exception {
@@ -330,11 +363,30 @@ public class TBoxClassificationTest {
     }
 
     @Test
-    public void testObjectPropertySubsumption() throws Exception {
+    public void testObjectPropertySubsumptionTopDirect() throws Exception {
         manager.addAxiom(ontology, SubObjectPropertyOf(r1, r2));
         startReasoner();
-        NodeSet<OWLObjectPropertyExpression> subProperties = reasoner.getSubObjectProperties(r2, false);
+
+        OWLObjectProperty owlTopObjectProperty = manager.getOWLDataFactory().getOWLTopObjectProperty();
+
+        NodeSet<OWLObjectPropertyExpression> subProperties = reasoner.getSubObjectProperties(owlTopObjectProperty, true);
+        assertFalse(subProperties.containsEntity(r1));
+        assertTrue(subProperties.containsEntity(r2));
+        assertTrue(subProperties.containsEntity(r2.getInverseProperty()));
+    }
+
+    @Test
+    public void testObjectPropertySubsumptionTop() throws Exception {
+        manager.addAxiom(ontology, SubObjectPropertyOf(r1, r2));
+        startReasoner();
+
+        OWLObjectProperty owlTopObjectProperty = manager.getOWLDataFactory().getOWLTopObjectProperty();
+
+        NodeSet<OWLObjectPropertyExpression> subProperties = reasoner.getSubObjectProperties(owlTopObjectProperty, false);
         assertTrue(subProperties.containsEntity(r1));
+        assertTrue(subProperties.containsEntity(r1.getInverseProperty()));
+        assertTrue(subProperties.containsEntity(r2));
+        assertTrue(subProperties.containsEntity(r2.getInverseProperty()));
     }
 
 //    10:30:02 From Guohui Xiao to Everyone:
