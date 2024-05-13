@@ -1544,7 +1544,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         String raster_name = termConverter.apply(terms.get(0));
 
 
-        return String.format("rasdaman_op.query2string(CONCAT('select sdom(c)[0] from ', %s, ' as c'))", raster_name);
+        return String.format("rasdaman_op.query2string(CONCAT('select sdom(c) from ', %s, ' as c'))", raster_name);
     }
 
     protected String serializeRAS_PROCESS_RASTER_ARRAY(ImmutableList<? extends ImmutableTerm> terms,
@@ -1651,7 +1651,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         String raster_name = termConverter.apply(terms.get(2));
 
         return String.format("rasdaman_op.query2numeric(CONCAT('select avg_cells(clip((c[',rasdaman_op.timestamp2grid(%s, %s),', 0:* , 0:*]*0.02) - 273.15,' , "
-                        + "rasdaman_op.geo2grid_final(ST_AsText((ST_Dump(%s)).geom), rasdaman_op.get_min_longitude(%s), rasdaman_op.get_max_latitude(%s)," +
+                        + "rasdaman_op.geo2grid_final(rasdaman_op.get_geom(%s), rasdaman_op.get_min_longitude(%s), rasdaman_op.get_max_latitude(%s)," +
                         " rasdaman_op.get_res_lon(%s), rasdaman_op.get_res_lat(%s)),')) from ', %s, ' as c'))",
                 time, raster_name, region, raster_name, raster_name, raster_name, raster_name, raster_name);
 
