@@ -289,7 +289,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .collect(ImmutableCollectors.toList());
 
         IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChildren.equals(children));
-        return iqFactory.createNaryIQTree(this, children, newTreeCache);
+        return iqFactory.createNaryIQTree(this, newChildren, newTreeCache);
     }
 
     /**

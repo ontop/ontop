@@ -29,6 +29,9 @@ import java.util.regex.Pattern;
 
 
 /**
+ * Used when the SQL cannot be parsed.
+ * The algorithm performs a crude approximate extraction of attribute names.
+ *
  * Created by Roman Kontchakov on 09/01/2017.
  */
 
@@ -36,7 +39,11 @@ public class ApproximateSelectQueryAttributeExtractor {
 
     private final QuotedIDFactory idfac;
 
-    private static final Pattern AS = Pattern.compile("\\sAS\\s", Pattern.CASE_INSENSITIVE);
+    private static final Pattern AS = Pattern.compile(
+            "(((\\w+)|(\"[^\"]+\")|(`[^`]+`)|(\\[[^]]+]))\\.)*" + // database, schema, table
+                    "(?<column>(\\w+)|(\"[^\"]+\")|(`[^`]+`)|(\\[[^]]+]))" + // all ID components can be unquoted or quoated in ", ` or []
+                    "(\\s+(AS\\s+)?" +
+                    "(?<alias>(\\w+)|(\"[^\"]+\")|(`[^`]+`)|(\\[[^]]+])))?", Pattern.CASE_INSENSITIVE);
     private static final Pattern BRACKETS = Pattern.compile("\\([^()]*\\)");
     private static final Pattern COL_SEP = Pattern.compile(",");
     private static final Pattern SELECT = Pattern.compile("\\A\\s*SELECT\\s+(DISTINCT\\s)?", Pattern.CASE_INSENSITIVE);
@@ -47,8 +54,6 @@ public class ApproximateSelectQueryAttributeExtractor {
     }
 
     public ImmutableList<QuotedID> getAttributes(String sql) throws InvalidQueryException {
-
-        // COULD NOT PARSE - do a rough approximation
 
         Matcher startMatcher = SELECT.matcher(sql);
         if (!startMatcher.find())
@@ -68,21 +73,15 @@ public class ApproximateSelectQueryAttributeExtractor {
 
         final ImmutableList.Builder<QuotedID> attributes = ImmutableList.builder();
         for (String column : COL_SEP.split(projection)) {
-            String[] components = AS.split(column);
-            // components = { column } if there is no AS
-            String columnName = components[components.length - 1].trim();
+            Matcher columnMatcher = AS.matcher(column);
 
-            // ROMAN (25 Jan 2017): do not understand the purpose
-            // split on spaces that are not inside single quotes
-            // if (columnName.contains(" "))
-            //    columnName = columnName.split("\\s+(?![^'\"]*')")[1].trim();
+            if (columnMatcher.find()) {
+                String columnString = columnMatcher.group("column");
+                String aliasString = columnMatcher.group("alias");
 
-            // get only the column name (but not the qualifier table name)
-            // eg: table.column -> column
-            columnName = columnName.substring(columnName.lastIndexOf(".") + 1);
-
-            QuotedID attribute = idfac.createAttributeID(columnName);
-            attributes.add(attribute);
+                QuotedID attribute = idfac.createAttributeID(aliasString == null ? columnString : aliasString);
+                attributes.add(attribute);
+            }
         }
 
         return attributes.build();

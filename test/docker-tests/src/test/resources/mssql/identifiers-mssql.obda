@@ -19,6 +19,13 @@ mappingId	Countries4
 target		:Country4-{investor} a :Country4 .
 source		select [id] as [investor], name, lastname, dateofbirth, ssn from person
 
+mappingId	Countries5
+target		:Country5-{id} a :Country5 .
+source		select [Id] from company
+
+mappingId	Countries6
+target		:Country6-{id} a :Country6 .
+source		select Id from company
 
 
 ]]

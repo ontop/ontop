@@ -1,0 +1,17 @@
+[PrefixDeclaration]
+xsd: http://www.w3.org/2001/XMLSchema#
+ex: http://www.example.org/
+
+[MappingDeclaration] @collection [[
+mappingId   mapping1
+target	    ex:Person/{person_id} a ex:Person; ex:givenName {first_name}.
+source	    SELECT * FROM person
+
+mappingId   mapping2
+target	    ex:House/{house_id} a ex:House; ex:address {address}; ex:belongs ex:Person/{owner} .
+source      SELECT * FROM house
+
+mappingId   mapping3
+target	    ex:Result/{sensor_id} a ex:Result; ex:hasTimestamp {timestamp}^^xsd:dateTime .
+source	    SELECT * FROM sensor
+]]
