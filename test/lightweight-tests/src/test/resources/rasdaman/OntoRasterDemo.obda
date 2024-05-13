@@ -41,7 +41,7 @@ source		SELECT gid, name_2 AS region_name from region_sweden
 
 mappingId	mapping_region_geometry_wkt_sweden
 target		:vector_region/sweden/{gid} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
-source		SELECT gid, st_astext(geom) AS geometry_wkt from region_sweden
+source		SELECT gid, st_astext((st_dump(geom)).geom) AS geometry_wkt from region_sweden
 
 ; ---------------- Mapping for All Regions in Bavaria -----------------
 
@@ -55,7 +55,7 @@ source		SELECT gid, name_2 AS region_name from region_bavaria
 
 mappingId	mapping_region_geometry_wkt_bavaria
 target		:vector_region/bavaria/{gid} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
-source		SELECT gid, st_astext(geom) AS geometry_wkt from region_bavaria
+source		SELECT gid, st_astext((st_dump(geom)).geom) AS geometry_wkt from region_bavaria
 
 ; ---------------- Mapping for All Regions in South Tyrol -----------------
 
@@ -69,7 +69,7 @@ source		SELECT gid, name_3 AS region_name from region_south_tyrol
 
 mappingId	mapping_region_geometry_wkt_south_tyrol
 target		:vector_region/tyrol/{gid} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
-source		SELECT gid, st_astext(geom) AS geometry_wkt from region_south_tyrol
+source		SELECT gid, st_astext((st_dump(geom)).geom) AS geometry_wkt from region_south_tyrol
 
 
 ; ---------------- Mapping for Raster Metadata Lookup Table -----------------

@@ -227,8 +227,8 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "SELECT ?v {\n"
                 + "?raster rasdb:hasRasterName ?raster_name .\n"
                 + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
-                + "BIND ('POLYGON((11.324157714843748 48.29050321714061,11.911926269531248 48.279537342260085,11.88995361328125 48.01932418480118,11.340637207031248 48.01564978668938,11.324157714843748 48.29050321714061))' AS ?custom_region_wkt\n)" //Vector region = Linköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  München (2023-07-24T00:00:00+00:00)
-                + "BIND ('2023-07-24T00:00:00+00:00' AS ?timestamp\n)"
+                + "BIND ('POLYGON((11.324157714843748 48.29050321714061,11.911926269531248 48.279537342260085,11.88995361328125 48.01932418480118,11.340637207031248 48.01564978668938,11.324157714843748 48.29050321714061))' AS ?custom_region_wkt\n)"
+                + "BIND ('2023-07-24T00:00:00+00:00' AS ?timestamp\n)" //Vector region = Linköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  München (2023-07-24T00:00:00+00:00)
                 + "BIND (rasdb:rasClipRasterAnyGeom(?timestamp, ?custom_region_wkt, ?raster_name) AS ?v)"
                 + "}\n";
 
