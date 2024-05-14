@@ -420,10 +420,56 @@ public class TBoxClassificationTest {
     public void testObjectPropertyDomains() throws Exception {
         manager.addAxiom(ontology, ObjectPropertyDomain(r1, A));
         manager.addAxiom(ontology, ObjectPropertyDomain(r1, B));
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, C));
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, D));
         startReasoner();
         NodeSet<OWLClass> domains = reasoner.getObjectPropertyDomains(r1, false);
         assertTrue(domains.containsEntity(A));
         assertTrue(domains.containsEntity(B));
+        assertFalse(domains.containsEntity(C));
+        assertFalse(domains.containsEntity(D));
+    }
+
+    @Test
+    public void testObjectPropertyDomainsInverse() throws Exception {
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, A));
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, B));
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, C));
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, D));
+        startReasoner();
+        NodeSet<OWLClass> domains = reasoner.getObjectPropertyDomains(r1.getInverseProperty(), false);
+        assertFalse(domains.containsEntity(A));
+        assertFalse(domains.containsEntity(B));
+        assertTrue(domains.containsEntity(C));
+        assertTrue(domains.containsEntity(D));
+    }
+
+    @Test
+    public void testObjectPropertyRanges() throws Exception {
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, A));
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, B));
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, C));
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, D));
+        startReasoner();
+        NodeSet<OWLClass> ranges = reasoner.getObjectPropertyRanges(r1, false);
+        assertFalse(ranges.containsEntity(A));
+        assertFalse(ranges.containsEntity(B));
+        assertTrue(ranges.containsEntity(C));
+        assertTrue(ranges.containsEntity(D));
+    }
+
+    @Test
+    public void testObjectPropertyRangesInverse() throws Exception {
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, A));
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, B));
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, C));
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, D));
+        startReasoner();
+        NodeSet<OWLClass> ranges = reasoner.getObjectPropertyRanges(r1.getInverseProperty(), false);
+        assertTrue(ranges.containsEntity(A));
+        assertTrue(ranges.containsEntity(B));
+        assertFalse(ranges.containsEntity(C));
+        assertFalse(ranges.containsEntity(D));
     }
 
 //    10:30:02 From Guohui Xiao to Everyone:

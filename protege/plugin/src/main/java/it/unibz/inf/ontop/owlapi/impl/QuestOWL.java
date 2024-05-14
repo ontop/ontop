@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -533,7 +532,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 				OWLClassExpression filler = owlSomeValuesFrom.getFiller();
 
 				if (filler.isOWLThing()) {
-					ObjectSomeValuesFrom oSomeValuesFrom = owlObjectSomeValuesFromAsSomeValuesFrom(owlSomeValuesFrom);
+					ObjectSomeValuesFrom oSomeValuesFrom = owlObjectSomeValuesFromAsObjectSomeValuesFrom(owlSomeValuesFrom);
 					Equivalences<ClassExpression> equivalences = classExpressionToEquivalences(oSomeValuesFrom);
 
 					ImmutableSet<Equivalences<ClassExpression>> subEquiv = direct
@@ -599,19 +598,19 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 				}
 
 			case OBJECT_SOME_VALUES_FROM:
-				OWLObjectSomeValuesFrom owlSomeValuesFrom = (OWLObjectSomeValuesFrom) ce;
-				OWLClassExpression filler = owlSomeValuesFrom.getFiller();
+				OWLObjectSomeValuesFrom owlObjectSomeValuesFrom = (OWLObjectSomeValuesFrom) ce;
+				OWLClassExpression filler = owlObjectSomeValuesFrom.getFiller();
 
 				if (filler.isOWLThing()) {
-					ObjectSomeValuesFrom oSomeValuesFrom = owlObjectSomeValuesFromAsSomeValuesFrom(owlSomeValuesFrom);
-					Equivalences<ClassExpression> equivalences1 = classExpressionToEquivalences(oSomeValuesFrom);
+					ObjectSomeValuesFrom objectSomeValuesFrom = owlObjectSomeValuesFromAsObjectSomeValuesFrom(owlObjectSomeValuesFrom);
+					Equivalences<ClassExpression> equivalences1 = classExpressionToEquivalences(objectSomeValuesFrom);
 
 					ImmutableSet<Equivalences<ClassExpression>> superEquiv = direct
 							? dag.getDirectSuper(equivalences1)
 							: dag.getSuper(equivalences1);
 
 					Set<Node<OWLClass>> superClasses = superEquiv.stream()
-							.filter(x -> !x.contains(oSomeValuesFrom))
+							.filter(x -> !x.contains(objectSomeValuesFrom))
 							.filter(x -> x.getRepresentative() instanceof OClass)
 							.map(this::equivalencesAsOWLClassSet)
 							.map(OWLClassNode::new)
@@ -660,7 +659,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 				OWLClassExpression filler = owlSomeValuesFrom.getFiller();
 
 				if (filler.isOWLThing()) {
-					ObjectSomeValuesFrom oSomeValuesFrom = owlObjectSomeValuesFromAsSomeValuesFrom(owlSomeValuesFrom);
+					ObjectSomeValuesFrom oSomeValuesFrom = owlObjectSomeValuesFromAsObjectSomeValuesFrom(owlSomeValuesFrom);
 					Equivalences<ClassExpression> equivalences1 = classExpressionToEquivalences(oSomeValuesFrom);
 
 					Set<OWLClass> collect1 = equivalences1.getMembers().stream()
@@ -705,7 +704,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 				OWLClassExpression filler = owlSomeValuesFrom.getFiller();
 
 				if (filler.isOWLThing()) {
-					ObjectSomeValuesFrom oSomeValuesFrom = owlObjectSomeValuesFromAsSomeValuesFrom(owlSomeValuesFrom);
+					ObjectSomeValuesFrom oSomeValuesFrom = owlObjectSomeValuesFromAsObjectSomeValuesFrom(owlSomeValuesFrom);
 
 					Set<Node<OWLClass>> classes1 = naryAxioms.stream()
 							.filter(x -> x.getComponents().contains(oSomeValuesFrom))
@@ -742,8 +741,6 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
 		EquivalencesDAG<ObjectPropertyExpression> dag = classifiedTBox.objectPropertiesDAG();
 
-		log.warn("getSubObjectProperties: " + pe.toString() + " ANON: " +  pe.isAnonymous());
-
 		if (pe.isOWLBottomObjectProperty()) {
 			return new OWLObjectPropertyNodeSet();
 		}
@@ -761,6 +758,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			return new OWLObjectPropertyNodeSet(sub);
 		}
 
+		// TODO: What if anon property?
 		OWLObjectProperty owlObjectProperty = pe.asOWLObjectProperty();
 
 		if (!classifiedTBoxContainsObjectProperty(owlObjectProperty)) {
@@ -898,21 +896,12 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		return structuralReasoner.getInverseObjectProperties(pe);
 	}
 
-
-//	Let N = getEquivalentClasses(ObjectSomeValuesFrom(pe owl:Thing)) .
-//	If direct is true: then if N is not empty then the return value is N,
-//	else the return value is the result of getSuperClasses(ObjectSomeValuesFrom(pe owl:Thing), true) .
-//	If direct is false: then the result of getSuperClasses(ObjectSomeValuesFrom(pe owl:Thing), false) together with N if N is non-empty.
 	@Nonnull
 	@Override
 	public NodeSet<OWLClass> getObjectPropertyDomains(@Nonnull OWLObjectPropertyExpression pe, boolean direct) throws InconsistentOntologyException,
 			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-		if (pe.isAnonymous()) {
-			return new OWLClassNodeSet();
-		} else {
-			OWLObjectProperty property = pe.asOWLObjectProperty();
 			OWLClass filler = owlDataFactory.getOWLThing();
-			OWLObjectSomeValuesFrom owlObjectSomeValuesFrom = owlDataFactory.getOWLObjectSomeValuesFrom(property, filler);
+			OWLObjectSomeValuesFrom owlObjectSomeValuesFrom = owlDataFactory.getOWLObjectSomeValuesFrom(pe, filler);
 
 			Node<OWLClass> nodes = getEquivalentClasses(owlObjectSomeValuesFrom);
 			if (direct) {
@@ -928,14 +917,29 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 				}
 				return superClasses;
 			}
-		}
 	}
 
 	@Nonnull
 	@Override
 	public NodeSet<OWLClass> getObjectPropertyRanges(@Nonnull OWLObjectPropertyExpression pe, boolean direct) throws InconsistentOntologyException,
 			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-		return structuralReasoner.getObjectPropertyRanges(pe, direct);
+			OWLClass filler = owlDataFactory.getOWLThing();
+			OWLObjectSomeValuesFrom owlObjectSomeValuesFrom = owlDataFactory.getOWLObjectSomeValuesFrom(pe.getInverseProperty(), filler);
+
+			Node<OWLClass> nodes = getEquivalentClasses(owlObjectSomeValuesFrom);
+			if (direct) {
+				if (nodes.getSize() == 0) {
+					return getSuperClasses(owlObjectSomeValuesFrom, true);
+				} else {
+					return new OWLClassNodeSet(nodes);
+				}
+			} else {
+				NodeSet<OWLClass> superClasses = getSuperClasses(owlObjectSomeValuesFrom, false);
+				if (nodes.getSize() != 0) {
+					superClasses.getNodes().add(nodes);
+				}
+				return superClasses;
+			}
 	}
 
 	@Nonnull
@@ -1079,12 +1083,20 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 	// OWLObjectSomeValuesFrom -> ObjectSomeValuesFrom
 
-	private ObjectSomeValuesFrom owlObjectSomeValuesFromAsSomeValuesFrom(OWLObjectSomeValuesFrom owlSomeValuesFrom) {
-		OWLObjectPropertyExpression propertyExpression = owlSomeValuesFrom.getProperty();
-		OWLObjectProperty property = propertyExpression.getNamedProperty();
-		ObjectPropertyExpression objectPropertyExpression = owlObjectPropertyAsExpression(property);
-		return objectPropertyExpression.getDomain();
+	private ObjectSomeValuesFrom owlObjectSomeValuesFromAsObjectSomeValuesFrom(OWLObjectSomeValuesFrom owlSomeValuesFrom) {
+		OWLObjectPropertyExpression owlObjectPropertyExpression = owlSomeValuesFrom.getProperty();
+		OWLObjectProperty owlObjectProperty = owlObjectPropertyExpression.getNamedProperty();
+		ObjectPropertyExpression objectPropertyExpression = owlObjectPropertyAsExpression(owlObjectProperty);
+		return owlObjectPropertyExpression.isAnonymous()
+				? objectPropertyExpression.getRange()
+				: objectPropertyExpression.getDomain();
 	}
+
+//	private ObjectPropertyExpression owlObjectPropertyExpressionAsObjectPropertyExpression(OWLObjectPropertyExpression ope) {
+//		OWLObjectSomeValuesFrom property = (OWLObjectSomeValuesFrom) ope;
+//		property.getProperty()
+//		return owlObjectPropertyAsExpression(property);
+//	}
 	// ----------------------------------------------
 
 	// OWLClass <-> OClass
