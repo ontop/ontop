@@ -910,29 +910,22 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		if (pe.isAnonymous()) {
 			return new OWLClassNodeSet();
 		} else {
-			ObjectPropertyExpression objectPropertyExpression = owlObjectPropertyAsExpression(pe.asOWLObjectProperty());
-
-			String iriString = objectPropertyExpression.getIRI().getIRIString();
-			OWLObjectProperty property = owlDataFactory.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI.create(iriString));
-			OWLObjectSomeValuesFrom owlObjectSomeValuesFrom = owlDataFactory.getOWLObjectSomeValuesFrom(property, owlDataFactory.getOWLThing());
+			OWLObjectProperty property = pe.asOWLObjectProperty();
+			OWLClass filler = owlDataFactory.getOWLThing();
+			OWLObjectSomeValuesFrom owlObjectSomeValuesFrom = owlDataFactory.getOWLObjectSomeValuesFrom(property, filler);
 
 			Node<OWLClass> nodes = getEquivalentClasses(owlObjectSomeValuesFrom);
-
 			if (direct) {
-
 				if (nodes.getSize() == 0) {
 					return getSuperClasses(owlObjectSomeValuesFrom, true);
 				} else {
 					return new OWLClassNodeSet(nodes);
 				}
-
 			} else {
 				NodeSet<OWLClass> superClasses = getSuperClasses(owlObjectSomeValuesFrom, false);
-
 				if (nodes.getSize() != 0) {
 					superClasses.getNodes().add(nodes);
 				}
-
 				return superClasses;
 			}
 		}
