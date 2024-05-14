@@ -898,23 +898,44 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		return structuralReasoner.getInverseObjectProperties(pe);
 	}
 
+
+//	Let N = getEquivalentClasses(ObjectSomeValuesFrom(pe owl:Thing)) .
+//	If direct is true: then if N is not empty then the return value is N,
+//	else the return value is the result of getSuperClasses(ObjectSomeValuesFrom(pe owl:Thing), true) .
+//	If direct is false: then the result of getSuperClasses(ObjectSomeValuesFrom(pe owl:Thing), false) together with N if N is non-empty.
 	@Nonnull
 	@Override
 	public NodeSet<OWLClass> getObjectPropertyDomains(@Nonnull OWLObjectPropertyExpression pe, boolean direct) throws InconsistentOntologyException,
 			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		if (pe.isAnonymous()) {
+			return new OWLClassNodeSet();
+		} else {
+			ObjectPropertyExpression objectPropertyExpression = owlObjectPropertyAsExpression(pe.asOWLObjectProperty());
 
-		ObjectPropertyExpression objectPropertyExpression = owlObjectPropertyAsExpression(pe.asOWLObjectProperty());
-		ObjectSomeValuesFrom domain = objectPropertyExpression.getDomain();
+			String iriString = objectPropertyExpression.getIRI().getIRIString();
+			OWLObjectProperty property = owlDataFactory.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI.create(iriString));
+			OWLObjectSomeValuesFrom owlObjectSomeValuesFrom = owlDataFactory.getOWLObjectSomeValuesFrom(property, owlDataFactory.getOWLThing());
 
+			Node<OWLClass> nodes = getEquivalentClasses(owlObjectSomeValuesFrom);
 
+			if (direct) {
 
-//		getEquivalentClasses(domain)
+				if (nodes.getSize() == 0) {
+					return getSuperClasses(owlObjectSomeValuesFrom, true);
+				} else {
+					return new OWLClassNodeSet(nodes);
+				}
 
-//		classExpressionToOWL(domain);
+			} else {
+				NodeSet<OWLClass> superClasses = getSuperClasses(owlObjectSomeValuesFrom, false);
 
-//		getEquivalentClasses(domain);
+				if (nodes.getSize() != 0) {
+					superClasses.getNodes().add(nodes);
+				}
 
-		return structuralReasoner.getObjectPropertyDomains(pe, direct);
+				return superClasses;
+			}
+		}
 	}
 
 	@Nonnull
@@ -1092,21 +1113,6 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	private OWLClass oClassAsOWLClass(OClass oClass) {
 		String iriString = oClass.getIRI().getIRIString();
 		return owlDataFactory.getOWLClass(org.semanticweb.owlapi.model.IRI.create(iriString));
-	}
-
-	// ----------------------------------------------
-
-	// OWLClassExpression -> ClassExpression
-
-	private OWLObjectSomeValuesFrom objectPropertyExpressionToOWL(ObjectPropertyExpression expression) {
-		// TODO: WORK ON THIS (COPILOT WROTE THIS FOR ME)
-		String iriString = expression.getIRI().getIRIString();
-		return owlDataFactory.getOWLObjectSomeValuesFrom(owlDataFactory.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI.create(iriString)), owlDataFactory.getOWLThing());
-
-//		ObjectPropertyExpression propertyExpression = expression.getProperty();
-//		OWLObjectProperty property = propertyExpression.getNamedProperty();
-//		ObjectPropertyExpression objectPropertyExpression = owlObjectPropertyAsExpression(property);
-//		return objectPropertyExpression.getDomain();
 	}
 
 	// ----------------------------------------------
