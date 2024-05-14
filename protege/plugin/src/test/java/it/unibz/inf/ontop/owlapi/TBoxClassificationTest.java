@@ -389,6 +389,43 @@ public class TBoxClassificationTest {
         assertTrue(subProperties.containsEntity(r2.getInverseProperty()));
     }
 
+    @Test
+    public void testObjectPropertySubsumptionMissingTBox() throws Exception {
+        manager.addAxiom(ontology, SubObjectPropertyOf(r1, r2));
+        startReasoner();
+
+        OWLObjectProperty r3 = ObjectProperty(IRI.create(prefix + "r3"));
+
+        NodeSet<OWLObjectPropertyExpression> subProperties = reasoner.getSubObjectProperties(r3, false);
+        assertTrue(subProperties.isEmpty());
+    }
+
+    @Test
+    public void testObjectPropertyEquivalence() throws Exception {
+        manager.addAxiom(ontology, EquivalentObjectProperties(r1, r2));
+        startReasoner();
+        Node<OWLObjectPropertyExpression> equivalentProperties = reasoner.getEquivalentObjectProperties(r1);
+        assertTrue(equivalentProperties.contains(r2));
+    }
+
+    @Test
+    public void testObjectPropertyDisjointness() throws Exception {
+        manager.addAxiom(ontology, DisjointObjectProperties(r1, r2));
+        startReasoner();
+        NodeSet<OWLObjectPropertyExpression> disjointProperties = reasoner.getDisjointObjectProperties(r1);
+        assertTrue(disjointProperties.containsEntity(r2));
+    }
+
+    @Test
+    public void testObjectPropertyDomains() throws Exception {
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, A));
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, B));
+        startReasoner();
+        NodeSet<OWLClass> domains = reasoner.getObjectPropertyDomains(r1, false);
+        assertTrue(domains.containsEntity(A));
+        assertTrue(domains.containsEntity(B));
+    }
+
 //    10:30:02 From Guohui Xiao to Everyone:
 //    Some(r1) subClassOf Some(r2)
 //            10:30:26 From Guohui Xiao to Everyone:
