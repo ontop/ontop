@@ -329,6 +329,11 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 		public T getCanonicalForm(T v) {
 			return null;
 		}
+
+		@Override
+		public ImmutableSet<Equivalences<T>> getDirectSubOfTop() {
+			return null;
+		}
 	}
 	
 	

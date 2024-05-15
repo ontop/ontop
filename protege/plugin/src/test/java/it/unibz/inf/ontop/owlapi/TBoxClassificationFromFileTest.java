@@ -23,7 +23,7 @@ public class TBoxClassificationFromFileTest {
     private OWLOntology ontology;
     private OWLOntologyManager manager;
 
-    private static final String prefix = "http://www.example.org/";
+    private static final String prefix = "http://example.org/voc#";
     private final OWLClass Male = Class(IRI.create(prefix + "Male"));
     private final OWLClass Female = Class(IRI.create(prefix + "Female"));
     private final OWLClass Person = Class(IRI.create(prefix + "Person"));
@@ -51,7 +51,7 @@ public class TBoxClassificationFromFileTest {
     public void setUp()  {
         manager = OWLManager.createOWLOntologyManager();
         // TODO: load the ontology from resources directory, not using absolute path
-        String filePath = "/Users/bendik/Documents/UiB/Master/INFO320-Semantic/ontop/protege/plugin/src/test/resources/test/university.ttl";
+        String filePath = "src/test/resources/test/university.ttl";
         try {
             ontology =  manager.loadOntologyFromOntologyDocument(new File(filePath));
         } catch (OWLOntologyCreationException e) {
@@ -79,9 +79,14 @@ public class TBoxClassificationFromFileTest {
     }
 
     @Test
-    public void testClassifyClasses(){
+    public void testClassifyClasses1(){
         NodeSet<OWLClass> subClasses = reasoner.getSubClasses(OWLThing(), true);
         subClasses.forEach(System.out::println);
     }
 
+    @Test
+    public void testClassifyClasses2(){
+        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(B, true);
+        subClasses.forEach(System.out::println);
+    }
 }
