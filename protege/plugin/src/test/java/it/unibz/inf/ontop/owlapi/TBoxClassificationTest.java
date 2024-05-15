@@ -401,6 +401,22 @@ public class TBoxClassificationTest {
     }
 
     @Test
+    public void testObjectPropertySuperclasses() throws Exception {
+        manager.addAxiom(ontology, SubObjectPropertyOf(r1, r2));
+        startReasoner();
+        NodeSet<OWLObjectPropertyExpression> superProperties = reasoner.getSuperObjectProperties(r1, true);
+        assertTrue(superProperties.containsEntity(r2));
+    }
+
+    @Test
+    public void testObjectPropertySuperclassesInverse() throws Exception {
+        manager.addAxiom(ontology, SubObjectPropertyOf(r1, r2));
+        startReasoner();
+        NodeSet<OWLObjectPropertyExpression> superProperties = reasoner.getSuperObjectProperties(r1.getInverseProperty(), true);
+        assertTrue(superProperties.containsEntity(r2.getInverseProperty()));
+    }
+
+    @Test
     public void testObjectPropertyEquivalence() throws Exception {
         manager.addAxiom(ontology, EquivalentObjectProperties(r1, r2));
         startReasoner();
@@ -414,6 +430,32 @@ public class TBoxClassificationTest {
         startReasoner();
         NodeSet<OWLObjectPropertyExpression> disjointProperties = reasoner.getDisjointObjectProperties(r1);
         assertTrue(disjointProperties.containsEntity(r2));
+    }
+
+    @Test
+    public void testObjectPropertyInverseProperties() throws Exception {
+        manager.addAxiom(ontology, InverseObjectProperties(r1, r2));
+        startReasoner();
+        Node<OWLObjectPropertyExpression> inverseProperties = reasoner.getInverseObjectProperties(r1);
+        assertTrue(inverseProperties.contains(r1.getInverseProperty()));
+        assertTrue(inverseProperties.contains(r2));
+    }
+
+    @Test
+    public void testObjectPropertyInverseProperties1() throws Exception {
+        manager.addAxiom(ontology, InverseObjectProperties(r1, r2));
+        startReasoner();
+        Node<OWLObjectPropertyExpression> inverseProperties = reasoner.getInverseObjectProperties(r1.getInverseProperty());
+        assertTrue(inverseProperties.contains(r1));
+        assertTrue(inverseProperties.contains(r2.getInverseProperty()));
+    }
+
+    @Test
+    public void testObjectPropertyNotInOntology() throws Exception {
+        OWLObjectProperty rx = ObjectProperty(IRI.create(prefix + "rx"));
+        startReasoner();
+        NodeSet<OWLObjectPropertyExpression> superProperties = reasoner.getSuperObjectProperties(rx, true);
+        assertTrue(superProperties.isEmpty());
     }
 
     @Test
