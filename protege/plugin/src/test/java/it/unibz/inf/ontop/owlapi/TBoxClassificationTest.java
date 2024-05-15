@@ -214,10 +214,75 @@ public class TBoxClassificationTest {
         // Domain(r1) is B
         manager.addAxiom(ontology, ObjectPropertyDomain(r1, B));
         startReasoner();
-        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(B, false);
+        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(B, true);
         assertTrue(subClasses.containsEntity(A));
     }
 
+    /**
+     * A -> \exists r1 -> \exists r2 -> B       => {A}, {C}
+     *                           C -> B
+     */
+    @Test
+    public void testSubsumptionWithSomeValues51() throws Exception {
+        // A subclass of R some OWLThing
+        manager.addAxiom(ontology, SubClassOf(A, ObjectSomeValuesFrom(r1, OWLThing())));
+        // (\exists r1) subclass (\exists r2)
+        manager.addAxiom(ontology, SubClassOf(ObjectSomeValuesFrom(r1, OWLThing()), ObjectSomeValuesFrom(r2, OWLThing())));
+        // (\exists r2) subclass B
+        manager.addAxiom(ontology, SubClassOf(ObjectSomeValuesFrom(r2, OWLThing()), B));
+        // C subclass B
+        manager.addAxiom(ontology, SubClassOf(C, B));
+        
+        startReasoner();
+        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(B, true);
+        assertEquals(2, subClasses.getNodes().size());
+        assertTrue(subClasses.containsEntity(A));
+        assertTrue(subClasses.containsEntity(C));
+    }
+
+    /**
+     * \exists r1 -> \exists r2 -> B       => {C}
+     *                           C -> B
+     */
+    @Test
+    public void testSubsumptionWithSomeValues52() throws Exception {
+        // (\exists r1) subclass (\exists r2)
+        manager.addAxiom(ontology, SubClassOf(ObjectSomeValuesFrom(r1, OWLThing()), ObjectSomeValuesFrom(r2, OWLThing())));
+        // (\exists r2) subclass B
+        manager.addAxiom(ontology, SubClassOf(ObjectSomeValuesFrom(r2, OWLThing()), B));
+        // C subclass B
+        manager.addAxiom(ontology, SubClassOf(C, B));
+
+        startReasoner();
+        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(B, true);
+        assertEquals(1, subClasses.getNodes().size());
+        assertTrue(subClasses.containsEntity(C));
+    }
+
+    /**
+     * D -> A -> \exists r1 -> \exists r2 -> B       => {A}, {C}
+     *                                  C -> B
+     */
+    @Test
+    public void testSubsumptionWithSomeValues53() throws Exception {
+        // D subclass A
+        manager.addAxiom(ontology, SubClassOf(D, A));
+        // A subclass of R some OWLThing
+        manager.addAxiom(ontology, SubClassOf(A, ObjectSomeValuesFrom(r1, OWLThing())));
+        // (\exists r1) subclass (\exists r2)
+        manager.addAxiom(ontology, SubClassOf(ObjectSomeValuesFrom(r1, OWLThing()), ObjectSomeValuesFrom(r2, OWLThing())));
+        // (\exists r2) subclass B
+        manager.addAxiom(ontology, SubClassOf(ObjectSomeValuesFrom(r2, OWLThing()), B));
+        // C subclass B
+        manager.addAxiom(ontology, SubClassOf(C, B));
+
+        startReasoner();
+        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(B, true);
+        assertEquals(2, subClasses.getNodes().size());
+        assertTrue(subClasses.containsEntity(A));
+        assertTrue(subClasses.containsEntity(C));
+    }
+    
     @Test
     public void testSubsumptionWithSomeValues6() throws Exception {
         // FIXME: Not complete

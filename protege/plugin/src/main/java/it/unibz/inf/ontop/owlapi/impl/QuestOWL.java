@@ -33,9 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -484,6 +482,16 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		return structuralReasoner.getBottomClassNode();
 	}
 
+	// TODO(bendik): create a test case
+	public boolean isAllAnonymous(Equivalences<ClassExpression> equivalences) {
+		return equivalences.getMembers().stream().noneMatch(x -> x instanceof OClass);
+	}
+
+	// TODO(bendik): create a test case
+	public boolean isAllAnonymous(ImmutableSet<Equivalences<ClassExpression>> equivalences) {
+		return equivalences.stream().allMatch(this::isAllAnonymous);
+	}
+	
 	@Nonnull
 	@Override
 	public NodeSet<OWLClass> getSubClasses(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException,
@@ -513,10 +521,34 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 					OClass oClass = owlClassAsOClass(owlClass);
 					Equivalences<ClassExpression> equivalences = classExpressionToEquivalences(oClass);
 
-					ImmutableSet<Equivalences<ClassExpression>> subEquiv = direct
-							? dag.getDirectSub(equivalences)
-							: dag.getSub(equivalences);
+					ImmutableSet<Equivalences<ClassExpression>> subEquiv;
 
+					if (!direct) {
+						subEquiv = dag.getSub(equivalences);
+					} else {
+						// the following algorithm recursively finds all "direct" sub nodes that are not anonymous
+						// By "direct" in the OWLAPI sense, we consider the sub nodes, that are connected to the given node via a (possibly empty) path of ONLY anonymous nodes
+						// 
+						// The algorithm is implemented as a BFS using a queue.
+						// The queue is initialized with the direct sub nodes of the given node.
+						// When a node is found that is not anonymous, it is added to the result set, 
+						//   otherwise, its direct sub nodes are added to the queue.
+						// It terminates when the queue is empty.
+						
+						ImmutableSet<Equivalences<ClassExpression>> directSubNodes = dag.getDirectSub(equivalences);
+						Queue<Equivalences<ClassExpression>> queue = new LinkedList<>(directSubNodes);
+						List<Equivalences<ClassExpression>> result = new ArrayList<>();
+						while (!queue.isEmpty()) {
+							Equivalences<ClassExpression> current = queue.poll();
+							if(!isAllAnonymous(current)) {
+								result.add(current);
+							} else {
+								queue.addAll(dag.getDirectSub(current));
+							}
+						}
+						subEquiv = ImmutableSet.copyOf(result);
+					}
+					
 					Set<Node<OWLClass>> subClasses = subEquiv.stream()
 							.filter(x -> !x.contains(oClass))
 							.filter(x -> x.getRepresentative() instanceof OClass)
