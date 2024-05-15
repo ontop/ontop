@@ -363,6 +363,14 @@ public class TBoxClassificationTest {
     }
 
     @Test
+    public void testDataPropertyEquivalence() throws Exception {
+        manager.addAxiom(ontology, EquivalentDataProperties(d1, d2));
+        startReasoner();
+        Node<OWLDataProperty> equivalentProperties = reasoner.getEquivalentDataProperties(d1);
+        assertTrue(equivalentProperties.contains(d2));
+    }
+
+    @Test
     public void testObjectPropertySubsumptionTopDirect() throws Exception {
         manager.addAxiom(ontology, SubObjectPropertyOf(r1, r2));
         startReasoner();
@@ -512,6 +520,19 @@ public class TBoxClassificationTest {
         assertTrue(ranges.containsEntity(B));
         assertFalse(ranges.containsEntity(C));
         assertFalse(ranges.containsEntity(D));
+    }
+
+    @Test
+    public void testObjectPropertyEquivalenceWithTop() throws Exception {
+
+        String w3Namespace = OWLThing().getIRI().getNamespace();
+        OWLObjectProperty owlBottomObjectProperty = ObjectProperty(IRI.create(w3Namespace + "bottomObjectProperty"));
+
+        manager.addAxiom(ontology, EquivalentObjectProperties(r1, r2));
+        startReasoner();
+        Node<OWLObjectPropertyExpression> equivalentProperties = reasoner.getEquivalentObjectProperties(owlBottomObjectProperty);
+        assertTrue(equivalentProperties.contains(r2));
+        assertTrue(equivalentProperties.contains(r2.getInverseProperty()));
     }
 
 //    10:30:02 From Guohui Xiao to Everyone:
