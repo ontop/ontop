@@ -363,6 +363,14 @@ public class TBoxClassificationTest {
     }
 
     @Test
+    public void testDataPropertyEquivalence() throws Exception {
+        manager.addAxiom(ontology, EquivalentDataProperties(d1, d2));
+        startReasoner();
+        Node<OWLDataProperty> equivalentProperties = reasoner.getEquivalentDataProperties(d1);
+        assertTrue(equivalentProperties.contains(d2));
+    }
+
+    @Test
     public void testObjectPropertySubsumptionTopDirect() throws Exception {
         manager.addAxiom(ontology, SubObjectPropertyOf(r1, r2));
         startReasoner();
@@ -401,6 +409,22 @@ public class TBoxClassificationTest {
     }
 
     @Test
+    public void testObjectPropertySuperclasses() throws Exception {
+        manager.addAxiom(ontology, SubObjectPropertyOf(r1, r2));
+        startReasoner();
+        NodeSet<OWLObjectPropertyExpression> superProperties = reasoner.getSuperObjectProperties(r1, true);
+        assertTrue(superProperties.containsEntity(r2));
+    }
+
+    @Test
+    public void testObjectPropertySuperclassesInverse() throws Exception {
+        manager.addAxiom(ontology, SubObjectPropertyOf(r1, r2));
+        startReasoner();
+        NodeSet<OWLObjectPropertyExpression> superProperties = reasoner.getSuperObjectProperties(r1.getInverseProperty(), true);
+        assertTrue(superProperties.containsEntity(r2.getInverseProperty()));
+    }
+
+    @Test
     public void testObjectPropertyEquivalence() throws Exception {
         manager.addAxiom(ontology, EquivalentObjectProperties(r1, r2));
         startReasoner();
@@ -417,13 +441,98 @@ public class TBoxClassificationTest {
     }
 
     @Test
+    public void testObjectPropertyInverseProperties() throws Exception {
+        manager.addAxiom(ontology, InverseObjectProperties(r1, r2));
+        startReasoner();
+        Node<OWLObjectPropertyExpression> inverseProperties = reasoner.getInverseObjectProperties(r1);
+        assertTrue(inverseProperties.contains(r1.getInverseProperty()));
+        assertTrue(inverseProperties.contains(r2));
+    }
+
+    @Test
+    public void testObjectPropertyInverseProperties1() throws Exception {
+        manager.addAxiom(ontology, InverseObjectProperties(r1, r2));
+        startReasoner();
+        Node<OWLObjectPropertyExpression> inverseProperties = reasoner.getInverseObjectProperties(r1.getInverseProperty());
+        assertTrue(inverseProperties.contains(r1));
+        assertTrue(inverseProperties.contains(r2.getInverseProperty()));
+    }
+
+    @Test
+    public void testObjectPropertyNotInOntology() throws Exception {
+        OWLObjectProperty rx = ObjectProperty(IRI.create(prefix + "rx"));
+        startReasoner();
+        NodeSet<OWLObjectPropertyExpression> superProperties = reasoner.getSuperObjectProperties(rx, true);
+        assertTrue(superProperties.isEmpty());
+    }
+
+    @Test
     public void testObjectPropertyDomains() throws Exception {
         manager.addAxiom(ontology, ObjectPropertyDomain(r1, A));
         manager.addAxiom(ontology, ObjectPropertyDomain(r1, B));
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, C));
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, D));
         startReasoner();
         NodeSet<OWLClass> domains = reasoner.getObjectPropertyDomains(r1, false);
         assertTrue(domains.containsEntity(A));
         assertTrue(domains.containsEntity(B));
+        assertFalse(domains.containsEntity(C));
+        assertFalse(domains.containsEntity(D));
+    }
+
+    @Test
+    public void testObjectPropertyDomainsInverse() throws Exception {
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, A));
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, B));
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, C));
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, D));
+        startReasoner();
+        NodeSet<OWLClass> domains = reasoner.getObjectPropertyDomains(r1.getInverseProperty(), false);
+        assertFalse(domains.containsEntity(A));
+        assertFalse(domains.containsEntity(B));
+        assertTrue(domains.containsEntity(C));
+        assertTrue(domains.containsEntity(D));
+    }
+
+    @Test
+    public void testObjectPropertyRanges() throws Exception {
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, A));
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, B));
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, C));
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, D));
+        startReasoner();
+        NodeSet<OWLClass> ranges = reasoner.getObjectPropertyRanges(r1, false);
+        assertFalse(ranges.containsEntity(A));
+        assertFalse(ranges.containsEntity(B));
+        assertTrue(ranges.containsEntity(C));
+        assertTrue(ranges.containsEntity(D));
+    }
+
+    @Test
+    public void testObjectPropertyRangesInverse() throws Exception {
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, A));
+        manager.addAxiom(ontology, ObjectPropertyDomain(r1, B));
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, C));
+        manager.addAxiom(ontology, ObjectPropertyRange(r1, D));
+        startReasoner();
+        NodeSet<OWLClass> ranges = reasoner.getObjectPropertyRanges(r1.getInverseProperty(), false);
+        assertTrue(ranges.containsEntity(A));
+        assertTrue(ranges.containsEntity(B));
+        assertFalse(ranges.containsEntity(C));
+        assertFalse(ranges.containsEntity(D));
+    }
+
+    @Test
+    public void testObjectPropertyEquivalenceWithTop() throws Exception {
+
+        String w3Namespace = OWLThing().getIRI().getNamespace();
+        OWLObjectProperty owlBottomObjectProperty = ObjectProperty(IRI.create(w3Namespace + "bottomObjectProperty"));
+
+        manager.addAxiom(ontology, EquivalentObjectProperties(r1, r2));
+        startReasoner();
+        Node<OWLObjectPropertyExpression> equivalentProperties = reasoner.getEquivalentObjectProperties(owlBottomObjectProperty);
+        assertTrue(equivalentProperties.contains(r2));
+        assertTrue(equivalentProperties.contains(r2.getInverseProperty()));
     }
 
 //    10:30:02 From Guohui Xiao to Everyone:
