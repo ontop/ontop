@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import java.util.Map;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.DECIMAL;
+import static it.unibz.inf.ontop.model.type.DBTermType.Category.FLOAT_DOUBLE;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.SAME_TYPE_NO_CONSTANT;
 
@@ -58,6 +59,9 @@ public class TDengineDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         NumberDBTermType defaultDecimalType = new NumberDBTermType(DEFAULT_DECIMAL_STR, rootAncestry,
                 typeFactory.getXsdDecimalDatatype(), DECIMAL);
+
+        NumberDBTermType defaultDoubleType = new NumberDBTermType(DOUBLE_PREC_STR, rootAncestry,
+                typeFactory.getXsdDoubleDatatype(), FLOAT_DOUBLE);
                 
         DBTermType textType = new StringDBTermType(TEXT_STR, "VARCHAR(500)", rootAncestry, typeFactory.getXsdStringDatatype());
 
@@ -74,13 +78,14 @@ public class TDengineDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DEFAULT_DECIMAL_STR, defaultDecimalType);
         map.put(TEXT_STR, textType);
         map.put(TIMESTAMP, timestamp);
+        map.put(DOUBLE_PREC_STR, defaultDoubleType);
 
         return map;
     }
 
     protected static ImmutableMap<DefaultTypeCode, String> createTDengineCodeMap() {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
-        map.put(DefaultTypeCode.DOUBLE, DOUBLE_PREC_STR);
+        map.put(DefaultTypeCode.DOUBLE, DOUBLE_STR);
         //map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMPTZ_STR);
         map.put(DefaultTypeCode.HEXBINARY, BYTEA_STR);
         map.put(DefaultTypeCode.STRING, TEXT_STR);
