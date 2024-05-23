@@ -26,6 +26,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     private final PreventDistinctOptimizer preventDistinctOptimizer;
     private final DisjunctionOfEqualitiesMergingSimplifier disjunctionOfEqualitiesMergingSimplifier;
     private final AuthorizationFunctionEvaluator authorizationFunctionEvaluator;
+    private final AllQueryContextFunctionSymbolEvaluator allQueryContextFunctionSymbolEvaluator;
 
     @Inject
     private GeneralStructuralAndSemanticIQOptimizerImpl(UnionAndBindingLiftOptimizer bindingLiftOptimizer,
@@ -37,7 +38,8 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
                                                         FlattenLifter flattenLifter,
                                                         PreventDistinctOptimizer preventDistinctOptimizer,
                                                         DisjunctionOfEqualitiesMergingSimplifier disjunctionOfEqualitiesMergingSimplifier,
-                                                        AuthorizationFunctionEvaluator authorizationFunctionEvaluator) {
+                                                        AuthorizationFunctionEvaluator authorizationFunctionEvaluator,
+                                                        AllQueryContextFunctionSymbolEvaluator allQueryContextFunctionSymbolEvaluator) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
         this.orderBySimplifier = orderBySimplifier;
@@ -48,6 +50,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         this.preventDistinctOptimizer = preventDistinctOptimizer;
         this.disjunctionOfEqualitiesMergingSimplifier = disjunctionOfEqualitiesMergingSimplifier;
         this.authorizationFunctionEvaluator = authorizationFunctionEvaluator;
+        this.allQueryContextFunctionSymbolEvaluator = allQueryContextFunctionSymbolEvaluator;
     }
 
     @Override
@@ -69,11 +72,12 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         IQ current = pushedIntoDistinct;
         do {
             long beginningAuthorizationEvaluation = System.currentTimeMillis();
-            current = authorizationFunctionEvaluator.optimize(current, queryContext);
-
-            LOGGER.debug("New query after evaluation authorization functions ({} ms):\n{}\n",
-                    System.currentTimeMillis() - beginningAuthorizationEvaluation,
-                    current);
+            if (queryContext != null) {
+                current = authorizationFunctionEvaluator.optimize(current, queryContext);
+                LOGGER.debug("New query after evaluation authorization functions ({} ms):\n{}\n",
+                        System.currentTimeMillis() - beginningAuthorizationEvaluation,
+                        current);
+            }
 
             long beginningJoinLike = System.currentTimeMillis();
             current = joinLikeOptimizer.optimize(current);
@@ -97,7 +101,13 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
 
         } while (true);
 
-        IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(current);
+        IQ queryAfterContextualSimplification = queryContext == null
+                ? current
+                : allQueryContextFunctionSymbolEvaluator.optimize(current, queryContext);
+        if (queryContext != null)
+            LOGGER.debug("New query after simplifying using the context:\n{}\n", queryAfterContextualSimplification);
+
+        IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(queryAfterContextualSimplification);
         LOGGER.debug("New query after simplifying the aggregation node:\n{}\n", queryAfterAggregationSimplification);
 
         IQ queryAfterAggregationSplitting = aggregationSplitter.optimize(queryAfterAggregationSimplification);

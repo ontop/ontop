@@ -244,9 +244,9 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
      * Asks the timezone to be included
      */
     @Override
-    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
-                                           Function<ImmutableTerm, String> termConverter,
-                                           TermFactory termFactory) {
+    protected String serializeDateTimeNormWithTZ(ImmutableList<? extends ImmutableTerm> terms,
+                                                 Function<ImmutableTerm, String> termConverter,
+                                                 TermFactory termFactory) {
         return String.format("CONVERT(nvarchar(50),%s,127)", termConverter.apply(terms.get(0)));
     }
 

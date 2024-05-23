@@ -45,7 +45,11 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     private final Pattern patternForUuid;
 
     protected ObjectStringTemplateFunctionSymbolImpl(ImmutableList<Template.Component> components, TypeFactory typeFactory) {
-        super(getTemplateString(components), createBaseTypes(components, typeFactory));
+        this(components, "", typeFactory);
+    }
+
+    protected ObjectStringTemplateFunctionSymbolImpl(ImmutableList<Template.Component> components, String suffix, TypeFactory typeFactory) {
+        super(getTemplateString(components) + suffix, createBaseTypes(components, typeFactory));
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
         this.components = components;
         this.safeSeparatorFragments = SafeSeparatorFragment.split(TemplateParser.getEncodedTemplateString(components));
@@ -108,17 +112,26 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                                                      TermFactory termFactory, VariableNullability variableNullability) {
 
         if (newTerms.stream().allMatch(t -> t instanceof DBConstant)) {
-            String value = components.stream()
-                    .map(c -> c.isColumnNameReference()
-                        ? encodeParameter((DBConstant)newTerms.get(c.getIndex()), termFactory, variableNullability)
-                        : c.getComponent())
-                    .collect(Collectors.joining());
-
-            return termFactory.getDBConstant(value, lexicalType);
+            return simplifyWithAllParametersConstant((ImmutableList<DBConstant>)(ImmutableList<?>)newTerms, termFactory, variableNullability);
         }
         else
             return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
+
+    protected ImmutableTerm simplifyWithAllParametersConstant(ImmutableList<DBConstant> newTerms, TermFactory termFactory,
+                                                            VariableNullability variableNullability) {
+        return termFactory.getDBConstant(buildString(newTerms, termFactory, variableNullability), lexicalType);
+    }
+
+    protected String buildString(ImmutableList<DBConstant> newTerms, TermFactory termFactory,
+                                 VariableNullability variableNullability) {
+        return components.stream()
+                .map(c -> c.isColumnNameReference()
+                        ? encodeParameter(newTerms.get(c.getIndex()), termFactory, variableNullability)
+                        : c.getComponent())
+                .collect(Collectors.joining());
+    }
+
 
     private static String encodeParameter(DBConstant constant, TermFactory termFactory, VariableNullability variableNullability) {
         return Optional.of(constant)
@@ -315,11 +328,11 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     }
 
     @Override
-    protected boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
-                                                           VariableNullability variableNullability,
-                                                           ImmutableList<? extends ImmutableTerm> otherTerms) {
+    protected Decomposability testDecomposabilityIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
+                                                         VariableNullability variableNullability,
+                                                         ImmutableList<? extends ImmutableTerm> otherTerms) {
         if (isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms())
-            return canBeSafelyDecomposedIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
+            return testDecomposabilityIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
 
         ImmutableSet<Integer> columnPositions = IntStream.range(0, components.size())
                 .filter(i -> components.get(i).isColumnNameReference())
@@ -328,7 +341,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
         // Needs to have a separator between variables
         if (columnPositions.stream().anyMatch(i -> columnPositions.contains(i+1)))
-            return false;
+            return Decomposability.CANNOT_BE_DECOMPOSED;
 
         ImmutableSet<Integer> separatorPositions = IntStream.range(0, components.size())
                 .filter(i -> !components.get(i).isColumnNameReference())
@@ -338,16 +351,16 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         // TODO: remove this restriction and tolerates consecutive separators
         if (IntStream.range(0, components.size() - 1)
                 .anyMatch(i -> separatorPositions.contains(i) && separatorPositions.contains(i+1)))
-            return false;
+            return Decomposability.CANNOT_BE_DECOMPOSED;
 
         if (separatorPositions.stream()
                 // Only those separating columns
                 .filter(i -> columnPositions.contains(i-1) && columnPositions.contains(i+1))
                 .allMatch(i -> isSafelySeparating(i, terms, otherTerms))) {
-            return canBeSafelyDecomposedIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
+            return testDecomposabilityIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
         }
 
-        return false;
+        return Decomposability.CANNOT_BE_DECOMPOSED;
     }
 
     private boolean isSafelySeparating(int separatorIndex, ImmutableList<? extends ImmutableTerm> terms,
@@ -451,8 +464,13 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             else
                 return IncrementalEvaluation.declareIsFalse();
         }
-        else if (!SafeSeparatorFragment.areCompatible(this.safeSeparatorFragments, SafeSeparatorFragment.split(otherValue)))
-            return IncrementalEvaluation.declareIsFalse();
+        else if (!SafeSeparatorFragment.areCompatible(this.safeSeparatorFragments, SafeSeparatorFragment.split(otherValue))) {
+            return termFactory.getFalseOrNullFunctionalTerm(
+                            terms.stream()
+                                    .map(termFactory::getDBIsNotNull)
+                                    .collect(ImmutableCollectors.toList()))
+                    .evaluate(variableNullability, true);
+        }
 
         return super.evaluateStrictEqWithNonNullConstant(terms, otherTerm, termFactory, variableNullability);
     }

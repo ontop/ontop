@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.impl.MappingImpl;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
@@ -29,7 +28,7 @@ import static it.unibz.inf.ontop.injection.OntopModelSettings.CardinalityPreserv
 
 public class DefaultMappingTransformer implements MappingTransformer {
 
-    private final MappingVariableNameNormalizer mappingNormalizer;
+    private final MappingVariableNameNormalizer mappingVariableNameNormalizer;
     private final MappingSaturator mappingSaturator;
     private final FactIntoMappingConverter factConverter;
     private final OntopMappingSettings settings;
@@ -38,6 +37,8 @@ public class DefaultMappingTransformer implements MappingTransformer {
     private final RDF rdfFactory;
 
     private final MappingDistinctTransformer mappingDistinctTransformer;
+    private final MappingValuesWrapper mappingValuesWrapper;
+
     private final TermFactory termFactory;
     private final RuleExecutor ruleExecutor;
 
@@ -45,7 +46,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
 
 
     @Inject
-    private DefaultMappingTransformer(MappingVariableNameNormalizer mappingNormalizer,
+    private DefaultMappingTransformer(MappingVariableNameNormalizer mappingVariableNameNormalizer,
                                       MappingSaturator mappingSaturator,
                                       FactIntoMappingConverter inserter,
                                       OntopMappingSettings settings,
@@ -53,9 +54,10 @@ public class DefaultMappingTransformer implements MappingTransformer {
                                       SpecificationFactory specificationFactory,
                                       RDF rdfFactory,
                                       MappingDistinctTransformer mappingDistinctTransformer,
+                                      MappingValuesWrapper mappingValuesWrapper,
                                       DisjunctionOfEqualitiesMergingSimplifier disjunctionOfEqualitiesMergingSimplifier,
                                       TermFactory termFactory, RuleExecutor ruleExecutor) {
-        this.mappingNormalizer = mappingNormalizer;
+        this.mappingVariableNameNormalizer = mappingVariableNameNormalizer;
         this.mappingSaturator = mappingSaturator;
         this.factConverter = inserter;
         this.settings = settings;
@@ -63,6 +65,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
         this.specificationFactory = specificationFactory;
         this.rdfFactory = rdfFactory;
         this.mappingDistinctTransformer = mappingDistinctTransformer;
+        this.mappingValuesWrapper = mappingValuesWrapper;
         this.disjunctionOfEqualitiesMergingSimplifier = disjunctionOfEqualitiesMergingSimplifier;
         this.termFactory = termFactory;
         this.ruleExecutor = ruleExecutor;
@@ -87,12 +90,14 @@ public class DefaultMappingTransformer implements MappingTransformer {
                 .collect(ImmutableCollectors.toList());
 
         ImmutableList<MappingAssertion> mappingAfterApplyingRules = ruleExecutor.apply(simplifiedBooleanExpressionsMapping, rules);
-        ImmutableList<MappingAssertion> normalizedMapping = mappingNormalizer.normalize(mappingAfterApplyingRules);
+        ImmutableList<MappingAssertion> mappingWithNormalizedVarNames = mappingVariableNameNormalizer.normalize(mappingAfterApplyingRules);
 
         // Don't insert the distinct if the cardinality preservation is set to LOOSE
-        ImmutableList<MappingAssertion> finalMapping = settings.getCardinalityPreservationMode() == LOOSE
-                ? normalizedMapping
-                : mappingDistinctTransformer.addDistinct(normalizedMapping);
+        ImmutableList<MappingAssertion> mappingWithRightCardinality = settings.getCardinalityPreservationMode() == LOOSE
+                ? mappingWithNormalizedVarNames
+                : mappingDistinctTransformer.addDistinct(mappingWithNormalizedVarNames);
+
+        ImmutableList<MappingAssertion> finalMapping = mappingValuesWrapper.normalize(mappingWithRightCardinality, dbParameters);
 
         return specificationFactory.createSpecification(getMapping(finalMapping), dbParameters, ontology.tbox());
     }

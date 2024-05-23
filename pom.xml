@@ -178,18 +178,18 @@
         <junit.version>4.13.2</junit.version>
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
         <junit-system-stubs.version>2.1.5</junit-system-stubs.version>
-        <logback.version>1.2.9</logback.version>
+        <logback.version>1.2.13</logback.version>
         <nullanno.version>3.0.0</nullanno.version>
         <opencsv.version>5.7.1</opencsv.version>
         <owlapi.version>5.1.20</owlapi.version>
         <proj4j.version>1.1.1</proj4j.version>
         <protege-xmlcatalog.version>1.0.5</protege-xmlcatalog.version>
-        <r2rml-api.version>0.9.0</r2rml-api.version>
-        <rdf4j.version>4.2.4</rdf4j.version>
+        <r2rml-api.version>0.9.1</r2rml-api.version>
+        <rdf4j.version>4.3.10</rdf4j.version>
         <servlet2-api.version>2.5</servlet2-api.version>
         <servlet4-api.version>4.0.1</servlet4-api.version>
         <slf4j.version>1.7.36</slf4j.version>
-        <spring-boot.version>2.7.12</spring-boot.version>
+        <spring-boot.version>2.7.18</spring-boot.version>
         <urlbuilder.version>2.0.9</urlbuilder.version>
         <tomcat-jdbc.version>10.0.0-M7</tomcat-jdbc.version>
         <toml4j.version>0.7.2</toml4j.version>
@@ -203,7 +203,7 @@
         <semargl-sesame.version>0.6.1</semargl-sesame.version>
         <semargl.version>0.7</semargl.version>
         <thymeleaf.version>3.0.15.RELEASE</thymeleaf.version>
-        <tomcat-embed-core.version>9.0.76</tomcat-embed-core.version>
+        <tomcat-embed-core.version>9.0.84</tomcat-embed-core.version>
         <log4j2.version>2.19.0</log4j2.version>
 
         <!-- JDK version -->

@@ -9,6 +9,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.type.impl.DateDBTermType;
+import it.unibz.inf.ontop.model.type.impl.DatetimeDBTermType;
 
 import java.util.Map;
 import java.util.Optional;
@@ -328,7 +330,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 abstractRootDBType);
         builder.put(ST_DISTANCE_SPHEROID, 3, distanceSpheroidFunctionSymbol);
 
-        DBFunctionSymbol asTextSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_ASTEXT, 1, dbStringType, false,
+        DBFunctionSymbol asTextSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_ASTEXT, 1, dbStringType, true,
                 abstractRootDBType);
         builder.put(ST_ASTEXT, 1, asTextSymbol);
 
@@ -380,6 +382,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 abstractRootDBType);
         builder.put(ST_SETSRID, 2, setsridSymbol);
 
+        DBFunctionSymbol transformSymbol = new GeoDBTypedFunctionSymbol(ST_TRANSFORM, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_TRANSFORM, 2, transformSymbol);
+
         DBFunctionSymbol geomfromtextSymbol = new GeoDBTypedFunctionSymbol(ST_GEOMFROMTEXT, 1, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_GEOMFROMTEXT, 1, geomfromtextSymbol);
@@ -390,6 +396,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
         DBFunctionSymbol ontopUserSymbol = new OntopUserFunctionSymbolImpl(dbBooleanType);
         builder.put(OntopUserFunctionSymbolImpl.ONTOP_USER, 0, ontopUserSymbol);
+
+        DBFunctionSymbol ontopContainsRoleFunctionSymbol = new OntopContainsRoleFunctionSymbol(dbStringType, dbBooleanType);
+        builder.put(OntopContainsRoleFunctionSymbol.ONTOP_CONTAINS_ROLE, 1, ontopContainsRoleFunctionSymbol);
+
+        DBFunctionSymbol ontopContainsGroupFunctionSymbol = new OntopContainsGroupFunctionSymbol(dbStringType, dbBooleanType);
+        builder.put(OntopContainsGroupFunctionSymbol.ONTOP_CONTAINS_GROUP, 1, ontopContainsGroupFunctionSymbol);
 
         DBFunctionSymbol ontopContainsRoleOrGroupFunctionSymbol = new OntopContainsRoleOrGroupFunctionSymbol(dbStringType,
                 dbBooleanType);
@@ -803,16 +815,31 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType) {
+        DBFunctionSymbolSerializer serializer = (dbDateTimestampType instanceof DatetimeDBTermType)
+                && ((DatetimeDBTermType) dbDateTimestampType).hasTimeZone()
+                .filter(b -> !b)
+                .isPresent()
+                ? this::serializeDateTimeNormNoTZ
+                : this::serializeDateTimeNormWithTZ;
+
         // TODO: check if it is safe to allow the decomposition
         return new DecomposeStrictEqualitySQLTimestampISONormFunctionSymbol(
                 dbDateTimestampType,
                 dbStringType,
-                this::serializeDateTimeNorm);
+                serializer);
+    }
+
+    /**
+     * TODO: make it abstract
+     */
+    protected String serializeDateTimeNormNoTZ(ImmutableList<? extends ImmutableTerm> terms,
+                                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializeDateTimeNormWithTZ(terms, termConverter, termFactory);
     }
 
 
-    protected abstract String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
-                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory);
+    protected abstract String serializeDateTimeNormWithTZ(ImmutableList<? extends ImmutableTerm> terms,
+                                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory);
 
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
@@ -1207,6 +1234,18 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBFunctionSymbol getOntopUser() {
         return getRegularDBFunctionSymbol(OntopUserFunctionSymbolImpl.ONTOP_USER, 0);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getOntopContainsRole() {
+        return (DBBooleanFunctionSymbol)
+                getRegularDBFunctionSymbol(OntopContainsRoleFunctionSymbol.ONTOP_CONTAINS_ROLE, 1);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getOntopContainsGroup() {
+        return (DBBooleanFunctionSymbol)
+                getRegularDBFunctionSymbol(OntopContainsGroupFunctionSymbol.ONTOP_CONTAINS_GROUP, 1);
     }
 
     @Override

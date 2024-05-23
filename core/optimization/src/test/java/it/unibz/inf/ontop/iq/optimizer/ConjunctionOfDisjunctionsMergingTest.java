@@ -299,7 +299,7 @@ public class ConjunctionOfDisjunctionsMergingTest {
     }
 
     private void optimizeAndCompare(IQ initialQuery, IQ expectedQuery) {
-        IQ optimizedQuery = GENERAL_STRUCTURAL_AND_SEMANTIC_IQ_OPTIMIZER.optimize(initialQuery);
+        IQ optimizedQuery = GENERAL_STRUCTURAL_AND_SEMANTIC_IQ_OPTIMIZER.optimize(initialQuery, null);
         LOGGER.debug("Initial query: {}", initialQuery);
         Assert.assertEquals(expectedQuery, optimizedQuery);
         LOGGER.debug("Optimized query: {}", optimizedQuery);

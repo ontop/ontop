@@ -271,7 +271,7 @@ public class SemanticIndexRepository {
         }
 
         String getObjectConstantUri(ObjectConstant c)  {
-            return (c instanceof BNode) ? ((BNode) c).getInternalLabel() : ((IRIConstant) c).getIRI().getIRIString();
+            return (c instanceof BNode) ? ((BNode) c).getLabel() : ((IRIConstant) c).getIRI().getIRIString();
         }
 
         void execute() throws SQLException {

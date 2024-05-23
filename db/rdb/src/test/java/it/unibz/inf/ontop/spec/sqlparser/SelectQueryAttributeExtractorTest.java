@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
+import it.unibz.inf.ontop.dbschema.impl.SQLServerQuotedIDFactory;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import org.junit.Test;
@@ -64,6 +65,29 @@ public class SelectQueryAttributeExtractorTest {
                 idfac.createAttributeID("FECBLO1"),
                 idfac.createAttributeID("STCMIN"),
                 idfac.createAttributeID("PRECIOFINAL")), res);
+    }
+
+    @Test
+    public void test_approximation_803() throws InvalidQueryException {
+        QuotedIDFactory idfac = new SQLServerQuotedIDFactory();
+
+        ApproximateSelectQueryAttributeExtractor aex = new ApproximateSelectQueryAttributeExtractor(idfac);
+
+        ImmutableList<QuotedID> res = aex.getAttributes("SELECT\n" +
+                "                    measurement_id,\n" +
+                "                    m.value_as_number [value],\n" +
+                "                    unit_c.concept_code unit,\n" +
+                "                    unit_c.concept_code code\n" +
+                "                FROM\n" +
+                "                    measurement m\n" +
+                "                    LEFT JOIN concept unit_c ON unit_c.concept_id = m.unit_concept_id\n" +
+                "                    AND unit_c.concept_id != 0"
+        );
+        assertEquals(ImmutableList.of(
+                idfac.createAttributeID("measurement_id"),
+                idfac.createAttributeID("value"),
+                idfac.createAttributeID("unit"),
+                idfac.createAttributeID("code")), res);
     }
 
     // issue 366

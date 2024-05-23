@@ -1,12 +1,14 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllSettings;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
+import java.util.function.Supplier;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -24,7 +26,13 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
     OntopMappingSQLAllOWLAPIConfigurationImpl(OntopMappingSQLAllSettings settings,
                                               OntopMappingSQLAllOWLAPIOptions options) {
         super(settings, options.sqlOptions);
-        mappingOWLConfiguration = new OntopMappingOntologyConfigurationImpl(settings, options.ontologyOptions);
+        mappingOWLConfiguration = new OntopMappingOntologyConfigurationImpl(settings, options.ontologyOptions, this::getInjector);
+    }
+
+    OntopMappingSQLAllOWLAPIConfigurationImpl(OntopMappingSQLAllSettings settings,
+        OntopMappingSQLAllOWLAPIOptions options, Supplier<Injector> injectorSupplier) {
+        super(settings, options.sqlOptions);
+        mappingOWLConfiguration = new OntopMappingOntologyConfigurationImpl(settings, options.ontologyOptions, injectorSupplier);
     }
 
     @Override

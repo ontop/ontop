@@ -24,9 +24,9 @@ public class RDF4JHelper {
 
     private RDF4JHelper(){}
 
-    public static Resource getResource(ObjectConstant obj, byte[] salt) {
+    public static Resource getResource(ObjectConstant obj) {
         if (obj instanceof BNode)
-            return fact.createBNode(((BNode) obj).getAnonymizedLabel(salt));
+            return fact.createBNode(((BNode) obj).getLabel());
         else if (obj instanceof IRIConstant)
             return fact.createIRI(((IRIConstant) obj).getIRI().getIRIString());
         else
@@ -49,7 +49,7 @@ public class RDF4JHelper {
                         fact.createIRI(type.getIRI().getIRIString())));
     }
 
-    public static Value getValue(RDFConstant c, byte[] salt) {
+    public static Value getValue(RDFConstant c) {
         if (c == null)
             return null;
 
@@ -57,7 +57,7 @@ public class RDF4JHelper {
         if (c instanceof RDFLiteralConstant) {
             value = RDF4JHelper.getLiteral((RDFLiteralConstant) c);
         } else if (c instanceof ObjectConstant) {
-            value = RDF4JHelper.getResource((ObjectConstant) c, salt);
+            value = RDF4JHelper.getResource((ObjectConstant) c);
         }
         return value;
     }
@@ -66,17 +66,17 @@ public class RDF4JHelper {
         return fact.createIRI(uri);
     }
 
-    public static Statement createStatement(RDFFact assertion, byte[] salt) {
+    public static Statement createStatement(RDFFact assertion) {
 
         return assertion.getGraph()
                 .map(g -> fact.createStatement(
-                        getResource(assertion.getSubject(), salt),
+                        getResource(assertion.getSubject()),
                         createURI(assertion.getProperty().getIRI().getIRIString()),
-                        getValue(assertion.getObject(), salt),
-                        getResource(g, salt)))
+                        getValue(assertion.getObject()),
+                        getResource(g)))
                 .orElseGet(() -> fact.createStatement(
-                        getResource(assertion.getSubject(), salt),
+                        getResource(assertion.getSubject()),
                         createURI(assertion.getProperty().getIRI().getIRIString()),
-                        getValue(assertion.getObject(), salt)));
+                        getValue(assertion.getObject())));
     }
 }

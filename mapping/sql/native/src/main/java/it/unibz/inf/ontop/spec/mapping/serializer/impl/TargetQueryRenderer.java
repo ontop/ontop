@@ -137,7 +137,7 @@ public class TargetQueryRenderer {
         if (term instanceof RDFLiteralConstant)
             return ((RDFLiteralConstant) term).toString();
         if (term instanceof BNode)
-            return ((BNode) term).getInternalLabel();
+            return ((BNode) term).getLabel();
         throw new MinorOntopInternalBugException("Unexpected type " + term.getClass() + " for term: " + term);
     }
 

@@ -1,0 +1,16 @@
+[PrefixDeclaration]
+:   		http://university.example.org/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+quest:		http://obda.org/quest#
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-professor
+target		:professor/{prof_id} a :Professor; :first_name {first_name}; :last_name {last_name}; :age {age}; :worked_minutes {worked_minutes}; :worked_hours {worked_hours}; :salary_per_hour {salary_per_hour}; :float_average_salary_per_minute {float_average_salary_per_minute}; :numeric_average_salary_per_minute {numeric_average_salary_per_minute}; :double_avargae_salary_per_minute {double_avargae_salary_per_minute}; :birthday_without_timezone {dup_birthday_without_timezone}  ; :double_first_name {double_upper_first_name}.
+source		SELECT * FROM "lenses"."professors";
+]]
+

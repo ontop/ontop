@@ -25,6 +25,10 @@ mappingId	MAPID-nickname
 target		_:professor_{prof_id} :nickname {nickname} .
 source		SELECT prof_id, nickname FROM professors;
 
+mappingId	MAPID-institution
+target		_:professor_{prof_id} :institution _:mit . _:mit a :Institution .
+source		SELECT prof_id FROM professors;
+
 mappingId	MAPID-teaches
 target		_:professor_{prof_id} :teaches _:course_{course_id} .
 source		SELECT prof_id, course_id FROM teaching;

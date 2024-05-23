@@ -16,8 +16,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.BINARY_VAR_STR;
-import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.VARBINARY_STR;
+import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.*;
 import static it.unibz.inf.ontop.model.type.impl.H2SQLDBTypeFactory.DEFAULT_DECIMAL_STR;
 
 public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
@@ -54,6 +53,9 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         builder.put(varBinary, createHexBinaryNormFunctionSymbol(varBinary));
         DBTermType varBinary2 = dbTypeFactory.getDBTermType(BINARY_VAR_STR);
         builder.put(varBinary2, createHexBinaryNormFunctionSymbol(varBinary2));
+
+        DBTermType timestampTZ = dbTypeFactory.getDBTermType(TIMESTAMP_WITH_TIME_ZONE_STR);
+        builder.put(timestampTZ, createDateTimeNormFunctionSymbol(timestampTZ));
 
         return builder.build();
     }
@@ -200,8 +202,8 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
      * Asks the timezone to be included
      */
     @Override
-    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
-                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+    protected String serializeDateTimeNormWithTZ(ImmutableList<? extends ImmutableTerm> terms,
+                                                 Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("REPLACE(FORMATDATETIME(%s,'yyyy-MM-dd HH:mm:ss.SSSXXX'), ' ', 'T')", termConverter.apply(terms.get(0)));
     }
 

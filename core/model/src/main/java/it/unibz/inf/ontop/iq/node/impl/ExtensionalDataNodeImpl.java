@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
@@ -16,6 +17,7 @@ import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -66,6 +68,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
     private final CoreUtilsFactory coreUtilsFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final QueryTransformerFactory queryTransformerFactory;
 
     /**
      * See {@link IntermediateQueryFactory#createExtensionalDataNode(RelationDefinition, ImmutableMap)}
@@ -75,8 +78,10 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     private ExtensionalDataNodeImpl(@Assisted RelationDefinition relationDefinition,
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
-                                    CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
-        this(relationDefinition, argumentMap, null, iqTreeTools, iqFactory, coreUtilsFactory, substitutionFactory);
+                                    CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory,
+                                    QueryTransformerFactory queryTransformerFactory) {
+        this(relationDefinition, argumentMap, null, iqTreeTools, iqFactory, coreUtilsFactory, substitutionFactory,
+                queryTransformerFactory);
     }
 
     /**
@@ -87,13 +92,15 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                     @Assisted @Nullable VariableNullability variableNullability,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
-                                    CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
+                                    CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory,
+                                    QueryTransformerFactory queryTransformerFactory) {
         super(iqTreeTools, iqFactory);
         this.coreUtilsFactory = coreUtilsFactory;
         this.relationDefinition = relationDefinition;
         this.argumentMap = argumentMap;
         this.variableNullability = variableNullability;
         this.substitutionFactory = substitutionFactory;
+        this.queryTransformerFactory = queryTransformerFactory;
     }
 
 
@@ -341,4 +348,45 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     public boolean isDeclaredAsEmpty() {
         return false;
     }
+
+    @Override
+    public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions() {
+        if (relationDefinition instanceof Lens) {
+            IQ iq = ((Lens) relationDefinition).getIQ();
+
+            IQTree renamedTree = merge(this, iq, coreUtilsFactory.createVariableGenerator(this.getKnownVariables()),
+                    substitutionFactory, queryTransformerFactory, iqFactory);
+
+            return renamedTree.getPossibleVariableDefinitions();
+        }
+        return ImmutableSet.of();
+    }
+
+    public static IQTree merge(ExtensionalDataNode dataNode, IQ definition, VariableGenerator variableGenerator,
+                               SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
+                               IntermediateQueryFactory iqFactory) {
+        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
+                variableGenerator, definition.getTree().getKnownVariables());
+
+        IQ renamedDefinition = transformerFactory.createRenamer(renamingSubstitution).transform(definition);
+
+        ImmutableList<Variable> sourceAtomArguments = substitutionFactory.apply(
+                renamingSubstitution,
+                renamedDefinition.getProjectionAtom().getArguments());
+
+        Substitution<VariableOrGroundTerm> descendingSubstitution = dataNode.getArgumentMap().entrySet().stream()
+                .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries(
+                        e -> sourceAtomArguments.get(e.getKey()),
+                        Map.Entry::getValue));
+
+        IQTree substitutedDefinition = renamedDefinition.getTree()
+                .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);
+
+        return iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(dataNode.getVariables()),
+                        substitutedDefinition)
+                .normalizeForOptimization(variableGenerator);
+    }
+
+
 }

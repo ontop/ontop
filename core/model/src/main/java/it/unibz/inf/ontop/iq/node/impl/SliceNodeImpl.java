@@ -185,6 +185,22 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                     return newTree.get();
             }
         }
+        // TODO: consider a more general technique (distinct removal in sub-tree)
+        else if ((newChildRoot instanceof InnerJoinNode) && limit <= 1) {
+            var joinChildren = newChild.getChildren();
+            var newJoinChildren = joinChildren.stream()
+                    // Distinct-s can be eliminated
+                    .map(c -> (c.getRootNode() instanceof DistinctNode)
+                            ? c.getChildren().get(0)
+                            : c)
+                    .collect(ImmutableCollectors.toList());
+
+            if (!newJoinChildren.equals(joinChildren)) {
+                var updatedChildTree = iqFactory.createNaryIQTree((InnerJoinNode) newChildRoot, newJoinChildren);
+                return normalizeForOptimization(updatedChildTree, variableGenerator, treeCache,
+                        () -> true);
+            }
+        }
 
         return iqFactory.createUnaryIQTree(this, newChild,
                 hasChildChanged.get()

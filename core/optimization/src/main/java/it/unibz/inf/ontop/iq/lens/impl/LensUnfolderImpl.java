@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq.lens.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.iq.lens.LensUnfolder;
 import it.unibz.inf.ontop.dbschema.Lens;
@@ -11,14 +10,10 @@ import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.node.impl.ExtensionalDataNodeImpl;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-
-import java.util.Map;
-import java.util.Optional;
 
 public class LensUnfolderImpl implements LensUnfolder {
 
@@ -98,27 +93,8 @@ public class LensUnfolderImpl implements LensUnfolder {
         }
 
         protected IQTree merge(ExtensionalDataNode dataNode, IQ definition) {
-            InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
-                    variableGenerator, definition.getTree().getKnownVariables());
-
-            IQ renamedDefinition = transformerFactory.createRenamer(renamingSubstitution).transform(definition);
-
-            ImmutableList<Variable> sourceAtomArguments = substitutionFactory.apply(
-                    renamingSubstitution,
-                    renamedDefinition.getProjectionAtom().getArguments());
-
-            Substitution<VariableOrGroundTerm> descendingSubstitution = dataNode.getArgumentMap().entrySet().stream()
-                    .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries(
-                            e -> sourceAtomArguments.get(e.getKey()),
-                            Map.Entry::getValue));
-
-            IQTree substitutedDefinition = renamedDefinition.getTree()
-                    .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);
-
-            return iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(dataNode.getVariables()),
-                    substitutedDefinition)
-                    .normalizeForOptimization(variableGenerator);
+            return ExtensionalDataNodeImpl.merge(dataNode, definition, variableGenerator, substitutionFactory,
+                    transformerFactory, iqFactory);
         }
 
     }

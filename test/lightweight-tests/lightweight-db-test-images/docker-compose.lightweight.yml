@@ -50,8 +50,22 @@ services:
       - ACCEPT_EULA=Y
       - MSSQL_PID=Express
 
-  mysql:
-    build: ./mysql
+  mysql-v8:
+    build:
+      context: ./mysql
+      args:
+        MYSQL_VERSION: 8.0.29
+    env_file: .env
+    ports:
+      - "3694:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+
+  mysql-v5:
+    build:
+      context: ./mysql
+      args:
+        MYSQL_VERSION: 5.7.44
     env_file: .env
     ports:
       - "3694:3306"

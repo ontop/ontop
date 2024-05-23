@@ -177,10 +177,11 @@ public class AbstractDockerRDF4JTest {
                     if (((SimpleLiteral) bindingSetValue).getDatatype().stringValue().endsWith("#PlainLiteral")) {
                             vValueBuilder.add("\"" + bindingSetValue.stringValue() + "\"^^xsd:string");
                     } else {
-                    // CASE 2.2.2: xsd datatype
+                    // CASE 2.2.2: xsd datatype, or wkt literal
                             vValueBuilder.add("\"" + simpleLiteral.stringValue() + "\"" + "^^" +
                             ((SimpleLiteral) bindingSetValue).getDatatype().stringValue()
-                                    .replace("http://www.w3.org/2001/XMLSchema#", "xsd:"));
+                                    .replace("http://www.w3.org/2001/XMLSchema#", "xsd:")
+                                    .replace("http://www.opengis.net/ont/geosparql#", "geo:"));
                     }
                 }
             }

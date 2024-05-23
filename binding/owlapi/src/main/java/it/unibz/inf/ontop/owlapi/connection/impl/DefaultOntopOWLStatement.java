@@ -66,21 +66,11 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 		try {
 			SelectQuery query = kgQueryFactory.createSelectQuery(inputQuery);
 			TupleResultSet resultSet = st.execute(query);
-
-
-
-			return new OntopTupleOWLResultSet(resultSet, generateSalt());
+			return new OntopTupleOWLResultSet(resultSet);
 
 		} catch (OntopQueryEngineException | OntopKGQueryException e) {
 			throw new OntopOWLException(e);
 		}
-	}
-
-	private byte[] generateSalt() {
-		SecureRandom random = new SecureRandom();
-		byte[] salt = new byte[20];
-		random.nextBytes(salt);
-		return salt;
 	}
 
 	@Override
@@ -131,7 +121,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 			OntopResultConversionException {
 
 		GraphResultSet resultSet = st.execute(query);
-		return new OntopGraphOWLResultSet(resultSet, generateSalt());
+		return new OntopGraphOWLResultSet(resultSet);
 	}
 
 	public int getMaxRows() throws OntopOWLException {

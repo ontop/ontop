@@ -61,6 +61,32 @@
       rr:termType rr:BlankNode
     ] .
 
+<urn:MAPID-institution> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT prof_id FROM professors;"
+    ];
+  rr:predicateObjectMap [ a rr:PredicateObjectMap;
+      rr:objectMap [ a rr:ObjectMap, rr:TermMap;
+          rr:template "mit";
+          rr:termType rr:BlankNode
+        ];
+      rr:predicate :institution
+    ];
+  rr:subjectMap [ a rr:SubjectMap, rr:TermMap;
+      rr:template "professor_{prof_id}";
+      rr:termType rr:BlankNode
+    ] .
+
+<urn:MAPID-mit> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT prof_id FROM professors;"
+    ];
+  rr:subjectMap [ a rr:SubjectMap, rr:TermMap;
+      rr:class :Institution;
+      rr:template "mit";
+      rr:termType rr:BlankNode
+    ] .
+
 <urn:MAPID-teaches> a rr:TriplesMap;
   rr:logicalTable [ a rr:R2RMLView;
       rr:sqlQuery "SELECT prof_id, course_id FROM teaching;"

@@ -120,6 +120,7 @@ public abstract class JsonLens extends JsonOpenObject {
 
         RawQuotedIDFactory rawQuotedIqFactory = new RawQuotedIDFactory(quotedIdFactory);
 
+        // TODO: preserve the original order?
         for (Variable v : iq.getProjectionAtom().getVariables()) {
             QuotedID attributeId = rawQuotedIqFactory.createAttributeID(v.getName());
 

@@ -15,12 +15,10 @@ public class OntopCloseableStatementIteration extends AbstractCloseableIteration
 
     private final OntopCloseableIterator<RDFFact, OntopConnectionException> iterator;
     private final ValueFactory valueFactory;
-    private final byte[] salt;
 
-    public OntopCloseableStatementIteration(OntopCloseableIterator<RDFFact, OntopConnectionException> iterator, byte[] salt) {
+    public OntopCloseableStatementIteration(OntopCloseableIterator<RDFFact, OntopConnectionException> iterator) {
         this.iterator = iterator;
         this.valueFactory = SimpleValueFactory.getInstance();
-        this.salt = salt;
     }
 
     @Override
@@ -57,8 +55,8 @@ public class OntopCloseableStatementIteration extends AbstractCloseableIteration
 
     private Statement convertToStatement(RDFFact rdfFact) {
         return valueFactory.createStatement(
-                RDF4JHelper.getResource(rdfFact.getSubject(), salt),
+                RDF4JHelper.getResource(rdfFact.getSubject()),
                 valueFactory.createIRI(rdfFact.getProperty().getIRI().getIRIString()),
-                RDF4JHelper.getValue(rdfFact.getObject(), salt));
+                RDF4JHelper.getValue(rdfFact.getObject()));
     }
 }
