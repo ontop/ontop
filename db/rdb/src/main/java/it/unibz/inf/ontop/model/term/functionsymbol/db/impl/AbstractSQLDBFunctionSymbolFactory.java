@@ -1650,8 +1650,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         String region = termConverter.apply(terms.get(1));
         String raster_name = termConverter.apply(terms.get(2));
 
-        return String.format("rasdaman_op.query2numeric(CONCAT('select avg_cells(clip((c[',rasdaman_op.timestamp2grid(%s, %s),', 0:* , 0:*]*0.02) - 273.15,' , "
-                        + "rasdaman_op.geo2grid_final(rasdaman_op.get_geom(%s), rasdaman_op.get_min_longitude(%s), rasdaman_op.get_max_latitude(%s)," +
+        return String.format("rasdaman_op.query2numeric(CONCAT('select avg_cells(clip(c[',rasdaman_op.timestamp2grid(%s, %s),', 0:* , 0:*],' , "
+                        + "rasdaman_op.geo2grid_final(%s, rasdaman_op.get_min_longitude(%s), rasdaman_op.get_max_latitude(%s)," +
                         " rasdaman_op.get_res_lon(%s), rasdaman_op.get_res_lat(%s)),')) from ', %s, ' as c'))",
                 time, raster_name, region, raster_name, raster_name, raster_name, raster_name, raster_name);
 

@@ -27,49 +27,69 @@ source		SELECT 404 AS gid, rasdaman_op.check_rasdaman_conn() AS conn
 
 ;mappingId	mapping_region_geometry
 ;target		:vector_region/demo/{region_id} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
-;source		SELECT region_id, st_astext((st_dump(geom)).geom) AS geometry_wkt from sample_regions_of_interest
+;source		SELECT region_id,
+;                        CASE
+;                              WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
+;                              ELSE ST_AsText(geom)
+;                        END AS geometry_wkt
+;            FROM sample_regions_of_interest
 
 ; ---------------- Mapping for All Regions in Sweden -----------------
 
 mappingId	Get_region_class_table_sweden
 target		:vector_region/sweden/{gid} a :region .
-source		SELECT gid from region_sweden
+source		SELECT gid FROM region_sweden
 
 mappingId	mapping_region_name_sweden
 target		:vector_region/sweden/{gid} rdfs:label {region_name}^^xsd:string .
-source		SELECT gid, name_2 AS region_name from region_sweden
+source		SELECT gid, name_2 AS region_name FROM region_sweden
 
 mappingId	mapping_region_geometry_wkt_sweden
 target		:vector_region/sweden/{gid} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
-source		SELECT gid, geom AS geometry_wkt from region_sweden
+source		SELECT gid,
+                CASE
+                    WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
+                    ELSE ST_AsText(geom)
+                END AS geometry_wkt
+            FROM region_sweden
 
 ; ---------------- Mapping for All Regions in Bavaria -----------------
 
 mappingId	Get_region_class_table_bavaria
 target		:vector_region/bavaria/{gid} a :region .
-source		SELECT gid from region_bavaria
+source		SELECT gid FROM region_bavaria
 
 mappingId	mapping_region_name_bavaria
 target		:vector_region/bavaria/{gid} rdfs:label {region_name}^^xsd:string .
-source		SELECT gid, name_2 AS region_name from region_bavaria
+source		SELECT gid, name_2 AS region_name FROM region_bavaria
 
 mappingId	mapping_region_geometry_wkt_bavaria
 target		:vector_region/bavaria/{gid} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
-source		SELECT gid, geom AS geometry_wkt from region_bavaria
+source		SELECT gid,
+                   CASE
+                       WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
+                       ELSE ST_AsText(geom)
+                   END AS geometry_wkt
+            FROM region_bavaria
 
 ; ---------------- Mapping for All Regions in South Tyrol -----------------
 
 mappingId	Get_region_class_table_south_tyrol
 target		:vector_region/tyrol/{gid} a :region .
-source		SELECT gid from region_south_tyrol
+source		SELECT gid FROM region_south_tyrol
 
 mappingId	mapping_region_name_south_tyrol
 target		:vector_region/tyrol/{gid} rdfs:label {region_name}^^xsd:string .
-source		SELECT gid, name_3 AS region_name from region_south_tyrol
+source		SELECT gid, name_3 AS region_name FROM region_south_tyrol
 
 mappingId	mapping_region_geometry_wkt_south_tyrol
 target		:vector_region/tyrol/{gid} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
-source		SELECT gid, geom AS geometry_wkt from region_south_tyrol
+source		SELECT gid,
+                   CASE
+                       WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
+                       ELSE ST_AsText(geom)
+                   END AS geometry_wkt
+            FROM region_south_tyrol
 
 
 ; ---------------- Mapping for Raster Metadata Lookup Table -----------------
@@ -78,7 +98,17 @@ source		SELECT gid, geom AS geometry_wkt from region_south_tyrol
 ;target		:raster/{raster_id} a :Raster .
 ;source		SELECT raster_id FROM sample_lookup_x1
 
-mappingId	mapping_rastername_lookup
+;mappingId	Get_raster_name_based_on_region_name_lookup
+;target		:raster/{raster_id} rasdb:hasRasterName {raster_name}^^xsd:string .
+;source		SELECT raster_id, raster_name
+;            FROM sample_lookup_x1
+;            WHERE max_lat > (SELECT  ST_YMax(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM sample_regions_of_interest as m WHERE   m.name_2 = 'Stockholm')
+;              AND min_lat < (SELECT  ST_YMin(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM sample_regions_of_interest as m WHERE   m.name_2 = 'Stockholm')
+;              AND max_lon > (SELECT  ST_XMax(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM sample_regions_of_interest as m WHERE   m.name_2 = 'Stockholm')
+;              AND min_lon < (SELECT  ST_XMin(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM sample_regions_of_interest as m WHERE   m.name_2 = 'Stockholm')
+
+
+mappingId	mapping_raster_name_lookup
 target		:raster/{raster_id} rasdb:hasRasterName {raster_name}^^xsd:string .
 source		SELECT raster_id, raster_name FROM sample_lookup_x1
 
