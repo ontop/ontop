@@ -1568,8 +1568,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         String time = termConverter.apply(terms.get(0)).replace("\'","");
 
 
-        //return String.format("rasdaman_op.query2numeric(CONCAT('select avg_cells(clip((c[%s, 0:* , 0:*] *\',"+ "%s"+"),',rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),')) from %s as c'))",time,sf,region,raster_name);
-        return String.format("rasdaman_op.query2numeric(CONCAT('select avg_cells(clip((c[' , %s, ', 0:* , 0:*] * ', %s, '),' , " + "rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),')) from ', %s, ' as c'))", time,sf,region,raster_name);
+       return String.format("rasdaman_op.query2numeric(CONCAT('select avg_cells(clip((c[' , %s, ', 0:* , 0:*] * ', %s, '),' , " + "rasdaman_op.geo2grid_coords(ST_AsText((ST_Dump(%s)).geom)),')) from ', %s, ' as c'))", time,sf,region,raster_name);
     }
 
     protected String serializeRAS_SPATIAL_MAXIMUM(ImmutableList<? extends ImmutableTerm> terms,
@@ -1710,7 +1709,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                         + "rasdaman_op.geo2grid_final(%s, rasdaman_op.get_min_longitude(%s), rasdaman_op.get_max_latitude(%s)," +
                         " rasdaman_op.get_res_lon(%s), rasdaman_op.get_res_lat(%s)),') from ', %s, ' as c'))",
                 time, raster_name, region, raster_name, raster_name, raster_name, raster_name, raster_name);
-        //return String.format("rasdaman_op.query2array(CONCAT('select clip(m[' , %s, ', 0:* , 0:*],' , " + "rasdaman_op.geo2grid_coords(%s),') from ', %s, ' as m'))",time03, region_name03, raster_name03);
     }
 
 
