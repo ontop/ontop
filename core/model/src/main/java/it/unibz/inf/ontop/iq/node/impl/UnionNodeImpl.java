@@ -315,7 +315,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .collect(ImmutableCollectors.toList());
 
         IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChildren.equals(children));
-        return iqFactory.createNaryIQTree(this, children, newTreeCache);
+        return iqFactory.createNaryIQTree(this, newChildren, newTreeCache);
     }
 
     /**

@@ -1,0 +1,20 @@
+[PrefixDeclaration]
+ex: http://example.org/
+
+[MappingDeclaration] @collection [[
+mappingId	map1
+target		ex:partner/{partner_id} ex:tutelle ex:tutelle/{tutelle_name}/{tutelle_category} .
+source		SELECT * FROM tutelle
+
+mappingId	map2
+target		ex:tutelle/{tutelle_name}/{tutelle_category} a ex:Tutelle ; ex:name {tutelle_name} ; ex:category ex:category/{tutelle_category} .
+source		SELECT * FROM tutelle
+
+mappingId	map3
+target		ex:category/{tutelle_category} ex:name {tutelle_category} .
+source		SELECT * FROM category
+
+mappingId	map3
+target		ex:category/{tutelle_category} ex:label {label} .
+source		SELECT l.label, c.tutelle_category FROM category c, category_label l where c.label_id = l.label_id
+]]

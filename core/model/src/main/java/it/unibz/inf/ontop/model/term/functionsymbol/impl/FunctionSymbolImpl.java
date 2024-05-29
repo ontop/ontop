@@ -336,15 +336,29 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         /*
          * In case of injectivity
          */
-        if (otherTerm.getFunctionSymbol().equals(this)
-                && canBeSafelyDecomposedIntoConjunction(terms, variableNullability, otherTerm.getTerms())) {
+        if (otherTerm.getFunctionSymbol().equals(this)) {
+            ImmutableList<? extends ImmutableTerm> otherTerms = otherTerm.getTerms();
+            Decomposability decomposability = testDecomposabilityIntoConjunction(terms, variableNullability, otherTerms);
+
+            if (decomposability == Decomposability.CANNOT_BE_DECOMPOSED)
+                return IncrementalEvaluation.declareSameExpression();
+
             if (getArity() == 0)
                 return IncrementalEvaluation.declareIsTrue();
 
-            ImmutableExpression newExpression = termFactory.getConjunction(
+            ImmutableExpression conjunction = termFactory.getConjunction(
                     IntStream.range(0, getArity())
                             .mapToObj(i -> termFactory.getStrictEquality(terms.get(i), otherTerm.getTerm(i)))
                             .collect(ImmutableCollectors.toList()));
+
+            ImmutableExpression newExpression = (decomposability == Decomposability.NEEDS_NON_NULL_CONDITION_WRAPPING)
+                ? termFactory.getBooleanIfElseNull(
+                        termFactory.getConjunction(
+                                Stream.concat(terms.stream(), otherTerms.stream())
+                                        .map(termFactory::getDBIsNotNull)
+                                ).orElseThrow(),
+                        conjunction)
+                : conjunction;
 
             return newExpression.evaluate(variableNullability, true);
         }
@@ -357,33 +371,34 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      * Makes sure that the conjunction would never evaluate as FALSE instead of NULL
      * (first produced equality evaluated as false, while the second evaluates as NULL)
      *
-     * TODO: could be refactored so as to signal it needs to be wrapped in a BOOL_IF_ELSE_NULL.
-     *
+     * In such a case, wrapping into a IF-ELSE-NULL expression checking that all the arguments are not null is required
      */
-    protected boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
-                                                         VariableNullability variableNullability,
-                                                         ImmutableList<? extends ImmutableTerm> otherTerms) {
+    protected Decomposability testDecomposabilityIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
+                                                                 VariableNullability variableNullability,
+                                                                 ImmutableList<? extends ImmutableTerm> otherTerms) {
         // Can be relaxed by overriding
         if (!isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms())
-            return false;
+            return Decomposability.CANNOT_BE_DECOMPOSED;
 
-        return canBeSafelyDecomposedIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
+        return testDecomposabilityIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
     }
 
     /**
      * ONLY when injectivity has been proved
      *
      */
-    protected boolean canBeSafelyDecomposedIntoConjunctionWhenInjective(ImmutableList<? extends ImmutableTerm> terms,
-                                                           VariableNullability variableNullability,
-                                                           ImmutableList<? extends ImmutableTerm> otherTerms) {
+    protected Decomposability testDecomposabilityIntoConjunctionWhenInjective(ImmutableList<? extends ImmutableTerm> terms,
+                                                                              VariableNullability variableNullability,
+                                                                              ImmutableList<? extends ImmutableTerm> otherTerms) {
         if (mayReturnNullWithoutNullArguments())
-            return false;
+            return Decomposability.CANNOT_BE_DECOMPOSED;
         if (getArity() < 2)
-            return true;
+            return Decomposability.NO_WRAPPING_NEEDED;
 
-        return !(variableNullability.canPossiblyBeNullSeparately(terms)
-                || variableNullability.canPossiblyBeNullSeparately(otherTerms));
+        return (variableNullability.canPossiblyBeNullSeparately(terms)
+                || variableNullability.canPossiblyBeNullSeparately(otherTerms))
+                ? Decomposability.NEEDS_NON_NULL_CONDITION_WRAPPING
+                : Decomposability.NO_WRAPPING_NEEDED;
     }
 
     /**
@@ -585,4 +600,11 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         else
             return Optional.empty();
     }
+
+    protected enum Decomposability {
+        NEEDS_NON_NULL_CONDITION_WRAPPING,
+        NO_WRAPPING_NEEDED,
+        CANNOT_BE_DECOMPOSED
+    }
+
 }
