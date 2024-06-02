@@ -396,8 +396,8 @@ public class OntopEnvVarTest {
             for (Field field : fields) {
                 if (field.isAnnotationPresent(Env.class)) {
                     Env envAnnotation = field.getAnnotation(Env.class);
-                    String[] envVariableName = envAnnotation.value();
-                    if (Arrays.asList(envVariableName).contains(identifier)) {
+                    String[] envVariableNames = envAnnotation.value();
+                    if (Arrays.asList(envVariableNames).contains(identifier)) {
                         try {
                             field.setAccessible(true);
                             return field.get(object).toString();
