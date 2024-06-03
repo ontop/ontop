@@ -156,10 +156,10 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
      * TODO: stop overriding (only use the top implementation)
      */
     @Override
-    protected boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
-                                                           VariableNullability variableNullability,
-                                                           ImmutableList<? extends ImmutableTerm> otherTerms) {
-        return true;
+    protected Decomposability testDecomposabilityIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
+                                                         VariableNullability variableNullability,
+                                                         ImmutableList<? extends ImmutableTerm> otherTerms) {
+        return Decomposability.NO_WRAPPING_NEEDED;
     }
 
     /**

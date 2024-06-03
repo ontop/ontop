@@ -71,6 +71,9 @@ public class OntopQuery extends OntopMappingOntologyRelatedCommand {
             configurationBuilder.nativeOntopMappingFile(mappingFile);
         }
 
+        if (constraintFile != null)
+            configurationBuilder.basicImplicitConstraintFile(constraintFile);
+
         if (dbMetadataFile != null)
             configurationBuilder.dbMetadataFile(dbMetadataFile);
 

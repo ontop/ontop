@@ -66,6 +66,9 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
         else
             builder.nativeOntopMappingFile(mappingFile);
 
+        if (constraintFile != null)
+            builder.basicImplicitConstraintFile(constraintFile);
+
         if (dbMetadataFile != null)
             builder.dbMetadataFile(dbMetadataFile);
 

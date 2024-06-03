@@ -152,7 +152,7 @@
         <versions-maven-plugin.version>2.15.0</versions-maven-plugin.version>
 
         <!-- Dependency versions: core dependencies -->
-        <airline.version>2.8.0</airline.version>
+        <airline.version>2.9.0</airline.version>
         <antlr4.version>4.12.0</antlr4.version>
         <commons-codec.version>1.14</commons-codec.version>
         <commons-collections4.version>4.2</commons-collections4.version>
@@ -177,6 +177,7 @@
         <jsr305.version>3.0.2</jsr305.version>
         <junit.version>4.13.2</junit.version>
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
+        <junit-system-stubs.version>2.1.5</junit-system-stubs.version>
         <logback.version>1.2.13</logback.version>
         <nullanno.version>3.0.0</nullanno.version>
         <opencsv.version>5.7.1</opencsv.version>
@@ -184,7 +185,7 @@
         <proj4j.version>1.1.1</proj4j.version>
         <protege-xmlcatalog.version>1.0.5</protege-xmlcatalog.version>
         <r2rml-api.version>0.9.1</r2rml-api.version>
-        <rdf4j.version>4.2.4</rdf4j.version>
+        <rdf4j.version>4.3.10</rdf4j.version>
         <servlet2-api.version>2.5</servlet2-api.version>
         <servlet4-api.version>4.0.1</servlet4-api.version>
         <slf4j.version>1.7.36</slf4j.version>
@@ -1077,6 +1078,14 @@
                 <version>${junit-jupiter.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <!-- JUnit Plugin -->
+            <dependency>
+                <groupId>uk.org.webcompere</groupId>
+                <artifactId>system-stubs-junit4</artifactId>
+                <version>${junit-system-stubs.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <!-- Hamcrest -->

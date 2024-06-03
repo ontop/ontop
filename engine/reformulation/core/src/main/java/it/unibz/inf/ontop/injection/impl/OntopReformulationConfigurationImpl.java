@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.query.KGQueryFactory;
@@ -10,6 +11,7 @@ import it.unibz.inf.ontop.injection.OntopReformulationConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.Properties;
@@ -29,6 +31,13 @@ public class OntopReformulationConfigurationImpl extends OntopKGQueryConfigurati
         this.specificationLoader = specificationLoader;
     }
 
+    OntopReformulationConfigurationImpl(OntopReformulationSettings settings, OntopReformulationOptions options,
+        SpecificationLoader specificationLoader, Supplier<Injector> injectorSupplier) {
+        super(settings, options.queryOptions, injectorSupplier);
+        this.settings = settings;
+        this.specificationLoader = specificationLoader;
+    }
+
     /**
      * When the OBDASpecification object is given by the user.
      *
@@ -37,6 +46,12 @@ public class OntopReformulationConfigurationImpl extends OntopKGQueryConfigurati
      */
     OntopReformulationConfigurationImpl(OntopReformulationSettings settings, OntopReformulationOptions options) {
         super(settings, options.queryOptions);
+        this.settings = settings;
+        this.specificationLoader = null;
+    }
+    
+    OntopReformulationConfigurationImpl(OntopReformulationSettings settings, OntopReformulationOptions options, Supplier<Injector> injectorSupplier) {
+        super(settings, options.queryOptions, injectorSupplier);
         this.settings = settings;
         this.specificationLoader = null;
     }

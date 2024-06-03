@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -9,6 +10,7 @@ import it.unibz.inf.ontop.injection.impl.OntopMappingOntologyBuilders.OntopMappi
 import it.unibz.inf.ontop.injection.impl.OntopMappingOntologyBuilders.StandardMappingOntologyBuilderFragment;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
+import java.util.function.Supplier;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -27,7 +29,12 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
 
     OntopSQLOWLAPIConfigurationImpl(OntopStandaloneSQLSettings settings, OntopSQLOWLAPIOptions options) {
         super(settings, options.sqlOptions);
-        mappingOWLConfiguration = new OntopMappingOntologyConfigurationImpl(settings, options.ontologyOptions);
+        mappingOWLConfiguration = new OntopMappingOntologyConfigurationImpl(settings, options.ontologyOptions, this::getInjector);
+    }
+
+    OntopSQLOWLAPIConfigurationImpl(OntopStandaloneSQLSettings settings, OntopSQLOWLAPIOptions options, Supplier<Injector> injectorSupplier) {
+        super(settings, options.sqlOptions, injectorSupplier);
+        mappingOWLConfiguration = new OntopMappingOntologyConfigurationImpl(settings, options.ontologyOptions, injectorSupplier);
     }
 
     @Override

@@ -11,6 +11,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.cli.utils.Env;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import net.sf.jsqlparser.JSQLParserException;
@@ -40,6 +41,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-m", "--mapping"}, title = "mapping file",
             description = "Mapping file in R2RML (.ttl) or in Ontop native format (.obda)")
+    @Env("ONTOP_MAPPING_FILE")
     @Required
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String mappingFile;

@@ -22,14 +22,14 @@ public abstract class OntopKGQueryConfigurationImpl extends OntopOBDAConfigurati
     OntopKGQueryConfigurationImpl(OntopKGQuerySettings settings, OntopKGQueryOptions options) {
         super(settings, options.obdaOptions);
         this.settings = settings;
-        this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions);
+        this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions, this::getInjector);
     }
 
     OntopKGQueryConfigurationImpl(OntopKGQuerySettings settings, OntopKGQueryOptions options,
                                   Supplier<Injector> injectorSupplier) {
         super(settings, options.obdaOptions, injectorSupplier);
         this.settings = settings;
-        this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions);
+        this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions, injectorSupplier);
     }
 
     @Override
