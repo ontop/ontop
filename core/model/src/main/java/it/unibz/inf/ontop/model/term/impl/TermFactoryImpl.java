@@ -591,11 +591,6 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getRasterSpatialMinimum(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName ){
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialMinimum(), ImmutableList.of(TimeSnap, dbRegionGeom, dbRasterName));
-	}
-
-	@Override
 	public ImmutableFunctionalTerm getRasterSpatialMaximumX(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbMinLon, ImmutableTerm dbMaxLat, ImmutableTerm dbXscale, ImmutableTerm dbYscale, ImmutableTerm dbRasterName){
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialMaximumX(), ImmutableList.of(TimeSnap, dbRegionGeom, dbMinLon, dbMaxLat, dbXscale, dbYscale, dbRasterName));
 	}
@@ -605,10 +600,20 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterTemporalMaximum(), ImmutableList.of(dbStartTime, dbEndTime, dbRegionGeom, dbRasterName));
 	}
 
+	@Override
+	public ImmutableFunctionalTerm getRasterSpatialMinimum(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName ){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialMinimum(), ImmutableList.of(TimeSnap, dbRegionGeom, dbRasterName));
+	}
+
 
 	@Override
 	public ImmutableFunctionalTerm getRasterSpatialMinimumX(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbMinLon, ImmutableTerm dbMaxLat, ImmutableTerm dbXscale, ImmutableTerm dbYscale, ImmutableTerm dbRasterName){
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialMinimumX(), ImmutableList.of(TimeSnap, dbRegionGeom, dbMinLon, dbMaxLat, dbXscale, dbYscale, dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getRasterTemporalMinimum(ImmutableTerm dbStartTime, ImmutableTerm dbEndTime, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterTemporalMinimum(), ImmutableList.of(dbStartTime, dbEndTime, dbRegionGeom, dbRasterName));
 	}
 
 	@Override
@@ -619,11 +624,6 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableFunctionalTerm getRasterSpatialAverageFinal(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName){
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialAverageFinal(), ImmutableList.of(TimeSnap, dbRegionGeom, dbRasterName));
-	}
-
-	@Override
-	public ImmutableFunctionalTerm getRasterTemporalMinimum(ImmutableTerm dbStartTime, ImmutableTerm dbEndTime, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName){
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterTemporalMinimum(), ImmutableList.of(dbStartTime, dbEndTime, dbRegionGeom, dbRasterName));
 	}
 
 	@Override

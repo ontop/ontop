@@ -11,8 +11,8 @@ import javax.annotation.Nonnull;
 
 public class RasterTemporalMaximumFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
 
-    public RasterTemporalMaximumFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType) {
-        super("RAS_TEMPORAL_MAXIMUM", functionIRI, ImmutableList.of(xsdStringDatatype, xsdStringDatatype, wktLiteralType, xsdStringDatatype),
+    public RasterTemporalMaximumFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdDatetime, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType) {
+        super("RAS_TEMPORAL_MAXIMUM", functionIRI, ImmutableList.of(xsdDatetime, xsdDatetime, wktLiteralType, xsdStringDatatype),
                 xsdStringDatatype);
     }
 

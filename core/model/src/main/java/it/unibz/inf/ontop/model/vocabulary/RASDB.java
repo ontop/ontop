@@ -44,6 +44,8 @@ public class RASDB {
 
     public static final IRI RAS_SPATIAL_MAXIMUM_X;
 
+    public static final IRI RAS_TEMPORAL_AVERAGE;
+
     public static final IRI RAS_TEMPORAL_MINIMUM;
 
     public static final IRI RAS_TEMPORAL_MAXIMUM;
@@ -99,6 +101,7 @@ public class RASDB {
         RAS_SPATIAL_MAXIMUM_X = factory.createIRI(PREFIX + "rasSpatialMaximumX");
 
 
+        RAS_TEMPORAL_AVERAGE =  factory.createIRI(PREFIX + "rasTemporalAverage");
 
         RAS_TEMPORAL_MINIMUM = factory.createIRI(PREFIX + "rasTemporalMinimum");
 

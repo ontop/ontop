@@ -11,8 +11,8 @@ import javax.annotation.Nonnull;
 
 public class ClipRasterFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl {
 
-    public ClipRasterFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType) {
-        super("RAS_CLIP_RASTER_SPATIAL", functionIRI, ImmutableList.of(xsdStringDatatype, wktLiteralType, xsdStringDatatype), xsdStringDatatype);
+    public ClipRasterFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdDatetime, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType) {
+        super("RAS_CLIP_RASTER_SPATIAL", functionIRI, ImmutableList.of(xsdDatetime, wktLiteralType, xsdStringDatatype), xsdStringDatatype);
     }
 
     @Override

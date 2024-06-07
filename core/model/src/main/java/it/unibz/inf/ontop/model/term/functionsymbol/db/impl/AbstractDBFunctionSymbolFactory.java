@@ -1995,23 +1995,23 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 //    }
 
     protected DBFunctionSymbol createRasterSpatialMaximumFunctionSymbol() {
-        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_MAXIMUM", ImmutableList.of(dbStringType, rootDBType, dbStringType), dbDoubleType, false,
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_MAXIMUM", ImmutableList.of(dbDateTimestampType, rootDBType, dbStringType), dbDoubleType, false,
                 this::serializeRAS_SPATIAL_MAXIMUM);
     }
 
     protected DBFunctionSymbol createRasterTemporalMaximumFunctionSymbol() {
-        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_TEMPORAL_MAXIMUM", ImmutableList.of(dbStringType, dbStringType, rootDBType, dbStringType), dbDoubleType, false,
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_TEMPORAL_MAXIMUM", ImmutableList.of(dbDateTimestampType, dbDateTimestampType, rootDBType, dbStringType), dbDoubleType, false,
                 this::serializeRAS_TEMPORAL_MAXIMUM);
-    }
-
-    protected DBFunctionSymbol createRasterSpatialMinimumFunctionSymbol() {
-        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_MINIMUM", ImmutableList.of(dbStringType, rootDBType, dbStringType), dbDoubleType, false,
-                this::serializeRAS_SPATIAL_MINIMUM);
     }
 
     protected DBFunctionSymbol createRasterSpatialMaximumXFunctionSymbol() {
         return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_MAXIMUM_X", ImmutableList.of(dbIntegerType, rootDBType, dbDoubleType, dbDoubleType, dbDoubleType, dbDoubleType,  dbStringType), dbIntegerType, false,
                 this::serializeRAS_SPATIAL_MAXIMUM_X);
+    }
+
+    protected DBFunctionSymbol createRasterSpatialMinimumFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_MINIMUM", ImmutableList.of(dbDateTimestampType, rootDBType, dbStringType), dbDoubleType, false,
+                this::serializeRAS_SPATIAL_MINIMUM);
     }
 
     protected DBFunctionSymbol createRasterSpatialMinimumXFunctionSymbol() {
@@ -2020,7 +2020,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     protected DBFunctionSymbol createRasterTemporalMinimumFunctionSymbol() {
-        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_TEMPORAL_MINIMUM", ImmutableList.of(dbStringType, dbStringType, rootDBType, dbStringType), dbDoubleType, false,
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_TEMPORAL_MINIMUM", ImmutableList.of(dbDateTimestampType, dbDateTimestampType, rootDBType, dbStringType), dbDoubleType, false,
                 this::serializeRAS_TEMPORAL_MINIMUM);
     }
 
@@ -2030,18 +2030,18 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     protected DBFunctionSymbol createRasterSpatialAverageFinalFunctionSymbol() {
-        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_AVERAGE_FINAL", ImmutableList.of(dbStringType, rootDBType, dbStringType), dbDoubleType, false,
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_AVERAGE_FINAL", ImmutableList.of(dbDateTimestampType, rootDBType, dbStringType), dbDoubleType, false,
                 this::serializeRAS_SPATIAL_AVERAGE_FINAL);
     }
 
 
     protected DBFunctionSymbol createClipRasterFunctionSymbol() {
-        return new DBFunctionSymbolWithSerializerImpl("DB_CLIP_RASTER_SPATIAL", ImmutableList.of(dbStringType, rootDBType, dbStringType), dbStringType, false,
+        return new DBFunctionSymbolWithSerializerImpl("DB_CLIP_RASTER_SPATIAL", ImmutableList.of(dbDateTimestampType, rootDBType, dbStringType), dbStringType, false,
                 this::serializeRAS_CLIP_RASTER_SPATIAL);
     }
 
     protected DBFunctionSymbol createClipRasterAnyGeomFunctionSymbol() {
-        return new DBFunctionSymbolWithSerializerImpl("RAS_CLIP_RASTER_SPATIAL_ANY_GEOM", ImmutableList.of(dbStringType, dbStringType, dbStringType), dbStringType, false,
+        return new DBFunctionSymbolWithSerializerImpl("RAS_CLIP_RASTER_SPATIAL_ANY_GEOM", ImmutableList.of(dbDateTimestampType, dbStringType, dbStringType), dbStringType, false,
                 this::serializeRAS_CLIP_RASTER_SPATIAL_ANY_GEOM);
     }
 

@@ -11,10 +11,11 @@ import javax.annotation.Nonnull;
 
 public class RasterMaximumFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
 
-    public RasterMaximumFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType) {
-        super("RAS_SPATIAL_MAXIMUM", functionIRI, ImmutableList.of(xsdStringDatatype,  wktLiteralType, xsdStringDatatype),
+    public RasterMaximumFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdDatetime, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType) {
+        super("RAS_SPATIAL_MAXIMUM", functionIRI, ImmutableList.of(xsdDatetime,  wktLiteralType, xsdStringDatatype),
                 xsdStringDatatype);
     }
+
     @Override
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
         //TODO

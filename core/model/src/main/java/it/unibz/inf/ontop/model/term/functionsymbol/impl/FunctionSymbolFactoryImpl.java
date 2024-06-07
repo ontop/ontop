@@ -19,12 +19,12 @@ import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterDimensionF
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.ProcessRasterArrayCellFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.Date2GridFunctionSymbolImpl;
 //import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterAverageFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterAverageXFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterAverageFinalFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMaximumFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMaximumXFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMinimumFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMinimumXFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMaximumXFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterAverageXFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterTemporalMinimumFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterTemporalMaximumFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.ClipRasterFunctionSymbolImpl;
@@ -362,9 +362,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
 //                new RasterAverageFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE, xsdInteger, xsdDouble, wktLiteral, xsdString),
 
-                new RasterMaximumFunctionSymbolImpl(RASDB.RAS_SPATIAL_MAXIMUM, xsdString, wktLiteral),
+                new RasterMaximumFunctionSymbolImpl(RASDB.RAS_SPATIAL_MAXIMUM, xsdDatetime, xsdString, wktLiteral),
 
-                new RasterMinimumFunctionSymbolImpl(RASDB.RAS_SPATIAL_MINIMUM, xsdString, wktLiteral),
+                new RasterMinimumFunctionSymbolImpl(RASDB.RAS_SPATIAL_MINIMUM, xsdDatetime, xsdString, wktLiteral),
 
                 new RasterMinimumXFunctionSymbolImpl(RASDB.RAS_SPATIAL_MINIMUM_X, xsdInteger, wktLiteral, xsdDouble, xsdString),
 
@@ -372,15 +372,15 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
                 new RasterAverageXFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE_X, xsdInteger, wktLiteral, xsdDouble, xsdString),
 
-                new RasterAverageFinalFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE_FINAL, xsdString, wktLiteral),
+                new RasterAverageFinalFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE_FINAL, xsdDatetime, xsdString, wktLiteral),
 
-                new RasterTemporalMinimumFunctionSymbolImpl(RASDB.RAS_TEMPORAL_MINIMUM, xsdString, wktLiteral),
+                new RasterTemporalMinimumFunctionSymbolImpl(RASDB.RAS_TEMPORAL_MINIMUM, xsdDatetime, xsdString, wktLiteral),
 
-                new RasterTemporalMaximumFunctionSymbolImpl(RASDB.RAS_TEMPORAL_MAXIMUM, xsdString, wktLiteral),
+                new RasterTemporalMaximumFunctionSymbolImpl(RASDB.RAS_TEMPORAL_MAXIMUM, xsdDatetime, xsdString, wktLiteral),
 
-                new ClipRasterFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL, xsdString, wktLiteral),
+                new ClipRasterFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL, xsdDatetime, xsdString, wktLiteral),
 
-                new ClipRasterAnyGeomFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL_ANY_GEOM, xsdString),
+                new ClipRasterAnyGeomFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL_ANY_GEOM, xsdDatetime, xsdString),
 
                 new RasterSmallArrayTempFunctionSymbolImpl(RASDB.RAS_CLIP_SMALL_ARRAY_TEMPORAL, xsdInteger, xsdInteger, xsdString),
 

@@ -108,7 +108,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
 
 
     @Test
-    public void avgRasterSPATIALX_Polygon_P1_FINAL() {
+    public void avgRasterSPATIAL_Polygon_P1_FINAL() {
         String query5 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
@@ -119,7 +119,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?raster rasdb:hasRasterName ?raster_name .\n"
                 + "FILTER (?vector_region_name = 'München'\n)" //Vector region = Linköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  München (2023-07-24T00:00:00+00:00)
                 + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
-                + "BIND ('2023-10-01T00:00:00+00:00' AS ?timestamp\n)" // Missing DateTime Issue
+                + "BIND ('2023-10-01T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)" // Missing DateTime Issue
                 + "BIND (rasdb:rasSpatialAverage(?timestamp, ?vector_region_wkt, ?raster_name) AS ?v)"
                 + "}\n";
 
@@ -127,7 +127,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
     }
 
     @Test
-    public void avgRasterSPATIALX_Polygon_P1_FINAL_02() {
+    public void avgRasterSPATIAL_Polygon_P1_FINAL_02() {
         String query6 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
@@ -138,7 +138,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?raster rasdb:hasRasterName ?raster_name .\n"
                 + "FILTER (?vector_region_name = 'Linköping'\n)" //Vector region = Söderköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  München (2023-07-24T00:00:00+00:00)
                 + "FILTER (CONTAINS(?raster_name, 'Sweden')\n)"
-                + "BIND ('2022-08-24T00:00:00+00:00' AS ?timestamp\n)"
+                + "BIND ('2022-08-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
                 + "BIND (rasdb:rasSpatialAverage(?timestamp, ?vector_region_wkt, ?raster_name) AS ?v)"
                 + "}\n";
 
@@ -146,7 +146,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
     }
 
     @Test
-    public void avgRasterSPATIALX_Polygon_P2_FINAL() {
+    public void avgRasterSPATIAL_Polygon_P2_FINAL() {
         String query5 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
@@ -157,17 +157,15 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?raster rasdb:hasRasterName ?raster_name .\n"
                 + "FILTER (?vector_region_name = 'Würzburg'\n)" //Vector region = Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00)
                 + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
-                + "BIND ('2023-10-01T00:00:00+00:00' AS ?timestamp\n)" // Missing DateTime Issue
-                + "BIND (rasdb:rasSpatialAverageFINAL(?timestamp, ?vector_region_wkt, ?raster_name) AS ?v)"
+                + "BIND ('2023-10-01T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)" // Missing DateTime Issue
+                + "BIND (rasdb:rasSpatialAverage(?timestamp, ?vector_region_wkt, ?raster_name) AS ?v)"
                 + "}\n";
 
         executeAndCompareValues(query5, ImmutableList.of("\"14177.483\"^^xsd:string"));
     }
 
-
-
     @Test
-    public void avgRasterSPATIALX_MultiPolygon_MP1_FINAL() {
+    public void avgRasterSPATIAL_MultiPolygon_MP1_FINAL() {
         String query7 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
@@ -178,7 +176,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?raster rasdb:hasRasterName ?raster_name .\n"
                 + "FILTER (?vector_region_name = 'Göteborg'\n)" //Vector region = Umeå (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  Bayreuth (2023-07-24T00:00:00+00:00)
                 + "FILTER (CONTAINS(?raster_name, 'Sweden')\n)"
-                + "BIND ('2022-08-24T00:00:00+00:00' AS ?timestamp\n)"
+                + "BIND ('2022-08-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
                 + "BIND (rasdb:rasSpatialAverage(?timestamp, ?vector_region_wkt, ?raster_name) AS ?v)"
                 + "}\n";
 
@@ -199,7 +197,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?coverage rasdb:hasRasterName ?coverage_id .\n"
                 + "FILTER (?region_name = 'Göteborg'\n)" //Vector region = Umeå (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  Bayreuth (2023-07-24T00:00:00+00:00)
                 + "FILTER (CONTAINS(?coverage_id, 'Sweden')\n)"
-                + "BIND ('2022-08-24T00:00:00+00:00' AS ?timestamp\n)"
+                + "BIND ('2022-08-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
                 + "BIND (rasdb:rasSpatialMinimum(?timestamp, ?region_wkt, ?coverage_id) AS ?v)"
                 + "}\n";
 
@@ -218,11 +216,30 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?raster rasdb:hasRasterName ?raster_name .\n"
                 + "FILTER (?vector_region_name = 'Göteborg'\n)" //Vector region = Umeå (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  Bayreuth (2023-07-24T00:00:00+00:00)
                 + "FILTER (CONTAINS(?raster_name, 'Sweden')\n)"
-                + "BIND ('2022-08-24T00:00:00+00:00' AS ?timestamp\n)"
+                + "BIND ('2022-08-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
                 + "BIND (rasdb:rasSpatialMaximum(?timestamp, ?vector_region_wkt, ?raster_name) AS ?v)"
                 + "}\n";
 
         executeAndCompareValues(query7, ImmutableList.of("\"14598\"^^xsd:string"));
+    }
+
+    @Test
+    public void avgRasterSPATIAL_MultiPolygon_MP1_FINAL_2() {
+        String query10 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
+                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
+                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "SELECT ?v {\n"
+                + "?vector rdfs:label ?vector_region_name .\n"
+                + "?vector geo:asWKT ?vector_region_wkt .\n"
+                + "?raster rasdb:hasRasterName ?raster_name .\n"
+                + "FILTER (?vector_region_name = 'Cham'\n)" //Vector region = Cham (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00)
+                + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
+                + "BIND ('2023-10-01T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)" // Missing DateTime Issue
+                + "BIND (rasdb:rasSpatialAverage(?timestamp, ?vector_region_wkt, ?raster_name) AS ?v)"
+                + "}\n";
+
+        executeAndCompareValues(query10, ImmutableList.of("\"14206.48\"^^xsd:string"));
     }
 
     @Test
@@ -239,14 +256,13 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?coverage rasdb:hasRasterName ?coverage_id .\n"
                 + "FILTER (?region_name = 'Deggendorf'\n)" //Vector region = Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00) mytimestamp'^^xsd:dateTime
                 + "FILTER (CONTAINS(?coverage_id, 'Bavaria')\n)"
-                + "BIND ('2023-07-15T00:00:00+00:00' AS ?start_time\n)"
-                + "BIND ('2023-07-21T00:00:00+00:00' AS ?end_time\n)"
+                + "BIND ('2023-07-18T00:00:00+00:00'^^xsd:dateTime AS ?start_time\n)"
+                + "BIND ('2023-07-21T00:00:00+00:00'^^xsd:dateTime AS ?end_time\n)"
                 + "BIND (rasdb:rasTemporalMinimum(?start_time, ?end_time, ?region_wkt, ?coverage_id) AS ?v)"
                 + "}\n";
 
         executeAndCompareValues(query8, ImmutableList.of("\"14167\"^^xsd:string"));
     }
-
 
     @Test
     public void maxRasterTEMPORAL() {
@@ -262,8 +278,8 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?coverage rasdb:hasRasterName ?coverage_id .\n"
                 + "FILTER (?region_name = 'Deggendorf'\n)" //Vector region = Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00)
                 + "FILTER (CONTAINS(?coverage_id, 'Bavaria')\n)"
-                + "BIND ('2023-06-15T00:00:00+00:00' AS ?start_time\n)"
-                + "BIND ('2023-07-21T00:00:00+00:00' AS ?end_time\n)"
+                + "BIND ('2023-06-15T00:00:00+00:00'^^xsd:dateTime AS ?start_time\n)"
+                + "BIND ('2023-07-21T00:00:00+00:00'^^xsd:dateTime AS ?end_time\n)"
                 + "BIND (rasdb:rasTemporalMaximum(?start_time, ?end_time , ?region_wkt, ?coverage_id) AS ?v)"
                 + "}\n";
 
@@ -271,27 +287,30 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
     }
 
     @Test
-    public void avgRasterSPATIALX_MultiPolygon_MP1_FINAL_2() {
-        String query10 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+    public void avgRasterTEMPORAL() {
+        String query9 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
                 + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
-                + "?vector rdfs:label ?vector_region_name .\n"
-                + "?vector geo:asWKT ?vector_region_wkt .\n"
-                + "?raster rasdb:hasRasterName ?raster_name .\n"
-                + "FILTER (?vector_region_name = 'Cham'\n)" //Vector region = Cham (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00)
-                + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
-                + "BIND ('2023-10-01T00:00:00+00:00' AS ?timestamp\n)" // Missing DateTime Issue
-                + "BIND (rasdb:rasSpatialAverageFINAL(?timestamp, ?vector_region_wkt, ?raster_name) AS ?v)"
+                + "?region a :Region .\n"
+                + "?region rdfs:label ?region_name .\n"
+                + "?region geo:asWKT ?region_wkt .\n"
+                + "?coverage a :Raster .\n"
+                + "?coverage rasdb:hasRasterName ?coverage_id .\n"
+                + "FILTER (?region_name = 'Deggendorf'\n)" //Vector region = Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00)
+                + "FILTER (CONTAINS(?coverage_id, 'Bavaria')\n)"
+                + "BIND ('2023-06-15T00:00:00+00:00'^^xsd:dateTime AS ?start_time\n)"
+                + "BIND ('2023-07-21T00:00:00+00:00'^^xsd:dateTime AS ?end_time\n)"
+                + "BIND (rasdb:rasTemporalAverage(?start_time, ?end_time , ?region_wkt, ?coverage_id) AS ?v)"
                 + "}\n";
 
-        executeAndCompareValues(query10, ImmutableList.of("\"14206.48\"^^xsd:string"));
+        executeAndCompareValues(query9, ImmutableList.of("\"14776.508\"^^xsd:string"));
     }
 
 
     @Test
-    public void avgRasterSPATIALX_Geom_Based_Raster_Search() { // Swtich on the special mapping
+    public void avgRasterSPATIAL_Geom_Based_Raster_Search() { // Swtich on the special mapping for raster name and switch off the default mapping ofr raster name
         String query11 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
@@ -301,8 +320,8 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
                 + "?raster rasdb:hasRasterName ?raster_name .\n"
                 + "FILTER (?vector_region_name = 'Stockholm'\n)" //Vector region = Linköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  München (2023-07-24T00:00:00+00:00)
-                + "BIND ('2022-08-24T00:00:00+00:00' AS ?timestamp\n)"
-                + "BIND (rasdb:rasSpatialAverageFINAL(?timestamp, ?vector_region_wkt, ?raster_name) AS ?v)"
+                + "BIND ('2022-08-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
+                + "BIND (rasdb:rasSpatialAverage(?timestamp, ?vector_region_wkt, ?raster_name) AS ?v)"
                 + "}\n";
 
         executeAndCompareValues(query11, ImmutableList.of("\"14364.694\"^^xsd:string"));
@@ -325,7 +344,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?raster rasdb:hasRasterName ?raster_name .\n"
                 + "FILTER (?vector_region_name = 'Castelrotto'\n)" //Vector region = Linköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  München (2023-07-24T00:00:00+00:00)
                 + "FILTER (CONTAINS(?raster_name, 'Tyrol')\n)"
-                + "BIND ('2023-09-24T00:00:00+00:00' AS ?timestamp\n)"
+                + "BIND ('2023-09-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
                 + "BIND (rasdb:rasClipRaster(?timestamp, ?vector_region_wkt, ?raster_name) AS ?v)"
                 + "}\n";
 
@@ -343,7 +362,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?raster rasdb:hasRasterName ?raster_name .\n"
                 + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
                 + "BIND ('POLYGON((11.324157714843748 48.29050321714061,11.911926269531248 48.279537342260085,11.88995361328125 48.01932418480118,11.340637207031248 48.01564978668938,11.324157714843748 48.29050321714061))' AS ?custom_region_wkt\n)"
-                + "BIND ('2023-07-24T00:00:00+00:00' AS ?timestamp\n)" //Vector region = Linköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  München (2023-07-24T00:00:00+00:00)
+                + "BIND ('2023-07-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)" //Vector region = Linköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  München (2023-07-24T00:00:00+00:00)
                 + "BIND (rasdb:rasClipRasterAnyGeom(?timestamp, ?custom_region_wkt, ?raster_name) AS ?v)"
                 + "}\n";
 

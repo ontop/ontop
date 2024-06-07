@@ -11,8 +11,8 @@ import javax.annotation.Nonnull;
 
 public class RasterMinimumFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
 
-    public RasterMinimumFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType) {
-        super("RAS_SPATIAL_MINIMUM", functionIRI, ImmutableList.of(xsdStringDatatype,  wktLiteralType, xsdStringDatatype),
+    public RasterMinimumFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdDatetime, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType) {
+        super("RAS_SPATIAL_MINIMUM", functionIRI, ImmutableList.of(xsdDatetime,  wktLiteralType, xsdStringDatatype),
                 xsdStringDatatype);
     }
 
