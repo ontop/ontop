@@ -34,10 +34,11 @@ source		SELECT 404 AS gid, rasdaman_op.check_rasdaman_conn() AS conn
 ;                        END AS geometry_wkt
 ;            FROM sample_regions_of_interest
 
+
 ; ---------------- Mapping for All Regions in Sweden -----------------
 
 mappingId	Get_region_class_table_sweden
-target		:vector_region/sweden/{gid} a :region .
+target		:vector_region/sweden/{gid} a :Region .
 source		SELECT gid FROM region_sweden
 
 mappingId	mapping_region_name_sweden
@@ -56,7 +57,7 @@ source		SELECT gid,
 ; ---------------- Mapping for All Regions in Bavaria -----------------
 
 mappingId	Get_region_class_table_bavaria
-target		:vector_region/bavaria/{gid} a :region .
+target		:vector_region/bavaria/{gid} a :Region .
 source		SELECT gid FROM region_bavaria
 
 mappingId	mapping_region_name_bavaria
@@ -75,7 +76,7 @@ source		SELECT gid,
 ; ---------------- Mapping for All Regions in South Tyrol -----------------
 
 mappingId	Get_region_class_table_south_tyrol
-target		:vector_region/tyrol/{gid} a :region .
+target		:vector_region/tyrol/{gid} a :Region .
 source		SELECT gid FROM region_south_tyrol
 
 mappingId	mapping_region_name_south_tyrol
@@ -94,9 +95,9 @@ source		SELECT gid,
 
 ; ---------------- Mapping for Raster Metadata Lookup Table -----------------
 
-;mappingId	mapping_rasterid_lookup
-;target		:raster/{raster_id} a :Raster .
-;source		SELECT raster_id FROM sample_lookup_x1
+mappingId	mapping_rasterid_lookup
+target		:raster/{raster_id} a :Raster .
+source		SELECT raster_id FROM sample_lookup_x1
 
 ;mappingId	Get_raster_name_based_on_region_name_lookup
 ;target		:raster/{raster_id} rasdb:hasRasterName {raster_name}^^xsd:string .

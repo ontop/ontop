@@ -998,36 +998,57 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
                                                   TermFactory termFactory){
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
-    @Override
-    protected String serializeRAS_SPATIAL_AVERAGE(ImmutableList<? extends ImmutableTerm> terms,
-                                                           Function<ImmutableTerm, String> termConverter,
-                                                           TermFactory termFactory){
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
-    }
-    @Override
-    protected String serializeRAS_SPATIAL_MAXIMUM(ImmutableList<? extends ImmutableTerm> terms,
-                                                  Function<ImmutableTerm, String> termConverter,
-                                                  TermFactory termFactory){
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
-    }
+
+//    @Override
+//    protected String serializeRAS_SPATIAL_AVERAGE(ImmutableList<? extends ImmutableTerm> terms,
+//                                                           Function<ImmutableTerm, String> termConverter,
+//                                                           TermFactory termFactory){
+//        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+//    }
+
     @Override
     protected String serializeRAS_SPATIAL_MINIMUM(ImmutableList<? extends ImmutableTerm> terms,
                                                   Function<ImmutableTerm, String> termConverter,
                                                   TermFactory termFactory){
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
+
+    @Override
+    protected String serializeRAS_SPATIAL_MINIMUM_X(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter,
+                                                    TermFactory termFactory){
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeRAS_TEMPORAL_MINIMUM(ImmutableList<? extends ImmutableTerm> terms,
+                                                  Function<ImmutableTerm, String> termConverter,
+                                                  TermFactory termFactory){
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeRAS_SPATIAL_MAXIMUM(ImmutableList<? extends ImmutableTerm> terms,
+                                                  Function<ImmutableTerm, String> termConverter,
+                                                  TermFactory termFactory){
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
     @Override
     protected String serializeRAS_SPATIAL_MAXIMUM_X(ImmutableList<? extends ImmutableTerm> terms,
                                                     Function<ImmutableTerm, String> termConverter,
                                                     TermFactory termFactory){
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
+
     @Override
-    protected String serializeRAS_SPATIAL_MINIMUM_X(ImmutableList<? extends ImmutableTerm> terms,
-                                                  Function<ImmutableTerm, String> termConverter,
-                                                  TermFactory termFactory){
+    protected String serializeRAS_TEMPORAL_MAXIMUM(ImmutableList<? extends ImmutableTerm> terms,
+                                                   Function<ImmutableTerm, String> termConverter,
+                                                   TermFactory termFactory){
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
+
+
     @Override
     protected String serializeRAS_SPATIAL_AVERAGE_X(ImmutableList<? extends ImmutableTerm> terms,
                                                     Function<ImmutableTerm, String> termConverter,

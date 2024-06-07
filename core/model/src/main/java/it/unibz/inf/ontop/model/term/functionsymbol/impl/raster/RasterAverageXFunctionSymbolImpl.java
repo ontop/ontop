@@ -26,3 +26,26 @@ public class RasterAverageXFunctionSymbolImpl extends AbstractRasterFunctionSymb
     }
 
 }
+
+//public class RasterAverageFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
+//
+//
+//    public RasterAverageFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdIntegerDatatype, RDFDatatype xsdDoubleType, RDFDatatype wktLiteralType, RDFDatatype xsdStringDatatype) {
+//        super("RAS_SPATIAL_AVERAGE", functionIRI, ImmutableList.of(xsdIntegerDatatype, xsdDoubleType, wktLiteralType, xsdStringDatatype),
+//                xsdDoubleType);
+//        //this.functionSymbolFactory = functionSymbolFactory;
+//    }
+//
+//    /**
+//     * @param subLexicalTerms (geom1, geom2, unit)
+//     */
+//    @Override
+//    protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+//        // return termFactory.getRESPECTIVEDBFUNCTIONSymbols;  --------------------------------[STEP 01b]-----------------------------------
+//        DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
+//
+//        return termFactory.getRasterSpatialAverage(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2), subLexicalTerms.get(3));
+//
+//    }
+//
+//}

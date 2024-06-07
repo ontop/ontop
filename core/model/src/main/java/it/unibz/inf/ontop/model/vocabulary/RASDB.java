@@ -13,7 +13,10 @@ public class RASDB {
     // Prefix for properties
     public static final String PREFIX_PROP = "http://www.semanticweb.org/RasterDataCube/";
 
-    // Simple Raster Functions
+    /////////////////////////////////////
+    ////// Simple Raster Functions ///////
+    /////////////////////////////////////
+
     public static final IRI RAS_CONNECTION;
 
     public static final IRI RAS_DATE_TO_GRID;
@@ -23,36 +26,42 @@ public class RASDB {
     public static final IRI RAS_PROCESS_RASTER_ARRAY;
 
 
+    ///////////////////////////////////////////
+    ////// Raster Aggregation Functions ///////
+    ///////////////////////////////////////////
 
-    // Raster Aggregation Functions
+//    public static final IRI RAS_SPATIAL_AVERAGE;
 
-    public static final IRI RAS_SPATIAL_AVERAGE;
+    public static final IRI RAS_SPATIAL_AVERAGE_FINAL;
 
     public static final IRI RAS_SPATIAL_MAXIMUM;
 
     public static final IRI RAS_SPATIAL_MINIMUM;
 
+    public static final IRI RAS_SPATIAL_AVERAGE_X;
+
     public static final IRI RAS_SPATIAL_MINIMUM_X;
 
     public static final IRI RAS_SPATIAL_MAXIMUM_X;
 
-    public static final IRI RAS_SPATIAL_AVERAGE_X;
+    public static final IRI RAS_TEMPORAL_MINIMUM;
 
-    public static final IRI RAS_SPATIAL_AVERAGE_FINAL;
-
-    public static final IRI RAS_SPATIAL_TEMPORAL_AVERAGE;
+    public static final IRI RAS_TEMPORAL_MAXIMUM;
 
 
+    ////////////////////////////////////////////
+    ////// Raster Filter Array Functions ///////
+    ////////////////////////////////////////////
 
-    // Raster Filter Array Functions
+    public static final IRI RAS_CLIP_RASTER_SPATIAL;
+
+    public static final IRI RAS_CLIP_RASTER_SPATIAL_ANY_GEOM;
 
     public static final IRI RAS_CLIP_SMALL_ARRAY_SPATIAL;
 
     public static final IRI RAS_CLIP_SMALL_ARRAY_TEMPORAL;
 
-    public static final IRI RAS_CLIP_RASTER_SPATIAL;
 
-    public static final IRI RAS_CLIP_RASTER_SPATIAL_ANY_GEOM;
 
     static {
         org.apache.commons.rdf.api.RDF factory = new SimpleRDF();
@@ -73,21 +82,27 @@ public class RASDB {
         // Use the vocabulary
         // ------------------------------------[STEP 01a]------------------------------------------
 
-        RAS_SPATIAL_AVERAGE = factory.createIRI(PREFIX + "rasSpatialAverage");
+//        RAS_SPATIAL_AVERAGE = factory.createIRI(PREFIX + "rasSpatialAverage");
+
+        RAS_SPATIAL_AVERAGE_FINAL = factory.createIRI(PREFIX + "rasSpatialAverage");
 
         RAS_SPATIAL_MAXIMUM = factory.createIRI(PREFIX + "rasSpatialMaximum");
 
         RAS_SPATIAL_MINIMUM = factory.createIRI(PREFIX + "rasSpatialMinimum");
 
+
+
+        RAS_SPATIAL_AVERAGE_X = factory.createIRI(PREFIX + "rasSpatialAverageX");
+
         RAS_SPATIAL_MINIMUM_X = factory.createIRI(PREFIX + "rasSpatialMinimumX");
 
         RAS_SPATIAL_MAXIMUM_X = factory.createIRI(PREFIX + "rasSpatialMaximumX");
 
-        RAS_SPATIAL_AVERAGE_X = factory.createIRI(PREFIX + "rasSpatialAverageX");
 
-        RAS_SPATIAL_AVERAGE_FINAL = factory.createIRI(PREFIX + "rasSpatialAverageFINAL");
 
-        RAS_SPATIAL_TEMPORAL_AVERAGE = factory.createIRI(PREFIX + "rasSpatialTemporalAverage");
+        RAS_TEMPORAL_MINIMUM = factory.createIRI(PREFIX + "rasTemporalMinimum");
+
+        RAS_TEMPORAL_MAXIMUM =  factory.createIRI(PREFIX + "rasTemporalMaximum");
 
 
         // Raster Filter Array Functions

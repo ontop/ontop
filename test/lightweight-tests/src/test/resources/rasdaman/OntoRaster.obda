@@ -18,7 +18,7 @@ source		SELECT 404 AS gid, rasdaman_op.check_rasdaman_conn() AS conn
 ; ---------------- Mapping for Sample Region of Interests -----------------
 
 ;mappingId	mapping_region_class
-;target		:vector_region/demo/{region_id} a :region .
+;target		:vector_region/demo/{region_id} a :Region .
 ;source		SELECT region_id from sample_regions_of_interest
 
 ;mappingId	mapping_region_name
@@ -46,7 +46,7 @@ source		SELECT gid, st_astext((st_dump(geom)).geom) AS geometry from region_swed
 ; ---------------- Mapping for All Regions in Bavaria -----------------
 
 mappingId	Get_region_class_table_bavaria
-target		:vector_region/bavaria/{gid} a :region .
+target		:vector_region/bavaria/{gid} a :Region .
 source		SELECT gid from region_bavaria
 
 mappingId	mapping_region_name_bavaria
@@ -60,7 +60,7 @@ source		SELECT gid, st_astext((st_dump(geom)).geom) AS geometry from region_bava
 ; ---------------- Mapping for All Regions in South Tyrol -----------------
 
 mappingId	Get_region_class_table_south_tyrol
-target		:vector_region/tyrol/{gid} a :region .
+target		:vector_region/tyrol/{gid} a :Region .
 source		SELECT gid from region_south_tyrol
 
 mappingId	mapping_region_name_south_tyrol

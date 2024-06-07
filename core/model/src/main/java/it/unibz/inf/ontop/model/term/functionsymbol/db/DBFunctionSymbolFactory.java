@@ -256,13 +256,18 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getRasterDimension();
     DBFunctionSymbol getProcessRasterArrayCell();
     DBFunctionSymbol getDate2Grid();
-    DBFunctionSymbol getRasterSpatialAverage();
-    DBFunctionSymbol getRasterSpatialMaximum();
-    DBFunctionSymbol getRasterSpatialMinimum();
-    DBFunctionSymbol getRasterSpatialMaximumX();
-    DBFunctionSymbol getRasterSpatialMinimumX();
-    DBFunctionSymbol getRasterSpatialAverageX();
+//    DBFunctionSymbol getRasterSpatialAverage();
     DBFunctionSymbol getRasterSpatialAverageFinal();
+    DBFunctionSymbol getRasterSpatialAverageX();
+
+    DBFunctionSymbol getRasterSpatialMaximum();
+    DBFunctionSymbol getRasterSpatialMaximumX();
+    DBFunctionSymbol getRasterTemporalMaximum();
+
+    DBFunctionSymbol getRasterSpatialMinimum();
+    DBFunctionSymbol getRasterSpatialMinimumX();
+    DBFunctionSymbol getRasterTemporalMinimum();
+
     DBFunctionSymbol getClipRaster();
     DBFunctionSymbol getClipRasterAnyGeom();
     DBFunctionSymbol getRasterSmallArrayTemp();

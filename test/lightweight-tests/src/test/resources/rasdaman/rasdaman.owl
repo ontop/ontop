@@ -19,10 +19,7 @@
 <!--     <Import>http://www.opengis.net/ont/sf/1.1</Import> -->
 <!--     <Import>https://www.w3.org/ns/sosa/</Import> -->
     <Declaration>
-        <Class IRI="Country"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="District"/>
+        <Class IRI="Region"/>
     </Declaration>
     <Declaration>
         <Class abbreviatedIRI="rdfs:Container"/>
@@ -37,13 +34,13 @@
         <ObjectProperty abbreviatedIRI="rdfs:member"/>
     </Declaration>
     <Declaration>
-        <DataProperty IRI="getArray"/>
+        <Class IRI="Raster"/>
     </Declaration>
+<!--     <Declaration> -->
+<!--         <DataProperty abbreviatedIRI="rasdb:hasRasterName"/> -->
+<!--     </Declaration> -->
     <Declaration>
-        <DataProperty IRI="hasCode"/>
-    </Declaration>
-    <Declaration>
-        <DataProperty abbreviatedIRI="rasdb:hasRasterName"/>
+        <DataProperty abbreviatedIRI="rasdb:hasCoverageId"/>
     </Declaration>
     <Declaration>
         <DataProperty abbreviatedIRI="rdfs:label"/>

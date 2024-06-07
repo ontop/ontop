@@ -9,10 +9,10 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-public class RasterMinimumFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
+public class RasterTemporalMaximumFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
 
-    public RasterMinimumFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType) {
-        super("RAS_SPATIAL_MINIMUM", functionIRI, ImmutableList.of(xsdStringDatatype,  wktLiteralType, xsdStringDatatype),
+    public RasterTemporalMaximumFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType) {
+        super("RAS_TEMPORAL_MAXIMUM", functionIRI, ImmutableList.of(xsdStringDatatype, xsdStringDatatype, wktLiteralType, xsdStringDatatype),
                 xsdStringDatatype);
     }
 
@@ -22,7 +22,7 @@ public class RasterMinimumFunctionSymbolImpl extends AbstractRasterFunctionSymbo
         // return termFactory.getRESPECTIVEDBFUNCTIONSymbols;  --------------------------------[STEP 01b]-----------------------------------
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
-        return termFactory.getRasterSpatialMinimum(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2));
+        return termFactory.getRasterTemporalMaximum(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2), subLexicalTerms.get(3));
 
     }
 
