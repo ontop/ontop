@@ -239,7 +239,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?coverage rasdb:hasRasterName ?coverage_id .\n"
                 + "FILTER (?region_name = 'Deggendorf'\n)" //Vector region = Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00) mytimestamp'^^xsd:dateTime
                 + "FILTER (CONTAINS(?coverage_id, 'Bavaria')\n)"
-                + "BIND ('2023-06-15T00:00:00+00:00' AS ?start_time\n)"
+                + "BIND ('2023-07-15T00:00:00+00:00' AS ?start_time\n)"
                 + "BIND ('2023-07-21T00:00:00+00:00' AS ?end_time\n)"
                 + "BIND (rasdb:rasTemporalMinimum(?start_time, ?end_time, ?region_wkt, ?coverage_id) AS ?v)"
                 + "}\n";
