@@ -239,7 +239,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?coverage rasdb:hasRasterName ?coverage_id .\n"
                 + "FILTER (?region_name = 'Deggendorf'\n)" //Vector region = Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00) mytimestamp'^^xsd:dateTime
                 + "FILTER (CONTAINS(?coverage_id, 'Bavaria')\n)"
-                + "BIND ('2023-07-15T00:00:00+00:00' AS ?start_time\n)"
+                + "BIND ('2023-06-15T00:00:00+00:00' AS ?start_time\n)"
                 + "BIND ('2023-07-21T00:00:00+00:00' AS ?end_time\n)"
                 + "BIND (rasdb:rasTemporalMinimum(?start_time, ?end_time, ?region_wkt, ?coverage_id) AS ?v)"
                 + "}\n";
@@ -249,23 +249,25 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
 
 
     @Test
-    public void maxRasterTEMPORAL_Polygon_P2_FINAL() {
+    public void maxRasterTEMPORAL() {
         String query9 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
                 + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
-                + "?vector rdfs:label ?vector_region_name .\n"
-                + "?vector geo:asWKT ?vector_region_wkt .\n"
-                + "?raster rasdb:hasRasterName ?raster_name .\n"
-                + "FILTER (?vector_region_name = 'Deggendorf'\n)" //Vector region = Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00)
-                + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
-                + "BIND ('2023-07-19T00:00:00+00:00' AS ?start_time\n)"
+                + "?region a :Region .\n"
+                + "?region rdfs:label ?region_name .\n"
+                + "?region geo:asWKT ?region_wkt .\n"
+                + "?coverage a :Raster .\n"
+                + "?coverage rasdb:hasRasterName ?coverage_id .\n"
+                + "FILTER (?region_name = 'Deggendorf'\n)" //Vector region = Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00)
+                + "FILTER (CONTAINS(?coverage_id, 'Bavaria')\n)"
+                + "BIND ('2023-06-15T00:00:00+00:00' AS ?start_time\n)"
                 + "BIND ('2023-07-21T00:00:00+00:00' AS ?end_time\n)"
-                + "BIND (rasdb:rasTemporalMaximum(?start_time, ?end_time , ?vector_region_wkt, ?raster_name) AS ?v)"
+                + "BIND (rasdb:rasTemporalMaximum(?start_time, ?end_time , ?region_wkt, ?coverage_id) AS ?v)"
                 + "}\n";
 
-        executeAndCompareValues(query9, ImmutableList.of("\"14584.278\"^^xsd:string"));
+        executeAndCompareValues(query9, ImmutableList.of("\"14776.508\"^^xsd:string"));
     }
 
     @Test

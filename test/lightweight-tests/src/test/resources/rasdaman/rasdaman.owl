@@ -15,6 +15,7 @@
     <Prefix name="obda" IRI="https://w3id.org/obda/vocabulary#"/>
     <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
     <Prefix name="rasdb" IRI="http://www.semanticweb.org/RasterDataCube/"/>
+    <Prefix name="cis" IRI="https://www.opengis.net/spec/CIS/1.1/"/>
 <!--     <Import>http://www.opengis.net/ont/geosparql/1.1</Import> -->
 <!--     <Import>http://www.opengis.net/ont/sf/1.1</Import> -->
 <!--     <Import>https://www.w3.org/ns/sosa/</Import> -->
@@ -36,11 +37,11 @@
     <Declaration>
         <Class IRI="Raster"/>
     </Declaration>
-<!--     <Declaration> -->
-<!--         <DataProperty abbreviatedIRI="rasdb:hasRasterName"/> -->
-<!--     </Declaration> -->
     <Declaration>
-        <DataProperty abbreviatedIRI="rasdb:hasCoverageId"/>
+        <DataProperty abbreviatedIRI="rasdb:hasRasterName"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="cis:hasCoverageId"/>
     </Declaration>
     <Declaration>
         <DataProperty abbreviatedIRI="rdfs:label"/>
