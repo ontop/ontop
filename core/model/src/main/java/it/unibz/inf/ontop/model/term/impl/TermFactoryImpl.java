@@ -576,8 +576,8 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getDate2Grid(ImmutableTerm TimeSnap, ImmutableTerm dbRasterId){
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDate2Grid(), ImmutableList.of(TimeSnap, dbRasterId));
+	public ImmutableFunctionalTerm getDate2Grid(ImmutableTerm TimeSnap, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDate2Grid(), ImmutableList.of(TimeSnap, dbRasterName));
 	}
 
 //	@Override
@@ -625,6 +625,12 @@ public class TermFactoryImpl implements TermFactory {
 	public ImmutableFunctionalTerm getRasterSpatialAverageFinal(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName){
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialAverageFinal(), ImmutableList.of(TimeSnap, dbRegionGeom, dbRasterName));
 	}
+
+	@Override
+	public ImmutableFunctionalTerm getRasterTemporalAverage(ImmutableTerm dbStartTime, ImmutableTerm dbEndTime, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterTemporalAverage(), ImmutableList.of(dbStartTime, dbEndTime, dbRegionGeom, dbRasterName));
+	}
+
 
 	@Override
 	public ImmutableFunctionalTerm getRasterSmallArrayTemp(ImmutableTerm StartTime,ImmutableTerm EndTime, ImmutableTerm dbRasterName){

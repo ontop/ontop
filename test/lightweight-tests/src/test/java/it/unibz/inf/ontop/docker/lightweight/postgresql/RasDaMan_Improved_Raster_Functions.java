@@ -51,29 +51,46 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
                 + "BIND ('*' AS ?operator\n)"
                 + "BIND (0.02 AS ?value\n)"
-                + "BIND ('2023-07-24T00:00:00+00:00' AS ?timestamp\n)"
+                + "BIND ('2023-07-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
                 + "BIND (rasdb:rasProcessRasterOp(?timestamp, ?operator, ?value, ?raster_name) AS ?v)"
                 + "}\n";
 
         executeAndCompareValues(query2, ImmutableList.of("\"[0:303,0:395,0:583]\"^^xsd:string"));
     }
 
-    //    @Test
-//    public void DateTime2Grid() {
+    @Test
+    public void DateTime2Grid() {
+        String query3 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
+                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
+                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "SELECT ?v {\n"
+                + "?x rasdb:hasRasterName ?raster_name .\n"
+                + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
+                + "BIND ('2023-06-15T00:00:00+00:00'^^xsd:dateTime AS ?time\n)"
+                + "BIND (rasdb:rasDate2Grid(?time, ?raster_name) AS ?v)"
+                + "}\n";
+
+        executeAndCompareValues(query3, ImmutableList.of("\"165\"^^xsd:string"));
+    }
+
+//    @Test
+//    public void DateTime2GridInterval() {
 //        String query3 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
 //                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
 //                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
 //                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
-//                + "SELECT ?v {\n"                 `
-////                + "?x rasdb:hasRasterId ?raster_id .\n"
+//                + "SELECT ?v {\n"
 //                + "?x rasdb:hasRasterName ?raster_name .\n"
 //                + "FILTER (CONTAINS(?raster_name, 'Sweden')\n)"
-//                + "BIND ('2022-08-23T00:00:00+00:00' AS ?time\n)"
-//                + "BIND (rasdb:rasDate2Grid(?time, ?raster_id) AS ?v)"
+//                + "BIND ('2023-07-19T00:00:00+00:00'^^xsd:dateTime AS ?start_time\n)"
+//                + "BIND ('2023-07-21T00:00:00+00:00'^^xsd:dateTime AS ?end_time\n)"
+//                + "BIND (rasdb:rasDate2Grid(?start_time, ?raster_name, ?end_time) AS ?v)"
 //                + "}\n";
 //
-//        executeAndCompareValues(query3, ImmutableList.of("\"144\"^^xsd:integer"));
+//        executeAndCompareValues(query3, ImmutableList.of("\"144\"^^xsd:string"));
 //    }
+
 
 
 
@@ -305,7 +322,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "BIND (rasdb:rasTemporalAverage(?start_time, ?end_time , ?region_wkt, ?coverage_id) AS ?v)"
                 + "}\n";
 
-        executeAndCompareValues(query9, ImmutableList.of("\"14776.508\"^^xsd:string"));
+        executeAndCompareValues(query9, ImmutableList.of("\"10040.017\"^^xsd:string"));
     }
 
 

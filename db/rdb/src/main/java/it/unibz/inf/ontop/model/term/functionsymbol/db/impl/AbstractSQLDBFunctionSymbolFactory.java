@@ -1585,6 +1585,28 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 time, raster_name, region, raster_name, raster_name, raster_name, raster_name, raster_name);
 
     }
+
+    protected String serializeRAS_TEMPORAL_AVERAGE(ImmutableList<? extends ImmutableTerm> terms,
+                                                   Function<ImmutableTerm, String> termConverter,
+                                                   TermFactory termFactory) {
+        String start_time = termConverter.apply(terms.get(0));
+        String end_time = termConverter.apply(terms.get(1));
+        String region = termConverter.apply(terms.get(2));
+        String raster_name = termConverter.apply(terms.get(3));
+
+//        return String.format("rasdaman_op.query2numeric(CONCAT('select condense + over x in [',rasdaman_op.timestamp2grid(%s, %s),':',rasdaman_op.timestamp2grid(%s, %s),'] using avg_cells(clip(datacube[x[0],0:*, 0:*],' , "
+//                        + "rasdaman_op.geo2grid_final(%s, rasdaman_op.get_min_longitude(%s), rasdaman_op.get_max_latitude(%s)," +
+//                        " rasdaman_op.get_res_lon(%s), rasdaman_op.get_res_lat(%s)),'))/36 from ', %s, ' as datacube'))",
+//                start_time, raster_name, end_time, raster_name, region, raster_name, raster_name, raster_name, raster_name, raster_name);
+
+// Rasdaman's syntax limitation for temporal avg, need to do end_date - start date
+        return String.format("rasdaman_op.query2numeric(CONCAT('select condense + over x in [',rasdaman_op.timestamp2grid(%s, %s),':',rasdaman_op.timestamp2grid(%s, %s),'] using avg_cells(clip(datacube[x[0],0:*, 0:*],' , "
+                        + "rasdaman_op.geo2grid_final(%s, rasdaman_op.get_min_longitude(%s), rasdaman_op.get_max_latitude(%s)," +
+                        " rasdaman_op.get_res_lon(%s), rasdaman_op.get_res_lat(%s)),'))/(',cast(rasdaman_op.timestamp2grid(%s, %s) as integer),' - ',cast(rasdaman_op.timestamp2grid(%s, %s) as integer),') from ', %s, ' as datacube'))",
+                start_time, raster_name, end_time, raster_name, region, raster_name, raster_name, raster_name, raster_name, end_time, raster_name, start_time, raster_name, raster_name);
+
+    }
+
     protected String serializeRAS_SPATIAL_MAXIMUM(ImmutableList<? extends ImmutableTerm> terms,
                                                   Function<ImmutableTerm, String> termConverter,
                                                   TermFactory termFactory) {
@@ -1694,9 +1716,14 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                                                            Function<ImmutableTerm, String> termConverter,
                                                            TermFactory termFactory){
 
-        String timestamp = termConverter.apply(terms.get(0));
-        String raster_id = termConverter.apply(terms.get(1));
-        return String.format("rasdaman_op.timestamp2grid(%s, %s)", timestamp, raster_id);
+//        String timestamp = termConverter.apply(terms.get(0));
+//        String rasterName = termConverter.apply(terms.get(1));
+//        return String.format(" cast(rasdaman_op.timestamp2grid(%s, %s) as integer)", timestamp, rasterName);
+
+        String start_time = termConverter.apply(terms.get(0));
+//        String end_time = termConverter.apply(terms.get(2));
+        String rasterName = termConverter.apply(terms.get(1));
+        return String.format("rasdaman_op.timestamp2grid(%s, %s)", start_time, rasterName);
     }
 
     protected String serializeRAS_CLIP_SMALL_ARRAY_SPATIAL(ImmutableList<? extends ImmutableTerm> terms,

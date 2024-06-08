@@ -11,9 +11,9 @@ import javax.annotation.Nonnull;
 
 public class Date2GridFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
 
-    public Date2GridFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdStringDatatype, RDFDatatype xsdIntegerDatatype) {
-        super("RAS_DATE_TO_GRID", functionIRI, ImmutableList.of(xsdStringDatatype, xsdIntegerDatatype),
-                xsdIntegerDatatype);
+    public Date2GridFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdDatetime, RDFDatatype xsdStringDatatype) {
+        super("RAS_DATE_TO_GRID", functionIRI, ImmutableList.of(xsdDatetime, xsdStringDatatype),
+                xsdStringDatatype);
     }
 
     @Override

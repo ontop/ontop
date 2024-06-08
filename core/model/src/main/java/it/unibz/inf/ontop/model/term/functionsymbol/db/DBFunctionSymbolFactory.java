@@ -259,6 +259,7 @@ public interface DBFunctionSymbolFactory {
 //    DBFunctionSymbol getRasterSpatialAverage();
     DBFunctionSymbol getRasterSpatialAverageFinal();
     DBFunctionSymbol getRasterSpatialAverageX();
+    DBFunctionSymbol getRasterTemporalAverage();
 
     DBFunctionSymbol getRasterSpatialMaximum();
     DBFunctionSymbol getRasterSpatialMaximumX();
@@ -272,6 +273,8 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getClipRasterAnyGeom();
     DBFunctionSymbol getRasterSmallArrayTemp();
     DBFunctionSymbol getRasterSmallArraySpatial();
+
+
     DBFunctionSymbol getExtractFunctionSymbol(String component);
     DBFunctionSymbol getCurrentDateTimeSymbol(String type);
 

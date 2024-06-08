@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMaximumFun
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMaximumXFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMinimumFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMinimumXFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterTemporalAverageFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterTemporalMinimumFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterTemporalMaximumFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.ClipRasterFunctionSymbolImpl;
@@ -356,9 +357,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
                 new RasterDimensionFunctionSymbolImpl(RASDB.RAS_GET_DIMENSION, xsdString),
 
-                new ProcessRasterArrayCellFunctionSymbolImpl(RASDB.RAS_PROCESS_RASTER_ARRAY, xsdString, xsdDouble),
+                new ProcessRasterArrayCellFunctionSymbolImpl(RASDB.RAS_PROCESS_RASTER_ARRAY, xsdDatetime, xsdString, xsdDouble),
 
-                new Date2GridFunctionSymbolImpl(RASDB.RAS_DATE_TO_GRID, xsdString, xsdInteger),
+                new Date2GridFunctionSymbolImpl(RASDB.RAS_DATE_TO_GRID, xsdDatetime, xsdString),
 
 //                new RasterAverageFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE, xsdInteger, xsdDouble, wktLiteral, xsdString),
 
@@ -373,6 +374,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new RasterAverageXFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE_X, xsdInteger, wktLiteral, xsdDouble, xsdString),
 
                 new RasterAverageFinalFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE_FINAL, xsdDatetime, xsdString, wktLiteral),
+
+                new RasterTemporalAverageFunctionSymbolImpl(RASDB.RAS_TEMPORAL_AVERAGE, xsdDatetime, xsdString, wktLiteral),
 
                 new RasterTemporalMinimumFunctionSymbolImpl(RASDB.RAS_TEMPORAL_MINIMUM, xsdDatetime, xsdString, wktLiteral),
 

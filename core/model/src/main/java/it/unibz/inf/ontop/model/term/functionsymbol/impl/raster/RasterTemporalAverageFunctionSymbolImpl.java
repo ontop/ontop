@@ -9,10 +9,10 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-public class ProcessRasterArrayCellFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
+public class RasterTemporalAverageFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
 
-    public ProcessRasterArrayCellFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdDatetime, RDFDatatype xsdStringDatatype, RDFDatatype xsdDouble) {
-        super("RAS_PROCESS_RASTER_ARRAY", functionIRI, ImmutableList.of(xsdDatetime, xsdStringDatatype, xsdDouble, xsdStringDatatype),
+    public RasterTemporalAverageFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdDatetime, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType) {
+        super("RAS_TEMPORAL_AVERAGE", functionIRI, ImmutableList.of(xsdDatetime, xsdDatetime, wktLiteralType, xsdStringDatatype),
                 xsdStringDatatype);
     }
 
@@ -22,7 +22,8 @@ public class ProcessRasterArrayCellFunctionSymbolImpl extends AbstractRasterFunc
         // return termFactory.getRESPECTIVEDBFUNCTIONSymbols;  --------------------------------[STEP 01b]-----------------------------------
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
-        return termFactory.getProcessRasterArrayCell(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2), subLexicalTerms.get(3));
+        return termFactory.getRasterTemporalAverage(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2), subLexicalTerms.get(3));
+
     }
 
 }
