@@ -100,7 +100,7 @@ target		:raster/{raster_id} a :Raster .
 source		SELECT raster_id FROM sample_lookup_x1
 
 ;mappingId	Get_raster_name_based_on_region_name_lookup
-;target		:raster/{raster_id} rasdb:hasRasterName {raster_name}^^xsd:string .
+;target		:raster/{raster_id} rasdb:rasterName {raster_name}^^xsd:string .
 ;source		SELECT raster_id, raster_name
 ;            FROM sample_lookup_x1
 ;            WHERE max_lat > (SELECT  ST_YMax(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM sample_regions_of_interest as m WHERE   m.name_2 = 'Stockholm')

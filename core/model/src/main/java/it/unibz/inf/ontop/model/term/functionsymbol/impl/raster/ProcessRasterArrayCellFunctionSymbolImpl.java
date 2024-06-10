@@ -11,8 +11,8 @@ import javax.annotation.Nonnull;
 
 public class ProcessRasterArrayCellFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
 
-    public ProcessRasterArrayCellFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdDatetime, RDFDatatype xsdStringDatatype, RDFDatatype xsdDouble) {
-        super("RAS_PROCESS_RASTER_ARRAY", functionIRI, ImmutableList.of(xsdDatetime, xsdStringDatatype, xsdDouble, xsdStringDatatype),
+    public ProcessRasterArrayCellFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdDatetime, RDFDatatype xsdStringDatatype, RDFDatatype xsdDecimal) {
+        super("RAS_PROCESS_RASTER_ARRAY", functionIRI, ImmutableList.of(xsdDatetime, xsdStringDatatype, xsdDecimal, xsdStringDatatype),
                 xsdStringDatatype);
     }
 

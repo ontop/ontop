@@ -357,7 +357,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
                 new RasterDimensionFunctionSymbolImpl(RASDB.RAS_GET_DIMENSION, xsdString),
 
-                new ProcessRasterArrayCellFunctionSymbolImpl(RASDB.RAS_PROCESS_RASTER_ARRAY, xsdDatetime, xsdString, xsdDouble),
+                new ProcessRasterArrayCellFunctionSymbolImpl(RASDB.RAS_PROCESS_RASTER_ARRAY, xsdDatetime, xsdString, xsdDecimal),
 
                 new Date2GridFunctionSymbolImpl(RASDB.RAS_DATE_TO_GRID, xsdDatetime, xsdString),
 

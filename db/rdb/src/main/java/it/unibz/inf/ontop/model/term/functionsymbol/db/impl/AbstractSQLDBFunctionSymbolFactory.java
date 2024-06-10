@@ -1556,7 +1556,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         String raster_name = termConverter.apply(terms.get(3));
 
 
-        return String.format("rasdaman_op.query2array(CONCAT('select c[',rasdaman_op.timestamp2grid(%s, %s),', 0:* , 0:*] %s %s from ', %s, ' as c'))", time, raster_name, operator, value, raster_name);
+        return String.format("rasdaman_op.query2array(CONCAT('select (c[',rasdaman_op.timestamp2grid(%s, %s),', 0:* , 0:*]', %s, '', %s,') from ', %s, ' as c'))", time, raster_name, operator, value, raster_name);
     }
 
 //    protected String serializeRAS_SPATIAL_AVERAGE(ImmutableList<? extends ImmutableTerm> terms,

@@ -75,7 +75,7 @@ public class RASDB {
 
         RAS_GET_DIMENSION = factory.createIRI(PREFIX + "rasDimension");
 
-        RAS_PROCESS_RASTER_ARRAY = factory.createIRI(PREFIX + "rasProcessRasterOp");
+        RAS_PROCESS_RASTER_ARRAY = factory.createIRI(PREFIX + "rasCellOp");
 
 
         // Raster Aggregation Functions

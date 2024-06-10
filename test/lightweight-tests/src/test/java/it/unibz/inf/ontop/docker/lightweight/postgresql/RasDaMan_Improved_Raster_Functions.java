@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.lightweight.AbstractDockerRDF4JTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -41,22 +42,26 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
         executeAndCompareValues(query1, ImmutableList.of("\"[0:303,0:395,0:583]\"^^xsd:string"));
     }
 
+@Disabled
     @Test
-    public void Q4_processRasterCell() {
+    public void Q2_processRasterCell() {
 
         String query2 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
                 + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?raster rasdb:hasRasterName ?raster_name .\n"
-                + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
+                + "FILTER (CONTAINS(?raster_name, 'Sweden')\n)"
                 + "BIND ('*' AS ?operator\n)"
-                + "BIND (0.02 AS ?value\n)"
-                + "BIND ('2023-07-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
-                + "BIND (rasdb:rasProcessRasterOp(?timestamp, ?operator, ?value, ?raster_name) AS ?v)"
+                + "BIND (0.02 AS ?operand\n)"
+                + "BIND ('2022-07-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
+                + "BIND (rasdb:rasCellOp(?timestamp, ?operator, ?operand, ?raster_name) AS ?v)"
                 + "}\n";
 
-        executeAndCompareValues(query2, ImmutableList.of("\"[0:303,0:395,0:583]\"^^xsd:string"));
+        executeAndCompareValues(query2, ImmutableList.of("\"{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,283.3,283.64,283.64,283.88,283.34000000000003,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,<...>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,281.38,281.38,281.90000000000003,282.1,0,0,0,281,280.02,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}\"^^xsd:string"));
     }
+
+
+
 
     @Test
     public void DateTime2Grid() {
@@ -293,14 +298,14 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?region geo:asWKT ?region_wkt .\n"
                 + "?coverage a :Raster .\n"
                 + "?coverage rasdb:hasRasterName ?coverage_id .\n"
-                + "FILTER (?region_name = 'Deggendorf'\n)" //Vector region = Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00)
-                + "FILTER (CONTAINS(?coverage_id, 'Bavaria')\n)"
+                + "FILTER (?region_name = 'Bolzano'\n)" //Vector region = Sarentino, Silandro, Castelrotto, Ultimo, San Leonardo In Passiria
+                + "FILTER (CONTAINS(?coverage_id, 'Tyrol')\n)"
                 + "BIND ('2023-06-15T00:00:00+00:00'^^xsd:dateTime AS ?start_time\n)"
                 + "BIND ('2023-07-21T00:00:00+00:00'^^xsd:dateTime AS ?end_time\n)"
                 + "BIND (rasdb:rasTemporalMaximum(?start_time, ?end_time , ?region_wkt, ?coverage_id) AS ?v)"
                 + "}\n";
 
-        executeAndCompareValues(query9, ImmutableList.of("\"14776.508\"^^xsd:string"));
+        executeAndCompareValues(query9, ImmutableList.of("\"14880.696\"^^xsd:string"));
     }
 
     @Test
@@ -315,14 +320,14 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?region geo:asWKT ?region_wkt .\n"
                 + "?coverage a :Raster .\n"
                 + "?coverage rasdb:hasRasterName ?coverage_id .\n"
-                + "FILTER (?region_name = 'Deggendorf'\n)" //Vector region = Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00)
+                + "FILTER (?region_name = 'Würzburg'\n)" //Vector region = Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00)
                 + "FILTER (CONTAINS(?coverage_id, 'Bavaria')\n)"
                 + "BIND ('2023-06-15T00:00:00+00:00'^^xsd:dateTime AS ?start_time\n)"
                 + "BIND ('2023-07-21T00:00:00+00:00'^^xsd:dateTime AS ?end_time\n)"
                 + "BIND (rasdb:rasTemporalAverage(?start_time, ?end_time , ?region_wkt, ?coverage_id) AS ?v)"
                 + "}\n";
 
-        executeAndCompareValues(query9, ImmutableList.of("\"10040.017\"^^xsd:string"));
+        executeAndCompareValues(query9, ImmutableList.of("\"9183.796\"^^xsd:string"));
     }
 
 

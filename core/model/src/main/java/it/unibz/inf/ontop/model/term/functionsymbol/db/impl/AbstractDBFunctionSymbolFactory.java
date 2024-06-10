@@ -1985,7 +1985,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     protected DBFunctionSymbol createProcessRasterArrayCellFunctionSymbol() {
-        return new DBFunctionSymbolWithSerializerImpl("RAS_PROCESS_RASTER_ARRAY", ImmutableList.of(dbDateTimestampType, dbStringType, dbDoubleType, dbStringType), dbStringType, false,
+        return new DBFunctionSymbolWithSerializerImpl("RAS_PROCESS_RASTER_ARRAY", ImmutableList.of(dbDateTimestampType, dbStringType, dbDecimalType, dbStringType), dbStringType, false,
                 this::serializeRAS_PROCESS_RASTER_ARRAY);
     }
 
