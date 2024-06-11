@@ -153,7 +153,7 @@ public class EnvCli<C> extends Cli<C> {
         public EnvOptionParser(Iterable<? extends OptionParser<T>> delegates) {
             // Store the parsers to delegate to (at least one required)
             this.delegates = ImmutableList.copyOf(delegates);
-            Preconditions.checkArgument(this.delegates.size() >= 1,
+            Preconditions.checkArgument(!this.delegates.isEmpty(),
                     "At least a delegate OptionParser is needed");
         }
 
