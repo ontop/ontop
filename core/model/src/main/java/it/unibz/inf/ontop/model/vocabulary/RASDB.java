@@ -8,10 +8,10 @@ public class RASDB {
     // Add raster functions like GEOF
     // Use the vocabulary
     // ------------------------------------[STEP 01]------------------------------------------
-    public static final String PREFIX = "http://www.semanticweb.org/RasterDataCube/";
+    public static final String PREFIX = "https://github.com/aghoshpro/RasterDataCube/";
 
     // Prefix for properties
-    public static final String PREFIX_PROP = "http://www.semanticweb.org/RasterDataCube/";
+    public static final String PREFIX_PROP = "https://github.com/aghoshpro/RasterDataCube/";
 
     /////////////////////////////////////
     ////// Simple Raster Functions ///////

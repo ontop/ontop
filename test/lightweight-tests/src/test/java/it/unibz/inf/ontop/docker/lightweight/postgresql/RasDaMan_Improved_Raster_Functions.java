@@ -31,8 +31,8 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
     @Test
     public void Q1_getRasterDimension() {
 
-        String query1 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+        String query1 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?raster rasdb:hasRasterName ?raster_name .\n"
                 + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
@@ -46,14 +46,14 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
     @Test
     public void Q2_processRasterCell() {
 
-        String query2 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+        String query2 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?raster rasdb:hasRasterName ?raster_name .\n"
                 + "FILTER (CONTAINS(?raster_name, 'Sweden')\n)"
                 + "BIND ('*' AS ?operator\n)"
                 + "BIND (0.02 AS ?operand\n)"
-                + "BIND ('2022-07-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
+                + "BIND ('2022-04-18T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
                 + "BIND (rasdb:rasCellOp(?timestamp, ?operator, ?operand, ?raster_name) AS ?v)"
                 + "}\n";
 
@@ -65,10 +65,10 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
 
     @Test
     public void DateTime2Grid() {
-        String query3 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+        String query3 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?x rasdb:hasRasterName ?raster_name .\n"
                 + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
@@ -81,10 +81,10 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
 
 //    @Test
 //    public void DateTime2GridInterval() {
-//        String query3 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+//        String query3 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
 //                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
 //                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-//                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+//                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
 //                + "SELECT ?v {\n"
 //                + "?x rasdb:hasRasterName ?raster_name .\n"
 //                + "FILTER (CONTAINS(?raster_name, 'Sweden')\n)"
@@ -107,10 +107,10 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
     @Test
     public void avgRasterSPATIALX() {
 
-        String query4 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+        String query4 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?r rdfs:label ?region_name .\n"
                 + "?r geo:asWKT ?region .\n"
@@ -131,10 +131,10 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
 
     @Test
     public void avgRasterSPATIAL_Polygon_P1_FINAL() {
-        String query5 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+        String query5 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
@@ -150,10 +150,10 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
 
     @Test
     public void avgRasterSPATIAL_Polygon_P1_FINAL_02() {
-        String query6 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+        String query6 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
@@ -169,10 +169,10 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
 
     @Test
     public void avgRasterSPATIAL_Polygon_P2_FINAL() {
-        String query5 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+        String query5 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
@@ -188,10 +188,10 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
 
     @Test
     public void avgRasterSPATIAL_MultiPolygon_MP1_FINAL() {
-        String query7 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+        String query7 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
@@ -207,10 +207,10 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
 
     @Test
     public void minRasterSPATIAL_MultiPolygon_MP1_FINAL() {
-        String query7 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+        String query7 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?region a :Region .\n"
                 + "?region rdfs:label ?region_name .\n"
@@ -228,29 +228,29 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
 
     @Test
     public void maxRasterSPATIAL_MultiPolygon_MP1_FINAL() {
-        String query7 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+        String query7 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
                 + "?raster rasdb:hasRasterName ?raster_name .\n"
-                + "FILTER (?vector_region_name = 'Göteborg'\n)" //Vector region = Umeå (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  Bayreuth (2023-07-24T00:00:00+00:00)
+                + "FILTER (?vector_region_name = 'Umeå'\n)" //Vector region = Umeå, Söderköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  Bayreuth (2023-07-24T00:00:00+00:00)
                 + "FILTER (CONTAINS(?raster_name, 'Sweden')\n)"
                 + "BIND ('2022-08-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
                 + "BIND (rasdb:rasSpatialMaximum(?timestamp, ?vector_region_wkt, ?raster_name) AS ?v)"
                 + "}\n";
 
-        executeAndCompareValues(query7, ImmutableList.of("\"14598\"^^xsd:string"));
+        executeAndCompareValues(query7, ImmutableList.of("\"14503\"^^xsd:string"));
     }
 
     @Test
     public void avgRasterSPATIAL_MultiPolygon_MP1_FINAL_2() {
-        String query10 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+        String query10 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
@@ -266,77 +266,77 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
 
     @Test
     public void minRasterTEMPORAL() {
-        String query8 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+        String query8 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?region a :Region .\n"
                 + "?region rdfs:label ?region_name .\n"
                 + "?region geo:asWKT ?region_wkt .\n"
                 + "?coverage a :Raster .\n"
                 + "?coverage rasdb:hasRasterName ?coverage_id .\n"
-                + "FILTER (?region_name = 'Deggendorf'\n)" //Vector region = Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00) mytimestamp'^^xsd:dateTime
-                + "FILTER (CONTAINS(?coverage_id, 'Bavaria')\n)"
-                + "BIND ('2023-07-18T00:00:00+00:00'^^xsd:dateTime AS ?start_time\n)"
+                + "FILTER (?region_name = 'Sarentino'\n)" //Vector region = Deggendorf, Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00) mytimestamp'^^xsd:dateTime
+                + "FILTER (CONTAINS(?coverage_id, 'Tyrol')\n)"
+                + "BIND ('2023-07-15T00:00:00+00:00'^^xsd:dateTime AS ?start_time\n)"
                 + "BIND ('2023-07-21T00:00:00+00:00'^^xsd:dateTime AS ?end_time\n)"
                 + "BIND (rasdb:rasTemporalMinimum(?start_time, ?end_time, ?region_wkt, ?coverage_id) AS ?v)"
                 + "}\n";
 
-        executeAndCompareValues(query8, ImmutableList.of("\"14167\"^^xsd:string"));
+        executeAndCompareValues(query8, ImmutableList.of("\"13924.253\"^^xsd:string"));
     }
 
     @Test
     public void maxRasterTEMPORAL() {
-        String query9 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+        String query9 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?region a :Region .\n"
                 + "?region rdfs:label ?region_name .\n"
                 + "?region geo:asWKT ?region_wkt .\n"
                 + "?coverage a :Raster .\n"
                 + "?coverage rasdb:hasRasterName ?coverage_id .\n"
-                + "FILTER (?region_name = 'Bolzano'\n)" //Vector region = Sarentino, Silandro, Castelrotto, Ultimo, San Leonardo In Passiria
-                + "FILTER (CONTAINS(?coverage_id, 'Tyrol')\n)"
-                + "BIND ('2023-06-15T00:00:00+00:00'^^xsd:dateTime AS ?start_time\n)"
-                + "BIND ('2023-07-21T00:00:00+00:00'^^xsd:dateTime AS ?end_time\n)"
+                + "FILTER (?region_name = 'Göteborg'\n)" //Vector region = Sarentino, Silandro, Castelrotto, Ultimo, San Leonardo In Passiria
+                + "FILTER (CONTAINS(?coverage_id, 'Sweden')\n)"
+                + "BIND ('2022-04-05T00:00:00+00:00'^^xsd:dateTime AS ?start_time\n)"
+                + "BIND ('2022-06-19T00:00:00+00:00'^^xsd:dateTime AS ?end_time\n)"
                 + "BIND (rasdb:rasTemporalMaximum(?start_time, ?end_time , ?region_wkt, ?coverage_id) AS ?v)"
                 + "}\n";
 
-        executeAndCompareValues(query9, ImmutableList.of("\"14880.696\"^^xsd:string"));
+        executeAndCompareValues(query9, ImmutableList.of("\"14338.136\"^^xsd:string"));
     }
 
     @Test
     public void avgRasterTEMPORAL() {
-        String query9 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+        String query9 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?region a :Region .\n"
                 + "?region rdfs:label ?region_name .\n"
                 + "?region geo:asWKT ?region_wkt .\n"
                 + "?coverage a :Raster .\n"
                 + "?coverage rasdb:hasRasterName ?coverage_id .\n"
-                + "FILTER (?region_name = 'Würzburg'\n)" //Vector region = Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00)
+                + "FILTER (?region_name = 'Cham'\n)" //Vector region = Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00)
                 + "FILTER (CONTAINS(?coverage_id, 'Bavaria')\n)"
                 + "BIND ('2023-06-15T00:00:00+00:00'^^xsd:dateTime AS ?start_time\n)"
                 + "BIND ('2023-07-21T00:00:00+00:00'^^xsd:dateTime AS ?end_time\n)"
                 + "BIND (rasdb:rasTemporalAverage(?start_time, ?end_time , ?region_wkt, ?coverage_id) AS ?v)"
                 + "}\n";
 
-        executeAndCompareValues(query9, ImmutableList.of("\"9183.796\"^^xsd:string"));
+        executeAndCompareValues(query9, ImmutableList.of("\"10771.558\"^^xsd:string"));
     }
 
 
     @Test
     public void avgRasterSPATIAL_Geom_Based_Raster_Search() { // Swtich on the special mapping for raster name and switch off the default mapping ofr raster name
-        String query11 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+        String query11 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
@@ -356,10 +356,10 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
 
     @Test
     public void clipRaster() {
-        String query12 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+        String query12 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
@@ -376,10 +376,10 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
 
     @Test
     public void clipRasterAnyGeom() {
-        String query13 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+        String query13 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?raster rasdb:hasRasterName ?raster_name .\n"
                 + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"

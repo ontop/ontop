@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
-     xml:base="http://www.semanticweb.org/arkaghosh/OntoRaster/"
+     xml:base="https://github.com/aghoshpro/OntoRaster/"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     ontologyIRI="http://www.semanticweb.org/arkaghosh/OntoRaster/">
-    <Prefix name="" IRI="http://www.semanticweb.org/arkaghosh/OntoRaster/"/>
+     ontologyIRI="https://github.com/aghoshpro/OntoRaster/">
+    <Prefix name="" IRI="https://github.com/aghoshpro/OntoRaster/"/>
     <Prefix name="geo" IRI="http://www.opengis.net/ont/geosparql#"/>
     <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
     <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
@@ -14,7 +14,7 @@
     <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
     <Prefix name="obda" IRI="https://w3id.org/obda/vocabulary#"/>
     <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
-    <Prefix name="rasdb" IRI="http://www.semanticweb.org/RasterDataCube/"/>
+    <Prefix name="rasdb" IRI="https://github.com/aghoshpro/RasterDataCube/"/>
     <Prefix name="cis" IRI="https://www.opengis.net/spec/CIS/1.1/"/>
 <!--     <Import>http://www.opengis.net/ont/geosparql/1.1</Import> -->
 <!--     <Import>http://www.opengis.net/ont/sf/1.1</Import> -->
