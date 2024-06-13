@@ -28,6 +28,17 @@ source		SELECT 404 AS gid, rasdaman_op.check_rasdaman_conn() AS conn
 ;mappingId	mapping_region_geometry
 ;target		:vector_region/demo/{region_id} geo:asWKT {geometry}^^geo:wktLiteral .
 ;source		SELECT region_id, st_astext((st_dump(geom)).geom) AS geometry from sample_regions_of_interest
+;
+; --------------------------------------------- OR --------------------------------------------
+;
+;mappingId	mapping_region_geometry
+;target		:vector_region/demo/{region_id} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
+;source		SELECT region_id,
+;                        CASE
+;                              WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
+;                              ELSE ST_AsText(geom)
+;                        END AS geometry_wkt
+;            FROM sample_regions_of_interest
 
 ; ---------------- Mapping for All Regions in Sweden -----------------
 

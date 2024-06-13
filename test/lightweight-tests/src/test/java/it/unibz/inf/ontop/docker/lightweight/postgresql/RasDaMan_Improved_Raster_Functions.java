@@ -25,7 +25,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
         release();
     }
     /////////////////////////////////////
-    ////// Simple Raster Function ///////
+    ////// Simple Raster Functions ///////
     /////////////////////////////////////
 
     @Test
@@ -60,9 +60,6 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
         executeAndCompareValues(query2, ImmutableList.of("\"{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,283.3,283.64,283.64,283.88,283.34000000000003,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,<...>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,281.38,281.38,281.90000000000003,282.1,0,0,0,281,280.02,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}\"^^xsd:string"));
     }
 
-
-
-
     @Test
     public void DateTime2Grid() {
         String query3 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
@@ -79,29 +76,9 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
         executeAndCompareValues(query3, ImmutableList.of("\"165\"^^xsd:string"));
     }
 
-//    @Test
-//    public void DateTime2GridInterval() {
-//        String query3 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
-//                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
-//                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-//                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
-//                + "SELECT ?v {\n"
-//                + "?x rasdb:hasRasterName ?raster_name .\n"
-//                + "FILTER (CONTAINS(?raster_name, 'Sweden')\n)"
-//                + "BIND ('2023-07-19T00:00:00+00:00'^^xsd:dateTime AS ?start_time\n)"
-//                + "BIND ('2023-07-21T00:00:00+00:00'^^xsd:dateTime AS ?end_time\n)"
-//                + "BIND (rasdb:rasDate2Grid(?start_time, ?raster_name, ?end_time) AS ?v)"
-//                + "}\n";
-//
-//        executeAndCompareValues(query3, ImmutableList.of("\"144\"^^xsd:string"));
-//    }
-
-
-
-
 
     ///////////////////////////////////////
-    ////// Aggregate Raster Function //////
+    ////// Aggregate Raster Functions //////
     ///////////////////////////////////////
 
     @Test
@@ -236,7 +213,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
                 + "?raster rasdb:hasRasterName ?raster_name .\n"
-                + "FILTER (?vector_region_name = 'Umeå'\n)" //Vector region = Umeå, Söderköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  Bayreuth (2023-07-24T00:00:00+00:00)
+                + "FILTER (?vector_region_name = 'Söderköping'\n)" //Vector region = Umeå, Söderköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  Bayreuth (2023-07-24T00:00:00+00:00)
                 + "FILTER (CONTAINS(?raster_name, 'Sweden')\n)"
                 + "BIND ('2022-08-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
                 + "BIND (rasdb:rasSpatialMaximum(?timestamp, ?vector_region_wkt, ?raster_name) AS ?v)"
@@ -350,9 +327,9 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
     }
 
 
-    ///////////////////////////////////////
-    ////// Clip Raster Function //////
-    ///////////////////////////////////////
+    /////////////////////////////////////
+    ////// Clip Raster Functions  ///////
+    /////////////////////////////////////
 
     @Test
     public void clipRaster() {

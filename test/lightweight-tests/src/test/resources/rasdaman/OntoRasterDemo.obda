@@ -10,85 +10,61 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 rasdb:		https://github.com/aghoshpro/RasterDataCube/
 
 [MappingDeclaration] @collection [[
-mappingId	mapping_checkConn
-target		:conn/{gid} rasdb:hasConnection {conn}^^xsd:string .
-source		SELECT 404 AS gid, rasdaman_op.check_rasdaman_conn() AS conn
-
-; ---------------- Mapping for Sample Region of Interests -----------------
-
-;mappingId	mapping_region_class
-;target		:vector_region/demo/{region_id} a :region .
-;source		SELECT region_id from sample_regions_of_interest
-
-;mappingId	mapping_region_name
-;target		:vector_region/demo/{region_id} rdfs:label {region_name}^^xsd:string .
-;source		SELECT region_id, name_2 AS region_name from sample_regions_of_interest
-
-;mappingId	mapping_region_geometry
-;target		:vector_region/demo/{region_id} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
-;source		SELECT region_id,
-;                        CASE
-;                              WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
-;                              ELSE ST_AsText(geom)
-;                        END AS geometry_wkt
-;            FROM sample_regions_of_interest
-
-
 ; ---------------- Mapping for All Regions in Sweden -----------------
 
 mappingId	Get_region_class_table_sweden
-target		:vector_region/sweden/{gid} a :Region .
-source		SELECT gid FROM region_sweden
+target		:vector_region/sweden/{regionId} a :Region .
+source		SELECT gid AS regionId FROM region_sweden
 
-mappingId	mapping_region_name_sweden
-target		:vector_region/sweden/{gid} rdfs:label {region_name}^^xsd:string .
-source		SELECT gid, name_2 AS region_name FROM region_sweden
+mappingId	mapping_regionName_sweden
+target		:vector_region/sweden/{regionId} rdfs:label {regionName}^^xsd:string .
+source		SELECT gid AS regionId, name_2 AS regionName FROM region_sweden
 
-mappingId	mapping_region_geometry_wkt_sweden
-target		:vector_region/sweden/{gid} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
-source		SELECT gid,
+mappingId	mapping_region_regionWkt_sweden
+target		:vector_region/sweden/{regionId} geo:asWKT {regionWkt}^^geo:wktLiteral .
+source		SELECT gid AS regionId,
                 CASE
                     WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
                     ELSE ST_AsText(geom)
-                END AS geometry_wkt
+                END AS regionWkt
             FROM region_sweden
 
 ; ---------------- Mapping for All Regions in Bavaria -----------------
 
 mappingId	Get_region_class_table_bavaria
-target		:vector_region/bavaria/{gid} a :Region .
-source		SELECT gid FROM region_bavaria
+target		:vector_region/bavaria/{regionId} a :Region .
+source		SELECT gid AS regionId FROM region_bavaria
 
-mappingId	mapping_region_name_bavaria
-target		:vector_region/bavaria/{gid} rdfs:label {region_name}^^xsd:string .
-source		SELECT gid, name_2 AS region_name FROM region_bavaria
+mappingId	mapping_regionName_bavaria
+target		:vector_region/bavaria/{regionId} rdfs:label {regionName}^^xsd:string .
+source		SELECT gid AS regionId, name_2 AS regionName FROM region_bavaria
 
-mappingId	mapping_region_geometry_wkt_bavaria
-target		:vector_region/bavaria/{gid} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
-source		SELECT gid,
+mappingId	mapping_region_regionWkt_bavaria
+target		:vector_region/bavaria/{regionId} geo:asWKT {regionWkt}^^geo:wktLiteral .
+source		SELECT gid AS regionId,
                    CASE
                        WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
                        ELSE ST_AsText(geom)
-                   END AS geometry_wkt
+                   END AS regionWkt
             FROM region_bavaria
 
 ; ---------------- Mapping for All Regions in South Tyrol -----------------
 
 mappingId	Get_region_class_table_south_tyrol
-target		:vector_region/tyrol/{gid} a :Region .
-source		SELECT gid FROM region_south_tyrol
+target		:vector_region/tyrol/{regionId} a :Region .
+source		SELECT gid AS regionId FROM region_south_tyrol
 
-mappingId	mapping_region_name_south_tyrol
-target		:vector_region/tyrol/{gid} rdfs:label {region_name}^^xsd:string .
-source		SELECT gid, name_3 AS region_name FROM region_south_tyrol
+mappingId	mapping_regionName_south_tyrol
+target		:vector_region/tyrol/{regionId} rdfs:label {regionName}^^xsd:string .
+source		SELECT gid AS regionId, name_3 AS regionName FROM region_south_tyrol
 
-mappingId	mapping_region_geometry_wkt_south_tyrol
-target		:vector_region/tyrol/{gid} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
-source		SELECT gid,
+mappingId	mapping_region_regionWkt_south_tyrol
+target		:vector_region/tyrol/{regionId} geo:asWKT {regionWkt}^^geo:wktLiteral .
+source		SELECT gid AS regionId,
                    CASE
                        WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
                        ELSE ST_AsText(geom)
-                   END AS geometry_wkt
+                   END AS regionWkt
             FROM region_south_tyrol
 
 
@@ -98,7 +74,7 @@ mappingId	mapping_rasterid_lookup
 target		:raster/{raster_id} a :Raster .
 source		SELECT raster_id FROM sample_lookup_x1
 
-;mappingId	Get_raster_name_based_on_region_name_lookup
+;mappingId	Get_raster_name_based_on_regionName_lookup
 ;target		:raster/{raster_id} rasdb:rasterName {raster_name}^^xsd:string .
 ;source		SELECT raster_id, raster_name
 ;            FROM sample_lookup_x1
@@ -110,17 +86,17 @@ source		SELECT raster_id FROM sample_lookup_x1
 
 mappingId	mapping_raster_name_lookup
 target		:raster/{raster_id} rasdb:hasRasterName {raster_name}^^xsd:string .
-source		SELECT raster_id, raster_name FROM sample_lookup_x1
+source		SELECT raster_id, raster_name FROM sample_lookup_x1_table
 
 mappingId	mapping_get_temporal_dimension_lookup
 target		:raster/{raster_id} rasdb:hasStartTime {start_time}^^xsd:string ; rasdb:hasEndTime {end_time}^^xsd:string ; rasdb:hasStartTimeGrid {start_time_grid}^^xsd:integer ; rasdb:hasEndTimeGrid {end_time_grid}^^xsd:integer ; rasdb:hasTemporalResolution {res_time}^^xsd:double .
-source		SELECT raster_id, raster_name, start_time, end_time, start_time_grid, end_time_grid, res_time FROM sample_lookup_x1
+source		SELECT raster_id, raster_name, start_time, end_time, start_time_grid, end_time_grid, res_time FROM sample_lookup_x1_table
 
 mappingId	Get_spatial_dimension_(X)_from_lookup_for_domain_raster
 target		:raster/{raster_id} rasdb:hasMinLongitude {min_lon}^^xsd:double ; rasdb:hasMaxLongitude {max_lon}^^xsd:double ; rasdb:hasSpatialResolution_lon {res_lon}^^xsd:double .
-source		SELECT raster_id, raster_name, min_lon, max_lon, res_lon FROM sample_lookup_x1
+source		SELECT raster_id, raster_name, min_lon, max_lon, res_lon FROM sample_lookup_x1_table
 
 mappingId	Get_spatial_dimension_(Y)_from_lookup_for_domain_raster
 target		:raster/{raster_id} rasdb:hasMinLatitude {min_lat}^^xsd:double ; rasdb:hasMaxLatitude {max_lat}^^xsd:double ; rasdb:hasSpatialResolution_lat {res_lat}^^xsd:double .
-source		SELECT raster_id, raster_name, min_lat, max_lat, res_lat FROM sample_lookup_x1
+source		SELECT raster_id, raster_name, min_lat, max_lat, res_lat FROM sample_lookup_x1_table
 ]]
