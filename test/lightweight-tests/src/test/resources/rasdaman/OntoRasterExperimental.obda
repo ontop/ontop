@@ -10,6 +10,11 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 rasdb:		https://github.com/aghoshpro/RasterDataCube/
 
 [MappingDeclaration] @collection [[
+
+mappingId	mapping_checkConn
+target		:conn/{gid} rasdb:hasConnection {conn}^^xsd:string .
+source		SELECT 404 AS gid, rasdaman_op.check_rasdaman_conn() AS conn
+
 ; ---------------- Mapping for All Regions in Sweden -----------------
 
 mappingId	Get_region_class_table_sweden
@@ -72,9 +77,34 @@ source		SELECT gid AS regionId,
 
 mappingId	mapping_rasterid_lookup
 target		:raster/{raster_id} a :Raster .
-source		SELECT raster_id FROM raster_lookup
+source		SELECT raster_id FROM raster_lookup_x1
 
 mappingId	mapping_raster_name_lookup
 target		:raster/{raster_id} rasdb:rasterName {raster_name}^^xsd:string .
-source		SELECT raster_id, raster_name FROM raster_lookup
+source		SELECT raster_id, raster_name FROM raster_lookup_x1
+
+mappingId	mapping_raster_field_lookup
+target		:raster/{raster_id} rasdb:rasterField {field}^^xsd:string .
+source		SELECT raster_id, field_name AS field FROM raster_lookup_x1
+
+;-------------------- Experimental Mappings -------------------
+
+;mappingId	Get_raster_name_based_on_regionName_lookup
+;target		:raster/{raster_id} rasdb:rasterName {raster_name}^^xsd:string .
+;source		SELECT raster_id, raster_name
+;            FROM raster_lookup
+;            WHERE max_lat > (SELECT  ST_YMax(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM sample_regions_of_interest as m WHERE   m.name_2 = 'Stockholm')
+;              AND min_lat < (SELECT  ST_YMin(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM sample_regions_of_interest as m WHERE   m.name_2 = 'Stockholm')
+;              AND max_lon > (SELECT  ST_XMax(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM sample_regions_of_interest as m WHERE   m.name_2 = 'Stockholm')
+;              AND min_lon < (SELECT  ST_XMin(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM sample_regions_of_interest as m WHERE   m.name_2 = 'Stockholm')
+
+
+;mappingId	Get_raster_name_based_on_regionName_lookup
+;target		:raster/{raster_id} rasdb:rasterName {raster_name}^^xsd:string .
+;source		SELECT raster_id, raster_name
+;            FROM raster_lookup
+;            WHERE max_lat > (SELECT  ST_YMax(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM region_bavaria as m WHERE   m.name_2 = 'Rosenheim' LIMIT 1)
+;              AND min_lat < (SELECT  ST_YMin(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM region_bavaria as m WHERE   m.name_2 = 'Rosenheim' LIMIT 1)
+;              AND max_lon > (SELECT  ST_XMax(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM region_bavaria as m WHERE   m.name_2 = 'Rosenheim' LIMIT 1)
+;              AND min_lon < (SELECT  ST_XMin(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM region_bavaria as m WHERE   m.name_2 = 'Rosenheim' LIMIT 1)
 ]]

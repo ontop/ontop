@@ -38,17 +38,21 @@ public class RASDB {
 
     public static final IRI RAS_SPATIAL_MINIMUM;
 
-    public static final IRI RAS_SPATIAL_AVERAGE_X;
-
-    public static final IRI RAS_SPATIAL_MINIMUM_X;
-
-    public static final IRI RAS_SPATIAL_MAXIMUM_X;
-
     public static final IRI RAS_TEMPORAL_AVERAGE;
 
     public static final IRI RAS_TEMPORAL_MINIMUM;
 
     public static final IRI RAS_TEMPORAL_MAXIMUM;
+
+//    Experimental
+
+    public static final IRI RAS_SPATIAL_AVERAGE_FIELD;
+
+    public static final IRI RAS_SPATIAL_AVERAGE_X;
+
+    public static final IRI RAS_SPATIAL_MINIMUM_X;
+
+    public static final IRI RAS_SPATIAL_MAXIMUM_X;
 
 
     ////////////////////////////////////////////
@@ -91,6 +95,9 @@ public class RASDB {
         RAS_SPATIAL_MAXIMUM = factory.createIRI(PREFIX + "rasSpatialMaximum");
 
         RAS_SPATIAL_MINIMUM = factory.createIRI(PREFIX + "rasSpatialMinimum");
+
+
+        RAS_SPATIAL_AVERAGE_FIELD = factory.createIRI(PREFIX + "rasSpatialAverageField");
 
 
 

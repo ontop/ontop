@@ -4,16 +4,15 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.lightweight.AbstractDockerRDF4JTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
 public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest {
-    private static final String PROPERTIES_FILE = "/rasdaman/rasdaman.properties";
+    private static final String PROPERTIES_FILE = "/rasdaman/OntoRaster.properties";
     private static final String OBDA_FILE = "/rasdaman/OntoRasterDemo.obda";
-    private static final String OWL_FILE = "/rasdaman/rasdaman.owl";
+    private static final String OWL_FILE = "/rasdaman/OntoRaster.owl";
 
     @BeforeAll
     public static void before() throws IOException, SQLException {
@@ -34,7 +33,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
         String query1 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
-                + "?raster rasdb:hasRasterName ?raster_name .\n"
+                + "?raster rasdb:rasterName ?raster_name .\n"
                 + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
                 + "BIND (rasdb:rasDimension(?raster_name) AS ?v)"
                 + "}\n";
@@ -42,23 +41,23 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
         executeAndCompareValues(query1, ImmutableList.of("\"[0:303,0:395,0:583]\"^^xsd:string"));
     }
 
-@Disabled
-    @Test
-    public void Q2_processRasterCell() {
-
-        String query2 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
-                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
-                + "SELECT ?v {\n"
-                + "?raster rasdb:hasRasterName ?raster_name .\n"
-                + "FILTER (CONTAINS(?raster_name, 'Sweden')\n)"
-                + "BIND ('*' AS ?operator\n)"
-                + "BIND (0.02 AS ?operand\n)"
-                + "BIND ('2022-04-18T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
-                + "BIND (rasdb:rasCellOp(?timestamp, ?operator, ?operand, ?raster_name) AS ?v)"
-                + "}\n";
-
-        executeAndCompareValues(query2, ImmutableList.of("\"{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,283.3,283.64,283.64,283.88,283.34000000000003,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,<...>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,281.38,281.38,281.90000000000003,282.1,0,0,0,281,280.02,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}\"^^xsd:string"));
-    }
+//@Disabled
+//    @Test
+//    public void Q2_processRasterCell() {
+//
+//        String query2 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
+//                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
+//                + "SELECT ?v {\n"
+//                + "?raster rasdb:rasterName ?raster_name .\n"
+//                + "FILTER (CONTAINS(?raster_name, 'Sweden')\n)"
+//                + "BIND ('*' AS ?operator\n)"
+//                + "BIND (0.02 AS ?operand\n)"
+//                + "BIND ('2022-04-18T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
+//                + "BIND (rasdb:rasCellOp(?timestamp, ?operator, ?operand, ?raster_name) AS ?v)"
+//                + "}\n";
+//
+//        executeAndCompareValues(query2, ImmutableList.of("\"{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,283.3,283.64,283.64,283.88,283.34000000000003,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,<...>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,281.38,281.38,281.90000000000003,282.1,0,0,0,281,280.02,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}\"^^xsd:string"));
+//    }
 
     @Test
     public void DateTime2Grid() {
@@ -67,7 +66,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
                 + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
-                + "?x rasdb:hasRasterName ?raster_name .\n"
+                + "?x rasdb:rasterName ?raster_name .\n"
                 + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
                 + "BIND ('2023-06-15T00:00:00+00:00'^^xsd:dateTime AS ?time\n)"
                 + "BIND (rasdb:rasDate2Grid(?time, ?raster_name) AS ?v)"
@@ -81,29 +80,29 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
     ////// Aggregate Raster Functions //////
     ///////////////////////////////////////
 
-    @Test
-    public void avgRasterSPATIALX() {
-
-        String query4 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
-                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
-                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
-                + "SELECT ?v {\n"
-                + "?r rdfs:label ?region_name .\n"
-                + "?r geo:asWKT ?region .\n"
-                + "?x rasdb:hasRasterName ?raster_name .\n"
-                + "?x rasdb:hasMinLongitude ?min_lon .\n"
-                + "?x rasdb:hasMaxLatitude ?max_lat .\n"
-                + "?x rasdb:hasSpatialResolution_lon ?x_res .\n"
-                + "?x rasdb:hasSpatialResolution_lat ?y_res .\n"
-                + "FILTER (CONTAINS(?region_name, 'Castelrotto')\n)" //Vector region = Würzburg Erding, Kelheim, Linköping (13.029), Göteborg Ultimo
-                + "FILTER (CONTAINS(?raster_name, 'Tyrol')\n)" //Raster Dataset = Bavaria_Temperature_MODIS_1km, Surface_Temperature_Sweden, South_Tyrol_Temperature_MODIS_1km
-                + "BIND (145 AS ?time\n)"
-                + "BIND (rasdb:rasSpatialAverageX(?time, ?region, ?min_lon, ?max_lat, ?x_res, ?y_res, ?raster_name) AS ?v)"
-                + "}\n";
-
-        executeAndCompareValues(query4, ImmutableList.of("\"5.282\"^^xsd:double"));
-    }
+//    @Test
+//    public void avgRasterSPATIALX() {
+//
+//        String query4 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
+//                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
+//                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
+//                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
+//                + "SELECT ?v {\n"
+//                + "?r rdfs:label ?region_name .\n"
+//                + "?r geo:asWKT ?region .\n"
+//                + "?x rasdb:rasterName ?raster_name .\n"
+//                + "?x rasdb:hasMinLongitude ?min_lon .\n"
+//                + "?x rasdb:hasMaxLatitude ?max_lat .\n"
+//                + "?x rasdb:hasSpatialResolution_lon ?x_res .\n"
+//                + "?x rasdb:hasSpatialResolution_lat ?y_res .\n"
+//                + "FILTER (CONTAINS(?region_name, 'Castelrotto')\n)" //Vector region = Würzburg Erding, Kelheim, Linköping (13.029), Göteborg Ultimo
+//                + "FILTER (CONTAINS(?raster_name, 'Tyrol')\n)" //Raster Dataset = Bavaria_Temperature_MODIS_1km, Surface_Temperature_Sweden, South_Tyrol_Temperature_MODIS_1km
+//                + "BIND (145 AS ?time\n)"
+//                + "BIND (rasdb:rasSpatialAverageX(?time, ?region, ?min_lon, ?max_lat, ?x_res, ?y_res, ?raster_name) AS ?v)"
+//                + "}\n";
+//
+//        executeAndCompareValues(query4, ImmutableList.of("\"5.282\"^^xsd:double"));
+//    }
 
 
     @Test
@@ -115,7 +114,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "SELECT ?v {\n"
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
-                + "?raster rasdb:hasRasterName ?raster_name .\n"
+                + "?raster rasdb:rasterName ?raster_name .\n"
                 + "FILTER (?vector_region_name = 'München'\n)" //Vector region = Linköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  München (2023-07-24T00:00:00+00:00)
                 + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
                 + "BIND ('2023-10-01T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)" // Missing DateTime Issue
@@ -134,7 +133,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "SELECT ?v {\n"
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
-                + "?raster rasdb:hasRasterName ?raster_name .\n"
+                + "?raster rasdb:rasterName ?raster_name .\n"
                 + "FILTER (?vector_region_name = 'Linköping'\n)" //Vector region = Söderköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  München (2023-07-24T00:00:00+00:00)
                 + "FILTER (CONTAINS(?raster_name, 'Sweden')\n)"
                 + "BIND ('2022-08-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
@@ -153,7 +152,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "SELECT ?v {\n"
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
-                + "?raster rasdb:hasRasterName ?raster_name .\n"
+                + "?raster rasdb:rasterName ?raster_name .\n"
                 + "FILTER (?vector_region_name = 'Würzburg'\n)" //Vector region = Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00)
                 + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
                 + "BIND ('2023-10-01T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)" // Missing DateTime Issue
@@ -172,7 +171,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "SELECT ?v {\n"
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
-                + "?raster rasdb:hasRasterName ?raster_name .\n"
+                + "?raster rasdb:rasterName ?raster_name .\n"
                 + "FILTER (?vector_region_name = 'Göteborg'\n)" //Vector region = Umeå (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  Bayreuth (2023-07-24T00:00:00+00:00)
                 + "FILTER (CONTAINS(?raster_name, 'Sweden')\n)"
                 + "BIND ('2022-08-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
@@ -193,7 +192,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?region rdfs:label ?region_name .\n"
                 + "?region geo:asWKT ?region_wkt .\n"
                 + "?coverage a :Raster .\n"
-                + "?coverage rasdb:hasRasterName ?coverage_id .\n"
+                + "?coverage rasdb:rasterName ?coverage_id .\n"
                 + "FILTER (?region_name = 'Göteborg'\n)" //Vector region = Umeå (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  Bayreuth (2023-07-24T00:00:00+00:00)
                 + "FILTER (CONTAINS(?coverage_id, 'Sweden')\n)"
                 + "BIND ('2022-08-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
@@ -212,7 +211,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "SELECT ?v {\n"
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
-                + "?raster rasdb:hasRasterName ?raster_name .\n"
+                + "?raster rasdb:rasterName ?raster_name .\n"
                 + "FILTER (?vector_region_name = 'Söderköping'\n)" //Vector region = Umeå, Söderköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  Bayreuth (2023-07-24T00:00:00+00:00)
                 + "FILTER (CONTAINS(?raster_name, 'Sweden')\n)"
                 + "BIND ('2022-08-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
@@ -231,7 +230,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "SELECT ?v {\n"
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
-                + "?raster rasdb:hasRasterName ?raster_name .\n"
+                + "?raster rasdb:rasterName ?raster_name .\n"
                 + "FILTER (?vector_region_name = 'Cham'\n)" //Vector region = Cham (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00)
                 + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
                 + "BIND ('2023-10-01T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)" // Missing DateTime Issue
@@ -252,7 +251,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?region rdfs:label ?region_name .\n"
                 + "?region geo:asWKT ?region_wkt .\n"
                 + "?coverage a :Raster .\n"
-                + "?coverage rasdb:hasRasterName ?coverage_id .\n"
+                + "?coverage rasdb:rasterName ?coverage_id .\n"
                 + "FILTER (?region_name = 'Sarentino'\n)" //Vector region = Deggendorf, Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00) mytimestamp'^^xsd:dateTime
                 + "FILTER (CONTAINS(?coverage_id, 'Tyrol')\n)"
                 + "BIND ('2023-07-15T00:00:00+00:00'^^xsd:dateTime AS ?start_time\n)"
@@ -274,7 +273,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?region rdfs:label ?region_name .\n"
                 + "?region geo:asWKT ?region_wkt .\n"
                 + "?coverage a :Raster .\n"
-                + "?coverage rasdb:hasRasterName ?coverage_id .\n"
+                + "?coverage rasdb:rasterName ?coverage_id .\n"
                 + "FILTER (?region_name = 'Göteborg'\n)" //Vector region = Sarentino, Silandro, Castelrotto, Ultimo, San Leonardo In Passiria
                 + "FILTER (CONTAINS(?coverage_id, 'Sweden')\n)"
                 + "BIND ('2022-04-05T00:00:00+00:00'^^xsd:dateTime AS ?start_time\n)"
@@ -296,7 +295,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "?region rdfs:label ?region_name .\n"
                 + "?region geo:asWKT ?region_wkt .\n"
                 + "?coverage a :Raster .\n"
-                + "?coverage rasdb:hasRasterName ?coverage_id .\n"
+                + "?coverage rasdb:rasterName ?coverage_id .\n"
                 + "FILTER (?region_name = 'Cham'\n)" //Vector region = Würzburg, Bayreuth (2023-07-24T00:00:00+00:00, 2023-10-01T00:00:00+00:00)
                 + "FILTER (CONTAINS(?coverage_id, 'Bavaria')\n)"
                 + "BIND ('2023-06-15T00:00:00+00:00'^^xsd:dateTime AS ?start_time\n)"
@@ -306,26 +305,6 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
 
         executeAndCompareValues(query9, ImmutableList.of("\"10771.558\"^^xsd:string"));
     }
-
-
-    @Test
-    public void avgRasterSPATIAL_Geom_Based_Raster_Search() { // Swtich on the special mapping for raster name and switch off the default mapping ofr raster name
-        String query11 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
-                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
-                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
-                + "SELECT ?v {\n"
-                + "?vector rdfs:label ?vector_region_name .\n"
-                + "?vector geo:asWKT ?vector_region_wkt .\n"
-                + "?raster rasdb:hasRasterName ?raster_name .\n"
-                + "FILTER (?vector_region_name = 'Stockholm'\n)" //Vector region = Linköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  München (2023-07-24T00:00:00+00:00)
-                + "BIND ('2022-08-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
-                + "BIND (rasdb:rasSpatialAverage(?timestamp, ?vector_region_wkt, ?raster_name) AS ?v)"
-                + "}\n";
-
-        executeAndCompareValues(query11, ImmutableList.of("\"14364.694\"^^xsd:string"));
-    }
-
 
     /////////////////////////////////////
     ////// Clip Raster Functions  ///////
@@ -340,7 +319,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "SELECT ?v {\n"
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
-                + "?raster rasdb:hasRasterName ?raster_name .\n"
+                + "?raster rasdb:rasterName ?raster_name .\n"
                 + "FILTER (?vector_region_name = 'Castelrotto'\n)" //Vector region = Linköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  München (2023-07-24T00:00:00+00:00)
                 + "FILTER (CONTAINS(?raster_name, 'Tyrol')\n)"
                 + "BIND ('2023-09-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
@@ -358,7 +337,7 @@ public class RasDaMan_Improved_Raster_Functions extends AbstractDockerRDF4JTest 
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
                 + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
-                + "?raster rasdb:hasRasterName ?raster_name .\n"
+                + "?raster rasdb:rasterName ?raster_name .\n"
                 + "FILTER (CONTAINS(?raster_name, 'Bavaria')\n)"
                 + "BIND ('POLYGON((11.324157714843748 48.29050321714061,11.911926269531248 48.279537342260085,11.88995361328125 48.01932418480118,11.340637207031248 48.01564978668938,11.324157714843748 48.29050321714061))' AS ?custom_region_wkt\n)"
                 + "BIND ('2023-07-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)" //Vector region = Linköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  München (2023-07-24T00:00:00+00:00)

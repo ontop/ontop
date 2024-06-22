@@ -11,22 +11,79 @@ sosa:		http://www.w3.org/ns/sosa/
 rasdb:		http://www.semanticweb.org/RasterDataCube/
 
 [MappingDeclaration] @collection [[
-
 mappingId	mapping_checkConn
 target		:conn/{gid} rasdb:hasConnection {conn}^^xsd:string .
-source		select 404 as gid, rasdaman_op.check_rasdaman_conn() as conn
+source		SELECT 404 AS gid, rasdaman_op.check_rasdaman_conn() AS conn
 
-mappingId	mapping_region_class
-target		:region/{gid} a :region .
-source		select gid from region_bavaria;
+; ---------------- Mapping for Sample Region of Interests -----------------
 
-mappingId	mapping_region_name
-target		:region/{gid} rdfs:label {region_name}^^xsd:string .
-source		select gid, name_2 as region_name from region_bavaria;
+;mappingId	mapping_region_class
+;target		:vector_region/demo/{region_id} a :Region .
+;source		SELECT region_id from sample_regions_of_interest
 
-mappingId	mapping_region_geometry
-target		:region/{gid} geo:asWKT {geometry}^^geo:wktLiteral .
-source		select gid, st_astext((st_dump(geom)).geom) as geometry from region_bavaria
+;mappingId	mapping_region_name
+;target		:vector_region/demo/{region_id} rdfs:label {region_name}^^xsd:string .
+;source		SELECT region_id, name_2 AS region_name from sample_regions_of_interest
+
+;mappingId	mapping_region_geometry
+;target		:vector_region/demo/{region_id} geo:asWKT {geometry}^^geo:wktLiteral .
+;source		SELECT region_id, st_astext((st_dump(geom)).geom) AS geometry from sample_regions_of_interest
+;
+; --------------------------------------------- OR --------------------------------------------
+;
+;mappingId	mapping_region_geometry
+;target		:vector_region/demo/{region_id} geo:asWKT {geometry_wkt}^^geo:wktLiteral .
+;source		SELECT region_id,
+;                        CASE
+;                              WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
+;                              ELSE ST_AsText(geom)
+;                        END AS geometry_wkt
+;            FROM sample_regions_of_interest
+
+; ---------------- Mapping for All Regions in Sweden -----------------
+
+mappingId	Get_region_class_table_sweden
+target		:vector_region/sweden/{gid} a :region .
+source		SELECT gid from region_sweden
+
+mappingId	mapping_region_name_sweden
+target		:vector_region/sweden/{gid} rdfs:label {region_name}^^xsd:string .
+source		SELECT gid, name_2 AS region_name from region_sweden
+
+mappingId	mapping_region_geometry_wkt_sweden
+target		:vector_region/sweden/{gid} geo:asWKT {geometry}^^geo:wktLiteral .
+source		SELECT gid, st_astext((st_dump(geom)).geom) AS geometry from region_sweden
+
+; ---------------- Mapping for All Regions in Bavaria -----------------
+
+mappingId	Get_region_class_table_bavaria
+target		:vector_region/bavaria/{gid} a :Region .
+source		SELECT gid from region_bavaria
+
+mappingId	mapping_region_name_bavaria
+target		:vector_region/bavaria/{gid} rdfs:label {region_name}^^xsd:string .
+source		SELECT gid, name_2 AS region_name from region_bavaria
+
+mappingId	mapping_region_geometry_wkt_bavaria
+target		:vector_region/bavaria/{gid} geo:asWKT {geometry}^^geo:wktLiteral .
+source		SELECT gid, st_astext((st_dump(geom)).geom) AS geometry from region_bavaria
+
+; ---------------- Mapping for All Regions in South Tyrol -----------------
+
+mappingId	Get_region_class_table_south_tyrol
+target		:vector_region/tyrol/{gid} a :Region .
+source		SELECT gid from region_south_tyrol
+
+mappingId	mapping_region_name_south_tyrol
+target		:vector_region/tyrol/{gid} rdfs:label {region_name}^^xsd:string .
+source		SELECT gid, name_3 AS region_name from region_south_tyrol
+
+mappingId	mapping_region_geometry_wkt_south_tyrol
+target		:vector_region/tyrol/{gid} geo:asWKT {geometry}^^geo:wktLiteral .
+source		SELECT gid, st_astext((st_dump(geom)).geom) AS geometry from region_south_tyrol
+
+
+; ---------------- Mapping for petascopedb inside vectordb -----------------
 
 mappingId	mapping_rastername
 target		:raster/{raster_id} rasdb:hasRasterName {raster_name}^^xsd:string .
@@ -39,5 +96,23 @@ source		select raster_id, dom_lower_bound, dom_upper_bound from petascopedb01;
 mappingId	mapping_scale_factor
 target		:raster/{raster_id} rasdb:hasScaleFactor {scale_factor}^^xsd:double .
 source		select raster_id, scale_factor from petascopedb01;
+
+; ---------------- Mapping for Raster Metadata Lookup Table -----------------
+mappingId	mapping_rastername_lookup
+target		:raster/{raster_id} rasdb:hasRasterName {raster_name}^^xsd:string .
+source		SELECT DISTINCT id AS raster_id, coverage_id AS raster_name FROM lookup_main
+
+mappingId	mapping_get_temporal_dimension_lookup
+target		:raster/{raster_id} rasdb:hasStartTime {domain_lower_bound}^^xsd:string ; rasdb:hasEndTime {domain_upper_bound}^^xsd:string ; rasdb:hasStartTimeGrid {grid_lower_bound}^^xsd:integer ; rasdb:hasEndTimeGrid {grid_upper_bound}^^xsd:integer ; rasdb:hasTemporalResolution {resolution}^^xsd:double .
+source		SELECT id AS raster_id, coverage_id AS raster_name, domain_lower_bound, domain_upper_bound, grid_lower_bound, grid_upper_bound, resolution FROM lookup_main WHERE axis_label = 'ansi'
+
+mappingId	Get_spatial_dimension_(X)_from_lookup_for_domain_raster
+target		:raster/{raster_id} rasdb:hasMinLongitude {min_long}^^xsd:double ; rasdb:hasMaxLongitude {max_long}^^xsd:double ; rasdb:hasSpatialResolution_lon {x_res}^^xsd:double .
+source		SELECT id AS raster_id, coverage_id AS raster_name, domain_lower_bound AS min_long, domain_upper_bound AS max_long, resolution AS x_res FROM lookup_main WHERE axis_label = 'Long'
+
+mappingId	Get_spatial_dimension_(Y)_from_lookup_for_domain_raster
+target		:raster/{raster_id} rasdb:hasMinLatitude {min_lat}^^xsd:double ; rasdb:hasMaxLatitude {max_lat}^^xsd:double ; rasdb:hasSpatialResolution_lat {y_res}^^xsd:double .
+source		SELECT id AS raster_id, coverage_id AS raster_name, domain_lower_bound AS min_lat, domain_upper_bound AS max_lat, resolution AS y_res FROM lookup_main WHERE axis_label = 'Lat'
+]]
 
 ]]

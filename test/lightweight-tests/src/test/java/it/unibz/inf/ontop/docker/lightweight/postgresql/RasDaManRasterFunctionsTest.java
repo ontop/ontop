@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public class RasDaManRasterFunctionsTest extends AbstractDockerRDF4JTest {
-    private static final String PROPERTIES_FILE = "/rasdaman/rasdaman.properties";
-    private static final String OBDA_FILE = "/rasdaman/OntoRasterDemo.obda";
+    private static final String PROPERTIES_FILE = "/rasdaman/OntoRaster.properties";
+    private static final String OBDA_FILE = "/rasdaman/OntoRasterExperimental.obda";
     private static final String OWL_FILE = "/rasdaman/rasdaman.owl";
 
     @BeforeAll
@@ -31,8 +31,8 @@ public class RasDaManRasterFunctionsTest extends AbstractDockerRDF4JTest {
     @Test
     public void testConnection() {
 
-        String query1 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+        String query1 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT * {\n"
                 + "?x rasdb:hasConnection ?v .\n"
                 + "}\n";

@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public class RasDaManRegionBasedRasterSearch extends AbstractDockerRDF4JTest {
-    private static final String PROPERTIES_FILE = "/rasdaman/rasdaman.properties";
+    private static final String PROPERTIES_FILE = "/rasdaman/OntoRaster.properties";
 
     private static final String OBDA_FILE = "/rasdaman/ExperimentalMappings.obda";
     //  private static final String LENS_FILE = "/nested/postgresql/nested-lenses-array.json";
@@ -27,16 +27,16 @@ public class RasDaManRegionBasedRasterSearch extends AbstractDockerRDF4JTest {
     }
 
     @Test
-    public void I_PolygonRegionBasedRasterSearch() {
+    public void I_PolygonRegionBasedRasterSearchX() {
 
-        String query1 = "PREFIX :\t<http://www.semanticweb.org/arkaghosh/OntoRaster/>\n"
+        String query1 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
-                + "PREFIX rasdb:\t<http://www.semanticweb.org/RasterDataCube/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
                 + "?r rdfs:label ?region_name .\n"
                 + "?r geo:asWKT ?region .\n"
-                + "?x rasdb:hasRasterName ?raster_name .\n"
+                + "?x rasdb:rasterName ?raster_name .\n"
                 + "?x rasdb:hasMinLongitude ?min_lon .\n"
                 + "?x rasdb:hasMaxLatitude ?max_lat .\n"
                 + "?x rasdb:hasSpatialResolution_lon ?x_res .\n"
@@ -59,7 +59,7 @@ public class RasDaManRegionBasedRasterSearch extends AbstractDockerRDF4JTest {
                 + "SELECT ?v {\n"
                 + "?r rdfs:label ?region_name .\n"
                 + "?r geo:asWKT ?region .\n"
-                + "?x rasdb:hasRasterName ?raster_name .\n"
+                + "?x rasdb:rasterName ?raster_name .\n"
                 + "?x rasdb:hasMinLongitude ?min_lon .\n"
                 + "?x rasdb:hasMaxLatitude ?max_lat .\n"
                 + "?x rasdb:hasSpatialResolution_lon ?x_res .\n"
@@ -82,7 +82,7 @@ public class RasDaManRegionBasedRasterSearch extends AbstractDockerRDF4JTest {
                 + "SELECT ?v {\n"
                 + "?r rdfs:label ?region_name .\n"
                 + "?r geo:asWKT ?region .\n"
-                + "?x rasdb:hasRasterName ?raster_name .\n"
+                + "?x rasdb:rasterName ?raster_name .\n"
                 + "?x rasdb:hasMinLongitude ?min_lon .\n"
                 + "?x rasdb:hasMaxLatitude ?max_lat .\n"
                 + "?x rasdb:hasSpatialResolution_lon ?x_res .\n"
@@ -105,7 +105,7 @@ public class RasDaManRegionBasedRasterSearch extends AbstractDockerRDF4JTest {
                 + "SELECT ?v {\n"
                 + "?r rdfs:label ?region_name .\n"
                 + "?r geo:asWKT ?region .\n"
-                + "?x rasdb:hasRasterName ?raster_name .\n"
+                + "?x rasdb:rasterName ?raster_name .\n"
                 + "?x rasdb:hasMinLongitude ?min_lon .\n"
                 + "?x rasdb:hasMaxLatitude ?max_lat .\n"
                 + "?x rasdb:hasSpatialResolution_lon ?x_res .\n"
@@ -128,7 +128,7 @@ public class RasDaManRegionBasedRasterSearch extends AbstractDockerRDF4JTest {
                     + "SELECT ?v {\n"
                     + "?r rdfs:label ?region_name .\n"
                     + "?r geo:asWKT ?region .\n"
-                    + "?x rasdb:hasRasterName ?raster_name .\n"
+                    + "?x rasdb:rasterName ?raster_name .\n"
                     + "?x rasdb:hasMinLongitude ?min_lon .\n"
                     + "?x rasdb:hasMaxLatitude ?max_lat .\n"
                     + "?x rasdb:hasSpatialResolution_lon ?x_res .\n"
