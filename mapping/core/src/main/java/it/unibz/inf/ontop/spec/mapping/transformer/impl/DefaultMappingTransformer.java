@@ -3,10 +3,12 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DBParameters;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.DisjunctionOfEqualitiesMergingSimplifier;
+import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
@@ -44,6 +46,8 @@ public class DefaultMappingTransformer implements MappingTransformer {
 
     private final DisjunctionOfEqualitiesMergingSimplifier disjunctionOfEqualitiesMergingSimplifier;
 
+    private final UnionBasedQueryMerger queryMerger;
+    private final IntermediateQueryFactory iqFactory;
 
     @Inject
     private DefaultMappingTransformer(MappingVariableNameNormalizer mappingVariableNameNormalizer,
@@ -56,7 +60,10 @@ public class DefaultMappingTransformer implements MappingTransformer {
                                       MappingDistinctTransformer mappingDistinctTransformer,
                                       MappingValuesWrapper mappingValuesWrapper,
                                       DisjunctionOfEqualitiesMergingSimplifier disjunctionOfEqualitiesMergingSimplifier,
-                                      TermFactory termFactory, RuleExecutor ruleExecutor) {
+                                      TermFactory termFactory,
+                                      RuleExecutor ruleExecutor,
+                                      UnionBasedQueryMerger queryMerger,
+                                      IntermediateQueryFactory iqFactory) {
         this.mappingVariableNameNormalizer = mappingVariableNameNormalizer;
         this.mappingSaturator = mappingSaturator;
         this.factConverter = inserter;
@@ -69,6 +76,8 @@ public class DefaultMappingTransformer implements MappingTransformer {
         this.disjunctionOfEqualitiesMergingSimplifier = disjunctionOfEqualitiesMergingSimplifier;
         this.termFactory = termFactory;
         this.ruleExecutor = ruleExecutor;
+        this.queryMerger = queryMerger;
+        this.iqFactory = iqFactory;
     }
 
     @Override
@@ -113,7 +122,8 @@ public class DefaultMappingTransformer implements MappingTransformer {
                 .map(DefaultMappingTransformer::asCell)
                 .collect(ImmutableCollectors.toTable());
 
-        return new MappingImpl(propertyDefinitions, classDefinitions);
+
+        return new MappingImpl(propertyDefinitions, classDefinitions, this.termFactory.getDBFunctionSymbolFactory().getIriTemplateSet(), termFactory, queryMerger, iqFactory);
     }
 
     private static Table.Cell<RDFAtomPredicate, IRI, IQ> asCell(MappingAssertion assertion) {

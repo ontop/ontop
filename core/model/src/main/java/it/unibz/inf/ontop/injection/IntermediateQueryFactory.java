@@ -55,7 +55,7 @@ public interface IntermediateQueryFactory {
 
     /**
      * NB: keys of the argumentMap are indices. They start at 0.
-     */
+     * */
     ExtensionalDataNode createExtensionalDataNode(RelationDefinition relationDefinition,
                                                   ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap);
 

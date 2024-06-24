@@ -9,6 +9,8 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * To be extended by overloading the methods of interest.
  */
@@ -111,6 +113,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
 
     @Override
     public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+        //LSH: forse devo modificare qui, istanziando più transformer (copiando il codice transformNaryCommutativeNode)
         return transformNaryCommutativeNode(tree, rootNode, children);
     }
 

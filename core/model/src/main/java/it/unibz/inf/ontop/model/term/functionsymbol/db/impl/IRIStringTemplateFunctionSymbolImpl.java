@@ -14,6 +14,7 @@ public class IRIStringTemplateFunctionSymbolImpl extends ObjectStringTemplateFun
 
     protected static IRIStringTemplateFunctionSymbol createFunctionSymbol(ImmutableList<Template.Component> template,
                                                                           TypeFactory typeFactory) {
+
         return new IRIStringTemplateFunctionSymbolImpl(template, typeFactory);
     }
 }

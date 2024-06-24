@@ -61,7 +61,6 @@ public class DefaultDBStrStartsWithFunctionSymbol extends DBBooleanFunctionSymbo
                             : termFactory.getFalseOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNull(firstFunctionalTerm)));
                     return simplifiedTerm.simplify(variableNullability);
                 }
-
             }
         }
 

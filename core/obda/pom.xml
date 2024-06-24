@@ -60,6 +60,10 @@
             <groupId>org.javabits.jgrapht</groupId>
             <artifactId>jgrapht-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>it.unibz.inf.ontop</groupId>
+            <artifactId>ontop-optimization</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

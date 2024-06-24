@@ -987,6 +987,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public ImmutableSet<ObjectStringTemplateFunctionSymbol> getIriTemplateSet() {
+        ImmutableSet.Builder<ObjectStringTemplateFunctionSymbol> builder = ImmutableSet.builder();
+        for (Map.Entry<ImmutableList<Template.Component>, IRIStringTemplateFunctionSymbol> entry : iriTemplateMap.entrySet()) {
+            builder.add(entry.getValue());
+        }
+        ImmutableSet<ObjectStringTemplateFunctionSymbol> iriTemplateSet = builder.build();
+        return iriTemplateSet;
+    }
+
+    @Override
     public Optional<DBFunctionSymbol> getFloor(DBTermType dbTermType) {
         DBFunctionSymbol existingFunctionSymbol = floorMap.get(dbTermType);
         if (existingFunctionSymbol != null)

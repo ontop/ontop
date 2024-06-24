@@ -134,7 +134,7 @@ public interface IQTree {
      *
      * The intended usage of this method it to determine the definition of a variable from the returned substitution.
      * Therefore this method is robust to simple variable renaming and to multiple complex substitutions.
-     * E.g. if [x/x2], [x2/x3] and [x3/URI("http://myURI{}", x4] are three substitutions found in that order in a same
+     * E.g. if [x/x2], [x2/x3] and [x3/URI("http://myURI{}", x4)] are three substitutions found in that order in a same
      * branch,
      * then x/URI("http://myURI{}", x4) will be the only output substitution for that branch.
      *

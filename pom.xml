@@ -114,7 +114,8 @@
         <filter.test.resources>false</filter.test.resources>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <ignoreNonCompile>true</ignoreNonCompile>
-        <license.skipAddThirdParty>true</license.skipAddThirdParty> <!-- default disable CLI execution of license:add-third-party (except for selected modules) -->
+        <license.skipAddThirdParty>true
+        </license.skipAddThirdParty> <!-- default disable CLI execution of license:add-third-party (except for selected modules) -->
         <plugin.phase-prefix>disabled-</plugin.phase-prefix>
         <asset-cli.phase-prefix>disabled-</asset-cli.phase-prefix>
         <asset-plugin.phase-prefix>disabled-</asset-plugin.phase-prefix>
@@ -148,7 +149,8 @@
         <maven-surefire-plugin.version>3.0.0-M9</maven-surefire-plugin.version>
         <maven-surefire-report-plugin.version>3.0.0-M9</maven-surefire-report-plugin.version>
         <sortpom-maven-plugin.version>3.2.1</sortpom-maven-plugin.version>
-        <spring-boot-maven-plugin.version>2.7.9</spring-boot-maven-plugin.version> <!-- 3.0.0+ needs JDK17 (via Spring Boot 3) -->
+        <spring-boot-maven-plugin.version>2.7.9
+        </spring-boot-maven-plugin.version> <!-- 3.0.0+ needs JDK17 (via Spring Boot 3) -->
         <versions-maven-plugin.version>2.15.0</versions-maven-plugin.version>
 
         <!-- Dependency versions: core dependencies -->
@@ -208,6 +210,8 @@
 
         <!-- JDK version -->
         <jdk.version>11</jdk.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
     </properties>
 
     <dependencyManagement>

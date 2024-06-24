@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.answering.reformulation.impl;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
@@ -7,6 +8,7 @@ import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
+import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.query.KGQuery;
 import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.query.translation.KGQueryTranslator;
@@ -19,6 +21,7 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.spec.OBDASpecification;
+import it.unibz.inf.ontop.substitution.Substitution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,7 +91,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		try {
 			LOGGER.debug("SPARQL query:\n{}\n", inputQuery.getOriginalString());
-			IQ convertedIQ = inputQuery.translate(inputQueryTranslator);
+			IQ convertedIQ = inputQuery.translate(inputQueryTranslator); //Step 1: conversion from SparQL to IQ tree
 			LOGGER.debug("Parsed query converted into IQ (after normalization):\n{}\n", convertedIQ);
 
 			queryLogger.setSparqlIQ(convertedIQ);
@@ -98,9 +101,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 
                 IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
                 LOGGER.debug("Rewritten IQ:\n{}\n", rewrittenIQ);
-
                 LOGGER.debug("Start the unfolding...");
-                IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);
+                IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ); //Step 2: unfolding della query
                 if (unfoldedIQ.getTree().isDeclaredAsEmpty()) {
 					queryLogger.declareReformulationFinishedAndSerialize(unfoldedIQ, false);
                 	LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
@@ -109,9 +111,11 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 				LOGGER.debug("Unfolded query:\n{}\n", unfoldedIQ);
 
+				//Step 3: optimization of unfolded query
                 IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ, queryContext);
 				IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
 				LOGGER.debug("Planned query:\n{}\n", plannedQuery);
+
 
 				queryLogger.setPlannedQuery(plannedQuery);
 

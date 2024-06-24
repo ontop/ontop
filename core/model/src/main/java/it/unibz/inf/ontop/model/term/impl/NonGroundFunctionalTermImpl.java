@@ -27,4 +27,5 @@ public class NonGroundFunctionalTermImpl extends ImmutableFunctionalTermImpl imp
     public boolean isGround() {
         return false;
     }
+
 }

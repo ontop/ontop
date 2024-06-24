@@ -27,7 +27,7 @@ public class OntopKGQueryModule extends OntopAbstractModule {
         bindFromSettings(KGQueryFactory.class);
         bindFromSettings(InsertClauseNormalizer.class);
 
-        Module unfolderFactory = buildFactory(
+        Module unfolderFactory = buildFactory( //definisce il metodo create della factory unfolder, ecc...
                 ImmutableList.of(
                         QueryUnfolder.class
                 ),
