@@ -15,10 +15,12 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.VariableGeneratorImpl;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
@@ -54,6 +56,41 @@ public class MappingImpl implements Mapping {
         if (!isCompatibleDefinitionComputed) { //serve a computarlo solo la prima volta
             ImmutableTable.Builder<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> builder = ImmutableTable.builder();
             ImmutableCollection<IQ> allDef = getQueries(rdfAtomPredicate);
+            Optional<IQ> optionalMergedAllDef = queryMerger.mergeDefinitions(allDef);
+            VariableGenerator variableGenerator = new VariableGeneratorImpl(optionalMergedAllDef.get().getTree().getKnownVariables(), termFactory);
+
+            if (optionalMergedAllDef.isPresent()) {
+                IQ mergedAllDefIQ = optionalMergedAllDef.get();
+                Variable subj = mergedAllDefIQ.getProjectionAtom().getArguments().get(0);
+                iriTemplateSet.stream()
+                        .forEach(iriTemplate -> {
+                            ImmutableExpression strictEquality = termFactory.getStrictEquality(
+                                    subj,
+                                    termFactory.getIRIFunctionalTerm(termFactory.getImmutableFunctionalTerm(
+                                            iriTemplate,
+                                            IntStream.range(0, iriTemplate.getArity())
+                                                    .mapToObj(i -> variableGenerator.generateNewVariable())
+                                                    .collect(ImmutableCollectors.toList()))));
+                            IQTree prunedIQTree = mergedAllDefIQ.getTree().propagateDownConstraint(strictEquality, variableGenerator).normalizeForOptimization(variableGenerator);
+                            IQ prunedIQ = iqFactory.createIQ(mergedAllDefIQ.getProjectionAtom(), prunedIQTree);
+                            builder.put((RDFAtomPredicate) mergedAllDefIQ.getProjectionAtom().getPredicate(), iriTemplate, prunedIQ);
+                        });
+            }
+
+            ImmutableTable<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitionsFromIRITemplate = builder.build();
+            this.compatibleDefinitionsFromIRITemplate = compatibleDefinitionsFromIRITemplate;
+            isCompatibleDefinitionComputed = true;
+        }
+    }
+
+    //IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator);
+    //IQTree optimizedMergedIQWithFilter = mergedIQWithFilter.normalizeForOptimization(new VariableGeneratorImpl(mergedIQWithFilter.getKnownVariables(), termFactory));
+    /*
+    @Override
+    public void computeCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate){
+        if (!isCompatibleDefinitionComputed) { //serve a computarlo solo la prima volta
+            ImmutableTable.Builder<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> builder = ImmutableTable.builder();
+            ImmutableCollection<IQ> allDef = getQueries(rdfAtomPredicate);
             Optional<IQ> optionalMergedIQ = queryMerger.mergeDefinitions(allDef);
 
             if (optionalMergedIQ.isPresent()) {
@@ -72,6 +109,11 @@ public class MappingImpl implements Mapping {
             this.compatibleDefinitionsFromIRITemplate = compatibleDefinitionsFromIRITemplate;
             isCompatibleDefinitionComputed = true;
         }
+    }*/
+
+    @Override
+    public ImmutableSet<ObjectStringTemplateFunctionSymbol> getIriTemplateSet() {
+        return iriTemplateSet;
     }
 
     @Override

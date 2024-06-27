@@ -113,7 +113,6 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
 
     @Override
     public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        //LSH: forse devo modificare qui, istanziando più transformer (copiando il codice transformNaryCommutativeNode)
         return transformNaryCommutativeNode(tree, rootNode, children);
     }
 

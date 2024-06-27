@@ -692,30 +692,20 @@ public class DestinationTest extends AbstractRDF4JTest {
 
     @Test
     public void andreaTest28(){
-        String sparql = "PREFIX schema: <http://schema.org/>\n" +
-                "SELECT ?s2 ?o\n" +
+        String sparql = "PREFIX sc: <http://purl.org/science/owl/sciencecommons/>\n" +
+                "PREFIX schema: <http://schema.org/>\n" +
+                "SELECT * \n" +
                 "WHERE {\n" +
-                "  ?s1 a ?c .\n" +
-                "  ?s2 ?o ?s1 .\n" +
+                "  <http://destination.example.org/data/source1/hospitality/EFF0FACBA54C11D1AD760020AFF92740> a schema:Hotel .\n" +
+                "  <http://destination.example.org/data/source1/hospitality/EFF0FACBA54C11D1AD760020AFF92740> ?p ?o .\n" +
                 "}\n" +
-                "LIMIT 100\n";
+                "LIMIT 10\n";
         runQuery(sparql);
     }
 
+
+/*
     @Test
-    public void andreaTest29(){
-        String sparql = "PREFIX schema: <http://schema.org/>\n" +
-                "SELECT ?s1 ?c\n" +
-                "WHERE {\n" +
-                "  ?s1 a ?c .\n" +
-                "}\n" +
-                "LIMIT 100\n";
-        runQuery(sparql);
-    }
-
-
-
-    /*@Test
     public void graphexplorer_critical_query_1(){
         String sparql = "SELECT ?class (COUNT(?class) AS ?count) {\n" +
                 "      ?subject a ?class {\n" +
@@ -823,7 +813,6 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "    }";
         runQuery(sparql);
     }
-
 
     @Test
     public void graphexplorer_critical_query_6(){

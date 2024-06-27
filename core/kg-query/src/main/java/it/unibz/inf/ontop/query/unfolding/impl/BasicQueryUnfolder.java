@@ -31,6 +31,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 
 /**
@@ -69,7 +71,7 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
     protected IQTree optimize(IQTree tree) {
         FirstPhaseQueryTrasformer firstPhaseTransformer = createFirstPhaseTransformer(tree.getKnownVariables());
         IQTree partialUnfoldedIQ = tree.acceptTransformer(firstPhaseTransformer);
-        if (firstPhaseTransformer.isThereIntensionalNode()){
+        if (firstPhaseTransformer.existsIntensionalNode()){
             IQTree normalizedPartialUnfoldedIQ = partialUnfoldedIQ.normalizeForOptimization(new VariableGeneratorImpl(partialUnfoldedIQ.getKnownVariables(), termFactory));
             variableGenerator = coreUtilsFactory.createVariableGenerator(normalizedPartialUnfoldedIQ.getKnownVariables());
             var tmp = normalizedPartialUnfoldedIQ.getPossibleVariableDefinitions();
@@ -119,7 +121,7 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
             }
         }
 
-        public void updateSubjTemplateMapping(ImmutableSet<Substitution<NonVariableTerm>> variableDefinitions){
+        private void updateSubjTemplateMapping(ImmutableSet<Substitution<NonVariableTerm>> variableDefinitions){
             Set<Map<Variable, ImmutableSet<ObjectStringTemplateFunctionSymbol>>> setSubjTemplateListMap = new HashSet<>();
             variableDefinitions.stream().forEach(elem -> {
                 setSubjTemplateListMap.add(findIRITemplateOfJustOneSubstitution(elem));
@@ -188,8 +190,8 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
 
             Map<Variable, Set<ObjectStringTemplateFunctionSymbol>> resultMap = cleanedListSubjTemplate.stream()
                     .collect(Collectors.groupingBy(
-                            Pair::getLeft, // Group by Variable
-                            Collectors.mapping(Pair::getRight, Collectors.toSet()) // Map ObjectStringTemplateFunctionSymbol to Set
+                            Pair::getLeft,
+                            Collectors.mapping(Pair::getRight, Collectors.toSet())
                     ));
 
             resultMap.forEach((key, value) -> subjTemplateForSubstitution.put(key, ImmutableSet.copyOf(value)));
@@ -203,41 +205,21 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
         //data una tripla rappresentata da un ?s ?p ?o, viene preso il nome del soggetto e si restituiscono tutte le definizioni che si ottengono interrogando compatibleDefinitionsFromIRITemplate
         //unite da un DISTINCT UNION.
         private Optional<IQ> getCompatibleDefinitionsWithSubject(RDFAtomPredicate rdfAtomPredicate, Variable subj){
-            Collection<ImmutableSet<ObjectStringTemplateFunctionSymbol>> values = subjTemplateListMap.values();
+            ImmutableSet<ObjectStringTemplateFunctionSymbol> associatedTemplate = subjTemplateListMap.get(subj);
+            return getCompatibleDefinitionsFromTemplateSet(rdfAtomPredicate, associatedTemplate);
+        }
+
+        private Optional<IQ> getCompatibleDefinitionsFromTemplateSet(RDFAtomPredicate rdfAtomPredicate, ImmutableSet<ObjectStringTemplateFunctionSymbol> templateSet){
             Collection<IQ> IQForest = new ArrayList<>();
-            for (ImmutableSet<ObjectStringTemplateFunctionSymbol> IRItemplateSet : values) {
-                for (ObjectStringTemplateFunctionSymbol template : IRItemplateSet) {
+            if (templateSet != null) {
+                for (ObjectStringTemplateFunctionSymbol template : templateSet) {
                     Optional<IQ> optionalIQ = mapping.getCompatibleDefinitionsFromIRITemplate(rdfAtomPredicate, template);
                     optionalIQ.ifPresent(IQForest::add);
                 }
+                Optional<IQ> optionalMergedIQ = queryMerger.mergeDefinitions(IQForest);
+                return optionalMergedIQ;
             }
-            Optional<IQ> optionalMergedIQ = queryMerger.mergeDefinitions(IQForest);
-            if (optionalMergedIQ.isPresent()) {
-                IQ mergedIQ = optionalMergedIQ.get();
-                if (IQForest.size() == 1) {
-                    return Optional.of(mergedIQ);
-                } else {
-                    DistinctNode distinctNode = iqFactory.createDistinctNode();
-                    IQTree mergedIQWithDistinct = iqFactory.createUnaryIQTree(distinctNode, mergedIQ.getTree());
-                    return Optional.of(iqFactory.createIQ(mergedIQ.getProjectionAtom(), mergedIQWithDistinct));
-                }
-            } else {
-                return Optional.empty();
-            }
-        }
-
-        private boolean isGenericSPO(ImmutableList<? extends VariableOrGroundTerm> arguments){
-            if (arguments.get(0) instanceof Variable && arguments.get(1) instanceof IRIConstant && arguments.get(2) instanceof Variable)
-                return true;
-            else
-                return false;
-        }
-
-        private boolean isClassSPO(ImmutableList<? extends VariableOrGroundTerm> arguments){
-            if (arguments.get(0) instanceof Variable && arguments.get(1) instanceof Variable && arguments.get(2) instanceof Variable)
-                return true;
-            else
-                return false;
+            return Optional.empty();
         }
 
         @Override
@@ -294,45 +276,173 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
             return predicate.getPropertyIRI(arguments)
                     //dalla tupla si cerca di prendere l'IRI del predicato
                     .map(i -> { //se l'IRI è presente
-                        if(i.equals(RDF.TYPE)) {
-                            //è un 'a' (rdf type), restituisci tutte le classi
-                            if(isClassSPO(arguments)){
-                                Variable subj = (Variable) arguments.get(0);
-                                Optional<IQ> optionalIQ = getCompatibleDefinitionsWithSubject(predicate, subj);
-                                if (optionalIQ.isPresent()){
-                                    return optionalIQ;
-                                }
-                                else{
-                                    return getRDFClassDefinition(predicate, arguments);
-                                }
-                            }
-                            else{
-                                return getRDFClassDefinition(predicate, arguments);
-                            }
-                        }
-                        else {
-                            return mapping.getRDFPropertyDefinition(predicate, i);
-                        }
+                        if(i.equals(RDF.TYPE)) return handleClassSPOCase(predicate, arguments);
+                        else return mapping.getRDFPropertyDefinition(predicate, i);
                     })
                     //altrimenti restituisci le definizioni delle proprietà se la proprietà è una variabile e non una costante
-                    .orElseGet(() -> {
-                        if(isGenericSPO(arguments)) {
-                            Variable subj = (Variable) arguments.get(0);
-                            Optional<IQ> optionalIQ = getCompatibleDefinitionsWithSubject(predicate, subj);
-                            //questo if serve nel caso in cui non si riesce ad effettuare l'unfolding intelligente (ci salva nel caso ad esempio in cui trovo prima un ?s ?p ?o e poi un rdf type)
-                            //e quindi sono costretto ad inserire tutte le definizioni per renderlo almeno corretto e non ottimizzato
-                            if (optionalIQ.isPresent()){
-                                return optionalIQ;
-                            }
-                            else{
-                                return getStarDefinition(predicate);
-                            }
-                        }
-                        else {
-                            //se il predicato ad esempio è una variabile, restituisci tutte le definizioni, ricade anche il caso ?s ?p ?o
-                            return getStarDefinition(predicate);
-                        }
-                    });
+                    .orElseGet(() -> handleGenericSPOCase(predicate, arguments));
+        }
+
+        private Optional<IQ> handleClassSPOCase(RDFAtomPredicate predicate,
+                                                ImmutableList<? extends VariableOrGroundTerm> arguments){
+            if(isClassSPO(arguments)){
+                if (arguments.get(0) instanceof Variable){ //(?s a ?c)
+                    Optional<ObjectStringTemplateFunctionSymbol> chosenTemplate = chooseOneTemplateIfPossible(subjTemplateListMap.get((Variable) arguments.get(0)));
+                    if (chosenTemplate.isPresent()){
+                        Optional<IQ> definitionSubj = mapping.getCompatibleDefinitionsFromIRITemplate(predicate, chosenTemplate.get());
+                        return definitionSubj.isPresent() ? definitionSubj : getStarDefinition(predicate);
+                    }
+                    else{
+                        return getStarDefinition(predicate);
+                    }
+                }
+                else if (arguments.get(0) instanceof IRIConstant){ //(iri a ?c)
+                    Optional<ObjectStringTemplateFunctionSymbol> chosenTemplate = chooseOneTemplateIfPossible(extractCompatibleTemplateFromIriConst((IRIConstant) arguments.get(0)));
+                    if (chosenTemplate.isPresent()){
+                        Optional<IQ> iriDefinition = mapping.getCompatibleDefinitionsFromIRITemplate(predicate, chosenTemplate.get());
+                        return iriDefinition.isPresent() ? iriDefinition : getRDFClassDefinition(predicate, arguments);
+                    }
+                    else{
+                        return getRDFClassDefinition(predicate, arguments);
+                    }
+                }
+                else{
+                    return getRDFClassDefinition(predicate, arguments);
+                }
+            }
+            else{
+                return getRDFClassDefinition(predicate, arguments);
+            }
+        }
+
+        private Optional<IQ> handleGenericSPOCase(RDFAtomPredicate predicate,
+                                                  ImmutableList<? extends VariableOrGroundTerm> arguments){
+            if(isSubPredObj(arguments)) {
+                Variable subj = (Variable) arguments.get(0);
+                ImmutableSet<ObjectStringTemplateFunctionSymbol> templateAssociatedWithSubj = subjTemplateListMap.containsKey(subj) ? subjTemplateListMap.get(subj) : ImmutableSet.of();
+                Optional<ObjectStringTemplateFunctionSymbol> chosenTemplate = chooseOneTemplateIfPossible(templateAssociatedWithSubj);
+                if (chosenTemplate.isPresent()){
+                    Optional<IQ> definitionSubj = mapping.getCompatibleDefinitionsFromIRITemplate(predicate, chosenTemplate.get());
+                    return definitionSubj.isPresent() ? definitionSubj : getStarDefinition(predicate);
+                }
+                else{
+                    return getStarDefinition(predicate);
+                }
+            }
+            else if(isIriPredObj(arguments)){
+                Optional<ObjectStringTemplateFunctionSymbol> chosenTemplate = chooseOneTemplateIfPossible(extractCompatibleTemplateFromIriConst((IRIConstant) arguments.get(0)));
+                if (chosenTemplate.isPresent()){
+                    Optional<IQ> iriDefinition = mapping.getCompatibleDefinitionsFromIRITemplate(predicate, chosenTemplate.get());
+                    return iriDefinition.isPresent() ? iriDefinition : getStarDefinition(predicate);
+                }
+                else{
+                    return getStarDefinition(predicate);
+                }
+            }
+            else if(isSubPredIri(arguments)){
+                Variable subj = (Variable) arguments.get(0);
+                ImmutableSet<ObjectStringTemplateFunctionSymbol> templateAssociatedWithSubj = subjTemplateListMap.containsKey(subj) ? subjTemplateListMap.get(subj) : ImmutableSet.of();
+                Optional<ObjectStringTemplateFunctionSymbol> chosenTemplate = chooseOneTemplateIfPossible(templateAssociatedWithSubj);
+                Optional<ObjectStringTemplateFunctionSymbol> firstCompatibleTemplate = chooseOneTemplateIfPossible(extractCompatibleTemplateFromIriConst((IRIConstant) arguments.get(2)));
+                if (chosenTemplate.isPresent()){
+                    Optional<IQ> definitionSubj = mapping.getCompatibleDefinitionsFromIRITemplate(predicate, chosenTemplate.get());
+                    return definitionSubj.isPresent() ? definitionSubj : getStarDefinition(predicate);
+                }
+                else if (firstCompatibleTemplate.isPresent()){
+                    Optional<IQ> iriDefinition = mapping.getCompatibleDefinitionsFromIRITemplate(predicate, firstCompatibleTemplate.get());
+                    return iriDefinition.isPresent() ? iriDefinition : getStarDefinition(predicate);
+                }
+                else{
+                    return getStarDefinition(predicate);
+                }
+            }
+            else if(isIriPredIri(arguments)){
+                Optional<ObjectStringTemplateFunctionSymbol> firstCompatibleTemplate = chooseOneTemplateIfPossible(extractCompatibleTemplateFromIriConst((IRIConstant) arguments.get(0)));
+                Optional<ObjectStringTemplateFunctionSymbol> otherCompatibleTemplate = chooseOneTemplateIfPossible(extractCompatibleTemplateFromIriConst((IRIConstant) arguments.get(2)));
+                if (firstCompatibleTemplate.isPresent()){
+                    Optional<IQ> iriDefinition = mapping.getCompatibleDefinitionsFromIRITemplate(predicate, firstCompatibleTemplate.get());
+                    return iriDefinition.isPresent() ? iriDefinition : getStarDefinition(predicate);
+                }
+                else if (otherCompatibleTemplate.isPresent()){
+                    Optional<IQ> iriDefinition = mapping.getCompatibleDefinitionsFromIRITemplate(predicate, otherCompatibleTemplate.get());
+                    return iriDefinition.isPresent() ? iriDefinition : getStarDefinition(predicate);
+                }
+                else{
+                    return getStarDefinition(predicate);
+                }
+            }
+            else {
+                return getStarDefinition(predicate);
+            }
+        }
+
+        private boolean isIriTemplateCompatibleWithConst(ObjectStringTemplateFunctionSymbol iriTemplate, IRIConstant iriConstant){
+            ImmutableExpression strictEquality = termFactory.getStrictEquality(
+                    termFactory.getConstantIRI(iriConstant.getIRI()),
+                    termFactory.getIRIFunctionalTerm(termFactory.getImmutableFunctionalTerm(
+                            iriTemplate,
+                            IntStream.range(0, iriTemplate.getArity())
+                                    .mapToObj(i -> variableGenerator.generateNewVariable())
+                                    .collect(ImmutableCollectors.toList()))));
+            return strictEquality.evaluate2VL(termFactory.createDummyVariableNullability(strictEquality))
+                    .getValue()
+                    .filter(v -> v.equals(ImmutableExpression.Evaluation.BooleanValue.FALSE))
+                    .isEmpty();
+        }
+
+        private ImmutableSet<ObjectStringTemplateFunctionSymbol> extractCompatibleTemplateFromIriConst(IRIConstant iriConstant) {
+            ImmutableSet<ObjectStringTemplateFunctionSymbol> iriTemplateSet = mapping.getIriTemplateSet();
+            ImmutableSet<ObjectStringTemplateFunctionSymbol> compatibleTemplate = iriTemplateSet.stream()
+                    .filter(elem -> isIriTemplateCompatibleWithConst(elem, iriConstant))
+                    .collect(ImmutableSet.toImmutableSet());
+            return compatibleTemplate;
+        }
+
+        private Optional<ObjectStringTemplateFunctionSymbol> chooseOneTemplateIfPossible(ImmutableSet<ObjectStringTemplateFunctionSymbol> compatibleTemplate){
+            if (compatibleTemplate.size() <= 0){
+                return Optional.empty();
+            }
+            else if (compatibleTemplate.size() == 1){
+                return Optional.of(compatibleTemplate.iterator().next());
+            }
+            else{
+                return Optional.empty();
+            }
+        }
+
+        private boolean isSubPredObj(ImmutableList<? extends VariableOrGroundTerm> arguments){
+            if (arguments.get(0) instanceof Variable && arguments.get(1) instanceof Variable && arguments.get(2) instanceof Variable)
+                return true;
+            else
+                return false;
+        }
+
+        private boolean isSubPredIri(ImmutableList<? extends VariableOrGroundTerm> arguments){
+            if (arguments.get(0) instanceof Variable && arguments.get(1) instanceof Variable && arguments.get(2) instanceof IRIConstant)
+                return true;
+            else
+                return false;
+        }
+
+        private boolean isIriPredObj(ImmutableList<? extends VariableOrGroundTerm> arguments){
+            if (arguments.get(0) instanceof IRIConstant && arguments.get(1) instanceof Variable && arguments.get(2) instanceof Variable)
+                return true;
+            else
+                return false;
+        }
+
+        private boolean isIriPredIri(ImmutableList<? extends VariableOrGroundTerm> arguments){
+            if (arguments.get(0) instanceof IRIConstant && arguments.get(1) instanceof Variable && arguments.get(2) instanceof IRIConstant)
+                return true;
+            else
+                return false;
+        }
+
+        private boolean isClassSPO(ImmutableList<? extends VariableOrGroundTerm> arguments){
+            if (arguments.get(1) instanceof Variable && arguments.get(2) instanceof Variable)
+                return true;
+            else
+                return false;
         }
 
         private Optional<IQ> getRDFClassDefinition(RDFAtomPredicate predicate,
@@ -349,7 +459,6 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
         }
 
         private Optional<IQ> getStarDefinition(RDFAtomPredicate predicate) {
-
             return queryMerger.mergeDefinitions(mapping.getQueries(predicate));
         }
 
@@ -362,15 +471,15 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
 
     //Transformer che effettua l'unfolding di tutto eccetto della spo generica e quella con rdftype class
     protected class FirstPhaseQueryTrasformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {
-        private boolean foundGenericSPO; //(?s ?p ?o)
-        private boolean foundClassSPO; //(?s a ?c)
+        private boolean foundGenericSPO; //(?s ?p ?o), (iri ?p ?o), (?s ?p iri), (iri ?p iri)
+        private boolean foundClassSPO; //(?s a ?c), (iri a ?c)
 
         protected FirstPhaseQueryTrasformer(VariableGenerator variableGenerator) {
             super(variableGenerator, BasicQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
         }
 
         private boolean isGenericSPO(ImmutableList<? extends VariableOrGroundTerm> arguments){
-            if (arguments.get(0) instanceof Variable && arguments.get(1) instanceof Variable && arguments.get(2) instanceof Variable){
+            if (arguments.get(1) instanceof Variable){
                 foundGenericSPO = true;
                 return true;
             }
@@ -379,7 +488,7 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
         }
 
         private boolean isClassSPO(ImmutableList<? extends VariableOrGroundTerm> arguments){
-            if (arguments.get(0) instanceof Variable && arguments.get(1) instanceof IRIConstant && arguments.get(2) instanceof Variable) {
+            if (arguments.get(1) instanceof IRIConstant && arguments.get(2) instanceof Variable) {
                 foundClassSPO = true;
                 return true;
             }
@@ -402,24 +511,16 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
             return predicate.getPropertyIRI(arguments)
                     .map(i -> {
                         if (i.equals(RDF.TYPE)) {
-                            if(isClassSPO(arguments)){
-                                return Optional.<IQ>empty();
-                            }
-                            else{
-                                return getRDFClassDefinition(predicate, arguments);
-                            }
+                            if(isClassSPO(arguments)) return Optional.<IQ>empty();
+                            else return getRDFClassDefinition(predicate, arguments);
                         }
                         else {
                             return mapping.getRDFPropertyDefinition(predicate, i);
                         }
                     })
                     .orElseGet(() -> {
-                        if(isGenericSPO(arguments)){
-                            return Optional.<IQ>empty();
-                        }
-                        else {
-                            return getStarDefinition(predicate);
-                        }
+                        isGenericSPO(arguments);
+                        return Optional.<IQ>empty();
                     });
         }
 
@@ -437,7 +538,6 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
         }
 
         private Optional<IQ> getStarDefinition(RDFAtomPredicate predicate) {
-
             return queryMerger.mergeDefinitions(mapping.getQueries(predicate));
         }
 
@@ -451,7 +551,7 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
             }
         }
 
-        public boolean isThereIntensionalNode(){
+        public boolean existsIntensionalNode(){
             if (foundGenericSPO || foundClassSPO)
                 return true;
             else

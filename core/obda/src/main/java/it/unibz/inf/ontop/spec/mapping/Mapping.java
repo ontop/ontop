@@ -52,4 +52,6 @@ public interface Mapping {
     Optional<IQ> getCompatibleDefinitionsFromIRITemplate(RDFAtomPredicate rdfAtomPredicate, ObjectStringTemplateFunctionSymbol template);
 
     void computeCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate);
+
+    ImmutableSet<ObjectStringTemplateFunctionSymbol> getIriTemplateSet();
 }
