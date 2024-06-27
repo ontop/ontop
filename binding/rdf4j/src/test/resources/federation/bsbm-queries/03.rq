@@ -32,13 +32,13 @@ SELECT ?product ?label
     ?product rdfs:label ?label .
     ?product a bsbm:Product .
     ?product bsbm:type <ProductType4> .  # type = 4 / in BSBM: ?product a %ProductType%
-    ?product bsbm:productFeature <ProductFeature79> .  # feature2 = 79
+    ?product bsbm:productFeature <ProductFeature87> .  # feature2 = 87
     ?product bsbm:productPropertyNumeric1 ?p1 .
-    FILTER ( ?p1 > 53 )   # propertynum1_lo = 53
+    FILTER (?p1 > 21)  # propertynum1_lo = 21
     ?product bsbm:productPropertyNumeric3 ?p3 .
-    FILTER ( ?p3 < 1874 )  # propertynum3_hi = 1874
+    FILTER (?p3 < 1246)  # propertynum3_hi = 1246
     OPTIONAL {
-        ?product bsbm:productFeature <ProductFeature814> .  # feature_missing = 814
+        ?product bsbm:productFeature <ProductFeature611> .  # feature_missing = 611
         ?product rdfs:label ?testVar
     }
     FILTER (!bound(?testVar))

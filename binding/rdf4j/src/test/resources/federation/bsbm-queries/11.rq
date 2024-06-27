@@ -1,27 +1,53 @@
 # BSBM-11: get all information about an offer
+# PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# PREFIX dc: <http://purl.org/dc/elements/1.1/>
 # BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
-# 
-# SELECT ?property ?hasValue ?isValueOf
+#
+# SELECT
+#     ?product ?productLabel ?vendor ?vendorLabel ?price  # following BSBM SQL returning also product/vendor/publisher labels to make the
+#     ?validFrom ?validTo ?deliveryDays ?offerWebpage     # query federated, but not returning producer (as not returned in SPARQL); the
+#     ?publisher ?publisherLabel ?publishDate             # BSBM SPARQL query is a SELECT incoming/outgoing properties simulating a DESCRIBE
 # {
-#     {
-#         <dataFromVendor/Offer${offer:percent}> ?property ?hasValue
-#     }
-#     UNION
-#     {
-#         ?isValueOf ?property <dataFromVendor/Offer${offer:percent}>
-#     }
+#     <dataFromVendor/Offer${offer:percent}>
+#         a bsbm:Offer ;
+#         bsbm:product ?product ;
+#         bsbm:vendor ?vendor ;
+#         bsbm:price ?price ;
+#         bsbm:validFrom ?validFrom ;
+#         bsbm:validTo ?validTo ;
+#         bsbm:deliveryDays ?deliveryDays ;
+#         bsbm:offerWebpage ?offerWebpage ;
+#         dc:publisher ?publisher ;
+#         dc:date ?publishDate .
+#     ?product rdfs:label ?productLabel .      # not in BSBM: label of referred ?product entity
+#     ?vendor rdfs:label ?vendorLabel .        # not in BSBM: label of referred ?vendor entity
+#     ?publisher rdfs:label ?publisherLabel .  # not in BSBM: label of referred ?publisher entity (same as vendor)
 # }
 #
 # instantiate sample variables
+PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
 BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
 
-SELECT ?property ?hasValue ?isValueOf
+SELECT
+    ?product ?productLabel ?vendor ?vendorLabel ?price  # following BSBM SQL returning also product/vendor/publisher labels to make the
+    ?validFrom ?validTo ?deliveryDays ?offerWebpage     # query federated, but not returning producer (as not returned in SPARQL); the
+    ?publisher ?publisherLabel ?publishDate             # BSBM SPARQL query is a SELECT incoming/outgoing properties simulating a DESCRIBE
 {
-    {
-        <dataFromVendor/Offer2838> ?property ?hasValue  # offer = 2838
-    }
-    UNION
-    {
-        ?isValueOf ?property <dataFromVendor/Offer2838>
-    }
+    <dataFromVendor/Offer2807>  # offer = 2807
+        a bsbm:Offer ;
+        bsbm:product ?product ;
+        bsbm:vendor ?vendor ;
+        bsbm:price ?price ;
+        bsbm:validFrom ?validFrom ;
+        bsbm:validTo ?validTo ;
+        bsbm:deliveryDays ?deliveryDays ;
+        bsbm:offerWebpage ?offerWebpage ;
+        dc:publisher ?publisher ;
+        dc:date ?publishDate .
+    ?product rdfs:label ?productLabel .      # not in BSBM: label of referred ?product entity
+    ?vendor rdfs:label ?vendorLabel .        # not in BSBM: label of referred ?vendor entity
+    ?publisher rdfs:label ?publisherLabel .  # not in BSBM: label of referred ?publisher entity (same as vendor)
 }

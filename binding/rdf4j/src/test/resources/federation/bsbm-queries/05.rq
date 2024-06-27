@@ -2,7 +2,7 @@
 # PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
 # PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 # BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
-# 
+#
 # SELECT DISTINCT ?product ?productLabel
 # {
 #     ?product rdfs:label ?productLabel .
@@ -27,13 +27,13 @@ BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
 SELECT DISTINCT ?product ?productLabel
 {
     ?product rdfs:label ?productLabel .
-    FILTER (<dataFromProducer/Product94> != ?product)  # product = 94
-    <dataFromProducer/Product94> bsbm:productFeature ?prodFeature .
+    FILTER (<dataFromProducer/Product23> != ?product)  # product = 23
+    <dataFromProducer/Product23> bsbm:productFeature ?prodFeature .
     ?product bsbm:productFeature ?prodFeature .
-    <dataFromProducer/Product94> bsbm:productPropertyNumeric1 ?origProperty1 .
+    <dataFromProducer/Product23> bsbm:productPropertyNumeric1 ?origProperty1 .
     ?product bsbm:productPropertyNumeric1 ?simProperty1 .
     FILTER (?simProperty1 < ?origProperty1 + 120 && ?simProperty1 > ?origProperty1 - 120)
-    <dataFromProducer/Product94> bsbm:productPropertyNumeric2 ?origProperty2 .
+    <dataFromProducer/Product23> bsbm:productPropertyNumeric2 ?origProperty2 .
     ?product bsbm:productPropertyNumeric2 ?simProperty2 .
     FILTER (?simProperty2 < ?origProperty2 + 170 && ?simProperty2 > ?origProperty2 - 170)
 }

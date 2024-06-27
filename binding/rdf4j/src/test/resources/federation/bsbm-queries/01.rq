@@ -15,7 +15,7 @@
 # }
 # ORDER BY ?label
 # LIMIT 10
-
+#
 # instantiate sample variables
 PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -25,11 +25,11 @@ SELECT DISTINCT ?product ?label
 {
     ?product rdfs:label ?label .
     ?product a bsbm:Product .
-    ?product bsbm:type <ProductType4> .  # type = 4 / in BSBM: ?product a %ProductType%
-    ?product bsbm:productFeature <ProductFeature79> .  # feature2 = 79
-    ?product bsbm:productFeature <ProductFeature116> .  # feature3 = 116
+    ?product bsbm:type <ProductType4> .  # type = 4 / in BSBM:  ?product a %ProductType%
+    ?product bsbm:productFeature <ProductFeature87> .  # feature2 = 87
+    ?product bsbm:productFeature <ProductFeature79> .  # feature3 = 79
     ?product bsbm:productPropertyNumeric1 ?value1 .
-    FILTER (?value1 > 53)  # propertynum1_lo = 53
+    FILTER (?value1 > 21)  # propertynum1_lo = 21
 }
 ORDER BY ?label
 LIMIT 10

@@ -2,7 +2,7 @@
 # PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
 # PREFIX dc: <http://purl.org/dc/elements/1.1/>
 # BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
-# 
+#
 # SELECT DISTINCT ?offer ?price
 # {
 #     ?offer bsbm:product <dataFromProducer/Product${product:none}> .
@@ -25,7 +25,7 @@ BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
 
 SELECT DISTINCT ?offer ?price
 {
-    ?offer bsbm:product <dataFromProducer/Product94> .  # product = 94
+    ?offer bsbm:product <dataFromProducer/Product23> .  # product = 23
     ?offer bsbm:vendor ?vendor .
     ?offer dc:publisher ?vendor .
     ?vendor bsbm:country <http://downlode.org/rdf/iso-3166/countries#US> .
@@ -33,7 +33,7 @@ SELECT DISTINCT ?offer ?price
     FILTER (?deliveryDays <= 3)
     ?offer bsbm:price ?price .
     ?offer bsbm:validTo ?date .
-    FILTER (?date > "2008-06-13"^^xsd:date)  # offer_validto_lo = 2008-06-13
+    FILTER (?date > "2008-06-04"^^xsd:date)  # offer_validto_lo = 2008-06-04
 }
 ORDER BY ?price  # in BSBM: xsd:double(str(?price))
 LIMIT 10

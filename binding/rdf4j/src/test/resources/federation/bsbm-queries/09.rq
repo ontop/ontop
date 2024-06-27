@@ -4,16 +4,16 @@
 # PREFIX rev: <http://purl.org/stuff/rev#>
 # PREFIX dc: <http://purl.org/dc/elements/1.1/>
 # BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
-# 
-# SELECT ?p ?name ?mbox_sha1sum ?country ?r ?product ?title  # in BSBM: DESCRIBE ?p
+#
+# SELECT ?p ?name ?mbox_sha1sum ?country ?r ?product ?title  # following BSBM SQL, in BSBM SPARQL: DESCRIBE ?p WHERE { <...> rev:reviewer ?p }
 # {
 #     <dataFromRatingSite/Review${review:percent}> rev:reviewer ?p .
 #     ?p foaf:name ?name .
 #     ?p foaf:mbox_sha1sum ?mbox_sha1sum .
 #     ?p bsbm:country ?country .
 #     ?r rev:reviewer ?p .
-#     ?r bsbm:reviewFor ?product .
-#     ?r dc:title ?title .
+#     ?r bsbm:reviewFor ?product . # in BSBM SQL, not in BSBM SPARQL (not part of DESCRIBE)
+#     ?r dc:title ?title .         # in BSBM SQL, not in BSBM SPARQL (not part of DESCRIBE)
 # }
 #
 # instantiate sample variables
@@ -23,13 +23,13 @@ PREFIX rev: <http://purl.org/stuff/rev#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
 
-SELECT ?p ?name ?mbox_sha1sum ?country ?r ?product ?title  # in BSBM: DESCRIBE ?p
+SELECT ?p ?name ?mbox_sha1sum ?country ?r ?product ?title  # following BSBM SQL, in BSBM SPARQL: DESCRIBE ?p WHERE { <...> rev:reviewer ?p }
 {
-    <dataFromRatingSite/Review1356> rev:reviewer ?p .  # review = 1356
+    <dataFromRatingSite/Review1893> rev:reviewer ?p .  # review = 1893
     ?p foaf:name ?name .
     ?p foaf:mbox_sha1sum ?mbox_sha1sum .
     ?p bsbm:country ?country .
     ?r rev:reviewer ?p .
-    ?r bsbm:reviewFor ?product .
-    ?r dc:title ?title .
+    ?r bsbm:reviewFor ?product . # in BSBM SQL, not in BSBM SPARQL (not part of DESCRIBE)
+    ?r dc:title ?title .         # in BSBM SQL, not in BSBM SPARQL (not part of DESCRIBE)
 }

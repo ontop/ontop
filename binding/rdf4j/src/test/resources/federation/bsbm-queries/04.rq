@@ -2,7 +2,7 @@
 # PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
 # PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 # BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
-# 
+#
 # SELECT DISTINCT ?product ?label ?propertyTextual
 # {
 #     {
@@ -42,22 +42,22 @@ SELECT DISTINCT ?product ?label ?propertyTextual
         ?product rdfs:label ?label .
         ?product a bsbm:Product .
         ?product bsbm:type <ProductType4> .  # type = 4 / in BSBM: ?product a %ProductType%
-        ?product bsbm:productFeature <ProductFeature90> .  # feature1 = 90
-        ?product bsbm:productFeature <ProductFeature79> .  # feature2 = 79
+        ?product bsbm:productFeature <ProductFeature120> .  # feature1 = 120
+        ?product bsbm:productFeature <ProductFeature87> .  # feature2 = 87
         ?product bsbm:productPropertyTextual1 ?propertyTextual .
         ?product bsbm:productPropertyNumeric1 ?p1 .
-        FILTER( ?p1 > 53 )  # propertynum1_lo = 53
+        FILTER (?p1 > 21)  # propertynum1_lo = 21
     }
     UNION
     {
         ?product rdfs:label ?label .
         ?product a bsbm:Product .
         ?product bsbm:type <ProductType4> .  # type = 4 / in BSBM: ?product a %ProductType%
-        ?product bsbm:productFeature <ProductFeature90> .  # feature1 = 90
-        ?product bsbm:productFeature <ProductFeature116> .  # feature3 = 116
+        ?product bsbm:productFeature <ProductFeature120> .  # feature1 = 120
+        ?product bsbm:productFeature <ProductFeature79> .  # feature3 = 79
         ?product bsbm:productPropertyTextual1 ?propertyTextual .
         ?product bsbm:productPropertyNumeric2 ?p2 .
-        FILTER ( ?p2 > 134 )  # propertynum2_lo = 134
+        FILTER (?p2 > 128)  # propertynum2_lo = 128
     }
 }
 ORDER BY ?label

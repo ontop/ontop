@@ -5,7 +5,7 @@
 # PREFIX rev: <http://purl.org/stuff/rev#>
 # PREFIX dc: <http://purl.org/dc/elements/1.1/>
 # BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
-# 
+#
 # SELECT
 #     ?productLabel ?offer ?price ?vendor ?vendorTitle
 #     ?review ?revTitle ?reviewer ?revName ?rating1 ?rating2
@@ -43,19 +43,19 @@ SELECT
     ?productLabel ?offer ?price ?vendor ?vendorTitle
     ?review ?revTitle ?reviewer ?revName ?rating1 ?rating2
 {
-    <dataFromProducer/Product94> rdfs:label ?productLabel .  # product = 94
+    <dataFromProducer/Product23> rdfs:label ?productLabel .  # product = 23
     OPTIONAL {
-        ?offer bsbm:product <dataFromProducer/Product94> .
+        ?offer bsbm:product <dataFromProducer/Product23> .
         ?offer bsbm:price ?price .
         ?offer bsbm:vendor ?vendor .
         ?vendor rdfs:label ?vendorTitle .
         ?vendor bsbm:country <http://downlode.org/rdf/iso-3166/countries#DE> .
         ?offer dc:publisher ?vendor .
         ?offer bsbm:validTo ?date .
-        FILTER (?date > "2008-06-13"^^xsd:date)  # offer_validto_lo = 2008-06-13
+        FILTER (?date > "2008-06-04"^^xsd:date)  # offer_validto_lo = 2008-06-04
     }
     OPTIONAL {
-        ?review bsbm:reviewFor <dataFromProducer/Product94> .
+        ?review bsbm:reviewFor <dataFromProducer/Product23> .
         ?review rev:reviewer ?reviewer .
         ?reviewer foaf:name ?revName .
         ?review dc:title ?revTitle .

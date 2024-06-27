@@ -4,7 +4,7 @@
 # PREFIX rev: <http://purl.org/stuff/rev#>
 # PREFIX dc: <http://purl.org/dc/elements/1.1/>
 # BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
-# 
+#
 # SELECT
 #     ?title ?text ?reviewDate ?reviewer ?reviewerName
 #     ?rating1 ?rating2 ?rating3 ?rating4
@@ -22,7 +22,7 @@
 #     OPTIONAL { ?review bsbm:rating4 ?rating4 }
 # }
 # ORDER BY DESC(?reviewDate)
-# # in BSBM: LIMIT 20
+# LIMIT 20
 #
 # instantiate sample variables
 PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
@@ -35,10 +35,10 @@ SELECT
     ?title ?text ?reviewDate ?reviewer ?reviewerName
     ?rating1 ?rating2 ?rating3 ?rating4
 {
-    ?review bsbm:reviewFor <dataFromProducer/Product94> .  # product = 94
+    ?review bsbm:reviewFor <dataFromProducer/Product23> .  # product = 23
     ?review dc:title ?title .
     ?review rev:text ?text .
-    ?review bsbm:language "en" .  # in BSBM:  langMatches(lang(?text), "en")
+    ?review bsbm:language "en" .  # in BSBM: langMatches(lang(?text), "en")
     ?review bsbm:reviewDate ?reviewDate .
     ?review rev:reviewer ?reviewer .
     ?reviewer foaf:name ?reviewerName .
@@ -48,4 +48,4 @@ SELECT
     OPTIONAL { ?review bsbm:rating4 ?rating4 }
 }
 ORDER BY DESC(?reviewDate)
-# in BSBM:  LIMIT 20
+LIMIT 20

@@ -3,7 +3,7 @@
 # PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 # PREFIX dc: <http://purl.org/dc/elements/1.1/>
 # BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
-# 
+#
 # SELECT
 #     ?label ?comment ?producer ?productFeature
 #     ?propertyTextual1 ?propertyTextual2 ?propertyTextual3 ?propertyNumeric1
@@ -37,19 +37,19 @@ SELECT
     ?propertyTextual1 ?propertyTextual2 ?propertyTextual3 ?propertyNumeric1
     ?propertyNumeric2 ?propertyTextual4 ?propertyTextual5 ?propertyNumeric4
 {
-    <dataFromProducer/Product94> rdfs:label ?label .  # product = 94
-    <dataFromProducer/Product94> rdfs:comment ?comment .
-    <dataFromProducer/Product94> bsbm:producer ?p .
+    <dataFromProducer/Product23> rdfs:label ?label .  # product = 23
+    <dataFromProducer/Product23> rdfs:comment ?comment .
+    <dataFromProducer/Product23> bsbm:producer ?p .
     ?p rdfs:label ?producer .
-    <dataFromProducer/Product94> dc:publisher ?p .
-    <dataFromProducer/Product94> bsbm:productFeature ?f .
+    <dataFromProducer/Product23> dc:publisher ?p .
+    <dataFromProducer/Product23> bsbm:productFeature ?f .
     ?f rdfs:label ?productFeature .
-    <dataFromProducer/Product94> bsbm:productPropertyTextual1 ?propertyTextual1 .
-    <dataFromProducer/Product94> bsbm:productPropertyTextual2 ?propertyTextual2 .
-    <dataFromProducer/Product94> bsbm:productPropertyTextual3 ?propertyTextual3 .
-    <dataFromProducer/Product94> bsbm:productPropertyNumeric1 ?propertyNumeric1 .
-    <dataFromProducer/Product94> bsbm:productPropertyNumeric2 ?propertyNumeric2 .
-    OPTIONAL { <dataFromProducer/Product94> bsbm:productPropertyTextual4 ?propertyTextual4 }
-    OPTIONAL { <dataFromProducer/Product94> bsbm:productPropertyTextual5 ?propertyTextual5 }
-    OPTIONAL { <dataFromProducer/Product94> bsbm:productPropertyNumeric4 ?propertyNumeric4 }
+    <dataFromProducer/Product23> bsbm:productPropertyTextual1 ?propertyTextual1 .
+    <dataFromProducer/Product23> bsbm:productPropertyTextual2 ?propertyTextual2 .
+    <dataFromProducer/Product23> bsbm:productPropertyTextual3 ?propertyTextual3 .
+    <dataFromProducer/Product23> bsbm:productPropertyNumeric1 ?propertyNumeric1 .
+    <dataFromProducer/Product23> bsbm:productPropertyNumeric2 ?propertyNumeric2 .
+    OPTIONAL { <dataFromProducer/Product23> bsbm:productPropertyTextual4 ?propertyTextual4 }
+    OPTIONAL { <dataFromProducer/Product23> bsbm:productPropertyTextual5 ?propertyTextual5 }
+    OPTIONAL { <dataFromProducer/Product23> bsbm:productPropertyNumeric4 ?propertyNumeric4 }
 }

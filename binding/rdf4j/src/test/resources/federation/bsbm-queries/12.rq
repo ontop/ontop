@@ -3,7 +3,7 @@
 # PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 # PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 # BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
-# 
+#
 # SELECT
 #     ?productURI ?productlabel ?vendorURI ?vendorname ?vendorhomepage
 #     ?offerURL ?price ?deliveryDays ?validTo
@@ -29,13 +29,13 @@ SELECT
     ?productURI ?productlabel ?vendorURI ?vendorname ?vendorhomepage
     ?offerURL ?price ?deliveryDays ?validTo
 {
-    <dataFromVendor/Offer2838> bsbm:product ?productURI .  # offer = 2838
+    <dataFromVendor/Offer2807> bsbm:product ?productURI .  # offer = 2807
     ?productURI rdfs:label ?productlabel .
-    <dataFromVendor/Offer2838> bsbm:vendor ?vendorURI .
+    <dataFromVendor/Offer2807> bsbm:vendor ?vendorURI .
     ?vendorURI rdfs:label ?vendorname .
     ?vendorURI foaf:homepage ?vendorhomepage .
-    <dataFromVendor/Offer2838> bsbm:offerWebpage ?offerURL .
-    <dataFromVendor/Offer2838> bsbm:price ?price .
-    <dataFromVendor/Offer2838> bsbm:deliveryDays ?deliveryDays .
-    <dataFromVendor/Offer2838> bsbm:validTo ?validTo
+    <dataFromVendor/Offer2807> bsbm:offerWebpage ?offerURL .
+    <dataFromVendor/Offer2807> bsbm:price ?price .
+    <dataFromVendor/Offer2807> bsbm:deliveryDays ?deliveryDays .
+    <dataFromVendor/Offer2807> bsbm:validTo ?validTo
 }
