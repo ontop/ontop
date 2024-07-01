@@ -18,6 +18,91 @@
     "otherNames" : [ [ "\"bsbm\"", "\"csv_productfeatureproduct2\"" ] ]
   }, {
     "uniqueConstraints" : [ {
+      "name" : "pkey_matv_s4_vendor_s4_offer",
+      "determinants" : [ "\"1_0\"", "\"2_0\"" ],
+      "isPrimaryKey" : true
+    }, {
+      "name" : "idx_matv_s4_vendor_s4_offer_2_0_1_0",
+      "determinants" : [ "\"2_0\"", "\"1_0\"" ],
+      "isPrimaryKey" : false
+    } ],
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(2147483647)"
+    }, {
+      "name" : "\"1_2\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(2147483647)"
+    }, {
+      "name" : "\"1_3\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(2147483647)"
+    }, {
+      "name" : "\"1_4\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(2147483647)"
+    }, {
+      "name" : "\"1_5\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_6\"",
+      "isNullable" : false,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : false,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : false,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : false,
+      "datatype" : "DATE"
+    }, {
+      "name" : "\"2_7\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_8\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(2147483647)"
+    }, {
+      "name" : "\"2_9\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_10\"",
+      "isNullable" : false,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"matv_s4_vendor_s4_offer\"" ],
+    "otherNames" : [ [ "\"bsbm\"", "\"matv_s4_vendor_s4_offer\"" ] ]
+  }, {
+    "uniqueConstraints" : [ {
       "name" : "reviewc_pkey",
       "determinants" : [ "\"nr\"" ],
       "isPrimaryKey" : true
@@ -364,16 +449,6 @@
       "isPrimaryKey" : false
     } ],
     "foreignKeys" : [ {
-      "name" : "product1_productfeatureproduct1",
-      "from" : {
-        "relation" : [ "\"productfeatureproduct1\"" ],
-        "columns" : [ "\"product\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"product1\"" ],
-        "columns" : [ "\"nr\"" ]
-      }
-    }, {
       "name" : "productfeatureproduct1_productfeature",
       "from" : {
         "relation" : [ "\"productfeatureproduct1\"" ],
@@ -381,6 +456,16 @@
       },
       "to" : {
         "relation" : [ "\"productfeature\"" ],
+        "columns" : [ "\"nr\"" ]
+      }
+    }, {
+      "name" : "product1_productfeatureproduct1",
+      "from" : {
+        "relation" : [ "\"productfeatureproduct1\"" ],
+        "columns" : [ "\"product\"" ]
+      },
+      "to" : {
+        "relation" : [ "\"product1\"" ],
         "columns" : [ "\"nr\"" ]
       }
     } ],
@@ -430,16 +515,6 @@
     "otherNames" : [ [ "\"bsbm\"", "\"producttype\"" ] ]
   }, {
     "foreignKeys" : [ {
-      "name" : "productfeatureproduct2_productfeature",
-      "from" : {
-        "relation" : [ "\"productfeatureproduct2\"" ],
-        "columns" : [ "\"productfeature\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"productfeature\"" ],
-        "columns" : [ "\"nr\"" ]
-      }
-    }, {
       "name" : "product2_productfeatureproduct2",
       "from" : {
         "relation" : [ "\"productfeatureproduct2\"" ],
@@ -447,6 +522,16 @@
       },
       "to" : {
         "relation" : [ "\"product2\"" ],
+        "columns" : [ "\"nr\"" ]
+      }
+    }, {
+      "name" : "productfeatureproduct2_productfeature",
+      "from" : {
+        "relation" : [ "\"productfeatureproduct2\"" ],
+        "columns" : [ "\"productfeature\"" ]
+      },
+      "to" : {
+        "relation" : [ "\"productfeature\"" ],
         "columns" : [ "\"nr\"" ]
       }
     } ],
@@ -873,16 +958,6 @@
     "otherNames" : [ [ "\"bsbm\"", "\"producer\"" ] ]
   }, {
     "foreignKeys" : [ {
-      "name" : "product2_producttypeproduct2",
-      "from" : {
-        "relation" : [ "\"producttypeproduct2\"" ],
-        "columns" : [ "\"product\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"product2\"" ],
-        "columns" : [ "\"nr\"" ]
-      }
-    }, {
       "name" : "producttypeproduct2_producttype",
       "from" : {
         "relation" : [ "\"producttypeproduct2\"" ],
@@ -890,6 +965,16 @@
       },
       "to" : {
         "relation" : [ "\"producttype\"" ],
+        "columns" : [ "\"nr\"" ]
+      }
+    }, {
+      "name" : "product2_producttypeproduct2",
+      "from" : {
+        "relation" : [ "\"producttypeproduct2\"" ],
+        "columns" : [ "\"product\"" ]
+      },
+      "to" : {
+        "relation" : [ "\"product2\"" ],
         "columns" : [ "\"nr\"" ]
       }
     } ],
@@ -1035,6 +1120,99 @@
     } ],
     "name" : [ "\"productfeature\"" ],
     "otherNames" : [ [ "\"bsbm\"", "\"productfeature\"" ] ]
+  }, {
+    "uniqueConstraints" : [ {
+      "name" : "pkey_matv_s5_productfeatureproduct2_s5_product2",
+      "determinants" : [ "\"1_1\"", "\"2_0\"" ],
+      "isPrimaryKey" : true
+    }, {
+      "name" : "idx_matv_s5_productfeatureproduct2_s5_product2_2_0_1_1",
+      "determinants" : [ "\"2_0\"", "\"1_1\"" ],
+      "isPrimaryKey" : false
+    } ],
+    "columns" : [ {
+      "name" : "\"1_0\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"1_1\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_0\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_1\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(2147483647)"
+    }, {
+      "name" : "\"2_2\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(2147483647)"
+    }, {
+      "name" : "\"2_3\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_4\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_5\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_6\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_7\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_8\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_9\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_10\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(2147483647)"
+    }, {
+      "name" : "\"2_11\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(2147483647)"
+    }, {
+      "name" : "\"2_12\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(2147483647)"
+    }, {
+      "name" : "\"2_13\"",
+      "isNullable" : true,
+      "datatype" : "VARCHAR(2147483647)"
+    }, {
+      "name" : "\"2_14\"",
+      "isNullable" : true,
+      "datatype" : "VARCHAR(2147483647)"
+    }, {
+      "name" : "\"2_15\"",
+      "isNullable" : true,
+      "datatype" : "VARCHAR(2147483647)"
+    }, {
+      "name" : "\"2_16\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"2_17\"",
+      "isNullable" : false,
+      "datatype" : "DATE"
+    } ],
+    "name" : [ "\"matv_s5_productfeatureproduct2_s5_product2\"" ],
+    "otherNames" : [ [ "\"bsbm\"", "\"matv_s5_productfeatureproduct2_s5_product2\"" ] ]
   }, {
     "uniqueConstraints" : [ {
       "name" : "csv_vendor_pk",
@@ -1631,9 +1809,9 @@
     "dbmsProductName" : "Virtual DataPort",
     "dbmsVersion" : "8.0 20230301",
     "driverName" : "com.denodo.vdp.jdbc.Driver",
-    "driverVersion" : "8.0 20230301",
+    "driverVersion" : "8.0 20240306",
     "quotationString" : "\"",
-    "extractionTime" : "2024-02-13T10:41:39",
+    "extractionTime" : "2024-07-01T15:08:14",
     "idFactoryType" : "POSTGRESQL"
   }
 }

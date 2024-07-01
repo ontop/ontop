@@ -1,5 +1,6 @@
 package federationOptimization;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Injector;
@@ -22,12 +23,10 @@ import it.unibz.inf.ontop.query.KGQueryFactory;
 import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -39,6 +38,8 @@ public final class Tester {
     private final QueryReformulator reformulator;
 
     private final KGQueryFactory kgQueryFactory;
+
+    private final Map<String, String> sourceMap;
 
     private Tester(
             String propertyFile, String ontologyFile, String mappingFile,
@@ -71,39 +72,59 @@ public final class Tester {
                 injector.getInstance(AtomFactory.class),
                 injector.getInstance(TermFactory.class),
                 injector.getInstance(CoreSingletons.class),
-                sourceFile != null,
+                hintFile != null,
                 sourceFile,
                 effLabelFile,
                 hintFile);
+
+        ImmutableMap.Builder<String, String> sourceMapBuilder = ImmutableMap.builder();
+        if (sourceFile != null) {
+            try {
+                for (String line : Files.readAllLines(Paths.get(sourceFile))) {
+                    String[] tokens = line.split("-");
+                    if (tokens.length == 2) {
+                        sourceMapBuilder.put(tokens[0], tokens[1]);
+                    }
+                }
+            } catch (IOException ex) {
+                throw new UncheckedIOException(ex);
+            }
+        }
+        this.sourceMap = sourceMapBuilder.build();
     }
 
     public static Tester create(
             Federator federator, Setting setting)
             throws OBDASpecificationException {
 
-        return create(federator, setting, null);
+        return create(federator, setting, Optimization.BASE);
     }
 
     public static Tester create(
-            Federator federator, Setting setting, @Nullable Optimization opt)
+            Federator federator, Setting setting, Optimization opt)
             throws OBDASpecificationException {
 
         Objects.requireNonNull(federator);
         Objects.requireNonNull(setting);
+        Objects.requireNonNull(opt);
+
+        Preconditions.checkArgument((setting == Setting.SC1 || setting == Setting.SC2) == (federator == Federator.NONE));
+        Preconditions.checkArgument((setting != Setting.SC1 && setting != Setting.SC2) || (opt == Optimization.BASE));
 
         String BASE = "src/test/resources/federation/";
         String f = federator.name().toLowerCase();
         String s = setting.name().toLowerCase();
-        String o = opt == null ? null : opt.name().toLowerCase();
+        String o = opt == Optimization.BASE ? null : opt.name().toLowerCase();
+        String v = setting == Setting.SC1 ? "orig" : "fed";
         return create(
-                BASE + "system-" + f + "-" + s + ".properties",
+                BASE + "system-" + (federator != Federator.NONE ? f + "-" : "") + s + ".properties",
                 BASE + "ontology.owl",
-                BASE + "mappings.fed" + (federator == Federator.TEIID ? ".teiid" : "") + ".obda",
-                BASE + "constraints.fed" + (federator == Federator.TEIID ? ".teiid" : "") + ".txt",
-                BASE + "system-" + f + "-" + s + ".metadata.json",
-                opt == null ? null : BASE + "source_relations." + s + ".txt",
-                opt == null ? null : BASE + "source_efficiency_labels." + s + ".txt",
-                opt == null ? null : BASE + "hints." + f + "-" + o + (opt == Optimization.OPTMATV ? "." + s : "") + ".txt");
+                BASE + "mappings." + v + (federator == Federator.TEIID ? ".teiid" : "") + ".obda",
+                BASE + "constraints." + v + (federator == Federator.TEIID ? ".teiid" : "") + ".txt",
+                BASE + "system-" + (federator != Federator.NONE ? f + "-" : "") + s + ".metadata.json",
+                BASE + "source_relations." + s + ".txt",
+                BASE + "source_efficiency_labels." + s + ".txt",
+                opt == Optimization.BASE ? null : BASE + "hints." + f + "-" + o + (opt == Optimization.OPTMATV ? "." + s : "") + ".txt");
     }
 
     public static Tester create(
@@ -126,15 +147,13 @@ public final class Tester {
         Objects.requireNonNull(ontologyFile);
         Objects.requireNonNull(mappingFile);
 
-        if (sourceFile != null || effLabelFile != null || hintFile != null) {
-            Objects.requireNonNull(sourceFile);
-            Objects.requireNonNull(effLabelFile);
-            Objects.requireNonNull(hintFile);
-        }
-
         return new Tester(
                 propertyFile, ontologyFile, mappingFile, constraintFile, metadataFile,
                 sourceFile, effLabelFile, hintFile);
+    }
+
+    public Map<String, String> getSourceMap() {
+        return sourceMap;
     }
 
     public void reformulate(String sparqlQuery)
@@ -168,15 +187,23 @@ public final class Tester {
     }
 
     public enum Federator {
-        TEIID, DENODO, DREMIO
+        NONE,
+        TEIID,
+        DENODO,
+        DREMIO
     }
 
     public enum Setting {
-        HOM, HET
+        SC1,
+        SC2,
+        HOM,
+        HET
     }
 
     public enum Optimization {
-        OPT, OPTMATV
+        BASE,
+        OPT,
+        OPTMATV
     }
 
     public enum Query {
