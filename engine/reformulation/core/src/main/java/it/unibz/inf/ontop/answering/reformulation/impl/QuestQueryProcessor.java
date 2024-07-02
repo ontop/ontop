@@ -101,8 +101,10 @@ public class QuestQueryProcessor implements QueryReformulator {
 
                 IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
                 LOGGER.debug("Rewritten IQ:\n{}\n", rewrittenIQ);
+				long test = System.currentTimeMillis();
                 LOGGER.debug("Start the unfolding...");
                 IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ); //Step 2: unfolding della query
+				System.out.println(System.currentTimeMillis()-test);
                 if (unfoldedIQ.getTree().isDeclaredAsEmpty()) {
 					queryLogger.declareReformulationFinishedAndSerialize(unfoldedIQ, false);
                 	LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);

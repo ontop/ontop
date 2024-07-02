@@ -7,6 +7,8 @@ import com.google.common.collect.ImmutableTable;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.spec.mapping.impl.MappingImpl;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
@@ -49,9 +51,7 @@ public interface Mapping {
 
     ImmutableCollection<IQ> getQueries(RDFAtomPredicate rdfAtomPredicate);
 
-    Optional<IQ> getCompatibleDefinitionsFromIRITemplate(RDFAtomPredicate rdfAtomPredicate, ObjectStringTemplateFunctionSymbol template);
-
-    void computeCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate);
+    Optional<IQ> getCompatibleDefinitions(VariableGenerator variableGenerator, MappingImpl.IndexType indexType, RDFAtomPredicate rdfAtomPredicate, ObjectStringTemplateFunctionSymbol template);
 
     ImmutableSet<ObjectStringTemplateFunctionSymbol> getIriTemplateSet();
 }

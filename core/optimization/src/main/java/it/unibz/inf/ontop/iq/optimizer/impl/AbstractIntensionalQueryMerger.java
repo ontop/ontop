@@ -72,7 +72,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
         }
 
         @Override
-        public final IQTree transformIntensionalData(IntensionalDataNode dataNode) { //effettua l'unfolding di un singolo nodo intensionale e lo rimpiazza con un IQ tree
+        public IQTree transformIntensionalData(IntensionalDataNode dataNode) { //effettua l'unfolding di un singolo nodo intensionale e lo rimpiazza con un IQ tree
             Optional<IQ> definition = getDefinition(dataNode); //mi faccio restituire tutte le definizioni
             return definition
                     .map(d -> replaceIntensionalData(dataNode, d)) //rimpiazza il nodo intensionale con le definizioni ottenute
