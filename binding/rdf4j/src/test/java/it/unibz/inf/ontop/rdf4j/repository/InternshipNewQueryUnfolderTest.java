@@ -37,7 +37,7 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
     public void subjectHaveMultipleIRITemplate() {
         String sparql =
                 "PREFIX schema: <http://schema.org/>\n" +
-                "SELECT ?o \n" +
+                "SELECT ?s ?p ?o \n" +
                 "WHERE \n" +
                 "{\n" +
                 "  ?s a schema:Hotel .\n" +
@@ -517,4 +517,23 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
         assertEquals(5, count);
     }
     */
+
+    @Test
+    public void andreaTest40(){
+        String sparql =
+                "SELECT * {\n" +
+                        "  ?subject a ?subjectClass .\n" +
+                        "  ?subject ?pred ?value .\n" +
+                        "  {\n" +
+                        "    SELECT DISTINCT ?subject {\n" +
+                        "      {\n" +
+                        "        <http://destination.example.org/data/municipality/021114> ?pToSubject ?subject.\n" +
+                        "        ?subject ?sPred ?sValue .\n" +
+                        "      }\n" +
+                        "    }\n" +
+                        "  }\n" +
+                        "}\n";
+        int count = runQueryAndCount(sparql);
+        assertEquals(28, count);
+    }
 }

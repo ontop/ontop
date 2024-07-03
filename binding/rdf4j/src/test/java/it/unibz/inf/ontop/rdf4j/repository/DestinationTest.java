@@ -328,7 +328,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  ?s ?p ?o .\n" +
                 "}\n" +
                 "LIMIT 100";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(92, count);
     }
 
     @Test
@@ -338,7 +339,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "WHERE {\n" +
                 "  ?hotel a schema:Hotel .\n" +
                 "}";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -352,7 +354,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  Bind((?n + ?m) AS ?s)\n" +
                 "  FILTER(bound(?s))\n" +
                 "}";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(10, count);
     }
     @Test
     public void andreaTest4(){
@@ -364,7 +367,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "\t?mun a :Municipality .\n" +
                 "\t?mun schema:name ?name .\n" +
                 "}\n";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(33, count);
     }
 
     @Test
@@ -378,7 +382,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  ?s schema:geo ?o .\n" +
                 "}\n" +
                 "LIMIT 100";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(11, count);
     }
 
     @Test
@@ -392,7 +397,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "\t?municipality schema:name ?name .\n" +
                 "    FILTER (lang(?name) = \"it\")\n" +
                 "}\n";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(11, count);
     }
 
     @Test
@@ -407,7 +413,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  ?s schema:name ?name .\n" +
                 "}\n" +
                 "LIMIT 100";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(33, count);
     }
 
     @Test
@@ -423,7 +430,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  FILTER (lang(?name) = \"it\")\n" +
                 "}\n" +
                 "LIMIT 100";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(11, count);
     }
 
     @Test
@@ -432,7 +440,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  <http://destination.example.org/data/weather/observation/202268> ?p ?o\n" +
                 "    }\n" +
                 "    LIMIT 500";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(5, count);
     }
 
     @Test
@@ -441,7 +450,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  ?subject ?p <http://destination.example.org/data/weather/observation/202268> \n" +
                 "}\n" +
                 "LIMIT 500";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(2, count);
     }
 
     @Test
@@ -452,7 +462,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "          UNION\n" +
                 "          { <http://destination.example.org/data/source1/hospitality/60E1EE8CE9647B98CF711E8B78F09955> ?p ?subject }\n" +
                 "        }";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -464,7 +475,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "            { <http://destination.example.org/data/weather/observation/202268> ?p ?subject }\n" +
                 "            }\n" +
                 "            LIMIT 500";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(5, count);
     }
 
     @Test
@@ -493,7 +505,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "    (\"Residence Bozen\"@en  \"residencbozen@gmail.com\")\n" +
                 "  }\n" +
                 "}";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -506,7 +519,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "}\n" +
                 "GROUP BY ?class\n" +
                 "LIMIT 500\n";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(5, count);
     }
 
     @Test
@@ -515,7 +529,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  <http://destination.example.org/data/source1/hospitality/60E1EE8CE9647B98CF711E8B78F09955> ?pred ?obj .\n" +
                 "    }\n" +
                 "    LIMIT 10";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -526,7 +541,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  ?hotel a schema:Hotel .\n" +
                 "  ?hotel ?p ?o .\n" +
                 "}\n";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -541,7 +557,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  ?mun ?p2 ?o2 .\n" +
                 "}\n" +
                 "LIMIT 10\n";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -555,7 +572,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  ?s ?p ?o\n" +
                 "}\n" +
                 "LIMIT 100";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(55, count);
     }
 
     @Test
@@ -569,7 +587,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  ?s a :Municipality .\n" +
                 "}\n" +
                 "LIMIT 100";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(55, count);
     }
 
     @Test
@@ -588,7 +607,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "    ?s ?p2 ?o1 .\n" +
                 "  }\n" +
                 "}\n";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(55, count);
     }
 
     @Test
@@ -607,7 +627,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "    ?s ?p2 ?o1 .\n" +
                 "  }\n" +
                 "}\n";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(46635, count);
     }
 
     @Test
@@ -628,7 +649,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "    ?s ?p2 ?o1 .\n" +
                 "  }\n" +
                 "}";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -644,7 +666,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  }\n" +
                 "}\n" +
                 "LIMIT 100\n";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -660,7 +683,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  }\n" +
                 "}\n" +
                 "LIMIT 100\n";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -672,7 +696,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  ?h ?p2 ?o2 .\n" +
                 "}\n" +
                 "LIMIT 100";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -687,7 +712,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "} \n" +
                 "GROUP BY ?s\n" +
                 "LIMIT 100";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -700,7 +726,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  <http://destination.example.org/data/source1/hospitality/EFF0FACBA54C11D1AD760020AFF92740> ?p ?o .\n" +
                 "}\n" +
                 "LIMIT 10\n";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -712,7 +739,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "UNION\n" +
                 "{ <http://destination.example.org/data/source1/hospitality/A1B9B1850E0B035D21D93D3FCD3AA257> ?p ?subject }\n" +
                 "}";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -720,7 +748,8 @@ public class DestinationTest extends AbstractRDF4JTest {
         String sparql =
                 "SELECT DISTINCT *\n" +
                 "{ ?s a ?c .}\n";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(14959, count);
     }
 
     @Test
@@ -731,7 +760,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "?s a ?c ." +
                 "<http://destination.example.org/data/source1/hospitality/A1B9B1850E0B035D21D93D3FCD3AA257> ?p ?s .\n" +
                 "}\n";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -740,13 +770,15 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "PREFIX schema: <http://schema.org/>\n" +
                 "SELECT DISTINCT * \n" +
                 "{ ?s a schema:Hotel . }";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
     public void andreaTest33(){
         String sparql = "SELECT * WHERE { ?subject ?p <http://destination.example.org/data/source1/hospitality/A1B9B1850E0B035D21D93D3FCD3AA257> . }";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -765,7 +797,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "    LIMIT 10\n" +
                 "  }\n" +
                 "}\n";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(1, count);
     }
 
     @Test
@@ -787,7 +820,118 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "  }\n" +
                 "}\n" +
                 "ORDER BY ASC(?p)\n";
+        int count = runQueryAndCount(sparql);
+        assertEquals(1, count);
+    }
+
+    @Test
+    public void andreaTest36(){
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX : <http://destination.example.org/ontology/dest#>\n" +
+                "SELECT ?subject ?pToSubject\n" +
+                "WHERE {\n" +
+                "  ?subject ?pFromSubject <http://destination.example.org/data/municipality/021010> .\n" +
+                "  ?subject a schema:BedAndBreakfast .\n" +
+                "  ?subject ?sPred ?sValue . \n" +
+                "}";
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
+    }
+
+    @Test
+    public void andreaTest37(){
+        String sparql = "SELECT DISTINCT ?subject ?pToSubject ?pFromSubject {\n" +
+                "          BIND(<http://destination.example.org/data/municipality/021114> AS ?argument)\n" +
+                "          VALUES ?subjectClass { <http://schema.org/BedAndBreakfast> }\n" +
+                "          {\n" +
+                "            ?argument ?pToSubject ?subject.\n" +
+                "            ?subject a         ?subjectClass;\n" +
+                "                     ?sPred    ?sValue .\n" +
+                "            \n" +
+                "          }\n" +
+                "          UNION\n" +
+                "          {\n" +
+                "            ?subject ?pFromSubject ?argument;\n" +
+                "                     a         ?subjectClass;\n" +
+                "                     ?sPred    ?sValue .\n" +
+                "           \n" +
+                "          }\n" +
+                "        }\n";
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
+    }
+
+    @Test
+    public void andreaTest38(){
+        String sparql = "SELECT ?subject ?pred ?value ?subjectClass ?pToSubject ?pFromSubject {\n" +
+                "  ?subject a ?subjectClass;\n" +
+                "           ?pred ?value {\n" +
+                "    SELECT DISTINCT ?subject ?pToSubject ?pFromSubject {\n" +
+                "      BIND(<http://destination.example.org/data/municipality/021114> AS ?argument)\n" +
+                "      VALUES ?subjectClass { <http://schema.org/BedAndBreakfast> }\n" +
+                "      {\n" +
+                "        ?argument ?pToSubject ?subject.\n" +
+                "        ?subject ?sPred ?sValue .\n" +
+                "      }\n" +
+                "      UNION\n" +
+                "      {\n" +
+                "        ?subject ?pFromSubject ?argument;\n" +
+                "                 a ?subjectClass;\n" +
+                "                 ?sPred ?sValue.\n" +
+                "      }\n" +
+                "    }\n" +
+                "    LIMIT 67 OFFSET 0\n" +
+                "  }\n" +
+                "  FILTER(isLiteral(?value))\n" +
+                "}\n";
+        int count = runQueryAndCount(sparql);
+        assertEquals(12, count);
+    }
+
+    @Test
+    public void andreaTest39(){
+        String sparql = "SELECT ?subject ?pred ?value ?subjectClass ?pToSubject ?pFromSubject {\n" +
+                "  ?subject a ?subjectClass;\n" +
+                "           ?pred ?value {\n" +
+                "    SELECT DISTINCT ?subject ?pToSubject ?pFromSubject {\n" +
+                "      BIND(<http://destination.example.org/data/geo/municipality/021010> AS ?argument)\n" +
+                "      VALUES ?subjectClass { <http://destination.example.org/ontology/dest#Municipality> }\n" +
+                "      {\n" +
+                "        ?argument ?pToSubject ?subject.\n" +
+                "        ?subject a ?subjectClass;\n" +
+                "                 ?sPred ?sValue .\n" +
+                "      }\n" +
+                "      UNION\n" +
+                "      {\n" +
+                "        ?subject ?pFromSubject ?argument;\n" +
+                "                 a ?subjectClass;\n" +
+                "                 ?sPred ?sValue .\n" +
+                "      }\n" +
+                "    }\n" +
+                "    LIMIT 67 OFFSET 0\n" +
+                "  }\n" +
+                "  FILTER(isLiteral(?value))\n" +
+                "}\n";
         runQuery(sparql);
+    }
+
+    @Test
+    public void andreaTest40(){
+        String sparql =
+                "SELECT * {\n" +
+                "  ?subject a ?subjectClass .\n" +
+                "  ?subject ?pred ?value .\n" +
+                "  {\n" +
+                "    SELECT DISTINCT ?subject {\n" +
+                "      {\n" +
+                "        <http://destination.example.org/data/municipality/021114> ?pToSubject ?subject.\n" +
+                "        ?subject ?sPred ?sValue .\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}\n";
+        int count = runQueryAndCount(sparql);
+        assertEquals(28, count);
     }
 
     @Test
@@ -804,7 +948,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "      }\n" +
                 "    }\n" +
                 "    GROUP BY ?class";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(5, count);
     }
 
     @Test
@@ -821,7 +966,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "      }\n" +
                 "    }\n" +
                 "    GROUP BY ?class";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -851,7 +997,6 @@ public class DestinationTest extends AbstractRDF4JTest {
         System.out.println(System.currentTimeMillis()-test);
     }
 
-/*
     @Test
     public void graphexplorer_critical_query_4(){
         String sparql = "SELECT ?subject ?pred ?value ?subjectClass ?pToSubject ?pFromSubject {\n" +
@@ -880,68 +1025,6 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "    }";
         int count = runQueryAndCount(sparql);
         assertEquals(0, count);
-    }
-*/
-    @Test
-    public void graphexplorer4_test_1(){
-        String sparql = "PREFIX schema: <http://schema.org/>\n" +
-                "PREFIX : <http://destination.example.org/ontology/dest#>\n" +
-                "SELECT ?subject ?pToSubject\n" +
-                "WHERE {\n" +
-                "  ?subject ?pFromSubject <http://destination.example.org/data/municipality/021010> .\n" +
-                "  ?subject a schema:BedAndBreakfast .\n" +
-                "  ?subject ?sPred ?sValue . \n" +
-                "}";
-        runQuery(sparql);
-    }
-
-    @Test
-    public void graphexplorer4_test_2(){
-        String sparql = "SELECT DISTINCT ?subject ?pToSubject ?pFromSubject {\n" +
-                "          BIND(<http://destination.example.org/data/municipality/021114> AS ?argument)\n" +
-                "          VALUES ?subjectClass { <http://schema.org/BedAndBreakfast> }\n" +
-                "          {\n" +
-                "            ?argument ?pToSubject ?subject.\n" +
-                "            ?subject a         ?subjectClass;\n" +
-                "                     ?sPred    ?sValue .\n" +
-                "            \n" +
-                "          }\n" +
-                "          UNION\n" +
-                "          {\n" +
-                "            ?subject ?pFromSubject ?argument;\n" +
-                "                     a         ?subjectClass;\n" +
-                "                     ?sPred    ?sValue .\n" +
-                "           \n" +
-                "          }\n" +
-                "        }\n";
-        runQuery(sparql);
-    }
-/*
-    @Test
-    public void graphexplorer4_test_3(){
-        String sparql = "SELECT ?subject ?pred ?value ?subjectClass ?pToSubject ?pFromSubject {\n" +
-                "  ?subject a ?subjectClass;\n" +
-                "           ?pred ?value {\n" +
-                "    SELECT DISTINCT ?subject ?pToSubject ?pFromSubject {\n" +
-                "      BIND(<http://destination.example.org/data/municipality/021114> AS ?argument)\n" +
-                "      VALUES ?subjectClass { <http://schema.org/BedAndBreakfast> }\n" +
-                "      {\n" +
-                "        ?argument ?pToSubject ?subject.\n" +
-                "        ?subject ?sPred ?sValue .\n" +
-                "      }\n" +
-                "      UNION\n" +
-                "      {\n" +
-                "        ?subject ?pFromSubject ?argument;\n" +
-                "                 a ?subjectClass;\n" +
-                "                 ?sPred ?sValue.\n" +
-                "      }\n" +
-                "    }\n" +
-                "    LIMIT 67 OFFSET 0\n" +
-                "  }\n" +
-                "  FILTER(isLiteral(?value))\n" +
-                "}\n";
-        int count = runQueryAndCount(sparql);
-        assertEquals(12, count);
     }
 
     @Test
@@ -1000,7 +1083,7 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "      FILTER(isLiteral(?value))\n" +
                 "    }";
         runQuery(sparql);
-    }*/
+    }
 
     @Test
     public void graphexplorer_critical_query_7(){
@@ -1017,7 +1100,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "      }\n" +
                 "      FILTER(isLiteral(?value))\n" +
                 "    }";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -1035,7 +1119,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "      }\n" +
                 "      FILTER(isLiteral(?value))\n" +
                 "    }";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -1053,7 +1138,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "        ?subject a ?subjectClass .\n" +
                 "      }\n" +
                 "    }";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(5, count);
     }
 
     @Test
@@ -1071,33 +1157,7 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "      }\n" +
                 "      FILTER(isLiteral(?value))\n" +
                 "    }";
-        runQuery(sparql);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
-/*
-    @Test
-    public void graphexplorer_critical_query__(){
-        String sparql = "SELECT ?subject ?pred ?value ?subjectClass ?pToSubject ?pFromSubject {\n" +
-                "  ?subject a ?subjectClass;\n" +
-                "           ?pred ?value {\n" +
-                "    SELECT DISTINCT ?subject ?pToSubject ?pFromSubject {\n" +
-                "      BIND(<http://destination.example.org/data/geo/municipality/021010> AS ?argument)\n" +
-                "      VALUES ?subjectClass { <http://destination.example.org/ontology/dest#Municipality> }\n" +
-                "      {\n" +
-                "        ?argument ?pToSubject ?subject.\n" +
-                "        ?subject a ?subjectClass;\n" +
-                "                 ?sPred ?sValue .\n" +
-                "      }\n" +
-                "      UNION\n" +
-                "      {\n" +
-                "        ?subject ?pFromSubject ?argument;\n" +
-                "                 a ?subjectClass;\n" +
-                "                 ?sPred ?sValue .\n" +
-                "      }\n" +
-                "    }\n" +
-                "    LIMIT 67 OFFSET 0\n" +
-                "  }\n" +
-                "  FILTER(isLiteral(?value))\n" +
-                "}\n";
-        runQuery(sparql);
-    }*/
 }

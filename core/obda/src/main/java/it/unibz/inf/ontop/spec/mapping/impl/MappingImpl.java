@@ -18,6 +18,8 @@ import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.spec.mapping.impl.MappingImpl.IndexType.*;
+
 
 public class MappingImpl implements Mapping {
 
@@ -28,6 +30,7 @@ public class MappingImpl implements Mapping {
     private Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitionsFromSubjSPO;
     private Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitionsFromObjSPO;
     private boolean isIQAllDefComputed;
+    private boolean isIQClassDefComputed;
     private final TermFactory termFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final IntermediateQueryFactory iqFactory;
@@ -51,6 +54,7 @@ public class MappingImpl implements Mapping {
         this.compatibleDefinitionsFromSubjSAC = HashBasedTable.create();
         this.optIQAllDef = Optional.empty();
         this.isIQAllDefComputed = false;
+        this.isIQClassDefComputed = false;
     }
 
     public enum IndexType{
@@ -106,13 +110,8 @@ public class MappingImpl implements Mapping {
         Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitions = null;
         Optional<IQ> optIQConsideredDef = Optional.empty();
         int subjOrObjIndex = -1;
-        //TODO DIVIDERE LE DUE COSE QUI SOTTO
-        if (!isIQAllDefComputed) {
-            ImmutableCollection<IQ> allDef = getQueries(rdfAtomPredicate);
-            optIQAllDef = queryMerger.mergeDefinitions(allDef);
-            optIQClassDef = queryMerger.mergeDefinitions(classDefinitions.row(rdfAtomPredicate).values().stream().collect(ImmutableCollectors.toList()));
-            isIQAllDefComputed = true;
-        }
+        getOptIQAllDef(rdfAtomPredicate);
+        getOptIQClassDef(rdfAtomPredicate);
         switch (indexType){
             case SPO_SUBJ_INDEX:
                 compatibleDefinitions = compatibleDefinitionsFromSubjSPO;
@@ -159,5 +158,24 @@ public class MappingImpl implements Mapping {
         else{
             return Optional.empty();
         }
+    }
+
+    @Override
+    public Optional<IQ> getOptIQAllDef(RDFAtomPredicate rdfAtomPredicate) {
+        if (!isIQAllDefComputed) {
+            ImmutableCollection<IQ> allDef = getQueries(rdfAtomPredicate);
+            optIQAllDef = queryMerger.mergeDefinitions(allDef);
+            isIQAllDefComputed = true;
+        }
+        return optIQAllDef;
+    }
+
+    @Override
+    public Optional<IQ> getOptIQClassDef(RDFAtomPredicate rdfAtomPredicate) {
+        if(!isIQClassDefComputed){
+            optIQClassDef = queryMerger.mergeDefinitions(classDefinitions.row(rdfAtomPredicate).values().stream().collect(ImmutableCollectors.toList()));
+            isIQClassDefComputed = true;
+        }
+        return optIQClassDef;
     }
 }

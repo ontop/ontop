@@ -28,6 +28,8 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.apache.commons.collections4.CollectionUtils.collect;
+
 /**
  * See {@link QueryUnfolder.Factory} for creating a new instance.
  */
@@ -95,19 +97,9 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
         }
 
         private Optional<IQ> getStarClassDefinition(RDFAtomPredicate predicate) {
-            AtomicInteger count = new AtomicInteger(0);
-
-            Optional<IQ> result = queryMerger.mergeDefinitions(mapping.getRDFClasses(predicate).stream()
-                    .flatMap(i -> {
-                        count.incrementAndGet(); // Incrementa il contatore per ogni `i`
-                        return mapping.getRDFClassDefinition(predicate, i).stream();
-                    })
+            return queryMerger.mergeDefinitions(mapping.getRDFClasses(predicate).stream()
+                    .flatMap(i -> mapping.getRDFClassDefinition(predicate, i).stream())
                     .collect(ImmutableCollectors.toList()));
-
-            // Stampa il numero di occorrenze di `i`
-            System.out.println("Number of times `i` is found: " + count.get());
-
-            return result;
         }
 
         private Optional<IQ> getStarDefinition(RDFAtomPredicate predicate) {

@@ -54,4 +54,8 @@ public interface Mapping {
     Optional<IQ> getCompatibleDefinitions(VariableGenerator variableGenerator, MappingImpl.IndexType indexType, RDFAtomPredicate rdfAtomPredicate, ObjectStringTemplateFunctionSymbol template);
 
     ImmutableSet<ObjectStringTemplateFunctionSymbol> getIriTemplateSet();
+
+    Optional<IQ> getOptIQAllDef(RDFAtomPredicate rdfAtomPredicate);
+
+    Optional<IQ> getOptIQClassDef(RDFAtomPredicate rdfAtomPredicate);
 }
