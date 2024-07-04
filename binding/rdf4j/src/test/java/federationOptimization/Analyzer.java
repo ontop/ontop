@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.iq.node.JoinLikeNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.node.impl.NativeNodeImpl;
-import org.junit.Test;
 
 import java.io.PrintStream;
 import java.util.*;
@@ -45,8 +44,10 @@ public class Analyzer {
                 "# Fed. Unions", s -> Integer.toString(s.getNumUnionsFederated()),
                 "# SQL Tokens", s -> Integer.toString(s.getNumSqlTokens()),
                 "# Nodes", s -> Integer.toString(s.getNumNodes()),
-                "Sources", s -> Joiner.on(',').join(
-                        s.getSources().stream().map(Analyzer::rewriteSource).distinct().sorted().collect(Collectors.toList()))
+                "Sources", s -> s.getSources().stream().map(Analyzer::rewriteSource).distinct().sorted()
+                        .collect(Collectors.joining(",")),
+                "Rules", s -> s.getAppliedRules().stream().filter(r -> r != Rule.SJE).map(r -> r.name().toLowerCase()).sorted()
+                        .collect(Collectors.joining(","))
         );
 
         emit(out, "property", "setting", Arrays.stream(Query.values()).map(Enum::name).collect(Collectors.toList()), tsv, false);
@@ -91,25 +92,45 @@ public class Analyzer {
     private static List<Statistics> evaluate(Federator federator, Setting setting, Optimization opt)
             throws OBDASpecificationException, OntopReformulationException, OntopKGQueryException {
         Tester tester = Tester.create(federator, setting, opt);
-        AtomicReference<IQ> optimizedIq = new AtomicReference<>();
-        AtomicReference<IQ> executableIq = new AtomicReference<>();
         List<Statistics> stats = Lists.newArrayListWithCapacity(Query.values().length);
         for (Query query : Query.values()) {
+            AtomicReference<IQ> optimizedIq = new AtomicReference<>();
+            AtomicReference<IQ> executableIq = new AtomicReference<>();
+            Set<Rule> appliedRules = Sets.newHashSet();
             tester.reformulate(query.getSparql(), Listener.create(
-                    null, null, optimizedIq::set, executableIq::set, null));
-            stats.add(new Statistics(optimizedIq.get(), executableIq.get(), tester.getSourceMap()));
+                    null, null, optimizedIq::set, executableIq::set, null,
+                    appliedRules::add));
+            stats.add(new Statistics(optimizedIq.get(), executableIq.get(), appliedRules, tester.getSourceMap()));
         }
         return stats;
     }
 
     public static class Statistics {
 
-        private Statistics(IQ optimizedIq, IQ executableIq, Map<String, String> sourceMap) {
+
+        private int numNodes;
+
+        private int numJoins;
+
+        private int numJoinsFederated;
+
+        private int numUnions;
+
+        private int numUnionsFederated;
+
+        private final int numSqlTokens;
+
+        private final Set<String> sources;
+
+        private final Set<Rule> appliedRules;
+
+        private Statistics(IQ optimizedIq, IQ executableIq, Set<Rule> appliedRules, Map<String, String> sourceMap) {
 
             String sqlQuery = ((NativeNodeImpl) executableIq.getTree().getChildren().get(0)).getNativeQueryString();
 
             this.sources = getSources(optimizedIq.getTree(), sourceMap);
             this.numSqlTokens = sqlQuery.split("\\s+").length;
+            this.appliedRules = ImmutableSet.copyOf(appliedRules);
             analyze(optimizedIq.getTree(), sourceMap);
         }
 
@@ -157,27 +178,13 @@ public class Analyzer {
                 n = idx < 0 ? n : n.substring(idx + 1);
                 String[] keys = new String[]{n, n.startsWith("\"") ? n.substring(1, n.length() - 1) : '"' + n + '"'};
                 for (String key : keys) {
-                    String source = sourceMap.get(n);
+                    String source = sourceMap.get(key);
                     if (source != null) {
                         sources.add(source);
                     }
                 }
             }
         }
-
-        private int numNodes;
-
-        private int numJoins;
-
-        private int numJoinsFederated;
-
-        private int numUnions;
-
-        private int numUnionsFederated;
-
-        private final int numSqlTokens;
-
-        private final Set<String> sources;
 
         public int getNumNodes() {
             return numNodes;
@@ -207,6 +214,10 @@ public class Analyzer {
             return sources;
         }
 
+        public Set<Rule> getAppliedRules() {
+            return appliedRules;
+        }
+
         @Override
         public boolean equals(Object obj) {
             if (obj == this) {
@@ -221,12 +232,15 @@ public class Analyzer {
                     numJoinsFederated == other.numJoinsFederated &&
                     numUnions == other.numUnions &&
                     numUnionsFederated == other.numUnionsFederated &&
-                    numSqlTokens == other.numSqlTokens;
+                    numSqlTokens == other.numSqlTokens &&
+                    sources.equals(other.sources) &&
+                    appliedRules.equals(other.appliedRules);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(numNodes, numJoins, numJoinsFederated, numUnions, numUnionsFederated, numSqlTokens);
+            return Objects.hash(numNodes, numJoins, numJoinsFederated, numUnions, numUnionsFederated, numSqlTokens,
+                    sources, appliedRules);
         }
 
         @Override

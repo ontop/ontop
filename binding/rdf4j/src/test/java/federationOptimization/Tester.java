@@ -3,6 +3,7 @@ package federationOptimization;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
@@ -14,7 +15,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.impl.NativeNodeImpl;
-import it.unibz.inf.ontop.iq.optimizer.FederationOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.FederationOptimizerImpl;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -33,7 +33,7 @@ import java.util.function.Consumer;
 @SuppressWarnings("unused")
 public final class Tester {
 
-    private final FederationOptimizer federationOptimizer;
+    private final Optimizer federationOptimizer;
 
     private final QueryReformulator reformulator;
 
@@ -67,7 +67,7 @@ public final class Tester {
 
         kgQueryFactory = configuration.getKGQueryFactory();
         reformulator = configuration.loadQueryReformulator();
-        federationOptimizer = new FederationOptimizerImpl(
+        federationOptimizer = new Optimizer(
                 injector.getInstance(IntermediateQueryFactory.class),
                 injector.getInstance(AtomFactory.class),
                 injector.getInstance(TermFactory.class),
@@ -175,7 +175,7 @@ public final class Tester {
         QuestQueryProcessor.returnPlannedQuery = false;
         listener.onInputIQ(inputIQ);
 
-        IQ optimizedIQ = federationOptimizer.optimize(inputIQ);
+        IQ optimizedIQ = federationOptimizer.optimize(inputIQ, listener);
         listener.onOptimizedIQ(optimizedIQ);
 
         IQ executableIQ = reformulator.generateExecutableQuery(optimizedIQ);
@@ -233,6 +233,13 @@ public final class Tester {
         }
     }
 
+    public enum Rule {
+        CE,
+        EJE,
+        SJE,
+        MTR
+    }
+
     public interface Listener {
 
         default void onSparqlQuery(String sparqlQuery) {
@@ -248,6 +255,9 @@ public final class Tester {
         }
 
         default void onSqlQuery(String sqlQuery) {
+        }
+
+        default void onRuleApplied(Rule rule) {
         }
 
         static Listener nil() {
@@ -273,7 +283,8 @@ public final class Tester {
                     inputIQ -> handler.accept("Input IQ", inputIQ),
                     optimizedIQ -> handler.accept("Optimized IQ", optimizedIQ),
                     executableIQ -> handler.accept("Executable IQ", executableIQ),
-                    sqlQuery -> handler.accept("SQL query", sqlQuery)
+                    sqlQuery -> handler.accept("SQL query", sqlQuery),
+                    rule -> handler.accept("Rule applued", rule)
             );
         }
 
@@ -282,7 +293,8 @@ public final class Tester {
                 @Nullable Consumer<? super IQ> onInputIQ,
                 @Nullable Consumer<? super IQ> onOptimizedIQ,
                 @Nullable Consumer<? super IQ> onExecutableIQ,
-                @Nullable Consumer<? super String> onSqlQuery) {
+                @Nullable Consumer<? super String> onSqlQuery,
+                @Nullable Consumer<? super Rule> onRuleApplied) {
 
             return new Listener() {
                 @Override
@@ -312,6 +324,13 @@ public final class Tester {
                     }
                 }
 
+                @Override
+                public void onRuleApplied(Rule rule) {
+                    if (onRuleApplied != null) {
+                        onRuleApplied.accept(rule);
+                    }
+                }
+
                 private <T> void call(@Nullable Consumer<T> callback, T object) {
                     if (callback != null) {
                         callback.accept(object);
@@ -319,6 +338,70 @@ public final class Tester {
                 }
 
             };
+        }
+
+    }
+
+    public static class Optimizer extends FederationOptimizerImpl {
+
+        private final ThreadLocal<@Nullable Listener> listener = new ThreadLocal<>();
+
+        @Inject
+        public Optimizer(
+                IntermediateQueryFactory iqFactory,
+                AtomFactory atomFactory,
+                TermFactory termFactory,
+                CoreSingletons coreSingletons) {
+            super(iqFactory, atomFactory, termFactory, coreSingletons);
+        }
+
+        public Optimizer(
+                IntermediateQueryFactory iqFactory,
+                AtomFactory atomFactory,
+                TermFactory termFactory,
+                CoreSingletons coreSingletons,
+                boolean enabled,
+                String sourceFile,
+                String effLabelFile,
+                String hintFile) {
+            super(iqFactory, atomFactory, termFactory, coreSingletons,
+                    enabled, sourceFile, effLabelFile, hintFile);
+        }
+
+        @Override
+        public IQ optimize(IQ query) {
+            return optimize(query, null);
+        }
+
+        public IQ optimize(IQ query, @Nullable Listener listener) {
+            this.listener.set(listener);
+            IQ iq = super.optimize(query);
+            this.listener.set(null);
+            return iq;
+        }
+
+        @Override
+        protected void onEquivalentRedundancyRuleApplied() {
+            onRuleApplied(Rule.CE);
+        }
+
+        @Override
+        protected void onEmptyJoinRuleApplied() {
+            onRuleApplied(Rule.EJE);
+        }
+
+        @Override
+        protected void onSelfJoinRuleApplied() {
+            onRuleApplied(Rule.SJE);
+        }
+
+        @Override
+        protected void onMatViewRuleApplied() {
+            onRuleApplied(Rule.MTR);
+        }
+
+        private void onRuleApplied(Rule rule) {
+            Optional.ofNullable(listener.get()).ifPresent(l -> l.onRuleApplied(rule));
         }
 
     }

@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory;
@@ -13,10 +11,8 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.node.impl.NativeNodeImpl;
 import it.unibz.inf.ontop.iq.optimizer.FederationOptimizer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -24,7 +20,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +44,10 @@ public class FederationOptimizerImpl implements FederationOptimizer {
     public static DBTypeFactory dbTypeFactory;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FederationOptimizerImpl.class);
+
+    private final ThreadLocal<Boolean> tryingEmptyJoinRule = new ThreadLocal<>();
+    private final ThreadLocal<Boolean> tryingSelfJoinRule = new ThreadLocal<>();
+
     @Inject
     public FederationOptimizerImpl(IntermediateQueryFactory iqFactory,
                                    AtomFactory atomFactory,
@@ -537,6 +536,7 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                                 } else {
                                     iqt = iqt.replaceSubTree(t, sub1);
                                 }
+                                onEquivalentRedundancyRuleApplied();
                                 change = true;
                                 continue outer;
                             }
@@ -854,6 +854,8 @@ public class FederationOptimizerImpl implements FederationOptimizer {
 
 
     public IQTree rewriteInnerJoin(IQTree iqt){
+        tryingEmptyJoinRule.set(Boolean.FALSE);
+        tryingSelfJoinRule.set(Boolean.FALSE);
         boolean update = true;
         int count = 0;
 
@@ -899,6 +901,12 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                                 if((cost1.get(0) >= cost2.get(0))&&((cost1.get(1) >= cost2.get(1)))){
                                     iqt = iqt_new;
                                     update = true;
+                                    if (tryingEmptyJoinRule.get()) {
+                                        onEmptyJoinRuleApplied();
+                                    }
+                                    if (tryingSelfJoinRule.get()) {
+                                        onSelfJoinRuleApplied();
+                                    }
                                     continue module;
                                 }
                             }
@@ -1027,6 +1035,7 @@ public class FederationOptimizerImpl implements FederationOptimizer {
 
                                 if(hints.get(2).contains(name_left+"<>"+name_right+"<>"+k+"<>"+l) || hints.get(2).contains(name_right+"<>"+name_left+"<>"+l+"<>"+k)){
                                     ER.canRewrite = true;
+                                    tryingEmptyJoinRule.set(Boolean.TRUE);
                                     return ER;
                                 }
                                 // check rewriting by materialized views
@@ -1087,6 +1096,7 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                             //if(right.constructions.get(j) == null){   //new added conditions
                             right_index_new.add(j);
                             ER.sjRewrite = true;
+                            tryingSelfJoinRule.set(Boolean.TRUE);
                             //}
                         }
                     }
@@ -1592,6 +1602,8 @@ public class FederationOptimizerImpl implements FederationOptimizer {
     }
 
     public IQTree rewriteLeftJoin(IQTree iqt){
+        tryingEmptyJoinRule.set(Boolean.FALSE);
+        tryingSelfJoinRule.set(Boolean.FALSE);
         boolean update = true;
         module: while(update){
             update = false;
@@ -1616,6 +1628,12 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                         if((cost_old.get(0)>= cost_new.get(0)) && (cost_old.get(1) >= cost_new.get(1))){
                             update = true;
                             iqt = t_new;
+                            if (tryingEmptyJoinRule.get()) {
+                                onEmptyJoinRuleApplied();
+                            }
+                            if (tryingSelfJoinRule.get()) {
+                                onSelfJoinRuleApplied();
+                            }
                             continue module;
                         }
 
@@ -1706,12 +1724,14 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                                 if((arg_left.get(f) instanceof Variable)&&(arg_right.get(h) instanceof Variable)&&(arg_left.get(f).equals(arg_right.get(h)))){
                                     if(hints.get(2).contains(name_left+"<>"+name_right+"<>"+f+"<>"+h)||hints.get(2).contains(name_right+"<>"+name_left+"<>"+h+"<>"+f)){
                                         label = true;
+                                        tryingEmptyJoinRule.set(Boolean.TRUE);
                                     }
                                 }
                                 ///new added part----------------------------------------------------------
                                 else if((arg_left.get(f) instanceof GroundTerm)&&(arg_right.get(h) instanceof GroundTerm)&&(arg_left.get(f).equals(arg_right.get(h)))){ // new added condition for A(a) JOIN B(a) empty when A(x) JOIN B(x) empty
                                     if(hints.get(2).contains(name_left+"<>"+name_right+"<>"+f+"<>"+h)||hints.get(2).contains(name_right+"<>"+name_left+"<>"+h+"<>"+f)){
                                         label = true;
+                                        tryingEmptyJoinRule.set(Boolean.TRUE);
                                     }
                                 }
                                 ///new added part----------------------------------------------------------
@@ -1807,7 +1827,7 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                             List<Integer> pk_index_i = getSinglePrimaryKeyIndexOfRelations(left_part.get(i).dataElement.get(ind).dn);
                             for(int pk_ind: pk_index_i){
                                 if(arg_j.containsKey(pk_ind) && arg_i.containsKey(pk_ind) && (arg_j.get(pk_ind).equals(arg_i.get(pk_ind)))){
-
+                                    tryingSelfJoinRule.set(Boolean.TRUE);
                                     b=true;
                                     ind_i = ind;
                                 }
@@ -1961,6 +1981,7 @@ public class FederationOptimizerImpl implements FederationOptimizer {
                                 if((cost1.get(0) >= cost2.get(0))&&((cost1.get(1) >= cost2.get(1)))){
                                     iqt = iqt_new;
                                     update = true;
+                                    onMatViewRuleApplied();
                                     continue module;
                                 }
                             }
@@ -2254,6 +2275,22 @@ public class FederationOptimizerImpl implements FederationOptimizer {
         //AtomPredicate ANS1 = ATOM_FACTORY.getRDFAnswerPredicate(iqt.getVariables().size());
         //DistinctVariableOnlyDataAtom projection = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1, ImmutableList.copyOf(iqt.getVariables()));
         return IQ_FACTORY.createIQ(project_original, iqt);
+    }
+
+    protected void onEquivalentRedundancyRuleApplied() {
+        // can override in sub-classes
+    }
+
+    protected void onEmptyJoinRuleApplied() {
+        // can override in sub-classes
+    }
+
+    protected void onSelfJoinRuleApplied() {
+        // can override in sub-classes
+    }
+
+    protected void onMatViewRuleApplied() {
+        // can override in sub-classes
     }
 
 }
