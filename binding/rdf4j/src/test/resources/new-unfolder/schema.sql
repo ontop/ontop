@@ -153,3 +153,29 @@ CREATE TABLE "source2_xyz" (
 );
 INSERT INTO "source2_xyz"(id, x, y, z) VALUES
     (1, 'x', 'y', 'z');
+
+CREATE TABLE "rating" (
+                         id varchar(250) primary key NOT NULL,
+                         rating integer NOT NULL
+);
+INSERT INTO "rating"(id, rating) VALUES
+    ('http://destination.example.org/data/source2/hotels/0471FC2FAE5744EC9D66B4220D0E6F39', 2),
+    ('http://destination.example.org/data/municipality/021036', 1),
+    ('http://destination.example.org/data/municipality/021010', 10),
+    ('http://destination.example.org/data/municipality/021056', 9),
+    ('http://destination.example.org/data/source2/hotels/001AE4C0FA0781A2CDD3750811DBDAEB', 5),
+    ('http://destination.example.org/data/municipality/021068', 3),
+    ('http://destination.example.org/data/municipality/021065', 8),
+    ('http://destination.example.org/data/source1/hospitality/0471FC2FAE5744EC9D66B4220D0E6F39', 7),
+    ('http://destination.example.org/data/municipality/021069', 10),
+    ('http://destination.example.org/data/source1/hospitality/A92A692C413911D483B90050BAC0A490', 1);
+
+CREATE TABLE "concat_test"(
+                            id varchar(250) primary key NOT NULL,
+                            associated_value varchar(250) NOT NULL
+);
+INSERT INTO "concat_test"(id, associated_value) VALUES
+    (CONCAT('http://destination.example.org/data/test1/', '1022'), 'ciao'),
+    (CONCAT('http://destination.example.org/data/test1/', '2002'), 'come'),
+    (CONCAT('http://destination.example.org/data/test2/', '2121'), 'va'),
+    (CONCAT('http://destination.example.org/data/test2/', '2000'), '?');

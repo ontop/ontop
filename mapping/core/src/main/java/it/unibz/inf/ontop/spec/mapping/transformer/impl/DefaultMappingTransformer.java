@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.optimizer.DisjunctionOfEqualitiesMergingSimplifier;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.impl.MappingImpl;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
@@ -49,6 +50,8 @@ public class DefaultMappingTransformer implements MappingTransformer {
     private final UnionBasedQueryMerger queryMerger;
     private final IntermediateQueryFactory iqFactory;
 
+    private final FunctionSymbolFactory functionSymbolFactory;
+
     @Inject
     private DefaultMappingTransformer(MappingVariableNameNormalizer mappingVariableNameNormalizer,
                                       MappingSaturator mappingSaturator,
@@ -63,7 +66,8 @@ public class DefaultMappingTransformer implements MappingTransformer {
                                       TermFactory termFactory,
                                       RuleExecutor ruleExecutor,
                                       UnionBasedQueryMerger queryMerger,
-                                      IntermediateQueryFactory iqFactory) {
+                                      IntermediateQueryFactory iqFactory,
+                                      FunctionSymbolFactory functionSymbolFactory) {
         this.mappingVariableNameNormalizer = mappingVariableNameNormalizer;
         this.mappingSaturator = mappingSaturator;
         this.factConverter = inserter;
@@ -78,6 +82,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
         this.ruleExecutor = ruleExecutor;
         this.queryMerger = queryMerger;
         this.iqFactory = iqFactory;
+        this.functionSymbolFactory = functionSymbolFactory;
     }
 
     @Override
@@ -123,7 +128,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
                 .collect(ImmutableCollectors.toTable());
 
 
-        return new MappingImpl(propertyDefinitions, classDefinitions, this.termFactory.getDBFunctionSymbolFactory().getIriTemplateSet(), termFactory, queryMerger, iqFactory);
+        return new MappingImpl(propertyDefinitions, classDefinitions, this.termFactory.getDBFunctionSymbolFactory().getIriTemplateSet(), termFactory, queryMerger, iqFactory, functionSymbolFactory);
     }
 
     private static Table.Cell<RDFAtomPredicate, IRI, IQ> asCell(MappingAssertion assertion) {

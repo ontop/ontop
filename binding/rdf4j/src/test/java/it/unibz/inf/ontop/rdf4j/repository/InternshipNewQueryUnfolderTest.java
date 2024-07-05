@@ -37,14 +37,14 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
     public void subjectHaveMultipleIRITemplate() {
         String sparql =
                 "PREFIX schema: <http://schema.org/>\n" +
-                "SELECT ?s ?p ?o \n" +
-                "WHERE \n" +
-                "{\n" +
+                "SELECT ?s ?p ?o\n" +
+                "WHERE {\n" +
                 "  ?s a schema:Hotel .\n" +
                 "  ?s ?p ?o .\n" +
-                "}";
+                "}\n" +
+                "ORDER BY ASC(?s)";
         int count = runQueryAndCount(sparql);
-        assertEquals(42, count);
+        assertEquals(45, count);
     }
 
     //http://destination.example.org/data/municipality/{}
@@ -58,7 +58,7 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
                         "  ?sub ?pred ?obj .\n" +
                         "}";
         int count = runQueryAndCount(sparql);
-        assertEquals(50, count);
+        assertEquals(68, count);
     }
 
     @Test
@@ -80,7 +80,7 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
                 "  <http://destination.example.org/data/xyz/xyz> ?pred ?obj .\n" +
                         "}";
         int count = runQueryAndCount(sparql);
-        assertEquals(2, count);
+        assertEquals(1, count);
     }
 
     //http://destination.example.org/data/municipality/{} e http://destination.example.org/data/municipality/0{}
@@ -92,7 +92,7 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
                 "  <http://destination.example.org/data/municipality/021069> ?pred ?obj .\n" +
                         "} ";
         int count = runQueryAndCount(sparql);
-        assertEquals(5, count);
+        assertEquals(8, count);
     }
 
     //http://destination.example.org/data/weather/observation/{}
@@ -221,7 +221,7 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
                 "  }\n" +
                 "}\n";
         int count = runQueryAndCount(sparql);
-        assertEquals(54, count);
+        assertEquals(57, count);
     }
 
     @Test
@@ -239,7 +239,7 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
                 "  }\n" +
                 "}\n";
         int count = runQueryAndCount(sparql);
-        assertEquals(117, count);
+        assertEquals(120, count);
     }
 
     @Test
@@ -259,7 +259,7 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
                 "  }\n" +
                 "}";
         int count = runQueryAndCount(sparql);
-        assertEquals(72, count);
+        assertEquals(75, count);
     }
 
     @Test
@@ -333,7 +333,7 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
                 "}\n" +
                 "LIMIT 100\n";
         int count = runQueryAndCount(sparql);
-        assertEquals(16, count);
+        assertEquals(17, count);
     }
 
     @Test
@@ -352,7 +352,7 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
                 "}\n" +
                 "LIMIT 100";
         int count = runQueryAndCount(sparql);
-        assertEquals(0, count);
+        assertEquals(2, count);
     }
 
     @Test
@@ -371,7 +371,7 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
                 "}\n" +
                 "LIMIT 100";
         int count = runQueryAndCount(sparql);
-        assertEquals(57, count);
+        assertEquals(60, count);
     }
 
     @Test
@@ -404,7 +404,7 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
                         "  }\n" +
                         "}\n";
         int count = runQueryAndCount(sparql);
-        assertEquals(42, count);
+        assertEquals(45, count);
     }
 
     @Test
@@ -437,7 +437,7 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
                 "  }\n" +
                 "}\n";
         int count = runQueryAndCount(sparql);
-        assertEquals(42, count);
+        assertEquals(45, count);
     }
 
     @Test
@@ -482,7 +482,7 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
                 "  }\n" +
                 "}";
         int count = runQueryAndCount(sparql);
-        assertEquals(10, count);
+        assertEquals(11, count);
     }
 
     @Test
@@ -499,41 +499,57 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
                 "  }\n" +
                 "}\n";
         int count = runQueryAndCount(sparql);
-        assertEquals(20, count);
+        assertEquals(22, count);
     }
 
-    /*
-    @Test
-    public void IRIConstantTakenFromDBColumn() {
-        String sparql = "";
-
-        int count = runQueryAndCount(sparql);
-        assertEquals(5, count);
-    }
-    @Test
-    public void IRIConstantConstructedWithSQL() {
-        String sparql = "";
-        int count = runQueryAndCount(sparql);
-        assertEquals(5, count);
-    }
-    */
 
     @Test
-    public void andreaTest40(){
+    public void IRIConstantTakenFromDBColumnDuplicateCantHappen() {
         String sparql =
-                "SELECT * {\n" +
-                        "  ?subject a ?subjectClass .\n" +
-                        "  ?subject ?pred ?value .\n" +
-                        "  {\n" +
-                        "    SELECT DISTINCT ?subject {\n" +
-                        "      {\n" +
-                        "        <http://destination.example.org/data/municipality/021114> ?pToSubject ?subject.\n" +
-                        "        ?subject ?sPred ?sValue .\n" +
-                        "      }\n" +
-                        "    }\n" +
-                        "  }\n" +
-                        "}\n";
+                "PREFIX schema: <http://schema.org/>\n" +
+                "SELECT * WHERE {\n" +
+                "  ?sub a schema:Place .\n" +
+                "  ?sub schema:ratingValue ?obj .\n" +
+                "}";
         int count = runQueryAndCount(sparql);
-        assertEquals(28, count);
+        assertEquals(10, count);
+    }
+
+    @Test
+    public void IRIConstantTakenFromDBColumnDuplicateCanHappenAndNeedToAvoidThem() {
+        String sparql =
+                "PREFIX schema: <http://schema.org/>\n" +
+                        "SELECT * WHERE {\n" +
+                        "  ?sub a schema:Place .\n" +
+                        "  ?sub ?p ?o .\n" +
+                        "} \n" +
+                        "ORDER BY ASC(?sub)";
+        int count = runQueryAndCount(sparql);
+        assertEquals(210, count);
+    }
+
+    @Test
+    public void IRIConstantConstructedWithSQLTakenFromDB() {
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "SELECT * WHERE {\n" +
+                "  ?sub a schema:Thing .\n" +
+                "  ?sub schema:value ?obj .\n" +
+                "} \n" +
+                "LIMIT 10";
+        int count = runQueryAndCount(sparql);
+        assertEquals(4, count);
+    }
+
+    @Test
+    public void IRIConstantConstructedWithSparQL() {
+        String sparql =
+                "PREFIX schema: <http://schema.org/>\n" +
+                "SELECT *\n" +
+                "WHERE {\n" +
+                "  BIND(IRI(CONCAT(\"http://destination.example.org/data/weather/observation/\", \"201539\")) AS ?subject)\n" +
+                "  ?subject ?p ?o .\n" +
+                "}\n";
+        int count = runQueryAndCount(sparql);
+        assertEquals(5, count);
     }
 }

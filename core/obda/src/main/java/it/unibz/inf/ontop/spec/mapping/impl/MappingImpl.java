@@ -1,13 +1,18 @@
 package it.unibz.inf.ontop.spec.mapping.impl;
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -37,12 +42,15 @@ public class MappingImpl implements Mapping {
     private Optional<IQ> optIQAllDef;
     private Optional<IQ> optIQClassDef;
 
+    private final FunctionSymbolFactory functionSymbolFactory;
+
     public MappingImpl(ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable,
                        ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable,
                        ImmutableSet<ObjectStringTemplateFunctionSymbol> iriTemplateSet,
                        TermFactory termFactory,
                        UnionBasedQueryMerger queryMerger,
-                       IntermediateQueryFactory iqFactory) {
+                       IntermediateQueryFactory iqFactory,
+                       FunctionSymbolFactory functionSymbolFactory) {
         this.propertyDefinitions = propertyTable;
         this.classDefinitions = classTable;
         this.iriTemplateSet = iriTemplateSet;
@@ -55,6 +63,7 @@ public class MappingImpl implements Mapping {
         this.optIQAllDef = Optional.empty();
         this.isIQAllDefComputed = false;
         this.isIQClassDefComputed = false;
+        this.functionSymbolFactory = functionSymbolFactory;
     }
 
     public enum IndexType{
@@ -110,23 +119,21 @@ public class MappingImpl implements Mapping {
         Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitions = null;
         Optional<IQ> optIQConsideredDef = Optional.empty();
         int subjOrObjIndex = -1;
-        getOptIQAllDef(rdfAtomPredicate);
-        getOptIQClassDef(rdfAtomPredicate);
         switch (indexType){
             case SPO_SUBJ_INDEX:
                 compatibleDefinitions = compatibleDefinitionsFromSubjSPO;
                 subjOrObjIndex = 0;
-                optIQConsideredDef = optIQAllDef;
+                optIQConsideredDef = getOptIQAllDef(rdfAtomPredicate);;
                 break;
             case SPO_OBJ_INDEX:
                 compatibleDefinitions = compatibleDefinitionsFromObjSPO;
                 subjOrObjIndex = 2;
-                optIQConsideredDef = optIQAllDef;
+                optIQConsideredDef = getOptIQAllDef(rdfAtomPredicate);
                 break;
             case SAC_SUBJ_INDEX:
                 compatibleDefinitions = compatibleDefinitionsFromSubjSAC;
                 subjOrObjIndex = 0;
-                optIQConsideredDef = optIQClassDef;
+                optIQConsideredDef = getOptIQClassDef(rdfAtomPredicate);;
                 break;
         }
         if (iriTemplateSet.contains(template)){

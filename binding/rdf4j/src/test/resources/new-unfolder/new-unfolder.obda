@@ -133,15 +133,23 @@ source		SELECT * FROM "source2_accommodation"
 
 mappingId	Observation
 target		data:weather/observation/{id} a sosa:Observation ; sosa:resultTime {timestamp} ; sosa:madeBySensor data:weather/sensor/{name}/{platform_id} ; sosa:observedProperty data:measurement/property/{name} ; sosa:hasResult data:weather/observation/result/{id} .
-source		select * from "source3_weather_measurement"
+source		SELECT * FROM "source3_weather_measurement"
 
 mappingId   Source 1 - xyz
 target      data:xyz/xy{z} a schema:Thing .
-source      select * from "source1_xyz"
+source      SELECT * FROM "source1_xyz"
 
 mappingId   Source 2 - xyz
 target      data:xyz/{x}{y}z a schema:Thing .
-source      select * from "source2_xyz"
+source      SELECT * FROM "source2_xyz"
+
+mappingId   Source - rating
+target      <{id}> a schema:Place ; schema:ratingValue {rating} .
+source      SELECT * FROM "rating"
+
+mappingId   Source - concat test
+target      <{id}> a schema:Thing ; schema:value {associated_value} .
+source      SELECT * FROM "concat_test"
 
 ;This section is commented out until homomorphisms modulo IRI unification is implemented
 ;mappingId	Source 3 - Measurement property
