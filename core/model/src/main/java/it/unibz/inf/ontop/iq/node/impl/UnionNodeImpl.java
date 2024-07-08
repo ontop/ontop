@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -65,10 +66,20 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     @Override
     public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(ImmutableList<IQTree> children) {
-        return children.stream()
-                .flatMap(c -> c.getPossibleVariableDefinitions().stream())
+        Set<Variable> variableToDelete = new HashSet<>();
+        var tmpDue =  children.stream()
+                .flatMap(c ->{
+                    /*ImmutableSet<Substitution<NonVariableTerm>> childrenVarDef = c.getPossibleVariableDefinitions();
+                    if (childrenVarDef.isEmpty())
+                        c.getVariables()
+                                .stream()
+                                .forEach(e -> variableToDelete.add(e));*/
+                    return c.getPossibleVariableDefinitions().stream();
+                })
                 .map(s -> s.restrictDomainTo(projectedVariables))
+                //.filter(s -> s.getRangeVariables().stream().map(v -> variableToDelete.contains(v)).count() == 0)
                 .collect(ImmutableCollectors.toSet());
+        return (ImmutableSet<Substitution<NonVariableTerm>>) tmpDue;
     }
 
     @Override

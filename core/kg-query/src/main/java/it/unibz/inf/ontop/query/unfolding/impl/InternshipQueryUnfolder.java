@@ -83,6 +83,8 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         IQTree partialUnfoldedIQ = tree.acceptTransformer(firstPhaseTransformer);
         if (firstPhaseTransformer.existsIntensionalNode()){
             IQTree normalizedPartialUnfoldedIQ = partialUnfoldedIQ.normalizeForOptimization(variableGenerator);
+            normalizedPartialUnfoldedIQ.getPossibleVariableDefinitions();
+            var tmp = normalizedPartialUnfoldedIQ;
             QueryMergingTransformer secondPhaseTransformer = createSecondPhaseTransformer(normalizedPartialUnfoldedIQ.getPossibleVariableDefinitions(), variableGenerator);
             return partialUnfoldedIQ.acceptTransformer(secondPhaseTransformer);
         }

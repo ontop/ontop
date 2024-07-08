@@ -320,6 +320,7 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(0, StringUtils.countMatches(sql, "UNION"));
     }
 
+    //TODO TEST LASCIATI PER SICUREZZA PER AVERE DELLE QUERY DA TESTARE. ELIMINALI ALLA FINE DEL TIROCINIO
     @Test
     public void andreaTest1(){
         String sparql = "SELECT DISTINCT ?p\n" +
@@ -934,6 +935,8 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(28, count);
     }
 
+    //TODO QUESTI DI GRAPH EXPLORER INVECE PUOI LASCIARLI
+
     @Test
     public void graphexplorer_critical_query_1(){
         String sparql = "SELECT ?class (COUNT(?class) AS ?count) {\n" +
@@ -974,11 +977,11 @@ public class DestinationTest extends AbstractRDF4JTest {
     public void graphexplorer_critical_query_3(){
         String sparqlFalsa =
                 "        SELECT DISTINCT ?subject ?class {\n" +
-                "          ?subject a ?class .\n" +
-                "          { ?subject ?p <http://destination.example.org/data/source1/hospitality/A1B9B1850E0B035D21D93D3FCD3AA257> }\n" +
-                "          UNION\n" +
-                "          { <http://destination.example.org/data/source1/hospitality/A1B9B1850E0B035D21D93D3FCD3AA257> ?p ?subject }\n" +
-                "        }";
+                        "          ?subject a ?class .\n" +
+                        "          { ?subject ?p <http://destination.example.org/data/source1/hospitality/A1B9B1850E0B035D21D93D3FCD3AA257> }\n" +
+                        "          UNION\n" +
+                        "          { <http://destination.example.org/data/source1/hospitality/A1B9B1850E0B035D21D93D3FCD3AA257> ?p ?subject }\n" +
+                        "        }";
         String sparqlVera = "SELECT ?class (COUNT(?class) AS ?count) {\n" +
                 "      ?subject a ?class {\n" +
                 "        SELECT DISTINCT ?subject ?class {\n" +

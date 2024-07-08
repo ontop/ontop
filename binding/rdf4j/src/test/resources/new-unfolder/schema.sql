@@ -154,11 +154,11 @@ CREATE TABLE "source2_xyz" (
 INSERT INTO "source2_xyz"(id, x, y, z) VALUES
     (1, 'x', 'y', 'z');
 
-CREATE TABLE "rating" (
+CREATE TABLE "place_rating" (
                          id varchar(250) primary key NOT NULL,
                          rating integer NOT NULL
 );
-INSERT INTO "rating"(id, rating) VALUES
+INSERT INTO "place_rating"(id, rating) VALUES
     ('http://destination.example.org/data/source2/hotels/0471FC2FAE5744EC9D66B4220D0E6F39', 2),
     ('http://destination.example.org/data/municipality/021036', 1),
     ('http://destination.example.org/data/municipality/021010', 10),

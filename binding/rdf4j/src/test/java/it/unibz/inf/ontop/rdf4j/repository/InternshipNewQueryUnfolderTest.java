@@ -190,6 +190,24 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
     }
 
     @Test
+    public void unionScopeChecking(){
+        String sparql =
+                "PREFIX schema: <http://schema.org/>\n" +
+                        "SELECT DISTINCT ?s ?p ?o {\n" +
+                        "  {\n" +
+                        "    ?s a schema:Hotel .\n" +
+                        "    ?s ?p ?o .\n" +
+                        "  }\n" +
+                        "  UNION\n" +
+                        "  {\n" +
+                        "    ?s ?p ?o .\n" +
+                        "  }\n" +
+                        "}\n";
+        int count = runQueryAndCount(sparql);
+        assertEquals(162, count);
+    }
+
+    @Test
     public void unionWithoutOptimization(){
         String sparql =
                 "PREFIX schema: <http://schema.org/>\n" +
@@ -375,6 +393,23 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
     }
 
     @Test
+    public void leftJoinScopeChecking(){
+        String sparql =
+                "PREFIX schema: <http://schema.org/>\n" +
+                "\n" +
+                "    SELECT ?hotel ?location ?name\n" +
+                "    WHERE {\n" +
+                "               ?hotel a schema:Hotel .\n" +
+                "                ?hotel schema:containedInPlace ?location .\n" +
+                "                OPTIONAL {\n" +
+                "       ?location schema:name ?name .\n" +
+                "        }\n" +
+                "    }";
+        int count = runQueryAndCount(sparql);
+        assertEquals(162, count);
+    }
+
+    @Test
     public void leftJoinWithoutOptimization(){
         String sparql = "PREFIX schema: <http://schema.org/>\n" +
                 "\n" +
@@ -504,7 +539,7 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
 
 
     @Test
-    public void IRIConstantTakenFromDBColumnDuplicateCantHappen() {
+    public void IRIConstantTakenFromDBColumnDuplicateCanHappen() {
         String sparql =
                 "PREFIX schema: <http://schema.org/>\n" +
                 "SELECT * WHERE {\n" +
@@ -515,8 +550,9 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
         assertEquals(10, count);
     }
 
+    //class: municipality
     @Test
-    public void IRIConstantTakenFromDBColumnDuplicateCanHappenAndNeedToAvoidThem() {
+    public void IRIConstantTakenFromDBColumnDuplicateCanHappenButOneClassIsMappedToPlaceJustInOBDA() {
         String sparql =
                 "PREFIX schema: <http://schema.org/>\n" +
                         "SELECT * WHERE {\n" +
@@ -551,5 +587,23 @@ public class InternshipNewQueryUnfolderTest extends AbstractRDF4JTest {
                 "}\n";
         int count = runQueryAndCount(sparql);
         assertEquals(5, count);
+    }
+
+    @Test
+    public void graphexplorer_critical_query_2(){
+        String sparql = "SELECT ?class (COUNT(?class) AS ?count) {\n" +
+                "      ?subject a ?class {\n" +
+                "        SELECT DISTINCT ?subject ?class {\n" +
+                "          ?subject a ?class .\n" +
+                "          { ?subject ?p <http://destination.example.org/data/source1/hospitality/11893AC7C0CD11D2AE71004095429799> }\n" +
+                "          UNION\n" +
+                "          { <http://destination.example.org/data/source1/hospitality/11893AC7C0CD11D2AE71004095429799> ?p ?subject }\n" +
+                "        }\n" +
+                "        \n" +
+                "      }\n" +
+                "    }\n" +
+                "    GROUP BY ?class";
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 }

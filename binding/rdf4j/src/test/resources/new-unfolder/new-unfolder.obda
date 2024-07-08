@@ -145,7 +145,7 @@ source      SELECT * FROM "source2_xyz"
 
 mappingId   Source - rating
 target      <{id}> a schema:Place ; schema:ratingValue {rating} .
-source      SELECT * FROM "rating"
+source      SELECT * FROM "place_rating"
 
 mappingId   Source - concat test
 target      <{id}> a schema:Thing ; schema:value {associated_value} .
