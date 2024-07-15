@@ -209,7 +209,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
-        return ImmutableSet.of();
+        return child.getPossibleVariableDefinitions();
     }
 
     /**

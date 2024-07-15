@@ -24,10 +24,13 @@ import java.util.function.Supplier;
 public class IQTreeTools {
 
     private final IntermediateQueryFactory iqFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
-    private IQTreeTools(IntermediateQueryFactory iqFactory) {
+    private IQTreeTools(IntermediateQueryFactory iqFactory,
+                        SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
+        this.substitutionFactory = substitutionFactory;
     }
 
     /**
@@ -130,6 +133,10 @@ public class IQTreeTools {
             return Optional.empty();
 
         return Optional.of(var2VarFragment.injective());
+    }
+
+    public Substitution<NonVariableTerm> getEmptyNonVariableSubstitution() {
+        return substitutionFactory.getSubstitution();
     }
 
 

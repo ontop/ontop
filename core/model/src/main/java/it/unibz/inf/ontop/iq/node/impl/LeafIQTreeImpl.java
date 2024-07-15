@@ -81,7 +81,7 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
 
     @Override
     public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions() {
-        return ImmutableSet.of();
+        return ImmutableSet.of(iqTreeTools.getEmptyNonVariableSubstitution());
     }
 
     @Override
