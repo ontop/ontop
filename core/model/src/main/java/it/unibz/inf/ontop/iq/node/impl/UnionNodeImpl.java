@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -66,20 +65,23 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     @Override
     public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(ImmutableList<IQTree> children) {
-        Set<Variable> variableToDelete = new HashSet<>();
-        var tmpDue =  children.stream()
-                .flatMap(c ->{
-                    /*ImmutableSet<Substitution<NonVariableTerm>> childrenVarDef = c.getPossibleVariableDefinitions();
-                    if (childrenVarDef.isEmpty())
-                        c.getVariables()
-                                .stream()
-                                .forEach(e -> variableToDelete.add(e));*/
-                    return c.getPossibleVariableDefinitions().stream();
+        var tmp = children.stream()
+                .flatMap(c -> {
+                    ImmutableSet<Substitution<NonVariableTerm>> childSubstitutions = c.getPossibleVariableDefinitions();
+                    if (childSubstitutions.isEmpty()){
+                        return ImmutableSet.of(termFactory.getSubstitution(
+                                ImmutableMap.of()
+                        )).stream();
+                    }
+                    else {
+                        return childSubstitutions.stream();
+                    }
                 })
-                .map(s -> s.restrictDomainTo(projectedVariables))
-                //.filter(s -> s.getRangeVariables().stream().map(v -> variableToDelete.contains(v)).count() == 0)
+                .map(s -> {
+                    return s.restrictDomainTo(projectedVariables);
+                })
                 .collect(ImmutableCollectors.toSet());
-        return (ImmutableSet<Substitution<NonVariableTerm>>) tmpDue;
+        return (ImmutableSet<Substitution<NonVariableTerm>>) tmp;
     }
 
     @Override

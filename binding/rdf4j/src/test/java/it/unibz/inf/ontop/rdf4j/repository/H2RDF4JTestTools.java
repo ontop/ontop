@@ -128,5 +128,4 @@ public class H2RDF4JTestTools {
         return repo.getConnection();
     }
 
-
 }

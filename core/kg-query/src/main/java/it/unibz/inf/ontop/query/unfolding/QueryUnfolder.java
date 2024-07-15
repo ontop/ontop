@@ -11,6 +11,6 @@ import it.unibz.inf.ontop.spec.mapping.Mapping;
 public interface QueryUnfolder extends IQOptimizer {
 
     interface Factory {
-        QueryUnfolder create(Mapping mapping); //si restituisce un oggetto di tipo QueryUnfolder, serve probabilmente a creare e inizializzare il InternshipQueryUnfolder
+        QueryUnfolder create(Mapping mapping);
     }
 }

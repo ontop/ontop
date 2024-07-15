@@ -50,8 +50,6 @@ public class DefaultMappingTransformer implements MappingTransformer {
     private final UnionBasedQueryMerger queryMerger;
     private final IntermediateQueryFactory iqFactory;
 
-    private final FunctionSymbolFactory functionSymbolFactory;
-
     @Inject
     private DefaultMappingTransformer(MappingVariableNameNormalizer mappingVariableNameNormalizer,
                                       MappingSaturator mappingSaturator,
@@ -66,8 +64,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
                                       TermFactory termFactory,
                                       RuleExecutor ruleExecutor,
                                       UnionBasedQueryMerger queryMerger,
-                                      IntermediateQueryFactory iqFactory,
-                                      FunctionSymbolFactory functionSymbolFactory) {
+                                      IntermediateQueryFactory iqFactory) {
         this.mappingVariableNameNormalizer = mappingVariableNameNormalizer;
         this.mappingSaturator = mappingSaturator;
         this.factConverter = inserter;
@@ -82,13 +79,13 @@ public class DefaultMappingTransformer implements MappingTransformer {
         this.ruleExecutor = ruleExecutor;
         this.queryMerger = queryMerger;
         this.iqFactory = iqFactory;
-        this.functionSymbolFactory = functionSymbolFactory;
     }
 
     @Override
     public OBDASpecification transform(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters,
                                        Optional<Ontology> optionalOntology, ImmutableSet<RDFFact> facts,
                                        ImmutableList<IQ> rules) {
+
 
         ImmutableList<MappingAssertion> factsAsMapping = factConverter.convert(facts);
         ImmutableList<MappingAssertion> mappingWithFacts =
@@ -128,7 +125,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
                 .collect(ImmutableCollectors.toTable());
 
 
-        return new MappingImpl(propertyDefinitions, classDefinitions, this.termFactory.getDBFunctionSymbolFactory().getIriTemplateSet(), termFactory, queryMerger, iqFactory, functionSymbolFactory);
+        return new MappingImpl(propertyDefinitions, classDefinitions, this.termFactory.getDBFunctionSymbolFactory().getIriTemplateSet(), termFactory, queryMerger, iqFactory);
     }
 
     private static Table.Cell<RDFAtomPredicate, IRI, IQ> asCell(MappingAssertion assertion) {

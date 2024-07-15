@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -935,6 +932,28 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(28, count);
     }
 
+    @Test
+    public void andreaTest41(){
+        String sparql =
+                "SELECT DISTINCT * \n" +
+                "WHERE {\n" +
+                "  ?a ?b ?c .\n" +
+                "}\n";
+        int count = runQueryAndCount(sparql);
+        assertEquals(46580, count);
+    }
+
+    @Test
+    public void andreaTest42(){
+        String sparql =
+                "SELECT DISTINCT * \n" +
+                        "WHERE {\n" +
+                        "  <http://destination.example.org/data/municipality/021114> ?b ?c .\n" +
+                        "}\n";
+        int count = runQueryAndCount(sparql);
+        assertEquals(5, count);
+    }
+
     //TODO QUESTI DI GRAPH EXPLORER INVECE PUOI LASCIARLI
 
     @Test
@@ -975,14 +994,7 @@ public class DestinationTest extends AbstractRDF4JTest {
 
     @Test
     public void graphexplorer_critical_query_3(){
-        String sparqlFalsa =
-                "        SELECT DISTINCT ?subject ?class {\n" +
-                        "          ?subject a ?class .\n" +
-                        "          { ?subject ?p <http://destination.example.org/data/source1/hospitality/A1B9B1850E0B035D21D93D3FCD3AA257> }\n" +
-                        "          UNION\n" +
-                        "          { <http://destination.example.org/data/source1/hospitality/A1B9B1850E0B035D21D93D3FCD3AA257> ?p ?subject }\n" +
-                        "        }";
-        String sparqlVera = "SELECT ?class (COUNT(?class) AS ?count) {\n" +
+        String sparql = "SELECT ?class (COUNT(?class) AS ?count) {\n" +
                 "      ?subject a ?class {\n" +
                 "        SELECT DISTINCT ?subject ?class {\n" +
                 "          ?subject a ?class .\n" +
@@ -994,10 +1006,8 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "      }\n" +
                 "    }\n" +
                 "    GROUP BY ?class";
-        runQuery(sparqlFalsa);
-        long test = System.currentTimeMillis();
-        runQuery(sparqlVera);
-        System.out.println(System.currentTimeMillis()-test);
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
     }
 
     @Test
@@ -1122,6 +1132,24 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "      }\n" +
                 "      FILTER(isLiteral(?value))\n" +
                 "    }";
+        int count = runQueryAndCount(sparql);
+        assertEquals(0, count);
+    }
+
+    @Test
+    public void graphexplorer_critical_query_8_can_optimize(){
+        String sparql =
+                "SELECT ?subject ?pred ?value ?class {\n" +
+                "  ?subject ?pred ?value {\n" +
+                "    SELECT DISTINCT ?subject ?class {\n" +
+                "      ?subject a <http://schema.org/Accommodation> ;\n" +
+                "               ?predicate ?value .\n" +
+                "      FILTER (?predicate IN (<http://schema.org/name>, <http://schema.org/description>))\n" +
+                "    }\n" +
+                "    LIMIT 10 OFFSET 0\n" +
+                "  }\n" +
+                "  FILTER(isLiteral(?value))\n" +
+                "}";
         int count = runQueryAndCount(sparql);
         assertEquals(0, count);
     }

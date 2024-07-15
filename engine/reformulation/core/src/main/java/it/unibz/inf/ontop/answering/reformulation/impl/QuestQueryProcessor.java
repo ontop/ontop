@@ -101,10 +101,11 @@ public class QuestQueryProcessor implements QueryReformulator {
 
                 IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
                 LOGGER.debug("Rewritten IQ:\n{}\n", rewrittenIQ);
-				long test = System.currentTimeMillis();
+				long startedUnfolding = System.currentTimeMillis();
                 LOGGER.debug("Start the unfolding...");
                 IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ); //Step 2: unfolding della query
-				System.out.println(System.currentTimeMillis()-test);
+				System.out.print("Unfolding time: ");
+				System.out.println(System.currentTimeMillis()-startedUnfolding);
                 if (unfoldedIQ.getTree().isDeclaredAsEmpty()) {
 					queryLogger.declareReformulationFinishedAndSerialize(unfoldedIQ, false);
                 	LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
@@ -114,8 +115,11 @@ public class QuestQueryProcessor implements QueryReformulator {
 				LOGGER.debug("Unfolded query:\n{}\n", unfoldedIQ);
 
 				//Step 3: optimization of unfolded query
-                IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ, queryContext);
+				long startedOptimization = System.currentTimeMillis();
+				IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ, queryContext);
 				IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
+				System.out.print("Optimization time: ");
+				System.out.println(System.currentTimeMillis()-startedOptimization);
 				LOGGER.debug("Planned query:\n{}\n", plannedQuery);
 
 

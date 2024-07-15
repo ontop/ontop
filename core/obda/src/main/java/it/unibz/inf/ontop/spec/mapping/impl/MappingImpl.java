@@ -19,6 +19,9 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.IRI;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -42,15 +45,12 @@ public class MappingImpl implements Mapping {
     private Optional<IQ> optIQAllDef;
     private Optional<IQ> optIQClassDef;
 
-    private final FunctionSymbolFactory functionSymbolFactory;
-
     public MappingImpl(ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable,
                        ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable,
                        ImmutableSet<ObjectStringTemplateFunctionSymbol> iriTemplateSet,
                        TermFactory termFactory,
                        UnionBasedQueryMerger queryMerger,
-                       IntermediateQueryFactory iqFactory,
-                       FunctionSymbolFactory functionSymbolFactory) {
+                       IntermediateQueryFactory iqFactory) {
         this.propertyDefinitions = propertyTable;
         this.classDefinitions = classTable;
         this.iriTemplateSet = iriTemplateSet;
@@ -63,7 +63,6 @@ public class MappingImpl implements Mapping {
         this.optIQAllDef = Optional.empty();
         this.isIQAllDefComputed = false;
         this.isIQClassDefComputed = false;
-        this.functionSymbolFactory = functionSymbolFactory;
     }
 
     public enum IndexType{
@@ -133,7 +132,7 @@ public class MappingImpl implements Mapping {
             case SAC_SUBJ_INDEX:
                 compatibleDefinitions = compatibleDefinitionsFromSubjSAC;
                 subjOrObjIndex = 0;
-                optIQConsideredDef = getOptIQClassDef(rdfAtomPredicate);;
+                optIQConsideredDef = getOptIQClassDef(rdfAtomPredicate);
                 break;
         }
         if (iriTemplateSet.contains(template)){
@@ -143,7 +142,7 @@ public class MappingImpl implements Mapping {
             }
             else{
                 if (optIQConsideredDef.isPresent()){
-                    IQ iqConsideredDef = optIQAllDef.get();
+                    IQ iqConsideredDef = optIQConsideredDef.get();
                     Variable var = iqConsideredDef.getProjectionAtom().getArguments().get(subjOrObjIndex);
                     ImmutableExpression strictEquality = termFactory.getStrictEquality(
                             var,

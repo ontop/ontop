@@ -82,7 +82,8 @@ INSERT INTO "source2_hotels" (id,english,italian,german,htype,lat,long,alt,cat,m
     ('001AE4C0FA0781A2CDD3750811DBDAEB','Apartment Haideblick','Appartamento Haideblick','App. Ferienwohnung Haideblick',2,46.766831,10.533657,1470.0,'2suns',21027),
     ('0316AB454F854E4989AD3A27D3571560','Haus Steiner','Haus Steiner','Haus Steiner',3,46.6225,10.5818,920.0,'1flower',21067),
     ('045B2B5A157B881DCDBB3B20F3137D94','Ansitz Vogelsang','Ansitz Vogelsang','Ansitz Vogelsang',4,46.62907,10.782926,730.0,'3suns',21093),
-    ('0471FC2FAE5744EC9D66B4220D0E6F39','Mühlander-Hof','Mühlander-Hof','UAB Mühlander-Hof',2,46.8308,10.5108,1500.0,'2flowers',21027);
+    ('0471FC2FAE5744EC9D66B4220D0E6F39','Mühlander-Hof','Mühlander-Hof','UAB Mühlander-Hof',2,46.8308,10.5108,1500.0,'2flowers',21027),
+    ('0471FC2FAE5744EC9D66B4220D0E6F36','Test-Hof','Test-Hof','UAB Mühlander-Hof',2,46.8308,10.5108,1500.0,'2flowers',021114);
 
 
 
@@ -154,11 +155,11 @@ CREATE TABLE "source2_xyz" (
 INSERT INTO "source2_xyz"(id, x, y, z) VALUES
     (1, 'x', 'y', 'z');
 
-CREATE TABLE "place_rating" (
+CREATE TABLE "rating" (
                          id varchar(250) primary key NOT NULL,
                          rating integer NOT NULL
 );
-INSERT INTO "place_rating"(id, rating) VALUES
+INSERT INTO "rating"(id, rating) VALUES
     ('http://destination.example.org/data/source2/hotels/0471FC2FAE5744EC9D66B4220D0E6F39', 2),
     ('http://destination.example.org/data/municipality/021036', 1),
     ('http://destination.example.org/data/municipality/021010', 10),
@@ -166,16 +167,6 @@ INSERT INTO "place_rating"(id, rating) VALUES
     ('http://destination.example.org/data/source2/hotels/001AE4C0FA0781A2CDD3750811DBDAEB', 5),
     ('http://destination.example.org/data/municipality/021068', 3),
     ('http://destination.example.org/data/municipality/021065', 8),
-    ('http://destination.example.org/data/source1/hospitality/0471FC2FAE5744EC9D66B4220D0E6F39', 7),
+    ('http://destination.example.org/data/source1/hospitality/EFF0FACBA54C11D1AD760020AFF92740', 7),
     ('http://destination.example.org/data/municipality/021069', 10),
     ('http://destination.example.org/data/source1/hospitality/A92A692C413911D483B90050BAC0A490', 1);
-
-CREATE TABLE "concat_test"(
-                            id varchar(250) primary key NOT NULL,
-                            associated_value varchar(250) NOT NULL
-);
-INSERT INTO "concat_test"(id, associated_value) VALUES
-    (CONCAT('http://destination.example.org/data/test1/', '1022'), 'ciao'),
-    (CONCAT('http://destination.example.org/data/test1/', '2002'), 'come'),
-    (CONCAT('http://destination.example.org/data/test2/', '2121'), 'va'),
-    (CONCAT('http://destination.example.org/data/test2/', '2000'), '?');
