@@ -210,7 +210,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         if (childDefs.isEmpty()) {
             Substitution<NonVariableTerm> def = substitution.restrictRangeTo(NonVariableTerm.class);
             return def.isEmpty()
-                    ? ImmutableSet.of()
+                    ? ImmutableSet.of(substitutionFactory.getSubstitution())
                     : ImmutableSet.of(def);
         }
 
