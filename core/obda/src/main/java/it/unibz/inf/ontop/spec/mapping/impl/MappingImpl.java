@@ -61,14 +61,25 @@ public class MappingImpl implements Mapping {
         this.compatibleDefinitionsFromObjSPO = HashBasedTable.create();
         this.compatibleDefinitionsFromSubjSAC = HashBasedTable.create();
         this.optIQAllDef = Optional.empty();
+        this.optIQClassDef = Optional.empty();
         this.isIQAllDefComputed = false;
         this.isIQClassDefComputed = false;
     }
 
     public enum IndexType{
-        SPO_SUBJ_INDEX,
-        SPO_OBJ_INDEX,
-        SAC_SUBJ_INDEX,
+        SPO_SUBJ_INDEX(0),
+        SPO_OBJ_INDEX(2),
+        SAC_SUBJ_INDEX(0);
+
+        private final int value;
+
+        IndexType(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
     }
 
     @Override
@@ -117,22 +128,15 @@ public class MappingImpl implements Mapping {
     public Optional<IQ> getCompatibleDefinitions(VariableGenerator variableGenerator, IndexType indexType, RDFAtomPredicate rdfAtomPredicate, ObjectStringTemplateFunctionSymbol template){
         Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitions = null;
         Optional<IQ> optIQConsideredDef = Optional.empty();
-        int subjOrObjIndex = -1;
         switch (indexType){
             case SPO_SUBJ_INDEX:
-                compatibleDefinitions = compatibleDefinitionsFromSubjSPO;
-                subjOrObjIndex = 0;
-                optIQConsideredDef = getOptIQAllDef(rdfAtomPredicate);;
+                compatibleDefinitions = compatibleDefinitionsFromSubjSPO; optIQConsideredDef = getOptIQAllDef(rdfAtomPredicate);
                 break;
             case SPO_OBJ_INDEX:
-                compatibleDefinitions = compatibleDefinitionsFromObjSPO;
-                subjOrObjIndex = 2;
-                optIQConsideredDef = getOptIQAllDef(rdfAtomPredicate);
+                compatibleDefinitions = compatibleDefinitionsFromObjSPO; optIQConsideredDef = getOptIQAllDef(rdfAtomPredicate);
                 break;
             case SAC_SUBJ_INDEX:
-                compatibleDefinitions = compatibleDefinitionsFromSubjSAC;
-                subjOrObjIndex = 0;
-                optIQConsideredDef = getOptIQClassDef(rdfAtomPredicate);
+                compatibleDefinitions = compatibleDefinitionsFromSubjSAC; optIQConsideredDef = getOptIQClassDef(rdfAtomPredicate);
                 break;
         }
         if (iriTemplateSet.contains(template)){
@@ -142,19 +146,7 @@ public class MappingImpl implements Mapping {
             }
             else{
                 if (optIQConsideredDef.isPresent()){
-                    IQ iqConsideredDef = optIQConsideredDef.get();
-                    Variable var = iqConsideredDef.getProjectionAtom().getArguments().get(subjOrObjIndex);
-                    ImmutableExpression strictEquality = termFactory.getStrictEquality(
-                            var,
-                            termFactory.getIRIFunctionalTerm(termFactory.getImmutableFunctionalTerm(
-                                    template,
-                                    IntStream.range(0, template.getArity())
-                                            .mapToObj(i -> variableGenerator.generateNewVariable())
-                                            .collect(ImmutableCollectors.toList()))));
-                    IQTree prunedIQTree = iqConsideredDef.getTree().propagateDownConstraint(strictEquality, variableGenerator).normalizeForOptimization(variableGenerator);
-                    IQ prunedIQ = iqFactory.createIQ(iqConsideredDef.getProjectionAtom(), prunedIQTree);
-                    compatibleDefinitions.put(rdfAtomPredicate, template, prunedIQ);
-                    return Optional.of(compatibleDefinitions.get(rdfAtomPredicate, template));
+                    return prunedIQFromDef(variableGenerator, rdfAtomPredicate, compatibleDefinitions, optIQConsideredDef.get(), indexType, template);
                 }
                 else {
                     return Optional.empty();
@@ -164,6 +156,21 @@ public class MappingImpl implements Mapping {
         else{
             return Optional.empty();
         }
+    }
+
+    private Optional<IQ> prunedIQFromDef(VariableGenerator variableGenerator, RDFAtomPredicate rdfAtomPredicate, Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitions, IQ iqConsideredDef, IndexType indexType, ObjectStringTemplateFunctionSymbol template){
+        Variable var = iqConsideredDef.getProjectionAtom().getArguments().get(indexType.getValue());
+        ImmutableExpression strictEquality = termFactory.getStrictEquality(
+                var,
+                termFactory.getIRIFunctionalTerm(termFactory.getImmutableFunctionalTerm(
+                        template,
+                        IntStream.range(0, template.getArity())
+                                .mapToObj(i -> variableGenerator.generateNewVariable())
+                                .collect(ImmutableCollectors.toList()))));
+        IQTree prunedIQTree = iqConsideredDef.getTree().propagateDownConstraint(strictEquality, variableGenerator).normalizeForOptimization(variableGenerator);
+        IQ prunedIQ = iqFactory.createIQ(iqConsideredDef.getProjectionAtom(), prunedIQTree);
+        compatibleDefinitions.put(rdfAtomPredicate, template, prunedIQ);
+        return Optional.of(compatibleDefinitions.get(rdfAtomPredicate, template));
     }
 
     @Override
