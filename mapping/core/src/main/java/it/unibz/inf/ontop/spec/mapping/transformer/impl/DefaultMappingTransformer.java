@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.optimizer.DisjunctionOfEqualitiesMergingSimplifier;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.impl.MappingImpl;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
@@ -125,7 +124,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
                 .collect(ImmutableCollectors.toTable());
 
 
-        return new MappingImpl(propertyDefinitions, classDefinitions, this.termFactory.getDBFunctionSymbolFactory().getIriTemplateSet(), termFactory, queryMerger, iqFactory);
+        return new MappingImpl(propertyDefinitions, classDefinitions, termFactory, queryMerger, iqFactory);
     }
 
     private static Table.Cell<RDFAtomPredicate, IRI, IQ> asCell(MappingAssertion assertion) {

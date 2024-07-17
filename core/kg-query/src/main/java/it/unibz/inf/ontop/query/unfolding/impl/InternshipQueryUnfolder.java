@@ -53,6 +53,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
     private final CoreUtilsFactory coreUtilsFactory;
     private final TermFactory termFactory;
     private final FunctionSymbolFactory functionSymbolFactory;
+    private final ImmutableSet<ObjectStringTemplateFunctionSymbol> objectTemplates;
     private VariableGenerator variableGenerator;
     private FirstPhaseQueryTransformer firstPhaseTransformer;
     private Map<IRIConstant, Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>>> iriTemplateSetMap;
@@ -75,6 +76,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         this.termFactory = termFactory;
         this.functionSymbolFactory = functionSymbolFactory;
         this.iriTemplateSetMap = new HashMap<>();
+        this.objectTemplates = termFactory.getDBFunctionSymbolFactory().getObjectTemplates();
     }
 
     @Override
@@ -137,8 +139,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
     private Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>> extractCompatibleTemplateFromIriConst(IRIConstant iriConstant) {
         Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>> optionalCompatibleTemplate;
         if (iriTemplateSetMap.get(iriConstant) == null) {
-            ImmutableSet<ObjectStringTemplateFunctionSymbol> iriTemplateSet = mapping.getIriTemplateSet();
-            optionalCompatibleTemplate = Optional.ofNullable(iriTemplateSet.stream()
+            optionalCompatibleTemplate = Optional.ofNullable(objectTemplates.stream()
                     .filter(template -> isIriTemplateCompatibleWithConst(template, iriConstant))
                     .collect(ImmutableSet.toImmutableSet()));
             iriTemplateSetMap.put(iriConstant, optionalCompatibleTemplate);

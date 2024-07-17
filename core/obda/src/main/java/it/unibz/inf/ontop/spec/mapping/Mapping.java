@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableTable;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
@@ -52,8 +51,6 @@ public interface Mapping {
     ImmutableCollection<IQ> getQueries(RDFAtomPredicate rdfAtomPredicate);
 
     Optional<IQ> getCompatibleDefinitions(VariableGenerator variableGenerator, MappingImpl.IndexType indexType, ObjectStringTemplateFunctionSymbol template);
-
-    ImmutableSet<ObjectStringTemplateFunctionSymbol> getIriTemplateSet();
 
     Optional<IQ> getOptIQAllDef();
 

@@ -18,14 +18,12 @@ import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.spec.mapping.impl.MappingImpl.IndexType.*;
-
 
 public class MappingImpl implements Mapping {
 
     private final ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyDefinitions;
     private final ImmutableTable<RDFAtomPredicate, IRI, IQ> classDefinitions;
-    private final ImmutableSet<ObjectStringTemplateFunctionSymbol> iriTemplateSet;
+    private final ImmutableSet<ObjectStringTemplateFunctionSymbol> objectTemplates;
     private Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitionsFromSubjSAC;
     private Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitionsFromSubjSPO;
     private Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitionsFromObjSPO;
@@ -39,13 +37,12 @@ public class MappingImpl implements Mapping {
 
     public MappingImpl(ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable,
                        ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable,
-                       ImmutableSet<ObjectStringTemplateFunctionSymbol> iriTemplateSet,
                        TermFactory termFactory,
                        UnionBasedQueryMerger queryMerger,
                        IntermediateQueryFactory iqFactory) {
         this.propertyDefinitions = propertyTable;
         this.classDefinitions = classTable;
-        this.iriTemplateSet = iriTemplateSet;
+        this.objectTemplates = termFactory.getDBFunctionSymbolFactory().getObjectTemplates();
         this.termFactory = termFactory;
         this.queryMerger = queryMerger;
         this.iqFactory = iqFactory;
@@ -72,11 +69,6 @@ public class MappingImpl implements Mapping {
         public int getValue() {
             return value;
         }
-    }
-
-    @Override
-    public ImmutableSet<ObjectStringTemplateFunctionSymbol> getIriTemplateSet() {
-        return iriTemplateSet;
     }
 
     @Override
@@ -132,7 +124,7 @@ public class MappingImpl implements Mapping {
                 compatibleDefinitions = compatibleDefinitionsFromSubjSAC; optIQConsideredDef = getOptIQClassDef();
                 break;
         }
-        if (iriTemplateSet.contains(template)){
+        if (objectTemplates.contains(template)){
             Optional<IQ> result = Optional.ofNullable(compatibleDefinitions.get(rdfAtomPredicate, template));
             if (result.isPresent()){
                 return result;

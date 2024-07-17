@@ -987,7 +987,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public ImmutableSet<ObjectStringTemplateFunctionSymbol> getIriTemplateSet() {
+    public ImmutableSet<ObjectStringTemplateFunctionSymbol> getObjectTemplates() {
         ImmutableSet.Builder<ObjectStringTemplateFunctionSymbol> builder = ImmutableSet.builder();
         for (Map.Entry<ImmutableList<Template.Component>, IRIStringTemplateFunctionSymbol> entry : iriTemplateMap.entrySet()) {
             builder.add(entry.getValue());
