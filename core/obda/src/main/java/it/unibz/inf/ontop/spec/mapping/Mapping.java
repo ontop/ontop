@@ -48,11 +48,11 @@ public interface Mapping {
      */
     ImmutableSet<IRI> getRDFClasses(RDFAtomPredicate rdfAtomPredicate);
 
-    ImmutableCollection<IQ> getQueries(RDFAtomPredicate rdfAtomPredicate);
+    Optional<IQ> getCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate,
+                                          VariableGenerator variableGenerator, MappingImpl.IndexType indexType,
+                                          ObjectStringTemplateFunctionSymbol template);
 
-    Optional<IQ> getCompatibleDefinitions(VariableGenerator variableGenerator, MappingImpl.IndexType indexType, ObjectStringTemplateFunctionSymbol template);
+    Optional<IQ> getMergedDefinitions(RDFAtomPredicate rdfAtomPredicate);
 
-    Optional<IQ> getOptIQAllDef();
-
-    Optional<IQ> getOptIQClassDef();
+    Optional<IQ> getMergedClassDefinitions(RDFAtomPredicate rdfAtomPredicate);
 }

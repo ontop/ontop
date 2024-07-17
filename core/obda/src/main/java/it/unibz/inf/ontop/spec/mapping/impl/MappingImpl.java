@@ -96,32 +96,25 @@ public class MappingImpl implements Mapping {
     }
 
     @Override
-    public ImmutableCollection<IQ> getQueries(RDFAtomPredicate rdfAtomPredicate) {
-        return Stream.concat(classDefinitions.row(rdfAtomPredicate).values().stream(),
-                    propertyDefinitions.row(rdfAtomPredicate).values().stream())
-                .collect(ImmutableCollectors.toList());
-    }
-
-    @Override
     public ImmutableSet<RDFAtomPredicate> getRDFAtomPredicates() {
         return Sets.union(propertyDefinitions.rowKeySet(), classDefinitions.rowKeySet())
                 .immutableCopy();
     }
 
     @Override
-    public Optional<IQ> getCompatibleDefinitions(VariableGenerator variableGenerator, IndexType indexType, ObjectStringTemplateFunctionSymbol template){
-        RDFAtomPredicate rdfAtomPredicate = getRDFAtomPredicates().stream().findFirst().get();
+    public Optional<IQ> getCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate, VariableGenerator variableGenerator,
+                                                 IndexType indexType, ObjectStringTemplateFunctionSymbol template){
         Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitions = null;
         Optional<IQ> optIQConsideredDef = Optional.empty();
         switch (indexType){
             case SPO_SUBJ_INDEX:
-                compatibleDefinitions = compatibleDefinitionsFromSubjSPO; optIQConsideredDef = getOptIQAllDef();
+                compatibleDefinitions = compatibleDefinitionsFromSubjSPO; optIQConsideredDef = getMergedDefinitions(rdfAtomPredicate);
                 break;
             case SPO_OBJ_INDEX:
-                compatibleDefinitions = compatibleDefinitionsFromObjSPO; optIQConsideredDef = getOptIQAllDef();
+                compatibleDefinitions = compatibleDefinitionsFromObjSPO; optIQConsideredDef = getMergedDefinitions(rdfAtomPredicate);
                 break;
             case SAC_SUBJ_INDEX:
-                compatibleDefinitions = compatibleDefinitionsFromSubjSAC; optIQConsideredDef = getOptIQClassDef();
+                compatibleDefinitions = compatibleDefinitionsFromSubjSAC; optIQConsideredDef = getMergedClassDefinitions(rdfAtomPredicate);
                 break;
         }
         if (objectTemplates.contains(template)){
@@ -160,20 +153,21 @@ public class MappingImpl implements Mapping {
     }
 
     @Override
-    public Optional<IQ> getOptIQAllDef() {
+    public Optional<IQ> getMergedDefinitions(RDFAtomPredicate rdfAtomPredicate) {
         if (!isIQAllDefComputed) {
-            RDFAtomPredicate rdfAtomPredicate = getRDFAtomPredicates().stream().findFirst().orElseThrow();
-            ImmutableCollection<IQ> allDef = getQueries(rdfAtomPredicate);
-            optIQAllDef = queryMerger.mergeDefinitions(allDef);
+            ImmutableCollection<IQ> definitions = Stream.concat(
+                        classDefinitions.row(rdfAtomPredicate).values().stream(),
+                        propertyDefinitions.row(rdfAtomPredicate).values().stream())
+                    .collect(ImmutableCollectors.toList());
+            optIQAllDef = queryMerger.mergeDefinitions(definitions);
             isIQAllDefComputed = true;
         }
         return optIQAllDef;
     }
 
     @Override
-    public Optional<IQ> getOptIQClassDef() {
+    public Optional<IQ> getMergedClassDefinitions(RDFAtomPredicate rdfAtomPredicate) {
         if(!isIQClassDefComputed){
-            RDFAtomPredicate rdfAtomPredicate = getRDFAtomPredicates().stream().findFirst().orElseThrow();
             optIQClassDef = queryMerger.mergeDefinitions(classDefinitions.row(rdfAtomPredicate).values().stream()
                     .collect(ImmutableCollectors.toList()));
             isIQClassDefComputed = true;

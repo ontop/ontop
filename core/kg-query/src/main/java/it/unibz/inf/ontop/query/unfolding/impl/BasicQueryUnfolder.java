@@ -100,7 +100,7 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
         }
 
         private Optional<IQ> getStarDefinition(RDFAtomPredicate predicate) {
-            return queryMerger.mergeDefinitions(mapping.getQueries(predicate));
+            return mapping.getMergedDefinitions(predicate);
         }
 
         @Override
