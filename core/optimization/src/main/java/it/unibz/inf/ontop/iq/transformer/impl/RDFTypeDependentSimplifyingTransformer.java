@@ -13,8 +13,6 @@ import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFTermType;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -26,12 +24,10 @@ import java.util.stream.Stream;
 public abstract class RDFTypeDependentSimplifyingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
     private final OptimizerFactory optimizerFactory;
-    private final SubstitutionFactory substitutionFactory;
 
     protected RDFTypeDependentSimplifyingTransformer(OptimizationSingletons optimizationSingletons) {
         super(optimizationSingletons.getCoreSingletons());
         this.optimizerFactory = optimizationSingletons.getOptimizerFactory();
-        this.substitutionFactory = optimizationSingletons.getCoreSingletons().getSubstitutionFactory();
     }
 
     protected ImmutableTerm unwrapIfElseNull(ImmutableTerm term) {

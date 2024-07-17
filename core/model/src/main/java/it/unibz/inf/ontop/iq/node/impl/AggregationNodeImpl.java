@@ -279,7 +279,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         if (groupingVariableDefs.isEmpty()) {
             return def.isEmpty()
-                    ? ImmutableSet.of()
+                    ? ImmutableSet.of(substitutionFactory.getSubstitution())
                     : ImmutableSet.of(def);
         }
 

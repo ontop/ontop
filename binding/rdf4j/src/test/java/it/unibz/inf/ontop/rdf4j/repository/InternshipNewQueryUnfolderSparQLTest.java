@@ -619,6 +619,7 @@ public class InternshipNewQueryUnfolderSparQLTest extends AbstractRDF4JTest {
     }
 
     //class: municipality
+    @Ignore //if you want to test it individually remove the ignore, otherwise leave it, because if runned with all the other test a crash occour for heap space
     @Test
     public void IRIConstantTakenFromDBColumnDuplicateCanHappenButOneClassIsMappedToPlaceJustInOBDA() {
         String sparql =
@@ -645,6 +646,18 @@ public class InternshipNewQueryUnfolderSparQLTest extends AbstractRDF4JTest {
         //runQuery(sparql);
         int count = runQueryAndCount(sparql);
         assertEquals(5, count);
+    }
+
+    @Test
+    public void test() {
+        String sparql =
+                "PREFIX sosa: <http://www.w3.org/ns/sosa/>\n" +
+                "SELECT * WHERE {\n" +
+                "  ?sub a sosa:Observation .\n" +
+                "  ?sub ?pred ?obj .\n" +
+                "} ";
+        int count = runQueryAndCount(sparql);
+        assertEquals(50, count);
     }
 
     /*

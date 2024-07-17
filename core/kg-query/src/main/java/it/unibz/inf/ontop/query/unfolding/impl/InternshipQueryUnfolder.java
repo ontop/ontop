@@ -151,7 +151,8 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
 
     private Optional<IQ> getCompatibleDefinitionsForIRI(MappingImpl.IndexType indexType, IRIConstant iriConstant){
         Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>> optionalCompatibleTemplate = extractCompatibleTemplateFromIriConst(iriConstant);
-        if (optionalCompatibleTemplate.isPresent() && optionalCompatibleTemplate.get().size() >= 1){ //TODO TRY PUTTING IT == 1 IF YOU HAVE PROBLEMS
+        //is == 1 and not >= 1, because you have problem when you two iri template for a iri constant and there is no generic one
+        if (optionalCompatibleTemplate.isPresent() && optionalCompatibleTemplate.get().size() == 1){
             Optional<IQ> optDef = mapping.getCompatibleDefinitions(variableGenerator, indexType, optionalCompatibleTemplate.get().stream().findFirst().get());
             if (optDef.isPresent()) {
                 IQ def = optDef.get();
