@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.*;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
+import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedBinaryMathOperationTransformer;
@@ -84,6 +85,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(DatabaseInfoSupplier.class);
 
         bind(CoreSingletons.class).to(CoreSingletonsImpl.class);
+        bindFromSettings(UnionBasedQueryMerger.class);
 
         Module utilsModule = buildFactory(
                 ImmutableList.of(
