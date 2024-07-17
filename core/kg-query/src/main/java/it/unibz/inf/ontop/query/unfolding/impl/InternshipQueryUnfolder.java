@@ -23,7 +23,6 @@ import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.mapping.impl.MappingImpl;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -37,7 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.spec.mapping.impl.MappingImpl.IndexType.*;
+import static it.unibz.inf.ontop.spec.mapping.Mapping.RDFAtomIndexPattern.*;
 
 
 /**
@@ -150,15 +149,15 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         return optionalCompatibleTemplate.isPresent() ? optionalCompatibleTemplate : Optional.empty();
     }
 
-    private Optional<IQ> getCompatibleDefinitionsForIRI(RDFAtomPredicate rdfAtomPredicate, MappingImpl.IndexType indexType, IRIConstant iriConstant){
+    private Optional<IQ> getCompatibleDefinitionsForIRI(RDFAtomPredicate rdfAtomPredicate, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern, IRIConstant iriConstant){
         Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>> optionalCompatibleTemplate = extractCompatibleTemplateFromIriConst(iriConstant);
         //is == 1 and not >= 1, because you have problem when you two iri template for a iri constant and there is no generic one
         if (optionalCompatibleTemplate.isPresent() && optionalCompatibleTemplate.get().size() == 1){
-            Optional<IQ> optDef = mapping.getCompatibleDefinitions(rdfAtomPredicate, variableGenerator, indexType, optionalCompatibleTemplate.get().stream().findFirst().get());
+            Optional<IQ> optDef = mapping.getCompatibleDefinitions(rdfAtomPredicate, RDFAtomIndexPattern, optionalCompatibleTemplate.get().stream().findFirst().get(), variableGenerator);
             if (optDef.isPresent()) {
                 IQ def = optDef.get();
                 ImmutableTerm var;
-                var = def.getProjectionAtom().getArguments().get(indexType.getValue());
+                var = def.getProjectionAtom().getArguments().get(RDFAtomIndexPattern.getPosition());
                 ImmutableExpression filterCondition = termFactory.getStrictEquality(var, termFactory.getConstantIRI(iriConstant.getIRI()));
                 FilterNode filterNode = iqFactory.createFilterNode(filterCondition);
                 IQTree iqTreeWithFilter = iqFactory.createUnaryIQTree(filterNode, def.getTree());
@@ -343,11 +342,11 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
             return templateSet.stream().filter(elem -> elem.isIRIConstantFromDB()).findFirst().isPresent();
         }
 
-        private Optional<IQ> filteredDefFromIRITemplate(RDFAtomPredicate rdfAtomPredicate, ObjectStringTemplateFunctionSymbol iriTemplate, MappingImpl.IndexType indexType){
+        private Optional<IQ> filteredDefFromIRITemplate(RDFAtomPredicate rdfAtomPredicate, ObjectStringTemplateFunctionSymbol iriTemplate, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern){
             Optional<IQ> evaluatedIQ;
-            evaluatedIQ = mapping.getCompatibleDefinitions(rdfAtomPredicate, variableGenerator, indexType, iriTemplate);
+            evaluatedIQ = mapping.getCompatibleDefinitions(rdfAtomPredicate, RDFAtomIndexPattern, iriTemplate, variableGenerator);
             IQ singleIQDef = evaluatedIQ.get();
-            Variable var = singleIQDef.getProjectionAtom().getArguments().get(indexType.getValue());
+            Variable var = singleIQDef.getProjectionAtom().getArguments().get(RDFAtomIndexPattern.getPosition());
             if (!isIQDefinitionSafe(var, singleIQDef.getTree(), iriTemplate)) {
                 String iriTemplatePrefix = iriTemplate.getTemplateComponents().get(0).toString();
                 evaluatedIQ = Optional.ofNullable(iqFactory.createIQ(singleIQDef.getProjectionAtom(),
@@ -357,15 +356,15 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
             return evaluatedIQ;
         }
 
-        private Optional<IQ> filteredDefFromIRIConst(RDFAtomPredicate rdfAtomPredicate, IRIConstant iriConstant, MappingImpl.IndexType indexType){
+        private Optional<IQ> filteredDefFromIRIConst(RDFAtomPredicate rdfAtomPredicate, IRIConstant iriConstant, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern){
             Optional<IQ> evaluatedIQ;
-            evaluatedIQ = getCompatibleDefinitionsForIRI(rdfAtomPredicate, indexType, iriConstant);
+            evaluatedIQ = getCompatibleDefinitionsForIRI(rdfAtomPredicate, RDFAtomIndexPattern, iriConstant);
             if (evaluatedIQ.isEmpty()) {
-                if (indexType == SAC_SUBJ_INDEX)
+                if (RDFAtomIndexPattern == SUBJECT_OF_ALL_CLASSES)
                     evaluatedIQ = mapping.getMergedClassDefinitions(rdfAtomPredicate);
                 else
                     evaluatedIQ = mapping.getMergedDefinitions(rdfAtomPredicate);
-                Variable var = evaluatedIQ.get().getProjectionAtom().getArguments().get(indexType.getValue());
+                Variable var = evaluatedIQ.get().getProjectionAtom().getArguments().get(RDFAtomIndexPattern.getPosition());
                 ImmutableExpression filterCondition = termFactory.getStrictEquality(var, termFactory.getConstantIRI(iriConstant.getIRI()));
                 FilterNode filterNode = iqFactory.createFilterNode(filterCondition);
                 IQTree iqTreeWithFilter = iqFactory.createUnaryIQTree(filterNode, evaluatedIQ.get().getTree());
@@ -375,14 +374,14 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         }
 
         private Collection<IQ> fromTemplateSetReturnForestOfCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate,
-                                                                                  ImmutableSet<IRIOrBNodeTemplateSelector> templateSet, MappingImpl.IndexType indexType){
+                                                                                  ImmutableSet<IRIOrBNodeTemplateSelector> templateSet, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern){
             Collection<IQ> IQForest = templateSet.stream()
                     .filter(elem -> (elem.isIRITemplate() || elem.isIRIConstant()))
                     .map(elem -> {
                         if (elem.isIRITemplate())
-                            return filteredDefFromIRITemplate(rdfAtomPredicate, elem.getOptTemplate().get(), indexType);
+                            return filteredDefFromIRITemplate(rdfAtomPredicate, elem.getOptTemplate().get(), RDFAtomIndexPattern);
                         else
-                            return filteredDefFromIRIConst(rdfAtomPredicate, elem.getOptIRIConstant().get(), indexType);
+                            return filteredDefFromIRIConst(rdfAtomPredicate, elem.getOptIRIConstant().get(), RDFAtomIndexPattern);
                     })
                     .filter(elem -> elem.isPresent())
                     .map(elem -> elem.get())
@@ -391,14 +390,14 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         }
 
         private Optional<IQ> getUnionOfCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate,
-                                                             MappingImpl.IndexType indexType, Variable subjOrObj){
+                                                             Mapping.RDFAtomIndexPattern RDFAtomIndexPattern, Variable subjOrObj){
             Optional<ImmutableSet<IRIOrBNodeTemplateSelector>> optionalTemplateSet;
             optionalTemplateSet = Optional.ofNullable(varTemplateSetMap.get(subjOrObj));
             if (optionalTemplateSet.isPresent()) {
                 ImmutableSet<IRIOrBNodeTemplateSelector> templateSet = optionalTemplateSet.get();
                 if (someDefComeFromDB(templateSet))
                     return Optional.empty();
-                return queryMerger.mergeDefinitions(fromTemplateSetReturnForestOfCompatibleDefinitions(rdfAtomPredicate, templateSet, indexType));
+                return queryMerger.mergeDefinitions(fromTemplateSetReturnForestOfCompatibleDefinitions(rdfAtomPredicate, templateSet, RDFAtomIndexPattern));
             }
             else
                 return Optional.empty();
@@ -471,7 +470,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
                                                   ImmutableList<? extends VariableOrGroundTerm> arguments){
             if(arguments.get(0) instanceof Variable && arguments.get(1) instanceof IRIConstant && arguments.get(2) instanceof Variable){
                 Variable var = (Variable) arguments.get(0);
-                Optional<IQ> definitionVarSubj = getUnionOfCompatibleDefinitions(predicate, SAC_SUBJ_INDEX, var);
+                Optional<IQ> definitionVarSubj = getUnionOfCompatibleDefinitions(predicate, SUBJECT_OF_ALL_CLASSES, var);
                 return definitionVarSubj.isPresent() ? definitionVarSubj : getStarClassDefinition(predicate);
             }
             else{
@@ -483,12 +482,12 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
                                                   ImmutableList<? extends VariableOrGroundTerm> arguments){
             if(isVarVarVar(arguments)) {
                 Variable var = (Variable) arguments.get(0);
-                Optional<IQ> definitionVarSubj = getUnionOfCompatibleDefinitions(predicate, SPO_SUBJ_INDEX, var);
+                Optional<IQ> definitionVarSubj = getUnionOfCompatibleDefinitions(predicate, SUBJECT_OF_ALL_DEFINITIONS, var);
                 if (definitionVarSubj.isPresent()){
                     return definitionVarSubj;
                 }
                 else{
-                    Optional<IQ> definitionVarObj = getUnionOfCompatibleDefinitions(predicate, SPO_OBJ_INDEX, var);
+                    Optional<IQ> definitionVarObj = getUnionOfCompatibleDefinitions(predicate, OBJECT_OF_ALL_DEFINITIONS, var);
                     return definitionVarObj.isPresent() ? definitionVarObj : getStarDefinition(predicate);
                 }
             }
@@ -615,22 +614,22 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
             if (!isGenericSPO(arguments)){
                 if (isIRIVarVar(arguments)){
                     IRIConstant subj = (IRIConstant) arguments.get(0);
-                    Optional<IQ> subjDef = getCompatibleDefinitionsForIRI(predicate, SPO_SUBJ_INDEX, subj);
+                    Optional<IQ> subjDef = getCompatibleDefinitionsForIRI(predicate, SUBJECT_OF_ALL_DEFINITIONS, subj);
                     return subjDef.isPresent() ? subjDef : getStarDefinition(predicate);
                 }
                 else if (isVarVarIRI(arguments)){
                     IRIConstant obj = (IRIConstant) arguments.get(2);
-                    Optional<IQ> objDef = getCompatibleDefinitionsForIRI(predicate, SPO_OBJ_INDEX, obj);
+                    Optional<IQ> objDef = getCompatibleDefinitionsForIRI(predicate, OBJECT_OF_ALL_DEFINITIONS, obj);
                     return objDef.isPresent() ? objDef : getStarDefinition(predicate);
                 }
                 else{
                     IRIConstant subj = (IRIConstant) arguments.get(0);
-                    Optional<IQ> subjDef = getCompatibleDefinitionsForIRI(predicate, SPO_SUBJ_INDEX, subj);
+                    Optional<IQ> subjDef = getCompatibleDefinitionsForIRI(predicate, SUBJECT_OF_ALL_DEFINITIONS, subj);
                     if (subjDef.isPresent())
                         return subjDef;
                     else{
                         IRIConstant obj = (IRIConstant) arguments.get(2);
-                        Optional<IQ> objDef = getCompatibleDefinitionsForIRI(predicate, SPO_OBJ_INDEX, obj);
+                        Optional<IQ> objDef = getCompatibleDefinitionsForIRI(predicate, OBJECT_OF_ALL_DEFINITIONS, obj);
                         return objDef.isPresent() ? objDef : getStarDefinition(predicate);
                     }
                 }
@@ -645,7 +644,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
                     return Optional.<IQ>empty();
                 else if (arguments.get(0) instanceof IRIConstant && arguments.get(2) instanceof Variable){
                     IRIConstant subj = (IRIConstant) arguments.get(0);
-                    Optional<IQ> subjDef = getCompatibleDefinitionsForIRI(predicate, SAC_SUBJ_INDEX, subj);
+                    Optional<IQ> subjDef = getCompatibleDefinitionsForIRI(predicate, SUBJECT_OF_ALL_CLASSES, subj);
                     return subjDef.isPresent() ? subjDef : getRDFClassDefinition(predicate, arguments);
                 }
                 else return getRDFClassDefinition(predicate, arguments);
