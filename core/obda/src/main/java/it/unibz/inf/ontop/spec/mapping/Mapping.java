@@ -51,11 +51,11 @@ public interface Mapping {
 
     ImmutableCollection<IQ> getQueries(RDFAtomPredicate rdfAtomPredicate);
 
-    Optional<IQ> getCompatibleDefinitions(VariableGenerator variableGenerator, MappingImpl.IndexType indexType, RDFAtomPredicate rdfAtomPredicate, ObjectStringTemplateFunctionSymbol template);
+    Optional<IQ> getCompatibleDefinitions(VariableGenerator variableGenerator, MappingImpl.IndexType indexType, ObjectStringTemplateFunctionSymbol template);
 
     ImmutableSet<ObjectStringTemplateFunctionSymbol> getIriTemplateSet();
 
-    Optional<IQ> getOptIQAllDef(RDFAtomPredicate rdfAtomPredicate);
+    Optional<IQ> getOptIQAllDef();
 
-    Optional<IQ> getOptIQClassDef(RDFAtomPredicate rdfAtomPredicate);
+    Optional<IQ> getOptIQClassDef();
 }

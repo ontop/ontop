@@ -125,18 +125,19 @@ public class MappingImpl implements Mapping {
     }
 
     @Override
-    public Optional<IQ> getCompatibleDefinitions(VariableGenerator variableGenerator, IndexType indexType, RDFAtomPredicate rdfAtomPredicate, ObjectStringTemplateFunctionSymbol template){
+    public Optional<IQ> getCompatibleDefinitions(VariableGenerator variableGenerator, IndexType indexType, ObjectStringTemplateFunctionSymbol template){
+        RDFAtomPredicate rdfAtomPredicate = getRDFAtomPredicates().stream().findFirst().get();
         Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitions = null;
         Optional<IQ> optIQConsideredDef = Optional.empty();
         switch (indexType){
             case SPO_SUBJ_INDEX:
-                compatibleDefinitions = compatibleDefinitionsFromSubjSPO; optIQConsideredDef = getOptIQAllDef(rdfAtomPredicate);
+                compatibleDefinitions = compatibleDefinitionsFromSubjSPO; optIQConsideredDef = getOptIQAllDef();
                 break;
             case SPO_OBJ_INDEX:
-                compatibleDefinitions = compatibleDefinitionsFromObjSPO; optIQConsideredDef = getOptIQAllDef(rdfAtomPredicate);
+                compatibleDefinitions = compatibleDefinitionsFromObjSPO; optIQConsideredDef = getOptIQAllDef();
                 break;
             case SAC_SUBJ_INDEX:
-                compatibleDefinitions = compatibleDefinitionsFromSubjSAC; optIQConsideredDef = getOptIQClassDef(rdfAtomPredicate);
+                compatibleDefinitions = compatibleDefinitionsFromSubjSAC; optIQConsideredDef = getOptIQClassDef();
                 break;
         }
         if (iriTemplateSet.contains(template)){
@@ -146,7 +147,7 @@ public class MappingImpl implements Mapping {
             }
             else{
                 if (optIQConsideredDef.isPresent()){
-                    return prunedIQFromDef(variableGenerator, rdfAtomPredicate, compatibleDefinitions, optIQConsideredDef.get(), indexType, template);
+                    return prunedIQFromDef(variableGenerator, compatibleDefinitions, optIQConsideredDef.get(), indexType, template);
                 }
                 else {
                     return Optional.empty();
@@ -158,8 +159,9 @@ public class MappingImpl implements Mapping {
         }
     }
 
-    private Optional<IQ> prunedIQFromDef(VariableGenerator variableGenerator, RDFAtomPredicate rdfAtomPredicate, Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitions, IQ iqConsideredDef, IndexType indexType, ObjectStringTemplateFunctionSymbol template){
+    private Optional<IQ> prunedIQFromDef(VariableGenerator variableGenerator, Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitions, IQ iqConsideredDef, IndexType indexType, ObjectStringTemplateFunctionSymbol template){
         Variable var = iqConsideredDef.getProjectionAtom().getArguments().get(indexType.getValue());
+        RDFAtomPredicate rdfAtomPredicate = getRDFAtomPredicates().stream().findFirst().get();
         ImmutableExpression strictEquality = termFactory.getStrictEquality(
                 var,
                 termFactory.getIRIFunctionalTerm(termFactory.getImmutableFunctionalTerm(
@@ -174,8 +176,9 @@ public class MappingImpl implements Mapping {
     }
 
     @Override
-    public Optional<IQ> getOptIQAllDef(RDFAtomPredicate rdfAtomPredicate) {
+    public Optional<IQ> getOptIQAllDef() {
         if (!isIQAllDefComputed) {
+            RDFAtomPredicate rdfAtomPredicate = getRDFAtomPredicates().stream().findFirst().orElseThrow();
             ImmutableCollection<IQ> allDef = getQueries(rdfAtomPredicate);
             optIQAllDef = queryMerger.mergeDefinitions(allDef);
             isIQAllDefComputed = true;
@@ -184,9 +187,11 @@ public class MappingImpl implements Mapping {
     }
 
     @Override
-    public Optional<IQ> getOptIQClassDef(RDFAtomPredicate rdfAtomPredicate) {
+    public Optional<IQ> getOptIQClassDef() {
         if(!isIQClassDefComputed){
-            optIQClassDef = queryMerger.mergeDefinitions(classDefinitions.row(rdfAtomPredicate).values().stream().collect(ImmutableCollectors.toList()));
+            RDFAtomPredicate rdfAtomPredicate = getRDFAtomPredicates().stream().findFirst().orElseThrow();
+            optIQClassDef = queryMerger.mergeDefinitions(classDefinitions.row(rdfAtomPredicate).values().stream()
+                    .collect(ImmutableCollectors.toList()));
             isIQClassDefComputed = true;
         }
         return optIQClassDef;

@@ -8,8 +8,10 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
+import it.unibz.inf.ontop.iq.node.ValuesNode;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -22,6 +24,8 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assume.assumeTrue;
 
 public class InternshipNewQueryUnfolderIQTreeTest {
     private static final String OBDA_FILE = "/new-unfolder/new-unfolder.obda";
@@ -29,12 +33,11 @@ public class InternshipNewQueryUnfolderIQTreeTest {
     private static final String ONTOLOGY_FILE = "/new-unfolder/new-unfolder.owl";
     private static final String PROPERTIES_FILE = "/new-unfolder/new-unfolder.properties";
     private static final String DB_METADATA_FILE = "/new-unfolder/db-metadata.json";
-
     private static final String USER = "sa";
     private static final String PASSWORD = "";
 
     public static final IntermediateQueryFactory IQ_FACTORY;
-    public static final InternshipQueryUnfolder INTERNSHIP_UNFOLDER;
+    public static final QueryUnfolder UNFOLDER;
     public static final Mapping MAPPING;
     public static final AtomFactory ATOM_FACTORY;
     public static final TermFactory TERM_FACTORY;
@@ -45,6 +48,8 @@ public class InternshipNewQueryUnfolderIQTreeTest {
     public static final Variable B;
     public static final Variable C;
     public static final IRIConstant MUN_IRI_CONST, GEO_IRI_CONST, RDF_TYPE, CLASS_MUNICIPALITY;
+    public static final long LEAF_DEF_IN_MAPPING_ALL_DEF;
+    public static final long LEAF_DEF_IN_MAPPING_ALL_CLASS;
 
     static {
         OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
@@ -75,46 +80,66 @@ public class InternshipNewQueryUnfolderIQTreeTest {
         GEO_IRI_CONST = TERM_FACTORY.getConstantIRI("http://schema.org/geo");
         RDF_TYPE = TERM_FACTORY.getConstantIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
         CLASS_MUNICIPALITY = TERM_FACTORY.getConstantIRI("http://destination.example.org/ontology/dest#Municipality");
+        LEAF_DEF_IN_MAPPING_ALL_DEF = 398;
+        LEAF_DEF_IN_MAPPING_ALL_CLASS = 277;
         try {
             OBDASpecification specification = config.loadSpecification();
             MAPPING = specification.getSaturatedMapping();
-            INTERNSHIP_UNFOLDER = (InternshipQueryUnfolder) QUERYUNFOLDER_FACTORY.create(MAPPING);
+            UNFOLDER = QUERYUNFOLDER_FACTORY.create(MAPPING);
         } catch (OBDASpecificationException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private DistinctVariableOnlyDataAtom automaticallyConstructedProjectAtom(VariableOrGroundTerm sub, VariableOrGroundTerm pred, VariableOrGroundTerm obj){
-        int countVar = 0;
-        var immutableList = ImmutableList.<Variable>builder();
+    private int countExtensionalAndValuesNode(IQTree iqTree){
+        if (iqTree instanceof ExtensionalDataNode || iqTree instanceof ValuesNode) {
+            return 1;
+        }
+        if (iqTree.isLeaf()) {
+            return 0;
+        }
+        return iqTree.getChildren().stream().mapToInt(this::countExtensionalAndValuesNode).sum();
+    }
+
+    private void unfoldAndCompareSecondPhaseSimpleTripleWithStandardUnfolding(VariableOrGroundTerm sub, VariableOrGroundTerm pred, VariableOrGroundTerm obj, long expected){
+        DistinctVariableOnlyDataAtom projectionAtom = automaticallyConstructedProjectAtom(ImmutableList.of(sub, pred, obj));
+        IntensionalDataNode varAIriClass = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(A, RDF.TYPE, CLASS_MUNICIPALITY));
+        IntensionalDataNode varVarVar = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(sub, pred, obj));
+        InnerJoinNode join = IQ_FACTORY.createInnerJoinNode();
+        NaryIQTree naryIQTree = IQ_FACTORY.createNaryIQTree(join, ImmutableList.of(varAIriClass, varVarVar));
+        IQ iq = IQ_FACTORY.createIQ(projectionAtom, naryIQTree);
+
+        IQTree unfoldedIQTree = UNFOLDER.optimize(iq).getTree();
+        assertNotEquals(expected, countExtensionalAndValuesNode(unfoldedIQTree));
+    }
+
+    private void unfoldAndCompareFirstPhaseSimpleTripleWithStandardUnfolding(VariableOrGroundTerm sub, VariableOrGroundTerm pred, VariableOrGroundTerm obj, long expected){
+        DistinctVariableOnlyDataAtom projectionAtom = automaticallyConstructedProjectAtom(ImmutableList.of(sub, pred, obj));
+        IntensionalDataNode iriVarVar = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(sub, pred, obj));
+        IQ iq = IQ_FACTORY.createIQ(projectionAtom, iriVarVar);
+
+        IQTree unfoldedIQTree = UNFOLDER.optimize(iq).getTree();
+        assertEquals(expected, countExtensionalAndValuesNode(unfoldedIQTree));
+    }
+
+    private DistinctVariableOnlyDataAtom automaticallyConstructedProjectAtom(ImmutableList<VariableOrGroundTerm> variableOrGroundTermImmutableList){
+        int countVar = Math.toIntExact(variableOrGroundTermImmutableList.stream().filter(e -> (e instanceof Variable)).count());
         AtomPredicate atomPredicate = null;
-        if (sub instanceof Variable){
-            ++countVar;
-            immutableList.add((Variable) sub);
-        }
-        if (pred instanceof Variable){
-            ++countVar;
-            immutableList.add((Variable) pred);
-        }
-        if (obj instanceof Variable){
-            ++countVar;
-            immutableList.add((Variable) obj);
-        }
         atomPredicate = (countVar == 0) ? ANS1_AR0_PREDICATE : atomPredicate;
         atomPredicate = (countVar == 1) ? ANS1_AR1_PREDICATE : atomPredicate;
         atomPredicate = (countVar == 2) ? ANS1_AR2_PREDICATE : atomPredicate;
         atomPredicate = (countVar == 3) ? ANS1_AR3_PREDICATE : atomPredicate;
-        return ATOM_FACTORY.getDistinctVariableOnlyDataAtom(atomPredicate, immutableList.build());
+        return ATOM_FACTORY.getDistinctVariableOnlyDataAtom(atomPredicate, (ImmutableList<Variable>) variableOrGroundTermImmutableList.stream().filter(e -> (e instanceof Variable)).map(e -> (Variable) e).collect(ImmutableList.toImmutableList()));
     }
 
     private void checkForSimpleTripleUnfoldingInFirstPhase(VariableOrGroundTerm sub, VariableOrGroundTerm pred, VariableOrGroundTerm obj){
         boolean isIQUnfoldedAfterFirstPhase = true;
 
-        DistinctVariableOnlyDataAtom projectionAtom = automaticallyConstructedProjectAtom(sub, pred, obj);
+        DistinctVariableOnlyDataAtom projectionAtom = automaticallyConstructedProjectAtom(ImmutableList.of(sub, pred, obj));
         IntensionalDataNode intensionalDataNode = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(sub, pred, obj));
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, intensionalDataNode);
 
-        IQTree partiallyUnfoldedIQ = INTERNSHIP_UNFOLDER.executeFirstPhaseUnfolding(initialIQ.getTree());
+        IQTree partiallyUnfoldedIQ = ((InternshipQueryUnfolder)UNFOLDER).executeFirstPhaseUnfolding(initialIQ.getTree());
 
         if (partiallyUnfoldedIQ.getRootNode() instanceof IntensionalDataNode)
             isIQUnfoldedAfterFirstPhase = false;
@@ -126,12 +151,12 @@ public class InternshipNewQueryUnfolderIQTreeTest {
         boolean isIQUnfoldedAfterFirstPhase = false;
         boolean isIQUnfoldedAfterSecondPhase = true;
 
-        DistinctVariableOnlyDataAtom projectionAtom = automaticallyConstructedProjectAtom(sub, pred, obj);
+        DistinctVariableOnlyDataAtom projectionAtom = automaticallyConstructedProjectAtom(ImmutableList.of(sub, pred, obj));
         IntensionalDataNode intensionalDataNode = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(sub, pred, obj));
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, intensionalDataNode);
 
-        IQTree partiallyUnfoldedIQ = INTERNSHIP_UNFOLDER.executeFirstPhaseUnfolding(initialIQ.getTree());
-        IQTree unfoldedIQ = INTERNSHIP_UNFOLDER.executeSecondPhaseUnfoldingIfNecessary(partiallyUnfoldedIQ);
+        IQTree partiallyUnfoldedIQ = ((InternshipQueryUnfolder)UNFOLDER).executeFirstPhaseUnfolding(initialIQ.getTree());
+        IQTree unfoldedIQ = ((InternshipQueryUnfolder)UNFOLDER).executeSecondPhaseUnfoldingIfNecessary(partiallyUnfoldedIQ);
 
         if (!(partiallyUnfoldedIQ.getRootNode() instanceof IntensionalDataNode))
             isIQUnfoldedAfterFirstPhase = true;
@@ -142,87 +167,109 @@ public class InternshipNewQueryUnfolderIQTreeTest {
         assertEquals(true, isIQUnfoldedAfterSecondPhase);
     }
 
+    private boolean isInternshipQueryUnfolder(){
+        return (UNFOLDER instanceof InternshipQueryUnfolder);
+    }
+
     @Test
     public void simpleTripleVarVarVarShouldBeUnfoldedInSecondPhase(){
+        assumeTrue("Condition is not met, skipping test", isInternshipQueryUnfolder());
         checkForSimpleTripleUnfoldingInSecondPhase(A, B, C);
     }
 
     @Test
     public void simpleTripleIriVarVarShouldBeUnfoldedInFirstPhase(){
+        assumeTrue("Condition is not met, skipping test", isInternshipQueryUnfolder());
         checkForSimpleTripleUnfoldingInFirstPhase(MUN_IRI_CONST, B, C);
     }
 
     @Test
     public void simpleTripleVarVarIriShouldBeUnfoldedInFirstPhase(){
+        assumeTrue("Condition is not met, skipping test", isInternshipQueryUnfolder());
         checkForSimpleTripleUnfoldingInFirstPhase(A, B, MUN_IRI_CONST);
     }
 
     @Test
     public void simpleTripleIriVarIriShouldBeUnfoldedInFirstPhase(){
+        assumeTrue("Condition is not met, skipping test", isInternshipQueryUnfolder());
         checkForSimpleTripleUnfoldingInFirstPhase(MUN_IRI_CONST, B, MUN_IRI_CONST);
     }
 
     @Test
     public void simpleTripleVarAVarShouldBeUnfoldedInSecondPhase(){
+        assumeTrue("Condition is not met, skipping test", isInternshipQueryUnfolder());
         checkForSimpleTripleUnfoldingInSecondPhase(A, RDF_TYPE, C);
     }
 
     @Test
     public void simpleTripleIriAVarShouldBeUnfoldedInFirstPhase(){
+        assumeTrue("Condition is not met, skipping test", isInternshipQueryUnfolder());
         checkForSimpleTripleUnfoldingInFirstPhase(MUN_IRI_CONST, RDF_TYPE, C);
     }
 
     @Test
     public void simpleTripleIriAIriShouldBeUnfoldedInFirstPhase(){
+        assumeTrue("Condition is not met, skipping test", isInternshipQueryUnfolder());
         checkForSimpleTripleUnfoldingInFirstPhase(MUN_IRI_CONST, RDF_TYPE, CLASS_MUNICIPALITY);
     }
 
     @Test
     public void simpleTripleVarAIriShouldBeUnfoldedInFirstPhase(){
+        assumeTrue("Condition is not met, skipping test", isInternshipQueryUnfolder());
         checkForSimpleTripleUnfoldingInFirstPhase(A, RDF_TYPE, CLASS_MUNICIPALITY);
     }
 
     @Test
     public void simpleTripleIriIriNotAIriShouldBeUnfoldedInFirstPhase(){
+        assumeTrue("Condition is not met, skipping test", isInternshipQueryUnfolder());
         checkForSimpleTripleUnfoldingInFirstPhase(MUN_IRI_CONST, GEO_IRI_CONST, MUN_IRI_CONST);
     }
 
     @Test
     public void simpleTripleIriIriNotAVarShouldBeUnfoldedInFirstPhase(){
+        assumeTrue("Condition is not met, skipping test", isInternshipQueryUnfolder());
         checkForSimpleTripleUnfoldingInFirstPhase(MUN_IRI_CONST, GEO_IRI_CONST, C);
     }
 
     @Test
     public void simpleTripleVarIriNotAIriShouldBeUnfoldedInFirstPhase(){
+        assumeTrue("Condition is not met, skipping test", isInternshipQueryUnfolder());
         checkForSimpleTripleUnfoldingInFirstPhase(A, GEO_IRI_CONST, MUN_IRI_CONST);
     }
 
     @Test
     public void simpleTripleVarIriNotAVarShouldBeUnfoldedInFirstPhase(){
+        assumeTrue("Condition is not met, skipping test", isInternshipQueryUnfolder());
         checkForSimpleTripleUnfoldingInFirstPhase(A, GEO_IRI_CONST, C);
     }
 
     @Test
     public void tripleVarVarVarUnfoldedMappingShouldBeSmallerThanAllDefinitions(){
-        DistinctVariableOnlyDataAtom projectionAtom = automaticallyConstructedProjectAtom(A, B, C);
-        IntensionalDataNode varAIriClass = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(A, RDF.TYPE, CLASS_MUNICIPALITY));
-        IntensionalDataNode varVarVar = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(A, B, C));
-        InnerJoinNode join = IQ_FACTORY.createInnerJoinNode();
-        NaryIQTree naryIQTree = IQ_FACTORY.createNaryIQTree(join, ImmutableList.of(varAIriClass, varVarVar));
-        IQ iq = IQ_FACTORY.createIQ(projectionAtom, naryIQTree);
-
-        IQTree unfoldedIQTree = INTERNSHIP_UNFOLDER.optimize(iq).getTree();
-
+        unfoldAndCompareSecondPhaseSimpleTripleWithStandardUnfolding(A, B, C, LEAF_DEF_IN_MAPPING_ALL_DEF + 1);
     }
 
     @Test
     public void tripleVarAVarUnfoldedMappingShouldBeSmallerThanAllDefinitions(){
-        DistinctVariableOnlyDataAtom projectionAtom = automaticallyConstructedProjectAtom(A, B, C);
-        IntensionalDataNode varAIriClass = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(A, RDF.TYPE, CLASS_MUNICIPALITY));
-        IntensionalDataNode varVarVar = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(A, RDF.TYPE, C));
-        InnerJoinNode join = IQ_FACTORY.createInnerJoinNode();
-        NaryIQTree naryIQTree = IQ_FACTORY.createNaryIQTree(join, ImmutableList.of(varAIriClass, varVarVar));
-        IQ iq = IQ_FACTORY.createIQ(projectionAtom, naryIQTree);
+        unfoldAndCompareSecondPhaseSimpleTripleWithStandardUnfolding(A, RDF_TYPE, C, LEAF_DEF_IN_MAPPING_ALL_CLASS + 1);
+    }
 
+    @Test
+    public void tripleIriVarVarUnfoldedMappingShouldBeTheSame(){
+        unfoldAndCompareFirstPhaseSimpleTripleWithStandardUnfolding(MUN_IRI_CONST, B, C, 8);
+    }
+
+    @Test
+    public void tripleVarVarIriUnfoldedMappingShouldBeTheSame(){
+        unfoldAndCompareFirstPhaseSimpleTripleWithStandardUnfolding(A, B, MUN_IRI_CONST, 3);
+    }
+
+    @Test
+    public void tripleIriVarIriUnfoldedMappingShouldBeTheSame(){
+        unfoldAndCompareFirstPhaseSimpleTripleWithStandardUnfolding(MUN_IRI_CONST, B, MUN_IRI_CONST, 0);
+    }
+
+    @Test
+    public void tripleIriAVarUnfoldedMappingShouldBeTheSame(){
+        unfoldAndCompareFirstPhaseSimpleTripleWithStandardUnfolding(MUN_IRI_CONST, RDF_TYPE, C, 3);
     }
 }
