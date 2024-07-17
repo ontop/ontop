@@ -9,8 +9,6 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * To be extended by overloading the methods of interest.
  */

@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import org.apache.commons.rdf.api.IRI;
 
-import java.io.Serializable;
 import java.util.Optional;
 
 /**

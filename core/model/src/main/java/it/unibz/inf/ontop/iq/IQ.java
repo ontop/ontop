@@ -4,8 +4,6 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.io.Serializable;
-
 /**
  *
  * For comparison, please use equals(o)

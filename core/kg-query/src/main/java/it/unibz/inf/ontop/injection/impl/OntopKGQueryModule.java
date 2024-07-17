@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.query.translation.InsertClauseNormalizer;
 import it.unibz.inf.ontop.query.translation.KGQueryTranslator;
 import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.query.unfolding.impl.InternshipQueryUnfolder;
 
 
 public class OntopKGQueryModule extends OntopAbstractModule {
@@ -33,7 +32,6 @@ public class OntopKGQueryModule extends OntopAbstractModule {
                         QueryUnfolder.class
                 ),
                 QueryUnfolder.Factory.class);
-
         install(unfolderFactory);
     }
 }

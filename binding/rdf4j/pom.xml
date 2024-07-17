@@ -165,12 +165,6 @@
             <groupId>com.moandjiezana.toml</groupId>
             <artifactId>toml4j</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>2.7.1</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
 </project>

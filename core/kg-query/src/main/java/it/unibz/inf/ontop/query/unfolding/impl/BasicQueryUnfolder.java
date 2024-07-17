@@ -26,9 +26,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.apache.commons.collections4.CollectionUtils.collect;
 
 /**
  * See {@link QueryUnfolder.Factory} for creating a new instance.

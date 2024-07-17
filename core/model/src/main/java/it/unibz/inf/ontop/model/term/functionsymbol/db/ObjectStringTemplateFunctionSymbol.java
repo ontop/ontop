@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 
-import java.io.Serializable;
 import java.util.Optional;
 
 /**
@@ -14,7 +13,7 @@ import java.util.Optional;
  *
  * NB: a functional term using this symbol is producing a DB string or a NULL
  */
-public interface ObjectStringTemplateFunctionSymbol extends DBFunctionSymbol, Serializable {
+public interface ObjectStringTemplateFunctionSymbol extends DBFunctionSymbol {
 
     String getTemplate();
 
