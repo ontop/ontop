@@ -576,7 +576,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         }
 
         private Optional<IQ> getStarDefinition(RDFAtomPredicate predicate) {
-            return mapping.getMergedClassDefinitions(predicate);
+            return mapping.getMergedDefinitions(predicate);
         }
 
         @Override
