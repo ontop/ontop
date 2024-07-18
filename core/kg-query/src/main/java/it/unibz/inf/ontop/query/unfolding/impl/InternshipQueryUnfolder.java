@@ -84,6 +84,11 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         return executeSecondPhaseUnfoldingIfNecessary(partialUnfoldedIQ);
     }
 
+    @Override
+    protected QueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
+        throw new MinorOntopInternalBugException("This method should not be called");
+    }
+
     public IQTree executeFirstPhaseUnfolding(IQTree tree){
         //long firstPhaseUnfolder = System.currentTimeMillis();
         variableGenerator = coreUtilsFactory.createVariableGenerator(tree.getKnownVariables());

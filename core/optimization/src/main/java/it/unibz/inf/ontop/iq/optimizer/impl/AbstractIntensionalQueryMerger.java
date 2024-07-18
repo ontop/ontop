@@ -38,9 +38,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
         return tree.acceptTransformer(transformer);
     }
 
-    protected QueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables){
-        return null;
-    }
+    protected abstract QueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables);
 
     /**
      * Replaces intensional data nodes by an IQTree
@@ -68,7 +66,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
         }
 
         @Override
-        public IQTree transformIntensionalData(IntensionalDataNode dataNode) {
+        public final IQTree transformIntensionalData(IntensionalDataNode dataNode) {
             Optional<IQ> definition = getDefinition(dataNode);
             return definition
                     .map(d -> replaceIntensionalData(dataNode, d))
