@@ -133,18 +133,19 @@ public class InternshipNewQueryUnfolderIQTreeTest {
     }
 
     private void checkForSimpleTripleUnfoldingInFirstPhase(VariableOrGroundTerm sub, VariableOrGroundTerm pred, VariableOrGroundTerm obj){
-        boolean isIQUnfoldedAfterFirstPhase = true;
-
-        DistinctVariableOnlyDataAtom projectionAtom = automaticallyConstructedProjectAtom(ImmutableList.of(sub, pred, obj));
-        IntensionalDataNode intensionalDataNode = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(sub, pred, obj));
-        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, intensionalDataNode);
-
-        IQTree partiallyUnfoldedIQ = ((InternshipQueryUnfolder)UNFOLDER).executeFirstPhaseUnfolding(initialIQ.getTree());
-
-        if (partiallyUnfoldedIQ.getRootNode() instanceof IntensionalDataNode)
-            isIQUnfoldedAfterFirstPhase = false;
-
-        assertEquals(true, isIQUnfoldedAfterFirstPhase);
+//        boolean isIQUnfoldedAfterFirstPhase = true;
+//
+//        DistinctVariableOnlyDataAtom projectionAtom = automaticallyConstructedProjectAtom(ImmutableList.of(sub, pred, obj));
+//        IntensionalDataNode intensionalDataNode = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(sub, pred, obj));
+//        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, intensionalDataNode);
+//
+//        IQTree partiallyUnfoldedIQ = ((InternshipQueryUnfolder)UNFOLDER).executeFirstPhaseUnfolding(initialIQ.getTree());
+//
+//        if (partiallyUnfoldedIQ.getRootNode() instanceof IntensionalDataNode)
+//            isIQUnfoldedAfterFirstPhase = false;
+//
+//        assertEquals(true, isIQUnfoldedAfterFirstPhase);
+        throw new RuntimeException("TODO: reimplement the test");
     }
 
     private void checkForSimpleTripleUnfoldingInSecondPhase(VariableOrGroundTerm sub, VariableOrGroundTerm pred, VariableOrGroundTerm obj){
@@ -155,16 +156,18 @@ public class InternshipNewQueryUnfolderIQTreeTest {
         IntensionalDataNode intensionalDataNode = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(sub, pred, obj));
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, intensionalDataNode);
 
-        IQTree partiallyUnfoldedIQ = ((InternshipQueryUnfolder)UNFOLDER).executeFirstPhaseUnfolding(initialIQ.getTree());
-        IQTree unfoldedIQ = ((InternshipQueryUnfolder)UNFOLDER).executeSecondPhaseUnfoldingIfNecessary(partiallyUnfoldedIQ);
+        throw new RuntimeException("TODO: reimplement the test");
 
-        if (!(partiallyUnfoldedIQ.getRootNode() instanceof IntensionalDataNode))
-            isIQUnfoldedAfterFirstPhase = true;
-        if (unfoldedIQ.getChildren().size() <= 0)
-            isIQUnfoldedAfterSecondPhase = false;
-
-        assertEquals(false, isIQUnfoldedAfterFirstPhase);
-        assertEquals(true, isIQUnfoldedAfterSecondPhase);
+//        IQTree partiallyUnfoldedIQ = ((InternshipQueryUnfolder)UNFOLDER).executeFirstPhaseUnfolding(initialIQ.getTree());
+//        IQTree unfoldedIQ = ((InternshipQueryUnfolder)UNFOLDER).executeSecondPhaseUnfolding(partiallyUnfoldedIQ);
+//
+//        if (!(partiallyUnfoldedIQ.getRootNode() instanceof IntensionalDataNode))
+//            isIQUnfoldedAfterFirstPhase = true;
+//        if (unfoldedIQ.getChildren().size() <= 0)
+//            isIQUnfoldedAfterSecondPhase = false;
+//
+//        assertEquals(false, isIQUnfoldedAfterFirstPhase);
+//        assertEquals(true, isIQUnfoldedAfterSecondPhase);
     }
 
     private boolean isInternshipQueryUnfolder(){
