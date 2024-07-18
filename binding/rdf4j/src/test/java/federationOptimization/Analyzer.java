@@ -15,6 +15,8 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.node.impl.NativeNodeImpl;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -24,10 +26,11 @@ import java.util.stream.Collectors;
 public class Analyzer {
 
     @SuppressWarnings("DataFlowIssue")
-    public static void main(String... args) throws OBDASpecificationException, OntopKGQueryException, OntopReformulationException {
+    public static void main(String... args) throws OBDASpecificationException, OntopKGQueryException, OntopReformulationException, FileNotFoundException {
 
-        Tester.Federator federator = Tester.Federator.DENODO;
+        Tester.Federator federator = Tester.Federator.TEIID;
         PrintStream out = System.out;
+//        PrintStream out = new PrintStream(new FileOutputStream("src/test/resources/federation/query_analysis_results_" + federator.name().toLowerCase() + ".tsv"));
         boolean tsv = false;
 
         Table<Optimization, Setting, List<Statistics>> stats = HashBasedTable.create();
