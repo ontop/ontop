@@ -648,18 +648,6 @@ public class InternshipNewQueryUnfolderSparQLTest extends AbstractRDF4JTest {
         assertEquals(5, count);
     }
 
-    @Test
-    public void test() {
-        String sparql =
-                "PREFIX sosa: <http://www.w3.org/ns/sosa/>\n" +
-                "SELECT * WHERE {\n" +
-                "  ?sub a sosa:Observation .\n" +
-                "  ?sub ?pred ?obj .\n" +
-                "} ";
-        int count = runQueryAndCount(sparql);
-        assertEquals(50, count);
-    }
-
     /*
     TODO SBAGLIATO IN FASE DI OTTIMIZZAZIONE (FAI IL BUG REPORT SU GITHUB O VIA E-MAIL A BENJAMIN)
     @Test

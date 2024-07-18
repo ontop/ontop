@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
-import it.unibz.inf.ontop.model.term.impl.DBConstantImpl;
 import it.unibz.inf.ontop.model.term.impl.NonGroundFunctionalTermImpl;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
@@ -153,7 +152,6 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         //is == 1 and not >= 1, because you have problem when you two iri template for a iri constant and there is no generic one
         // TODO: revise that restriction
         if (optionalCompatibleTemplate.isPresent() && optionalCompatibleTemplate.get().size() == 1) {
-
             ObjectStringTemplateFunctionSymbol template = optionalCompatibleTemplate.get().iterator().next();
             return mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern, template, variableGenerator);
         }
@@ -264,28 +262,16 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         }
 
         private IRIOrBNodeTemplateSelector extractIRITemplateOrObjectConstantFromOneTerm(ImmutableTerm term){
-            IRIOrBNodeTemplateSelector elem;
             if (term instanceof ImmutableFunctionalTerm && ((ImmutableFunctionalTerm)term).getFunctionSymbol().getName().equals("RDF")){
                 ImmutableTerm lexicalTerm = ((ImmutableFunctionalTerm)term).getTerm(0);
-                ImmutableTerm termTypeTerm = ((ImmutableFunctionalTerm)term).getTerm(1);
                 if (lexicalTerm instanceof NonGroundFunctionalTerm && ((NonGroundFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol) {
-                    elem = new IRIOrBNodeTemplateSelector((ObjectStringTemplateFunctionSymbol) ((NonGroundFunctionalTermImpl) lexicalTerm).getFunctionSymbol());
+                    return new IRIOrBNodeTemplateSelector((ObjectStringTemplateFunctionSymbol) ((NonGroundFunctionalTermImpl) lexicalTerm).getFunctionSymbol());
                 }
-                else if (lexicalTerm instanceof NonGroundFunctionalTerm && termTypeTerm.toString().equals("IRI")){
-                    //  Case of DB expression build the lexical value --> no optimization
-                    elem = new IRIOrBNodeTemplateSelector();
-                }
-                else if (lexicalTerm instanceof DBConstant && termTypeTerm instanceof RDFTermTypeConstant && ((RDFTermTypeConstant)termTypeTerm).getValue().equals("IRI")){
-                    elem = new IRIOrBNodeTemplateSelector(termFactory.getConstantIRI(((DBConstantImpl)lexicalTerm).getValue()));
-                }
-                else{
-                    elem = new IRIOrBNodeTemplateSelector();
+                else if (lexicalTerm instanceof ObjectConstant){
+                    return new IRIOrBNodeTemplateSelector((ObjectConstant)lexicalTerm);
                 }
             }
-            else{
-                elem = new IRIOrBNodeTemplateSelector();
-            }
-            return elem;
+            return new IRIOrBNodeTemplateSelector();
         }
 
         private Map<Variable, ImmutableSet<IRIOrBNodeTemplateSelector>> findTemplateOfJustOneSubstitution(Substitution<? extends ImmutableTerm> substitution){
