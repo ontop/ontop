@@ -1,10 +1,12 @@
 package it.unibz.inf.ontop.spec.mapping.impl;
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
@@ -23,17 +25,14 @@ public class MappingImpl implements Mapping {
 
     private final ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyDefinitions;
     private final ImmutableTable<RDFAtomPredicate, IRI, IQ> classDefinitions;
-    private final ImmutableSet<ObjectStringTemplateFunctionSymbol> objectTemplates;
-    private Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitionsFromSubjSAC;
-    private Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitionsFromSubjSPO;
-    private Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitionsFromObjSPO;
-    private boolean isIQAllDefComputed;
-    private boolean isIQClassDefComputed;
+    private final Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitionsFromSubjSAC;
+    private final Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitionsFromSubjSPO;
+    private final Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitionsFromObjSPO;
     private final TermFactory termFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final IntermediateQueryFactory iqFactory;
-    private Optional<IQ> optIQAllDef;
-    private Optional<IQ> optIQClassDef;
+    private final Map<RDFAtomPredicate, IQ> allDefinitionMergedMap;
+    private final Map<RDFAtomPredicate, IQ> allClassMergedMap;
 
     public MappingImpl(ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable,
                        ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable,
@@ -42,17 +41,14 @@ public class MappingImpl implements Mapping {
                        IntermediateQueryFactory iqFactory) {
         this.propertyDefinitions = propertyTable;
         this.classDefinitions = classTable;
-        this.objectTemplates = termFactory.getDBFunctionSymbolFactory().getObjectTemplates();
         this.termFactory = termFactory;
         this.queryMerger = queryMerger;
         this.iqFactory = iqFactory;
         this.compatibleDefinitionsFromSubjSPO = HashBasedTable.create();
         this.compatibleDefinitionsFromObjSPO = HashBasedTable.create();
         this.compatibleDefinitionsFromSubjSAC = HashBasedTable.create();
-        this.optIQAllDef = Optional.empty();
-        this.optIQClassDef = Optional.empty();
-        this.isIQAllDefComputed = false;
-        this.isIQClassDefComputed = false;
+        this.allDefinitionMergedMap = Maps.newHashMap();
+        this.allClassMergedMap = Maps.newHashMap();
     }
 
     @Override
@@ -86,75 +82,80 @@ public class MappingImpl implements Mapping {
     }
 
     @Override
-    public Optional<IQ> getCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate, RDFAtomIndexPattern RDFAtomIndexPattern, ObjectStringTemplateFunctionSymbol templateFunctionSymbol, VariableGenerator variableGenerator){
-        Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitions = null;
-        Optional<IQ> optIQConsideredDef = Optional.empty();
-        switch (RDFAtomIndexPattern){
+    public Optional<IQ> getCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate, RDFAtomIndexPattern indexPattern,
+                                                 ObjectStringTemplateFunctionSymbol templateFunctionSymbol, VariableGenerator variableGenerator) {
+        switch (indexPattern) {
             case SUBJECT_OF_ALL_DEFINITIONS:
-                compatibleDefinitions = compatibleDefinitionsFromSubjSPO; optIQConsideredDef = getMergedDefinitions(rdfAtomPredicate);
-                break;
+                return getCompatibleDefinitions(rdfAtomPredicate, indexPattern, templateFunctionSymbol, variableGenerator,
+                        compatibleDefinitionsFromSubjSPO, getMergedDefinitions(rdfAtomPredicate));
             case OBJECT_OF_ALL_DEFINITIONS:
-                compatibleDefinitions = compatibleDefinitionsFromObjSPO; optIQConsideredDef = getMergedDefinitions(rdfAtomPredicate);
-                break;
+                return getCompatibleDefinitions(rdfAtomPredicate, indexPattern, templateFunctionSymbol, variableGenerator,
+                        compatibleDefinitionsFromObjSPO, getMergedDefinitions(rdfAtomPredicate));
             case SUBJECT_OF_ALL_CLASSES:
-                compatibleDefinitions = compatibleDefinitionsFromSubjSAC; optIQConsideredDef = getMergedClassDefinitions(rdfAtomPredicate);
-                break;
-        }
-        if (objectTemplates.contains(templateFunctionSymbol)){
-            Optional<IQ> result = Optional.ofNullable(compatibleDefinitions.get(rdfAtomPredicate, templateFunctionSymbol));
-            if (result.isPresent()){
-                return result;
-            }
-            else{
-                if (optIQConsideredDef.isPresent()){
-                    return prunedIQFromDef(variableGenerator, compatibleDefinitions, optIQConsideredDef.get(), RDFAtomIndexPattern, templateFunctionSymbol);
-                }
-                else {
-                    return Optional.empty();
-                }
-            }
-        }
-        else{
-            return Optional.empty();
+                return getCompatibleDefinitions(rdfAtomPredicate, indexPattern, templateFunctionSymbol, variableGenerator,
+                        compatibleDefinitionsFromSubjSAC, getMergedClassDefinitions(rdfAtomPredicate));
+            default:
+                throw new MinorOntopInternalBugException("Unsupported RDFAtomIndexPattern: " + indexPattern);
         }
     }
 
-    private Optional<IQ> prunedIQFromDef(VariableGenerator variableGenerator, Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitions, IQ iqConsideredDef, RDFAtomIndexPattern RDFAtomIndexPattern, ObjectStringTemplateFunctionSymbol template){
-        Variable var = iqConsideredDef.getProjectionAtom().getArguments().get(RDFAtomIndexPattern.getPosition());
-        RDFAtomPredicate rdfAtomPredicate = getRDFAtomPredicates().stream().findFirst().get();
+    private Optional<IQ> getCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate, RDFAtomIndexPattern indexPattern,
+                                                  ObjectStringTemplateFunctionSymbol templateFunctionSymbol, VariableGenerator variableGenerator,
+                                                  Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitions,
+                                                  Optional<IQ> mergedDefinition) {
+        if (mergedDefinition.isEmpty())
+            return Optional.empty();
+
+        // Just an optimization to avoid parallel computations of the same thing
+        synchronized (templateFunctionSymbol) {
+            Optional<IQ> result = Optional.ofNullable(compatibleDefinitions.get(rdfAtomPredicate, templateFunctionSymbol));
+            if (result.isPresent())
+                return result;
+
+            IQ definition = pruneMergedDefinitionWithTemplate(variableGenerator, mergedDefinition.get(), indexPattern, templateFunctionSymbol);
+            compatibleDefinitions.put(rdfAtomPredicate, templateFunctionSymbol, definition);
+            return Optional.of(definition);
+        }
+    }
+
+    private IQ pruneMergedDefinitionWithTemplate(VariableGenerator variableGenerator, IQ mergedDefinition, RDFAtomIndexPattern indexPattern,
+                                                 ObjectStringTemplateFunctionSymbol template) {
+        DistinctVariableOnlyDataAtom projectionAtom = mergedDefinition.getProjectionAtom();
+        Variable targetedVariable = projectionAtom.getArguments().get(indexPattern.getPosition());
+
         ImmutableExpression strictEquality = termFactory.getStrictEquality(
-                var,
+                targetedVariable,
                 termFactory.getIRIFunctionalTerm(termFactory.getImmutableFunctionalTerm(
                         template,
                         IntStream.range(0, template.getArity())
                                 .mapToObj(i -> variableGenerator.generateNewVariable())
                                 .collect(ImmutableCollectors.toList()))));
-        IQTree prunedIQTree = iqConsideredDef.getTree().propagateDownConstraint(strictEquality, variableGenerator).normalizeForOptimization(variableGenerator);
-        IQ prunedIQ = iqFactory.createIQ(iqConsideredDef.getProjectionAtom(), prunedIQTree);
-        compatibleDefinitions.put(rdfAtomPredicate, template, prunedIQ);
-        return Optional.of(compatibleDefinitions.get(rdfAtomPredicate, template));
+
+        IQTree prunedIQTree = mergedDefinition.getTree().propagateDownConstraint(strictEquality, variableGenerator);
+        return iqFactory.createIQ(projectionAtom, prunedIQTree)
+                .normalizeForOptimization();
     }
 
     @Override
-    public Optional<IQ> getMergedDefinitions(RDFAtomPredicate rdfAtomPredicate) {
-        if (!isIQAllDefComputed) {
+    public synchronized Optional<IQ> getMergedDefinitions(RDFAtomPredicate rdfAtomPredicate) {
+        if (!allDefinitionMergedMap.containsKey(rdfAtomPredicate)) {
             ImmutableCollection<IQ> definitions = Stream.concat(
                         classDefinitions.row(rdfAtomPredicate).values().stream(),
                         propertyDefinitions.row(rdfAtomPredicate).values().stream())
                     .collect(ImmutableCollectors.toList());
-            optIQAllDef = queryMerger.mergeDefinitions(definitions);
-            isIQAllDefComputed = true;
+            queryMerger.mergeDefinitions(definitions)
+                    .ifPresent(d -> allDefinitionMergedMap.put(rdfAtomPredicate, d));
         }
-        return optIQAllDef;
+        return Optional.ofNullable(allDefinitionMergedMap.get(rdfAtomPredicate));
     }
 
     @Override
-    public Optional<IQ> getMergedClassDefinitions(RDFAtomPredicate rdfAtomPredicate) {
-        if(!isIQClassDefComputed){
-            optIQClassDef = queryMerger.mergeDefinitions(classDefinitions.row(rdfAtomPredicate).values().stream()
-                    .collect(ImmutableCollectors.toList()));
-            isIQClassDefComputed = true;
+    public synchronized Optional<IQ> getMergedClassDefinitions(RDFAtomPredicate rdfAtomPredicate) {
+        if(!allClassMergedMap.containsKey(rdfAtomPredicate)) {
+            ImmutableCollection<IQ> definitions = classDefinitions.row(rdfAtomPredicate).values();
+            queryMerger.mergeDefinitions(definitions)
+                    .ifPresent(d -> allClassMergedMap.put(rdfAtomPredicate, d));;
         }
-        return optIQClassDef;
+        return Optional.ofNullable(allClassMergedMap.get(rdfAtomPredicate));
     }
 }
