@@ -30,6 +30,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.rdf.api.IRI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,6 +46,8 @@ import static it.unibz.inf.ontop.spec.mapping.Mapping.RDFAtomIndexPattern.*;
  */
 public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger implements QueryUnfolder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(InternshipQueryUnfolder.class);
+
     private final Mapping mapping;
     private final SubstitutionFactory substitutionFactory;
     private final QueryTransformerFactory transformerFactory;
@@ -53,9 +57,10 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
     private final TermFactory termFactory;
     private final FunctionSymbolFactory functionSymbolFactory;
     private final ImmutableSet<ObjectStringTemplateFunctionSymbol> objectTemplates;
-    private VariableGenerator variableGenerator;
-    private FirstPhaseQueryTransformer firstPhaseTransformer;
-    private Map<IRIConstant, Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>>> iriTemplateSetMap;
+
+    // TODO: generalize to object constants (IRI and Bnode)
+    // TODO: replace it by a cache or drop it?
+    private final Map<IRIConstant, Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>>> iriTemplateSetMap;
 
     /**
      * See {@link QueryUnfolder.Factory#create(Mapping)}
@@ -80,8 +85,17 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
 
     @Override
     protected IQTree optimize(IQTree tree) {
-        IQTree partialUnfoldedIQ = executeFirstPhaseUnfolding(tree);
-        return executeSecondPhaseUnfoldingIfNecessary(partialUnfoldedIQ);
+        long before = System.currentTimeMillis();
+        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(tree.getKnownVariables());
+        FirstPhaseQueryTransformer firstPhaseTransformer = new FirstPhaseQueryTransformer(variableGenerator);
+        IQTree partiallyUnfoldedIQ = tree.acceptTransformer(firstPhaseTransformer)
+                        .normalizeForOptimization(variableGenerator);
+        LOGGER.debug("First phase query unfolding time: {}", System.currentTimeMillis() - before);
+
+        if (!firstPhaseTransformer.areIntensionalNodesRemaining())
+            return partiallyUnfoldedIQ;
+
+        return executeSecondPhaseUnfoldingIfNecessary(partiallyUnfoldedIQ, variableGenerator);
     }
 
     @Override
@@ -89,33 +103,14 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         throw new MinorOntopInternalBugException("This method should not be called");
     }
 
-    public IQTree executeFirstPhaseUnfolding(IQTree tree){
-        //long firstPhaseUnfolder = System.currentTimeMillis();
-        variableGenerator = coreUtilsFactory.createVariableGenerator(tree.getKnownVariables());
-        firstPhaseTransformer = createFirstPhaseTransformer(variableGenerator);
-        IQTree partialUnfoldedIQ = tree.acceptTransformer(firstPhaseTransformer);
-        //System.out.print("firstPhaseUnfolder: ");
-        //System.out.println(System.currentTimeMillis()-firstPhaseUnfolder);
-        return partialUnfoldedIQ;
-    }
 
-    public IQTree executeSecondPhaseUnfoldingIfNecessary(IQTree partialUnfoldedIQ){
-        if (firstPhaseTransformer.existsIntensionalNode()){
-            //long secondPhaseUnfolder = System.currentTimeMillis();
-            IQTree normalizedPartialUnfoldedIQ = partialUnfoldedIQ.normalizeForOptimization(variableGenerator);
-            QueryMergingTransformer secondPhaseTransformer = createSecondPhaseTransformer(normalizedPartialUnfoldedIQ.getPossibleVariableDefinitions(), variableGenerator);
-            IQTree unfoldedIQ = partialUnfoldedIQ.acceptTransformer(secondPhaseTransformer);
-            //System.out.print("secondPhaseUnfolder: ");
-            //System.out.println(System.currentTimeMillis()-secondPhaseUnfolder);
-            return unfoldedIQ;
-        }
-        else{
-            return partialUnfoldedIQ;
-        }
-    }
-
-    private FirstPhaseQueryTransformer createFirstPhaseTransformer(VariableGenerator variableGenerator){
-        return new FirstPhaseQueryTransformer(variableGenerator);
+    public IQTree executeSecondPhaseUnfoldingIfNecessary(IQTree partiallyUnfoldedIQ, VariableGenerator variableGenerator){
+        long before = System.currentTimeMillis();
+        QueryMergingTransformer secondPhaseTransformer = createSecondPhaseTransformer(
+                partiallyUnfoldedIQ.getPossibleVariableDefinitions(), variableGenerator);
+        IQTree unfoldedIQ = partiallyUnfoldedIQ.acceptTransformer(secondPhaseTransformer);
+        LOGGER.debug("Second phase query unfolding time: {}", System.currentTimeMillis() - before);
+        return unfoldedIQ;
     }
 
     protected SecondPhaseQueryTransformer createSecondPhaseTransformer(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> variableDefinitions, VariableGenerator variableGenerator) {
@@ -126,7 +121,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         return new SecondPhaseQueryTransformer(variableDefinitions, variableGenerator, subjTemplateListMap);
     }
 
-    private boolean isIriTemplateCompatibleWithConst(ObjectStringTemplateFunctionSymbol iriTemplate, IRIConstant iriConstant){
+    private boolean isIriTemplateCompatibleWithConst(ObjectStringTemplateFunctionSymbol iriTemplate, IRIConstant iriConstant, VariableGenerator variableGenerator){
         ImmutableExpression strictEquality = termFactory.getStrictEquality(
                 termFactory.getConstantIRI(iriConstant.getIRI()),
                 termFactory.getIRIFunctionalTerm(termFactory.getImmutableFunctionalTerm(
@@ -154,8 +149,10 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         return optionalCompatibleTemplate.isPresent() ? optionalCompatibleTemplate : Optional.empty();
     }
 
-    private Optional<IQ> getCompatibleDefinitionsForIRI(RDFAtomPredicate rdfAtomPredicate, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern, IRIConstant iriConstant){
-        Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>> optionalCompatibleTemplate = extractCompatibleTemplateFromIriConst(iriConstant);
+    private Optional<IQ> getCompatibleDefinitionsForConstant(RDFAtomPredicate rdfAtomPredicate, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern,
+                                                             ObjectConstant objectConstant,
+                                                             VariableGenerator variableGenerator){
+        Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>> optionalCompatibleTemplate = extractCompatibleTemplateFromIriConst(objectConstant);
         //is == 1 and not >= 1, because you have problem when you two iri template for a iri constant and there is no generic one
         if (optionalCompatibleTemplate.isPresent() && optionalCompatibleTemplate.get().size() == 1){
             Optional<IQ> optDef = mapping.getCompatibleDefinitions(rdfAtomPredicate, RDFAtomIndexPattern, optionalCompatibleTemplate.get().stream().findFirst().get(), variableGenerator);
@@ -163,7 +160,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
                 IQ def = optDef.get();
                 ImmutableTerm var;
                 var = def.getProjectionAtom().getArguments().get(RDFAtomIndexPattern.getPosition());
-                ImmutableExpression filterCondition = termFactory.getStrictEquality(var, termFactory.getConstantIRI(iriConstant.getIRI()));
+                ImmutableExpression filterCondition = termFactory.getStrictEquality(var, termFactory.getConstantIRI(objectConstant.getIRI()));
                 FilterNode filterNode = iqFactory.createFilterNode(filterCondition);
                 IQTree iqTreeWithFilter = iqFactory.createUnaryIQTree(filterNode, def.getTree());
                 return Optional.of(iqFactory.createIQ(def.getProjectionAtom(), iqTreeWithFilter.normalizeForOptimization(variableGenerator)));
@@ -363,7 +360,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
 
         private Optional<IQ> filteredDefFromIRIConst(RDFAtomPredicate rdfAtomPredicate, IRIConstant iriConstant, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern){
             Optional<IQ> evaluatedIQ;
-            evaluatedIQ = getCompatibleDefinitionsForIRI(rdfAtomPredicate, RDFAtomIndexPattern, iriConstant);
+            evaluatedIQ = getCompatibleDefinitionsForConstant(rdfAtomPredicate, RDFAtomIndexPattern, iriConstant);
             if (evaluatedIQ.isEmpty()) {
                 if (RDFAtomIndexPattern == SUBJECT_OF_ALL_CLASSES)
                     evaluatedIQ = mapping.getMergedClassDefinitions(rdfAtomPredicate);
@@ -525,29 +522,13 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
     }
 
     protected class FirstPhaseQueryTransformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {
-        private boolean foundGenericSPO; //(?s ?p ?o)
-        private boolean foundClassSPO; //(?s a ?c)
+        private final VariableGenerator variableGenerator;
+        private boolean areIntensionalNodeRemaining; //(?s ?p ?o) or (?s ?p ?o ?g)
 
         protected FirstPhaseQueryTransformer(VariableGenerator variableGenerator) {
             super(variableGenerator, InternshipQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
-        }
-
-        private boolean isGenericSPO(ImmutableList<? extends VariableOrGroundTerm> arguments){
-            if (arguments.get(0) instanceof Variable && arguments.get(1) instanceof Variable && arguments.get(2) instanceof Variable ){
-                foundGenericSPO = true;
-                return true;
-            }
-            else
-                return false;
-        }
-
-        private boolean isClassSPO(ImmutableList<? extends VariableOrGroundTerm> arguments){
-            if (arguments.get(0) instanceof Variable && arguments.get(1) instanceof IRIConstant && arguments.get(2) instanceof Variable) {
-                foundClassSPO = true;
-                return true;
-            }
-            else
-                return false;
+            this.areIntensionalNodeRemaining = false;
+            this.variableGenerator = variableGenerator;
         }
 
         @Override
@@ -563,100 +544,67 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         private Optional<IQ> getDefinition(RDFAtomPredicate predicate,
                                            ImmutableList<? extends VariableOrGroundTerm> arguments) {
             return predicate.getPropertyIRI(arguments)
-                    .map(i -> handleGenericSACCase(i, predicate, arguments))
-                    .orElseGet(() -> handleGenericSPOCase(predicate, arguments));
+                    .map(i -> i.equals(RDF.TYPE)
+                            ? getRDFClassDefinition(predicate, arguments)
+                            : mapping.getRDFPropertyDefinition(predicate, i))
+                    .orElseGet(() -> getStarDefinition(predicate, arguments));
         }
 
         private Optional<IQ> getRDFClassDefinition(RDFAtomPredicate predicate,
                                                    ImmutableList<? extends VariableOrGroundTerm> arguments) {
             return predicate.getClassIRI(arguments)
                     .map(i -> mapping.getRDFClassDefinition(predicate, i))
-                    .orElseGet(() -> getStarClassDefinition(predicate));
+                    .orElseGet(() -> getStarClassDefinition(predicate, arguments));
         }
 
-        private Optional<IQ> getStarClassDefinition(RDFAtomPredicate predicate) {
-            return queryMerger.mergeDefinitions(mapping.getRDFClasses(predicate).stream()
-                    .flatMap(i -> mapping.getRDFClassDefinition(predicate, i).stream())
-                    .collect(ImmutableCollectors.toList()));
+        private Optional<IQ> getStarClassDefinition(RDFAtomPredicate predicate,
+                                                    ImmutableList<? extends VariableOrGroundTerm> arguments) {
+            VariableOrGroundTerm subject = predicate.getSubject(arguments);
+            if (subject instanceof ObjectConstant) {
+                return getCompatibleDefinitionsForConstant(predicate, SUBJECT_OF_ALL_CLASSES, (ObjectConstant) subject,
+                        variableGenerator);
+            }
+
+            // Leave it for next phase
+            return Optional.empty();
         }
 
-        private Optional<IQ> getStarDefinition(RDFAtomPredicate predicate) {
-            return mapping.getMergedDefinitions(predicate);
+        private Optional<IQ> getStarDefinition(RDFAtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> arguments) {
+            VariableOrGroundTerm subject = predicate.getSubject(arguments);
+
+            if (subject instanceof ObjectConstant) {
+                Optional<IQ> definition = getCompatibleDefinitionsForConstant(predicate, SUBJECT_OF_ALL_DEFINITIONS, (ObjectConstant) subject,
+                        variableGenerator);
+                if (definition.isPresent())
+                    return definition;
+            }
+
+            VariableOrGroundTerm object = predicate.getObject(arguments);
+            if (object instanceof ObjectConstant) {
+                return getCompatibleDefinitionsForConstant(predicate, OBJECT_OF_ALL_DEFINITIONS, (ObjectConstant) object,
+                        variableGenerator);
+            }
+
+            // Leave it for next phase
+            return Optional.empty();
         }
 
         @Override
         protected IQTree handleIntensionalWithoutDefinition(IntensionalDataNode dataNode) {
-            ImmutableList arguments = dataNode.getProjectionAtom().getArguments();
-            if(isGenericSPO(arguments) || isClassSPO(arguments))
-                return dataNode.getRootNode();
-            else{
-                return iqFactory.createEmptyNode(dataNode.getVariables());
+            DataAtom<AtomPredicate> projectionAtom = dataNode.getProjectionAtom();
+            AtomPredicate atomPredicate = projectionAtom.getPredicate();
+
+            if ((atomPredicate instanceof RDFAtomPredicate)
+                    && ((RDFAtomPredicate) atomPredicate).getPredicateIRI(projectionAtom.getArguments()).isEmpty()) {
+                areIntensionalNodeRemaining = true;
+                return dataNode;
             }
+
+            return iqFactory.createEmptyNode(dataNode.getVariables());
         }
 
-        public boolean existsIntensionalNode(){
-            if (foundGenericSPO || foundClassSPO)
-                return true;
-            else
-                return false;
-        }
-
-        private boolean isIRIVarVar(ImmutableList<? extends VariableOrGroundTerm> arguments){
-            if (arguments.get(0) instanceof IRIConstant && arguments.get(1) instanceof Variable && arguments.get(2) instanceof Variable)
-                return true;
-            else
-                return false;
-        }
-        private boolean isVarVarIRI(ImmutableList<? extends VariableOrGroundTerm> arguments){
-            if (arguments.get(0) instanceof Variable && arguments.get(1) instanceof Variable && arguments.get(2) instanceof IRIConstant)
-                return true;
-            else
-                return false;
-        }
-
-        private Optional<IQ> handleGenericSPOCase(RDFAtomPredicate predicate,
-                                                  ImmutableList<? extends VariableOrGroundTerm> arguments){
-            if (!isGenericSPO(arguments)){
-                if (isIRIVarVar(arguments)){
-                    IRIConstant subj = (IRIConstant) arguments.get(0);
-                    Optional<IQ> subjDef = getCompatibleDefinitionsForIRI(predicate, SUBJECT_OF_ALL_DEFINITIONS, subj);
-                    return subjDef.isPresent() ? subjDef : getStarDefinition(predicate);
-                }
-                else if (isVarVarIRI(arguments)){
-                    IRIConstant obj = (IRIConstant) arguments.get(2);
-                    Optional<IQ> objDef = getCompatibleDefinitionsForIRI(predicate, OBJECT_OF_ALL_DEFINITIONS, obj);
-                    return objDef.isPresent() ? objDef : getStarDefinition(predicate);
-                }
-                else{
-                    IRIConstant subj = (IRIConstant) arguments.get(0);
-                    Optional<IQ> subjDef = getCompatibleDefinitionsForIRI(predicate, SUBJECT_OF_ALL_DEFINITIONS, subj);
-                    if (subjDef.isPresent())
-                        return subjDef;
-                    else{
-                        IRIConstant obj = (IRIConstant) arguments.get(2);
-                        Optional<IQ> objDef = getCompatibleDefinitionsForIRI(predicate, OBJECT_OF_ALL_DEFINITIONS, obj);
-                        return objDef.isPresent() ? objDef : getStarDefinition(predicate);
-                    }
-                }
-            }
-            return Optional.<IQ>empty();
-        }
-
-        private Optional<IQ> handleGenericSACCase(IRI iri, RDFAtomPredicate predicate,
-                                                  ImmutableList<? extends VariableOrGroundTerm> arguments){
-            if (iri.equals(RDF.TYPE)) {
-                if (isClassSPO(arguments))
-                    return Optional.<IQ>empty();
-                else if (arguments.get(0) instanceof IRIConstant && arguments.get(2) instanceof Variable){
-                    IRIConstant subj = (IRIConstant) arguments.get(0);
-                    Optional<IQ> subjDef = getCompatibleDefinitionsForIRI(predicate, SUBJECT_OF_ALL_CLASSES, subj);
-                    return subjDef.isPresent() ? subjDef : getRDFClassDefinition(predicate, arguments);
-                }
-                else return getRDFClassDefinition(predicate, arguments);
-            }
-            else {
-                return mapping.getRDFPropertyDefinition(predicate, iri);
-            }
+        public boolean areIntensionalNodesRemaining() {
+            return areIntensionalNodeRemaining;
         }
     }
 
