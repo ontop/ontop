@@ -499,15 +499,5 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     public boolean isPreferringToBePostProcessedOverBeingBlocked() {
         return true;
     }
-
-
-    public boolean canBeGeneratedByTemplate(String value) {
-        if (isInjective) {
-            Matcher matcher = getPattern().matcher(value);
-            return matcher.matches();
-        } else {
-            return SafeSeparatorFragment.areCompatible(this.safeSeparatorFragments, SafeSeparatorFragment.split(value));
-        }
-    }
 }
 

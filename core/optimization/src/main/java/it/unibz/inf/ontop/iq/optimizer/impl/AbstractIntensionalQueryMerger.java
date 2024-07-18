@@ -1,15 +1,12 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
-import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -18,7 +15,6 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.*;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -32,13 +28,13 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
     }
 
     @Override
-    public IQ optimize(IQ query) { //Questo è quello che viene invocato in QuestQueryProcessor per effettuare l'unfolding
-        IQTree newTree = optimize(query.getTree()); //è quello sotto
+    public IQ optimize(IQ query) {
+        IQTree newTree = optimize(query.getTree());
         return iqFactory.createIQ(query.getProjectionAtom(), newTree);
     }
 
     protected IQTree optimize(IQTree tree) {
-        QueryMergingTransformer transformer = createTransformer(tree.getKnownVariables()); //crea una nuova variabile QueryMergingTransformer
+        QueryMergingTransformer transformer = createTransformer(tree.getKnownVariables());
         return tree.acceptTransformer(transformer);
     }
 
@@ -72,10 +68,10 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
         }
 
         @Override
-        public IQTree transformIntensionalData(IntensionalDataNode dataNode) { //effettua l'unfolding di un singolo nodo intensionale e lo rimpiazza con un IQ tree
-            Optional<IQ> definition = getDefinition(dataNode); //mi faccio restituire tutte le definizioni
+        public IQTree transformIntensionalData(IntensionalDataNode dataNode) {
+            Optional<IQ> definition = getDefinition(dataNode);
             return definition
-                    .map(d -> replaceIntensionalData(dataNode, d)) //rimpiazza il nodo intensionale con le definizioni ottenute
+                    .map(d -> replaceIntensionalData(dataNode, d))
                     .orElseGet(() -> handleIntensionalWithoutDefinition(dataNode));
         }
 
