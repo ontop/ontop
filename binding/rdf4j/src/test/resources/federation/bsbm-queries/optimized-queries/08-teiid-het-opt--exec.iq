@@ -1,8 +1,0 @@
-ans1(title, text, reviewDate, reviewer, reviewerName, rating1, rating2, rating3, rating4)
-CONSTRUCT [title, text, reviewDate, reviewer, reviewerName, rating1, rating2, rating3, rating4] [reviewerName/RDF(name1m12,xsd:string), rating1/RDF(INTEGERToSTRING(rating1m16),IF_ELSE_NULL(IS_NOT_NULL(rating1m16),xsd:integer)), rating2/RDF(INTEGERToSTRING(rating1m17),IF_ELSE_NULL(IS_NOT_NULL(rating1m17),xsd:integer)), reviewDate/RDF(DATEToSTRING(reviewdate2m37),xsd:date), rating3/RDF(INTEGERToSTRING(rating1m13),IF_ELSE_NULL(IS_NOT_NULL(rating1m13),xsd:integer)), rating4/RDF(INTEGERToSTRING(rating1m15),IF_ELSE_NULL(IS_NOT_NULL(rating1m15),xsd:integer)), reviewer/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite/Reviewer{}(INTEGERToSTRING(person2m7)),IRI), text/RDF(text2m14,xsd:string), title/RDF(title2m11,xsd:string)]
-   NATIVE [name1m12, person2m7, rating1m13, rating1m15, rating1m16, rating1m17, reviewdate2m37, text2m14, title2m11]
-SELECT v2."name" AS "name1m12", v1."person" AS "person2m7", v1."rating3" AS "rating1m13", v1."rating4" AS "rating1m15", v1."rating1" AS "rating1m16", v1."rating2" AS "rating1m17", v1."reviewdate" AS "reviewdate2m37", v1."text" AS "text2m14", v1."title" AS "title2m11"
-FROM "s2"."review" v1, "s2"."person" v2
-WHERE (v1."person" = v2."nr" AND (94 = v1."product" AND 'en' = v1."language"))
-ORDER BY v1."reviewdate" DESC NULLS LAST
-

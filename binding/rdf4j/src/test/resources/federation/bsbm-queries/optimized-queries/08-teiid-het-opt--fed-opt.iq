@@ -1,6 +1,0 @@
-ans1(title, text, reviewDate, reviewer, reviewerName, rating1, rating2, rating3, rating4)
-CONSTRUCT [title, text, reviewDate, reviewer, reviewerName, rating1, rating2, rating3, rating4] [reviewerName/RDF(name1m12,xsd:string), rating1/RDF(INTEGERToSTRING(rating1m16),IF_ELSE_NULL(IS_NOT_NULL(rating1m16),xsd:integer)), rating2/RDF(INTEGERToSTRING(rating1m17),IF_ELSE_NULL(IS_NOT_NULL(rating1m17),xsd:integer)), reviewDate/RDF(DATEToSTRING(reviewdate2m37),xsd:date), rating3/RDF(INTEGERToSTRING(rating1m13),IF_ELSE_NULL(IS_NOT_NULL(rating1m13),xsd:integer)), rating4/RDF(INTEGERToSTRING(rating1m15),IF_ELSE_NULL(IS_NOT_NULL(rating1m15),xsd:integer)), reviewer/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite/Reviewer{}(INTEGERToSTRING(person2m7)),IRI), text/RDF(text2m14,xsd:string), title/RDF(title2m11,xsd:string)]
-   ORDER BY [DESC(reviewdate2m37)]
-      JOIN
-         EXTENSIONAL "s2"."review"(1:"94"^^INTEGER,3:person2m7,4:reviewdate2m37,5:title2m11,6:text2m14,7:"en"^^STRING,8:rating1m16,9:rating1m17,10:rating1m13,11:rating1m15)
-         EXTENSIONAL "s2"."person"(0:person2m7,1:name1m12)

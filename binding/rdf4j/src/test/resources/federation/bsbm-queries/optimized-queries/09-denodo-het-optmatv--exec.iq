@@ -1,7 +1,0 @@
-ans1(p, name, mbox_sha1sum, country, r, product, title)
-CONSTRUCT [p, name, mbox_sha1sum, country, r, product, title] [p/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite/Reviewer{}(INTEGERToTEXT(person2m7)),IRI), country/RDF(http://downlode.org/rdf/iso-3166/countries#{}(VARCHARToTEXT(country3m1)),IRI), product/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product{}(INTEGERToTEXT(product2m4)),IRI), r/RDF(http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite/Review{}(INTEGERToTEXT(nr0m4)),IRI), name/RDF(VARCHARToTEXT(name1m12),xsd:string), mbox_sha1sum/RDF(VARCHARToTEXT(mbox_sha1sum1m41),xsd:string), title/RDF(VARCHARToTEXT(title2m11),xsd:string)]
-   NATIVE [country3m1, mbox_sha1sum1m41, name1m12, nr0m4, person2m7, product2m4, title2m11]
-SELECT v2."country" AS "country3m1", v2."mbox_sha1sum" AS "mbox_sha1sum1m41", v2."name" AS "name1m12", v3."nr" AS "nr0m4", v1."person" AS "person2m7", v3."product" AS "product2m4", v3."title" AS "title2m11"
-FROM "review" v1, "person" v2, "review" v3
-WHERE (v1."person" = v2."nr" AND v1."person" = v3."person" AND 1356 = v1."nr")
-
