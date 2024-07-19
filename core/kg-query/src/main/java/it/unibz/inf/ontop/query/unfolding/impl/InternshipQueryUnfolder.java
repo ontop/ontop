@@ -87,8 +87,8 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         long before = System.currentTimeMillis();
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(tree.getKnownVariables());
         FirstPhaseQueryTransformer firstPhaseTransformer = new FirstPhaseQueryTransformer(variableGenerator);
-        IQTree partiallyUnfoldedIQ = tree.acceptTransformer(firstPhaseTransformer)
-                        .normalizeForOptimization(variableGenerator);
+        // NB: no normalization at that point, because of limitation of getPossibleVariableDefinitions implementation (Problem with join strict equality and condition)
+        IQTree partiallyUnfoldedIQ = tree.acceptTransformer(firstPhaseTransformer);
         LOGGER.debug("First phase query unfolding time: {}", System.currentTimeMillis() - before);
 
         if (!firstPhaseTransformer.areIntensionalNodesRemaining())
@@ -103,7 +103,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
     }
 
 
-    public IQTree executeSecondPhaseUnfolding(IQTree partiallyUnfoldedIQ, VariableGenerator variableGenerator){
+    protected IQTree executeSecondPhaseUnfolding(IQTree partiallyUnfoldedIQ, VariableGenerator variableGenerator){
         long before = System.currentTimeMillis();
         QueryMergingTransformer secondPhaseTransformer = new SecondPhaseQueryTransformer(
                 partiallyUnfoldedIQ.getPossibleVariableDefinitions(), variableGenerator);
@@ -380,8 +380,6 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
             optionalTemplateSet = Optional.ofNullable(constraints.get(subjOrObj));
             if (optionalTemplateSet.isPresent()) {
                 ImmutableSet<IRIOrBNodeTemplateSelector> templateSet = optionalTemplateSet.get();
-                if (someDefComeFromDB(templateSet))
-                    return Optional.empty();
                 return queryMerger.mergeDefinitions(fromTemplateSetReturnForestOfCompatibleDefinitions(rdfAtomPredicate, templateSet, RDFAtomIndexPattern));
             }
             else
