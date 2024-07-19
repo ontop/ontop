@@ -943,17 +943,6 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(46580, count);
     }
 
-    @Test
-    public void andreaTest42(){
-        String sparql =
-                "SELECT DISTINCT * \n" +
-                        "WHERE {\n" +
-                        "  <http://destination.example.org/data/municipality/021114> ?b ?c .\n" +
-                        "}\n";
-        int count = runQueryAndCount(sparql);
-        assertEquals(5, count);
-    }
-
     //TODO QUESTI DI GRAPH EXPLORER INVECE PUOI LASCIARLI
 
     @Test

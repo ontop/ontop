@@ -122,7 +122,6 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
                                         .mapToObj(i -> variableGenerator.generateNewVariable())
                                         .collect(ImmutableCollectors.toList())),
                         termFactory.getRDFTermTypeConstant(objectConstant.getType())));
-
         return strictEquality.evaluate2VL(termFactory.createDummyVariableNullability(strictEquality))
                 .getValue()
                 .filter(v -> v.equals(ImmutableExpression.Evaluation.BooleanValue.FALSE))
@@ -131,7 +130,6 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
 
     private Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>> extractCompatibleTemplateFromConst(
             ObjectConstant objectConstant, VariableGenerator variableGenerator) {
-
         Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>> selectedTemplate;
         if (!objectTemplateSetMap.containsKey(objectConstant)) {
             selectedTemplate = Optional.ofNullable(objectTemplates.stream()
@@ -141,7 +139,6 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         }
         else
             selectedTemplate = objectTemplateSetMap.get(objectConstant);
-
         return selectedTemplate;
     }
 
@@ -170,8 +167,8 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         protected SecondPhaseQueryTransformer(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> localVariableDefinitions, VariableGenerator variableGenerator) {
             super(variableGenerator, InternshipQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
             this.constraints = new HashMap<>();
-            this.updateWithDefinitions(localVariableDefinitions);
             this.variableGenerator = variableGenerator;
+            this.updateWithDefinitions(localVariableDefinitions);
         }
 
         protected SecondPhaseQueryTransformer(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> variableDefinitions,
@@ -289,9 +286,37 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
             return subjTemplateForSubstitution;
         }
 
+        private boolean isTermAConstantThatComesFromTable(ImmutableTerm term) {
+            if (term instanceof ImmutableFunctionalTerm && ((ImmutableFunctionalTerm)term).getFunctionSymbol().getName().equals("RDF")) {
+                ImmutableTerm lexicalTerm = ((ImmutableFunctionalTerm) term).getTerm(0);
+                if (lexicalTerm instanceof NonGroundFunctionalTerm && ((NonGroundFunctionalTerm)lexicalTerm).getTerm(0) instanceof Variable)
+                    return true;
+            }
+            return false;
+        }
+
+        private boolean doesSingleSubstitutionContainsConstantFromTable(Variable var, Substitution<? extends ImmutableTerm> substitution){
+            return substitution.stream()
+                    .map(entry -> {
+                        if (entry.getKey().equals(var)) {
+                            ImmutableTerm term = entry.getValue();
+                            return isTermAConstantThatComesFromTable(term);
+                        }
+                        return false;
+                    })
+                    .anyMatch(result -> result);
+        }
+
+        private boolean doesConstantComeFromTableForVariable(Variable var, ImmutableSet substitutions){
+            return substitutions.stream()
+                    .anyMatch(entry -> doesSingleSubstitutionContainsConstantFromTable(var, (Substitution<? extends ImmutableTerm>) entry));
+        }
+
         private boolean isIQDefinitionSafe(Variable var, IQTree iqTree, ObjectStringTemplateFunctionSymbol template){
-            boolean result = false;
             ImmutableSet substitution = iqTree.getPossibleVariableDefinitions();
+            if (doesConstantComeFromTableForVariable(var, substitution)){
+                return false;
+            }
             Map<Variable, ImmutableSet<IRIOrBNodeTemplateSelector>> iriTemplateMap = convertIntoConstraints(substitution);
             if (iriTemplateMap.get(var) != null){
                 ImmutableSet<IRIOrBNodeTemplateSelector> setOfTemplate = iriTemplateMap.get(var)
@@ -302,10 +327,10 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
                         setOfTemplate.stream().findFirst().get().isTemplate() &&
                         setOfTemplate.stream().findFirst().get().template.equals(template);
                 if (setOfTemplate.size() == 1 && templateFromDefinitionAndFromIQAreTheSame){
-                    result = true;
+                    return true;
                 }
             }
-            return result;
+            return false;
         }
 
         private IQTree filteredTreeToPreventInsecureUnion(IQTree currentIQTree, ImmutableTerm var, String prefix){
