@@ -262,14 +262,15 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         }
 
         private IRIOrBNodeTemplateSelector extractIRITemplateOrObjectConstantFromOneTerm(ImmutableTerm term){
-            if (term instanceof ImmutableFunctionalTerm && ((ImmutableFunctionalTerm)term).getFunctionSymbol().getName().equals("RDF")){
-                ImmutableTerm lexicalTerm = ((ImmutableFunctionalTerm)term).getTerm(0);
+            ImmutableTerm simplifiedTerm = term.simplify();
+            if (simplifiedTerm instanceof ImmutableFunctionalTerm && ((ImmutableFunctionalTerm)simplifiedTerm).getFunctionSymbol().getName().equals("RDF")){
+                ImmutableTerm lexicalTerm = ((ImmutableFunctionalTerm)simplifiedTerm).getTerm(0);
                 if (lexicalTerm instanceof NonGroundFunctionalTerm && ((NonGroundFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol) {
                     return new IRIOrBNodeTemplateSelector((ObjectStringTemplateFunctionSymbol) ((NonGroundFunctionalTermImpl) lexicalTerm).getFunctionSymbol());
                 }
-                else if (lexicalTerm instanceof ObjectConstant){
-                    return new IRIOrBNodeTemplateSelector((ObjectConstant)lexicalTerm);
-                }
+            }
+            else if (simplifiedTerm instanceof ObjectConstant){
+                return new IRIOrBNodeTemplateSelector((ObjectConstant)simplifiedTerm);
             }
             return new IRIOrBNodeTemplateSelector();
         }
