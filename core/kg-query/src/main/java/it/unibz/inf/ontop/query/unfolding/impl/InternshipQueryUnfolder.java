@@ -147,7 +147,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
                                                              VariableGenerator variableGenerator) {
         Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>> optionalCompatibleTemplate = extractCompatibleTemplateFromConst(objectConstant, variableGenerator);
         // TODO: revise that restriction
-        if (optionalCompatibleTemplate.isPresent()) {
+        if (optionalCompatibleTemplate.isPresent() && optionalCompatibleTemplate.get().size() >= 1) {
             ObjectStringTemplateFunctionSymbol template = optionalCompatibleTemplate.get().iterator().next();
             return mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern, template, variableGenerator);
         }

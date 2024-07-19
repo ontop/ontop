@@ -144,9 +144,9 @@ target      data:xyz/{x}{y}z a schema:Thing .
 source      SELECT * FROM "source2_xyz"
 
 ;IRI that comes from DB. You can try to uncomment this and run the test again and see the difference
-;mappingId   Source - rating
-;target      <{id}> a schema:Place ; schema:ratingValue {rating} .
-;source      SELECT * FROM "rating"
+mappingId   Source - rating
+target      <{id}> a schema:Place ; schema:ratingValue {rating} .
+source      SELECT * FROM "rating"
 
 ;This section is commented out until homomorphisms modulo IRI unification is implemented
 ;mappingId	Source 3 - Measurement property

@@ -647,24 +647,4 @@ public class InternshipNewQueryUnfolderSparQLTest extends AbstractRDF4JTest {
         int count = runQueryAndCount(sparql);
         assertEquals(5, count);
     }
-
-    /*
-    TODO SBAGLIATO IN FASE DI OTTIMIZZAZIONE (FAI IL BUG REPORT SU GITHUB O VIA E-MAIL A BENJAMIN)
-    @Test
-    public void graphexplorer_critical_query_2(){
-        String sparql = "SELECT ?class (COUNT(?class) AS ?count) {\n" +
-                "      ?subject a ?class {\n" +
-                "        SELECT DISTINCT ?subject ?class {\n" +
-                "          ?subject a ?class .\n" +
-                "          { ?subject ?p <http://destination.example.org/data/source1/hospitality/11893AC7C0CD11D2AE71004095429799> }\n" +
-                "          UNION\n" +
-                "          { <http://destination.example.org/data/source1/hospitality/11893AC7C0CD11D2AE71004095429799> ?p ?subject }\n" +
-                "        }\n" +
-                "        \n" +
-                "      }\n" +
-                "    }\n" +
-                "    GROUP BY ?class";
-        int count = runQueryAndCount(sparql);
-        assertEquals(0, count);
-    }*/
 }
