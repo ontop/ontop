@@ -323,10 +323,6 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
             return iqTreeWithFilter;
         }
 
-        private boolean someDefComeFromDB(ImmutableSet<IRIOrBNodeTemplateSelector> templateSet){
-            return templateSet.stream().filter(elem -> elem.isObjectConstantFromDB()).findFirst().isPresent();
-        }
-
         private Optional<IQ> filteredDefFromIRITemplate(RDFAtomPredicate rdfAtomPredicate, ObjectStringTemplateFunctionSymbol iriTemplate, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern){
             Optional<IQ> evaluatedIQ;
             evaluatedIQ = mapping.getCompatibleDefinitions(rdfAtomPredicate, RDFAtomIndexPattern, iriTemplate, variableGenerator);
