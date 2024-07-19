@@ -146,9 +146,8 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
                                                              ObjectConstant objectConstant,
                                                              VariableGenerator variableGenerator) {
         Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>> optionalCompatibleTemplate = extractCompatibleTemplateFromConst(objectConstant, variableGenerator);
-        //is == 1 and not >= 1, because you have problem when you two iri template for a iri constant and there is no generic one
         // TODO: revise that restriction
-        if (optionalCompatibleTemplate.isPresent() && optionalCompatibleTemplate.get().size() == 1) {
+        if (optionalCompatibleTemplate.isPresent()) {
             ObjectStringTemplateFunctionSymbol template = optionalCompatibleTemplate.get().iterator().next();
             return mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern, template, variableGenerator);
         }
@@ -546,8 +545,12 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
                                                     ImmutableList<? extends VariableOrGroundTerm> arguments) {
             VariableOrGroundTerm subject = predicate.getSubject(arguments);
             if (subject instanceof ObjectConstant) {
-                return getDefinitionCompatibleWithConstant(predicate, SUBJECT_OF_ALL_CLASSES, (ObjectConstant) subject,
+                Optional<IQ> definition = getDefinitionCompatibleWithConstant(predicate, SUBJECT_OF_ALL_CLASSES, (ObjectConstant) subject,
                         variableGenerator);
+                if (definition.isPresent())
+                    return definition;
+                else
+                    return mapping.getMergedClassDefinitions(predicate);
             }
 
             // Leave it for next phase
@@ -562,12 +565,18 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
                         variableGenerator);
                 if (definition.isPresent())
                     return definition;
+                else
+                    return mapping.getMergedDefinitions(predicate);
             }
 
             VariableOrGroundTerm object = predicate.getObject(arguments);
             if (object instanceof ObjectConstant) {
-                return getDefinitionCompatibleWithConstant(predicate, OBJECT_OF_ALL_DEFINITIONS, (ObjectConstant) object,
+                Optional<IQ> definition = getDefinitionCompatibleWithConstant(predicate, OBJECT_OF_ALL_DEFINITIONS, (ObjectConstant) object,
                         variableGenerator);
+                if (definition.isPresent())
+                    return definition;
+                else
+                    return mapping.getMergedDefinitions(predicate);
             }
 
             // Leave it for next phase
