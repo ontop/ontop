@@ -17,11 +17,11 @@ import static junit.framework.TestCase.assertEquals;
 
 public class UniqueConstraintInferenceTest {
 
-    private final ImmutableList<Template.Component> URI_TEMPLATE_INJECTIVE_2 = Template.of("http://example.org/ds1/", 0, "/", 1);
+    private final ImmutableList<Template.Component> URI_TEMPLATE_INJECTIVE_2 = Template.builder().string("http://example.org/ds1/").placeholder().string("/").placeholder().build();
 
-    private final ImmutableList<Template.Component> URI_TEMPLATE_INJECTIVE_2_1 = Template.of("http://example.org/ds3/", 0, "/", 1);
+    private final ImmutableList<Template.Component> URI_TEMPLATE_INJECTIVE_2_1 = Template.builder().string("http://example.org/ds3/").placeholder().string("/").placeholder().build();
 
-    private final ImmutableList<Template.Component> URI_TEMPLATE_NOT_INJECTIVE_2 = Template.of("http://example.org/ds2/", 0, "", 1);
+    private final ImmutableList<Template.Component> URI_TEMPLATE_NOT_INJECTIVE_2 = Template.builder().string("http://example.org/ds2/").placeholder().string("").placeholder().build();
 
     private final ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(PK_TABLE1_AR2, ImmutableList.of(A, B));
     private final ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(PK_TABLE1_AR3, ImmutableList.of(A, B, C));

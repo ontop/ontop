@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.impl.TemplateParser;
 
-import javax.annotation.Nullable;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -52,10 +51,10 @@ public class SafeSeparatorFragment {
         }
         else {
             Template.Component first = components.get(0);
-            prefix = first.isColumnNameReference() ? "" : first.getComponent();
+            prefix = first.isColumn() ? "" : first.getComponent();
             Template.Component last = components.get(components.size() - 1);
-            suffix = last.isColumnNameReference() ? "" : last.getComponent();
-            hasPlaceholders = components.size() > 1 || first.isColumnNameReference();
+            suffix = last.isColumn() ? "" : last.getComponent();
+            hasPlaceholders = components.size() > 1 || first.isColumn();
         }
     }
 

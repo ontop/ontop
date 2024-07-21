@@ -33,8 +33,8 @@ public class ConstructionNodeCleanerTest {
     private final static Variable Z1 = TERM_FACTORY.getVariable("Z1");
     private final static Variable Z2 = TERM_FACTORY.getVariable("Z2");
 
-    private final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/ds1/", 0);
-    private final ImmutableList<Template.Component> URI_TEMPLATE_STR_2_2 = Template.of("http://example.org/ds2/", 0, "/", 1);
+    private final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.builder().string("http://example.org/ds1/").placeholder().build();
+    private final ImmutableList<Template.Component> URI_TEMPLATE_STR_2_2 = Template.builder().string("http://example.org/ds2/").placeholder().string("/").placeholder().build();
 
 
     @Test

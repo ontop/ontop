@@ -19,105 +19,105 @@ public class IRITemplateCompatibilityTest {
 
     @Test
     public void test1() {
-        assertTrue(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/").addColumn().build(), 2,
-                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/2").build(), 1));
+        assertTrue(areCompatible(Template.builder().string("http://example.org/person/").placeholder().string("/").placeholder().build(), 2,
+                Template.builder().string("http://example.org/person/").placeholder().string("/2").build(), 1));
     }
 
     @Test
     public void test2() {
-        assertFalse(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().build(), 1,
-                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/2").build(), 1));
+        assertFalse(areCompatible(Template.builder().string("http://example.org/person/").placeholder().build(), 1,
+                Template.builder().string("http://example.org/person/").placeholder().string("/2").build(), 1));
     }
 
     @Test
     public void test3() {
-        assertTrue(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().build(), 1,
-                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("2").build(), 1));
+        assertTrue(areCompatible(Template.builder().string("http://example.org/person/").placeholder().build(), 1,
+                Template.builder().string("http://example.org/person/").placeholder().string("2").build(), 1));
     }
 
     @Test
     public void test4() {
-        assertFalse(areCompatible(Template.builder().addSeparator("http://example.org/car/").addColumn().build(), 1,
-                Template.builder().addSeparator("http://example.org/person/").addColumn().build(), 1));
+        assertFalse(areCompatible(Template.builder().string("http://example.org/car/").placeholder().build(), 1,
+                Template.builder().string("http://example.org/person/").placeholder().build(), 1));
     }
 
     @Test
     public void test5() {
-        assertTrue(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address/").addColumn().build(), 2,
-                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/").addColumn().addSeparator("/").addColumn().build(), 3));
+        assertTrue(areCompatible(Template.builder().string("http://example.org/person/").placeholder().string("/address/").placeholder().build(), 2,
+                Template.builder().string("http://example.org/person/").placeholder().string("/").placeholder().string("/").placeholder().build(), 3));
     }
 
     @Test
     public void test6() {
-        assertTrue(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address/").addColumn().build(), 2,
-                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/").addColumn().addSeparator("/45").build(), 2));
+        assertTrue(areCompatible(Template.builder().string("http://example.org/person/").placeholder().string("/address/").placeholder().build(), 2,
+                Template.builder().string("http://example.org/person/").placeholder().string("/").placeholder().string("/45").build(), 2));
     }
 
     @Test
     public void test7() {
-        assertFalse(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address/").addColumn().build(), 2,
-                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/position/").addColumn().build(), 2));
+        assertFalse(areCompatible(Template.builder().string("http://example.org/person/").placeholder().string("/address/").placeholder().build(), 2,
+                Template.builder().string("http://example.org/person/").placeholder().string("/position/").placeholder().build(), 2));
     }
 
     @Test
     public void test8Same() {
-        assertTrue(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address/").addColumn().build(), 2,
-                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address/").addColumn().build(), 2));
+        assertTrue(areCompatible(Template.builder().string("http://example.org/person/").placeholder().string("/address/").placeholder().build(), 2,
+                Template.builder().string("http://example.org/person/").placeholder().string("/address/").placeholder().build(), 2));
     }
 
     @Test
     public void test8splitbug() {
-        assertFalse(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("//").build(), 1,
-                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/ / ").addColumn().build(), 2));
+        assertFalse(areCompatible(Template.builder().string("http://example.org/person/").placeholder().string("//").build(), 1,
+                Template.builder().string("http://example.org/person/").placeholder().string("/ / ").placeholder().build(), 2));
     }
 
     @Test
     public void test9() {
-        assertTrue(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().build(), 1,
-                Template.builder().addSeparator("http://example.org/person/").addColumn().addColumn().build(), 2));
+        assertTrue(areCompatible(Template.builder().string("http://example.org/person/").placeholder().build(), 1,
+                Template.builder().string("http://example.org/person/").placeholder().placeholder().build(), 2));
     }
 
     @Test
     public void test10() {
-        assertFalse(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address/").addColumn().build(), 2,
-                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address+").addColumn().build(), 2));
+        assertFalse(areCompatible(Template.builder().string("http://example.org/person/").placeholder().string("/address/").placeholder().build(), 2,
+                Template.builder().string("http://example.org/person/").placeholder().string("/address+").placeholder().build(), 2));
     }
 
     @Test
     public void test11() {
-        assertTrue(areCompatible(Template.builder().addColumn().addColumn().build(), 2,
-                Template.builder().addColumn().build(), 1));
+        assertTrue(areCompatible(Template.builder().placeholder().placeholder().build(), 2,
+                Template.builder().placeholder().build(), 1));
     }
 
     @Test
     public void test12() {
-        assertFalse(areCompatible(Template.builder().addColumn().addSeparator("/").addColumn().build(), 2,
-                Template.builder().addColumn().build(), 1));
+        assertFalse(areCompatible(Template.builder().placeholder().string("/").placeholder().build(), 2,
+                Template.builder().placeholder().build(), 1));
     }
 
     @Test
     public void test13() {
-        assertFalse(areCompatible(Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("A").build(), 2,
-                Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("B").build(), 2));
+        assertFalse(areCompatible(Template.builder().string("A").placeholder().string("/").placeholder().string("A").build(), 2,
+                Template.builder().string("A").placeholder().string("/").placeholder().string("B").build(), 2));
     }
 
     @Test
     public void test14() {
-        assertFalse(areCompatible(Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("A").build(), 2,
-                Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("BAB").build(), 2));
+        assertFalse(areCompatible(Template.builder().string("A").placeholder().string("/").placeholder().string("A").build(), 2,
+                Template.builder().string("A").placeholder().string("/").placeholder().string("BAB").build(), 2));
     }
 
     @Test
     public void test15() {
-        assertTrue(areCompatible(Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("AB").build(), 2,
-                Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("BAB").build(), 2));
+        assertTrue(areCompatible(Template.builder().string("A").placeholder().string("/").placeholder().string("AB").build(), 2,
+                Template.builder().string("A").placeholder().string("/").placeholder().string("BAB").build(), 2));
     }
 
     @Test
     public void test16() {
         assertTrue(areCompatible(
-                Template.builder().addSeparator("http://example.org/level").addColumn().addSeparator("/").addColumn().build(), 2,
-                Template.builder().addSeparator("http://example.org/level0/").addColumn().build(), 1));
+                Template.builder().string("http://example.org/level").placeholder().string("/").placeholder().build(), 2,
+                Template.builder().string("http://example.org/level0/").placeholder().build(), 1));
     }
 
     private boolean areCompatible(ImmutableList<Template.Component> template1, int arity1, ImmutableList<Template.Component> template2, int arity2) {

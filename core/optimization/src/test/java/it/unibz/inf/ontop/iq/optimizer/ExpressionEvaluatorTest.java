@@ -37,8 +37,8 @@ public class ExpressionEvaluatorTest {
     private final Variable C = TERM_FACTORY.getVariable("c");
     private final Variable D = TERM_FACTORY.getVariable("d");
 
-    private final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/stock/", 0);
-    private final ImmutableList<Template.Component> URI_TEMPLATE_STR_2 = Template.of("http://example.org/something/", 0, "/", 1);
+    private final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.builder().string("http://example.org/stock/").placeholder().build();
+    private final ImmutableList<Template.Component> URI_TEMPLATE_STR_2 = Template.builder().string("http://example.org/something/").placeholder().string("/").placeholder().build();
 
 
     private final ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
