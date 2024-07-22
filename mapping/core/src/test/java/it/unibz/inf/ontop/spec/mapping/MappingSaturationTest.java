@@ -31,9 +31,9 @@ public class MappingSaturationTest {
     private static final Variable P = TERM_FACTORY.getVariable("p");
     private static final Variable O = TERM_FACTORY.getVariable("o");
 
-    private static final ImmutableList<Template.Component> URI_TEMPLATE_PERSON = Template.of("http://example.org/person/", 0);
-    private static final ImmutableList<Template.Component>  URI_TEMPLATE_COURSE1 =  Template.of("http://example.org/uni1/course/", 0);
-    private static final ImmutableList<Template.Component>  URI_TEMPLATE_COURSE2 =  Template.of("http://example.org/uni2/course/", 0);
+    private static final ImmutableList<Template.Component> URI_TEMPLATE_PERSON = Template.builder().string("http://example.org/person/").placeholder().build();
+    private static final ImmutableList<Template.Component>  URI_TEMPLATE_COURSE1 = Template.builder().string("http://example.org/uni1/course/").placeholder().build();
+    private static final ImmutableList<Template.Component>  URI_TEMPLATE_COURSE2 = Template.builder().string("http://example.org/uni2/course/").placeholder().build();
 
     private static final IRI PROP_GIVES_LECTURE, PROP_TEACHES, PROP_GIVES_LAB, PROP_IS_TAUGHT_BY;
 

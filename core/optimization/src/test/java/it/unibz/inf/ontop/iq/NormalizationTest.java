@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionS
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.substitution.Substitution;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -434,20 +433,20 @@ public class NormalizationTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
 
-        ImmutableList<Template.Component> iriTemplate1 = Template.builder().addSeparator("http://example.org/house/")
-                .addColumn()
-                .addSeparator("#zzz")
+        ImmutableList<Template.Component> iriTemplate1 = Template.builder().string("http://example.org/house/")
+                .placeholder()
+                .string("#zzz")
                 .build();
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(iriTemplate1, ImmutableList.of(A))));
 
-        ImmutableList<Template.Component> iriTemplate2 = Template.builder().addSeparator("http://example.org/house/")
-                .addColumn()
-                .addSeparator("#z")
-                .addColumn()
-                .addSeparator("z")
+        ImmutableList<Template.Component> iriTemplate2 = Template.builder().string("http://example.org/house/")
+                .placeholder()
+                .string("#z")
+                .placeholder()
+                .string("z")
                 .build();
 
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
@@ -483,19 +482,19 @@ public class NormalizationTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
 
-        ImmutableList<Template.Component> iriTemplate1 = Template.builder().addSeparator("http://example.org/house/")
-                .addColumn()
-                .addSeparator("#z")
+        ImmutableList<Template.Component> iriTemplate1 = Template.builder().string("http://example.org/house/")
+                .placeholder()
+                .string("#z")
                 .build();
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(iriTemplate1, ImmutableList.of(A))));
 
-        ImmutableList<Template.Component> iriTemplate2 = Template.builder().addSeparator("http://example.org/house/")
-                .addColumn()
-                .addSeparator("#")
-                .addColumn()
+        ImmutableList<Template.Component> iriTemplate2 = Template.builder().string("http://example.org/house/")
+                .placeholder()
+                .string("#")
+                .placeholder()
                 .build();
 
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
@@ -531,19 +530,19 @@ public class NormalizationTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
 
-        ImmutableList<Template.Component> iriTemplate1 = Template.builder().addSeparator("http://example.org/house/")
-                .addColumn()
-                .addSeparator("/z")
+        ImmutableList<Template.Component> iriTemplate1 = Template.builder().string("http://example.org/house/")
+                .placeholder()
+                .string("/z")
                 .build();
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(iriTemplate1, ImmutableList.of(A))));
 
-        ImmutableList<Template.Component> iriTemplate2 = Template.builder().addSeparator("http://example.org/house/")
-                .addColumn()
-                .addSeparator("/")
-                .addColumn()
+        ImmutableList<Template.Component> iriTemplate2 = Template.builder().string("http://example.org/house/")
+                .placeholder()
+                .string("/")
+                .placeholder()
                 .build();
 
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
@@ -579,9 +578,9 @@ public class NormalizationTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
 
-        ImmutableList<Template.Component> iriTemplate1 = Template.builder().addSeparator("http://example.org/house/")
-                .addColumn()
-                .addSeparator(".z")
+        ImmutableList<Template.Component> iriTemplate1 = Template.builder().string("http://example.org/house/")
+                .placeholder()
+                .string(".z")
                 .build();
 
         ImmutableFunctionalTerm iriTerm1 = TERM_FACTORY.getIRIFunctionalTerm(iriTemplate1, ImmutableList.of(A));
@@ -590,10 +589,10 @@ public class NormalizationTest {
                 ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, iriTerm1));
 
-        ImmutableList<Template.Component> iriTemplate2 = Template.builder().addSeparator("http://example.org/house/")
-                .addColumn()
-                .addSeparator(".")
-                .addColumn()
+        ImmutableList<Template.Component> iriTemplate2 = Template.builder().string("http://example.org/house/")
+                .placeholder()
+                .string(".")
+                .placeholder()
                 .build();
 
         ImmutableFunctionalTerm iriTerm2 = TERM_FACTORY.getIRIFunctionalTerm(iriTemplate2,
@@ -633,19 +632,19 @@ public class NormalizationTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
 
-        ImmutableList<Template.Component> iriTemplate1 = Template.builder().addSeparator("http://example.org/house/")
-                .addColumn()
-                .addSeparator("#%2F")
+        ImmutableList<Template.Component> iriTemplate1 = Template.builder().string("http://example.org/house/")
+                .placeholder()
+                .string("#%2F")
                 .build();
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(iriTemplate1, ImmutableList.of(A))));
 
-        ImmutableList<Template.Component> iriTemplate2 = Template.builder().addSeparator("http://example.org/house/")
-                .addColumn()
-                .addSeparator("#")
-                .addColumn()
+        ImmutableList<Template.Component> iriTemplate2 = Template.builder().string("http://example.org/house/")
+                .placeholder()
+                .string("#")
+                .placeholder()
                 .build();
 
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
@@ -681,9 +680,9 @@ public class NormalizationTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
 
-        ImmutableList<Template.Component> iriTemplate1 = Template.builder().addSeparator("http://example.org/house/")
-                .addColumn()
-                .addSeparator("%2Fz")
+        ImmutableList<Template.Component> iriTemplate1 = Template.builder().string("http://example.org/house/")
+                .placeholder()
+                .string("%2Fz")
                 .build();
 
         ImmutableFunctionalTerm iriTerm1 = TERM_FACTORY.getIRIFunctionalTerm(iriTemplate1, ImmutableList.of(A));
@@ -692,10 +691,10 @@ public class NormalizationTest {
                 ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, iriTerm1));
 
-        ImmutableList<Template.Component> iriTemplate2 = Template.builder().addSeparator("http://example.org/house/")
-                .addColumn()
-                .addSeparator("%2F")
-                .addColumn()
+        ImmutableList<Template.Component> iriTemplate2 = Template.builder().string("http://example.org/house/")
+                .placeholder()
+                .string("%2F")
+                .placeholder()
                 .build();
 
         ImmutableFunctionalTerm iriTerm2 = TERM_FACTORY.getIRIFunctionalTerm(iriTemplate2,
@@ -2796,8 +2795,8 @@ public class NormalizationTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
 
-        ImmutableList<Template.Component> template1 = Template.builder().addSeparator("http://example.org/ds1/").addColumn().build();
-        ImmutableList<Template.Component> template2 = Template.builder().addSeparator("http://example.org/ds2/").addColumn().build();
+        ImmutableList<Template.Component> template1 = Template.builder().string("http://example.org/ds1/").placeholder().build();
+        ImmutableList<Template.Component> template2 = Template.builder().string("http://example.org/ds2/").placeholder().build();
 
         ImmutableSet<Variable> unionVariables = ImmutableSet.of(X, D);
 
@@ -2862,8 +2861,8 @@ public class NormalizationTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
 
-        ImmutableList<Template.Component> template1 = Template.builder().addSeparator("http://example.org/ds1/").addColumn().build();
-        ImmutableList<Template.Component> template2 = Template.builder().addSeparator("http://example.org/ds2/").addColumn().build();
+        ImmutableList<Template.Component> template1 = Template.builder().string("http://example.org/ds1/").placeholder().build();
+        ImmutableList<Template.Component> template2 = Template.builder().string("http://example.org/ds2/").placeholder().build();
 
         ImmutableSet<Variable> unionVariables = ImmutableSet.of(X);
 
@@ -3024,12 +3023,12 @@ public class NormalizationTest {
     @Test
     public void testIRITemplateContextuallyInjective1() {
         ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
-                .addSeparator("http://www.Department")
-                .addColumn()
-                .addSeparator(".University1")
-                .addColumn()
-                .addSeparator(".edu/GraduateStudent")
-                .addColumn()
+                .string("http://www.Department")
+                .placeholder()
+                .string(".University1")
+                .placeholder()
+                .string(".edu/GraduateStudent")
+                .placeholder()
                 .build();
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
@@ -3082,12 +3081,12 @@ public class NormalizationTest {
     @Test
     public void testIRITemplateContextuallyInjective2() {
         ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
-                .addSeparator("http://www.Department")
-                .addColumn()
-                .addSeparator(".University")
-                .addColumn()
-                .addSeparator(".edu/GraduateStudent")
-                .addColumn()
+                .string("http://www.Department")
+                .placeholder()
+                .string(".University")
+                .placeholder()
+                .string(".edu/GraduateStudent")
+                .placeholder()
                 .build();
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
@@ -3141,12 +3140,12 @@ public class NormalizationTest {
     @Test
     public void testIRITemplateContextuallyInjective3() {
         ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
-                .addSeparator("http://www.Department")
-                .addColumn()
-                .addSeparator(".University")
-                .addColumn()
-                .addSeparator(".edu/GraduateStudent")
-                .addColumn()
+                .string("http://www.Department")
+                .placeholder()
+                .string(".University")
+                .placeholder()
+                .string(".edu/GraduateStudent")
+                .placeholder()
                 .build();
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
@@ -3200,12 +3199,12 @@ public class NormalizationTest {
     @Test
     public void testIRITemplateContextuallyInjective4() {
         ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
-                .addSeparator("http://www.Department")
-                .addColumn()
-                .addSeparator(".University1")
-                .addColumn()
-                .addSeparator(".edu/GraduateStudent")
-                .addColumn()
+                .string("http://www.Department")
+                .placeholder()
+                .string(".University1")
+                .placeholder()
+                .string(".edu/GraduateStudent")
+                .placeholder()
                 .build();
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
@@ -3259,12 +3258,12 @@ public class NormalizationTest {
     @Test
     public void testIRITemplateContextuallyInjective5() {
         ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
-                .addSeparator("http://www.Department")
-                .addColumn()
-                .addSeparator(".University")
-                .addColumn()
-                .addSeparator(".edu-GraduateStudent")
-                .addColumn()
+                .string("http://www.Department")
+                .placeholder()
+                .string(".University")
+                .placeholder()
+                .string(".edu-GraduateStudent")
+                .placeholder()
                 .build();
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
@@ -3316,10 +3315,10 @@ public class NormalizationTest {
     @Test
     public void testIRITemplateContextuallyInjective6() {
         ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
-                .addSeparator("http://ex.org/")
-                .addColumn()
-                .addSeparator("1fg")
-                .addColumn()
+                .string("http://ex.org/")
+                .placeholder()
+                .string("1fg")
+                .placeholder()
                 .build();
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, D));
@@ -3369,12 +3368,12 @@ public class NormalizationTest {
     @Test
     public void testIRITemplateContextuallyNotInjective1() {
         ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
-                .addSeparator("http://www.Department")
-                .addColumn()
-                .addSeparator(".University")
-                .addColumn()
-                .addSeparator(".edu/GraduateStudent")
-                .addColumn()
+                .string("http://www.Department")
+                .placeholder()
+                .string(".University")
+                .placeholder()
+                .string(".edu/GraduateStudent")
+                .placeholder()
                 .build();
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
@@ -3403,12 +3402,12 @@ public class NormalizationTest {
     @Test
     public void testIRITemplateContextuallyNotInjective2() {
         ImmutableList<Template.Component> template = Template.builder()
-                .addSeparator("http://www.Department")
-                .addColumn()
-                .addSeparator("1")
-                .addColumn()
-                .addSeparator(".edu/GraduateStudent")
-                .addColumn()
+                .string("http://www.Department")
+                .placeholder()
+                .string("1")
+                .placeholder()
+                .string(".edu/GraduateStudent")
+                .placeholder()
                 .build();
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
@@ -3450,12 +3449,12 @@ public class NormalizationTest {
     @Test
     public void testIRITemplateContextuallyNotInjective3() {
         ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
-                .addSeparator("http://www.Department")
-                .addColumn()
-                .addSeparator(".University")
-                .addColumn()
-                .addSeparator(".edu/GraduateStudent")
-                .addColumn()
+                .string("http://www.Department")
+                .placeholder()
+                .string(".University")
+                .placeholder()
+                .string(".edu/GraduateStudent")
+                .placeholder()
                 .build();
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(C, F));
@@ -3491,12 +3490,12 @@ public class NormalizationTest {
     @Test
     public void testIRITemplateContextuallyNotInjective4() {
         ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
-                .addSeparator("http://www.Department")
-                .addColumn()
-                .addSeparator(".University")
-                .addColumn()
-                .addSeparator(".edu-GraduateStudent")
-                .addColumn()
+                .string("http://www.Department")
+                .placeholder()
+                .string(".University")
+                .placeholder()
+                .string(".edu-GraduateStudent")
+                .placeholder()
                 .build();
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
@@ -3536,10 +3535,10 @@ public class NormalizationTest {
     @Test
     public void testIRITemplateContextuallyNotInjective5() {
         ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
-                .addSeparator("http://ex.org/")
-                .addColumn()
-                .addSeparator("1ff")
-                .addColumn()
+                .string("http://ex.org/")
+                .placeholder()
+                .string("1ff")
+                .placeholder()
                 .build();
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, D));
