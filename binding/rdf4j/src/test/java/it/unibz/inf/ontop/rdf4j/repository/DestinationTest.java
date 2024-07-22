@@ -1120,7 +1120,7 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "SELECT ?subject ?pred ?value ?class {\n" +
                 "  ?subject ?pred ?value {\n" +
                 "    SELECT DISTINCT ?subject ?class {\n" +
-                "      ?subject a <http://schema.org/Accommodation> ;\n" +
+                "      ?subject a <http://schema.org/Apartment> ;\n" +
                 "               ?predicate ?value .\n" +
                 "      FILTER (?predicate IN (<http://schema.org/name>, <http://schema.org/description>))\n" +
                 "    }\n" +
