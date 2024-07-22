@@ -21,7 +21,7 @@ public abstract class AbstractTemplateFactory implements TemplateFactory {
 
 
     protected NonVariableTerm templateComponentToTerm(Template.Component c) {
-        return c.isColumnNameReference()
+        return c.isColumn()
                 ? getVariable(c.getComponent())
                 : termFactory.getDBStringConstant(c.getComponent());
     }

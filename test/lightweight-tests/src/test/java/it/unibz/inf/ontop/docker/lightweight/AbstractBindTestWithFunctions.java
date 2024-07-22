@@ -8,8 +8,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.junit.jupiter.api.*;
 
-import java.util.stream.Collectors;
-
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;

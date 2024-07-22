@@ -15,11 +15,11 @@ import static org.junit.Assert.assertEquals;
 public class PossibleDefinitionsTest {
 
     private final ImmutableList<Template.Component> template1 = Template.builder()
-            .addSeparator("http://example.org/type1/").addColumn()
+            .string("http://example.org/type1/").placeholder()
             .build();
 
     private final ImmutableList<Template.Component> template2 = Template.builder()
-            .addSeparator("http://example.org/type2/").addColumn()
+            .string("http://example.org/type2/").placeholder()
             .build();
 
     @Test

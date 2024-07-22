@@ -572,7 +572,7 @@ public class ValuesNodeOptimizationTest {
                 SUBSTITUTION_FACTORY.getSubstitution(X, TWO_STR));
         GroundFunctionalTerm xValue0 =
                 (GroundFunctionalTerm) TERM_FACTORY.getIRIFunctionalTerm(
-                        Template.of("http://example.org/ds1/", 0),
+                        Template.builder().string("http://example.org/ds1/").placeholder().build(),
                         ImmutableList.of(ONE_STR));
         IRIConstant xValue1 = TERM_FACTORY.getConstantIRI("http://example.org/ds1/1");
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),

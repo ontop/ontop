@@ -117,8 +117,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} a :Person .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI(RDF.TYPE),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
@@ -130,7 +130,7 @@ public class TurtleSyntaxParserTest {
 				":x={x}&y={y} a :Person .");
 
 		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#x=", 0, "&y=", 1),
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#x=").placeholder().string("&y=").placeholder().build(),
 						getVariable("x"), getVariable("y")),
 				getConstantIRI(RDF.TYPE),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
@@ -141,8 +141,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{\"id\"} a :Person .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("\"id\"")),
 				getConstantIRI(RDF.TYPE),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
@@ -153,8 +153,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{`id`} a :Person .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("`id`")),
 				getConstantIRI(RDF.TYPE),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
@@ -165,8 +165,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{\"id\"\"\"} a :Person .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("\"id\"\"\"")),
 				getConstantIRI(RDF.TYPE),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
@@ -184,8 +184,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				"<http://example.org/testcase#Person-{id}> a :Person .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://example.org/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://example.org/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI(RDF.TYPE),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
@@ -196,8 +196,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				"<http://example.org/testcase#Person-{\"id\"}> a :Person .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://example.org/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://example.org/testcase#Person-").placeholder().build(),
 						getVariable("\"id\"")),
 				getConstantIRI(RDF.TYPE),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
@@ -208,8 +208,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				"<http://example.org/testcase#Person-{\"\"\"id\"\"\"}> a :Person .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://example.org/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://example.org/testcase#Person-").placeholder().build(),
 						getVariable("\"\"\"id\"\"\"")),
 				getConstantIRI(RDF.TYPE),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
@@ -221,8 +221,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				"<http://example.org/testcase#Person-{id}> a <http://example.org/testcase#Person> .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://example.org/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://example.org/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI(RDF.TYPE),
 				getConstantIRI("http://example.org/testcase#Person"))), result);
@@ -233,8 +233,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				"<http://example.org/testcase#Person-{id}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.org/testcase#Person> .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://example.org/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://example.org/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI(RDF.TYPE),
 				getConstantIRI("http://example.org/testcase#Person"))), result);
@@ -245,11 +245,11 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} :hasFather :Person-{id} .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#hasFather"),
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")))), result);
 	}
 
@@ -258,8 +258,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} :hasFather <http://example.org/testcase#Person-12> .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#hasFather"),
 				getConstantIRI("http://example.org/testcase#Person-12"))), result);
@@ -270,8 +270,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} <http://example.org/testcase#hasFather> <http://example.org/testcase#Person-12> .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://example.org/testcase#hasFather"),
 				getConstantIRI("http://example.org/testcase#Person-12"))), result);
@@ -282,8 +282,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} :firstName {fname} .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -295,8 +295,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} :firstName {\"fname\"} .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -308,8 +308,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} :firstName \"{fname}\" .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -321,8 +321,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} :firstName \"{\\\"fname\\\"}\" .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -334,8 +334,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} :firstName \"\" .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(TERM_FACTORY.getDBStringConstant(""), XSD.STRING))), result);
@@ -346,8 +346,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} :firstName \"{fname}\"^^xsd:string .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -359,8 +359,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} :firstName <{fname}> .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				TERM_FACTORY.getIRIFunctionalTerm(
@@ -372,8 +372,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} :firstName {fname}^^xsd:string .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -385,8 +385,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} rdfs:label \"adres : {Address} \\\\{city:\\\\} {City}{Country}something\"@en-us .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://www.w3.org/2000/01/rdf-schema#label"),
 				getRDFLiteralFunctionalTerm(
@@ -404,8 +404,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} :firstName \"hello {fname}\"^^xsd:string .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(
@@ -419,8 +419,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} :firstName \"hello {fname}\"^^xsd:double .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(
@@ -434,8 +434,8 @@ public class TurtleSyntaxParserTest {
 	public void test_3_3() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} :firstName {fname}@en-US .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -446,8 +446,8 @@ public class TurtleSyntaxParserTest {
 	public void test_4_1_1() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} :firstName \"John\"^^xsd:string .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(
@@ -459,8 +459,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} <http://example.org/testcase#firstName> \"John\"^^xsd:string .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://example.org/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(
@@ -472,8 +472,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} :firstName \"John\"^^rdfs:Literal .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(
@@ -485,8 +485,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} :firstName \"John\"@en-US .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(
@@ -498,15 +498,15 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} a :Person ; :firstName {fname} .");
 
-		assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -518,22 +518,22 @@ public class TurtleSyntaxParserTest {
 		final ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} a :Person ; :firstName {fname} ; :age {age} .");
 
-		assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
 								getVariable("fname")), DEFAULT_DATATYPE)),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#age"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -545,29 +545,29 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} a :Person ; :hasFather :Person-{id} ; :firstName {fname} ; :age {age} .");
 
-		assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#hasFather"),
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id"))),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
 								getVariable("fname")), DEFAULT_DATATYPE)),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#age"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -579,15 +579,15 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} a :Person ; :firstName {fname}^^xsd:string .");
 
-		assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -599,22 +599,22 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} a :Person ; :firstName {fname}^^xsd:string ; :age {age}^^xsd:integer .");
 
-		assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
 								getVariable("fname")), XSD.STRING)),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#age"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -626,29 +626,29 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} a :Person ; :hasFather :Person-{id} ; :firstName {fname}^^xsd:string ; :age {age}^^xsd:integer .");
 
-		assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#hasFather"),
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id"))),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
 								getVariable("fname")), XSD.STRING)),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#age"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -660,36 +660,36 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} a :Person ; :hasFather :Person-{id} ; :firstName {fname}^^xsd:string ; :age {age}^^xsd:integer ; :description {text}@en-US .");
 
-		assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#hasFather"),
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id"))),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
 								getVariable("fname")), XSD.STRING)),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#age"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
 								getVariable("age")), XSD.INTEGER)),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#description"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -701,36 +701,36 @@ public class TurtleSyntaxParserTest {
 		final ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} a <http://example.org/testcase#Person> ; <http://example.org/testcase:hasFather> :Person-{id} ; <http://example.org/testcase#firstName> {fname}^^xsd:string ; <http://example.org/testcase#age> {age}^^xsd:integer ; <http://example.org/testcase#description> {text}@en-US .");
 
-		assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://example.org/testcase#Person")),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://example.org/testcase:hasFather"),
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id"))),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://example.org/testcase#firstName"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
 								getVariable("fname")), XSD.STRING)),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://example.org/testcase#age"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
 								getVariable("age")), XSD.INTEGER)),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://example.org/testcase#description"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -749,15 +749,15 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} a :Person ; :firstName \"Sarah\" .");
 
-		assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-",  0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 						getRDFLiteralFunctionalTerm(
@@ -768,15 +768,15 @@ public class TurtleSyntaxParserTest {
 	public void test_6_2() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} a :Person ; :firstName {fname}^^ex:randomDatatype .");
 
-		assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -789,8 +789,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} rdf:type :Person .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI(RDF.TYPE),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
@@ -801,8 +801,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				"ex:Person-{id} rdf:type ex:Person .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://www.example.org/Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://www.example.org/Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI(RDF.TYPE),
 				getConstantIRI("http://www.example.org/Person"))), result);
@@ -813,8 +813,8 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				"ex:Person-{id} ex:hasFather ex:Person-123 .");
 
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://www.example.org/Person-", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://www.example.org/Person-").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI("http://www.example.org/hasFather"),
 				getConstantIRI("http://www.example.org/Person-123"))), result);
@@ -826,7 +826,7 @@ public class TurtleSyntaxParserTest {
 				"ex:Person/{id}/ ex:hasFather ex:Person/123/ .");
 
 		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.builder().addSeparator("http://www.example.org/Person/").addColumn().addSeparator("/").build(),
+				getIRIFunctionalTerm(Template.builder().string("http://www.example.org/Person/").placeholder().string("/").build(),
 						getVariable("id")),
 				getConstantIRI("http://www.example.org/hasFather"),
 				getConstantIRI("http://www.example.org/Person/123/"))), result);
@@ -875,8 +875,8 @@ public class TurtleSyntaxParserTest {
 	@Test
 	public void test_BNODE_object() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse("<http://example.com/emp/{empno}> <http://example.com/emp#c_ref_deptno> _:{deptId} .");
-		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://example.com/emp/", 0),
+        assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://example.com/emp/").placeholder().build(),
 						getVariable("empno")),
 				getConstantIRI("http://example.com/emp#c_ref_deptno"),
 				TERM_FACTORY.getBnodeFunctionalTerm(
@@ -887,17 +887,17 @@ public class TurtleSyntaxParserTest {
 	@Test
 	public void test_BNODE_function() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse("<http://esricanada.com/gfx_ontology_prototype/{feature_hash}> a <http://ontology.eil.utoronto.ca/icity/LandUse/Parcel> ; <http://ontology.eil.utoronto.ca/icity/LandUse/hasLandUse> _:landuse{feature_hash} .");
-		assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://esricanada.com/gfx_ontology_prototype/", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://esricanada.com/gfx_ontology_prototype/").placeholder().build(),
 								getVariable("feature_hash")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://ontology.eil.utoronto.ca/icity/LandUse/Parcel")),
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://esricanada.com/gfx_ontology_prototype/", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://esricanada.com/gfx_ontology_prototype/").placeholder().build(),
 								getVariable("feature_hash")),
 						getConstantIRI("http://ontology.eil.utoronto.ca/icity/LandUse/hasLandUse"),
-						getBnodeFunctionalTerm(Template.of("landuse", 0),
+						getBnodeFunctionalTerm(Template.builder().string("landuse").placeholder().build(),
 								getVariable("feature_hash")))), result);
 	}
 
@@ -906,12 +906,12 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				"GRAPH <http://www.ciao.it/{id}> { :{id} a :C . }");
 
-		assertEquals(ImmutableList.of(getQuadTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#", 0),
+        assertEquals(ImmutableList.of(getQuadTargetAtom(
+				getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#").placeholder().build(),
 						getVariable("id")),
 				getConstantIRI(RDF.TYPE),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#C"),
-				getIRIFunctionalTerm(Template.of("http://www.ciao.it/", 0),
+				getIRIFunctionalTerm(Template.builder().string("http://www.ciao.it/").placeholder().build(),
 						getVariable("id")))), result);
 	}
 
@@ -920,22 +920,22 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				"GRAPH <http://www.ciao.it/{id}> { :{id} a :C ; :P :{attr1} . }");
 
-		assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
 				getQuadTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#C"),
-						getIRIFunctionalTerm(Template.of("http://www.ciao.it/", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://www.ciao.it/").placeholder().build(),
 								getVariable("id"))),
 
 				getQuadTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#P"),
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#").placeholder().build(),
 								getVariable("attr1")),
-						getIRIFunctionalTerm(Template.of("http://www.ciao.it/", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://www.ciao.it/").placeholder().build(),
 								getVariable("id")))), result);
 	}
 
@@ -944,22 +944,22 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				"GRAPH <http://www.ciao.it/{id}> { :{id} a :C . :{id} :P :{attr1} . }");
 
-		assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
 				getQuadTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#C"),
-						getIRIFunctionalTerm(Template.of("http://www.ciao.it/", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://www.ciao.it/").placeholder().build(),
 								getVariable("id"))),
 
 				getQuadTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#").placeholder().build(),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#P"),
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#").placeholder().build(),
 								getVariable("attr1")),
-						getIRIFunctionalTerm(Template.of("http://www.ciao.it/", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://www.ciao.it/").placeholder().build(),
 								getVariable("id")))), result);
 	}
 
@@ -968,16 +968,16 @@ public class TurtleSyntaxParserTest {
 		ImmutableList<TargetAtom> result = parser.parse(
 				"GRAPH :uni1 { :uni1/student/{s_id} a :Student ; ex:firstName {first_name}^^xsd:string ; ex:lastName {last_name}^^xsd:string . }");
 
-		assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
 				getQuadTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#uni1/student/", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#uni1/student/").placeholder().build(),
 								getVariable("s_id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#Student"),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#uni1")),
 
 				getQuadTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#uni1/student/", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#uni1/student/").placeholder().build(),
 								getVariable("s_id")),
 						getConstantIRI("http://www.example.org/firstName"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -985,7 +985,7 @@ public class TurtleSyntaxParserTest {
 						getConstantIRI("http://obda.inf.unibz.it/testcase#uni1")),
 
 				getQuadTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#uni1/student/", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#uni1/student/").placeholder().build(),
 								getVariable("s_id")),
 						getConstantIRI("http://www.example.org/lastName"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -999,16 +999,16 @@ public class TurtleSyntaxParserTest {
 				"GRAPH :uni1 { :uni1/student/{s_id} a :Student ; ex:firstName {first_name}^^xsd:string ; ex:lastName {last_name}^^xsd:string . } " +
 				"GRAPH :uni2 { :uni2/student/{s_id} a :Student . }");
 
-		assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
 				getQuadTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#uni1/student/", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#uni1/student/").placeholder().build(),
 								getVariable("s_id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#Student"),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#uni1")),
 
 				getQuadTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#uni1/student/", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#uni1/student/").placeholder().build(),
 								getVariable("s_id")),
 						getConstantIRI("http://www.example.org/firstName"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -1016,7 +1016,7 @@ public class TurtleSyntaxParserTest {
 						getConstantIRI("http://obda.inf.unibz.it/testcase#uni1")),
 
 				getQuadTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#uni1/student/", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#uni1/student/").placeholder().build(),
 								getVariable("s_id")),
 						getConstantIRI("http://www.example.org/lastName"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedConversionToString(
@@ -1024,7 +1024,7 @@ public class TurtleSyntaxParserTest {
 						getConstantIRI("http://obda.inf.unibz.it/testcase#uni1")),
 
 				getQuadTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#uni2/student/", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#uni2/student/").placeholder().build(),
 								getVariable("s_id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#Student"),
@@ -1038,22 +1038,22 @@ public class TurtleSyntaxParserTest {
 						" :uni3/student/{s_id} a :Student . " +
 						"GRAPH :uni2 { :uni2/student/{s_id} a :Student . }");
 
-		assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
 				getQuadTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#uni1/student/", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#uni1/student/").placeholder().build(),
 								getVariable("s_id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#Student"),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#uni1")),
 
 				getTripleTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#uni3/student/", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#uni3/student/").placeholder().build(),
 								getVariable("s_id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#Student")),
 
 				getQuadTargetAtom(
-						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#uni2/student/", 0),
+						getIRIFunctionalTerm(Template.builder().string("http://obda.inf.unibz.it/testcase#uni2/student/").placeholder().build(),
 								getVariable("s_id")),
 						getConstantIRI(RDF.TYPE),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#Student"),

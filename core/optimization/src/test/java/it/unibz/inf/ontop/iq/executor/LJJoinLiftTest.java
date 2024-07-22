@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class LJJoinLiftTest {
 
-    private static final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/ds1/", 0);
+    private static final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.builder().string("http://example.org/ds1/").placeholder().build();
     private static final AtomPredicate P1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 1);
     private static final AtomPredicate P2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
     private static final AtomPredicate P3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);

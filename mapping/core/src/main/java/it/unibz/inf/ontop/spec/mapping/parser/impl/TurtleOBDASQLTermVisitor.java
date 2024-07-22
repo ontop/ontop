@@ -72,7 +72,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     private static ImmutableTerm getTermForObjectTemplate(String template, ObjectTemplateFactory factory) {
         ImmutableList<Template.Component> components = factory.getComponents(template);
 
-        if (components.size() == 1 && components.get(0).isColumnNameReference())
+        if (components.size() == 1 && components.get(0).isColumn())
             return factory.getColumn(components.get(0).getComponent());
 
         return factory.getTemplateTerm(components);

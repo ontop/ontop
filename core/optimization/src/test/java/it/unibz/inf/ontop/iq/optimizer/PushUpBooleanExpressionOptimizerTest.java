@@ -384,9 +384,9 @@ public class PushUpBooleanExpressionOptimizerTest {
 
     private static ImmutableFunctionalTerm generateURI(VariableOrGroundTerm... arguments) {
         Template.Builder builder = Template.builder();
-        builder.addSeparator("http://example.org/ds1/");
+        builder.string("http://example.org/ds1/");
         for (VariableOrGroundTerm argument : arguments)
-            builder.addColumn();
+            builder.placeholder();
         return TERM_FACTORY.getIRIFunctionalTerm(builder.build(), ImmutableList.copyOf(arguments));
     }
 

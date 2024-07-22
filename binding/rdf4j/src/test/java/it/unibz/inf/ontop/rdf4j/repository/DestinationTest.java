@@ -1,7 +1,10 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -11,10 +14,10 @@ import static org.junit.Assert.assertTrue;
 
 public class DestinationTest extends AbstractRDF4JTest {
 
-    private static final String OBDA_FILE = "/destination/dest.obda"; //contiene i mapping
-    private static final String SQL_SCRIPT = "/destination/schema.sql"; //sql script per generare le tabelle del database
-    private static final String ONTOLOGY_FILE = "/destination/dest.owl"; //contiene l'ontologia
-    private static final String PROPERTIES_FILE = "/destination/dest.properties"; //permette di specificare le chiavi di configurazioni. Guarda: https://ontop-vkg.org/guide/advanced/configuration.html
+    private static final String OBDA_FILE = "/destination/dest.obda";
+    private static final String SQL_SCRIPT = "/destination/schema.sql";
+    private static final String ONTOLOGY_FILE = "/destination/dest.owl";
+    private static final String PROPERTIES_FILE = "/destination/dest.properties";
 
     @BeforeClass
     public static void before() throws IOException, SQLException {
@@ -731,12 +734,12 @@ public class DestinationTest extends AbstractRDF4JTest {
     @Test
     public void andreaTest29(){
         String sparql =
-            "SELECT DISTINCT ?subject ?class {\n" +
-            "?subject a ?class .\n" +
-                "{ ?subject ?p <http://destination.example.org/data/source1/hospitality/A1B9B1850E0B035D21D93D3FCD3AA257> }\n" +
-                "UNION\n" +
-                "{ <http://destination.example.org/data/source1/hospitality/A1B9B1850E0B035D21D93D3FCD3AA257> ?p ?subject }\n" +
-                "}";
+                "SELECT DISTINCT ?subject ?class {\n" +
+                        "?subject a ?class .\n" +
+                        "{ ?subject ?p <http://destination.example.org/data/source1/hospitality/A1B9B1850E0B035D21D93D3FCD3AA257> }\n" +
+                        "UNION\n" +
+                        "{ <http://destination.example.org/data/source1/hospitality/A1B9B1850E0B035D21D93D3FCD3AA257> ?p ?subject }\n" +
+                        "}";
         int count = runQueryAndCount(sparql);
         assertEquals(0, count);
     }
@@ -745,7 +748,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     public void andreaTest30(){
         String sparql =
                 "SELECT DISTINCT *\n" +
-                "{ ?s a ?c .}\n";
+                        "{ ?s a ?c .}\n";
         int count = runQueryAndCount(sparql);
         assertEquals(14959, count);
     }
@@ -754,10 +757,10 @@ public class DestinationTest extends AbstractRDF4JTest {
     public void andreaTest31(){
         String sparql =
                 "SELECT DISTINCT *\n" +
-                "{\n" +
-                "?s a ?c ." +
-                "<http://destination.example.org/data/source1/hospitality/A1B9B1850E0B035D21D93D3FCD3AA257> ?p ?s .\n" +
-                "}\n";
+                        "{\n" +
+                        "?s a ?c ." +
+                        "<http://destination.example.org/data/source1/hospitality/A1B9B1850E0B035D21D93D3FCD3AA257> ?p ?s .\n" +
+                        "}\n";
         int count = runQueryAndCount(sparql);
         assertEquals(0, count);
     }
@@ -766,8 +769,8 @@ public class DestinationTest extends AbstractRDF4JTest {
     public void andreaTest32(){
         String sparql =
                 "PREFIX schema: <http://schema.org/>\n" +
-                "SELECT DISTINCT * \n" +
-                "{ ?s a schema:Hotel . }";
+                        "SELECT DISTINCT * \n" +
+                        "{ ?s a schema:Hotel . }";
         int count = runQueryAndCount(sparql);
         assertEquals(0, count);
     }
@@ -917,17 +920,17 @@ public class DestinationTest extends AbstractRDF4JTest {
     public void andreaTest40(){
         String sparql =
                 "SELECT * {\n" +
-                "  ?subject a ?subjectClass .\n" +
-                "  ?subject ?pred ?value .\n" +
-                "  {\n" +
-                "    SELECT DISTINCT ?subject {\n" +
-                "      {\n" +
-                "        <http://destination.example.org/data/municipality/021114> ?pToSubject ?subject.\n" +
-                "        ?subject ?sPred ?sValue .\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}\n";
+                        "  ?subject a ?subjectClass .\n" +
+                        "  ?subject ?pred ?value .\n" +
+                        "  {\n" +
+                        "    SELECT DISTINCT ?subject {\n" +
+                        "      {\n" +
+                        "        <http://destination.example.org/data/municipality/021114> ?pToSubject ?subject.\n" +
+                        "        ?subject ?sPred ?sValue .\n" +
+                        "      }\n" +
+                        "    }\n" +
+                        "  }\n" +
+                        "}\n";
         int count = runQueryAndCount(sparql);
         assertEquals(28, count);
     }
@@ -1118,16 +1121,16 @@ public class DestinationTest extends AbstractRDF4JTest {
     public void graphExplorerCriticalQuery8CanOptimize(){
         String sparql =
                 "SELECT ?subject ?pred ?value ?class {\n" +
-                "  ?subject ?pred ?value {\n" +
-                "    SELECT DISTINCT ?subject ?class {\n" +
-                "      ?subject a <http://schema.org/Apartment> ;\n" +
-                "               ?predicate ?value .\n" +
-                "      FILTER (?predicate IN (<http://schema.org/name>, <http://schema.org/description>))\n" +
-                "    }\n" +
-                "    LIMIT 10 OFFSET 0\n" +
-                "  }\n" +
-                "  FILTER(isLiteral(?value))\n" +
-                "}";
+                        "  ?subject ?pred ?value {\n" +
+                        "    SELECT DISTINCT ?subject ?class {\n" +
+                        "      ?subject a <http://schema.org/Apartment> ;\n" +
+                        "               ?predicate ?value .\n" +
+                        "      FILTER (?predicate IN (<http://schema.org/name>, <http://schema.org/description>))\n" +
+                        "    }\n" +
+                        "    LIMIT 10 OFFSET 0\n" +
+                        "  }\n" +
+                        "  FILTER(isLiteral(?value))\n" +
+                        "}";
         int count = runQueryAndCount(sparql);
         assertEquals(0, count);
     }

@@ -589,10 +589,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
             throw new IllegalArgumentException("A positive BNode arity is expected");
 
         Template.Builder builder = Template.builder();
-        builder.addSeparator(BNODE_PREFIX + counter.incrementAndGet());
+        builder.string(BNODE_PREFIX + counter.incrementAndGet());
         for (int i = 0; i < arity - 1; i++) // except the last one
-            builder.addColumn().addSeparator("/");
-        builder.addColumn();
+            builder.placeholder().string("/");
+        builder.placeholder();
         return getBnodeStringTemplateFunctionSymbol(builder.build());
     }
 

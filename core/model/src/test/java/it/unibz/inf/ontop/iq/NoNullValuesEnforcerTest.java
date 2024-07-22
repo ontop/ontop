@@ -160,7 +160,7 @@ public class NoNullValuesEnforcerTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X,
-                        TERM_FACTORY.getIRIFunctionalTerm(Template.of("http://example.org/", 0),
+                        TERM_FACTORY.getIRIFunctionalTerm(Template.builder().string("http://example.org/").placeholder().build(),
                                 ImmutableList.of(TERM_FACTORY.getDBCoalesce(A, B)))));
 
 
@@ -194,7 +194,7 @@ public class NoNullValuesEnforcerTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X,
-                        TERM_FACTORY.getIRIFunctionalTerm(Template.of("http://example.org/", 0),
+                        TERM_FACTORY.getIRIFunctionalTerm(Template.builder().string("http://example.org/").placeholder().build(),
                                 ImmutableList.of(TERM_FACTORY.getImmutableFunctionalTerm(
                                         TERM_FACTORY.getDBFunctionSymbolFactory()
                                                 .getRegularDBFunctionSymbol("NULLIF", 2),
@@ -207,7 +207,7 @@ public class NoNullValuesEnforcerTest {
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X,
-                        TERM_FACTORY.getIRIFunctionalTerm(Template.of("http://example.org/", 0), ImmutableList.of(A))));
+                        TERM_FACTORY.getIRIFunctionalTerm(Template.builder().string("http://example.org/").placeholder().build(), ImmutableList.of(A))));
 
         UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(newConstructionNode,
                 IQ_FACTORY.createUnaryIQTree(
