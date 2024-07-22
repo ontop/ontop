@@ -935,7 +935,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     //TODO QUESTI DI GRAPH EXPLORER INVECE PUOI LASCIARLI
 
     @Test
-    public void graphexplorer_critical_query_1(){
+    public void graphExplorerCriticalQuery1(){
         String sparql = "SELECT ?class (COUNT(?class) AS ?count) {\n" +
                 "      ?subject a ?class {\n" +
                 "        SELECT DISTINCT ?subject ?class {\n" +
@@ -953,7 +953,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void graphexplorer_critical_query_2(){
+    public void graphExplorerCriticalQuery2(){
         String sparql = "SELECT ?class (COUNT(?class) AS ?count) {\n" +
                 "      ?subject a ?class {\n" +
                 "        SELECT DISTINCT ?subject ?class {\n" +
@@ -971,7 +971,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void graphexplorer_critical_query_3(){
+    public void graphExplorerCriticalQuery3(){
         String sparql = "SELECT ?class (COUNT(?class) AS ?count) {\n" +
                 "      ?subject a ?class {\n" +
                 "        SELECT DISTINCT ?subject ?class {\n" +
@@ -989,7 +989,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void graphexplorer_critical_query_4(){
+    public void graphExplorerCriticalQuery4(){
         String sparql = "SELECT ?subject ?pred ?value ?subjectClass ?pToSubject ?pFromSubject {\n" +
                 "      ?subject a     ?subjectClass;\n" +
                 "               ?pred ?value {\n" +
@@ -1019,7 +1019,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void graphexplorer_critical_query_5(){
+    public void graphExplorerCriticalQuery5(){
         String sparql = "SELECT ?subject ?pred ?value ?subjectClass ?pToSubject ?pFromSubject {\n" +
                 "      ?subject a     ?subjectClass;\n" +
                 "               ?pred ?value {\n" +
@@ -1048,7 +1048,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void graphexplorer_critical_query_6(){
+    public void graphExplorerCriticalQuery6(){
         String sparql = "SELECT ?subject ?pred ?value ?subjectClass ?pToSubject ?pFromSubject {\n" +
                 "      ?subject a     ?subjectClass;\n" +
                 "               ?pred ?value {\n" +
@@ -1077,7 +1077,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void graphexplorer_critical_query_7(){
+    public void graphExplorerCriticalQuery7(){
         String sparql = "SELECT ?subject ?pred ?value ?class {\n" +
                 "      ?subject ?pred ?value {\n" +
                 "        SELECT DISTINCT ?subject ?class {\n" +
@@ -1096,7 +1096,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void graphexplorer_critical_query_8(){
+    public void graphExplorerCriticalQuery8(){
         String sparql = "SELECT ?subject ?pred ?value ?class {\n" +
                 "      ?subject ?pred ?value {\n" +
                 "        SELECT DISTINCT ?subject ?class {\n" +
@@ -1115,7 +1115,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void graphexplorer_critical_query_8_can_optimize(){
+    public void graphExplorerCriticalQuery8CanOptimize(){
         String sparql =
                 "SELECT ?subject ?pred ?value ?class {\n" +
                 "  ?subject ?pred ?value {\n" +
@@ -1133,7 +1133,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void graphexplorer_critical_query_9(){
+    public void graphExplorerCriticalQuery9(){
         String sparql = "SELECT ?subject ?subjectClass ?predToSubject ?predFromSubject {\n" +
                 "      BIND(<http://destination.example.org/data/weather/observation/203021> AS ?argument)\n" +
                 "      \n" +
@@ -1152,7 +1152,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void graphexplorer_critical_query_10(){
+    public void graphExplorerCriticalQuery10(){
         String sparql = "SELECT ?subject ?pred ?value ?class {\n" +
                 "      ?subject ?pred ?value {\n" +
                 "        SELECT DISTINCT ?subject ?class {\n" +
