@@ -195,8 +195,6 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         }
 
         private boolean filterSelector(IRIOrBNodeSelector selector, ImmutableSet<IRIOrBNodeSelector> templateSelectors) {
-            if (selector.isEmpty())
-                return false;
             if (selector.isTemplate())
                 return true;
 
@@ -214,16 +212,9 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
             mergeWithParentContext(finalMap);
         }
 
-        private Map<Variable, ImmutableSet<IRIOrBNodeSelector>> convertIntoMapOfSet(ImmutableMap<Variable, Collection<IRIOrBNodeSelector>> map) {
-            return map.entrySet().stream()
-                    .collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            e -> ImmutableSet.copyOf(e.getValue())));
-        }
-
         private Map<Variable, ImmutableSet<IRIOrBNodeSelector>> convertIntoConstraints(
                 ImmutableSet<? extends Substitution<? extends ImmutableTerm>> variableDefinitions) {
-            Set<Map<Variable, ImmutableSet<IRIOrBNodeSelector>>> constraintMaps =
+            Set<Map<Variable, Collection<IRIOrBNodeSelector>>> constraintMaps =
                     variableDefinitions.stream()
                             .map(this::extractSelectorsFromSubstitution)
                             .collect(Collectors.toSet());
@@ -249,7 +240,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
 
-        private IRIOrBNodeSelector extractSelectorFromTerm(ImmutableTerm term) {
+        private Optional<IRIOrBNodeSelector> extractSelectorFromTerm(ImmutableTerm term) {
             ImmutableTerm simplifiedTerm = term.simplify();
             // Template case
             if ((simplifiedTerm instanceof ImmutableFunctionalTerm)
@@ -257,24 +248,24 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
                 ImmutableTerm lexicalTerm = ((ImmutableFunctionalTerm)simplifiedTerm).getTerm(0);
                 if ((lexicalTerm instanceof ImmutableFunctionalTerm)
                         && ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol) {
-                    return new IRIOrBNodeSelector((ObjectStringTemplateFunctionSymbol) ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol());
+                    return Optional.of(new IRIOrBNodeSelector((ObjectStringTemplateFunctionSymbol) ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol()));
                 }
             }
             // Constant case
             else if (simplifiedTerm instanceof ObjectConstant){
-                return new IRIOrBNodeSelector((ObjectConstant)simplifiedTerm);
+                return Optional.of(new IRIOrBNodeSelector((ObjectConstant)simplifiedTerm));
             }
             // No constraint extracted (will be treated as unconstrained)
-            return new IRIOrBNodeSelector();
+            return Optional.empty();
         }
 
-        private Map<Variable, ImmutableSet<IRIOrBNodeSelector>> extractSelectorsFromSubstitution(Substitution<? extends ImmutableTerm> substitution) {
-            return convertIntoMapOfSet(substitution.stream()
-                    .collect(ImmutableCollectors.toMultimap(
-                            Map.Entry::getKey,
-                            e -> extractSelectorFromTerm(e.getValue())))
-                    // Converts the collection into an immutable set
-                    .asMap());
+        private Map<Variable, Collection<IRIOrBNodeSelector>> extractSelectorsFromSubstitution(Substitution<? extends ImmutableTerm> substitution) {
+            return substitution.stream()
+                    .flatMap(e -> extractSelectorFromTerm(e.getValue())
+                            .map(s -> Maps.immutableEntry(e.getKey(), s))
+                            .stream())
+                    .collect(ImmutableCollectors.toMultimap())
+                    .asMap();
         }
 
         private boolean isTermAConstantThatComesFromTable(ImmutableTerm term) {
@@ -613,11 +604,6 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
             this.template = null;
         }
 
-        public IRIOrBNodeSelector() {
-            this.template = null;
-            this.constant = null;
-        }
-
         public boolean isTemplate(){
             return template != null;
         }
@@ -638,10 +624,6 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
             else{
                 return false;
             }
-        }
-
-        public boolean isEmpty(){
-            return !isTemplate() && !isConstant() && !isObjectConstantFromDB();
         }
 
         public Optional<ObjectStringTemplateFunctionSymbol> getTemplate() {
