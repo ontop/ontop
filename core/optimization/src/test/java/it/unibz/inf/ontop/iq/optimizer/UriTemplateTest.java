@@ -85,6 +85,6 @@ public class UriTemplateTest {
 
 
     private static ImmutableFunctionalTerm generateOneVarURITemplate(String prefix, ImmutableTerm value) {
-        return TERM_FACTORY.getIRIFunctionalTerm(Template.of(prefix, 0), ImmutableList.of(value));
+        return TERM_FACTORY.getIRIFunctionalTerm(Template.builder().string(prefix).placeholder().build(), ImmutableList.of(value));
     }
 }

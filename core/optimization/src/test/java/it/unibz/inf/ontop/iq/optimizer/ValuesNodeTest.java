@@ -207,8 +207,8 @@ public class ValuesNodeTest {
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, TERM_FACTORY.getIRIFunctionalTerm(
                                 Template.builder()
-                                        .addSeparator("http://localhost/thing/")
-                                        .addColumn()
+                                        .string("http://localhost/thing/")
+                                        .placeholder()
                                         .build(),
                                 ImmutableList.of(A)
                         ).getTerm(0)));
@@ -247,8 +247,8 @@ public class ValuesNodeTest {
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, TERM_FACTORY.getIRIFunctionalTerm(
                                 Template.builder()
-                                        .addSeparator("http://localhost/thing/")
-                                        .addColumn()
+                                        .string("http://localhost/thing/")
+                                        .placeholder()
                                         .build(),
                                 ImmutableList.of(A)
                         ).getTerm(0)));
@@ -288,8 +288,8 @@ public class ValuesNodeTest {
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, TERM_FACTORY.getIRIFunctionalTerm(
                                 Template.builder()
-                                        .addSeparator("http://localhost/thing/")
-                                        .addColumn()
+                                        .string("http://localhost/thing/")
+                                        .placeholder()
                                         .build(),
                                 ImmutableList.of(A)
                         ).getTerm(0)));
@@ -317,10 +317,10 @@ public class ValuesNodeTest {
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, TERM_FACTORY.getIRIFunctionalTerm(
                                 Template.builder()
-                                        .addSeparator("http://localhost/thing/")
-                                        .addColumn()
-                                        .addSeparator("/")
-                                        .addColumn()
+                                        .string("http://localhost/thing/")
+                                        .placeholder()
+                                        .string("/")
+                                        .placeholder()
                                         .build(),
                                 ImmutableList.of(A, B)
                         ).getTerm(0)));
@@ -361,10 +361,10 @@ public class ValuesNodeTest {
 
         ImmutableTerm functionalTerm = TERM_FACTORY.getIRIFunctionalTerm(
                 Template.builder()
-                        .addSeparator("http://localhost/thing/")
-                        .addColumn()
+                        .string("http://localhost/thing/")
+                        .placeholder()
                         // Non-injective!!
-                        .addColumn()
+                        .placeholder()
                         .build(),
                 ImmutableList.of(A, B)).getTerm(0);
 
@@ -405,10 +405,10 @@ public class ValuesNodeTest {
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, TERM_FACTORY.getIRIFunctionalTerm(
                                 Template.builder()
-                                        .addSeparator("http://localhost/thing/")
-                                        .addColumn()
-                                        .addSeparator("/")
-                                        .addColumn()
+                                        .string("http://localhost/thing/")
+                                        .placeholder()
+                                        .string("/")
+                                        .placeholder()
                                         .build(),
                                 ImmutableList.of(A, B)
                         ).getTerm(0)));
@@ -449,10 +449,10 @@ public class ValuesNodeTest {
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, TERM_FACTORY.getIRIFunctionalTerm(
                                 Template.builder()
-                                        .addSeparator("http://localhost/thing/")
-                                        .addColumn()
-                                        .addSeparator("/")
-                                        .addColumn()
+                                        .string("http://localhost/thing/")
+                                        .placeholder()
+                                        .string("/")
+                                        .placeholder()
                                         .build(),
                                 ImmutableList.of(TERM_FACTORY.getDBCastFunctionalTerm(
                                             TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType(),
@@ -498,10 +498,10 @@ public class ValuesNodeTest {
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, TERM_FACTORY.getIRIFunctionalTerm(
                                 Template.builder()
-                                        .addSeparator("http://localhost/thing/")
-                                        .addColumn()
-                                        .addSeparator("/")
-                                        .addColumn()
+                                        .string("http://localhost/thing/")
+                                        .placeholder()
+                                        .string("/")
+                                        .placeholder()
                                         .build(),
                                 ImmutableList.of(A, B)
                         ).getTerm(0)));
@@ -542,17 +542,17 @@ public class ValuesNodeTest {
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, TERM_FACTORY.getIRIFunctionalTerm(
                                 Template.builder()
-                                        .addSeparator("http://localhost/thing/")
-                                        .addColumn()
-                                        .addSeparator("/")
-                                        .addColumn()
+                                        .string("http://localhost/thing/")
+                                        .placeholder()
+                                        .string("/")
+                                        .placeholder()
                                         .build(),
                                 ImmutableList.of(A, B)
                         ).getTerm(0),
                 Y, TERM_FACTORY.getIRIFunctionalTerm(
                         Template.builder()
-                                .addSeparator("http://localhost/other/")
-                                .addColumn()
+                                .string("http://localhost/other/")
+                                .placeholder()
                                 .build(),
                         ImmutableList.of(B)
                         ).getTerm(0)));
@@ -612,10 +612,10 @@ public class ValuesNodeTest {
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, TERM_FACTORY.getIRIFunctionalTerm(
                                 Template.builder()
-                                        .addSeparator("http://localhost/thing/")
-                                        .addColumn()
-                                        .addSeparator("/")
-                                        .addColumn()
+                                        .string("http://localhost/thing/")
+                                        .placeholder()
+                                        .string("/")
+                                        .placeholder()
                                         .build(),
                                 ImmutableList.of(TERM_FACTORY.getDBCastFunctionalTerm(
                                                 TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType(),

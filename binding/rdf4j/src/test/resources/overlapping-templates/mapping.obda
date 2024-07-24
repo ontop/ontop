@@ -1,0 +1,16 @@
+[PrefixDeclaration]
+data: http://example.org/
+schema: https://schema.org/
+
+[MappingDeclaration] @collection [[
+
+mappingId   Source 1 - xyz
+target      data:xyz/xy{z} a schema:Thing .
+source      SELECT * FROM "source1_xyz"
+
+
+mappingId   Source 2 - xyz
+target      data:xyz/{x}{y}z a schema:Thing .
+source      SELECT * FROM "source2_xyz"
+
+]]

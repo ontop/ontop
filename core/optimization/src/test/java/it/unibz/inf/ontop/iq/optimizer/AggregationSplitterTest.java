@@ -40,33 +40,33 @@ public class AggregationSplitterTest {
 
 
         TEMPLATE_1 = Template.builder()
-                .addSeparator("https://ex.org/template1/")
-                .addColumn()
+                .string("https://ex.org/template1/")
+                .placeholder()
                 .build();
 
         TEMPLATE_2 = Template.builder()
-                .addSeparator("https://ex.org/template2/")
-                .addColumn()
+                .string("https://ex.org/template2/")
+                .placeholder()
                 .build();
 
         TEMPLATE_3 = Template.builder()
-                .addSeparator("https://ex.org/template")
-                .addColumn()
-                .addSeparator("/")
-                .addColumn()
+                .string("https://ex.org/template")
+                .placeholder()
+                .string("/")
+                .placeholder()
                 .build();
 
         TEMPLATE_4 = Template.builder()
-                .addSeparator("https://ex.org/template1")
-                .addColumn()
-                .addSeparator("/")
-                .addColumn()
+                .string("https://ex.org/template1")
+                .placeholder()
+                .string("/")
+                .placeholder()
                 .build();
 
         TEMPLATE_5 = Template.builder()
-                .addSeparator("https://ex.org/template1/")
-                .addColumn()
-                .addSeparator("2")
+                .string("https://ex.org/template1/")
+                .placeholder()
+                .string("2")
                 .build();
     }
 

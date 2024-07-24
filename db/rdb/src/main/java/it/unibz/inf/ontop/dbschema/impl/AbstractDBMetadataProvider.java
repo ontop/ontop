@@ -487,7 +487,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             return new ParserViewDefinition(builder, query);
 
         } catch (SQLException e) {
-            throw new MetadataExtractionException("Cannot extract metadata for a black-box view. ", e);
+            throw new MetadataExtractionException("Cannot extract metadata for a black-box view. " + e.getMessage(), e);
         }
     }
 
