@@ -1,18 +1,13 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
-import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
-import it.unibz.inf.ontop.utils.VariableGenerator;
-import it.unibz.inf.ontop.utils.impl.LegacyVariableGenerator;
 import org.junit.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 
-public class InternshipNewQueryUnfolderSparQLTest extends AbstractRDF4JTest {
+public class TwoPhaseQueryUnfolderSPARQLTest extends AbstractRDF4JTest {
     private static final String OBDA_FILE = "/new-unfolder/new-unfolder.obda";
     private static final String SQL_SCRIPT = "/new-unfolder/schema.sql";
     private static final String ONTOLOGY_FILE = "/new-unfolder/new-unfolder.owl";

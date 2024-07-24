@@ -44,9 +44,9 @@ import static it.unibz.inf.ontop.spec.mapping.Mapping.RDFAtomIndexPattern.*;
 /**
  * See {@link QueryUnfolder.Factory} for creating a new instance.
  */
-public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger implements QueryUnfolder {
+public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implements QueryUnfolder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InternshipQueryUnfolder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TwoPhaseQueryUnfolder.class);
 
     private final Mapping mapping;
     private final SubstitutionFactory substitutionFactory;
@@ -65,10 +65,10 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
      * See {@link QueryUnfolder.Factory#create(Mapping)}
      */
     @AssistedInject
-    private InternshipQueryUnfolder(@Assisted Mapping mapping, IntermediateQueryFactory iqFactory,
-                                    SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
-                                    UnionBasedQueryMerger queryMerger, CoreUtilsFactory coreUtilsFactory,
-                                    AtomFactory atomFactory, TermFactory termFactory, FunctionSymbolFactory functionSymbolFactory) {
+    private TwoPhaseQueryUnfolder(@Assisted Mapping mapping, IntermediateQueryFactory iqFactory,
+                                  SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
+                                  UnionBasedQueryMerger queryMerger, CoreUtilsFactory coreUtilsFactory,
+                                  AtomFactory atomFactory, TermFactory termFactory, FunctionSymbolFactory functionSymbolFactory) {
         super(iqFactory);
         this.mapping = mapping;
         this.substitutionFactory = substitutionFactory;
@@ -164,7 +164,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         private final VariableGenerator variableGenerator;
 
         protected SecondPhaseQueryTransformer(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> localVariableDefinitions, VariableGenerator variableGenerator) {
-            super(variableGenerator, InternshipQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
+            super(variableGenerator, TwoPhaseQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
             this.constraints = new HashMap<>();
             this.variableGenerator = variableGenerator;
             this.updateWithDefinitions(localVariableDefinitions);
@@ -510,7 +510,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         private boolean areIntensionalNodeRemaining; //(?s ?p ?o) or (?s ?p ?o ?g)
 
         protected FirstPhaseQueryTransformer(VariableGenerator variableGenerator) {
-            super(variableGenerator, InternshipQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
+            super(variableGenerator, TwoPhaseQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
             this.areIntensionalNodeRemaining = false;
             this.variableGenerator = variableGenerator;
         }
