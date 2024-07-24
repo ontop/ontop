@@ -182,31 +182,6 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
             this.constraints.putAll(parentConstraints);
         }
 
-        //I decided not to put a filter but to remove unnecessary information later with this method, to make it easier to remove template-compatible constant iri if necessary
-        private ImmutableSet<IRIOrBNodeSelector> filterSelectors(Collection<IRIOrBNodeSelector> selectors) {
-
-            ImmutableSet<IRIOrBNodeSelector> templateSelectors = selectors.stream()
-                    .filter(IRIOrBNodeSelector::isTemplate)
-                    .collect(ImmutableSet.toImmutableSet());
-
-            return selectors.stream()
-                    .filter(s -> filterSelector(s, templateSelectors))
-                    .collect(ImmutableSet.toImmutableSet());
-        }
-
-        private boolean filterSelector(IRIOrBNodeSelector selector, ImmutableSet<IRIOrBNodeSelector> templateSelectors) {
-            if (selector.isTemplate())
-                return true;
-
-            // Constants that don't match a template
-            return templateSelectors.stream()
-                    .noneMatch(t -> isTemplateCompatibleWithConst(
-                            t.getTemplate()
-                                    .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to be a template")),
-                            selector.getObjectConstant()
-                                    .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to be a constant")), variableGenerator));
-        }
-
         private void updateWithDefinitions(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> variableDefinitions) {
             Map<Variable, ImmutableSet<IRIOrBNodeSelector>> finalMap = convertIntoConstraints(variableDefinitions);
             mergeWithParentContext(finalMap);
@@ -234,11 +209,12 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
 
             return mergedConstraints.entrySet().stream()
                     .filter(e -> alwaysDefinedVariables.contains(e.getKey()))
-                    .map(e -> Maps.immutableEntry(e.getKey(), filterSelectors(e.getValue())))
-                    .filter(e -> !e.getValue().isEmpty())
                     // TODO: can we make it immutable?
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            e -> filterSelectors(e.getValue())));
         }
+
 
         private Optional<IRIOrBNodeSelector> extractSelectorFromTerm(ImmutableTerm term) {
             ImmutableTerm simplifiedTerm = term.simplify();
@@ -266,6 +242,34 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
                             .stream())
                     .collect(ImmutableCollectors.toMultimap())
                     .asMap();
+        }
+
+        /**
+         * Removes constants that are contained in templates.
+         * Never causes the set to be empty (unless already empty)
+         */
+        private ImmutableSet<IRIOrBNodeSelector> filterSelectors(Collection<IRIOrBNodeSelector> selectors) {
+
+            ImmutableSet<IRIOrBNodeSelector> templateSelectors = selectors.stream()
+                    .filter(IRIOrBNodeSelector::isTemplate)
+                    .collect(ImmutableSet.toImmutableSet());
+
+            return selectors.stream()
+                    .filter(s -> filterSelector(s, templateSelectors))
+                    .collect(ImmutableSet.toImmutableSet());
+        }
+
+        private boolean filterSelector(IRIOrBNodeSelector selector, ImmutableSet<IRIOrBNodeSelector> templateSelectors) {
+            if (selector.isTemplate())
+                return true;
+
+            // Constants that don't match a template
+            return templateSelectors.stream()
+                    .noneMatch(t -> isTemplateCompatibleWithConst(
+                            t.getTemplate()
+                                    .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to be a template")),
+                            selector.getObjectConstant()
+                                    .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to be a constant")), variableGenerator));
         }
 
         private boolean isTermAConstantThatComesFromTable(ImmutableTerm term) {
