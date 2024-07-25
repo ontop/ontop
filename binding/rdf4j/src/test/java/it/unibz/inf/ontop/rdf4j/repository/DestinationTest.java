@@ -1172,4 +1172,18 @@ public class DestinationTest extends AbstractRDF4JTest {
         int count = runQueryAndCount(sparql);
         assertEquals(0, count);
     }
+
+    @Test
+    public void test1(){
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "SELECT *\n" +
+                "WHERE\n" +
+                "{\n" +
+                "  BIND( schema:Hotel AS ?c )\n" +
+                "  ?s a ?c .\n" +
+                "  ?s schema:name ?o1 .\n" +
+                "}\n" +
+                "LIMIT 10";
+        runQuery(sparql);
+    }
 }
