@@ -462,7 +462,6 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
                 if (definition.isPresent())
                     return definition;
             }
-
             return getStarDefinition(predicate);
         }
 
@@ -548,22 +547,14 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
             VariableOrGroundTerm subject = predicate.getSubject(arguments);
 
             if (subject instanceof ObjectConstant) {
-                Optional<IQ> definition = getDefinitionCompatibleWithConstant(predicate, SUBJECT_OF_ALL_DEFINITIONS, (ObjectConstant) subject,
+                return getDefinitionCompatibleWithConstant(predicate, SUBJECT_OF_ALL_DEFINITIONS, (ObjectConstant) subject,
                         variableGenerator);
-                if (definition.isPresent())
-                    return definition;
-                else
-                    return mapping.getMergedDefinitions(predicate);
             }
 
             VariableOrGroundTerm object = predicate.getObject(arguments);
             if (object instanceof ObjectConstant) {
-                Optional<IQ> definition = getDefinitionCompatibleWithConstant(predicate, OBJECT_OF_ALL_DEFINITIONS, (ObjectConstant) object,
+                return getDefinitionCompatibleWithConstant(predicate, OBJECT_OF_ALL_DEFINITIONS, (ObjectConstant) object,
                         variableGenerator);
-                if (definition.isPresent())
-                    return definition;
-                else
-                    return mapping.getMergedDefinitions(predicate);
             }
 
             // Leave it for next phase
