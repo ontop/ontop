@@ -268,41 +268,10 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
                                     .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to be a constant")), variableGenerator));
         }
 
-        private boolean isDefinitionOnlyProducingValuesMatchingTemplate(Variable var, IQTree iqTree, ObjectStringTemplateFunctionSymbol template) {
-            ImmutableSet<Substitution<NonVariableTerm>> possibleSubstitutions = iqTree.getPossibleVariableDefinitions();
-            if (isVariableUnconstrained(var, possibleSubstitutions))
-                return false;
-
-            Map<Variable, ImmutableSet<IRIOrBNodeSelector>> constraints = convertIntoConstraints(possibleSubstitutions);
-            if (constraints.get(var) != null) {
-                ImmutableSet<IRIOrBNodeSelector> templateSelectors = constraints.get(var).stream()
-                        .filter(IRIOrBNodeSelector::isTemplate)
-                        .collect(ImmutableSet.toImmutableSet());
-
-                if (templateSelectors.isEmpty())
-                    // TODO: can we safe say it to be true?
-                    return false;
-
-                return templateSelectors.iterator().next().getTemplate()
-                        .filter(t -> t.equals(template))
-                        .isPresent();
-            }
-            return false;
-        }
-
-        private boolean isVariableUnconstrained(Variable var, ImmutableSet<Substitution<NonVariableTerm>> substitutions){
-            return substitutions.stream()
-                    .anyMatch(s -> isVariableUnconstrained(var, s));
-        }
-
-        private boolean isVariableUnconstrained(Variable var, Substitution<? extends ImmutableTerm> substitution) {
-            return Optional.ofNullable(substitution.get(var))
-                    .filter(term -> extractSelectorFromTerm(term)
-                            .isPresent())
-                    .isEmpty();
-        }
-
-        private IQTree filteredTreeToPreventInsecureUnion(IQTree currentIQTree, ImmutableTerm var, String prefix){
+        /**
+         * Filters using the prefix of the template
+         */
+        private IQTree filteredTreeToPreventInsecureUnion(IQTree currentIQTree, ImmutableTerm var, String prefix) {
             ImmutableFunctionalTerm sparqlSTRSTARTSFunctionWithParameters = termFactory.getImmutableFunctionalTerm(
                     functionSymbolFactory.getSPARQLFunctionSymbol(XPathFunction.STARTS_WITH.getIRIString(), 2).get(),
                     termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.STR, 1)
@@ -320,20 +289,18 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
 
         private Optional<IQ> getFilteredMatchingDefinitionFromTemplate(RDFAtomPredicate rdfAtomPredicate,
                                                                        ObjectStringTemplateFunctionSymbol template, RDFAtomIndexPattern indexPattern){
-            Optional<IQ> mergedDefinition = mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern, template, variableGenerator);
-            if (mergedDefinition.isEmpty())
+            Optional<IQ> filteredDefinition = mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern, template, variableGenerator);
+            if (filteredDefinition.isEmpty())
                 return Optional.empty();
 
-            IQ definition = mergedDefinition.get();
+            IQ definition = filteredDefinition.get();
             Variable var = definition.getProjectionAtom().getArguments().get(indexPattern.getPosition());
-            if (!isDefinitionOnlyProducingValuesMatchingTemplate(var, definition.getTree(), template)) {
-                // TODO: make sure the prefix is enough!! Require comparison with other templates
-                String iriTemplatePrefix = template.getTemplateComponents().get(0).toString();
-                mergedDefinition = Optional.ofNullable(iqFactory.createIQ(definition.getProjectionAtom(),
-                        filteredTreeToPreventInsecureUnion(definition.getTree(), var, iriTemplatePrefix))
-                );
-            }
-            return mergedDefinition;
+
+            // TODO: only apply filter when there are more than one possible constraint
+            String templatePrefix = template.getTemplateComponents().get(0).getComponent();
+            return Optional.of(
+                    iqFactory.createIQ(definition.getProjectionAtom(),
+                    filteredTreeToPreventInsecureUnion(definition.getTree(), var, templatePrefix)));
         }
 
         private Optional<IQ> getFilteredMatchingDefinitionFromConstant(RDFAtomPredicate rdfAtomPredicate, ObjectConstant objectConstant,
@@ -352,10 +319,30 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
 
         }
 
-        private Collection<IQ> getMatchingDefinitions(RDFAtomPredicate rdfAtomPredicate,
-                                                      ImmutableSet<IRIOrBNodeSelector> constraints, RDFAtomIndexPattern indexPattern) {
+        private Optional<IQ> getCompatibleDefinition(RDFAtomPredicate rdfAtomPredicate,
+                                                     RDFAtomIndexPattern RDFAtomIndexPattern, Variable subjOrObj){
+            if (!constraintMap.containsKey(subjOrObj))
+                return Optional.empty();
 
-            // TODO: implement the failing back logic if the union of definitions is not possible
+            ImmutableSet<IRIOrBNodeSelector> constraints = constraintMap.get(subjOrObj);
+
+            if (canBeSeparatedByPrefix(constraints)) {
+                return queryMerger.mergeDefinitions(
+                        getMatchingDefinitionsForSafeConstraints(rdfAtomPredicate, constraints, RDFAtomIndexPattern));
+            }
+            return Optional.empty();
+        }
+
+        private boolean canBeSeparatedByPrefix(ImmutableSet<IRIOrBNodeSelector> constraints) {
+            if (constraints.size() < 2)
+                return true;
+
+            // TODO: implement it
+            return false;
+        }
+
+        private Collection<IQ> getMatchingDefinitionsForSafeConstraints(RDFAtomPredicate rdfAtomPredicate,
+                                                                        ImmutableSet<IRIOrBNodeSelector> constraints, RDFAtomIndexPattern indexPattern) {
             return constraints.stream()
                     .flatMap(c -> c.getTemplate()
                             .map(t -> getFilteredMatchingDefinitionFromTemplate(rdfAtomPredicate, t, indexPattern))
@@ -365,13 +352,6 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
                                     indexPattern))
                             .stream())
                     .collect(ImmutableCollectors.toList());
-        }
-
-        private Optional<IQ> getUnionOfCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate,
-                                                             RDFAtomIndexPattern RDFAtomIndexPattern, Variable subjOrObj){
-            return Optional.ofNullable(constraintMap.get(subjOrObj))
-                    .flatMap(cs -> queryMerger.mergeDefinitions(
-                            getMatchingDefinitions(rdfAtomPredicate, cs, RDFAtomIndexPattern)));
         }
 
         @Override
@@ -437,14 +417,14 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         private Optional<IQ> getAllDefinitions(RDFAtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> arguments) {
             VariableOrGroundTerm subject = predicate.getSubject(arguments);
             if (subject instanceof Variable) {
-                Optional<IQ> definition = getUnionOfCompatibleDefinitions(predicate, SUBJECT_OF_ALL_DEFINITIONS, (Variable) subject);
+                Optional<IQ> definition = getCompatibleDefinition(predicate, SUBJECT_OF_ALL_DEFINITIONS, (Variable) subject);
                 if (definition.isPresent())
                     return definition;
             }
 
             VariableOrGroundTerm object = predicate.getObject(arguments);
             if (object instanceof Variable) {
-                Optional<IQ> definition = getUnionOfCompatibleDefinitions(predicate, OBJECT_OF_ALL_DEFINITIONS, (Variable) object);
+                Optional<IQ> definition = getCompatibleDefinition(predicate, OBJECT_OF_ALL_DEFINITIONS, (Variable) object);
                 if (definition.isPresent())
                     return definition;
             }
@@ -455,7 +435,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
                                                 ImmutableList<? extends VariableOrGroundTerm> arguments){
             VariableOrGroundTerm subject = predicate.getSubject(arguments);
             if (subject instanceof Variable) {
-                Optional<IQ> definition = getUnionOfCompatibleDefinitions(predicate, SUBJECT_OF_ALL_CLASSES, (Variable) subject);
+                Optional<IQ> definition = getCompatibleDefinition(predicate, SUBJECT_OF_ALL_CLASSES, (Variable) subject);
                 if (definition.isPresent())
                     return definition;
             }
