@@ -1,15 +1,14 @@
 package it.unibz.inf.ontop.query.unfolding.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
-import it.unibz.inf.ontop.model.term.impl.NonGroundFunctionalTermImpl;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
@@ -27,7 +26,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +34,6 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.spec.mapping.Mapping.RDFAtomIndexPattern.*;
 
@@ -44,9 +41,9 @@ import static it.unibz.inf.ontop.spec.mapping.Mapping.RDFAtomIndexPattern.*;
 /**
  * See {@link QueryUnfolder.Factory} for creating a new instance.
  */
-public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger implements QueryUnfolder {
+public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implements QueryUnfolder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InternshipQueryUnfolder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TwoPhaseQueryUnfolder.class);
 
     private final Mapping mapping;
     private final SubstitutionFactory substitutionFactory;
@@ -65,10 +62,10 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
      * See {@link QueryUnfolder.Factory#create(Mapping)}
      */
     @AssistedInject
-    private InternshipQueryUnfolder(@Assisted Mapping mapping, IntermediateQueryFactory iqFactory,
-                                    SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
-                                    UnionBasedQueryMerger queryMerger, CoreUtilsFactory coreUtilsFactory,
-                                    AtomFactory atomFactory, TermFactory termFactory, FunctionSymbolFactory functionSymbolFactory) {
+    private TwoPhaseQueryUnfolder(@Assisted Mapping mapping, IntermediateQueryFactory iqFactory,
+                                  SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
+                                  UnionBasedQueryMerger queryMerger, CoreUtilsFactory coreUtilsFactory,
+                                  AtomFactory atomFactory, TermFactory termFactory, FunctionSymbolFactory functionSymbolFactory) {
         super(iqFactory);
         this.mapping = mapping;
         this.substitutionFactory = substitutionFactory;
@@ -160,20 +157,19 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
      */
     protected class SecondPhaseQueryTransformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {
 
-        private final Map<Variable, ImmutableSet<IRIOrBNodeTemplateSelector>> constraints;
+        private final Map<Variable, ImmutableSet<IRIOrBNodeSelector>> constraints;
         private final VariableGenerator variableGenerator;
 
-        protected SecondPhaseQueryTransformer(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> localVariableDefinitions, VariableGenerator variableGenerator) {
-            super(variableGenerator, InternshipQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
-            this.constraints = new HashMap<>();
+        protected SecondPhaseQueryTransformer(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> localVariableDefinitions,
+                                              VariableGenerator variableGenerator) {
+            super(variableGenerator, TwoPhaseQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
             this.variableGenerator = variableGenerator;
-            this.updateWithDefinitions(localVariableDefinitions);
+            this.constraints = convertIntoConstraints(localVariableDefinitions);
         }
 
-        protected SecondPhaseQueryTransformer(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> variableDefinitions,
-                                              VariableGenerator variableGenerator,
-                                              Map<Variable, ImmutableSet<IRIOrBNodeTemplateSelector>> parentConstraints) {
-            this(variableDefinitions, variableGenerator);
+        protected SecondPhaseQueryTransformer(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> localVariableDefinitions,
+                                              VariableGenerator variableGenerator, Map<Variable, ImmutableSet<IRIOrBNodeSelector>> parentConstraints) {
+            this(localVariableDefinitions, variableGenerator);
             mergeWithParentContext(parentConstraints);
         }
 
@@ -182,107 +178,103 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
          *
          * TODO: put a better merging logic
          */
-        private void mergeWithParentContext(Map<Variable, ImmutableSet<IRIOrBNodeTemplateSelector>> parentConstraints) {
+        private void mergeWithParentContext(Map<Variable, ImmutableSet<IRIOrBNodeSelector>> parentConstraints) {
             this.constraints.putAll(parentConstraints);
         }
 
         //I decided not to put a filter but to remove unnecessary information later with this method, to make it easier to remove template-compatible constant iri if necessary
-        private void removeUselessVarAndObjectConstantIfExistsCompatibleTemplate(Map<Variable, Set<IRIOrBNodeTemplateSelector>> subjTemplateSetMap) {
-            subjTemplateSetMap.forEach((key, valueSet) -> {
-                Set<IRIOrBNodeTemplateSelector> extractedTemplateSelectors = valueSet.stream()
-                        .filter(IRIOrBNodeTemplateSelector::isTemplate)
-                        .collect(Collectors.toSet());
-                Set<IRIOrBNodeTemplateSelector> extractedObjectConstants = valueSet.stream()
-                        .filter(IRIOrBNodeTemplateSelector::isConstant)
-                        .collect(Collectors.toSet());
-                Set<IRIOrBNodeTemplateSelector> extractedUselessVars = valueSet.stream()
-                        .filter(IRIOrBNodeTemplateSelector::isEmpty)
-                        .collect(Collectors.toSet());
+        private ImmutableSet<IRIOrBNodeSelector> filterSelectors(Collection<IRIOrBNodeSelector> selectors) {
 
-                extractedObjectConstants
-                        .forEach(objectConstant ->
-                                extractedTemplateSelectors.stream()
-                                    .filter(selector -> isTemplateCompatibleWithConst(
-                                                selector.getTemplate().get(),
-                                                objectConstant.getObjectConstant().get(), variableGenerator))
-                                    .findFirst()
-                                    .ifPresent(template -> valueSet.remove(objectConstant))
-                );
+            ImmutableSet<IRIOrBNodeSelector> templateSelectors = selectors.stream()
+                    .filter(IRIOrBNodeSelector::isTemplate)
+                    .collect(ImmutableSet.toImmutableSet());
 
-                valueSet.removeAll(extractedUselessVars);
-            });
+            return selectors.stream()
+                    .filter(s -> filterSelector(s, templateSelectors))
+                    .collect(ImmutableSet.toImmutableSet());
+        }
+
+        private boolean filterSelector(IRIOrBNodeSelector selector, ImmutableSet<IRIOrBNodeSelector> templateSelectors) {
+            if (selector.isEmpty())
+                return false;
+            if (selector.isTemplate())
+                return true;
+
+            // Constants that don't match a template
+            return templateSelectors.stream()
+                    .noneMatch(t -> isTemplateCompatibleWithConst(
+                            t.getTemplate()
+                                    .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to be a template")),
+                            selector.getObjectConstant()
+                                    .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to be a constant")), variableGenerator));
         }
 
         private void updateWithDefinitions(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> variableDefinitions) {
-            Map<Variable, ImmutableSet<IRIOrBNodeTemplateSelector>> finalMap = convertIntoConstraints(variableDefinitions);
+            Map<Variable, ImmutableSet<IRIOrBNodeSelector>> finalMap = convertIntoConstraints(variableDefinitions);
             mergeWithParentContext(finalMap);
         }
 
-        private Map<Variable, Set<IRIOrBNodeTemplateSelector>> mergeAllKeysOfVarTemplateSets(Set<Map<Variable, ImmutableSet<IRIOrBNodeTemplateSelector>>> setVarTemplateSetMap) {
-            return setVarTemplateSetMap.stream()
-                    .flatMap(map -> map.entrySet().stream())
-                    .collect(Collectors.groupingBy(
-                            Map.Entry::getKey,
-                            Collectors.mapping(
-                                    Map.Entry::getValue,
-                                    Collectors.collectingAndThen(
-                                            Collectors.toList(),
-                                            lists -> lists.stream().flatMap(Set::stream).collect(Collectors.toSet())
-                                    )
-                            )
-                    ));
-        }
-
-        private Map<Variable, ImmutableSet<IRIOrBNodeTemplateSelector>> convertIntoConstraints(
-                ImmutableSet<? extends Substitution<? extends ImmutableTerm>> variableDefinitions) {
-            //searching for iri constant, iri template, etc., from each substitution
-            Set<Map<Variable, ImmutableSet<IRIOrBNodeTemplateSelector>>> setVarTemplateSetMap =
-                    variableDefinitions.stream()
-                            .map(this::findTemplateOfJustOneSubstitution)
-                            .collect(Collectors.toSet());
-
-            //combining all the keys of the set of maps into a single map
-            Map<Variable, Set<IRIOrBNodeTemplateSelector>> mergedVarTemplateSets = mergeAllKeysOfVarTemplateSets(setVarTemplateSetMap);
-
-            //removing keys that do not appear in all substitutions
-            setVarTemplateSetMap.forEach(tmpMap -> mergedVarTemplateSets.keySet().retainAll(tmpMap.keySet()));
-
-            removeUselessVarAndObjectConstantIfExistsCompatibleTemplate(mergedVarTemplateSets);
-
-            // making the values immutable
-            return mergedVarTemplateSets.entrySet().stream()
+        private Map<Variable, ImmutableSet<IRIOrBNodeSelector>> convertIntoMapOfSet(ImmutableMap<Variable, Collection<IRIOrBNodeSelector>> map) {
+            return map.entrySet().stream()
                     .collect(Collectors.toMap(
                             Map.Entry::getKey,
-                            entry -> ImmutableSet.copyOf(entry.getValue())
-                    ));
+                            e -> ImmutableSet.copyOf(e.getValue())));
         }
 
-        private IRIOrBNodeTemplateSelector extractIRITemplateOrObjectConstantFromOneTerm(ImmutableTerm term){
+        private Map<Variable, ImmutableSet<IRIOrBNodeSelector>> convertIntoConstraints(
+                ImmutableSet<? extends Substitution<? extends ImmutableTerm>> variableDefinitions) {
+            Set<Map<Variable, ImmutableSet<IRIOrBNodeSelector>>> constraintMaps =
+                    variableDefinitions.stream()
+                            .map(this::extractSelectorsFromSubstitution)
+                            .collect(Collectors.toSet());
+
+            // Combining all the constraints per variable
+            ImmutableMap<Variable, Collection<IRIOrBNodeSelector>> mergedConstraints = constraintMaps.stream()
+                    .flatMap(m -> m.entrySet().stream()
+                            .flatMap(e -> e.getValue().stream()
+                                    .map(v -> Maps.immutableEntry(e.getKey(), v))))
+                    .collect(ImmutableCollectors.toMultimap())
+                    .asMap();
+
+            var alwaysDefinedVariables = constraintMaps.stream()
+                    .map(Map::keySet)
+                    .reduce(Sets::intersection)
+                    .orElseGet(ImmutableSet::of);
+
+            return mergedConstraints.entrySet().stream()
+                    .filter(e -> alwaysDefinedVariables.contains(e.getKey()))
+                    .map(e -> Maps.immutableEntry(e.getKey(), filterSelectors(e.getValue())))
+                    .filter(e -> !e.getValue().isEmpty())
+                    // TODO: can we make it immutable?
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        }
+
+        private IRIOrBNodeSelector extractSelectorFromTerm(ImmutableTerm term) {
             ImmutableTerm simplifiedTerm = term.simplify();
-            if (simplifiedTerm instanceof ImmutableFunctionalTerm && ((ImmutableFunctionalTerm)simplifiedTerm).getFunctionSymbol().getName().equals("RDF")){
+            // Template case
+            if ((simplifiedTerm instanceof ImmutableFunctionalTerm)
+                    && (((ImmutableFunctionalTerm)simplifiedTerm).getFunctionSymbol() instanceof RDFTermFunctionSymbol)){
                 ImmutableTerm lexicalTerm = ((ImmutableFunctionalTerm)simplifiedTerm).getTerm(0);
-                if (lexicalTerm instanceof NonGroundFunctionalTerm && ((NonGroundFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol) {
-                    return new IRIOrBNodeTemplateSelector((ObjectStringTemplateFunctionSymbol) ((NonGroundFunctionalTermImpl) lexicalTerm).getFunctionSymbol());
+                if ((lexicalTerm instanceof ImmutableFunctionalTerm)
+                        && ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol) {
+                    return new IRIOrBNodeSelector((ObjectStringTemplateFunctionSymbol) ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol());
                 }
             }
+            // Constant case
             else if (simplifiedTerm instanceof ObjectConstant){
-                return new IRIOrBNodeTemplateSelector((ObjectConstant)simplifiedTerm);
+                return new IRIOrBNodeSelector((ObjectConstant)simplifiedTerm);
             }
-            return new IRIOrBNodeTemplateSelector();
+            // No constraint extracted (will be treated as unconstrained)
+            return new IRIOrBNodeSelector();
         }
 
-        private Map<Variable, ImmutableSet<IRIOrBNodeTemplateSelector>> findTemplateOfJustOneSubstitution(Substitution<? extends ImmutableTerm> substitution){
-            Map<Variable, ImmutableSet<IRIOrBNodeTemplateSelector>> subjTemplateForSubstitution = substitution.stream()
-                    .flatMap(entry -> {
-                        ImmutableTerm term = entry.getValue();
-                        IRIOrBNodeTemplateSelector elem = extractIRITemplateOrObjectConstantFromOneTerm(term);
-                        return Stream.of(Pair.of(entry.getKey(), elem));
-                    })
-                    .collect(Collectors.groupingBy(
-                    Pair::getLeft,
-                    Collectors.mapping(Pair::getRight, ImmutableSet.toImmutableSet())
-            ));
-            return subjTemplateForSubstitution;
+        private Map<Variable, ImmutableSet<IRIOrBNodeSelector>> extractSelectorsFromSubstitution(Substitution<? extends ImmutableTerm> substitution) {
+            return convertIntoMapOfSet(substitution.stream()
+                    .collect(ImmutableCollectors.toMultimap(
+                            Map.Entry::getKey,
+                            e -> extractSelectorFromTerm(e.getValue())))
+                    // Converts the collection into an immutable set
+                    .asMap());
         }
 
         private boolean isTermAConstantThatComesFromTable(ImmutableTerm term) {
@@ -316,9 +308,9 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
             if (doesConstantComeFromTableForVariable(var, substitution)){
                 return false;
             }
-            Map<Variable, ImmutableSet<IRIOrBNodeTemplateSelector>> iriTemplateMap = convertIntoConstraints(substitution);
+            Map<Variable, ImmutableSet<IRIOrBNodeSelector>> iriTemplateMap = convertIntoConstraints(substitution);
             if (iriTemplateMap.get(var) != null){
-                ImmutableSet<IRIOrBNodeTemplateSelector> setOfTemplate = iriTemplateMap.get(var)
+                ImmutableSet<IRIOrBNodeSelector> setOfTemplate = iriTemplateMap.get(var)
                         .stream()
                         .filter(elem -> elem.isTemplate() || elem.isObjectConstantFromDB())
                         .collect(ImmutableSet.toImmutableSet());
@@ -380,7 +372,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         }
 
         private Collection<IQ> fromTemplateSetReturnForestOfCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate,
-                                                                                  ImmutableSet<IRIOrBNodeTemplateSelector> templateSet, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern){
+                                                                                  ImmutableSet<IRIOrBNodeSelector> templateSet, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern){
             Collection<IQ> IQForest = templateSet.stream()
                     .filter(elem -> (elem.isTemplate() || elem.isConstant()))
                     .map(elem -> {
@@ -397,10 +389,10 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
 
         private Optional<IQ> getUnionOfCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate,
                                                              Mapping.RDFAtomIndexPattern RDFAtomIndexPattern, Variable subjOrObj){
-            Optional<ImmutableSet<IRIOrBNodeTemplateSelector>> optionalTemplateSet;
+            Optional<ImmutableSet<IRIOrBNodeSelector>> optionalTemplateSet;
             optionalTemplateSet = Optional.ofNullable(constraints.get(subjOrObj));
             if (optionalTemplateSet.isPresent()) {
-                ImmutableSet<IRIOrBNodeTemplateSelector> templateSet = optionalTemplateSet.get();
+                ImmutableSet<IRIOrBNodeSelector> templateSet = optionalTemplateSet.get();
                 return queryMerger.mergeDefinitions(fromTemplateSetReturnForestOfCompatibleDefinitions(rdfAtomPredicate, templateSet, RDFAtomIndexPattern));
             }
             else
@@ -509,7 +501,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         private boolean areIntensionalNodeRemaining; //(?s ?p ?o) or (?s ?p ?o ?g)
 
         protected FirstPhaseQueryTransformer(VariableGenerator variableGenerator) {
-            super(variableGenerator, InternshipQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
+            super(variableGenerator, TwoPhaseQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
             this.areIntensionalNodeRemaining = false;
             this.variableGenerator = variableGenerator;
         }
@@ -593,7 +585,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         }
     }
 
-    protected class IRIOrBNodeTemplateSelector {
+    protected class IRIOrBNodeSelector {
 
         @Nullable
         private final ObjectStringTemplateFunctionSymbol template;
@@ -602,17 +594,17 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         @Nullable
         private final NonNullConstant constant;
 
-        public IRIOrBNodeTemplateSelector(@Nonnull ObjectStringTemplateFunctionSymbol template) {
+        public IRIOrBNodeSelector(@Nonnull ObjectStringTemplateFunctionSymbol template) {
             this.template = template;
             this.constant = null;
         }
 
-        public IRIOrBNodeTemplateSelector(NonNullConstant constant) {
+        public IRIOrBNodeSelector(NonNullConstant constant) {
             this.constant = constant;
             this.template = null;
         }
 
-        public IRIOrBNodeTemplateSelector() {
+        public IRIOrBNodeSelector() {
             this.template = null;
             this.constant = null;
         }
@@ -658,7 +650,7 @@ public class InternshipQueryUnfolder extends AbstractIntensionalQueryMerger impl
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            IRIOrBNodeTemplateSelector that = (IRIOrBNodeTemplateSelector) o;
+            IRIOrBNodeSelector that = (IRIOrBNodeSelector) o;
             if (this.isConstant() && that.isConstant()){
                 return this.constant.equals(that.constant);
             }

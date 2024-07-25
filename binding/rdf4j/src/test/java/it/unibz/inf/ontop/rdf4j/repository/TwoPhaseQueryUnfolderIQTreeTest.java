@@ -16,19 +16,16 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
-import it.unibz.inf.ontop.query.unfolding.impl.InternshipQueryUnfolder;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assume.assumeTrue;
 
-public class InternshipNewQueryUnfolderIQTreeTest {
+public class TwoPhaseQueryUnfolderIQTreeTest {
     private static final String OBDA_FILE = "/new-unfolder/new-unfolder.obda";
     //private static final String SQL_SCRIPT = "/new-unfolder/schema.sql";
     private static final String ONTOLOGY_FILE = "/new-unfolder/new-unfolder.owl";
