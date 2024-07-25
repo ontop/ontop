@@ -160,7 +160,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         /**
          * For each variable, a disjunction of IRI/Bnode selectors
          */
-        private final Map<Variable, ImmutableSet<IRIOrBNodeSelector>> constraints;
+        private final ImmutableMap<Variable, ImmutableSet<IRIOrBNodeSelector>> constraints;
         private final VariableGenerator variableGenerator;
 
         protected SecondPhaseQueryTransformer(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> localVariableDefinitions,
@@ -172,25 +172,23 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
 
         protected SecondPhaseQueryTransformer(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> localVariableDefinitions,
                                               VariableGenerator variableGenerator, Map<Variable, ImmutableSet<IRIOrBNodeSelector>> parentConstraints) {
-            this(localVariableDefinitions, variableGenerator);
-            mergeWithParentContext(parentConstraints);
+            super(variableGenerator, TwoPhaseQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
+            this.variableGenerator = variableGenerator;
+            this.constraints = mergeConstraints(convertIntoConstraints(localVariableDefinitions), parentConstraints);
         }
 
         /**
-         * Priority to the parent constraints
-         *
-         * TODO: put a better merging logic
+         * Takes constraints from parent if variable not locally constrained
          */
-        private void mergeWithParentContext(Map<Variable, ImmutableSet<IRIOrBNodeSelector>> parentConstraints) {
-            this.constraints.putAll(parentConstraints);
+        private ImmutableMap<Variable, ImmutableSet<IRIOrBNodeSelector>> mergeConstraints(
+                Map<Variable, ImmutableSet<IRIOrBNodeSelector>> localConstraints,
+                Map<Variable, ImmutableSet<IRIOrBNodeSelector>> parentConstraints) {
+            Map<Variable, ImmutableSet<IRIOrBNodeSelector>> newConstraints = Maps.newHashMap(parentConstraints);
+            newConstraints.putAll(localConstraints);
+            return ImmutableMap.copyOf(newConstraints);
         }
 
-        private void updateWithDefinitions(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> variableDefinitions) {
-            Map<Variable, ImmutableSet<IRIOrBNodeSelector>> finalMap = convertIntoConstraints(variableDefinitions);
-            mergeWithParentContext(finalMap);
-        }
-
-        private Map<Variable, ImmutableSet<IRIOrBNodeSelector>> convertIntoConstraints(
+        private ImmutableMap<Variable, ImmutableSet<IRIOrBNodeSelector>> convertIntoConstraints(
                 ImmutableSet<? extends Substitution<? extends ImmutableTerm>> variableDefinitions) {
             Set<Map<Variable, IRIOrBNodeSelector>> selectorMapFromSubstitutions =
                     variableDefinitions.stream()
@@ -210,8 +208,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
 
             return groupedSelectors.entrySet().stream()
                     .filter(e -> alwaysConstrainedVariables.contains(e.getKey()))
-                    // TODO: can we make it immutable?
-                    .collect(Collectors.toMap(
+                    .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
                             e -> eliminateRedundantSelectors(e.getValue())));
         }
@@ -420,14 +417,21 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
 
         @Override
         public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
-            this.updateWithDefinitions(child.getPossibleVariableDefinitions());
-            return transformUnaryNode(tree, rootNode, child);
+            return transformUnaryTreeUsingLocalDefinitions(tree, rootNode, child);
         }
+
+        public IQTree transformUnaryTreeUsingLocalDefinitions(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+            SecondPhaseQueryTransformer newTransformer = new SecondPhaseQueryTransformer(child.getPossibleVariableDefinitions(), variableGenerator, constraints);
+            IQTree newChild = newTransformer.transform(child);
+            return newChild.equals(child)
+                    ? tree
+                    : iqFactory.createUnaryIQTree(rootNode, newChild);
+        }
+
 
         @Override
         public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
-            this.updateWithDefinitions(child.getPossibleVariableDefinitions());
-            return transformUnaryNode(tree, rootNode, child);
+            return transformUnaryTreeUsingLocalDefinitions(tree, rootNode, child);
         }
 
         @Override
