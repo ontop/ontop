@@ -157,6 +157,9 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
      */
     protected class SecondPhaseQueryTransformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {
 
+        /**
+         * For each variable, a disjunction of IRI/Bnode selectors
+         */
         private final Map<Variable, ImmutableSet<IRIOrBNodeSelector>> constraints;
         private final VariableGenerator variableGenerator;
 
@@ -189,30 +192,28 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
 
         private Map<Variable, ImmutableSet<IRIOrBNodeSelector>> convertIntoConstraints(
                 ImmutableSet<? extends Substitution<? extends ImmutableTerm>> variableDefinitions) {
-            Set<Map<Variable, Collection<IRIOrBNodeSelector>>> constraintMaps =
+            Set<Map<Variable, IRIOrBNodeSelector>> selectorMapFromSubstitutions =
                     variableDefinitions.stream()
                             .map(this::extractSelectorsFromSubstitution)
                             .collect(Collectors.toSet());
 
-            // Combining all the constraints per variable
-            ImmutableMap<Variable, Collection<IRIOrBNodeSelector>> mergedConstraints = constraintMaps.stream()
-                    .flatMap(m -> m.entrySet().stream()
-                            .flatMap(e -> e.getValue().stream()
-                                    .map(v -> Maps.immutableEntry(e.getKey(), v))))
+            // Groups the selectors per variable
+            ImmutableMap<Variable, Collection<IRIOrBNodeSelector>> groupedSelectors = selectorMapFromSubstitutions.stream()
+                    .flatMap(m -> m.entrySet().stream())
                     .collect(ImmutableCollectors.toMultimap())
                     .asMap();
 
-            var alwaysDefinedVariables = constraintMaps.stream()
+            var alwaysConstrainedVariables = selectorMapFromSubstitutions.stream()
                     .map(Map::keySet)
                     .reduce(Sets::intersection)
                     .orElseGet(ImmutableSet::of);
 
-            return mergedConstraints.entrySet().stream()
-                    .filter(e -> alwaysDefinedVariables.contains(e.getKey()))
+            return groupedSelectors.entrySet().stream()
+                    .filter(e -> alwaysConstrainedVariables.contains(e.getKey()))
                     // TODO: can we make it immutable?
                     .collect(Collectors.toMap(
                             Map.Entry::getKey,
-                            e -> filterSelectors(e.getValue())));
+                            e -> eliminateRedundantSelectors(e.getValue())));
         }
 
 
@@ -235,20 +236,19 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
             return Optional.empty();
         }
 
-        private Map<Variable, Collection<IRIOrBNodeSelector>> extractSelectorsFromSubstitution(Substitution<? extends ImmutableTerm> substitution) {
+        private Map<Variable, IRIOrBNodeSelector> extractSelectorsFromSubstitution(Substitution<? extends ImmutableTerm> substitution) {
             return substitution.stream()
                     .flatMap(e -> extractSelectorFromTerm(e.getValue())
                             .map(s -> Maps.immutableEntry(e.getKey(), s))
                             .stream())
-                    .collect(ImmutableCollectors.toMultimap())
-                    .asMap();
+                    .collect(ImmutableCollectors.toMap());
         }
 
         /**
          * Removes constants that are contained in templates.
          * Never causes the set to be empty (unless already empty)
          */
-        private ImmutableSet<IRIOrBNodeSelector> filterSelectors(Collection<IRIOrBNodeSelector> selectors) {
+        private ImmutableSet<IRIOrBNodeSelector> eliminateRedundantSelectors(Collection<IRIOrBNodeSelector> selectors) {
 
             ImmutableSet<IRIOrBNodeSelector> templateSelectors = selectors.stream()
                     .filter(IRIOrBNodeSelector::isTemplate)
