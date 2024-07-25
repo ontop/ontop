@@ -190,6 +190,7 @@
         <servlet4-api.version>4.0.1</servlet4-api.version>
         <slf4j.version>1.7.36</slf4j.version>
         <spring-boot.version>2.7.18</spring-boot.version>
+        <spring-framework.version>5.3.37</spring-framework.version>
         <urlbuilder.version>2.0.9</urlbuilder.version>
         <tomcat-jdbc.version>10.0.0-M7</tomcat-jdbc.version>
         <toml4j.version>0.7.2</toml4j.version>
@@ -836,6 +837,22 @@
                 <artifactId>spring-boot-starter-test</artifactId>
                 <version>${spring-boot.version}</version>
             </dependency>
+            <!-- Force using the latest version of Spring Web 5.3.x -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webmvc</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
 
             <!-- Servlet API -->
             <dependency>
@@ -1147,6 +1164,11 @@
             <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat-embed-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
                 <version>${tomcat-embed-core.version}</version>
             </dependency>
             <dependency>
