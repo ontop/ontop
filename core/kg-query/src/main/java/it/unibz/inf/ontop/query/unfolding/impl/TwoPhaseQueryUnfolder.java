@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.Mapping.RDFAtomIndexPattern;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -137,7 +138,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         return constantTemplateMap.get(objectConstant);
     }
 
-    private Optional<IQ> getDefinitionCompatibleWithConstant(RDFAtomPredicate rdfAtomPredicate, Mapping.RDFAtomIndexPattern indexPattern,
+    private Optional<IQ> getDefinitionCompatibleWithConstant(RDFAtomPredicate rdfAtomPredicate, RDFAtomIndexPattern indexPattern,
                                                              ObjectConstant objectConstant,
                                                              VariableGenerator variableGenerator) {
         Optional<ObjectStringTemplateFunctionSymbol> selectedTemplate = selectCompatibleTemplateWithConstant(objectConstant, variableGenerator);
@@ -267,50 +268,38 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
                                     .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to be a constant")), variableGenerator));
         }
 
-        private boolean isTermAConstantThatComesFromTable(ImmutableTerm term) {
-            if (term instanceof ImmutableFunctionalTerm && ((ImmutableFunctionalTerm)term).getFunctionSymbol().getName().equals("RDF")) {
-                ImmutableTerm lexicalTerm = ((ImmutableFunctionalTerm) term).getTerm(0);
-                return lexicalTerm instanceof NonGroundFunctionalTerm && ((NonGroundFunctionalTerm) lexicalTerm).getTerm(0) instanceof Variable;
-            }
-            return false;
-        }
-
-        private boolean doesSingleSubstitutionContainsConstantFromTable(Variable var, Substitution<? extends ImmutableTerm> substitution){
-            return substitution.stream()
-                    .map(entry -> {
-                        if (entry.getKey().equals(var)) {
-                            ImmutableTerm term = entry.getValue();
-                            return isTermAConstantThatComesFromTable(term);
-                        }
-                        return false;
-                    })
-                    .anyMatch(result -> result);
-        }
-
-        private boolean doesConstantComeFromTableForVariable(Variable var, ImmutableSet substitutions){
-            return substitutions.stream()
-                    .anyMatch(entry -> doesSingleSubstitutionContainsConstantFromTable(var, (Substitution<? extends ImmutableTerm>) entry));
-        }
-
-        private boolean isIQDefinitionSafe(Variable var, IQTree iqTree, ObjectStringTemplateFunctionSymbol template){
-            ImmutableSet substitution = iqTree.getPossibleVariableDefinitions();
-            if (doesConstantComeFromTableForVariable(var, substitution)){
+        private boolean isDefinitionOnlyProducingValuesMatchingTemplate(Variable var, IQTree iqTree, ObjectStringTemplateFunctionSymbol template) {
+            ImmutableSet<Substitution<NonVariableTerm>> possibleSubstitutions = iqTree.getPossibleVariableDefinitions();
+            if (isVariableUnconstrained(var, possibleSubstitutions))
                 return false;
-            }
-            Map<Variable, ImmutableSet<IRIOrBNodeSelector>> iriTemplateMap = convertIntoConstraints(substitution);
-            if (iriTemplateMap.get(var) != null){
-                ImmutableSet<IRIOrBNodeSelector> setOfTemplate = iriTemplateMap.get(var)
-                        .stream()
-                        .filter(elem -> elem.isTemplate() || elem.isObjectConstantFromDB())
+
+            Map<Variable, ImmutableSet<IRIOrBNodeSelector>> constraints = convertIntoConstraints(possibleSubstitutions);
+            if (constraints.get(var) != null) {
+                ImmutableSet<IRIOrBNodeSelector> templateSelectors = constraints.get(var).stream()
+                        .filter(IRIOrBNodeSelector::isTemplate)
                         .collect(ImmutableSet.toImmutableSet());
-                boolean templateFromDefinitionAndFromIQAreTheSame =
-                        setOfTemplate.stream().findFirst().get().isTemplate() &&
-                        setOfTemplate.stream().findFirst().get().template.equals(template);
-                if (setOfTemplate.size() == 1 && templateFromDefinitionAndFromIQAreTheSame){
-                    return true;
-                }
+
+                if (templateSelectors.isEmpty())
+                    // TODO: can we safe say it to be true?
+                    return false;
+
+                return templateSelectors.iterator().next().getTemplate()
+                        .filter(t -> t.equals(template))
+                        .isPresent();
             }
             return false;
+        }
+
+        private boolean isVariableUnconstrained(Variable var, ImmutableSet<Substitution<NonVariableTerm>> substitutions){
+            return substitutions.stream()
+                    .anyMatch(s -> isVariableUnconstrained(var, s));
+        }
+
+        private boolean isVariableUnconstrained(Variable var, Substitution<? extends ImmutableTerm> substitution) {
+            return Optional.ofNullable(substitution.get(var))
+                    .filter(term -> extractSelectorFromTerm(term)
+                            .isPresent())
+                    .isEmpty();
         }
 
         private IQTree filteredTreeToPreventInsecureUnion(IQTree currentIQTree, ImmutableTerm var, String prefix){
@@ -329,26 +318,30 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
             return iqTreeWithFilter;
         }
 
-        private Optional<IQ> getMatchingDefinitionFromTemplate(RDFAtomPredicate rdfAtomPredicate, ObjectStringTemplateFunctionSymbol iriTemplate, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern){
-            Optional<IQ> evaluatedIQ;
-            evaluatedIQ = mapping.getCompatibleDefinitions(rdfAtomPredicate, RDFAtomIndexPattern, iriTemplate, variableGenerator);
-            IQ singleIQDef = evaluatedIQ.get();
-            Variable var = singleIQDef.getProjectionAtom().getArguments().get(RDFAtomIndexPattern.getPosition());
-            if (!isIQDefinitionSafe(var, singleIQDef.getTree(), iriTemplate)) {
-                String iriTemplatePrefix = iriTemplate.getTemplateComponents().get(0).toString();
-                evaluatedIQ = Optional.ofNullable(iqFactory.createIQ(singleIQDef.getProjectionAtom(),
-                        filteredTreeToPreventInsecureUnion(singleIQDef.getTree(), var, iriTemplatePrefix))
+        private Optional<IQ> getFilteredMatchingDefinitionFromTemplate(RDFAtomPredicate rdfAtomPredicate,
+                                                                       ObjectStringTemplateFunctionSymbol template, RDFAtomIndexPattern indexPattern){
+            Optional<IQ> mergedDefinition = mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern, template, variableGenerator);
+            if (mergedDefinition.isEmpty())
+                return Optional.empty();
+
+            IQ definition = mergedDefinition.get();
+            Variable var = definition.getProjectionAtom().getArguments().get(indexPattern.getPosition());
+            if (!isDefinitionOnlyProducingValuesMatchingTemplate(var, definition.getTree(), template)) {
+                // TODO: make sure the prefix is enough!! Require comparison with other templates
+                String iriTemplatePrefix = template.getTemplateComponents().get(0).toString();
+                mergedDefinition = Optional.ofNullable(iqFactory.createIQ(definition.getProjectionAtom(),
+                        filteredTreeToPreventInsecureUnion(definition.getTree(), var, iriTemplatePrefix))
                 );
             }
-            return evaluatedIQ;
+            return mergedDefinition;
         }
 
         private Optional<IQ> getFilteredMatchingDefinitionFromConstant(RDFAtomPredicate rdfAtomPredicate, ObjectConstant objectConstant,
-                                                                       Mapping.RDFAtomIndexPattern RDFAtomIndexPattern) {
-            return getDefinitionCompatibleWithConstant(rdfAtomPredicate, RDFAtomIndexPattern, objectConstant, variableGenerator)
+                                                                       RDFAtomIndexPattern indexPattern) {
+            return getDefinitionCompatibleWithConstant(rdfAtomPredicate, indexPattern, objectConstant, variableGenerator)
                     .map(d -> {
                         DistinctVariableOnlyDataAtom projectionAtom = d.getProjectionAtom();
-                        Variable indexVariable = projectionAtom.getArguments().get(RDFAtomIndexPattern.getPosition());
+                        Variable indexVariable = projectionAtom.getArguments().get(indexPattern.getPosition());
 
                         ImmutableExpression filterCondition = termFactory.getStrictEquality(indexVariable, objectConstant);
                         IQTree filteredTree = iqFactory.createUnaryIQTree(
@@ -360,20 +353,22 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         }
 
         private Collection<IQ> getMatchingDefinitions(RDFAtomPredicate rdfAtomPredicate,
-                                                      ImmutableSet<IRIOrBNodeSelector> constraints, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern){
+                                                      ImmutableSet<IRIOrBNodeSelector> constraints, RDFAtomIndexPattern indexPattern) {
+
+            // TODO: implement the failing back logic if the union of definitions is not possible
             return constraints.stream()
                     .flatMap(c -> c.getTemplate()
-                            .map(t -> getMatchingDefinitionFromTemplate(rdfAtomPredicate, t, RDFAtomIndexPattern))
+                            .map(t -> getFilteredMatchingDefinitionFromTemplate(rdfAtomPredicate, t, indexPattern))
                             .orElseGet(() -> getFilteredMatchingDefinitionFromConstant(rdfAtomPredicate,
                                     c.getObjectConstant()
                                             .orElseThrow(() -> new MinorOntopInternalBugException("Should be a constant")),
-                                    RDFAtomIndexPattern))
+                                    indexPattern))
                             .stream())
                     .collect(ImmutableCollectors.toList());
         }
 
         private Optional<IQ> getUnionOfCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate,
-                                                             Mapping.RDFAtomIndexPattern RDFAtomIndexPattern, Variable subjOrObj){
+                                                             RDFAtomIndexPattern RDFAtomIndexPattern, Variable subjOrObj){
             return Optional.ofNullable(constraintMap.get(subjOrObj))
                     .flatMap(cs -> queryMerger.mergeDefinitions(
                             getMatchingDefinitions(rdfAtomPredicate, cs, RDFAtomIndexPattern)));
@@ -603,15 +598,6 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
             }
         }
 
-        public boolean isObjectConstantFromDB(){
-            if (constant != null){
-                return !(constant instanceof ObjectConstant);
-            }
-            else{
-                return false;
-            }
-        }
-
         public Optional<ObjectStringTemplateFunctionSymbol> getTemplate() {
             return Optional.ofNullable(template);
         }
@@ -649,7 +635,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
             if (isTemplate()){
                 return "IRIorBNodeSelector{" + template + "}";
             }
-            else if (isConstant() || isObjectConstantFromDB()){
+            else if (isConstant()){
                 return "IRIorBNodeSelector{" + constant + "}";
             }
             else{
