@@ -210,7 +210,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
                     .filter(e -> alwaysConstrainedVariables.contains(e.getKey()))
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
-                            e -> eliminateRedundantSelectors(e.getValue())));
+                            e -> filterRedundantSelectors(e.getValue())));
         }
 
 
@@ -245,7 +245,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
          * Removes constants that are contained in templates.
          * Never causes the set to be empty (unless already empty)
          */
-        private ImmutableSet<IRIOrBNodeSelector> eliminateRedundantSelectors(Collection<IRIOrBNodeSelector> selectors) {
+        private ImmutableSet<IRIOrBNodeSelector> filterRedundantSelectors(Collection<IRIOrBNodeSelector> selectors) {
 
             ImmutableSet<IRIOrBNodeSelector> templateSelectors = selectors.stream()
                     .filter(IRIOrBNodeSelector::isTemplate)
@@ -272,8 +272,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         private boolean isTermAConstantThatComesFromTable(ImmutableTerm term) {
             if (term instanceof ImmutableFunctionalTerm && ((ImmutableFunctionalTerm)term).getFunctionSymbol().getName().equals("RDF")) {
                 ImmutableTerm lexicalTerm = ((ImmutableFunctionalTerm) term).getTerm(0);
-                if (lexicalTerm instanceof NonGroundFunctionalTerm && ((NonGroundFunctionalTerm)lexicalTerm).getTerm(0) instanceof Variable)
-                    return true;
+                return lexicalTerm instanceof NonGroundFunctionalTerm && ((NonGroundFunctionalTerm) lexicalTerm).getTerm(0) instanceof Variable;
             }
             return false;
         }
@@ -394,10 +393,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         @Override
         public final IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children){
             ImmutableList<IQTree> newChildren = children.stream()
-                    .map(t ->{
-                        SecondPhaseQueryTransformer newTransformer = new SecondPhaseQueryTransformer(t.getPossibleVariableDefinitions(), variableGenerator, constraints);
-                        return t.acceptTransformer(newTransformer);
-                    })
+                    .map(child -> transformChildWithNewTransformer(child))
                     .collect(ImmutableCollectors.toList());
 
             return newChildren.equals(children) && rootNode.equals(tree.getRootNode())
@@ -408,8 +404,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         @Override
         public final IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild){
             IQTree newLeftChild = leftChild.acceptTransformer(this);
-            SecondPhaseQueryTransformer newTransformer = new SecondPhaseQueryTransformer(rightChild.getPossibleVariableDefinitions(), variableGenerator, constraints);
-            IQTree newRightChild = rightChild.acceptTransformer(newTransformer);
+            IQTree newRightChild = transformChildWithNewTransformer(rightChild);
             return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild) && rootNode.equals(tree.getRootNode())
                     ? tree
                     : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild);
@@ -421,11 +416,15 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         }
 
         public IQTree transformUnaryTreeUsingLocalDefinitions(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-            SecondPhaseQueryTransformer newTransformer = new SecondPhaseQueryTransformer(child.getPossibleVariableDefinitions(), variableGenerator, constraints);
-            IQTree newChild = newTransformer.transform(child);
+            IQTree newChild = transformChildWithNewTransformer(child);
             return newChild.equals(child)
                     ? tree
                     : iqFactory.createUnaryIQTree(rootNode, newChild);
+        }
+
+        private IQTree transformChildWithNewTransformer(IQTree child) {
+            return child.acceptTransformer(
+                    new SecondPhaseQueryTransformer(child.getPossibleVariableDefinitions(), variableGenerator, constraints));
         }
 
 
