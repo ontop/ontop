@@ -56,7 +56,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
     private final ImmutableSet<ObjectStringTemplateFunctionSymbol> objectTemplates;
 
     // TODO: replace it by a cache or drop it?
-    private final Map<ObjectConstant, Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>>> objectTemplateSetMap;
+    private final Map<ObjectConstant, Optional<ObjectStringTemplateFunctionSymbol>> constantTemplateMap;
 
     /**
      * See {@link QueryUnfolder.Factory#create(Mapping)}
@@ -75,7 +75,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.functionSymbolFactory = functionSymbolFactory;
-        this.objectTemplateSetMap = new HashMap<>();
+        this.constantTemplateMap = new HashMap<>();
         this.objectTemplates = termFactory.getDBFunctionSymbolFactory().getObjectTemplates();
     }
 
@@ -109,7 +109,8 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         return unfoldedIQ;
     }
 
-    private boolean isTemplateCompatibleWithConst(ObjectStringTemplateFunctionSymbol template, ObjectConstant objectConstant, VariableGenerator variableGenerator) {
+    private boolean isTemplateCompatibleWithConstant(ObjectStringTemplateFunctionSymbol template, ObjectConstant objectConstant,
+                                                     VariableGenerator variableGenerator) {
         ImmutableExpression strictEquality = termFactory.getStrictEquality(
                 objectConstant,
                 termFactory.getRDFFunctionalTerm(
@@ -125,31 +126,22 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
                 .isEmpty();
     }
 
-    private Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>> extractCompatibleTemplateFromConst(
+    private Optional<ObjectStringTemplateFunctionSymbol> extractCompatibleTemplateWithConstant(
             ObjectConstant objectConstant, VariableGenerator variableGenerator) {
-        Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>> selectedTemplate;
-        if (!objectTemplateSetMap.containsKey(objectConstant)) {
-            selectedTemplate = Optional.ofNullable(objectTemplates.stream()
-                    .filter(t -> isTemplateCompatibleWithConst(t, objectConstant, variableGenerator))
-                    .collect(ImmutableSet.toImmutableSet()));
-            objectTemplateSetMap.put(objectConstant, selectedTemplate);
+        if (!constantTemplateMap.containsKey(objectConstant)) {
+            Optional<ObjectStringTemplateFunctionSymbol> selectedTemplate = objectTemplates.stream()
+                    .filter(t -> isTemplateCompatibleWithConstant(t, objectConstant, variableGenerator))
+                    .findAny();
+            constantTemplateMap.put(objectConstant, selectedTemplate);
         }
-        else
-            selectedTemplate = objectTemplateSetMap.get(objectConstant);
-        return selectedTemplate;
+        return constantTemplateMap.get(objectConstant);
     }
 
     private Optional<IQ> getDefinitionCompatibleWithConstant(RDFAtomPredicate rdfAtomPredicate, Mapping.RDFAtomIndexPattern indexPattern,
                                                              ObjectConstant objectConstant,
                                                              VariableGenerator variableGenerator) {
-        Optional<ImmutableSet<ObjectStringTemplateFunctionSymbol>> optionalCompatibleTemplate = extractCompatibleTemplateFromConst(objectConstant, variableGenerator);
-        // TODO: revise that restriction
-        if (optionalCompatibleTemplate.isPresent() && optionalCompatibleTemplate.get().size() >= 1) {
-            ObjectStringTemplateFunctionSymbol template = optionalCompatibleTemplate.get().iterator().next();
-            return mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern, template, variableGenerator);
-        }
-        // TODO: handle the case of multiple templates
-        return Optional.empty();
+        return extractCompatibleTemplateWithConstant(objectConstant, variableGenerator)
+                .flatMap(t -> mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern, t, variableGenerator));
     }
 
     /**
@@ -160,21 +152,21 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         /**
          * For each variable, a disjunction of IRI/Bnode selectors
          */
-        private final ImmutableMap<Variable, ImmutableSet<IRIOrBNodeSelector>> constraints;
+        private final ImmutableMap<Variable, ImmutableSet<IRIOrBNodeSelector>> constraintMap;
         private final VariableGenerator variableGenerator;
 
         protected SecondPhaseQueryTransformer(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> localVariableDefinitions,
                                               VariableGenerator variableGenerator) {
             super(variableGenerator, TwoPhaseQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
             this.variableGenerator = variableGenerator;
-            this.constraints = convertIntoConstraints(localVariableDefinitions);
+            this.constraintMap = convertIntoConstraints(localVariableDefinitions);
         }
 
         protected SecondPhaseQueryTransformer(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> localVariableDefinitions,
                                               VariableGenerator variableGenerator, Map<Variable, ImmutableSet<IRIOrBNodeSelector>> parentConstraints) {
             super(variableGenerator, TwoPhaseQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
             this.variableGenerator = variableGenerator;
-            this.constraints = mergeConstraints(convertIntoConstraints(localVariableDefinitions), parentConstraints);
+            this.constraintMap = mergeConstraints(convertIntoConstraints(localVariableDefinitions), parentConstraints);
         }
 
         /**
@@ -262,7 +254,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
 
             // Constants that don't match a template
             return templateSelectors.stream()
-                    .noneMatch(t -> isTemplateCompatibleWithConst(
+                    .noneMatch(t -> isTemplateCompatibleWithConstant(
                             t.getTemplate()
                                     .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to be a template")),
                             selector.getObjectConstant()
@@ -331,7 +323,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
             return iqTreeWithFilter;
         }
 
-        private Optional<IQ> filteredDefFromIRITemplate(RDFAtomPredicate rdfAtomPredicate, ObjectStringTemplateFunctionSymbol iriTemplate, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern){
+        private Optional<IQ> getMatchingDefinitionFromTemplate(RDFAtomPredicate rdfAtomPredicate, ObjectStringTemplateFunctionSymbol iriTemplate, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern){
             Optional<IQ> evaluatedIQ;
             evaluatedIQ = mapping.getCompatibleDefinitions(rdfAtomPredicate, RDFAtomIndexPattern, iriTemplate, variableGenerator);
             IQ singleIQDef = evaluatedIQ.get();
@@ -345,9 +337,8 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
             return evaluatedIQ;
         }
 
-        private Optional<IQ> filteredDefFromIRIConst(RDFAtomPredicate rdfAtomPredicate, ObjectConstant objectConstant, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern) {
-            Optional<IQ> evaluatedIQ;
-            evaluatedIQ = getDefinitionCompatibleWithConstant(rdfAtomPredicate, RDFAtomIndexPattern, objectConstant, variableGenerator);
+        private Optional<IQ> getMatchingDefinitionFromConstant(RDFAtomPredicate rdfAtomPredicate, ObjectConstant objectConstant, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern) {
+            Optional<IQ> evaluatedIQ = getDefinitionCompatibleWithConstant(rdfAtomPredicate, RDFAtomIndexPattern, objectConstant, variableGenerator);
             if (evaluatedIQ.isEmpty()) {
                 if (RDFAtomIndexPattern == SUBJECT_OF_ALL_CLASSES)
                     evaluatedIQ = mapping.getMergedClassDefinitions(rdfAtomPredicate);
@@ -362,32 +353,24 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
             return evaluatedIQ;
         }
 
-        private Collection<IQ> fromTemplateSetReturnForestOfCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate,
-                                                                                  ImmutableSet<IRIOrBNodeSelector> templateSet, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern){
-            Collection<IQ> IQForest = templateSet.stream()
-                    .filter(elem -> (elem.isTemplate() || elem.isConstant()))
-                    .map(elem -> {
-                        if (elem.isTemplate())
-                            return filteredDefFromIRITemplate(rdfAtomPredicate, elem.getTemplate().get(), RDFAtomIndexPattern);
-                        else
-                            return filteredDefFromIRIConst(rdfAtomPredicate, elem.getObjectConstant().get(), RDFAtomIndexPattern);
-                    })
-                    .filter(elem -> elem.isPresent())
-                    .map(elem -> elem.get())
+        private Collection<IQ> getMatchingDefinitions(RDFAtomPredicate rdfAtomPredicate,
+                                                      ImmutableSet<IRIOrBNodeSelector> constraints, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern){
+            return constraints.stream()
+                    .flatMap(c -> c.getTemplate()
+                            .map(t -> getMatchingDefinitionFromTemplate(rdfAtomPredicate, t, RDFAtomIndexPattern))
+                            .orElseGet(() -> getMatchingDefinitionFromConstant(rdfAtomPredicate,
+                                    c.getObjectConstant()
+                                            .orElseThrow(() -> new MinorOntopInternalBugException("Should be a constant")),
+                                    RDFAtomIndexPattern))
+                            .stream())
                     .collect(Collectors.toList());
-            return IQForest;
         }
 
         private Optional<IQ> getUnionOfCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate,
                                                              Mapping.RDFAtomIndexPattern RDFAtomIndexPattern, Variable subjOrObj){
-            Optional<ImmutableSet<IRIOrBNodeSelector>> optionalTemplateSet;
-            optionalTemplateSet = Optional.ofNullable(constraints.get(subjOrObj));
-            if (optionalTemplateSet.isPresent()) {
-                ImmutableSet<IRIOrBNodeSelector> templateSet = optionalTemplateSet.get();
-                return queryMerger.mergeDefinitions(fromTemplateSetReturnForestOfCompatibleDefinitions(rdfAtomPredicate, templateSet, RDFAtomIndexPattern));
-            }
-            else
-                return Optional.empty();
+            return Optional.ofNullable(constraintMap.get(subjOrObj))
+                    .flatMap(cs -> queryMerger.mergeDefinitions(
+                            getMatchingDefinitions(rdfAtomPredicate, cs, RDFAtomIndexPattern)));
         }
 
         @Override
@@ -424,9 +407,8 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
 
         private IQTree transformChildWithNewTransformer(IQTree child) {
             return child.acceptTransformer(
-                    new SecondPhaseQueryTransformer(child.getPossibleVariableDefinitions(), variableGenerator, constraints));
+                    new SecondPhaseQueryTransformer(child.getPossibleVariableDefinitions(), variableGenerator, constraintMap));
         }
-
 
         @Override
         public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
