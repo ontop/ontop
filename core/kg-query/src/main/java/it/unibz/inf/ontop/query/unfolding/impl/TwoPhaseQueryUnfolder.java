@@ -126,7 +126,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
                 .isEmpty();
     }
 
-    private Optional<ObjectStringTemplateFunctionSymbol> extractCompatibleTemplateWithConstant(
+    private Optional<ObjectStringTemplateFunctionSymbol> selectCompatibleTemplateWithConstant(
             ObjectConstant objectConstant, VariableGenerator variableGenerator) {
         if (!constantTemplateMap.containsKey(objectConstant)) {
             Optional<ObjectStringTemplateFunctionSymbol> selectedTemplate = objectTemplates.stream()
@@ -140,8 +140,14 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
     private Optional<IQ> getDefinitionCompatibleWithConstant(RDFAtomPredicate rdfAtomPredicate, Mapping.RDFAtomIndexPattern indexPattern,
                                                              ObjectConstant objectConstant,
                                                              VariableGenerator variableGenerator) {
-        return extractCompatibleTemplateWithConstant(objectConstant, variableGenerator)
-                .flatMap(t -> mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern, t, variableGenerator));
+        Optional<ObjectStringTemplateFunctionSymbol> selectedTemplate = selectCompatibleTemplateWithConstant(objectConstant, variableGenerator);
+
+        if (selectedTemplate.isPresent())
+            return mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern, selectedTemplate.get(), variableGenerator);
+
+        return indexPattern == SUBJECT_OF_ALL_CLASSES
+                    ? mapping.getMergedClassDefinitions(rdfAtomPredicate)
+                    : mapping.getMergedDefinitions(rdfAtomPredicate);
     }
 
     /**
@@ -337,20 +343,20 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
             return evaluatedIQ;
         }
 
-        private Optional<IQ> getMatchingDefinitionFromConstant(RDFAtomPredicate rdfAtomPredicate, ObjectConstant objectConstant, Mapping.RDFAtomIndexPattern RDFAtomIndexPattern) {
-            Optional<IQ> evaluatedIQ = getDefinitionCompatibleWithConstant(rdfAtomPredicate, RDFAtomIndexPattern, objectConstant, variableGenerator);
-            if (evaluatedIQ.isEmpty()) {
-                if (RDFAtomIndexPattern == SUBJECT_OF_ALL_CLASSES)
-                    evaluatedIQ = mapping.getMergedClassDefinitions(rdfAtomPredicate);
-                else
-                    evaluatedIQ = mapping.getMergedDefinitions(rdfAtomPredicate);
-                Variable var = evaluatedIQ.get().getProjectionAtom().getArguments().get(RDFAtomIndexPattern.getPosition());
-                ImmutableExpression filterCondition = termFactory.getStrictEquality(var, objectConstant);
-                FilterNode filterNode = iqFactory.createFilterNode(filterCondition);
-                IQTree iqTreeWithFilter = iqFactory.createUnaryIQTree(filterNode, evaluatedIQ.get().getTree());
-                evaluatedIQ = Optional.of(iqFactory.createIQ(evaluatedIQ.get().getProjectionAtom(), iqTreeWithFilter.normalizeForOptimization(variableGenerator)));
-            }
-            return evaluatedIQ;
+        private Optional<IQ> getFilteredMatchingDefinitionFromConstant(RDFAtomPredicate rdfAtomPredicate, ObjectConstant objectConstant,
+                                                                       Mapping.RDFAtomIndexPattern RDFAtomIndexPattern) {
+            return getDefinitionCompatibleWithConstant(rdfAtomPredicate, RDFAtomIndexPattern, objectConstant, variableGenerator)
+                    .map(d -> {
+                        DistinctVariableOnlyDataAtom projectionAtom = d.getProjectionAtom();
+                        Variable indexVariable = projectionAtom.getArguments().get(RDFAtomIndexPattern.getPosition());
+
+                        ImmutableExpression filterCondition = termFactory.getStrictEquality(indexVariable, objectConstant);
+                        IQTree filteredTree = iqFactory.createUnaryIQTree(
+                                iqFactory.createFilterNode(filterCondition),
+                                d.getTree());
+                        return iqFactory.createIQ(projectionAtom, filteredTree.normalizeForOptimization(variableGenerator));
+                    });
+
         }
 
         private Collection<IQ> getMatchingDefinitions(RDFAtomPredicate rdfAtomPredicate,
@@ -358,12 +364,12 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
             return constraints.stream()
                     .flatMap(c -> c.getTemplate()
                             .map(t -> getMatchingDefinitionFromTemplate(rdfAtomPredicate, t, RDFAtomIndexPattern))
-                            .orElseGet(() -> getMatchingDefinitionFromConstant(rdfAtomPredicate,
+                            .orElseGet(() -> getFilteredMatchingDefinitionFromConstant(rdfAtomPredicate,
                                     c.getObjectConstant()
                                             .orElseThrow(() -> new MinorOntopInternalBugException("Should be a constant")),
                                     RDFAtomIndexPattern))
                             .stream())
-                    .collect(Collectors.toList());
+                    .collect(ImmutableCollectors.toList());
         }
 
         private Optional<IQ> getUnionOfCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate,
