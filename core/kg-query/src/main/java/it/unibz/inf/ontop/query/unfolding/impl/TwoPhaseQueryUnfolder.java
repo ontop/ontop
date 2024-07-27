@@ -333,12 +333,33 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
             return Optional.empty();
         }
 
+        private boolean doesTemplatePairShareSamePrefix(ObjectStringTemplateFunctionSymbol firstTemplate, ObjectStringTemplateFunctionSymbol secondTemplate) {
+            return firstTemplate.getTemplateComponents().get(0).equals(secondTemplate.getTemplateComponents().get(0));
+        }
+
+        private boolean doesTemplateShareSamePrefixWithConstraintsSelector(ObjectStringTemplateFunctionSymbol firstTemplate, ImmutableSet<IRIOrBNodeSelector> constraintsSelector) {
+            return constraintsSelector.stream()
+                    .anyMatch(t -> doesTemplatePairShareSamePrefix(
+                            t.getTemplate().orElseThrow(() -> new MinorOntopInternalBugException("Should be a template")),
+                            firstTemplate
+                    ));
+        }
+
         private boolean canBeSeparatedByPrefix(ImmutableSet<IRIOrBNodeSelector> constraints) {
             if (constraints.size() < 2)
                 return true;
 
-            // TODO: implement it
-            return false;
+            // TODO: check if implementation is correct
+            ImmutableSet<IRIOrBNodeSelector> constraintsSelector = constraints.stream()
+                    .filter(s -> s.isTemplate())
+                    .collect(ImmutableSet.toImmutableSet());
+
+            return constraintsSelector.stream()
+                    .anyMatch(t -> doesTemplateShareSamePrefixWithConstraintsSelector(
+                            t.getTemplate().orElseThrow(() -> new MinorOntopInternalBugException("Should be a template")),
+                            constraintsSelector
+                    ));
+
         }
 
         private Collection<IQ> getMatchingDefinitionsForSafeConstraints(RDFAtomPredicate rdfAtomPredicate,
