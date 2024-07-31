@@ -144,6 +144,7 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
                 return lexicalTerm.isGround()
                         ? Stream.empty()
                         : Stream.of(computeDBTerm(lexicalTerm, possibleType, childTree))
+                            .flatMap(Optional::stream)
                             .map(t -> iqFactory.createOrderComparator(t, isAscending))
                             .map(ComparatorSimplification::new);
             }
@@ -161,9 +162,13 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
                                     isAscending))));
         }
 
-        protected NonGroundTerm computeDBTerm(ImmutableTerm lexicalTerm, RDFTermType rdfType, IQTree childTree) {
-            return (NonGroundTerm) termFactory.getConversionFromRDFLexical2DB(lexicalTerm, rdfType)
+        protected Optional<NonGroundTerm> computeDBTerm(ImmutableTerm lexicalTerm, RDFTermType rdfType, IQTree childTree) {
+            ImmutableTerm orderTerm = termFactory.getConversionFromRDFLexical2DB(lexicalTerm, rdfType)
                     .simplify(childTree.getVariableNullability());
+
+            return orderTerm.isGround()
+                    ? Optional.empty()
+                    : Optional.of((NonGroundTerm) orderTerm);
         }
 
         /**
@@ -209,23 +214,21 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
             return possibleTypes.stream()
                     .filter(t -> t.isA(type))
                     .findAny()
-                    .map(t -> computeSimplificationForSelectedType(lexicalTerm, referenceCastType, childTree, isAscending,
+                    .flatMap(t -> computeSimplificationForSelectedType(lexicalTerm, referenceCastType, childTree, isAscending,
                             termFactory.getIsAExpression(rdfTypeTerm, type)));
         }
 
-        private ComparatorSimplification computeSimplificationForSelectedType(ImmutableTerm lexicalTerm,
+        private Optional<ComparatorSimplification> computeSimplificationForSelectedType(ImmutableTerm lexicalTerm,
                                                                               RDFTermType referenceCastType,
                                                                               IQTree childTree, boolean isAscending,
                                                                               ImmutableExpression condition) {
             Variable v = variableGenerator.generateNewVariable();
 
-            DefinitionPushDownRequest request = DefinitionPushDownRequest.create(v,
-                    computeDBTerm(lexicalTerm, referenceCastType, childTree),
-                    condition);
-
-            return new ComparatorSimplification(
-                    iqFactory.createOrderComparator(v, isAscending),
-                    request);
+            return computeDBTerm(lexicalTerm, referenceCastType, childTree)
+                    .map(t -> DefinitionPushDownRequest.create(v, t, condition))
+                    .map(r -> new ComparatorSimplification(
+                                    iqFactory.createOrderComparator(v, isAscending),
+                                    r));
         }
 
         private Optional<ComparatorSimplification> computeOtherLiteralSimplification(ImmutableTerm lexicalTerm,
@@ -246,7 +249,7 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
                                     .map(st -> termFactory.getIsAExpression(rdfTypeTerm, st))
                                     .map(e -> e.negate(termFactory))
                             )))
-                    .map(c -> computeSimplificationForSelectedType(lexicalTerm, typeFactory.getXsdStringDatatype(),
+                    .flatMap(c -> computeSimplificationForSelectedType(lexicalTerm, typeFactory.getXsdStringDatatype(),
                             childTree, isAscending, c));
         }
 

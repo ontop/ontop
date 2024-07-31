@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -42,11 +41,11 @@ public class MappingAssertionMergeWithCQCTest {
     private static final Variable NAME = TERM_FACTORY.getVariable("name");
 
 
-    private static final ImmutableList<Template.Component> URI_TEMPLATE_AUTHOR = Template.of("http://meraka/moss/exampleBooks.owl#author/", 0);
-    private static final ImmutableList<Template.Component> URI_TEMPLATE_STUDENT = Template.of("http://example.org/voc#uni1/student/", 0);
-    private static final ImmutableList<Template.Component> URI_TEMPLATE_ADDRESS = Template.of("http://www.owl-ontologies.com/Ontology1207768242.owl#address-", 0);
+    private static final ImmutableList<Template.Component> URI_TEMPLATE_AUTHOR = Template.builder().string("http://meraka/moss/exampleBooks.owl#author/").placeholder().build();
+    private static final ImmutableList<Template.Component> URI_TEMPLATE_STUDENT = Template.builder().string("http://example.org/voc#uni1/student/").placeholder().build();
+    private static final ImmutableList<Template.Component> URI_TEMPLATE_ADDRESS = Template.builder().string("http://www.owl-ontologies.com/Ontology1207768242.owl#address-").placeholder().build();
 
-    private static final ImmutableList<Template.Component> URI_TEMPLATE_RESULT = Template.of("http://example.org/weather/observation/result/", 0);
+    private static final ImmutableList<Template.Component> URI_TEMPLATE_RESULT = Template.builder().string("http://example.org/weather/observation/result/").placeholder().build();
 
     private static final IRI AUTHOR = RDF_FACTORY.createIRI("http://meraka/moss/exampleBooks.owl#Author");
     private static final IRI PERSON = RDF_FACTORY.createIRI("http://xmlns.com/foaf/0.1/Person");

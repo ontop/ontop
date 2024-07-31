@@ -63,7 +63,7 @@ public class NoQueryContextTest {
     public void testBnodeTemplate() {
         var bnodeFunctionalTerm = TERM_FACTORY.getBnodeFunctionalTerm(
                 Template.builder()
-                        .addSeparator("something")
+                        .string("something")
                         .build(),
                 ImmutableList.of());
 

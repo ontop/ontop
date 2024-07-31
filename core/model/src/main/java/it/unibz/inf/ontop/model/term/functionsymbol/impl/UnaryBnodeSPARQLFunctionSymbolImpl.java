@@ -21,7 +21,7 @@ public class UnaryBnodeSPARQLFunctionSymbolImpl extends AbstractBnodeSPARQLFunct
 
         return termFactory.getImmutableFunctionalTerm(
                 termFactory.getDBFunctionSymbolFactory().getBnodeStringTemplateFunctionSymbol(
-                        Template.builder().addColumn().addSeparator("/").addColumn().build()),
+                        Template.builder().placeholder().string("/").placeholder().build()),
                 subLexicalTerm, termFactory.getDBRowUniqueStr());
     }
 }
