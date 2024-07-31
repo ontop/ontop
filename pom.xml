@@ -155,7 +155,7 @@
         <airline.version>3.0.0</airline.version>
         <antlr4.version>4.12.0</antlr4.version>
         <commons-codec.version>1.14</commons-codec.version>
-        <commons-collections4.version>4.2</commons-collections4.version>
+        <commons-collections4.version>4.3</commons-collections4.version>
         <commons-lang3.version>3.11</commons-lang3.version>
         <commons-rdf.version>0.5.0</commons-rdf.version>
         <commons-text.version>1.10.0</commons-text.version>
@@ -203,7 +203,7 @@
         <semargl-sesame.version>0.6.1</semargl-sesame.version>
         <semargl.version>0.7</semargl.version>
         <thymeleaf.version>3.0.15.RELEASE</thymeleaf.version>
-        <tomcat-embed-core.version>9.0.84</tomcat-embed-core.version>
+        <tomcat-embed-core.version>9.0.91</tomcat-embed-core.version>
         <log4j2.version>2.19.0</log4j2.version>
 
         <!-- JDK version -->

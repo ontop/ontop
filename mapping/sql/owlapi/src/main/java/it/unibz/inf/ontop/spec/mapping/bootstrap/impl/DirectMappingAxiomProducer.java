@@ -300,14 +300,14 @@ public class DirectMappingAxiomProducer {
 			Template.Builder builder = Template.builder();
 
 			// TODO: IMPROVE
-			builder.addSeparator(getTableIRIString(td) + "/" +
+			builder.string(getTableIRIString(td) + "/" +
 							R2RMLIRISafeEncoder.encode(pk.getAttributes().get(0).getID().getName()) + "=");
-			builder.addColumn();
+			builder.placeholder();
 
 			for (int i = 1; i < pk.getAttributes().size(); i++) {
-				builder.addSeparator(
+				builder.string(
 						";" + R2RMLIRISafeEncoder.encode(pk.getAttributes().get(i).getID().getName()) + "=");
-				builder.addColumn();
+				builder.placeholder();
 			}
 
 			ImmutableList<ImmutableFunctionalTerm> arguments = getVariablesWithCast(pk.getAttributes(), varNamePrefix);

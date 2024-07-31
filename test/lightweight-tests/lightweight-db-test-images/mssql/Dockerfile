@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/mssql/server:2022-latest
+FROM mcr.microsoft.com/mssql/server:2022-CU13-ubuntu-20.04
 
 # Set this so that it skips prompting you during the mssql-tools package install
 ENV ACCEPT_EULA=Y \

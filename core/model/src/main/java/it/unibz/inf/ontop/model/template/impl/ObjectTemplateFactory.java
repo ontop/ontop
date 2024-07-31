@@ -20,7 +20,7 @@ public abstract class ObjectTemplateFactory extends AbstractTemplateFactory {
 
     protected ImmutableList<ImmutableTerm> getTemplateTerms(ImmutableList<Template.Component> components) {
         return components.stream()
-                .filter(Template.Component::isColumnNameReference)
+                .filter(Template.Component::isColumn)
                 .map(c -> getVariable(c.getComponent()))
                 .collect(ImmutableCollectors.toList());
     }
@@ -48,7 +48,7 @@ public abstract class ObjectTemplateFactory extends AbstractTemplateFactory {
 
         ObjectStringTemplateFunctionSymbol fs = (ObjectStringTemplateFunctionSymbol) functionalTerm.getFunctionSymbol();
         return  fs.getTemplateComponents().stream()
-                .map(c -> c.isColumnNameReference()
+                .map(c -> c.isColumn()
                         ? varNames.get(c.getIndex())
                         : c.getComponent())
                 .collect(Collectors.joining());
@@ -69,7 +69,7 @@ public abstract class ObjectTemplateFactory extends AbstractTemplateFactory {
 
         ImmutableList<Template.Component> components = TemplateParser.getComponents(iriOrBnodeTemplate, true);
         return components.stream()
-                .map(c -> c.isColumnNameReference()
+                .map(c -> c.isColumn()
                 ? args.get(c.getIndex()).toString()
                         : c.getComponent()).collect(Collectors.joining());
     }

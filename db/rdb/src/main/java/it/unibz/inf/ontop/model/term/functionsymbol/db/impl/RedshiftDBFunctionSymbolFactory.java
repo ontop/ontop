@@ -114,7 +114,8 @@ public class RedshiftDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
     @Override
     protected String serializeDateTimeNormWithTZ(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("TO_CHAR(%s, 'YYYY-MM-DD\"T\"HH24:MI:SSOF')", termConverter.apply(terms.get(0)));
+        return String.format("REGEXP_REPLACE(REGEXP_REPLACE(TO_CHAR(%s, 'YYYY-MM-DD\"T\"HH24:MI:SSOF'),'(\\\\d\\\\d)(\\\\d\\\\d)$','\\\\1:\\\\2'),'([+-]\\\\d\\\\d)$','\\\\1:00')",
+                termConverter.apply(terms.get(0)));
     }
 
     //Care: Redshift does not support the UUID function
