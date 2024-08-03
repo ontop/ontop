@@ -35,8 +35,6 @@ jobs:
           cache: 'maven'
       - name: Set maven opts
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
-      - name: Maven install without running tests
-        run: ./mvnw install -DskipTests
       - name: Run CI without docker tests
         run: ./mvnw install --fail-at-end
 
