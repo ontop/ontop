@@ -63,10 +63,10 @@ public class SparqlQueryExecutor {
                     response.setHeader(CONTENT_TYPE, "application/sparql-results+xml;charset=UTF-8");
                     evaluateSelectQuery(selectQuery, new SPARQLResultsXMLWriter(bao), response);
                 } else if (accept.contains("csv")) {
-                    response.setHeader(CONTENT_TYPE, "text/sparql-results+csv;charset=UTF-8");
+                    response.setHeader(CONTENT_TYPE, "text/csv;charset=UTF-8");
                     evaluateSelectQuery(selectQuery, new SPARQLResultsCSVWriter(bao), response);
                 } else if (accept.contains("tsv") || accept.contains("text/tab-separated-values")) {
-                    response.setHeader(CONTENT_TYPE, "text/sparql-results+tsv;charset=UTF-8");
+                    response.setHeader(CONTENT_TYPE, "text/tab-separated-values;charset=UTF-8");
                     evaluateSelectQuery(selectQuery, new SPARQLResultsTSVWriter(bao), response);
                 } else {
                     response.setStatus(NOT_ACCEPTABLE);
