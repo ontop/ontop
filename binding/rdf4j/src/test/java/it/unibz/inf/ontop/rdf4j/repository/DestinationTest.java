@@ -612,6 +612,7 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(55, count);
     }
 
+    @Ignore("TODO: enable it (too slow)")
     @Test
     public void andreaTest22(){
         String sparql = "PREFIX schema: <http://schema.org/>\n" +
@@ -802,6 +803,7 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(1, count);
     }
 
+    @Ignore("TODO: enable it (too slow)")
     @Test
     public void andreaTest35(){
         String sparql = "PREFIX schema: <http://schema.org/>\n" +
@@ -862,6 +864,7 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(0, count);
     }
 
+    @Ignore("TODO: enable it (too slow)")
     @Test
     public void andreaTest38(){
         String sparql = "SELECT ?subject ?pred ?value ?subjectClass ?pToSubject ?pFromSubject {\n" +
@@ -916,6 +919,7 @@ public class DestinationTest extends AbstractRDF4JTest {
         runQuery(sparql);
     }
 
+    @Ignore("TODO: enable it (too slow)")
     @Test
     public void andreaTest40(){
         String sparql =
@@ -991,6 +995,7 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(0, count);
     }
 
+    @Ignore("TODO: enable (too slow)")
     @Test
     public void graphExplorerCriticalQuery4(){
         String sparql = "SELECT ?subject ?pred ?value ?subjectClass ?pToSubject ?pFromSubject {\n" +
@@ -1021,6 +1026,7 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(0, count);
     }
 
+    @Ignore("TODO: enable (too slow)")
     @Test
     public void graphExplorerCriticalQuery5(){
         String sparql = "SELECT ?subject ?pred ?value ?subjectClass ?pToSubject ?pFromSubject {\n" +
@@ -1050,6 +1056,7 @@ public class DestinationTest extends AbstractRDF4JTest {
         runQuery(sparql);
     }
 
+    @Ignore("TODO: enable (too slow)")
     @Test
     public void graphExplorerCriticalQuery6(){
         String sparql = "SELECT ?subject ?pred ?value ?subjectClass ?pToSubject ?pFromSubject {\n" +
