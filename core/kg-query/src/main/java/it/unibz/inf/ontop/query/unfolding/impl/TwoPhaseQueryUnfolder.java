@@ -6,6 +6,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.*;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
@@ -321,10 +322,13 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
 
         private Optional<IQ> getCompatibleDefinition(RDFAtomPredicate rdfAtomPredicate,
                                                      RDFAtomIndexPattern RDFAtomIndexPattern, Variable subjOrObj){
-            if (!constraintMap.containsKey(subjOrObj))
+
+            Optional<ImmutableSet<IRIOrBNodeSelector>> optionalConstraints = Optional.ofNullable(constraintMap.get(subjOrObj));
+
+            if (optionalConstraints.isEmpty())
                 return Optional.empty();
 
-            ImmutableSet<IRIOrBNodeSelector> constraints = constraintMap.get(subjOrObj);
+            ImmutableSet<IRIOrBNodeSelector> constraints = optionalConstraints.get();
 
             if (canBeSeparatedByPrefix(constraints)) {
                 return queryMerger.mergeDefinitions(
@@ -333,33 +337,32 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
             return Optional.empty();
         }
 
-        private boolean doesTemplatePairShareSamePrefix(ObjectStringTemplateFunctionSymbol firstTemplate, ObjectStringTemplateFunctionSymbol secondTemplate) {
-            return firstTemplate.getTemplateComponents().get(0).equals(secondTemplate.getTemplateComponents().get(0));
-        }
-
-        private boolean doesTemplateShareSamePrefixWithConstraintsSelector(ObjectStringTemplateFunctionSymbol firstTemplate, ImmutableSet<IRIOrBNodeSelector> constraintsSelector) {
-            return constraintsSelector.stream()
-                    .anyMatch(t -> doesTemplatePairShareSamePrefix(
-                            t.getTemplate().orElseThrow(() -> new MinorOntopInternalBugException("Should be a template")),
-                            firstTemplate
-                    ));
-        }
-
         private boolean canBeSeparatedByPrefix(ImmutableSet<IRIOrBNodeSelector> constraints) {
             if (constraints.size() < 2)
                 return true;
 
-            // TODO: check if implementation is correct
-            ImmutableSet<IRIOrBNodeSelector> constraintsSelector = constraints.stream()
-                    .filter(s -> s.isTemplate())
-                    .collect(ImmutableSet.toImmutableSet());
+            // NB: constant selectors are supposed at that stage to be incompatible with the templates
+            ImmutableList<Template.Component> templateFirstComponents = constraints.stream()
+                    .filter(IRIOrBNodeSelector::isTemplate)
+                    .map(s -> s.getTemplate().orElseThrow().getTemplateComponents())
+                    .filter(components -> !components.isEmpty())
+                    .map(components -> components.get(0))
+                    .collect(ImmutableList.toImmutableList());
 
-            return constraintsSelector.stream()
-                    .anyMatch(t -> doesTemplateShareSamePrefixWithConstraintsSelector(
-                            t.getTemplate().orElseThrow(() -> new MinorOntopInternalBugException("Should be a template")),
-                            constraintsSelector
-                    ));
+            return IntStream.range(0, templateFirstComponents.size())
+                    .noneMatch(i -> IntStream.range(i+1, templateFirstComponents.size())
+                            .anyMatch(j -> haveCompatiblePrefixes(templateFirstComponents.get(i), templateFirstComponents.get(j))));
+        }
 
+        private boolean haveCompatiblePrefixes(Template.Component firstComponentTemplate1, Template.Component firstComponentTemplate2) {
+            if (firstComponentTemplate1.isColumn() || firstComponentTemplate2.isColumn())
+                // Shall we do more checks based on lexical values?
+                return true;
+
+            String prefix1 = firstComponentTemplate1.getComponent();
+            String prefix2 = firstComponentTemplate1.getComponent();
+
+            return prefix1.startsWith(prefix2) || prefix2.startsWith(prefix1);
         }
 
         private Collection<IQ> getMatchingDefinitionsForSafeConstraints(RDFAtomPredicate rdfAtomPredicate,
