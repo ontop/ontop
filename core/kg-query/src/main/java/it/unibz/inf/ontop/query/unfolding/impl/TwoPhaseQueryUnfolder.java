@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
@@ -160,7 +161,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         /**
          * For each variable, a disjunction of IRI/Bnode selectors
          */
-        private final ImmutableMap<Variable, ImmutableSet<IRIOrBNodeSelector>> constraintMap;
+        private final ImmutableMap<Variable, ImmutableSet<RDFSelector>> constraintMap;
         private final VariableGenerator variableGenerator;
 
         protected SecondPhaseQueryTransformer(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> localVariableDefinitions,
@@ -171,7 +172,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         }
 
         protected SecondPhaseQueryTransformer(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> localVariableDefinitions,
-                                              VariableGenerator variableGenerator, Map<Variable, ImmutableSet<IRIOrBNodeSelector>> parentConstraints) {
+                                              VariableGenerator variableGenerator, Map<Variable, ImmutableSet<RDFSelector>> parentConstraints) {
             super(variableGenerator, TwoPhaseQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
             this.variableGenerator = variableGenerator;
             this.constraintMap = mergeConstraints(convertIntoConstraints(localVariableDefinitions), parentConstraints);
@@ -180,23 +181,23 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         /**
          * Takes constraints from parent if variable not locally constrained
          */
-        private ImmutableMap<Variable, ImmutableSet<IRIOrBNodeSelector>> mergeConstraints(
-                Map<Variable, ImmutableSet<IRIOrBNodeSelector>> localConstraints,
-                Map<Variable, ImmutableSet<IRIOrBNodeSelector>> parentConstraints) {
-            Map<Variable, ImmutableSet<IRIOrBNodeSelector>> newConstraints = Maps.newHashMap(parentConstraints);
+        private ImmutableMap<Variable, ImmutableSet<RDFSelector>> mergeConstraints(
+                Map<Variable, ImmutableSet<RDFSelector>> localConstraints,
+                Map<Variable, ImmutableSet<RDFSelector>> parentConstraints) {
+            Map<Variable, ImmutableSet<RDFSelector>> newConstraints = Maps.newHashMap(parentConstraints);
             newConstraints.putAll(localConstraints);
             return ImmutableMap.copyOf(newConstraints);
         }
 
-        private ImmutableMap<Variable, ImmutableSet<IRIOrBNodeSelector>> convertIntoConstraints(
+        private ImmutableMap<Variable, ImmutableSet<RDFSelector>> convertIntoConstraints(
                 ImmutableSet<? extends Substitution<? extends ImmutableTerm>> variableDefinitions) {
-            Set<Map<Variable, IRIOrBNodeSelector>> selectorMapFromSubstitutions =
+            Set<Map<Variable, RDFSelector>> selectorMapFromSubstitutions =
                     variableDefinitions.stream()
                             .map(this::extractSelectorsFromSubstitution)
                             .collect(Collectors.toSet());
 
             // Groups the selectors per variable
-            ImmutableMap<Variable, Collection<IRIOrBNodeSelector>> groupedSelectors = selectorMapFromSubstitutions.stream()
+            ImmutableMap<Variable, Collection<RDFSelector>> groupedSelectors = selectorMapFromSubstitutions.stream()
                     .flatMap(m -> m.entrySet().stream())
                     .collect(ImmutableCollectors.toMultimap())
                     .asMap();
@@ -214,7 +215,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         }
 
 
-        private Optional<IRIOrBNodeSelector> extractSelectorFromTerm(ImmutableTerm term) {
+        private Optional<RDFSelector> extractSelectorFromTerm(ImmutableTerm term) {
             ImmutableTerm simplifiedTerm = term.simplify();
             // Template case
             if ((simplifiedTerm instanceof ImmutableFunctionalTerm)
@@ -222,18 +223,25 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
                 ImmutableTerm lexicalTerm = ((ImmutableFunctionalTerm)simplifiedTerm).getTerm(0);
                 if ((lexicalTerm instanceof ImmutableFunctionalTerm)
                         && ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol) {
-                    return Optional.of(new IRIOrBNodeSelector((ObjectStringTemplateFunctionSymbol) ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol()));
+                    return Optional.of(new RDFSelector((ObjectStringTemplateFunctionSymbol) ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol()));
+                }
+
+                ImmutableTerm typeTerm = ((ImmutableFunctionalTerm)simplifiedTerm).getTerm(1);
+                if (typeTerm instanceof RDFTermTypeConstant
+                        && (((RDFTermTypeConstant) typeTerm).getRDFTermType() instanceof RDFDatatype)) {
+                    // Literal
+                    return Optional.of(new RDFSelector());
                 }
             }
             // Constant case
             else if (simplifiedTerm instanceof ObjectConstant){
-                return Optional.of(new IRIOrBNodeSelector((ObjectConstant)simplifiedTerm));
+                return Optional.of(new RDFSelector((ObjectConstant)simplifiedTerm));
             }
             // No constraint extracted (will be treated as unconstrained)
             return Optional.empty();
         }
 
-        private Map<Variable, IRIOrBNodeSelector> extractSelectorsFromSubstitution(Substitution<? extends ImmutableTerm> substitution) {
+        private Map<Variable, RDFSelector> extractSelectorsFromSubstitution(Substitution<? extends ImmutableTerm> substitution) {
             return substitution.stream()
                     .flatMap(e -> extractSelectorFromTerm(e.getValue())
                             .map(s -> Maps.immutableEntry(e.getKey(), s))
@@ -245,25 +253,25 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
          * Removes constants that are contained in templates.
          * Never causes the set to be empty (unless already empty)
          */
-        private ImmutableSet<IRIOrBNodeSelector> filterRedundantSelectors(Collection<IRIOrBNodeSelector> selectors) {
+        private ImmutableSet<RDFSelector> filterRedundantSelectors(Collection<RDFSelector> selectors) {
 
-            ImmutableSet<IRIOrBNodeSelector> templateSelectors = selectors.stream()
-                    .filter(IRIOrBNodeSelector::isTemplate)
+            ImmutableSet<RDFSelector> templateSelectors = selectors.stream()
+                    .filter(RDFSelector::isObjectTemplate)
                     .collect(ImmutableSet.toImmutableSet());
 
             return selectors.stream()
-                    .filter(s -> filterSelector(s, templateSelectors))
+                    .filter(s -> filterRedundantSelector(s, templateSelectors))
                     .collect(ImmutableSet.toImmutableSet());
         }
 
-        private boolean filterSelector(IRIOrBNodeSelector selector, ImmutableSet<IRIOrBNodeSelector> templateSelectors) {
-            if (selector.isTemplate())
+        private boolean filterRedundantSelector(RDFSelector selector, ImmutableSet<RDFSelector> templateSelectors) {
+            if (selector.getType() != RDFSelectorType.OBJECT_CONSTANT)
                 return true;
 
             // Constants that don't match a template
             return templateSelectors.stream()
                     .noneMatch(t -> isTemplateCompatibleWithConstant(
-                            t.getTemplate()
+                            t.getObjectTemplate()
                                     .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to be a template")),
                             selector.getObjectConstant()
                                     .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to be a constant")), variableGenerator));
@@ -321,30 +329,45 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         }
 
         private Optional<IQ> getCompatibleDefinition(RDFAtomPredicate rdfAtomPredicate,
-                                                     RDFAtomIndexPattern RDFAtomIndexPattern, Variable subjOrObj){
+                                                     RDFAtomIndexPattern atomIndexPattern, Variable subjOrObj){
 
-            Optional<ImmutableSet<IRIOrBNodeSelector>> optionalConstraints = Optional.ofNullable(constraintMap.get(subjOrObj));
+            Optional<ImmutableSet<RDFSelector>> optionalConstraints = Optional.ofNullable(constraintMap.get(subjOrObj))
+                    .flatMap(selectors -> handleLiterals(selectors, atomIndexPattern));
 
             if (optionalConstraints.isEmpty())
                 return Optional.empty();
 
-            ImmutableSet<IRIOrBNodeSelector> constraints = optionalConstraints.get();
+            ImmutableSet<RDFSelector> constraints = optionalConstraints.get();
 
             if (canBeSeparatedByPrefix(constraints)) {
                 return queryMerger.mergeDefinitions(
-                        getMatchingDefinitionsForSafeConstraints(rdfAtomPredicate, constraints, RDFAtomIndexPattern));
+                        getMatchingDefinitionsForSafeConstraints(rdfAtomPredicate, constraints, atomIndexPattern));
             }
             return Optional.empty();
         }
 
-        private boolean canBeSeparatedByPrefix(ImmutableSet<IRIOrBNodeSelector> constraints) {
+        private Optional<ImmutableSet<RDFSelector>> handleLiterals(ImmutableSet<RDFSelector> selectors,
+                                                                   RDFAtomIndexPattern atomIndexPattern) {
+            if (!atomIndexPattern.canBeLiteral())
+                // Literal constraints can be eliminated
+                return Optional.of(selectors.stream()
+                        .filter(s -> s.getType() != RDFSelectorType.LITERAL)
+                        .collect(ImmutableSet.toImmutableSet()));
+
+            // If a literal constraint is present, cannot use indexes (as they are assuming no literal)
+            return selectors.stream().anyMatch(s -> s.getType() == RDFSelectorType.LITERAL)
+                    ? Optional.empty()
+                    : Optional.of(selectors);
+        }
+
+        private boolean canBeSeparatedByPrefix(ImmutableSet<RDFSelector> constraints) {
             if (constraints.size() < 2)
                 return true;
 
             // NB: constant selectors are supposed at that stage to be incompatible with the templates
             ImmutableList<Template.Component> templateFirstComponents = constraints.stream()
-                    .filter(IRIOrBNodeSelector::isTemplate)
-                    .map(s -> s.getTemplate().orElseThrow().getTemplateComponents())
+                    .filter(RDFSelector::isObjectTemplate)
+                    .map(s -> s.getObjectTemplate().orElseThrow().getTemplateComponents())
                     .filter(components -> !components.isEmpty())
                     .map(components -> components.get(0))
                     .collect(ImmutableList.toImmutableList());
@@ -366,9 +389,9 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         }
 
         private Collection<IQ> getMatchingDefinitionsForSafeConstraints(RDFAtomPredicate rdfAtomPredicate,
-                                                                        ImmutableSet<IRIOrBNodeSelector> constraints, RDFAtomIndexPattern indexPattern) {
+                                                                        ImmutableSet<RDFSelector> constraints, RDFAtomIndexPattern indexPattern) {
             return constraints.stream()
-                    .flatMap(c -> c.getTemplate()
+                    .flatMap(c -> c.getObjectTemplate()
                             .map(t -> getFilteredMatchingDefinitionFromTemplate(rdfAtomPredicate, t, indexPattern))
                             .orElseGet(() -> getFilteredMatchingDefinitionFromConstant(rdfAtomPredicate,
                                     c.getObjectConstant()
@@ -570,80 +593,80 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         }
     }
 
-    protected class IRIOrBNodeSelector {
+    protected enum RDFSelectorType {
+        OBJECT_TEMPLATE,
+        OBJECT_CONSTANT,
+        LITERAL
+    }
+
+    protected class RDFSelector {
 
         @Nullable
-        private final ObjectStringTemplateFunctionSymbol template;
+        private final ObjectStringTemplateFunctionSymbol objectTemplate;
 
-        // TODO: Can we reduce it to ObjectConstant?
         @Nullable
-        private final NonNullConstant constant;
+        private final ObjectConstant objectConstant;
 
-        public IRIOrBNodeSelector(@Nonnull ObjectStringTemplateFunctionSymbol template) {
-            this.template = template;
-            this.constant = null;
+        private final RDFSelectorType type;
+
+
+        protected RDFSelector(@Nonnull ObjectStringTemplateFunctionSymbol objectTemplate) {
+            this.objectTemplate = objectTemplate;
+            this.objectConstant = null;
+            this.type = RDFSelectorType.OBJECT_TEMPLATE;
         }
 
-        public IRIOrBNodeSelector(NonNullConstant constant) {
-            this.constant = constant;
-            this.template = null;
+        protected RDFSelector(ObjectConstant objectConstant) {
+            this.objectConstant = objectConstant;
+            this.objectTemplate = null;
+            this.type = RDFSelectorType.OBJECT_CONSTANT;
         }
 
-        public boolean isTemplate(){
-            return template != null;
+        protected RDFSelector() {
+            this.objectConstant = null;
+            this.objectTemplate = null;
+            this.type = RDFSelectorType.LITERAL;
         }
 
-        public boolean isConstant(){
-            if (constant != null){
-                return constant instanceof ObjectConstant;
-            }
-            else{
-                return false;
-            }
+        public boolean isObjectTemplate(){
+            return type == RDFSelectorType.OBJECT_TEMPLATE;
         }
 
-        public Optional<ObjectStringTemplateFunctionSymbol> getTemplate() {
-            return Optional.ofNullable(template);
+        public RDFSelectorType getType() {
+            return type;
+        }
+
+        public Optional<ObjectStringTemplateFunctionSymbol> getObjectTemplate() {
+            return Optional.ofNullable(objectTemplate);
         }
 
         public Optional<ObjectConstant> getObjectConstant() {
-
-            return Optional.ofNullable(constant)
-                    .filter(c -> c instanceof ObjectConstant)
-                    .map(c -> (ObjectConstant) c);
+            return Optional.ofNullable(objectConstant);
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            IRIOrBNodeSelector that = (IRIOrBNodeSelector) o;
-            if (this.isConstant() && that.isConstant()){
-                return this.constant.equals(that.constant);
-            }
-            else if (this.isTemplate() && that.isTemplate()){
-                return this.template.equals(that.template);
-            }
-            else {
-                return true;
-            }
+            if (!(o instanceof RDFSelector)) return false;
+            RDFSelector that = (RDFSelector) o;
+            return Objects.equals(objectTemplate, that.objectTemplate)
+                    && Objects.equals(objectConstant, that.objectConstant) && type == that.type;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(constant, template);
+            return Objects.hash(objectConstant, objectTemplate, type);
         }
 
         @Override
         public String toString() {
-            if (isTemplate()){
-                return "IRIorBNodeSelector{" + template + "}";
-            }
-            else if (isConstant()){
-                return "IRIorBNodeSelector{" + constant + "}";
-            }
-            else{
-                return "IRIorBNodeSelector{EMPTY}";
+            switch (type) {
+                case OBJECT_TEMPLATE:
+                    return "RDFSelector{" + objectTemplate + "}";
+                case OBJECT_CONSTANT:
+                    return "RDFSelector{" + objectConstant + "}";
+                default:
+                    return "RDFSelector{LITERAL}";
             }
         }
     }

@@ -59,20 +59,22 @@ public interface Mapping {
         /**
          * Subject of ?s ?p ?o or ?s ?p ?o ?g
          */
-        SUBJECT_OF_ALL_DEFINITIONS(0),
+        SUBJECT_OF_ALL_DEFINITIONS(0, false),
         /**
          * Object of ?s ?p ?o or ?s ?p ?o ?g
          */
-        OBJECT_OF_ALL_DEFINITIONS(2),
+        OBJECT_OF_ALL_DEFINITIONS(2, true),
         /**
          * Subject of ?s a ?c or ?s a ?c ?g
          */
-        SUBJECT_OF_ALL_CLASSES(0);
+        SUBJECT_OF_ALL_CLASSES(0, false);
 
         private final int position;
+        private final boolean canBeLiteral;
 
-        RDFAtomIndexPattern(int position) {
+        RDFAtomIndexPattern(int position, boolean canBeLiteral) {
             this.position = position;
+            this.canBeLiteral = canBeLiteral;
         }
 
         /**
@@ -80,6 +82,10 @@ public interface Mapping {
          */
         public int getPosition() {
             return position;
+        }
+
+        public boolean canBeLiteral() {
+            return canBeLiteral;
         }
     }
 }
