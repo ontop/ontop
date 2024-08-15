@@ -136,7 +136,7 @@ public class EnvRestrictionFactory implements OptionRestrictionFactory, Argument
         @Override
         public String getPreamble() {
             return varList.length > 1
-                    ? "This option can be also supplied through one of the following environment variables:"
+                    ? "Equivalent environment variables:"
                     : null;
         }
 
@@ -153,7 +153,7 @@ public class EnvRestrictionFactory implements OptionRestrictionFactory, Argument
         @Override
         public String[] getContentBlock(int blockNumber) {
             return (varList.length > 1) ? varList : new String[]{
-                    String.format("This option can be also supplied through environment variable %s.", this.varList[0])};
+                    String.format("Equivalent environment variable: %s", this.varList[0])};
         }
 
     }
