@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
 import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
@@ -57,11 +58,11 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
     }
 
     @Override
-    protected QueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
+    protected AbstractQueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
         return new BasicQueryUnfoldingTransformer(coreUtilsFactory.createVariableGenerator(knownVariables));
     }
 
-    protected class BasicQueryUnfoldingTransformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {
+    protected class BasicQueryUnfoldingTransformer extends AbstractQueryMergingTransformer {
 
         protected BasicQueryUnfoldingTransformer(VariableGenerator variableGenerator) {
             super(variableGenerator, BasicQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
