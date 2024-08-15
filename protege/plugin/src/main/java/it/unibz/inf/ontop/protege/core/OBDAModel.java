@@ -325,7 +325,7 @@ public class OBDAModel {
 
 // This is an Exact Copy of the class it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils from the ontop/mapping/sql/owlapi module.
 // It is needed here because the original class is compiled with OWLAPI v5 and the Protege plugin uses OWLAPI v4. 
-// More specifically, the class OWLDataFactory implements the DeclarationAxiomProvider interface in OWLAPI v5, but not in OWLAPI v4.
+// More specifically, the interface OWLDataFactory extends the DeclarationAxiomProvider interface in OWLAPI v5, but not in OWLAPI v4.
 // Another tricky difference is that the code here imports the shaded version of the ImmutableSet/ImmutableList classes
 class MappingOntologyUtils_OWLAIP4 {
 
