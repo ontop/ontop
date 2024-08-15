@@ -383,7 +383,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
                 return true;
 
             String prefix1 = firstComponentTemplate1.getComponent();
-            String prefix2 = firstComponentTemplate1.getComponent();
+            String prefix2 = firstComponentTemplate2.getComponent();
 
             return prefix1.startsWith(prefix2) || prefix2.startsWith(prefix1);
         }
