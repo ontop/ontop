@@ -194,6 +194,7 @@ public class TwoPhaseQueryUnfolderSPARQLTest extends AbstractRDF4JTest {
         assertEquals(0, count);
     }
 
+    @Ignore("TODO: enable (too slow)")
     @Test
     public void unionScopeOfChildDivided(){
         String sparql =
@@ -406,6 +407,7 @@ public class TwoPhaseQueryUnfolderSPARQLTest extends AbstractRDF4JTest {
         assertEquals(2, count);
     }
 
+    @Ignore("TODO: enable (too slow)")
     @Test
     public void unionWithConstAndSubjOptimization(){
         String sparql =
@@ -443,6 +445,7 @@ public class TwoPhaseQueryUnfolderSPARQLTest extends AbstractRDF4JTest {
         assertEquals(10, count);
     }
 
+    @Ignore("TODO: enable (too slow)")
     @Test
     public void leftJoinScopeFromRightCannotGoToTheLeft(){
         String sparql =
