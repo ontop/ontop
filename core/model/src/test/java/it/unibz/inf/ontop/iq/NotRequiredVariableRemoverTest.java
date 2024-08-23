@@ -73,16 +73,16 @@ public class NotRequiredVariableRemoverTest {
   @Test
   public void swappingSubstitutionInTopConstructionNodeNotRemoved() {
     ImmutableFunctionalTerm iriDom1 = TERM_FACTORY.getIRIFunctionalTerm(
-        Template.builder().addSeparator("http://example.org/dom1").addSeparator("/").addColumn()
+        Template.builder().string("http://example.org/dom1").string("/").placeholder()
             .build(), ImmutableList.of(V0));
     ImmutableFunctionalTerm iriRange1 = TERM_FACTORY.getIRIFunctionalTerm(
-        Template.builder().addSeparator("http://example.org/range1").addSeparator("/").addColumn()
+        Template.builder().string("http://example.org/range1").string("/").placeholder()
             .build(), ImmutableList.of(V1));
     ImmutableFunctionalTerm iriDom2 = TERM_FACTORY.getIRIFunctionalTerm(
-        Template.builder().addSeparator("http://example.org/dom2").addSeparator("/").addColumn()
+        Template.builder().string("http://example.org/dom2").string("/").placeholder()
             .build(), ImmutableList.of(V2));
     ImmutableFunctionalTerm iriRange2 = TERM_FACTORY.getIRIFunctionalTerm(
-        Template.builder().addSeparator("http://example.org/range2").addSeparator("/").addColumn()
+        Template.builder().string("http://example.org/range2").string("/").placeholder()
             .build(), ImmutableList.of(V3));
 
     ConstructionNode child1ConstructionNode = IQ_FACTORY.createConstructionNode(
