@@ -62,9 +62,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
         // only the variables that are also used in the bindings for the child of the construction node
         this.childVariables = Sets.difference(
-                        Sets.union(this.projectedVariables, this.substitution.getRangeVariables()),
-                        this.substitution.getDomain())
-                .immutableCopy();
+            Sets.union(this.projectedVariables, this.substitution.getRangeVariables()),
+            Sets.difference(this.substitution.getDomain(), getSwappedVariable())).immutableCopy();
 
         if (settings.isTestModeEnabled())
             validateNode();
@@ -97,9 +96,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                     "of the substitution must be projected.\n" + this);
         }
 
-        if (!Sets.intersection(substitutionDomain, childVariables).isEmpty()) {
+        if (!Sets.intersection(substitutionDomain, Sets.difference(childVariables, getSwappedVariable())).isEmpty()) {
             throw new InvalidQueryNodeException("ConstructionNode: variables defined by the substitution cannot " +
-                    "be used for defining other variables.\n" + this);
+                "be used for defining other variables.\n" + this);
         }
 
         if (!Sets.difference(substitution.restrictRangeTo(Variable.class).getRangeSet(), projectedVariables).isEmpty()) {
@@ -556,5 +555,14 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         return newGrandChild.getVariables().equals(newConstructionNode.getVariables())
                 ? newGrandChild
                 : iqFactory.createUnaryIQTree(newConstructionNode, newGrandChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
+    }
+
+    private ImmutableSet<Variable> getSwappedVariable() {
+        return substitution.stream()
+            .filter(sub -> sub.getValue() instanceof Variable)
+            .filter(sub -> substitution.isDefining((Variable) sub.getValue()))
+            .filter(sub -> substitution.get((Variable) sub.getValue()).equals(sub.getKey()))
+            .map(Map.Entry::getKey)
+            .collect(ImmutableCollectors.toSet());
     }
 }
