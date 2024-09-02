@@ -117,11 +117,8 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
 
         @Override
         public Optional<TermType> visitValues(ValuesNode valuesNode) {
-            ImmutableSet<TermType> termTypes = valuesNode.getValueStream(variable)
+            return valuesNode.getValueStream(variable)
                     .flatMap(c -> c.getOptionalType().stream())
-                    .collect(ImmutableCollectors.toSet());
-
-            return termTypes.stream()
                     .findAny();
         }
 
