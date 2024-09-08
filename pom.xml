@@ -180,7 +180,7 @@
         <logback.version>1.2.13</logback.version>
         <nullanno.version>3.0.0</nullanno.version>
         <opencsv.version>5.7.1</opencsv.version>
-        <owlapi.version>5.5.1-SNAPSHOT</owlapi.version>
+        <owlapi.version>5.5.1</owlapi.version>
         <proj4j.version>1.1.1</proj4j.version>
         <protege-xmlcatalog.version>1.0.5</protege-xmlcatalog.version>
         <r2rml-api.version>0.9.1</r2rml-api.version>
