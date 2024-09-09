@@ -310,6 +310,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .filter(v -> previousUC.contains(v) || !Sets.intersection(previousUC, determinedByMap.get(v)).isEmpty())
                 .collect(ImmutableCollectors.toSet());
 
+        if (!includesAll(relatedVariables, previousUC, determinedByMap))
+            // Some determinants of the previous UC are projected out
+            return ImmutableSet.of();
+
         List<ImmutableList<Variable>> setsToCheck = relatedVariables.stream()
                 .map(ImmutableList::of)
                 .collect(Collectors.toList());
@@ -336,10 +340,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .collect(ImmutableCollectors.toSet());
     }
 
-    private static boolean includesAll(ImmutableList<Variable> variables, ImmutableSet<Variable> target, ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap) {
+    private static boolean includesAll(ImmutableCollection<Variable> variables, ImmutableSet<Variable> target, ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap) {
         return variables.stream()
-                .map(determinedByMap::get)
-                .reduce(Set.of(), Sets::union, Sets::union)
+                .flatMap(v -> Optional.ofNullable(determinedByMap.get(v)).orElseThrow().stream())
+                .collect(ImmutableSet.toImmutableSet())
                 .containsAll(target);
     }
 
