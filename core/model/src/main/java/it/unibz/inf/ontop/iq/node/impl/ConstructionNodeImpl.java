@@ -247,6 +247,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .filter(projectedVariables::containsAll)
                 .collect(ImmutableCollectors.toSet());
 
+        if (substitution.isEmpty())
+            return preservedConstraints;
+
         VariableNullability variableNullability = getVariableNullability(child);
         ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap = getDeterminedByMap(variableNullability);
 
