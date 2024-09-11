@@ -87,7 +87,7 @@ public abstract class AbstractOntopQuery<Q extends ParsedQuery> implements Query
     @Override
     public void setDataset(Dataset dataset) {
         if (dataset != null)
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("The RDF dataset on which to run the query cannot be changed");
     }
 
     @Override
