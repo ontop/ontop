@@ -64,6 +64,10 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     @Override
     protected ResultSet getColumns(RelationID id) throws SQLException {
         ResultSet rs = super.getColumns(id);
+        for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
+            LOGGER.debug("[DB-METADATA] Getting columns info; column {} is of type {}",
+                    rs.getMetaData().getColumnName(i),
+                    rs.getMetaData().getColumnTypeName(i));
         /*
         if (isDual(id))
             return super.getColumns(id);
