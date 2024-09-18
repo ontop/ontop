@@ -49,6 +49,8 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     @Override
     protected ResultSet getColumns(RelationID id) throws SQLException {
+        ResultSet rs = super.getColumns(id);
+        /*
         if (isDual(id))
             return super.getColumns(id);
         Statement statement = connection.createStatement();
@@ -64,6 +66,9 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 "FROM ALL_TAB_COLUMNS t\n" +
                 "WHERE t.owner = '%s' AND t.table_name = '%s'\n" +
                 "ORDER BY t.column_id", schema, table));
+         */
+        LOGGER.debug("[DB-METADATA] Getting columns list with fetch size {}", rs.getFetchSize());
+        return rs;
     }
 
     @Override
