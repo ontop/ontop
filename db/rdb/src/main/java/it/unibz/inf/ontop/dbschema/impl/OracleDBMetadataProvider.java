@@ -9,6 +9,8 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.*;
 
 import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
@@ -24,6 +26,18 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/functions207.htm#i79833
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/queries009.htm
         this.sysDualId = rawIdFactory.createRelationID("DUAL");
+
+        Class<? extends Connection> cc = connection.getClass();
+        try {
+            Method srr = cc.getMethod("setRemarksReporting", boolean.class);
+            srr.invoke(connection, false);
+            Method sis = cc.getMethod("setIncludeSynonyms", boolean.class);
+            sis.invoke(connection, true);
+        }
+        catch (ReflectiveOperationException e) {
+            LOGGER.debug("[DB-METADATA] Setting connection parameters {}", e.toString());
+        }
+
     }
 
     private boolean isDual(RelationID id) {
@@ -49,9 +63,6 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     @Override
     protected ResultSet getColumns(RelationID id) throws SQLException {
-        LOGGER.debug("[DB-METADATA] Getting columns list with client info {}", connection.getClientInfo());
-        connection.setClientInfo("remarksReporting", "false");
-        connection.setClientInfo("includeSynonyms", "true");
         ResultSet rs = super.getColumns(id);
         /*
         if (isDual(id))
