@@ -48,6 +48,25 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     }
 
     @Override
+    protected ResultSet getColumns(RelationID id) throws SQLException {
+        if (isDual(id))
+            return super.getColumns(id);
+        Statement statement = connection.createStatement();
+        String schema = escapeRelationIdComponentPattern(getRelationSchema(id));
+        String table = escapeRelationIdComponentPattern(getRelationName(id));
+        return statement.executeQuery(String.format("SELECT \n" +
+                "NULL AS TABLE_CAT, t.owner AS TABLE_SCHEM, TABLE_NAME, COLUMN_NAME, \n" +
+                "DECODE(t.nullable, 'N', 0, 1) AS NULLABLE, \n" +
+                "t.data_type AS TYPE_NAME,\n" +
+                "DECODE(t.data_precision, null, DECODE(t.data_type, 'NUMBER', DECODE(t.data_scale, null, 38, 38), DECODE(t.data_type,'CHAR', t.char_length,'VARCHAR', t.char_length,'VARCHAR2', t.char_length,'NVARCHAR2', t.char_length,'NCHAR', t.char_length,'NUMBER', 0, t.data_length)), t.data_precision) AS COLUMN_SIZE,\n" +
+                "DECODE(t.data_type,'CHAR',1,'NCHAR',-15,'VARCHAR2',12,'NVARCHAR2',-9,'DATE',91,'RAW',-3,'BLOB',2004,'CLOB',2005,'NCLOB',2011,'NUMBER',2,'TIMESTAMP',93,'TIMESTAMP(6)',93,'TIMESTAMP WITH TIME ZONE',-101,'TIMESTAMP WITH LOCAL TIME ZONE',-102,'INTERVALYM',-103,'INTERVALDS',-104,'LONG',-1,'LONG RAW',-4,'FLOAT',6,'REAL',7,'REF',2006,'ARRAY',2003,'STRUCT',2002,-9999) AS DATA_TYPE,\n" +
+                "DECODE(t.data_type,'NUMBER', DECODE(t.data_precision, null, DECODE(t.data_scale, null, 0, t.data_scale), t.data_scale), t.data_scale) AS DECIMAL_DIGITS  \n" +
+                "FROM ALL_TAB_COLUMNS t\n" +
+                "WHERE t.owner = '%s' AND t.table_name = '%s'\n" +
+                "ORDER BY t.column_id", schema, table));
+    }
+
+    @Override
     protected String makeQueryMinimizeResultSet(String query) {
         return String.format("SELECT * FROM (%s) subQ FETCH NEXT 1 ROWS ONLY", query);
     }

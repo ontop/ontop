@@ -151,11 +151,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
         RelationID id = getCanonicalRelationId(id0);
         LOGGER.debug("[DB-METADATA] Calling metadata.getColumns()");
-        try (ResultSet rs = metadata.getColumns(
-                getRelationCatalog(id), // catalog is not escaped
-                escapeRelationIdComponentPattern(getRelationSchema(id)),
-                escapeRelationIdComponentPattern(getRelationName(id)),
-                null)) {
+        try (ResultSet rs = getColumns(id)) {
             LOGGER.debug("[DB-METADATA] metadata.getColumns() results obtained");
             Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
 
@@ -189,6 +185,14 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
         }
+    }
+
+    protected ResultSet getColumns(RelationID id) throws SQLException {
+        return metadata.getColumns(
+                getRelationCatalog(id), // catalog is not escaped
+                escapeRelationIdComponentPattern(getRelationSchema(id)),
+                escapeRelationIdComponentPattern(getRelationName(id)),
+                null);
     }
 
     protected String extractSQLTypeName(String typeName, int jdbcType, int columnSize,
