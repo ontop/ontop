@@ -49,6 +49,9 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     @Override
     protected ResultSet getColumns(RelationID id) throws SQLException {
+        LOGGER.debug("[DB-METADATA] Getting columns list with client info {}", connection.getClientInfo());
+        connection.setClientInfo("remarksReporting", "false");
+        connection.setClientInfo("includeSynonyms", "true");
         ResultSet rs = super.getColumns(id);
         /*
         if (isDual(id))
