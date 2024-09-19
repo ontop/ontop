@@ -38,8 +38,9 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     private static <T> T getProperty(Connection connection, String name, T defValue) {
         try {
-            Method d2ds = connection.getClass().getMethod(name);
-            return (T)d2ds.invoke(connection);
+            Method m = connection.getClass().getMethod(name);
+            m.setAccessible(true);
+            return (T)m.invoke(connection);
         }
         catch (Exception e) {
             LOGGER.debug("[DB-METADATA] {} exception {}", name, e.toString());
@@ -74,7 +75,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             return super.getColumns(id);
 
         try {
-            String query = getColumnsNoWildcardsPlsql();
+            String query = getColumnsSql();
             PreparedStatement stmt = connection.prepareStatement(query);
             String schema = escapeRelationIdComponentPattern(getRelationSchema(id));
             String table = escapeRelationIdComponentPattern(getRelationName(id));
@@ -92,14 +93,14 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         }
     }
 
-    private String getColumnsNoWildcardsPlsql() throws SQLException {
+    private String getColumnsSql() throws SQLException {
 
-        return "SELECT NULL AS TABLE_CAT,\n" + // !
-                "       in_owner AS TABLE_SCHEM,\n" + // !
-                "       in_name AS TABLE_NAME,\n" + // !
-                "       t.column_name AS COLUMN_NAME,\n" + // !
-                datatypeQuery() +
-                "       t.data_type AS TYPE_NAME,\n" + // !
+        return "SELECT NULL AS TABLE_CAT,\n" +
+                "       in_owner AS TABLE_SCHEM,\n" +
+                "       in_name AS TABLE_NAME,\n" +
+                "       t.column_name AS COLUMN_NAME,\n" +
+                getDatatypeSql() +
+                "       t.data_type AS TYPE_NAME,\n" +
                 "       DECODE (t.data_precision," +
                 "                null, DECODE(t.data_type," +
                 "                        'NUMBER', DECODE(t.data_scale," +
@@ -122,9 +123,9 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 "                                              null, " + (j2ee13Compliant ? "0" : "-127") +
                 "                                             , t.data_scale)," +
                 "                                  t.data_scale)," +
-                "                t.data_scale) AS DECIMAL_DIGITS,\n" + // !
+                "                t.data_scale) AS DECIMAL_DIGITS,\n" +
 //                "       10 AS NUM_PREC_RADIX,\n" +
-                "       DECODE (t.nullable, 'N', 0, 1) AS NULLABLE\n" + // !
+                "       DECODE (t.nullable, 'N', 0, 1) AS NULLABLE\n" +
 //                "       NULL AS REMARKS,\n" +
 //                "       t.data_default AS COLUMN_DEF,\n" +
 //                "       0 AS SQL_DATA_TYPE,\n" +
@@ -144,20 +145,20 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 (versionNumber >= 12000
                         ? "FROM all_tab_cols t"
                         : "FROM all_tab_columns t") + "\n" +
-                "WHERE t.owner = ?: \n" +
-                "  AND t.table_name = ?:\n" +
+                "WHERE t.owner = ? \n" +
+                "  AND t.table_name = ?\n" +
 //                "  AND t.column_name LIKE ? ESCAPE '/'\n" +
                 (versionNumber >= 12000 ? "  AND t.user_generated = 'YES'\n" : "") + "\n" +
-                "ORDER BY TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION\n";
+                "ORDER BY TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION";
     }
 
 
-    private String datatypeQuery() {
+    private String getDatatypeSql() {
         return "  DECODE(substr(t.data_type, 1, 9), \n" +
                 "    'TIMESTAMP', \n" +
                 "      DECODE(substr(t.data_type, 10, 1), \n" +
                 "        '(', \n" +
-                "          DECODE(substr(t" + "." + "data_type, 19, 5), \n" +
+                "          DECODE(substr(t.data_type, 19, 5), \n" +
                 "            'LOCAL', -102, 'TIME ', -101, 93), \n" +
                 "        DECODE(substr(t.data_type, 16, 5), \n" +
                 "          'LOCAL', -102, 'TIME ', -101, 93)), \n" +
