@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -9,9 +10,10 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.*;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 
@@ -99,7 +101,42 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 "       in_owner AS TABLE_SCHEM,\n" +
                 "       in_name AS TABLE_NAME,\n" +
                 "       t.column_name AS COLUMN_NAME,\n" +
-                getDatatypeSql() +
+                // see https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/Data-Types.htm
+                "  DECODE(substr(t.data_type, 1, 9)," +
+                // TIMESTAMP [(fractional_seconds_precision)], where fractional_seconds_precision is one digit
+                // TIMESTAMP [(fractional_seconds_precision)] WITH [LOCAL] TIME ZONE
+                "            'TIMESTAMP'," +
+                "              DECODE(substr(t.data_type, 10, 1)," +
+                "                '('," + // (fractional_seconds_precision) is present
+                "                  DECODE(substr(t.data_type, 19, 5)," +
+                "                    'LOCAL', -102, " +
+                "                    'TIME ', -101, " +
+                                               Types.TIMESTAMP + ")," +
+                                 // (fractional_seconds_precision) is missing
+                "                DECODE(substr(t.data_type, 16, 5)," +
+                "                  'LOCAL', -102, " +
+                "                  'TIME ', -101, " +
+                                             Types.TIMESTAMP + "))," +
+                // INTERVAL YEAR [(year_precision)] TO MONTH
+                // INTERVAL DAY [(day_precision)] TO SECOND [(fractional_seconds_precision)]
+                "            'INTERVAL '," +
+                "              DECODE(substr(t.data_type, 10, 3)," +
+                "               'DAY', -104, " +
+                "               'YEA', -103)," +
+                "            DECODE(t.data_type," +
+                getSupportedSimpleTypes()
+                        .entrySet().stream()
+                        .map(e -> "              '" + e.getKey() + "', " + e.getValue() + ",\n")
+                        .collect(Collectors.joining()) +
+                "              DECODE((SELECT a.typecode " +
+                "                      FROM ALL_TYPES a " +
+                "                      WHERE a.type_name = t.data_type" +
+                "                           AND ((a.owner IS NULL AND t.data_type_owner IS NULL)" +
+                "                             OR (a.owner = t.data_type_owner)))," +
+                "                   'OBJECT', " + Types.STRUCT + "," +
+                "                   'COLLECTION', " + Types.ARRAY + ", " +
+                "                                 1111)))" +
+                "         AS DATA_TYPE,\n" +
                 "       t.data_type AS TYPE_NAME,\n" +
                 "       DECODE (t.data_precision," +
                 "                null, DECODE(t.data_type," +
@@ -114,9 +151,8 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 "                   'NUMBER', 0," +
                 "           t.data_length)" +
                 "                           )," +
-                "         t.data_precision)\n" +
+                "         t.data_precision)" +
                 "              AS COLUMN_SIZE,\n" + // !
-//                "       0 AS BUFFER_LENGTH,\n" +
                 "       DECODE (t.data_type," +
                 "                'NUMBER', DECODE(t.data_precision," +
                 "                                 null, DECODE(t.data_scale," +
@@ -124,87 +160,50 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 "                                             , t.data_scale)," +
                 "                                  t.data_scale)," +
                 "                t.data_scale) AS DECIMAL_DIGITS,\n" +
-//                "       10 AS NUM_PREC_RADIX,\n" +
-                "       DECODE (t.nullable, 'N', 0, 1) AS NULLABLE\n" +
-//                "       NULL AS REMARKS,\n" +
-//                "       t.data_default AS COLUMN_DEF,\n" +
-//                "       0 AS SQL_DATA_TYPE,\n" +
-//                "       0 AS SQL_DATETIME_SUB,\n" +
-//                "       t.data_length AS CHAR_OCTET_LENGTH,\n" +
-                "       t.column_id AS ORDINAL_POSITION,\n" +
-//                "       DECODE (t.nullable, 'N', 'NO', 'YES') AS IS_NULLABLE,\n" +
-//                "       null as SCOPE_CATALOG,\n" +
-//                "       null as SCOPE_SCHEMA,\n" +
-//                "       null as SCOPE_TABLE,\n" +
-//                "       null as SOURCE_DATA_TYPE,\n" +
-//                (db_version >= 12000
-//                        ? "       t.identity_column as IS_AUTOINCREMENT,\n" +
-//                          "       t.virtual_column as IS_GENERATEDCOLUMN\n"
-//                        : "       'NO' as IS_AUTOINCREMENT,\n" +
-//                          "       null as IS_GENERATEDCOLUMN\n") +
+                "       DECODE (t.nullable, 'N', 0, 1) AS NULLABLE,\n" +
+                "       t.column_id AS ORDINAL_POSITION\n" +
                 (versionNumber >= 12000
                         ? "FROM all_tab_cols t"
                         : "FROM all_tab_columns t") + "\n" +
                 "WHERE t.owner = ? \n" +
                 "  AND t.table_name = ?\n" +
-//                "  AND t.column_name LIKE ? ESCAPE '/'\n" +
-                (versionNumber >= 12000 ? "  AND t.user_generated = 'YES'\n" : "") + "\n" +
+                (versionNumber >= 12000
+                        ? "  AND t.user_generated = 'YES'"
+                        : "") + "\n" +
                 "ORDER BY TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION";
     }
 
-
-    private String getDatatypeSql() {
-        return "  DECODE(substr(t.data_type, 1, 9), \n" +
-                "    'TIMESTAMP', \n" +
-                "      DECODE(substr(t.data_type, 10, 1), \n" +
-                "        '(', \n" +
-                "          DECODE(substr(t.data_type, 19, 5), \n" +
-                "            'LOCAL', -102, 'TIME ', -101, 93), \n" +
-                "        DECODE(substr(t.data_type, 16, 5), \n" +
-                "          'LOCAL', -102, 'TIME ', -101, 93)), \n" +
-                "    'INTERVAL ', \n" +
-                "      DECODE(substr(t.data_type, 10, 3), \n" +
-                "       'DAY', -104, 'YEA', -103), \n" +
-                "    DECODE(t.data_type, \n" +
-                "      'BINARY_DOUBLE', 101, \n" +
-                "      'BINARY_FLOAT', 100, \n" +
-                "      'BFILE', -13, \n" +
-                "      'BLOB', 2004, \n" +
-                "      'BOOLEAN', 16, \n" +
-                "      'CHAR', 1, \n" +
-                "      'CLOB', 2005, \n" +
-                "      'COLLECTION', 2003, \n" +
-                "      'DATE', " + (mapDateToTimestamp ? "93" : "91") + ", \n" +
-                "      'FLOAT', 6, \n" +
-                "      'JSON', 2016, \n" +
-                "      'LONG', -1, \n" +
-                "      'LONG RAW', -4, \n" +
-                "      'NCHAR', -15, \n" +
-                "      'NCLOB', 2011, \n" +
-                "      'NUMBER', 2, \n" +
-                "      'NVARCHAR', -9, \n" +
-                "      'NVARCHAR2', -9, \n" +
-                "      'OBJECT', 2002, \n" +
-                "      'OPAQUE/XMLTYPE', 2009, \n" +
-                "      'RAW', -3, \n" +
-                "      'REF', 2006, \n" +
-                "      'ROWID', -8, \n" +
-                "      'SQLXML', 2009, \n" +
-                "      'UROWID', -8, \n" +
-                "      'VARCHAR2', 12, \n" +
-                "      'VARRAY', 2003, \n" +
-                "      'VECTOR', -105, \n" +
-                "      'XMLTYPE', 2009, \n" +
-                "      DECODE((SELECT a.typecode \n" +
-                "        FROM ALL_TYPES a \n" +
-                "        WHERE a.type_name = t.data_type\n" +
-                "             AND ((a.owner IS NULL AND \n" +
-                "                    t.data_type_owner IS NULL)\n" +
-                "                  OR (a.owner = t.data_type_owner))\n" +
-                "        ), \n" +
-                "        'OBJECT', 2002, \n" +
-                "        'COLLECTION', 2003, 1111))) \n" +
-                " AS DATA_TYPE,\n"; // !
+    private Map<String, Integer> getSupportedSimpleTypes() {
+        return ImmutableMap.ofEntries(
+                Map.entry("BINARY_DOUBLE", 101),
+                Map.entry("BINARY_FLOAT", 100),
+                Map.entry("BFILE", -13),
+                Map.entry("BLOB", Types.BLOB),
+                Map.entry("BOOLEAN", Types.BOOLEAN),
+                Map.entry("CHAR", Types.CHAR),
+                Map.entry("CLOB", Types.CLOB),
+                Map.entry("COLLECTION", Types.ARRAY),
+                Map.entry("DATE", (mapDateToTimestamp ? Types.TIMESTAMP : Types.DATE)),
+                Map.entry("FLOAT", Types.FLOAT),
+                Map.entry("JSON", 2016),
+                Map.entry("LONG", Types.LONGVARCHAR),
+                Map.entry("LONG RAW", Types.LONGVARBINARY),
+                Map.entry("NCHAR", Types.NCHAR),
+                Map.entry("NCLOB", Types.NCLOB),
+                Map.entry("NUMBER", Types.NUMERIC),
+                Map.entry("NVARCHAR", Types.NVARCHAR),
+                Map.entry("NVARCHAR2", Types.NVARCHAR),
+                Map.entry("OBJECT", Types.STRUCT),
+                Map.entry("OPAQUE/XMLTYPE", Types.SQLXML),
+                Map.entry("RAW", Types.VARBINARY),
+                Map.entry("REF", Types.REF),
+                Map.entry("ROWID", Types.ROWID),
+                Map.entry("'SQLXML", Types.SQLXML),
+                Map.entry("UROWID" , Types.ROWID),
+                Map.entry("VARCHAR2", Types.VARCHAR),
+                Map.entry("VARRAY", Types.ARRAY),
+                Map.entry("VECTOR", -105),
+                Map.entry("XMLTYPE'", Types.SQLXML));
     }
 
 
