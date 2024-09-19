@@ -95,47 +95,36 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         }
     }
 
-    private String getColumnsSql() throws SQLException {
+    private String getColumnsSql() {
 
         return "SELECT NULL AS TABLE_CAT,\n" +
-                "       in_owner AS TABLE_SCHEM,\n" +
-                "       in_name AS TABLE_NAME,\n" +
+                "       t.owner AS TABLE_SCHEM,\n" +
+                "       t.table_name AS TABLE_NAME,\n" +
                 "       t.column_name AS COLUMN_NAME,\n" +
                 // see https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/Data-Types.htm
-                "  DECODE(substr(t.data_type, 1, 9)," +
-                // TIMESTAMP [(fractional_seconds_precision)], where fractional_seconds_precision is one digit
-                // TIMESTAMP [(fractional_seconds_precision)] WITH [LOCAL] TIME ZONE
-                "            'TIMESTAMP'," +
-                "              DECODE(substr(t.data_type, 10, 1)," +
-                "                '('," + // (fractional_seconds_precision) is present
-                "                  DECODE(substr(t.data_type, 19, 5)," +
-                "                    'LOCAL', -102, " +
-                "                    'TIME ', -101, " +
-                                               Types.TIMESTAMP + ")," +
-                                 // (fractional_seconds_precision) is missing
-                "                DECODE(substr(t.data_type, 16, 5)," +
-                "                  'LOCAL', -102, " +
-                "                  'TIME ', -101, " +
-                                             Types.TIMESTAMP + "))," +
-                // INTERVAL YEAR [(year_precision)] TO MONTH
-                // INTERVAL DAY [(day_precision)] TO SECOND [(fractional_seconds_precision)]
-                "            'INTERVAL '," +
-                "              DECODE(substr(t.data_type, 10, 3)," +
-                "               'DAY', -104, " +
-                "               'YEA', -103)," +
-                "            DECODE(t.data_type," +
-                getSupportedSimpleTypes()
-                        .entrySet().stream()
-                        .map(e -> "              '" + e.getKey() + "', " + e.getValue() + ",\n")
-                        .collect(Collectors.joining()) +
-                "              DECODE((SELECT a.typecode " +
-                "                      FROM ALL_TYPES a " +
-                "                      WHERE a.type_name = t.data_type" +
-                "                           AND ((a.owner IS NULL AND t.data_type_owner IS NULL)" +
-                "                             OR (a.owner = t.data_type_owner)))," +
-                "                   'OBJECT', " + Types.STRUCT + "," +
-                "                   'COLLECTION', " + Types.ARRAY + ", " +
-                "                                 1111)))" +
+                decodeSql("substr(t.data_type, 1, 9)", ImmutableMap.of(
+                                // TIMESTAMP [(fractional_seconds_precision)], where fractional_seconds_precision is one digit
+                                // TIMESTAMP [(fractional_seconds_precision)] WITH [LOCAL] TIME ZONE
+                                "TIMESTAMP", decodeSql("substr(t.data_type, 10, 1)",
+                                        ImmutableMap.of("(",
+                                                // (fractional_seconds_precision) is present
+                                                decodeSql("substr(t.data_type, 19, 5)", ImmutableMap.of(
+                                                        "LOCAL", -102, "TIME", -101), Types.TIMESTAMP)),
+                                        // (fractional_seconds_precision) is missing
+                                        decodeSql("substr(t.data_type, 16, 5)", ImmutableMap.of(
+                                                "LOCAL", -102, "TIME", -101), Types.TIMESTAMP)),
+                                // INTERVAL YEAR [(year_precision)] TO MONTH
+                                // INTERVAL DAY [(day_precision)] TO SECOND [(fractional_seconds_precision)]
+                                "INTERVAL", decodeSql("substr(t.data_type, 10, 3)", ImmutableMap.of(
+                                        "DAY", -104, "YEA", -103))),
+                        decodeSql("t.data_type",
+                                getSupportedSimpleTypes(),
+                                decodeSql("(SELECT a.typecode " +
+                                        "                      FROM ALL_TYPES a " +
+                                        "                      WHERE a.type_name = t.data_type" +
+                                        "                           AND ((a.owner IS NULL AND t.data_type_owner IS NULL)" +
+                                        "                             OR (a.owner = t.data_type_owner)))", ImmutableMap.of(
+                                        "OBJECT", Types.STRUCT, "COLLECTION", Types.ARRAY), 1111) +
                 "         AS DATA_TYPE,\n" +
                 "       t.data_type AS TYPE_NAME,\n" +
                 "       DECODE (t.data_precision," +
@@ -173,6 +162,22 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 "ORDER BY TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION";
     }
 
+
+
+    private static String decodeSql(String expression, Map<String, ?> cases, Object defaultValue) {
+        return "DECODE(" + expression + ", " + cases.entrySet().stream()
+                .map(e -> "'" + e.getKey() + "', " + e.getValue())
+                .collect(Collectors.joining(", "))
+                +  ", " + defaultValue +  ")";
+    }
+
+    private static String decodeSql(String expression, Map<String, ?> cases) {
+        return "DECODE(" + expression + ", " + cases.entrySet().stream()
+                .map(e -> "'" + e.getKey() + "', " + e.getValue())
+                .collect(Collectors.joining(", "))
+                +  ")";
+    }
+
     private Map<String, Integer> getSupportedSimpleTypes() {
         return ImmutableMap.ofEntries(
                 Map.entry("BINARY_DOUBLE", 101),
@@ -198,12 +203,12 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 Map.entry("RAW", Types.VARBINARY),
                 Map.entry("REF", Types.REF),
                 Map.entry("ROWID", Types.ROWID),
-                Map.entry("'SQLXML", Types.SQLXML),
+                Map.entry("SQLXML", Types.SQLXML),
                 Map.entry("UROWID" , Types.ROWID),
                 Map.entry("VARCHAR2", Types.VARCHAR),
                 Map.entry("VARRAY", Types.ARRAY),
                 Map.entry("VECTOR", -105),
-                Map.entry("XMLTYPE'", Types.SQLXML));
+                Map.entry("XMLTYPE", Types.SQLXML));
     }
 
 
