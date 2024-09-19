@@ -124,7 +124,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                                         "                      WHERE a.type_name = t.data_type" +
                                         "                           AND ((a.owner IS NULL AND t.data_type_owner IS NULL)" +
                                         "                             OR (a.owner = t.data_type_owner)))", ImmutableMap.of(
-                                        "OBJECT", Types.STRUCT, "COLLECTION", Types.ARRAY), 1111) +
+                                        "OBJECT", Types.STRUCT, "COLLECTION", Types.ARRAY), 1111))) +
                 "         AS DATA_TYPE,\n" +
                 "       t.data_type AS TYPE_NAME,\n" +
                 "       DECODE (t.data_precision," +
