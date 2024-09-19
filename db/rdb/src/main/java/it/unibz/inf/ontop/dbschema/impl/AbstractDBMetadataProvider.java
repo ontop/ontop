@@ -580,7 +580,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     protected abstract String getRelationName(RelationID id);
 
     @FunctionalInterface
-    interface PrecisionSupplier {
+    protected interface PrecisionSupplier {
         int getPrecision() throws SQLException;
     }
 }

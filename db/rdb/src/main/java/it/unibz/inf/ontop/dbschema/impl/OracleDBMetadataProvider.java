@@ -18,6 +18,9 @@ import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     private final RelationID sysDualId;
+    private final boolean mapDateToTimestamp;
+    private final boolean j2ee13Compliant;
+    private final short versionNumber;
 
     @AssistedInject
     protected OracleDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
@@ -27,17 +30,21 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/queries009.htm
         this.sysDualId = rawIdFactory.createRelationID("DUAL");
 
-        Class<? extends Connection> cc = connection.getClass();
-        try {
-            Method srr = cc.getMethod("setRemarksReporting", boolean.class);
-            srr.invoke(connection, false);
-            Method sis = cc.getMethod("setIncludeSynonyms", boolean.class);
-            sis.invoke(connection, true);
-        }
-        catch (ReflectiveOperationException e) {
-            LOGGER.debug("[DB-METADATA] Setting connection parameters {}", e.toString());
-        }
+        this.mapDateToTimestamp = getProperty(connection, "getMapDateToTimestamp", true);
+        this.j2ee13Compliant = getProperty(connection, "getJ2EE13Compliant", true);
+        this.versionNumber = getProperty(connection, "getVersionNumber", (short)12000);
 
+    }
+
+    private static <T> T getProperty(Connection connection, String name, T defValue) {
+        try {
+            Method d2ds = connection.getClass().getMethod(name);
+            return (T)d2ds.invoke(connection);
+        }
+        catch (Exception e) {
+            LOGGER.debug("[DB-METADATA] {} exception {}", name, e.toString());
+            return defValue;
+        }
     }
 
     private boolean isDual(RelationID id) {
@@ -63,31 +70,142 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     @Override
     protected ResultSet getColumns(RelationID id) throws SQLException {
-        ResultSet rs = super.getColumns(id);
-        for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
-            LOGGER.debug("[DB-METADATA] Getting columns info; column {} is of type {}",
-                    rs.getMetaData().getColumnName(i),
-                    rs.getMetaData().getColumnTypeName(i));
-        /*
         if (isDual(id))
             return super.getColumns(id);
-        Statement statement = connection.createStatement();
-        String schema = escapeRelationIdComponentPattern(getRelationSchema(id));
-        String table = escapeRelationIdComponentPattern(getRelationName(id));
-        return statement.executeQuery(String.format("SELECT \n" +
-                "NULL AS TABLE_CAT, t.owner AS TABLE_SCHEM, TABLE_NAME, COLUMN_NAME, \n" +
-                "DECODE(t.nullable, 'N', 0, 1) AS NULLABLE, \n" +
-                "t.data_type AS TYPE_NAME,\n" +
-                "DECODE(t.data_precision, null, DECODE(t.data_type, 'NUMBER', DECODE(t.data_scale, null, 38, 38), DECODE(t.data_type,'CHAR', t.char_length,'VARCHAR', t.char_length,'VARCHAR2', t.char_length,'NVARCHAR2', t.char_length,'NCHAR', t.char_length,'NUMBER', 0, t.data_length)), t.data_precision) AS COLUMN_SIZE,\n" +
-                "DECODE(t.data_type,'CHAR',1,'NCHAR',-15,'VARCHAR2',12,'NVARCHAR2',-9,'DATE',91,'RAW',-3,'BLOB',2004,'CLOB',2005,'NCLOB',2011,'NUMBER',2,'TIMESTAMP',93,'TIMESTAMP(6)',93,'TIMESTAMP WITH TIME ZONE',-101,'TIMESTAMP WITH LOCAL TIME ZONE',-102,'INTERVALYM',-103,'INTERVALDS',-104,'LONG',-1,'LONG RAW',-4,'FLOAT',6,'REAL',7,'REF',2006,'ARRAY',2003,'STRUCT',2002,-9999) AS DATA_TYPE,\n" +
-                "DECODE(t.data_type,'NUMBER', DECODE(t.data_precision, null, DECODE(t.data_scale, null, 0, t.data_scale), t.data_scale), t.data_scale) AS DECIMAL_DIGITS  \n" +
-                "FROM ALL_TAB_COLUMNS t\n" +
-                "WHERE t.owner = '%s' AND t.table_name = '%s'\n" +
-                "ORDER BY t.column_id", schema, table));
-         */
-        LOGGER.debug("[DB-METADATA] Getting columns list with fetch size {}", rs.getFetchSize());
-        return rs;
+
+        try {
+            String query = getColumnsNoWildcardsPlsql();
+            PreparedStatement stmt = connection.prepareStatement(query);
+            String schema = escapeRelationIdComponentPattern(getRelationSchema(id));
+            String table = escapeRelationIdComponentPattern(getRelationName(id));
+            stmt.setString(1, schema);
+            stmt.setString(2, table);
+            stmt.closeOnCompletion();
+            stmt.setPoolable(false);
+            ResultSet rs = stmt.executeQuery();
+            LOGGER.debug("[DB-METADATA] Getting columns list with fetch size {}", rs.getFetchSize());
+            return rs;
+        }
+        catch (Throwable e) {
+            LOGGER.debug("[DB-METADATA] Reverting to the default implementation: {}", e.toString());
+            return super.getColumns(id);
+        }
     }
+
+    private String getColumnsNoWildcardsPlsql() throws SQLException {
+
+        return "SELECT NULL AS TABLE_CAT,\n" + // !
+                "       in_owner AS TABLE_SCHEM,\n" + // !
+                "       in_name AS TABLE_NAME,\n" + // !
+                "       t.column_name AS COLUMN_NAME,\n" + // !
+                datatypeQuery() +
+                "       t.data_type AS TYPE_NAME,\n" + // !
+                "       DECODE (t.data_precision," +
+                "                null, DECODE(t.data_type," +
+                "                        'NUMBER', DECODE(t.data_scale," +
+                "                                    null, " + (j2ee13Compliant ? "38" : "0") +
+                "                                   , 38)," +
+                "          DECODE (t.data_type, 'CHAR', t.char_length," +
+                "                   'VARCHAR', t.char_length," +
+                "                   'VARCHAR2', t.char_length," +
+                "                   'NVARCHAR2', t.char_length," +
+                "                   'NCHAR', t.char_length," +
+                "                   'NUMBER', 0," +
+                "           t.data_length)" +
+                "                           )," +
+                "         t.data_precision)\n" +
+                "              AS COLUMN_SIZE,\n" + // !
+//                "       0 AS BUFFER_LENGTH,\n" +
+                "       DECODE (t.data_type," +
+                "                'NUMBER', DECODE(t.data_precision," +
+                "                                 null, DECODE(t.data_scale," +
+                "                                              null, " + (j2ee13Compliant ? "0" : "-127") +
+                "                                             , t.data_scale)," +
+                "                                  t.data_scale)," +
+                "                t.data_scale) AS DECIMAL_DIGITS,\n" + // !
+//                "       10 AS NUM_PREC_RADIX,\n" +
+                "       DECODE (t.nullable, 'N', 0, 1) AS NULLABLE\n" + // !
+//                "       NULL AS REMARKS,\n" +
+//                "       t.data_default AS COLUMN_DEF,\n" +
+//                "       0 AS SQL_DATA_TYPE,\n" +
+//                "       0 AS SQL_DATETIME_SUB,\n" +
+//                "       t.data_length AS CHAR_OCTET_LENGTH,\n" +
+                "       t.column_id AS ORDINAL_POSITION,\n" +
+//                "       DECODE (t.nullable, 'N', 'NO', 'YES') AS IS_NULLABLE,\n" +
+//                "       null as SCOPE_CATALOG,\n" +
+//                "       null as SCOPE_SCHEMA,\n" +
+//                "       null as SCOPE_TABLE,\n" +
+//                "       null as SOURCE_DATA_TYPE,\n" +
+//                (db_version >= 12000
+//                        ? "       t.identity_column as IS_AUTOINCREMENT,\n" +
+//                          "       t.virtual_column as IS_GENERATEDCOLUMN\n"
+//                        : "       'NO' as IS_AUTOINCREMENT,\n" +
+//                          "       null as IS_GENERATEDCOLUMN\n") +
+                (versionNumber >= 12000
+                        ? "FROM all_tab_cols t"
+                        : "FROM all_tab_columns t") + "\n" +
+                "WHERE t.owner = ?: \n" +
+                "  AND t.table_name = ?:\n" +
+//                "  AND t.column_name LIKE ? ESCAPE '/'\n" +
+                (versionNumber >= 12000 ? "  AND t.user_generated = 'YES'\n" : "") + "\n" +
+                "ORDER BY TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION\n";
+    }
+
+
+    private String datatypeQuery() {
+        return "  DECODE(substr(t.data_type, 1, 9), \n" +
+                "    'TIMESTAMP', \n" +
+                "      DECODE(substr(t.data_type, 10, 1), \n" +
+                "        '(', \n" +
+                "          DECODE(substr(t" + "." + "data_type, 19, 5), \n" +
+                "            'LOCAL', -102, 'TIME ', -101, 93), \n" +
+                "        DECODE(substr(t.data_type, 16, 5), \n" +
+                "          'LOCAL', -102, 'TIME ', -101, 93)), \n" +
+                "    'INTERVAL ', \n" +
+                "      DECODE(substr(t.data_type, 10, 3), \n" +
+                "       'DAY', -104, 'YEA', -103), \n" +
+                "    DECODE(t.data_type, \n" +
+                "      'BINARY_DOUBLE', 101, \n" +
+                "      'BINARY_FLOAT', 100, \n" +
+                "      'BFILE', -13, \n" +
+                "      'BLOB', 2004, \n" +
+                "      'BOOLEAN', 16, \n" +
+                "      'CHAR', 1, \n" +
+                "      'CLOB', 2005, \n" +
+                "      'COLLECTION', 2003, \n" +
+                "      'DATE', " + (mapDateToTimestamp ? "93" : "91") + ", \n" +
+                "      'FLOAT', 6, \n" +
+                "      'JSON', 2016, \n" +
+                "      'LONG', -1, \n" +
+                "      'LONG RAW', -4, \n" +
+                "      'NCHAR', -15, \n" +
+                "      'NCLOB', 2011, \n" +
+                "      'NUMBER', 2, \n" +
+                "      'NVARCHAR', -9, \n" +
+                "      'NVARCHAR2', -9, \n" +
+                "      'OBJECT', 2002, \n" +
+                "      'OPAQUE/XMLTYPE', 2009, \n" +
+                "      'RAW', -3, \n" +
+                "      'REF', 2006, \n" +
+                "      'ROWID', -8, \n" +
+                "      'SQLXML', 2009, \n" +
+                "      'UROWID', -8, \n" +
+                "      'VARCHAR2', 12, \n" +
+                "      'VARRAY', 2003, \n" +
+                "      'VECTOR', -105, \n" +
+                "      'XMLTYPE', 2009, \n" +
+                "      DECODE((SELECT a.typecode \n" +
+                "        FROM ALL_TYPES a \n" +
+                "        WHERE a.type_name = t.data_type\n" +
+                "             AND ((a.owner IS NULL AND \n" +
+                "                    t.data_type_owner IS NULL)\n" +
+                "                  OR (a.owner = t.data_type_owner))\n" +
+                "        ), \n" +
+                "        'OBJECT', 2002, \n" +
+                "        'COLLECTION', 2003, 1111))) \n" +
+                " AS DATA_TYPE,\n"; // !
+    }
+
 
     @Override
     protected String makeQueryMinimizeResultSet(String query) {
