@@ -10,9 +10,11 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
@@ -32,12 +34,12 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/queries009.htm
         this.sysDualId = rawIdFactory.createRelationID("DUAL");
 
-        this.mapDateToTimestamp = getProperty(connection, "getMapDateToTimestamp", true);
-        this.j2ee13Compliant = getProperty(connection, "getJ2EE13Compliant", false);
-        this.versionNumber = getProperty(connection, "getVersionNumber", (short)12000);
+        this.versionNumber = getProperty(connection, "getVersionNumber", null, (short)12000);
+        this.mapDateToTimestamp = getProperty(connection, "getMapDateToTimestamp", "oracle.jdbc.mapDateToTimestamp", true);
+        this.j2ee13Compliant = getProperty(connection, "getJ2EE13Compliant", "oracle.jdbc.J2EE13Compliant", true);
     }
 
-    private static <T> T getProperty(Connection connection, String name, T defValue) {
+    private static <T> T getProperty(Connection connection, String name, String property, T defValue) {
         try {
             Method m = connection.getClass().getMethod(name);
             m.setAccessible(true);
@@ -45,8 +47,22 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         }
         catch (Exception e) {
             LOGGER.debug("[DB-METADATA] {} exception {}", name, e.toString());
-            return defValue;
+            if (property != null) {
+                try {
+                    Method pm = connection.getClass().getMethod("getProperties");
+                    Properties props = (Properties) pm.invoke(connection);
+                    T v = (T)props.getProperty(property);
+                    if (v != null)
+                        return v;
+
+                    LOGGER.debug("[DB-METADATA] property {} is not found", property);
+                }
+                catch (Exception ex) {
+                    LOGGER.debug("[DB-METADATA] getProperties exception {}", e.toString());
+                }
+            }
         }
+        return defValue;
     }
 
     private boolean isDual(RelationID id) {
