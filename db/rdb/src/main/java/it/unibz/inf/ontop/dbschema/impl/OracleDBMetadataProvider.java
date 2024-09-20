@@ -104,6 +104,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             stmt.setString(2, table);
             stmt.closeOnCompletion();
             stmt.setPoolable(false);
+            System.out.println("DBMETADATA QUERY: " + query);
             ResultSet rs = stmt.executeQuery();
             if (rs.getFetchSize() < PREFETCH_SIZE)
                 rs.setFetchSize(PREFETCH_SIZE);
