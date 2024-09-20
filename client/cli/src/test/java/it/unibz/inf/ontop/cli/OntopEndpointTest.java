@@ -15,6 +15,8 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.ExternalResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -30,6 +32,7 @@ public class OntopEndpointTest {
     private static final String DBURL = "jdbc:h2:tcp://localhost:19123/./src/test/resources/h2/books.h2;ACCESS_MODE_DATA=r";
     private static final String DBUSER = "sa";
     private static final String DBPASSWORD = "test";
+    private static final Logger LOGGER = LoggerFactory.getLogger(OntopEndpointTest.class);
 
 
     @BeforeClass
@@ -67,7 +70,7 @@ public class OntopEndpointTest {
                 while (result.hasNext()) {  // iterate over the result
                     BindingSet bindingSet = result.next();
                     //Value movie = bindingSet.getValue("teacher");
-                    System.out.println(bindingSet);
+                    LOGGER.debug(bindingSet.toString());
                 }
             }
         }
@@ -87,7 +90,7 @@ public class OntopEndpointTest {
                 while (result.hasNext()) {  // iterate over the result
                     Statement bindingSet = result.next();
                     //Value movie = bindingSet.getValue("teacher");
-                    System.out.println(bindingSet);
+                    LOGGER.debug(bindingSet.toString());
                 }
             }
         }
