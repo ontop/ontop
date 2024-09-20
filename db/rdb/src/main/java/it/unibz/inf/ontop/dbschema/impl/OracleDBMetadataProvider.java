@@ -109,8 +109,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 rs.setFetchSize(PREFETCH_SIZE);
 
             LOGGER.debug("[DB-METADATA] Getting columns list with fetch size {}", rs.getFetchSize());
-            return super.getColumns(id);
-            //return rs;
+            return rs;
         }
         catch (Throwable e) {
             LOGGER.debug("[DB-METADATA] Reverting to the default implementation: {}", e.toString());
@@ -329,7 +328,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             "APPQOSSYS",
             "AUDSYS");
 
-    private static ImmutableSet<String> IGNORED_SYSTEM_VIEWS = ImmutableSet.of("SCHEDULER_PROGRAM_ARGS",
+    private static final ImmutableSet<String> IGNORED_SYSTEM_VIEWS = ImmutableSet.of("SCHEDULER_PROGRAM_ARGS",
             "SCHEDULER_JOB_ARGS",
             "PRODUCT_PRIVS");
 

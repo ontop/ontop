@@ -148,42 +148,48 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
     @Override
     public NamedRelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
-        DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
-        RelationID id = getCanonicalRelationId(id0);
-        LOGGER.debug("[DB-METADATA] Calling metadata.getColumns()");
-        try (ResultSet rs = getColumns(id)) {
-            LOGGER.debug("[DB-METADATA] metadata.getColumns() results obtained");
-            Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
+        try {
+            DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
+            RelationID id = getCanonicalRelationId(id0);
+            LOGGER.debug("[DB-METADATA] Calling metadata.getColumns()");
+            try (ResultSet rs = getColumns(id)) {
+                LOGGER.debug("[DB-METADATA] metadata.getColumns() results obtained");
+                Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
 
-            while (rs.next()) {
-                RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
-                checkSameRelationID(extractedId, id, "getColumns");
+                while (rs.next()) {
+                    RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME");
+                    checkSameRelationID(extractedId, id, "getColumns");
 
-                RelationDefinition.AttributeListBuilder builder = relations.computeIfAbsent(extractedId,
-                        i -> DatabaseTableDefinition.attributeListBuilder());
+                    RelationDefinition.AttributeListBuilder builder = relations.computeIfAbsent(extractedId,
+                            i -> DatabaseTableDefinition.attributeListBuilder());
 
-                QuotedID attributeId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
-                // columnNoNulls, columnNullable, columnNullableUnknown
-                boolean isNullable = rs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
-                String typeName = rs.getString("TYPE_NAME");
-                int columnSize = rs.getInt("COLUMN_SIZE");
-                DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
+                    QuotedID attributeId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
+                    // columnNoNulls, columnNullable, columnNullableUnknown
+                    boolean isNullable = rs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
+                    String typeName = rs.getString("TYPE_NAME");
+                    int columnSize = rs.getInt("COLUMN_SIZE");
+                    DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
 
-                String sqlTypeName = extractSQLTypeName(typeName, rs.getInt("DATA_TYPE"), columnSize,
-                        () -> rs.getInt("DECIMAL_DIGITS"));
-                builder.addAttribute(attributeId, termType, sqlTypeName, isNullable);
+                    String sqlTypeName = extractSQLTypeName(typeName, rs.getInt("DATA_TYPE"), columnSize,
+                            () -> rs.getInt("DECIMAL_DIGITS"));
+                    builder.addAttribute(attributeId, termType, sqlTypeName, isNullable);
+                }
+
+                if (relations.entrySet().size() == 1) {
+                    Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
+                    return new DatabaseTableDefinition(getAllIDs(r.getKey()), r.getValue());
+                }
+                throw relations.isEmpty()
+                        ? new RelationNotFoundInMetadataException(id, getRelationIDs())
+                        : new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
+            } catch (SQLException e) {
+                throw new MetadataExtractionException(e);
             }
-
-            if (relations.entrySet().size() == 1) {
-                Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
-                return new DatabaseTableDefinition(getAllIDs(r.getKey()), r.getValue());
-            }
-            throw relations.isEmpty()
-                    ? new RelationNotFoundInMetadataException(id, getRelationIDs())
-                    : new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
         }
-        catch (SQLException e) {
-            throw new MetadataExtractionException(e);
+        catch (Throwable e) {
+            System.out.println("DBMETADATA EXCEPTION: " + e);
+            e.printStackTrace(System.out);
+            throw e;
         }
     }
 
