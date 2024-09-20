@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
@@ -34,12 +35,12 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/queries009.htm
         this.sysDualId = rawIdFactory.createRelationID("DUAL");
 
-        this.versionNumber = getProperty(connection, "getVersionNumber", null, (short)12000);
-        this.mapDateToTimestamp = getProperty(connection, "getMapDateToTimestamp", "oracle.jdbc.mapDateToTimestamp", true);
-        this.j2ee13Compliant = getProperty(connection, "getJ2EE13Compliant", "oracle.jdbc.J2EE13Compliant", true);
+        this.versionNumber = getProperty(connection, "getVersionNumber", null, null, (short)12000);
+        this.mapDateToTimestamp = getProperty(connection, "getMapDateToTimestamp", "oracle.jdbc.mapDateToTimestamp", Boolean::parseBoolean, true);
+        this.j2ee13Compliant = getProperty(connection, "getJ2EE13Compliant", "oracle.jdbc.J2EE13Compliant", Boolean::parseBoolean, true);
     }
 
-    private static <T> T getProperty(Connection connection, String name, String property, T defValue) {
+    private static <T> T getProperty(Connection connection, String name, String property, Function<String, T> parser, T defValue) {
         try {
             Method m = connection.getClass().getMethod(name);
             m.setAccessible(true);
@@ -50,10 +51,11 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             if (property != null) {
                 try {
                     Method pm = connection.getClass().getMethod("getProperties");
+                    pm.setAccessible(true);
                     Properties props = (Properties) pm.invoke(connection);
-                    T v = (T)props.getProperty(property);
+                    String v = props.getProperty(property);
                     if (v != null)
-                        return v;
+                        return parser.apply(v);
 
                     LOGGER.debug("[DB-METADATA] property {} is not found", property);
                 }
