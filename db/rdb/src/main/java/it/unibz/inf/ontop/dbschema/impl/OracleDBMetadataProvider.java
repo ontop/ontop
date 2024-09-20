@@ -92,8 +92,6 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     @Override
     protected ResultSet getColumns(RelationID id) throws SQLException {
-        return super.getColumns(id);
-        /*
         if (isDual(id))
             return super.getColumns(id);
 
@@ -111,13 +109,13 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 rs.setFetchSize(PREFETCH_SIZE);
 
             LOGGER.debug("[DB-METADATA] Getting columns list with fetch size {}", rs.getFetchSize());
-            return rs;
+            return super.getColumns(id);
+            //return rs;
         }
         catch (Throwable e) {
             LOGGER.debug("[DB-METADATA] Reverting to the default implementation: {}", e.toString());
             return super.getColumns(id);
         }
-         */
     }
 
     private String getColumnsSql() {
