@@ -92,6 +92,8 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     @Override
     protected ResultSet getColumns(RelationID id) throws SQLException {
+        return super.getColumns(id);
+        /*
         if (isDual(id))
             return super.getColumns(id);
 
@@ -115,6 +117,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             LOGGER.debug("[DB-METADATA] Reverting to the default implementation: {}", e.toString());
             return super.getColumns(id);
         }
+         */
     }
 
     private String getColumnsSql() {
