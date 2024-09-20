@@ -36,7 +36,7 @@ public class DuckDBDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     }
 
     @Override
-    protected ResultSet getIndexInfo(String catalog, String schema, String name) throws SQLException {
+    protected ResultSet getIndexInfoResultSet(String catalog, String schema, String name) throws SQLException {
         PreparedStatement st = metadata.getConnection().prepareStatement(
                 "SELECT database_name AS TABLE_CAT, " +
                         "schema_name AS TABLE_SCHEM, " +
@@ -58,7 +58,7 @@ public class DuckDBDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     }
 
     @Override
-    protected ResultSet getImportedKeys(String catalog, String schema, String name) throws SQLException {
+    protected ResultSet getImportedKeysResultSet(String catalog, String schema, String name) throws SQLException {
         PreparedStatement st = metadata.getConnection().prepareStatement(
                 "SELECT f.database_name AS FKTABLE_CAT, " +
                         "f.schema_name AS FKTABLE_SCHEM, " +

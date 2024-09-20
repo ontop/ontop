@@ -151,7 +151,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
         RelationID id = getCanonicalRelationId(id0);
         LOGGER.debug("[DB-METADATA] Calling metadata.getColumns()");
-        try (ResultSet rs = getColumns(id)) {
+        try (ResultSet rs = getColumnsResultSet(id)) {
             LOGGER.debug("[DB-METADATA] metadata.getColumns() results obtained");
             Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
 
@@ -174,7 +174,6 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                 builder.addAttribute(attributeId, termType, sqlTypeName, isNullable);
             }
 
-            System.out.println("DBMETADATA RELATIONS GOT: " + relations);
             if (relations.entrySet().size() == 1) {
                 Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
                 return new DatabaseTableDefinition(getAllIDs(r.getKey()), r.getValue());
@@ -188,7 +187,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         }
     }
 
-    protected ResultSet getColumns(RelationID id) throws SQLException {
+    protected ResultSet getColumnsResultSet(RelationID id) throws SQLException {
         return metadata.getColumns(
                 getRelationCatalog(id), // catalog is not escaped
                 escapeRelationIdComponentPattern(getRelationSchema(id)),
@@ -315,7 +314,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
      * @throws SQLException
      */
 
-    protected ResultSet getIndexInfo(String catalog, String schema, String name) throws SQLException {
+    protected ResultSet getIndexInfoResultSet(String catalog, String schema, String name) throws SQLException {
         return metadata.getIndexInfo(catalog, schema, name, true, true);
     }
 
@@ -324,7 +323,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         RelationID id = getCanonicalRelationId(relation.getID());
         // extracting unique
         LOGGER.debug("[DB-METADATA] Calling metadata.getIndexInfo()");
-        try (ResultSet rs = getIndexInfo(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
+        try (ResultSet rs = getIndexInfoResultSet(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
             LOGGER.debug("[DB-METADATA] metadata.getIndexInfo() results obtained");
             UniqueConstraint.Builder builder = null;
             List<String> columnsNotFound = new ArrayList<>();
@@ -416,7 +415,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
      * @throws SQLException
      */
 
-    protected ResultSet getImportedKeys(String catalog, String schema, String name) throws SQLException {
+    protected ResultSet getImportedKeysResultSet(String catalog, String schema, String name) throws SQLException {
         return metadata.getImportedKeys(catalog, schema, name);
     }
 
@@ -424,7 +423,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         LOGGER.debug("[DB-METADATA] Extracting foreign keys for a relation");
         RelationID id = getCanonicalRelationId(relation.getID());
         LOGGER.debug("[DB-METADATA] Calling metadata.getImportedKeys()");
-        try (ResultSet rs = getImportedKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
+        try (ResultSet rs = getImportedKeysResultSet(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
             LOGGER.debug("[DB-METADATA] metadata.getImportedKeys() results obtained");
             ForeignKeyConstraint.Builder builder = null;
             String constraintId = null;

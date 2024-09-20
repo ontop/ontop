@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.Map;
@@ -93,9 +92,9 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     private static final int PREFETCH_SIZE = 4048;
 
     @Override
-    protected ResultSet getColumns(RelationID id) throws SQLException {
+    protected ResultSet getColumnsResultSet(RelationID id) throws SQLException {
         if (isDual(id))
-            return super.getColumns(id);
+            return super.getColumnsResultSet(id);
 
         try {
             String query = getColumnsSql();
@@ -115,7 +114,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         }
         catch (Throwable e) {
             LOGGER.debug("[DB-METADATA] Reverting to the default implementation: {}", e.toString());
-            return super.getColumns(id);
+            return super.getColumnsResultSet(id);
         }
     }
 
