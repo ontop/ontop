@@ -58,7 +58,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                     LOGGER.debug("[DB-METADATA] property {} is not found", property);
                 }
                 catch (Exception ex) {
-                    LOGGER.debug("[DB-METADATA] getProperties exception {}", e.toString());
+                    LOGGER.debug("[DB-METADATA] getProperties exception {}", ex.toString());
                 }
             }
         }
