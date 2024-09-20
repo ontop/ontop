@@ -33,9 +33,8 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         this.sysDualId = rawIdFactory.createRelationID("DUAL");
 
         this.mapDateToTimestamp = getProperty(connection, "getMapDateToTimestamp", true);
-        this.j2ee13Compliant = getProperty(connection, "getJ2EE13Compliant", true);
+        this.j2ee13Compliant = getProperty(connection, "getJ2EE13Compliant", false);
         this.versionNumber = getProperty(connection, "getVersionNumber", (short)12000);
-
     }
 
     private static <T> T getProperty(Connection connection, String name, T defValue) {
@@ -71,6 +70,8 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         super.checkSameRelationID(extractedId, givenId, method);
     }
 
+    private static final int PREFETCH_SIZE = 4048;
+
     @Override
     protected ResultSet getColumns(RelationID id) throws SQLException {
         if (isDual(id))
@@ -80,12 +81,15 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             String query = getColumnsSql();
             PreparedStatement stmt = connection.prepareStatement(query);
             String schema = escapeRelationIdComponentPattern(getRelationSchema(id));
-            String table = escapeRelationIdComponentPattern(getRelationName(id));
             stmt.setString(1, schema);
+            String table = escapeRelationIdComponentPattern(getRelationName(id));
             stmt.setString(2, table);
             stmt.closeOnCompletion();
             stmt.setPoolable(false);
             ResultSet rs = stmt.executeQuery();
+            if (rs.getFetchSize() < PREFETCH_SIZE)
+                rs.setFetchSize(PREFETCH_SIZE);
+
             LOGGER.debug("[DB-METADATA] Getting columns list with fetch size {}", rs.getFetchSize());
             return rs;
         }
@@ -97,81 +101,94 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     private String getColumnsSql() {
 
-        return "SELECT NULL AS TABLE_CAT,\n" +
-                "       t.owner AS TABLE_SCHEM,\n" +
-                "       t.table_name AS TABLE_NAME,\n" +
-                "       t.column_name AS COLUMN_NAME,\n" +
-                // see https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/Data-Types.htm
-                decodeSql("substr(t.data_type, 1, 9)", ImmutableMap.of(
-                                // TIMESTAMP [(fractional_seconds_precision)], where fractional_seconds_precision is one digit
-                                // TIMESTAMP [(fractional_seconds_precision)] WITH [LOCAL] TIME ZONE
-                                "TIMESTAMP", decodeSql("substr(t.data_type, 10, 1)",
-                                        ImmutableMap.of("(",
-                                                // (fractional_seconds_precision) is present
-                                                decodeSql("substr(t.data_type, 19, 5)", ImmutableMap.of(
+        return sqlSelect(ImmutableMap.of(
+                        "TABLE_CAT", "NULL",
+                        "TABLE_SCHEM", sqlColumn("owner"),
+                        "TABLE_NAME", sqlColumn("table_name"),
+                        "COLUMN_NAME", sqlColumn("column_name"),
+                        // see https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/Data-Types.htm
+                        "DATA_TYPE", sqlDecode(sqlSubstring(sqlColumn("data_type"), 1, "TIMESTAMP".length()), ImmutableMap.of(
+                                        // TIMESTAMP [(fractional_seconds_precision)], where fractional_seconds_precision is a single digit
+                                        // TIMESTAMP [(fractional_seconds_precision)] WITH [LOCAL] TIME ZONE
+                                        "TIMESTAMP", sqlDecode(sqlSubstring(sqlColumn("data_type"), "TIMESTAMP".length() + 1, 1),
+                                                ImmutableMap.of("(",
+                                                        // with (fractional_seconds_precision)
+                                                        sqlDecode(sqlSubstring(sqlColumn("data_type"), "TIMESTAMP(X) WITH ".length() + 1, "LOCAL".length()), ImmutableMap.of(
+                                                                "LOCAL", -102, "TIME", -101), Types.TIMESTAMP)),
+                                                // no (fractional_seconds_precision)
+                                                sqlDecode(sqlSubstring(sqlColumn("data_type"), "TIMESTAMP WITH ".length() + 1, "LOCAL".length()), ImmutableMap.of(
                                                         "LOCAL", -102, "TIME", -101), Types.TIMESTAMP)),
-                                        // (fractional_seconds_precision) is missing
-                                        decodeSql("substr(t.data_type, 16, 5)", ImmutableMap.of(
-                                                "LOCAL", -102, "TIME", -101), Types.TIMESTAMP)),
-                                // INTERVAL YEAR [(year_precision)] TO MONTH
-                                // INTERVAL DAY [(day_precision)] TO SECOND [(fractional_seconds_precision)]
-                                "INTERVAL", decodeSql("substr(t.data_type, 10, 3)", ImmutableMap.of(
-                                        "DAY", -104, "YEA", -103))),
-                        decodeSql("t.data_type",
-                                getSupportedSimpleTypes(),
-                                decodeSql("(SELECT a.typecode " +
-                                        "                      FROM ALL_TYPES a " +
-                                        "                      WHERE a.type_name = t.data_type" +
-                                        "                           AND ((a.owner IS NULL AND t.data_type_owner IS NULL)" +
-                                        "                             OR (a.owner = t.data_type_owner)))", ImmutableMap.of(
-                                        "OBJECT", Types.STRUCT, "COLLECTION", Types.ARRAY), 1111))) +
-                "         AS DATA_TYPE,\n" +
-                "       t.data_type AS TYPE_NAME,\n" +
-                "       DECODE (t.data_precision," +
-                "                null, DECODE(t.data_type," +
-                "                        'NUMBER', DECODE(t.data_scale," +
-                "                                    null, " + (j2ee13Compliant ? "38" : "0") +
-                "                                   , 38)," +
-                "          DECODE (t.data_type, 'CHAR', t.char_length," +
-                "                   'VARCHAR', t.char_length," +
-                "                   'VARCHAR2', t.char_length," +
-                "                   'NVARCHAR2', t.char_length," +
-                "                   'NCHAR', t.char_length," +
-                "                   'NUMBER', 0," +
-                "           t.data_length)" +
-                "                           )," +
-                "         t.data_precision)" +
-                "              AS COLUMN_SIZE,\n" + // !
-                "       DECODE (t.data_type," +
-                "                'NUMBER', DECODE(t.data_precision," +
-                "                                 null, DECODE(t.data_scale," +
-                "                                              null, " + (j2ee13Compliant ? "0" : "-127") +
-                "                                             , t.data_scale)," +
-                "                                  t.data_scale)," +
-                "                t.data_scale) AS DECIMAL_DIGITS,\n" +
-                "       DECODE (t.nullable, 'N', 0, 1) AS NULLABLE,\n" +
-                "       t.column_id AS ORDINAL_POSITION\n" +
-                (versionNumber >= 12000
-                        ? "FROM all_tab_cols t"
-                        : "FROM all_tab_columns t") + "\n" +
-                "WHERE t.owner = ? \n" +
-                "  AND t.table_name = ?\n" +
-                (versionNumber >= 12000
-                        ? "  AND t.user_generated = 'YES'"
-                        : "") + "\n" +
-                "ORDER BY TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION";
+                                        // INTERVAL YEAR [(year_precision)] TO MONTH
+                                        // INTERVAL DAY [(day_precision)] TO SECOND [(fractional_seconds_precision)]
+                                        "INTERVAL", sqlDecode(sqlSubstring(sqlColumn("data_type"),  "INTERVAL ".length() + 1, "DAY".length()), ImmutableMap.of(
+                                                "DAY", -104, "YEA", -103))),
+                                sqlDecode(sqlColumn("data_type"),
+                                        getSupportedSimpleTypes(),
+                                        sqlDecode("(SELECT a.typecode " +
+                                                        "                      FROM ALL_TYPES a " +
+                                                        "                      WHERE a.type_name = t.data_type" +
+                                                        "                           AND ((a.owner IS NULL AND t.data_type_owner IS NULL)" +
+                                                        "                             OR (a.owner = t.data_type_owner)))", ImmutableMap.of(
+                                                        "OBJECT", Types.STRUCT,
+                                                        "COLLECTION", Types.ARRAY),
+                                                1111))),
+                        "TYPE_NAME", sqlColumn("data_type"),
+                        "COLUMN_SIZE", sqlDecodeNull(sqlColumn("data_precision"),
+                                sqlDecode(sqlColumn("data_type"), ImmutableMap.of(
+                                                "NUMBER", sqlDecodeNull(sqlColumn("data_scale"),
+                                                        j2ee13Compliant ? "38" : "0", "38")),
+                                        sqlDecode(sqlColumn("data_type"), ImmutableMap.of(
+                                                        "CHAR", sqlColumn("char_length"),
+                                                        "VARCHAR", sqlColumn("char_length"),
+                                                        "VARCHAR2", sqlColumn("char_length"),
+                                                        "NVARCHAR2", sqlColumn("char_length"),
+                                                        "NCHAR", sqlColumn("char_length"),
+                                                        "NUMBER", "0"),
+                                                sqlColumn("data_length"))),
+                                sqlColumn("data_precision")),
+                        "DECIMAL_DIGITS", sqlDecode(sqlColumn("data_type"), ImmutableMap.of(
+                                        "NUMBER", sqlDecodeNull(sqlColumn("data_precision"),
+                                                sqlDecodeNull(sqlColumn("data_scale"),
+                                                        j2ee13Compliant ? "0" : "-127",
+                                                        sqlColumn("data_scale")),
+                                                sqlColumn("data_scale"))),
+                                sqlColumn("data_scale")),
+                        "NULLABLE", sqlDecode(sqlColumn("nullable"), ImmutableMap.of("N", 0), 1),
+                        "ORDINAL_POSITION", sqlColumn("column_id")),
+                (versionNumber >= 12000 ? "all_tab_cols" : "all_tab_columns") + " t",
+                sqlColumn("owner") + " = ? AND " + sqlColumn("table_name") + " = ?" +
+                        (versionNumber >= 12000 ? " AND " + sqlColumn("user_generated") + " = 'YES'" : ""),
+                ImmutableList.of("TABLE_SCHEM", "TABLE_NAME", "ORDINAL_POSITION"));
+    }
+
+    private static String sqlSubstring(String expression, int start, int length) {
+        return "substr(" + expression + ", " + start + ", " + length + ")";
+    }
+
+    private static String sqlColumn(String column) {
+        return "t." + column;
+    }
+
+    private static String sqlSelect(ImmutableMap<String, String> columns, String from, String where, ImmutableList<String> order) {
+        return columns.entrySet().stream()
+                .map(e -> e.getValue() + " AS " + e.getKey())
+                .collect(Collectors.joining(",\n", "SELECT ", "\n")) +
+                "FROM " + from + "\n" + "WHERE " + where + "\n" + "ORDER BY " + String.join(", ", order);
+    }
+
+    private static String sqlDecodeNull(String expression, Object nullValue, Object otherValue) {
+        return "DECODE(" + expression + ", NULL, " + nullValue + ", " + otherValue +  ")";
     }
 
 
-
-    private static String decodeSql(String expression, Map<String, ?> cases, Object defaultValue) {
+    private static String sqlDecode(String expression, Map<String, ?> cases, Object defaultValue) {
         return "DECODE(" + expression + ", " + cases.entrySet().stream()
                 .map(e -> "'" + e.getKey() + "', " + e.getValue())
                 .collect(Collectors.joining(", "))
                 +  ", " + defaultValue +  ")";
     }
 
-    private static String decodeSql(String expression, Map<String, ?> cases) {
+    private static String sqlDecode(String expression, Map<String, ?> cases) {
         return "DECODE(" + expression + ", " + cases.entrySet().stream()
                 .map(e -> "'" + e.getKey() + "', " + e.getValue())
                 .collect(Collectors.joining(", "))
