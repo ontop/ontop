@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
@@ -28,6 +27,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     private final boolean mapDateToTimestamp;
     private final boolean j2ee13Compliant;
     private final short versionNumber;
+    private final boolean includeSynonyms;
 
     @AssistedInject
     protected OracleDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
@@ -37,9 +37,11 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/queries009.htm
         this.sysDualId = rawIdFactory.createRelationID("DUAL");
 
+        // see https://docs.oracle.com/en/database/oracle/oracle-database/23/jajdb/oracle/jdbc/OracleConnection.html
         this.versionNumber = getProperty(connection, "getVersionNumber", null, null, (short)12000);
         this.mapDateToTimestamp = getProperty(connection, "getMapDateToTimestamp", "oracle.jdbc.mapDateToTimestamp", Boolean::parseBoolean, true);
         this.j2ee13Compliant = getProperty(connection, "getJ2EE13Compliant", "oracle.jdbc.J2EE13Compliant", Boolean::parseBoolean, true);
+        this.includeSynonyms = getProperty(connection, "getIncludeSynonyms", "includeSynonyms", Boolean::parseBoolean, false)
     }
 
     private static <T> T getProperty(Connection connection, String name, String property, Function<String, T> parser, T defValue) {
@@ -94,7 +96,6 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     @Override
     protected ResultSet getColumnsResultSet(RelationID id) throws SQLException {
-        System.out.println("[DB-METADATA] getColumnsResultSet for " + id);
         if (isDual(id))
             return super.getColumnsResultSet(id);
 
@@ -103,11 +104,12 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             PreparedStatement stmt = connection.prepareStatement(query);
             String schema = escapeRelationIdComponentPattern(getRelationSchema(id));
             stmt.setString(1, schema);
-            stmt.setString(3, schema);
             String table = escapeRelationIdComponentPattern(getRelationName(id));
             stmt.setString(2, table);
-            stmt.setString(4, table);
-            System.out.println("[DB-METADATA] Query Parameters " + stmt.getParameterMetaData().getParameterCount());
+            if (includeSynonyms) {
+                stmt.setString(3, schema);
+                stmt.setString(4, table);
+            }
             stmt.closeOnCompletion();
             stmt.setPoolable(false);
             ResultSet rs = stmt.executeQuery();
@@ -118,7 +120,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             return rs;
         }
         catch (Throwable e) {
-            System.out.println("[DB-METADATA] Reverting to the default implementation: " + e.toString());
+            System.out.println("[DB-METADATA] Reverting to the default implementation: " + e);
             LOGGER.debug("[DB-METADATA] Reverting to the default implementation: {}", e.toString());
             return super.getColumnsResultSet(id);
         }
@@ -178,11 +180,11 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 "NULLABLE", sqlDecode(sqlColumn("nullable"), ImmutableMap.of("N", 0), 1),
                 "ORDINAL_POSITION", sqlColumn("column_id"));
 
-        String queryHint = (versionNumber >= 10200 && versionNumber < 11100) ? "/*+ CHOOSE */" : "";
+        String queryHint = (includeSynonyms && versionNumber >= 10200 && versionNumber < 11100) ? "/*+ CHOOSE */" : "";
         String allColumnsTable = versionNumber >= 12000 ? "all_tab_cols" : "all_tab_columns";
         String userGeneratedFilter = versionNumber >= 12000 ? " AND " + sqlColumn("user_generated") + " = 'YES'" : "";
 
-        return sqlSelect(queryHint, concat(ImmutableMap.of(
+        return sqlSelectFromWhere(queryHint, concat(ImmutableMap.of(
                                 "TABLE_CAT", "NULL",
                                 "TABLE_SCHEM", sqlColumn("owner"),
                                 "TABLE_NAME", sqlColumn("table_name")),
@@ -191,9 +193,10 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 sqlColumn("owner") + " = ? AND " + sqlColumn("table_name") + " = ?" +
                         userGeneratedFilter)
 
-                + "\nUNION ALL\n"
+                + (includeSynonyms
+                ? "\nUNION ALL\n"
 
-                + sqlSelect(queryHint, concat(ImmutableMap.of(
+                + sqlSelectFromWhere(queryHint, concat(ImmutableMap.of(
                                 "TABLE_CAT", "NULL",
                                 "TABLE_SCHEM", "REGEXP_SUBSTR(LTRIM(s.owner, '/'), '[^/]+')",
                                 "TABLE_NAME", "REGEXP_SUBSTR(LTRIM(s.synonym_name, '/'), '[^/]+')"),
@@ -201,7 +204,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 allColumnsTable + " t,\n" +
                         "(SELECT SYS_CONNECT_BY_PATH(owner, '/') owner, " +
                         "SYS_CONNECT_BY_PATH(synonym_name, '/') synonym_name, " +
-                        "table_owner, table_name " +
+                        "table_owner, table_name\n" +
                         "FROM all_synonyms\n" +
                         "WHERE CONNECT_BY_ISLEAF = 1\n" +
                         "AND db_link is NULL\n" +
@@ -210,6 +213,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "AND PRIOR table_owner = owner) s",
                 sqlColumn("owner") + " = s.table_owner AND " + sqlColumn("table_name") + " = s.table_name " +
                         userGeneratedFilter)
+                : "")
 
                 + "\n" + "ORDER BY " + String.join(", ", ImmutableList.of("TABLE_SCHEM", "TABLE_NAME", "ORDINAL_POSITION"));
     }
@@ -226,11 +230,13 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         return "t." + column;
     }
 
-    private static String sqlSelect(String hint, ImmutableMap<String, String> columns, String from, String where) {
-        return columns.entrySet().stream()
-                .map(e -> e.getValue() + " AS " + e.getKey())
-                .collect(Collectors.joining(",\n", "SELECT " + hint + " ", "\n")) +
-                "FROM " + from + "\n" + "WHERE " + where;
+    private static String sqlSelectFromWhere(String hint, ImmutableMap<String, String> columns, String from, String where) {
+        return "SELECT " + hint + " " +
+                columns.entrySet().stream()
+                        .map(e -> e.getValue() + " AS " + e.getKey())
+                        .collect(Collectors.joining(",\n")) +
+                "\nFROM " + from +
+                "\nWHERE " + where;
     }
 
     private static String sqlDecodeNull(String expression, Object nullValue, Object otherValue) {
