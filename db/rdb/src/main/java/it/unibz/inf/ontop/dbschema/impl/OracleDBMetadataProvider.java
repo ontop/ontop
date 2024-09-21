@@ -106,7 +106,12 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             stmt.setString(2, table);
             System.out.println("[DB-METADATA] Query Parameters " + stmt.getParameterMetaData().getParameterCount()
                     + " " + IntStream.rangeClosed(1, stmt.getParameterMetaData().getParameterCount())
-                    .map(i -> stmt.getParameterMetaData().getParameterType(i))
+                    .map(i -> {
+                        try {
+                            return stmt.getParameterMetaData().getParameterType(i);
+                        } catch (SQLException ignored) {
+                        }
+                    })
                     .collect(Collectors.joining(", ")));
             stmt.closeOnCompletion();
             stmt.setPoolable(false);
