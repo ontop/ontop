@@ -41,7 +41,8 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         this.versionNumber = getProperty(connection, "getVersionNumber", null, null, (short)12000);
         this.mapDateToTimestamp = getProperty(connection, "getMapDateToTimestamp", "oracle.jdbc.mapDateToTimestamp", Boolean::parseBoolean, true);
         this.j2ee13Compliant = getProperty(connection, "getJ2EE13Compliant", "oracle.jdbc.J2EE13Compliant", Boolean::parseBoolean, true);
-        this.includeSynonyms = getProperty(connection, "getIncludeSynonyms", "includeSynonyms", Boolean::parseBoolean, false);
+        this.includeSynonyms = true; // getProperty(connection, "getIncludeSynonyms", "includeSynonyms", Boolean::parseBoolean, false);
+        System.out.println("[DB-METADATA] version " + versionNumber + ", mapDateToTimestamp " + mapDateToTimestamp + ", j2ee13Compliant " + j2ee13Compliant + ", includeSynonyms " + includeSynonyms);
     }
 
     private static <T> T getProperty(Connection connection, String name, String property, Function<String, T> parser, T defValue) {
