@@ -103,6 +103,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             stmt.setString(1, schema);
             String table = escapeRelationIdComponentPattern(getRelationName(id));
             stmt.setString(2, table);
+            System.out.println("[DB-METADATA] Query Parameters " + stmt.getParameterMetaData());
             stmt.closeOnCompletion();
             stmt.setPoolable(false);
             ResultSet rs = stmt.executeQuery();
