@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
@@ -103,7 +104,10 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             stmt.setString(1, schema);
             String table = escapeRelationIdComponentPattern(getRelationName(id));
             stmt.setString(2, table);
-            System.out.println("[DB-METADATA] Query Parameters " + stmt.getParameterMetaData());
+            System.out.println("[DB-METADATA] Query Parameters " + stmt.getParameterMetaData().getParameterCount()
+                    + " " + IntStream.rangeClosed(1, stmt.getParameterMetaData().getParameterCount())
+                    .map(i -> stmt.getParameterMetaData().getParameterType(i))
+                    .collect(Collectors.joining(", ")));
             stmt.closeOnCompletion();
             stmt.setPoolable(false);
             ResultSet rs = stmt.executeQuery();
