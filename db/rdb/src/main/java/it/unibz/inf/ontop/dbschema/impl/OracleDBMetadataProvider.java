@@ -103,18 +103,11 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             PreparedStatement stmt = connection.prepareStatement(query);
             String schema = escapeRelationIdComponentPattern(getRelationSchema(id));
             stmt.setString(1, schema);
+            stmt.setString(3, schema);
             String table = escapeRelationIdComponentPattern(getRelationName(id));
             stmt.setString(2, table);
-            System.out.println("[DB-METADATA] Query Parameters " + stmt.getParameterMetaData().getParameterCount()
-                    + " " + IntStream.rangeClosed(1, stmt.getParameterMetaData().getParameterCount())
-                    .mapToObj(i -> {
-                        try {
-                            return stmt.getParameterMetaData().getParameterTypeName(i);
-                        } catch (SQLException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .collect(Collectors.joining(", ")));
+            stmt.setString(4, table);
+            System.out.println("[DB-METADATA] Query Parameters " + stmt.getParameterMetaData().getParameterCount());
             stmt.closeOnCompletion();
             stmt.setPoolable(false);
             ResultSet rs = stmt.executeQuery();
@@ -195,7 +188,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                                 "TABLE_NAME", sqlColumn("table_name")),
                         otherColumns),
                 allColumnsTable + " t",
-                sqlColumn("owner") + " = :1 AND " + sqlColumn("table_name") + " = :2" +
+                sqlColumn("owner") + " = ? AND " + sqlColumn("table_name") + " = ?" +
                         userGeneratedFilter)
 
                 + "\nUNION ALL\n"
@@ -212,7 +205,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "FROM all_synonyms\n" +
                         "WHERE CONNECT_BY_ISLEAF = 1\n" +
                         "AND db_link is NULL\n" +
-                        "START WITH owner = :1 AND synonym_name = :2\n  " +
+                        "START WITH owner = ? AND synonym_name = ?\n  " +
                         "CONNECT BY PRIOR table_name = synonym_name\n    " +
                         "AND PRIOR table_owner = owner) s",
                 sqlColumn("owner") + " = s.table_owner AND " + sqlColumn("table_name") + " = s.table_name " +
