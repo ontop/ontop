@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.awt.desktop.SystemEventListener;
 import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.Map;
@@ -102,6 +103,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
         try {
             String query = getColumnsSql();
+            System.out.println("[DB-METADATA] Query " + query);
             PreparedStatement stmt = connection.prepareStatement(query);
             String schema = escapeRelationIdComponentPattern(getRelationSchema(id));
             stmt.setString(1, schema);
