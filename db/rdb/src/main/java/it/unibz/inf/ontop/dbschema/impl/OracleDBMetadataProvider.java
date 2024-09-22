@@ -43,7 +43,6 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         this.mapDateToTimestamp = getProperty(connection, "getMapDateToTimestamp", "oracle.jdbc.mapDateToTimestamp", Boolean::parseBoolean, true);
         this.j2ee13Compliant = getProperty(connection, "getJ2EE13Compliant", "oracle.jdbc.J2EE13Compliant", Boolean::parseBoolean, true);
         this.includeSynonyms = getProperty(connection, "getIncludeSynonyms", "includeSynonyms", Boolean::parseBoolean, false);
-        System.out.println("[DB-METADATA] version " + versionNumber + ", mapDateToTimestamp " + mapDateToTimestamp + ", j2ee13Compliant " + j2ee13Compliant + ", includeSynonyms " + includeSynonyms);
     }
 
     private static <T> T getProperty(Connection connection, String name, String property, Function<String, T> parser, T defValue) {
@@ -112,7 +111,6 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 stmt.setString(3, schema);
                 stmt.setString(4, table);
             }
-            System.out.println("[DB-METADATA] Given table " + schema + "." + table);
             stmt.closeOnCompletion();
             stmt.setPoolable(false);
             ResultSet rs = stmt.executeQuery();
@@ -123,7 +121,6 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             return rs;
         }
         catch (Throwable e) {
-            System.out.println("[DB-METADATA] Reverting to the default implementation: " + e);
             LOGGER.debug("[DB-METADATA] Reverting to the default implementation: {}", e.toString());
             return super.getColumnsResultSet(id);
         }
