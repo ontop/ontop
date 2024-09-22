@@ -42,7 +42,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         this.versionNumber = getProperty(connection, "getVersionNumber", null, null, (short)12000);
         this.mapDateToTimestamp = getProperty(connection, "getMapDateToTimestamp", "oracle.jdbc.mapDateToTimestamp", Boolean::parseBoolean, true);
         this.j2ee13Compliant = getProperty(connection, "getJ2EE13Compliant", "oracle.jdbc.J2EE13Compliant", Boolean::parseBoolean, true);
-        this.includeSynonyms = true; // getProperty(connection, "getIncludeSynonyms", "includeSynonyms", Boolean::parseBoolean, false);
+        this.includeSynonyms = getProperty(connection, "getIncludeSynonyms", "includeSynonyms", Boolean::parseBoolean, false);
         System.out.println("[DB-METADATA] version " + versionNumber + ", mapDateToTimestamp " + mapDateToTimestamp + ", j2ee13Compliant " + j2ee13Compliant + ", includeSynonyms " + includeSynonyms);
     }
 
@@ -103,7 +103,6 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
         try {
             String query = getColumnsSql();
-            System.out.println("[DB-METADATA] Query " + query);
             PreparedStatement stmt = connection.prepareStatement(query);
             String schema = escapeRelationIdComponentPattern(getRelationSchema(id));
             stmt.setString(1, schema);
@@ -113,6 +112,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 stmt.setString(3, schema);
                 stmt.setString(4, table);
             }
+            System.out.println("[DB-METADATA] Given table " + schema + "." + table);
             stmt.closeOnCompletion();
             stmt.setPoolable(false);
             ResultSet rs = stmt.executeQuery();
@@ -211,8 +211,8 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "FROM all_synonyms\n" +
                         "WHERE CONNECT_BY_ISLEAF = 1\n" +
                         "AND db_link is NULL\n" +
-                        "START WITH owner = ? AND synonym_name = ?\n  " +
-                        "CONNECT BY PRIOR table_name = synonym_name\n    " +
+                        "START WITH owner = ? AND synonym_name = ?\n" +
+                        "CONNECT BY PRIOR table_name = synonym_name\n" +
                         "AND PRIOR table_owner = owner) s",
                 sqlColumn("owner") + " = s.table_owner AND " + sqlColumn("table_name") + " = s.table_name " +
                         userGeneratedFilter)
