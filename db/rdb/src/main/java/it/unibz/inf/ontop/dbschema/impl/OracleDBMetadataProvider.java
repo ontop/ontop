@@ -104,9 +104,9 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         try {
             String query = getColumnsSql();
             PreparedStatement stmt = connection.prepareStatement(query);
-            String schema = escapeRelationIdComponentPattern(getRelationSchema(id));
+            String schema = getRelationSchema(id);
             stmt.setString(1, schema);
-            String table = escapeRelationIdComponentPattern(getRelationName(id));
+            String table = getRelationName(id);
             stmt.setString(2, table);
             if (includeSynonyms) {
                 stmt.setString(3, schema);
