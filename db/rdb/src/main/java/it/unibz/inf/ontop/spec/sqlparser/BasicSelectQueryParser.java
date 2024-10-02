@@ -15,13 +15,11 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
-import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.function.Function;
 
 public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
-    protected static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BasicSelectQueryParser.class);
 
     protected final ExpressionParser expressionParser;
     protected final TermFactory termFactory;
@@ -280,9 +278,7 @@ public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
 
             RelationID id = JSqlParserTools.getRelationId(idfac, table);
             try {
-                LOGGER.debug("[DB-METADATA] Extracting metadata from a new relation");
                 NamedRelationDefinition relation = metadata.getRelation(id);
-                LOGGER.debug("[DB-METADATA] Metadata extracted for the relation");
                 T rae = create(relation);
                 result = (table.getAlias() == null)
                         ? rae

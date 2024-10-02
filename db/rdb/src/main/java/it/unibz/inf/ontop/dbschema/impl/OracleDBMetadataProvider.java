@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.awt.desktop.SystemEventListener;
 import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.Map;
@@ -43,6 +42,9 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         this.mapDateToTimestamp = getProperty(connection, "getMapDateToTimestamp", "oracle.jdbc.mapDateToTimestamp", Boolean::parseBoolean, true);
         this.j2ee13Compliant = getProperty(connection, "getJ2EE13Compliant", "oracle.jdbc.J2EE13Compliant", Boolean::parseBoolean, true);
         this.includeSynonyms = getProperty(connection, "getIncludeSynonyms", "includeSynonyms", Boolean::parseBoolean, false);
+
+        LOGGER.debug("[DB-METADATA] Oracle version {} with mapDateToTimestamp {}, j2ee13Compliant {} and includeSynonyms {}",
+                versionNumber, mapDateToTimestamp, j2ee13Compliant, includeSynonyms);
     }
 
     private static <T> T getProperty(Connection connection, String name, String property, Function<String, T> parser, T defValue) {
@@ -52,7 +54,6 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             return (T)m.invoke(connection);
         }
         catch (Exception e) {
-            LOGGER.debug("[DB-METADATA] {} exception {}", name, e.toString());
             if (property != null) {
                 try {
                     Method pm = connection.getClass().getMethod("getProperties");
@@ -61,11 +62,8 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                     String v = props.getProperty(property);
                     if (v != null)
                         return parser.apply(v);
-
-                    LOGGER.debug("[DB-METADATA] property {} is not found", property);
                 }
-                catch (Exception ex) {
-                    LOGGER.debug("[DB-METADATA] getProperties exception {}", ex.toString());
+                catch (Exception ignored) {
                 }
             }
         }
@@ -117,7 +115,6 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             if (rs.getFetchSize() < PREFETCH_SIZE)
                 rs.setFetchSize(PREFETCH_SIZE);
 
-            LOGGER.debug("[DB-METADATA] Getting columns list with fetch size {}", rs.getFetchSize());
             return rs;
         }
         catch (Throwable e) {

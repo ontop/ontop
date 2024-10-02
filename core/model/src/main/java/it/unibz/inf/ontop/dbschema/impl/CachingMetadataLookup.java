@@ -5,14 +5,11 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class CachingMetadataLookup implements MetadataLookup {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CachingMetadataLookup.class);
     private final MetadataProvider provider;
     private final Map<RelationID, NamedRelationDefinition> map = new HashMap<>();
 
@@ -56,10 +53,8 @@ public class CachingMetadataLookup implements MetadataLookup {
         ImmutableMetadataLookup lookup = extractImmutableMetadataLookup();
         ImmutableList<NamedRelationDefinition> list = lookup.getRelations();
 
-        LOGGER.debug("[DB-METADATA] Inserting integrity constraints for {} relations", list.size());
         for (NamedRelationDefinition relation : list)
             provider.insertIntegrityConstraints(relation, lookup);
-        LOGGER.debug("[DB-METADATA] Integrity constraints for {} relations inserted", list.size());
 
         provider.normalizeAndOptimizeRelations(list);
 

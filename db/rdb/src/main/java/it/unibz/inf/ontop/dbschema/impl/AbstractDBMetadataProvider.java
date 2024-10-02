@@ -148,14 +148,14 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
     @Override
     public NamedRelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
+        LogOperation logOperation = new LogOperation();
         DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
         RelationID id = getCanonicalRelationId(id0);
-        LOGGER.debug("[DB-METADATA] Calling metadata.getColumns()");
         try (ResultSet rs = getColumnsResultSet(id)) {
-            LOGGER.debug("[DB-METADATA] metadata.getColumns() results obtained");
             Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
 
             while (rs.next()) {
+                logOperation.advanceCounter();
                 RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
                 checkSameRelationID(extractedId, id, "getColumns");
 
@@ -173,6 +173,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                         () -> rs.getInt("DECIMAL_DIGITS"));
                 builder.addAttribute(attributeId, termType, sqlTypeName, isNullable);
             }
+            LOGGER.debug("[DB-METADATA] Column info extracted in {} ms/column", logOperation.getAverageDuration());
 
             if (relations.entrySet().size() == 1) {
                 Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
@@ -253,16 +254,14 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     }
 
     private void insertPrimaryKey(NamedRelationDefinition relation) throws MetadataExtractionException, SQLException {
-        LOGGER.debug("[DB-METADATA] Extracting primary keys for a relation");
-
+        LogOperation logOperation = new LogOperation();
         RelationID id = getCanonicalRelationId(relation.getID());
         // Retrieves a description of the given table's primary key columns. They are ordered by COLUMN_NAME (sic!)
-        LOGGER.debug("[DB-METADATA] Calling metadata.getPrimaryKeys()");
         try (ResultSet rs = getPrimaryKeysResultSet(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
-            LOGGER.debug("[DB-METADATA] metadata.getPrimaryKeys() results obtained");
             Map<Integer, QuotedID> primaryKeyAttributes = new HashMap<>();
             String currentPkName = null;
             while (rs.next()) {
+                logOperation.advanceCounter();
                 RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
                 checkSameRelationID(extractedId, id, "getPrimaryKeys");
 
@@ -292,7 +291,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                     }
             }
         }
-        LOGGER.debug("[DB-METADATA] Primary key(s) extracted for a relation");
+        LOGGER.debug("[DB-METADATA] Primary key(s) extracted in {} ms/column", logOperation.getAverageDuration());
     }
 
     protected boolean isUniqueConstraintDisabled(RelationID id, String constraintId) { return false; }
@@ -319,16 +318,15 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     }
 
     private void insertUniqueAttributes(NamedRelationDefinition relation) throws MetadataExtractionException, SQLException {
-        LOGGER.debug("[DB-METADATA] Extracting unique attributes for a relation");
+        LogOperation logOperation = new LogOperation();
         RelationID id = getCanonicalRelationId(relation.getID());
         // extracting unique
-        LOGGER.debug("[DB-METADATA] Calling metadata.getIndexInfo()");
         try (ResultSet rs = getIndexInfoResultSet(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
-            LOGGER.debug("[DB-METADATA] metadata.getIndexInfo() results obtained");
             UniqueConstraint.Builder builder = null;
             List<String> columnsNotFound = new ArrayList<>();
             String constraintId = null;
             while (rs.next()) {
+                logOperation.advanceCounter();
                 RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
                 checkSameRelationID(extractedId, id, "getIndexInfo");
 
@@ -379,7 +377,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             }
             createUniqueConstraint(id, builder, constraintId, columnsNotFound);
         }
-        LOGGER.debug("[DB-METADATA] Unique constraints extracted for a relation");
+        LOGGER.debug("[DB-METADATA] Unique constraints extracted in {} ms/column", logOperation.getAverageDuration());
     }
 
     private void createUniqueConstraint(RelationID id, UniqueConstraint.Builder builder, String constraintId, List<String> columnsNotFound) {
@@ -420,14 +418,13 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     }
 
     private void insertForeignKeys(NamedRelationDefinition relation, MetadataLookup dbMetadata) throws MetadataExtractionException, SQLException {
-        LOGGER.debug("[DB-METADATA] Extracting foreign keys for a relation");
+        LogOperation logOperation = new LogOperation();
         RelationID id = getCanonicalRelationId(relation.getID());
-        LOGGER.debug("[DB-METADATA] Calling metadata.getImportedKeys()");
         try (ResultSet rs = getImportedKeysResultSet(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
-            LOGGER.debug("[DB-METADATA] metadata.getImportedKeys() results obtained");
             ForeignKeyConstraint.Builder builder = null;
             String constraintId = null;
             while (rs.next()) {
+                logOperation.advanceCounter();
                 RelationID extractedId = getRelationID(rs, "FKTABLE_CAT", "FKTABLE_SCHEM","FKTABLE_NAME");
                 checkSameRelationID(extractedId, id, "getImportedKeys");
                 RelationID pkId = getRelationID(rs, "PKTABLE_CAT", "PKTABLE_SCHEM","PKTABLE_NAME");
@@ -436,13 +433,8 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                     int seq = rs.getShort("KEY_SEQ");
                     if (seq == 1) {
                         createForeignKeyConstraint(id, builder, constraintId);
-
                         constraintId = rs.getString("FK_NAME"); // String => foreign key name (may be null)
-
-                        LOGGER.debug("[DB-METADATA] Trying to obtain the target relation of the FK");
                         NamedRelationDefinition ref = dbMetadata.getRelation(pkId);
-                        LOGGER.debug("[DB-METADATA] Target relation of the FK obtained");
-
                         builder = ForeignKeyConstraint.builder(constraintId, relation, ref);
                     }
                     if (builder != null) {
@@ -463,7 +455,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             }
             createForeignKeyConstraint(id, builder, constraintId);
         }
-        LOGGER.debug("[DB-METADATA] Foreign keys extracted for a relation");
+        LOGGER.debug("[DB-METADATA] Foreign keys extracted in {} ms/column", logOperation.getAverageDuration());
     }
 
     private void createForeignKeyConstraint(RelationID id, ForeignKeyConstraint.Builder builder, String constraintId) {
@@ -583,4 +575,25 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     protected interface PrecisionSupplier {
         int getPrecision() throws SQLException;
     }
+
+    protected static class LogOperation {
+        private final long startTime;
+        private int count;
+
+        LogOperation() {
+            startTime = System.currentTimeMillis();
+        }
+
+        void advanceCounter() {
+            count++;
+        }
+
+        long getAverageDuration() {
+            if (count == 0)
+                return 0;
+            long endTime = System.currentTimeMillis();
+            return (endTime - startTime)/ count;
+        }
+    }
+
 }
