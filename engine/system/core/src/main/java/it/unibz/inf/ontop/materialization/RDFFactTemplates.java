@@ -27,6 +27,5 @@ public interface RDFFactTemplates {
      * Each list contains variables in a substitution that correspond to the same ImmutableTerm
      */
     RDFFactTemplates compress(ImmutableSet<ImmutableCollection<Variable>> equivalentVariables);
-
     ImmutableSet<Variable> getVariables();
 }

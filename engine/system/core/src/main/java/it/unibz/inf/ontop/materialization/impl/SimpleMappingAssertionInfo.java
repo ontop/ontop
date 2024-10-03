@@ -1,16 +1,13 @@
 package it.unibz.inf.ontop.materialization.impl;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
 import it.unibz.inf.ontop.materialization.MappingAssertionInformation;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -19,6 +16,7 @@ import it.unibz.inf.ontop.substitution.UnifierBuilder;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Optional;
 
@@ -74,7 +72,19 @@ public class SimpleMappingAssertionInfo implements MappingAssertionInformation {
     }
 
     @Override
+    public RDFFactTemplates restrict(ImmutableSet<IRI> predicates) {
+        ImmutableCollection<ImmutableList<Variable>> filteredTemplates = RDFTemplates.getTriplesOrQuadsVariables().stream()
+                .filter(tripleOrQuad -> {
+                    ImmutableTerm predicate = topConstructSubstitution.apply(tripleOrQuad.get(1));
+                    return predicate instanceof IRI && predicates.contains(predicate);
+                })
+                .collect(ImmutableCollectors.toList());
 
+        return new RDFFactTemplatesImpl(filteredTemplates);
+
+    }
+
+    @Override
     public Optional<MappingAssertionInformation> merge(MappingAssertionInformation otherInfo) {
         if (!(otherInfo instanceof SimpleMappingAssertionInfo)
                 || !relationDefinition.getAtomPredicate().getName().equals(((SimpleMappingAssertionInfo) otherInfo).getRelationName())) {

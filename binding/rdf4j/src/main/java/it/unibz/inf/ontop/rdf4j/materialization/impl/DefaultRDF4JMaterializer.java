@@ -37,6 +37,7 @@ public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
 
     public DefaultRDF4JMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
         materializer = new DefaultOntopRDFMaterializer(configuration, materializationParams);
+        // materializer = new OnePassRDFMaterializer(configuration, materializationParams);
     }
 
     /**

@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -87,12 +86,11 @@ public class RDFFactTemplatesImpl implements RDFFactTemplates {
     }
 
     private Variable getEquivalentVariable(Variable variable, ImmutableSet<ImmutableCollection<Variable>> equivalentVariables) {
-        var tmp = equivalentVariables.stream()
+        return equivalentVariables.stream()
                 .filter(equivalent -> equivalent.contains(variable))
                 .flatMap(ImmutableCollection::stream)
                 .findFirst()
                 .orElse(variable);
-        return tmp;
     }
 
     private ImmutableList<Variable> getTemplate(int index) {
