@@ -198,7 +198,7 @@ public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
         }
     }
 
-    private static class GraphMaterializationIteration implements CloseableIteration<Statement, QueryEvaluationException> {
+    private static class GraphMaterializationIteration implements CloseableIteration<Statement> {
 
         private final MaterializedGraphResultSet graphResultSet;
 

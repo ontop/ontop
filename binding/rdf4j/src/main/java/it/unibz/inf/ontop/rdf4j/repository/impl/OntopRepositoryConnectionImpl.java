@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 
 import org.eclipse.rdf4j.common.iteration.CloseableIteratorIteration;
+import org.eclipse.rdf4j.common.iteration.EmptyIteration;
 import org.eclipse.rdf4j.common.transaction.IsolationLevel;
 import org.eclipse.rdf4j.common.transaction.IsolationLevels;
 import org.eclipse.rdf4j.model.*;
@@ -84,7 +85,7 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
     }
 
     @Override
-    public void add(URL url, String baseIRI, RDFFormat dataFormat, Resource... contexts) 
+    public void add(URL url, String baseIRI, RDFFormat dataFormat, Resource... contexts)
             throws RepositoryException {
         throw new RepositoryException(READ_ONLY_MESSAGE);
     }
@@ -248,9 +249,9 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
                 GraphQuery query = prepareGraphQuery(QueryLanguage.SPARQL,
                         queryString.toString());
                 GraphQueryResult result = query.evaluate();
-                return new RepositoryResult<>(new CloseableIteratorIteration<>(result.iterator()));
+                return new RepositoryResult<Statement>(new CloseableIteratorIteration<Statement>(result.iterator()));
             }
-            return new RepositoryResult<>(new CloseableIteratorIteration<>());
+            return new RepositoryResult<Statement>(new EmptyIteration<>());
         } catch (MalformedQueryException | QueryEvaluationException e) {
             throw new RepositoryException(e);
         }
@@ -592,16 +593,16 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
 
 
     @Override
-    public <E extends Exception> void add(
-            org.eclipse.rdf4j.common.iteration.Iteration<? extends Statement, E> statements, Resource... contexts)
-            throws RepositoryException, E {
+    public void add(
+            org.eclipse.rdf4j.common.iteration.CloseableIteration<? extends Statement> statements, Resource... contexts)
+            throws RepositoryException {
         throw new UnsupportedOperationException(READ_ONLY_MESSAGE);
     }
 
     @Override
-    public <E extends Exception> void remove(
-            org.eclipse.rdf4j.common.iteration.Iteration<? extends Statement, E> statements, Resource... contexts)
-            throws RepositoryException, E {
+    public  void remove(
+            org.eclipse.rdf4j.common.iteration.CloseableIteration<? extends Statement> statements, Resource... contexts)
+            throws RepositoryException {
         throw new UnsupportedOperationException(READ_ONLY_MESSAGE);
     }
 

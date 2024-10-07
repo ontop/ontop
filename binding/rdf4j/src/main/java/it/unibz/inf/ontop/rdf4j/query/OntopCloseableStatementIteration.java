@@ -11,7 +11,7 @@ import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 
-public class OntopCloseableStatementIteration extends AbstractCloseableIteration<Statement, QueryEvaluationException> {
+public class OntopCloseableStatementIteration extends AbstractCloseableIteration<Statement> {
 
     private final OntopCloseableIterator<RDFFact, OntopConnectionException> iterator;
     private final ValueFactory valueFactory;
