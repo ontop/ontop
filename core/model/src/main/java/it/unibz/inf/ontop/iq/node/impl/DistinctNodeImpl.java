@@ -105,9 +105,10 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
 
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child) {
-        return Sets.union(
-                child.inferUniqueConstraints(),
-                ImmutableSet.of(inferNewUC(child))).immutableCopy();
+        var childConstraints = child.inferUniqueConstraints();
+        return childConstraints.isEmpty()
+                ? ImmutableSet.of(inferNewUC(child))
+                : childConstraints;
     }
 
     private ImmutableSet<Variable> inferNewUC(IQTree child) {
