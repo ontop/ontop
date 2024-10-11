@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.Set;
 
 
 public interface IQTree {
@@ -154,6 +155,13 @@ public interface IQTree {
      * NOT guaranteed to return all the functional dependencies (MAY BE INCOMPLETE)
      */
     FunctionalDependencies inferFunctionalDependencies();
+
+
+    /**
+     * Strict dependents are dependents of some functional dependencies that never appear as
+     * determinants in any functional dependency
+     */
+    ImmutableSet<Variable> inferStrictDependents();
 
     /**
      * Variables that the tree proposes for removal if the ancestor trees do not need them.
