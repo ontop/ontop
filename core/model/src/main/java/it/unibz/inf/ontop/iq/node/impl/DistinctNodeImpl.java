@@ -112,11 +112,7 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     private ImmutableSet<Variable> inferNewUC(IQTree child) {
-        ImmutableSet<Variable> dependents = child.inferFunctionalDependencies().stream()
-                .flatMap(e -> e.getValue().stream())
-                .collect(ImmutableCollectors.toSet());
-
-        return Sets.difference(child.getVariables(), dependents)
+        return Sets.difference(child.getVariables(), child.inferStrictDependents())
                 .immutableCopy();
     }
 

@@ -38,6 +38,9 @@ public interface ConcreteIQTreeCache extends IQTreeCache {
     FunctionalDependencies getFunctionalDependencies();
 
     @Nullable
+    ImmutableSet<Variable> getStrictDependents();
+
+    @Nullable
     Boolean isDistinct();
 
     /**
@@ -69,6 +72,11 @@ public interface ConcreteIQTreeCache extends IQTreeCache {
      * Can only be set ONCE!
      */
     void setFunctionalDependencies(@Nonnull FunctionalDependencies functionalDependencies);
+
+    /**
+     * Can only be set ONCE!
+     */
+    void setStrictDependents(@Nonnull ImmutableSet<Variable> strictDependents);
 
     /**
      * Can only be set ONCE!

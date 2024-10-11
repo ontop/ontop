@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
@@ -16,7 +17,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -274,6 +274,35 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
             treeCache.setFunctionalDependencies(dependencies);
         }
         return dependencies;
+    }
+
+    @Override
+    public synchronized ImmutableSet<Variable> inferStrictDependents() {
+        // Non-final
+        ImmutableSet<Variable> dependents = treeCache.getStrictDependents();
+        if (dependents == null) {
+            dependents = computeStrictDependentsFromFunctionalDependencies();
+            treeCache.setStrictDependents(dependents);
+        }
+        return dependents;
+    }
+
+    /**
+     * Default implementation
+     */
+    protected ImmutableSet<Variable> computeStrictDependentsFromFunctionalDependencies() {
+        return computeStrictDependentsFromFunctionalDependencies(this);
+    }
+
+    public static ImmutableSet<Variable> computeStrictDependentsFromFunctionalDependencies(IQTree tree) {
+        FunctionalDependencies functionalDependencies = tree.inferFunctionalDependencies();
+        ImmutableSet<Variable> dependents = functionalDependencies.stream()
+                .flatMap(e -> e.getValue().stream())
+                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> determinants = functionalDependencies.stream()
+                .flatMap(e -> e.getKey().stream())
+                .collect(ImmutableCollectors.toSet());
+        return Sets.difference(dependents, determinants).immutableCopy();
     }
 
     protected abstract FunctionalDependencies computeFunctionalDependencies();

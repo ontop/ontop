@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
+import it.unibz.inf.ontop.iq.impl.AbstractCompositeIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
@@ -92,5 +93,10 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
     @Override
     public IQTree removeDistincts() {
         return this;
+    }
+
+    @Override
+    public ImmutableSet<Variable> inferStrictDependents() {
+        return AbstractCompositeIQTree.computeStrictDependentsFromFunctionalDependencies(this);
     }
 }
