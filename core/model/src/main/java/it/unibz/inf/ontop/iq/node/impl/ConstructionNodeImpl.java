@@ -446,7 +446,28 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
     @Override
     public ImmutableSet<Variable> inferStrictDependents(UnaryIQTree tree, IQTree child) {
-        // TODO: provide a custom implementation
+        ImmutableSet<Variable> childStrictDependents = child.inferStrictDependents();
+
+        if (childStrictDependents.isEmpty()) {
+            VariableNullability nullability = getVariableNullability(child);
+            return newDependenciesFromSubstitution(nullability)
+                    .filter(e -> projectedVariables.containsAll(e.getKey()))
+                    .flatMap(e -> e.getValue().stream())
+                    .collect(ImmutableSet.toImmutableSet());
+        }
+
+        Sets.SetView<Variable> childDeterminants = Sets.difference(child.getVariables(), childStrictDependents);
+
+        if (projectedVariables.containsAll(childDeterminants)) {
+            VariableNullability nullability = getVariableNullability(child);
+            return Stream.concat(
+                    Sets.intersection(childStrictDependents, projectedVariables).stream(),
+                    newDependenciesFromSubstitution(nullability)
+                            .filter(e -> projectedVariables.containsAll(e.getKey()))
+                            .flatMap(e -> e.getValue().stream()))
+                    .collect(ImmutableSet.toImmutableSet());
+        }
+
         return IQTreeTools.computeStrictDependentsFromFunctionalDependencies(tree);
     }
 
