@@ -177,7 +177,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    protected ImmutableSet<Variable> computeStrictDependentsFromFunctionalDependencies() {
+    protected ImmutableSet<Variable> computeStrictDependents() {
         return getRootNode().inferStrictDependents(this, getChildren());
     }
 
