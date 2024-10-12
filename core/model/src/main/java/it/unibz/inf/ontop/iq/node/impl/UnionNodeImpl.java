@@ -400,7 +400,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     @Override
     public ImmutableSet<Variable> inferStrictDependents(NaryIQTree tree, ImmutableList<IQTree> children) {
         return children.stream()
-                .map(c -> (Set<Variable>) c.inferStrictDependents())
+                .<Set<Variable>>map(IQTree::inferStrictDependents)
                 .reduce(Sets::intersection)
                 .map(ImmutableSet::copyOf)
                 .orElseThrow(() -> new InvalidIntermediateQueryException("At least 2 children are expected for a union"));
