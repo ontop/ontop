@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -333,6 +334,11 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     @Override
     public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
         return VariableNonRequirement.of(substitution.getDomain());
+    }
+
+    @Override
+    public ImmutableSet<Variable> inferStrictDependents(UnaryIQTree tree, IQTree child) {
+        return IQTreeTools.computeStrictDependentsFromFunctionalDependencies(tree);
     }
 
     @Override

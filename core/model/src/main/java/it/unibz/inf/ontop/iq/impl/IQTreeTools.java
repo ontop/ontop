@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
+import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -28,6 +29,17 @@ public class IQTreeTools {
     @Inject
     private IQTreeTools(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
+    }
+
+    public static ImmutableSet<Variable> computeStrictDependentsFromFunctionalDependencies(IQTree tree) {
+        FunctionalDependencies functionalDependencies = tree.inferFunctionalDependencies();
+        ImmutableSet<Variable> dependents = functionalDependencies.stream()
+                .flatMap(e -> e.getValue().stream())
+                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> determinants = functionalDependencies.stream()
+                .flatMap(e -> e.getKey().stream())
+                .collect(ImmutableCollectors.toSet());
+        return Sets.difference(dependents, determinants).immutableCopy();
     }
 
     /**

@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -71,4 +72,6 @@ public interface UnaryOperatorNode extends QueryNode {
     FunctionalDependencies inferFunctionalDependencies(IQTree child, ImmutableSet<ImmutableSet<Variable>> uniqueConstraints, ImmutableSet<Variable> variables);
 
     VariableNonRequirement computeVariableNonRequirement(IQTree child);
+
+    ImmutableSet<Variable> inferStrictDependents(UnaryIQTree tree, IQTree child);
 }
