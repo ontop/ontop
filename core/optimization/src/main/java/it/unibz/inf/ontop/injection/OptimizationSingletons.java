@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.injection;
 
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
+import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 
@@ -27,6 +28,8 @@ public interface OptimizationSingletons {
     GeneralStructuralAndSemanticIQOptimizer getGeneralStructuralAndSemanticIQOptimizer();
 
     JoinLikeOptimizer getJoinLikeOptimizer();
+
+    QueryPlanner getQueryPlanner();
 
     OntopOptimizationSettings getSettings();
 

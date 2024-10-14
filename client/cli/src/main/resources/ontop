@@ -1,29 +1,77 @@
 #!/bin/bash
 
-if [ -n "${JAVA_HOME}" -a -x "${JAVA_HOME}/bin/java" ]; then
-	JAVA="${JAVA_HOME}/bin/java"
+#
+# ONTOP STARTUP SCRIPT
+#
+# This script runs Ontop CLI (class it.unibz.inf.ontop.cli.Ontop) passing the supplied command line arguments and
+# current environment variables. Run without arguments to see available commands and their syntax.
+#
+# The following functionalities are implemented within this script, rather than in Ontop Java code:
+# - setting JVM option '-Xmx' based on variable ONTOP_JAVA_ARGS (default: 512m)
+# - setting Java property 'file.encoding', based on variable ONTOP_FILE_ENCODING (default: UTF-8)
+# - setting Java properties 'logback.configurationFile' and 'logging.config', based on variable ONTOP_LOG_CONFIG
+#   (default log/logback.xml)
+# - optionally setting Logback root logger level, via variables ONTOP_LOG_LEVEL (values: debug, info, etc...) or, if
+#   undefined, via legacy variable ONTOP_DEBUG (log level set to debug)
+#
+
+# Select Java executable leveraging JAVA_HOME
+if [ -n "$JAVA_HOME" ] && [ -x "$JAVA_HOME/bin/java" ]; then
+  JAVA="$JAVA_HOME/bin/java"
 else
-	JAVA=java
+  JAVA=java
 fi
 
-# <http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in>
-
+# Determine Ontop root directory
+# Bash-specific solution from <http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in>
+# (possible POSIX variants: https://stackoverflow.com/questions/29832037/how-to-get-script-directory-in-posix-sh)
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
   SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to
+                                               # the path where the symlink file was located
 done
-
 ONTOP_HOME="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-if [ -z "${ONTOP_JAVA_ARGS}" ]; then
-  ONTOP_JAVA_ARGS="-Xmx512m"
+# Inject -Xmx512m into ONTOP_JAVA_ARGS, if not set already
+if [ "${ONTOP_JAVA_ARGS#*-Xmx}" = "$ONTOP_JAVA_ARGS" ]; then
+  ONTOP_JAVA_ARGS="$ONTOP_JAVA_ARGS -Xmx512m"
 fi
 
-if [ -z "${ONTOP_FILE_ENCODING}" ]; then
-  ONTOP_FILE_ENCODING="UTF-8"
+# Warn ignoring of -Dfile.encoding, -Dlogback.configurationFile, -Dlogging.config if present in ONTOP_JAVA_ARGS
+if [ "${ONTOP_JAVA_ARGS#*-Dfile.encoding=}" != "$ONTOP_JAVA_ARGS" ]; then
+  echo "WARNING: Ignoring -Dfile.encoding in ONTOP_JAVA_ARGS. Use ONTOP_FILE_ENCODING instead." >&2
+fi
+if [ "${ONTOP_JAVA_ARGS#*-Dlogback.configurationFile=}" != "$ONTOP_JAVA_ARGS" ]; then
+  echo "WARNING: Ignoring -Dlogback.configurationFile in ONTOP_JAVA_ARGS. Use ONTOP_LOG_CONFIG instead." >&2
+fi
+if [ "${ONTOP_JAVA_ARGS#*-Dlogging.config=}" != "$ONTOP_JAVA_ARGS" ]; then
+  echo "WARNING: Ignoring -Dlogging.config in ONTOP_JAVA_ARGS. Use ONTOP_LOG_CONFIG instead." >&2
 fi
 
-exec ${JAVA} ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogback.configurationFile="${ONTOP_HOME}/log/logback.xml" -Dlogging.config="${ONTOP_HOME}/log/logback.xml" \
- it.unibz.inf.ontop.cli.Ontop $@
+# Assign ONTOP_LOG_LEVEL based on legacy ONTOP_DEBUG if the former is unset, or report a warning if both are set
+if [ -z "$ONTOP_LOG_LEVEL" ]; then
+  if [ "${ONTOP_DEBUG-false}" != "false" ]; then
+    export ONTOP_LOG_LEVEL="debug"
+  else
+    export ONTOP_LOG_LEVEL="info"
+  fi
+elif [ ${ONTOP_DEBUG+x} ]; then
+  echo "WARNING: environment variable ONTOP_DEBUG ignored due to ONTOP_LOG_LEVEL being specified" >&2
+fi
+
+# Assign ONTOP_FILE_ENCODING and ONTOP_LOG_CONFIG to their default values, if undefined
+if [ -z "$ONTOP_FILE_ENCODING" ]; then ONTOP_FILE_ENCODING="UTF-8"; fi
+if [ -z "$ONTOP_LOG_CONFIG" ]; then ONTOP_LOG_CONFIG="$ONTOP_HOME/log/logback.xml"; fi
+
+# Run Ontop replacing the shell running this script so to proper handle signals
+# (note: ONTOP_JAVA_ARGS specified first and possibly overridden by following -D settings)
+# shellcheck disable=SC2086
+exec "$JAVA" \
+  $ONTOP_JAVA_ARGS \
+  -Dfile.encoding="$ONTOP_FILE_ENCODING" \
+  -Dlogback.configurationFile="$ONTOP_LOG_CONFIG" \
+  -Dlogging.config="$ONTOP_LOG_CONFIG" \
+  -cp "$ONTOP_HOME/lib/*:$ONTOP_HOME/jdbc/*" \
+  it.unibz.inf.ontop.cli.Ontop "$@"

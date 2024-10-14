@@ -1,6 +1,13 @@
 package it.unibz.inf.ontop.protege.core;
 
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
 import it.unibz.inf.ontop.answering.connection.pool.impl.ConnectionGenerator;
 import it.unibz.inf.ontop.exception.MappingException;
@@ -14,9 +21,10 @@ import it.unibz.inf.ontop.protege.mapping.TriplesMapManager;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapFactory;
 import it.unibz.inf.ontop.protege.query.QueryManager;
 import it.unibz.inf.ontop.protege.query.QueryManagerListener;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.protege.editor.core.ui.util.UIUtil;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
@@ -251,7 +259,7 @@ public class OBDAModel {
 
     public Set<OWLDeclarationAxiom> insertTriplesMaps(ImmutableList<SQLPPTriplesMap> triplesMaps, boolean bootstraped) throws DuplicateTriplesMapException {
         triplesMapManager.addAll(triplesMaps);
-        return MappingOntologyUtils.extractAndInsertDeclarationAxioms(ontology, triplesMaps, typeFactory, bootstraped);
+        return MappingOntologyUtils_OWLAIP4.extractAndInsertDeclarationAxioms(ontology, triplesMaps, typeFactory, bootstraped);
     }
 
     public void addAxiomsToOntology(Set<? extends OWLAxiom> axioms) {
@@ -312,5 +320,71 @@ public class OBDAModel {
 
         return builder;
     }
-
+    
 }
+
+// This is an Exact Copy of the class it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils from the ontop/mapping/sql/owlapi module.
+// It is needed here because the original class is compiled with OWLAPI v5 and the Protege plugin uses OWLAPI v4. 
+// More specifically, the interface OWLDataFactory extends the DeclarationAxiomProvider interface in OWLAPI v5, but not in OWLAPI v4.
+// Another tricky difference is that the code here imports the shaded version of the ImmutableSet/ImmutableList classes
+class MappingOntologyUtils_OWLAIP4 {
+
+    public static ImmutableSet<OWLDeclarationAxiom> extractAndInsertDeclarationAxioms(OWLOntology ontology,
+                                                                                      ImmutableList<? extends SQLPPTriplesMap> tripleMaps,
+                                                                                      TypeFactory typeFactory,
+                                                                                      boolean bootstrappedMapping) {
+
+        OWLOntologyManager manager = ontology.getOWLOntologyManager();
+        OWLDataFactory dataFactory = ontology.getOWLOntologyManager().getOWLDataFactory();
+
+        ImmutableSet<OWLDeclarationAxiom> declarationAxioms =
+                tripleMaps.stream()
+                        .flatMap(ax -> ax.getTargetAtoms().stream())
+                        .map(ta -> extractEntity(ta, dataFactory, typeFactory, bootstrappedMapping))
+                        .map(dataFactory::getOWLDeclarationAxiom)
+                        .collect(ImmutableCollectors.toSet());
+
+        manager.addAxioms(ontology, declarationAxioms);
+        return declarationAxioms;
+    }
+
+    private static OWLEntity extractEntity(TargetAtom targetAtom, OWLDataFactory dataFactory,
+                                           TypeFactory typeFactory, boolean bootstrappedMapping) {
+
+        ImmutableList<ImmutableTerm> terms = targetAtom.getSubstitutedTerms();
+        RDFAtomPredicate predicate = (RDFAtomPredicate) targetAtom.getProjectionAtom().getPredicate();
+
+        Optional<org.apache.commons.rdf.api.IRI> classIRI = predicate.getClassIRI(terms);
+        Optional<org.apache.commons.rdf.api.IRI> propertyIRI = predicate.getPropertyIRI(terms);
+
+        if (classIRI.isPresent()) {
+            return dataFactory.getOWLClass(IRI.create(classIRI.get().getIRIString()));
+        }
+        if (!propertyIRI.isPresent()) {
+            throw new MinorOntopInternalBugException("No IRI could be extracted from " + targetAtom);
+        }
+
+        IRI iri = IRI.create(propertyIRI.get().getIRIString());
+
+        ImmutableTerm objectTerm = predicate.getObject(terms);
+
+        if (objectTerm instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm objectFunctionalTerm = (ImmutableFunctionalTerm) objectTerm;
+
+            TermType termType = objectFunctionalTerm.inferType()
+                    .flatMap(TermTypeInference::getTermType)
+                    .filter(t -> t.isA(typeFactory.getAbstractRDFTermType()))
+                    .orElseThrow(() -> new MinorOntopInternalBugException(
+                            "Could not infer the RDF type of " + objectFunctionalTerm));
+
+            return (termType.isA(typeFactory.getAbstractRDFSLiteral()))
+                    ? dataFactory.getOWLDataProperty(iri)
+                    : dataFactory.getOWLObjectProperty(iri);
+        }
+        if (bootstrappedMapping) {
+            throw new MinorOntopInternalBugException("A functional term was expected for the object: " + objectTerm);
+        }
+        return dataFactory.getOWLDataProperty(iri);
+    }
+}
+

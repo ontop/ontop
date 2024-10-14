@@ -40,8 +40,6 @@ public class GeoSPARQLTest {
         H2GISFunctions.load(sqlConnection);
         executeFromFile(sqlConnection, "src/test/resources/geosparql/create-h2.sql");
 
-//        org.h2.tools.Server.startWebServer(sqlConnection);
-
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFile)
                 .nativeOntopMappingFile(obdaFile)
@@ -598,8 +596,6 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
-    // it.unibz.inf.ontop.owlapi.exception.OntopOWLException: i
-    // t.unibz.inf.ontop.exception.OntopReformulationException: java.lang.IllegalArgumentException:
     // SRIDs do not match: <http://www.opengis.net/def/crs/OGC/1.3/CRS84> and <http://www.opengis.net/def/crs/EPSG/0/3044>
     @Test(expected = OntopOWLException.class) // test intersect with user input geometry (template)
     public void testAskIntersects4() throws Exception {
@@ -1439,16 +1435,6 @@ public class GeoSPARQLTest {
             final OWLBindingSet bindingSet = rs.next();
             OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
             return ind1.getLiteral();
-        }
-    }
-
-    private Integer runQueryAndReturnIntegerX(String query) throws Exception {
-        try (OWLStatement st = conn.createStatement()) {
-            TupleOWLResultSet rs = st.executeSelectQuery(query);
-            assertTrue(rs.hasNext());
-            final OWLBindingSet bindingSet = rs.next();
-            OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
-            return ind1.parseInteger();
         }
     }
 }

@@ -310,6 +310,9 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
             configBuilder.nativeOntopMappingFile(mappingFile);
         }
 
+        if (constraintFile != null)
+            configBuilder.basicImplicitConstraintFile(constraintFile);
+
         if (dbMetadataFile != null)
             configBuilder.dbMetadataFile(dbMetadataFile);
 

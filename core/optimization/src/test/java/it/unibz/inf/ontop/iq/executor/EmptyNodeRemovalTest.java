@@ -31,7 +31,7 @@ public class EmptyNodeRemovalTest {
     private static final Variable C = TERM_FACTORY.getVariable("c");
     private static final DistinctVariableOnlyDataAtom PROJECTION_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_PREDICATE, ImmutableList.of(X, Y));
-    private static final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/ds1/", 0);
+    private static final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.builder().string("http://example.org/ds1/").placeholder().build();
     private static final ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
     private static final ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(A));
     private static final EmptyNode DB_NODE_1 = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, C));

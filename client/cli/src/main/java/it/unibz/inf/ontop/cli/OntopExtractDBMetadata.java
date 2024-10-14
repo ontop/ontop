@@ -3,10 +3,11 @@ package it.unibz.inf.ontop.cli;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
-import com.github.rvesse.airline.annotations.help.BashCompletion;
+import com.github.rvesse.airline.annotations.help.bash.BashCompletion;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.cli.utils.Env;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.spec.dbschema.tools.DBMetadataExtractorAndSerializer;
 
@@ -19,6 +20,7 @@ public class OntopExtractDBMetadata implements OntopCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-p", "--properties"}, title = "properties file",
             description = "Properties file")
+    @Env("ONTOP_PROPERTIES_FILE")
     @Required
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String propertiesFile;

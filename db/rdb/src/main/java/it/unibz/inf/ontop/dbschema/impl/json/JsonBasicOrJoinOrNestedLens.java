@@ -129,6 +129,8 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
                         Attribute::getID));
 
         return variableUniqueConstraints.stream()
+                // TODO: shall we allow unique constraints not to be specified on any column (single-line relation)?
+                .filter(vs -> !vs.isEmpty())
                 .map(vs -> new AddUniqueConstraints(
                         UUID.randomUUID().toString(),
                         vs.stream()

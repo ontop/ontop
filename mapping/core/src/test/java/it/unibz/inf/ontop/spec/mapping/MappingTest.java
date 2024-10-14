@@ -44,7 +44,7 @@ public class MappingTest {
 
     private final static Variable Y = TERM_FACTORY.getVariable("company");
 
-    private static final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/person/", 0);
+    private static final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.builder().string("http://example.org/person/").placeholder().build();
 
     private static final IRI PROP_1, PROP_2, CLASS_1;
 

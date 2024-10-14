@@ -27,7 +27,6 @@
 			<outputDirectory>/log</outputDirectory>
 			<includes>
 				<include>logback.xml</include>
-				<include>logback-debug.xml</include>
 			</includes>
 		</fileSet>
 		<fileSet>
@@ -35,7 +34,10 @@
 			</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
-				<include>*</include>
+				<include>README.md</include>
+				<include>ontop</include>
+				<include>ontop.bat</include>
+				<include>ontop-completion.sh</include>
 			</includes>
 		</fileSet>
 		<fileSet>
