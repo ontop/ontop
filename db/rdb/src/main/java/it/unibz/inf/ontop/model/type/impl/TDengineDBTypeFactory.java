@@ -9,15 +9,18 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import java.util.Map;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.DECIMAL;
+import static it.unibz.inf.ontop.model.type.DBTermType.Category.FLOAT_DOUBLE;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.SAME_TYPE_NO_CONSTANT;
 
 public class TDengineDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String TIMESTAMPTZ_STR = "TIMESTAMP WITH TIME ZONE";
     public static final String TIMETZ_STR = "TIME WITH TIME ZONE";
+    public static final String TIMESTAMP = "TIMESTAMP WITHOUT TIME ZONE";
     public static final String BYTEA_STR = "BYTEA";
     private static final String DEFAULT_DECIMAL_STR = "DECIMAL(38, 18)";
     public static final String UUID_STR = "UUID";
+    public static final String TEXT_STR = "TEXT";
 
 
     protected TDengineDBTypeFactory(Map<String, DBTermType> typeMap, ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap) {
@@ -43,6 +46,9 @@ public class TDengineDBTypeFactory extends DefaultSQLDBTypeFactory {
         DBTermType timeTzType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIMETZ_STR, rootAncestry,
                 typeFactory.getDatatype(XSD.TIME), NOTHING);
 
+        DatetimeDBTermType timestamp = new DatetimeDBTermType(TIMESTAMP, rootTermType.getAncestry(),
+                typeFactory.getXsdDatetimeDatatype(), false);
+
         DBTermType dateType = new DateDBTermType(DATE_STR, rootAncestry,
                 typeFactory.getDatatype(XSD.DATE));
 
@@ -53,7 +59,12 @@ public class TDengineDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         NumberDBTermType defaultDecimalType = new NumberDBTermType(DEFAULT_DECIMAL_STR, rootAncestry,
                 typeFactory.getXsdDecimalDatatype(), DECIMAL);
+
+        NumberDBTermType defaultDoubleType = new NumberDBTermType(DOUBLE_PREC_STR, rootAncestry,
+                typeFactory.getXsdDoubleDatatype(), FLOAT_DOUBLE);
                 
+        DBTermType textType = new StringDBTermType(TEXT_STR, "VARCHAR(500)", rootAncestry, typeFactory.getXsdStringDatatype());
+
         /*  TODO-SCAFFOLD: Add to or modify the type map:
          *-------------------------------------------------------------------
          *      map.put("TYPE_NAME", DBTermType);
@@ -65,22 +76,29 @@ public class TDengineDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(UUID_STR, uuidType);
         map.put(BYTEA_STR, byteAType);
         map.put(DEFAULT_DECIMAL_STR, defaultDecimalType);
+        map.put(TEXT_STR, textType);
+        map.put(TIMESTAMP, timestamp);
+        map.put(DOUBLE_PREC_STR, defaultDoubleType);
 
         return map;
     }
 
     protected static ImmutableMap<DefaultTypeCode, String> createTDengineCodeMap() {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
-        map.put(DefaultTypeCode.DOUBLE, DOUBLE_PREC_STR);
-        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMPTZ_STR);
+        map.put(DefaultTypeCode.DOUBLE, DOUBLE_STR);
+        //map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMPTZ_STR);
         map.put(DefaultTypeCode.HEXBINARY, BYTEA_STR);
-        map.put(DefaultTypeCode.STRING, VARCHAR_STR);
+        map.put(DefaultTypeCode.STRING, TEXT_STR);
         map.put(DefaultTypeCode.DECIMAL, DEFAULT_DECIMAL_STR);
 
         /*  TODO-SCAFFOLD: Add to or modify the code map:
          *-------------------------------------------------------------------
          *      map.put(DefaultTypeCode.CODE, "TYPE_NAME");
          */
+
+
+        //map.put(DefaultTypeCode.TEXT, "VARCHAR(200)");
+        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMP);
 
         return ImmutableMap.copyOf(map);
     }
@@ -117,5 +135,4 @@ public class TDengineDBTypeFactory extends DefaultSQLDBTypeFactory {
     public boolean supportsArrayType() {
         return false;
     }
-
 }
