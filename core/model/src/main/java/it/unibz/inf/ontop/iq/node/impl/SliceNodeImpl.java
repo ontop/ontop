@@ -413,6 +413,11 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
+    public ImmutableSet<Variable> inferStrictDependents(UnaryIQTree tree, IQTree child) {
+        return child.inferStrictDependents();
+    }
+
+    @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
         visitor.visit(this);
     }

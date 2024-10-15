@@ -397,6 +397,15 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 Sets.difference(fd.getValue(), vSet).immutableCopy());
     }
 
+    @Override
+    public ImmutableSet<Variable> inferStrictDependents(NaryIQTree tree, ImmutableList<IQTree> children) {
+        return children.stream()
+                .<Set<Variable>>map(IQTree::inferStrictDependents)
+                .reduce(Sets::intersection)
+                .map(ImmutableSet::copyOf)
+                .orElseThrow(() -> new InvalidIntermediateQueryException("At least 2 children are expected for a union"));
+    }
+
 
     private boolean areDisjoint(ImmutableList<IQTree> children, ImmutableSet<Variable> uc) {
         int childrenCount = children.size();

@@ -30,7 +30,6 @@ import it.unibz.inf.ontop.utils.impl.VariableGeneratorImpl;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
@@ -443,6 +442,33 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     @Override
     public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
         return VariableNonRequirement.of(getVariables());
+    }
+
+    @Override
+    public ImmutableSet<Variable> inferStrictDependents(UnaryIQTree tree, IQTree child) {
+        ImmutableSet<Variable> childStrictDependents = child.inferStrictDependents();
+
+        if (childStrictDependents.isEmpty()) {
+            VariableNullability nullability = getVariableNullability(child);
+            return newDependenciesFromSubstitution(nullability)
+                    .filter(e -> projectedVariables.containsAll(e.getKey()))
+                    .flatMap(e -> e.getValue().stream())
+                    .collect(ImmutableSet.toImmutableSet());
+        }
+
+        Sets.SetView<Variable> childDeterminants = Sets.difference(child.getVariables(), childStrictDependents);
+
+        if (projectedVariables.containsAll(childDeterminants)) {
+            VariableNullability nullability = getVariableNullability(child);
+            return Stream.concat(
+                    Sets.intersection(childStrictDependents, projectedVariables).stream(),
+                    newDependenciesFromSubstitution(nullability)
+                            .filter(e -> projectedVariables.containsAll(e.getKey()))
+                            .flatMap(e -> e.getValue().stream()))
+                    .collect(ImmutableSet.toImmutableSet());
+        }
+
+        return IQTreeTools.computeStrictDependentsFromFunctionalDependencies(tree);
     }
 
     @Override
