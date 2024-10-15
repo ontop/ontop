@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.Set;
 
 
 public interface IQTree {
@@ -159,7 +158,8 @@ public interface IQTree {
 
     /**
      * Strict dependents are dependents of some functional dependencies that never appear as
-     * determinants in any functional dependency
+     * determinants in any functional dependency.
+     * Lightweight alternative to functional dependencies (cheaper to compute).
      */
     ImmutableSet<Variable> inferStrictDependents();
 
