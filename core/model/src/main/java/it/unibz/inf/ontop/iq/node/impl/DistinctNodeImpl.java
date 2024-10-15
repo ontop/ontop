@@ -20,11 +20,9 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.Set;
 
 
 public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctNode {
@@ -113,6 +111,12 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     private ImmutableSet<Variable> inferNewUC(IQTree child) {
+        /*
+         * NB: by using strict dependents, we are including in the UC intermediate determinants like b in a -> b -> c .
+         * The benefit is that it is usually much cheaper to compute strict dependents than functional dependencies
+         * (especially for large UNIONs).
+         * We are still waiting for a real case where eliminating b in this example has a significant impact.
+         */
         return Sets.difference(child.getVariables(), child.inferStrictDependents())
                 .immutableCopy();
     }
