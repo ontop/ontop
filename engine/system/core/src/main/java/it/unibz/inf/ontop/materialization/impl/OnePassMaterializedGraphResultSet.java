@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.materialization.MappingAssertionInformation;
@@ -22,16 +21,12 @@ import it.unibz.inf.ontop.query.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.query.resultset.OntopCloseableIterator;
 import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
-import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class OnePassMaterializedGraphResultSet implements MaterializedGraphResultSet {
     private final NativeQueryGenerator nativeQueryGenerator;
@@ -140,15 +135,8 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
                 }
             } catch (OntopQueryAnsweringException | OntopConnectionException e) {
                 if (canBeIncomplete) {
-                    Substitution<ImmutableTerm> substitution = ((ConstructionNode)assertionInfo.getIQTree().getRootNode()).getSubstitution();
-                    ImmutableList<IRI> possiblyIncompletePredicates = currentRDFFactTemplates.getTriplesOrQuadsVariables().stream()
-                            .map(variables -> variables.get(1))
-                            .map(v -> (IRIConstant) substitution.apply(v))
-                            .map(IRIConstant::getIRI)
-                            .collect(ImmutableCollectors.toList());
-                    LOGGER.warn("Possibly incomplete class/property " + possiblyIncompletePredicates + " (materialization problem).\n"
+                    LOGGER.warn("Possibly incomplete class/property " + assertionInfo.getIQTree() + " (materialization problem).\n"
                             + "Details: " + e);
-                    possiblyIncompleteClassesAndProperties.addAll(possiblyIncompletePredicates);
                 } else {
                     LOGGER.error("Problem materializing " + assertionInfo.getIQTree());
                     throw e;
@@ -164,12 +152,35 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
         counter++;
         OntopBindingSet resultTuple;
         try {
-           if (tmpRDFFactsIterator != null && tmpRDFFactsIterator.hasNext()) {
-               return tmpRDFFactsIterator.next();
-           }
-           resultTuple = tmpContextResultSet.next();
-           tmpRDFFactsIterator = toAssertions(resultTuple, currentRDFFactTemplates);
-           return tmpRDFFactsIterator.next();
+            if (tmpRDFFactsIterator != null && tmpRDFFactsIterator.hasNext()) {
+                return tmpRDFFactsIterator.next();
+            }
+            resultTuple = tmpContextResultSet.next();
+            tmpRDFFactsIterator = toAssertions(resultTuple, currentRDFFactTemplates);
+            while (!tmpRDFFactsIterator.hasNext()) {
+                if (!tmpContextResultSet.hasNext()) {
+                    MappingAssertionInformation assertionInfo = mappingAssertionsIterator.next();
+                    currentRDFFactTemplates = assertionInfo.getRDFFactTemplates();
+
+                    try {
+                        tmpStatement = ontopConnection.createStatement();
+                        IQ nativeQuery = translateIntoNativeQuery(assertionInfo);
+                        tmpContextResultSet = tmpStatement.executeSelectQuery(nativeQuery, queryLogger);
+                    } catch (OntopConnectionException e) {
+                        if (canBeIncomplete) {
+                            LOGGER.warn("Possibly incomplete class/property " + assertionInfo.getIQTree() + " (materialization problem).\n"
+                                    + "Details: " + e);
+                        } else {
+                            LOGGER.error("Problem materializing " + assertionInfo.getIQTree());
+                            throw e;
+                        }
+                    }
+
+                }
+                resultTuple = tmpContextResultSet.next();
+                tmpRDFFactsIterator = toAssertions(resultTuple, currentRDFFactTemplates);
+            }
+            return tmpRDFFactsIterator.next();
         } catch (OntopConnectionException e) {
             try {
                 tmpContextResultSet.close();
@@ -223,19 +234,29 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
 
     private Iterator<RDFFact> toAssertions(OntopBindingSet tuple, RDFFactTemplates templates) throws OntopResultConversionException {
         return templates.getTriplesOrQuadsVariables().stream()
+                .filter(variables -> convertToRDFConstants(tuple, variables.subList(0, 3)).stream().allMatch(Optional::isPresent))
                 .map(variables -> {
-                    try {
-                        RDFConstant subject = tuple.getConstant(variables.get(0).getName());
-                        RDFConstant predicate = tuple.getConstant(variables.get(1).getName());
-                        RDFConstant object = tuple.getConstant(variables.get(2).getName());
-                        RDFConstant graph = variables.size() == 4 ? tuple.getConstant(variables.get(3).getName()) : null;
+                    ImmutableList<Optional<RDFConstant>> tupleConstants = convertToRDFConstants(tuple, variables);
+                    var subject = (ObjectConstant) tupleConstants.get(0).orElseThrow();
+                    var predicate = (IRIConstant) tupleConstants.get(1).orElseThrow();
+                    var object = tupleConstants.get(2).orElseThrow();
+                    return tupleConstants.size() == 3
+                            ? RDFFact.createTripleFact(subject, predicate, object)
+                            : RDFFact.createQuadFact(
+                                    subject, predicate, object, (ObjectConstant) tupleConstants.get(3).orElseThrow());
+                }).iterator();
+    }
 
-                        return graph == null
-                                ? RDFFact.createTripleFact((ObjectConstant) subject, (IRIConstant) predicate, object)
-                                : RDFFact.createQuadFact((ObjectConstant) subject, (IRIConstant) predicate, object, (ObjectConstant) graph);
+    private ImmutableList<Optional<RDFConstant>> convertToRDFConstants(OntopBindingSet tuple, ImmutableList<Variable> variables) {
+        return variables.stream()
+                .map(variable -> {
+                    try {
+                        var constant = tuple.getConstant(variable.getName());
+                        return constant == null ? Optional.<RDFConstant>empty() : Optional.of(constant);
                     } catch (OntopResultConversionException e) {
                         throw new RuntimeException(e);
                     }
-                }).iterator();
+                })
+                .collect(ImmutableList.toImmutableList());
     }
 }
