@@ -29,7 +29,7 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
     private final IQTree tree;
     private final RDFFactTemplates rdfFactTemplates;
     private final ExtensionalDataNode relationDefinitionNode;
-    private final Optional<ImmutableExpression> optionalFilterCondition;
+    private final Optional<ImmutableExpression> notSimplifiedFilterCondition;
     private final VariableGenerator variableGenerator;
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
@@ -55,11 +55,11 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
                 ((ConstructionNode) originalTree.getRootNode()).getSubstitution());
 
         IQTree simplifiedTree = potentiallySimplifiedTree.orElse(originalTree);
-        this.optionalFilterCondition = potentiallySimplifiedTree.isPresent()
+        this.notSimplifiedFilterCondition = potentiallySimplifiedTree.isPresent()
                 ? Optional.empty()
                 : Optional.of(((FilterNode) filterSubtree.getRootNode()).getFilterCondition());
-        ImmutableSet<Variable> nullableVariables = optionalFilterCondition.isPresent()
-                ? optionalFilterCondition.get().getVariables()
+        ImmutableSet<Variable> nullableVariables = notSimplifiedFilterCondition.isEmpty()
+                ? Optional.of(((FilterNode) filterSubtree.getRootNode()).getFilterCondition()).get().getVariables()
                 : ImmutableSet.of();
 
         this.tree = setPossiblyNullRDFDatatypes(simplifiedTree, nullableVariables);
@@ -92,11 +92,11 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
         ImmutableMap<Integer, Variable> argumentMap = (ImmutableMap<Integer, Variable>) relationDefinitionNode.getArgumentMap();
 
         if (other instanceof SimpleMappingAssertionInfo) {
-            if (optionalFilterCondition.isEmpty()) {
+            if (notSimplifiedFilterCondition.isEmpty()) {
                 SimpleMappingAssertionInfo otherSimpleInfo = (SimpleMappingAssertionInfo) other;
                 boolean sameRelation = otherSimpleInfo.getRelationsDefinitions().get(0).getAtomPredicate().getName()
                         .equals(getRelationsDefinitions().get(0).getAtomPredicate().getName());
-                if (!sameRelation) {
+                if (sameRelation) {
                     return other.merge(new SimpleMappingAssertionInfo(
                             relationDefinitionNode.getRelationDefinition(),
                             argumentMap,
@@ -117,8 +117,8 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
         variableGenerator.registerAdditionalVariables(otherFilterInfo.variableGenerator.getKnownVariables());
 
         ImmutableMap<Integer, Variable> otherArgumentMap = (ImmutableMap<Integer, Variable>) otherFilterInfo.relationDefinitionNode.getArgumentMap();
-        ImmutableExpression filterCondition = this.optionalFilterCondition.orElseThrow();
-        ImmutableExpression otherFilterCondition = otherFilterInfo.getOptionalFilterCondition().orElseThrow();
+        ImmutableExpression filterCondition = this.notSimplifiedFilterCondition.orElseThrow();
+        ImmutableExpression otherFilterCondition = otherFilterInfo.getNotSimplifiedFilterCondition().orElseThrow();
 
         boolean sameOperation = filterCondition.getFunctionSymbol().equals(otherFilterCondition.getFunctionSymbol());
         boolean sameTerms = IntStream.range(0, filterCondition.getTerms().size())
@@ -222,8 +222,8 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
         return new RDFFactTemplatesImpl(filteredTemplates);
     }
 
-    public Optional<ImmutableExpression> getOptionalFilterCondition() {
-        return optionalFilterCondition;
+    public Optional<ImmutableExpression> getNotSimplifiedFilterCondition() {
+        return notSimplifiedFilterCondition;
     }
 
     private Optional<IQTree> simplifyExplicitNotNullFilter(IQTree tree, IQTree filterSubtree, Substitution<ImmutableTerm> rdfTermConstructionSubstitution) {
