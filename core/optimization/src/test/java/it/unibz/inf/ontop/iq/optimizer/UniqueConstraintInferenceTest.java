@@ -411,7 +411,12 @@ public class UniqueConstraintInferenceTest {
         var tree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y)),
                 ImmutableList.of(child1, child2, child3));
-        assertEquals(ImmutableSet.of(ImmutableSet.of(X, Y)), tree.inferUniqueConstraints());
+
+        var ucs = ImmutableSet.of(ImmutableSet.of(X, Y));
+        assertEquals(ucs,
+                tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables()))
+                        .inferUniqueConstraints());
+        assertEquals(ucs, tree.inferUniqueConstraints());
     }
 
     @Test
