@@ -17,6 +17,8 @@ import static junit.framework.TestCase.assertEquals;
 
 public class UniqueConstraintInferenceTest {
 
+    private final ImmutableList<Template.Component> URI_TEMPLATE_INJECTIVE_1 = Template.builder().string("http://example.org/ds4/").placeholder().build();
+
     private final ImmutableList<Template.Component> URI_TEMPLATE_INJECTIVE_2 = Template.builder().string("http://example.org/ds1/").placeholder().string("/").placeholder().build();
 
     private final ImmutableList<Template.Component> URI_TEMPLATE_INJECTIVE_2_1 = Template.builder().string("http://example.org/ds3/").placeholder().string("/").placeholder().build();
@@ -371,6 +373,87 @@ public class UniqueConstraintInferenceTest {
                 ImmutableList.of(child1, child2, child2));
         assertEquals(ImmutableSet.of(), tree.inferUniqueConstraints());
     }
+
+    @Test
+    public void testUnion10() {
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR2, ImmutableMap.of(0, A, 1, B));
+
+        var child1 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, Y),
+                        SUBSTITUTION_FACTORY.getSubstitution(
+                                X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_1, ImmutableList.of(A)),
+                                Y, TERM_FACTORY.getRDFLiteralFunctionalTerm(B, "en")
+                                )),
+                dataNode1);
+
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR2, ImmutableMap.of(0, C, 1, D));
+
+        var child2 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, Y),
+                        SUBSTITUTION_FACTORY.getSubstitution(
+                                X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_1, ImmutableList.of(C)),
+                                Y, TERM_FACTORY.getRDFLiteralFunctionalTerm(D, "de")
+                        )),
+                dataNode2);
+
+        var dataNode3 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR2, ImmutableMap.of(0, E, 1, F));
+        var child3 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, Y),
+                        SUBSTITUTION_FACTORY.getSubstitution(
+                                X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(E, ONE)),
+                                Y, TERM_FACTORY.getRDFLiteralFunctionalTerm(F, "en")
+                        )),
+                dataNode3);
+
+        var tree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y)),
+                ImmutableList.of(child1, child2, child3));
+        assertEquals(ImmutableSet.of(ImmutableSet.of(X, Y)), tree.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testUnion11() {
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR2, ImmutableMap.of(0, A, 1, B));
+
+        var child1 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, Y),
+                        SUBSTITUTION_FACTORY.getSubstitution(
+                                X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_1, ImmutableList.of(A)),
+                                Y, TERM_FACTORY.getRDFLiteralFunctionalTerm(B, "en")
+                        )),
+                dataNode1);
+
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR2, ImmutableMap.of(0, C, 1, D));
+
+        var child2 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, Y),
+                        SUBSTITUTION_FACTORY.getSubstitution(
+                                X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_1, ImmutableList.of(C)),
+                                Y, TERM_FACTORY.getRDFLiteralFunctionalTerm(D, "de")
+                        )),
+                dataNode2);
+
+        var dataNode3 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR2, ImmutableMap.of(0, E, 1, F));
+        var child3 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, Y),
+                        SUBSTITUTION_FACTORY.getSubstitution(
+                                X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(E, ONE)),
+                                Y, TERM_FACTORY.getRDFLiteralFunctionalTerm(F, "es")
+                        )),
+                dataNode3);
+
+        var tree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y)),
+                ImmutableList.of(child1, child2, child3));
+        assertEquals(ImmutableSet.of(ImmutableSet.of(X, Y)), tree.inferUniqueConstraints());
+    }
+
 
     @Test
     public void testValues1() {
