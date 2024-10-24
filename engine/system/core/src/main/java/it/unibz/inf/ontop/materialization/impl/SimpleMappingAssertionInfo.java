@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Map;
@@ -97,51 +96,106 @@ public class SimpleMappingAssertionInfo implements MappingAssertionInformation {
         }
 
         SimpleMappingAssertionInfo otherSimpleAssertion = (SimpleMappingAssertionInfo) otherInfo;
-        if (!relationDefinition.getAtomPredicate().getName().equals(otherSimpleAssertion.getRelationsDefinitions().get(0).getAtomPredicate().getName())) {
+        if (!relationDefinition.getAtomPredicate().getName()
+                .equals(otherSimpleAssertion.getRelationsDefinitions().get(0).getAtomPredicate().getName())) {
             return Optional.empty();
         }
         variableGenerator.registerAdditionalVariables(otherSimpleAssertion.variableGenerator.getKnownVariables());
         SimpleMappingAssertionInfo other = otherSimpleAssertion.renameConflictingVariables(variableGenerator);
 
-        ImmutablePair<ImmutableMap<Integer, Variable>, Optional<Substitution<Variable>>> mergedPair = mergeRelationArguments(other.argumentMap);
-        ImmutableMap<Integer, Variable> mergedArgumentMap = mergedPair.left;
-        Optional<Substitution<Variable>> mergeRenamingSubstitution = mergedPair.right;
+        ImmutableMap<Integer, Variable> mergedArgumentMap = mergeRelationArguments(other.argumentMap);
 
         ExtensionalDataNode relationDefinitionNode = iqFactory.createExtensionalDataNode(
                 relationDefinition,
                 mergedArgumentMap);
 
-        ConstructionNode OptionalRenamingNode;
-        if (mergeRenamingSubstitution.isPresent()) {
-            ImmutableSet<Variable> originalRelationsVariables = Streams.concat(
-                    argumentMap.values().stream(),
-                    other.argumentMap.values().stream(),
-                    mergeRenamingSubstitution.get().getRangeVariables().stream()
-            ).collect(ImmutableCollectors.toSet());
-            OptionalRenamingNode = iqFactory.createConstructionNode(originalRelationsVariables, mergeRenamingSubstitution.get());
-        } else {
-            ImmutableSet<Variable> originalRelationsVariables = Streams.concat(
-                    argumentMap.values().stream(),
-                    other.argumentMap.values().stream()
-            ).collect(ImmutableCollectors.toSet());
-            OptionalRenamingNode = iqFactory.createConstructionNode(originalRelationsVariables);
-        }
-        IQTree childTree = iqFactory.createUnaryIQTree(OptionalRenamingNode, relationDefinitionNode);
+        ConstructionNode optionalRenamingNode = createOptionalRenamingNode(other.argumentMap);
 
-        RDFFactTemplates mergedRDFTemplates = rdfFactTemplates.merge(other.rdfFactTemplates);
-
-        Substitution<ImmutableTerm> RDFTermsConstructionSubstitution = topConstructSubstitution.compose(other.topConstructSubstitution);
+        Substitution<ImmutableTerm> rdfTermsConstructionSubstitution = topConstructSubstitution.compose(other.topConstructSubstitution);
         ImmutableSet<Variable> termsVariables = ImmutableSet.<Variable>builder()
                 .addAll(topConstructSubstitution.getDomain())
                 .addAll(other.topConstructSubstitution.getDomain())
                 .build();
-        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(termsVariables, RDFTermsConstructionSubstitution);
-        IQTree mappingTree = iqFactory.createUnaryIQTree(topConstructionNode, childTree);
+        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(termsVariables, rdfTermsConstructionSubstitution);
+        IQTree mappingTree = iqFactory.createUnaryIQTree(topConstructionNode,
+                iqFactory.createUnaryIQTree(optionalRenamingNode, relationDefinitionNode));
 
-        IQTree normalizedTree = mappingTree.normalizeForOptimization(variableGenerator);
+        RDFFactTemplates mergedRDFTemplates = rdfFactTemplates.merge(other.rdfFactTemplates);
+        var treeTemplatesPair = compressMappingAssertion(mappingTree.normalizeForOptimization(variableGenerator), mergedRDFTemplates);
 
+        return Optional.of(new SimpleMappingAssertionInfo(relationDefinition,
+                mergedArgumentMap,
+                treeTemplatesPair.getKey(),
+                treeTemplatesPair.getValue(),
+                variableGenerator,
+                iqFactory,
+                substitutionFactory));
+    }
+
+    private SimpleMappingAssertionInfo renameConflictingVariables(VariableGenerator generator) {
+        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(generator, tree.getKnownVariables());
+        IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
+        RDFFactTemplates renamedRDFTemplates = rdfFactTemplates.apply(renamingSubstitution);
+
+        ImmutableMap<Integer, Variable> renamedArgumentMap = argumentMap.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> (Variable) renamingSubstitution.apply(e.getValue())
+                ));
+        variableGenerator.registerAdditionalVariables(generator.getKnownVariables());
+        return new SimpleMappingAssertionInfo(relationDefinition,
+                renamedArgumentMap,
+                renamedTree,
+                renamedRDFTemplates,
+                variableGenerator,
+                iqFactory,
+                substitutionFactory);
+    }
+
+    private ImmutableMap<Integer, Variable> mergeRelationArguments(ImmutableMap <Integer, Variable > otherArgumentMap){
+        ImmutableSet<Integer> keys = ImmutableSet.<Integer>builder()
+                .addAll(argumentMap.keySet())
+                .addAll(otherArgumentMap.keySet())
+                .build();
+
+        return keys.stream()
+                .collect(ImmutableCollectors.toMap(
+                        idx -> idx,
+                        idx -> argumentMap.getOrDefault(idx, otherArgumentMap.get(idx))
+                ));
+    }
+
+    private ConstructionNode createOptionalRenamingNode(ImmutableMap<Integer, Variable> otherArgumentMap) {
+        ImmutableSet<Integer> keys = ImmutableSet.<Integer>builder()
+                .addAll(argumentMap.keySet())
+                .addAll(otherArgumentMap.keySet())
+                .build();
+        Optional<Substitution<Variable>> mergedSubstitution  = substitutionFactory.onVariables().unifierBuilder()
+                .unify(keys.stream(),
+                        idx -> otherArgumentMap.getOrDefault(idx, argumentMap.get(idx)),
+                        idx -> argumentMap.getOrDefault(idx, otherArgumentMap.get(idx)))
+                .build();
+
+        ConstructionNode optionalRenamingNode;
+        if (mergedSubstitution.isPresent()) {
+            ImmutableSet<Variable> originalRelationsVariables = Streams.concat(
+                    argumentMap.values().stream(),
+                    otherArgumentMap.values().stream(),
+                    mergedSubstitution.get().getRangeVariables().stream()
+            ).collect(ImmutableCollectors.toSet());
+            optionalRenamingNode = iqFactory.createConstructionNode(originalRelationsVariables, mergedSubstitution.get());
+        } else {
+            ImmutableSet<Variable> originalRelationsVariables = Streams.concat(
+                    argumentMap.values().stream(),
+                    otherArgumentMap.values().stream()
+            ).collect(ImmutableCollectors.toSet());
+            optionalRenamingNode = iqFactory.createConstructionNode(originalRelationsVariables);
+        }
+        return optionalRenamingNode;
+    }
+
+    private Map.Entry<IQTree, RDFFactTemplates> compressMappingAssertion(IQTree normalizedTree, RDFFactTemplates mergedRDFTemplates) {
         Substitution<ImmutableTerm> normalizedSubstitution = ((ConstructionNode) normalizedTree.getRootNode()).getSubstitution();
-
         RDFFactTemplates compressedTemplates = mergedRDFTemplates.compress(normalizedSubstitution.inverseMap().values().stream()
                 .filter(vs -> vs.size() > 1)
                 .map(ImmutableList::copyOf)
@@ -154,44 +208,6 @@ public class SimpleMappingAssertionInfo implements MappingAssertionInformation {
                 iqFactory.createConstructionNode(compressedVariables, compressedSubstitution),
                 normalizedTree.getChildren().get(0));
 
-        return Optional.of(new SimpleMappingAssertionInfo(relationDefinition,
-                mergedArgumentMap,
-                compressedTree,
-                compressedTemplates,
-                variableGenerator,
-                iqFactory,
-                substitutionFactory));
-    }
-
-    private SimpleMappingAssertionInfo renameConflictingVariables(VariableGenerator generator) {
-        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(generator, tree.getVariables());
-        IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
-        RDFFactTemplates renamedRDFTemplates = rdfFactTemplates.apply(renamingSubstitution);
-
-        ImmutableMap<Integer, Variable> renamedArgumentMap = argumentMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> (Variable) renamingSubstitution.apply(e.getValue())
-                ));
-        variableGenerator.registerAdditionalVariables(generator.getKnownVariables());
-        return new SimpleMappingAssertionInfo(relationDefinition, renamedArgumentMap, renamedTree, renamedRDFTemplates, variableGenerator, iqFactory, substitutionFactory);
-    }
-    private ImmutablePair<ImmutableMap<Integer, Variable>, Optional<Substitution<Variable>>> mergeRelationArguments(ImmutableMap <Integer, Variable > otherArgumentMap){
-        ImmutableSet<Integer> keys = ImmutableSet.<Integer>builder()
-                .addAll(argumentMap.keySet())
-                .addAll(otherArgumentMap.keySet())
-                .build();
-
-        Optional<Substitution<Variable>> mergedSubstitution  = substitutionFactory.onVariables().unifierBuilder()
-                .unify(keys.stream(),
-                    idx -> otherArgumentMap.getOrDefault(idx, argumentMap.get(idx)),
-                    idx -> argumentMap.getOrDefault(idx, otherArgumentMap.get(idx)))
-                .build();
-        ImmutableMap<Integer, Variable> mergedArgumentMap = keys.stream()
-                .collect(ImmutableCollectors.toMap(
-                        idx -> idx,
-                        idx -> argumentMap.getOrDefault(idx, otherArgumentMap.get(idx))
-                ));
-        return ImmutablePair.of(mergedArgumentMap, mergedSubstitution);
+        return Map.entry(compressedTree, compressedTemplates);
     }
 }

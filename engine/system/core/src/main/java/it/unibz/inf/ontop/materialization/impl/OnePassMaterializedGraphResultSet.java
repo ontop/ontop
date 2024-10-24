@@ -35,7 +35,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
     private final OntopQueryEngine queryEngine;
     private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
     private final QueryPlanner queryPlanner;
-    private final QueryLogger queryLogger;
+    private final QueryLogger.Factory queryLoggerFactory;
 
     private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
     private final Iterator<MappingAssertionInformation> mappingAssertionsIterator;
@@ -65,7 +65,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
                                       IntermediateQueryFactory iqFactory,
                                       GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
                                       QueryPlanner queryPlanner,
-                                      QueryLogger queryLogger) {
+                                      QueryLogger.Factory queryLogger) {
         this.vocabulary = vocabulary;
         this.mappingAssertionsIterator = assertionsInfo.stream().iterator();
         this.queryEngine = queryEngine;
@@ -75,7 +75,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
         this.iqFactory = iqFactory;
         this.generalOptimizer = generalOptimizer;
         this.queryPlanner = queryPlanner;
-        this.queryLogger = queryLogger;
+        this.queryLoggerFactory = queryLogger;
 
         this.possiblyIncompleteClassesAndProperties = new ArrayList<>();
         counter = 0;
@@ -127,7 +127,8 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
 
             try {
                 tmpStatement = ontopConnection.createStatement();
-                IQ nativeQuery = translateIntoNativeQuery(assertionInfo);
+                QueryLogger queryLogger = queryLoggerFactory.create(ImmutableMap.of());
+                IQ nativeQuery = translateIntoNativeQuery(assertionInfo, queryLogger);
                 tmpContextResultSet = tmpStatement.executeSelectQuery(nativeQuery, queryLogger);
 
                 if (tmpContextResultSet.hasNext()) {
@@ -164,7 +165,8 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
 
                     try {
                         tmpStatement = ontopConnection.createStatement();
-                        IQ nativeQuery = translateIntoNativeQuery(assertionInfo);
+                        QueryLogger queryLogger = queryLoggerFactory.create(ImmutableMap.of());
+                        IQ nativeQuery = translateIntoNativeQuery(assertionInfo, queryLogger);
                         tmpContextResultSet = tmpStatement.executeSelectQuery(nativeQuery, queryLogger);
                     } catch (OntopConnectionException e) {
                         if (canBeIncomplete) {
@@ -218,7 +220,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
         return ImmutableList.copyOf(possiblyIncompleteClassesAndProperties);
     }
 
-    private IQ translateIntoNativeQuery(MappingAssertionInformation assertionInfo) {
+    private IQ translateIntoNativeQuery(MappingAssertionInformation assertionInfo, QueryLogger queryLogger) {
         ImmutableList<Variable> variables = assertionInfo.getRDFFactTemplates().getVariables().asList();
         IQ tree = iqFactory.createIQ(
                 atomFactory.getDistinctVariableOnlyDataAtom(atomFactory.getRDFAnswerPredicate(variables.size()),
@@ -228,8 +230,10 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
 
         IQ optimizedQuery = generalOptimizer.optimize(tree, null);
         IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
+        IQ executableQuery = nativeQueryGenerator.generateSourceQuery(plannedQuery);
+        queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
 
-        return nativeQueryGenerator.generateSourceQuery(plannedQuery);
+        return executableQuery;
     }
 
     private Iterator<RDFFact> toAssertions(OntopBindingSet tuple, RDFFactTemplates templates) throws OntopResultConversionException {
