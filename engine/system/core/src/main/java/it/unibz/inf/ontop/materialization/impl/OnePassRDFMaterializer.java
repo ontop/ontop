@@ -54,7 +54,6 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
 
     private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
     private final ImmutableList<MappingAssertionInformation> mappingInformation;
-    private final Map<Attribute, ArrayList<IQ>> constantsDictionaryPatterns;
 
     public OnePassRDFMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
         Injector injector = configuration.getInjector();
@@ -74,32 +73,19 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         this.termFactory = injector.getInstance(TermFactory.class);
         this.queryTransformerFactory = injector.getInstance(QueryTransformerFactory.class);
 
-        this.constantsDictionaryPatterns = new HashMap<>();
-
         Mapping saturatedMapping = specification.getSaturatedMapping();
         ImmutableList<IQ> mappingAssertionsIQs = saturatedMapping.getRDFAtomPredicates().stream()
                 .map(saturatedMapping::getQueries)
+                .flatMap(Collection::stream)
+                .map(this::splitPotentialUnionNode)
                 .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toList());
 
         ImmutableList<MappingAssertionInformation> tmpMappingInfo = mappingAssertionsIQs.stream()
                 .map(this::createMappingAssertionInfo)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(ImmutableCollectors.toList());
-        /*
-        ImmutableList<MappingAssertionInformation> dictionaryPatternMappingInfo = constantsDictionaryPatterns.entrySet()
-                .stream()
-                .map(e -> new DictionaryPatternMappingAssertionInfo(e.getKey(),
-                        e.getValue().stream().collect(ImmutableCollectors.toList()),
-                        substitutionFactory, iqFactory, termFactory, queryTransformerFactory))
                 .collect(ImmutableCollectors.toList());
 
-         */
-        mappingInformation = mergeMappingInformation(ImmutableList.<MappingAssertionInformation>builder()
-                .addAll(tmpMappingInfo)
-                //.addAll(dictionaryPatternMappingInfo)
-                .build());
+        mappingInformation = mergeMappingInformation(tmpMappingInfo);
     }
 
     @Override
@@ -160,49 +146,49 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         ImmutableList<MappingAssertionInformation> complexMappingAssertionInfo = mappingInformation.stream()
                 .filter(m -> m instanceof ComplexMappingAssertionInfo)
                 .collect(ImmutableCollectors.toList());
-        /*
-        ImmutableList<MappingAssertionInformation> patternMappingAssertionInfo = mappingInformation.stream()
-                .filter(m -> m instanceof DictionaryPatternMappingAssertionInfo)
-                .collect(ImmutableCollectors.toList());
-        */
+
         ImmutableMap<String, ImmutableList<MappingAssertionInformation>> groupedByRelationMappingsInfo = mappingInformation.stream()
-                .filter(m -> !(m instanceof ComplexMappingAssertionInfo || m instanceof DictionaryPatternMappingAssertionInfo))
+                .filter(m -> !(m instanceof ComplexMappingAssertionInfo))
                 .collect(Collectors.collectingAndThen(
                         Collectors.groupingBy(mapping -> mapping.getRelationsDefinitions().get(0).getAtomPredicate().getName(), ImmutableCollectors.toList()),
                         ImmutableMap::copyOf
                 ));
 
-        ImmutableList<MappingAssertionInformation> mergedSimpleMappingsInfo = groupedByRelationMappingsInfo.values().stream()
-                .map(sameRelationMappingsInfos -> {
-                    MappingAssertionInformation firstMappingInfo = sameRelationMappingsInfos.get(0);
-                    return sameRelationMappingsInfos.stream()
-                            .skip(1)
-                            .reduce(firstMappingInfo, (m1, m2) -> m1.merge(m2).orElseThrow());
+        ArrayList<MappingAssertionInformation> unmergedMappingAssertionInfos = new ArrayList<>();
+        ImmutableList<MappingAssertionInformation> mergedMappingAssertionInfos = groupedByRelationMappingsInfo.values().stream()
+                .map( sameRelationMappings -> {
+                    MappingAssertionInformation mergedSameRelationMapping = sameRelationMappings.get(0);
+                    for (int i=1; i<sameRelationMappings.size(); i++) {
+                        var m1 = sameRelationMappings.get(i);
+                        Optional<MappingAssertionInformation> merged = mergedSameRelationMapping.merge(m1);
+                        if (merged.isPresent()) {
+                            mergedSameRelationMapping = merged.get();
+                        } else {
+                            unmergedMappingAssertionInfos.add(m1);
+                        }
+                    }
+                    return mergedSameRelationMapping;
                 })
                 .collect(ImmutableCollectors.toList());
 
         return ImmutableList.<MappingAssertionInformation>builder()
-                .addAll(mergedSimpleMappingsInfo)
+                .addAll(mergedMappingAssertionInfos)
+                .addAll(unmergedMappingAssertionInfos)
                 .addAll(complexMappingAssertionInfo)
-                //.addAll(patternMappingAssertionInfo)
                 .build();
     }
 
-    private Optional<MappingAssertionInformation> createMappingAssertionInfo(IQ mappingAssertionIQ) {
+    private MappingAssertionInformation createMappingAssertionInfo(IQ mappingAssertionIQ) {
         IQTree tree = mappingAssertionIQ.getTree();
         RDFFactTemplates rdfTemplates = new RDFFactTemplatesImpl(ImmutableList.of((mappingAssertionIQ.getProjectionAtom().getArguments())));
 
-        if (!(tree.getRootNode() instanceof ConstructionNode)) {
-            throw new MinorOntopInternalBugException("The root node of a mapping is expected to be a ConstructionNode");
-        }
-
         if (hasNotSupportedNode(tree)) {
-            return Optional.of(new ComplexMappingAssertionInfo(tree, rdfTemplates));
+            return new ComplexMappingAssertionInfo(tree, rdfTemplates);
         }
 
         ImmutableList<ExtensionalDataNode> extensionalNodes = findExtensionalNodes(tree);
         if (extensionalNodes.size() != 1) {
-            return Optional.of(new ComplexMappingAssertionInfo(tree, rdfTemplates));
+            return new ComplexMappingAssertionInfo(tree, rdfTemplates);
         }
         ExtensionalDataNode extensionalNode = extensionalNodes.get(0);
         RelationDefinition relation = extensionalNode.getRelationDefinition();
@@ -210,7 +196,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         Optional<IQTree> filterSubtree = findFilterSubtrees(tree);
         if (filterSubtree.isPresent()) {
             return filterSubtree.get().getRootNode() instanceof FilterNode
-                    ? Optional.of(new FilterMappingAssertionInfo(
+                    ? new FilterMappingAssertionInfo(
                             tree,
                             rdfTemplates,
                             extensionalNode,
@@ -218,32 +204,49 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                             mappingAssertionIQ.getVariableGenerator(),
                             iqFactory,
                             termFactory,
-                            substitutionFactory))
-                    : Optional.of(new ComplexMappingAssertionInfo(tree, rdfTemplates));
+                            substitutionFactory)
+                    : new ComplexMappingAssertionInfo(tree, rdfTemplates);
         }
 
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = extensionalNode.getArgumentMap();
         if (argumentMap.values().stream().allMatch(v -> v instanceof Variable)) {
-            return Optional.of(new SimpleMappingAssertionInfo(relation,
+            return new SimpleMappingAssertionInfo(relation,
                     (ImmutableMap<Integer, Variable>) argumentMap,
                     tree,
                     rdfTemplates,
                     mappingAssertionIQ.getVariableGenerator(),
                     iqFactory,
-                    substitutionFactory));
+                    substitutionFactory);
         } else if (argumentMap.values().stream().anyMatch(v -> v instanceof DBConstant)) {
-            // TODO: handle the case where there are multiple constants
-            Attribute constantAttribute = argumentMap.entrySet().stream()
+            ImmutableMap<Integer, Attribute> constantAttributes = argumentMap.entrySet().stream()
                     .filter(e -> e.getValue() instanceof DBConstant)
                     .map(Map.Entry::getKey)
-                    .map(index -> relation.getAttribute(index + 1))
-                    .findAny()
-                    .orElseThrow();
-            updatePatterns(constantAttribute, mappingAssertionIQ);
-            //return Optional.empty();
-            return Optional.of(new ComplexMappingAssertionInfo(tree, rdfTemplates));
+                    .collect(ImmutableCollectors.toMap(
+                            k -> k,
+                            k -> relation.getAttribute(k + 1)));
+
+            return new DictionaryPatternMappingAssertion(tree, rdfTemplates, constantAttributes, extensionalNode, mappingAssertionIQ.getVariableGenerator(), iqFactory, substitutionFactory, termFactory);
         } else {
-            return Optional.of(new ComplexMappingAssertionInfo(mappingAssertionIQ.getTree(), rdfTemplates));
+            return new ComplexMappingAssertionInfo(mappingAssertionIQ.getTree(), rdfTemplates);
+        }
+    }
+
+    private ImmutableList<IQ> splitPotentialUnionNode(IQ iq) {
+        IQTree tree = iq.getTree();
+        if (!(tree.getRootNode() instanceof ConstructionNode)) {
+            throw new MinorOntopInternalBugException("The root node of a mapping is expected to be a ConstructionNode");
+        }
+        if (tree.getChildren().get(0).getRootNode() instanceof UnionNode) {
+            ImmutableList<IQTree> unionChildren = tree.getChildren().get(0).getChildren();
+            return unionChildren.stream()
+                    .map(unionChild -> {
+                        IQTree newTree = iqFactory.createUnaryIQTree(
+                                (ConstructionNode) tree.getRootNode(), unionChild);
+                        return iqFactory.createIQ(iq.getProjectionAtom(), newTree.normalizeForOptimization(iq.getVariableGenerator()));
+                    })
+                    .collect(ImmutableCollectors.toList());
+        } else {
+            return ImmutableList.of(iq);
         }
     }
 
@@ -285,23 +288,14 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
      * Recursive
      */
     private boolean hasNotSupportedNode(IQTree tree) {
-        if (tree.getRootNode() instanceof UnionNode
-                || tree.getRootNode() instanceof DistinctNode
-                || tree.getRootNode() instanceof ValuesNode) {
+        if (tree.getRootNode() instanceof QueryModifierNode
+                || tree.getRootNode() instanceof AggregationNode
+                || tree.getRootNode() instanceof ValuesNode
+                || tree.getRootNode() instanceof JoinLikeNode){
             return true;
         } else {
             return tree.getChildren().stream()
                     .anyMatch(this::hasNotSupportedNode);
-        }
-    }
-
-    private void updatePatterns(Attribute key, IQ value) {
-        var tmp = constantsDictionaryPatterns.get(key);
-        if (tmp == null) {
-            constantsDictionaryPatterns.put(key, new ArrayList<>(Collections.singleton(value)));
-        } else {
-            tmp.add(value);
-            constantsDictionaryPatterns.put(key, tmp);
         }
     }
 }
