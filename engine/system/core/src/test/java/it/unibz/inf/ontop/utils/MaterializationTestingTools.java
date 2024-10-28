@@ -19,6 +19,7 @@ public class MaterializationTestingTools {
     public static final TypeFactory TYPE_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final RDF RDF_FACTORY;
+    public static final QueryTransformerFactory QUERY_TRANSFORMER_FACTORY;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
     public static final CoreSingletons CORE_SINGLETONS;
 
@@ -37,6 +38,7 @@ public class MaterializationTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
+        QUERY_TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
 

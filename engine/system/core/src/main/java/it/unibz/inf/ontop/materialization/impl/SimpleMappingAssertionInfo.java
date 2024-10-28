@@ -87,11 +87,9 @@ public class SimpleMappingAssertionInfo implements MappingAssertionInformation {
 
     @Override
     public Optional<MappingAssertionInformation> merge(MappingAssertionInformation otherInfo) {
-        if (otherInfo instanceof ComplexMappingAssertionInfo) {
-            return Optional.empty();
-        }
-
-        if (otherInfo instanceof FilterMappingAssertionInfo) {
+        if (otherInfo instanceof ComplexMappingAssertionInfo ||
+                otherInfo instanceof FilterMappingAssertionInfo ||
+                otherInfo instanceof DictionaryPatternMappingAssertion) {
             return otherInfo.merge(this);
         }
 

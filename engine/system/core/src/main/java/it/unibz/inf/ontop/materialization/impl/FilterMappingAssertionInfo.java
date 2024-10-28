@@ -100,17 +100,18 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
             return Optional.empty();
         }
 
-        if (other instanceof SimpleMappingAssertionInfo && notSimplifiedFilterCondition.isEmpty()) {
-            return other.merge(new SimpleMappingAssertionInfo(
-                    relationDefinitionNode.getRelationDefinition(),
-                    argumentMap,
-                    tree,
-                    rdfFactTemplates,
-                    variableGenerator,
-                    iqFactory,
-                    substitutionFactory));
+        if (other instanceof SimpleMappingAssertionInfo || other instanceof DictionaryPatternMappingAssertion ) {
+            return notSimplifiedFilterCondition.isEmpty()
+                    ? other.merge(new SimpleMappingAssertionInfo(
+                        relationDefinitionNode.getRelationDefinition(),
+                        argumentMap,
+                        tree,
+                        rdfFactTemplates,
+                        variableGenerator,
+                        iqFactory,
+                        substitutionFactory))
+                    : Optional.empty();
         }
-
 
         FilterMappingAssertionInfo otherFilterAssertion = (FilterMappingAssertionInfo) other;
         otherFilterAssertion.variableGenerator.registerAdditionalVariables(variableGenerator.getKnownVariables());
@@ -139,9 +140,9 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
         } else if (notSimplifiedFilterCondition.isEmpty() || otherFilterInfo.getNotSimplifiedFilterCondition().isEmpty()) {
             return Optional.empty();
         }
+
         ImmutableExpression filterCondition = notSimplifiedFilterCondition.get();
         ImmutableExpression otherFilterCondition = otherFilterInfo.getNotSimplifiedFilterCondition().get();
-
         if (!haveSameFilterCondition(argumentMap, otherArgumentMap, filterCondition, otherFilterCondition)) {
             return Optional.empty();
         }
