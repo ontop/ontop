@@ -8,8 +8,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.type.DBTermType.Category.DECIMAL;
-import static it.unibz.inf.ontop.model.type.DBTermType.Category.FLOAT_DOUBLE;
+import static it.unibz.inf.ontop.model.type.DBTermType.Category.*;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.SAME_TYPE_NO_CONSTANT;
 
@@ -21,6 +20,8 @@ public class TDengineDBTypeFactory extends DefaultSQLDBTypeFactory {
     private static final String DEFAULT_DECIMAL_STR = "DECIMAL(38, 18)";
     public static final String UUID_STR = "UUID";
     public static final String TEXT_STR = "TEXT";
+    public static final String SMALLINT_UNSIGNED = "SMALLINT UNSIGNED";
+    public static final String BOOLEAN = "BOOLEAN";
 
 
     protected TDengineDBTypeFactory(Map<String, DBTermType> typeMap, ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap) {
@@ -62,7 +63,13 @@ public class TDengineDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         NumberDBTermType defaultDoubleType = new NumberDBTermType(DOUBLE_PREC_STR, rootAncestry,
                 typeFactory.getXsdDoubleDatatype(), FLOAT_DOUBLE);
-                
+
+        NumberDBTermType defaultSmallIntType = new NumberDBTermType(SMALLINT_STR, rootAncestry,
+                typeFactory.getXsdIntegerDatatype(), INTEGER);
+
+        BooleanDBTermType defaultBooleanType = new BooleanDBTermType(BOOLEAN_STR, rootAncestry,
+                typeFactory.getXsdBooleanDatatype());
+
         DBTermType textType = new StringDBTermType(TEXT_STR, "VARCHAR(500)", rootAncestry, typeFactory.getXsdStringDatatype());
 
         /*  TODO-SCAFFOLD: Add to or modify the type map:
@@ -79,6 +86,8 @@ public class TDengineDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(TEXT_STR, textType);
         map.put(TIMESTAMP, timestamp);
         map.put(DOUBLE_PREC_STR, defaultDoubleType);
+        map.put(SMALLINT_STR, defaultSmallIntType);
+        map.put(BOOLEAN_STR, defaultBooleanType);
 
         return map;
     }
@@ -97,7 +106,8 @@ public class TDengineDBTypeFactory extends DefaultSQLDBTypeFactory {
          */
 
 
-        //map.put(DefaultTypeCode.TEXT, "VARCHAR(200)");
+        map.put(DefaultTypeCode.DECIMAL, SMALLINT_UNSIGNED);
+        map.put(DefaultTypeCode.BOOLEAN, BOOLEAN);
         map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMP);
 
         return ImmutableMap.copyOf(map);
