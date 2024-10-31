@@ -85,6 +85,14 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
 
     private Optional<OntopBinding> getBinding(Variable v, Substitution<Constant> sqlVar2Constant) {
         ImmutableTerm term = sparqlVar2Term.apply(v);
+        boolean isRDFTermNull = term.getVariableStream()
+                .filter(var -> sqlVar2Constant.get(var).isNull())
+                .anyMatch(var -> var.equals(((NonGroundFunctionalTerm)term).getTerm(0)));
+        // hack: if the term is null we can skip the term simplification and return an empty binding
+        if (isRDFTermNull) {
+            return Optional.empty();
+        }
+
         ImmutableTerm constantTerm = sqlVar2Constant.applyToTerm(term);
         Optional<RDFConstant> constant = evaluate(constantTerm);
         return constant.map(rdfConstant -> new OntopBindingImpl(v, rdfConstant));
@@ -92,7 +100,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
 
 
     private Optional<RDFConstant> evaluate(ImmutableTerm term) {
-        ImmutableTerm simplifiedTerm = term.simplify();
+        ImmutableTerm simplifiedTerm = term.simplify(null);
         if (simplifiedTerm instanceof RDFConstant) {
             return Optional.of((RDFConstant) simplifiedTerm);
         }

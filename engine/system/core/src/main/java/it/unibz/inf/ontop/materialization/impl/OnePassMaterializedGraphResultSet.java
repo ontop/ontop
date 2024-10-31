@@ -230,7 +230,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
 
         IQ optimizedQuery = generalOptimizer.optimize(tree, null);
         IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
-        IQ executableQuery = nativeQueryGenerator.generateSourceQuery(plannedQuery, false, true);
+        IQ executableQuery = nativeQueryGenerator.generateSourceQuery(plannedQuery, true, true);
         queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
 
         return executableQuery;
