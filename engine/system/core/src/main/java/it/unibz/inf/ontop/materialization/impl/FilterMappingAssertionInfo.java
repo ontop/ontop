@@ -113,13 +113,12 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
                     : Optional.empty();
         }
 
-        FilterMappingAssertionInfo otherFilterAssertion = (FilterMappingAssertionInfo) other;
-        otherFilterAssertion.variableGenerator.registerAdditionalVariables(variableGenerator.getKnownVariables());
-        FilterMappingAssertionInfo otherFilterInfo = otherFilterAssertion.renameConflictingVariables(otherFilterAssertion.variableGenerator);
+        FilterMappingAssertionInfo otherFilterInfo = (FilterMappingAssertionInfo) other;
         variableGenerator.registerAdditionalVariables(otherFilterInfo.variableGenerator.getKnownVariables());
+        FilterMappingAssertionInfo otherFilterInfoRenamed = otherFilterInfo.renameConflictingVariables(otherFilterInfo.variableGenerator);
 
-        ImmutableMap<Integer, Variable> otherArgumentMap = (ImmutableMap<Integer, Variable>) otherFilterInfo.relationDefinitionNode.getArgumentMap();
-        if (notSimplifiedFilterCondition.isEmpty() && otherFilterInfo.getNotSimplifiedFilterCondition().isEmpty()) {
+        ImmutableMap<Integer, Variable> otherArgumentMap = (ImmutableMap<Integer, Variable>) otherFilterInfoRenamed.relationDefinitionNode.getArgumentMap();
+        if (notSimplifiedFilterCondition.isEmpty() && otherFilterInfoRenamed.getNotSimplifiedFilterCondition().isEmpty()) {
             SimpleMappingAssertionInfo simpleMappingAssertionInfo = new SimpleMappingAssertionInfo(
                     relationDefinitionNode.getRelationDefinition(),
                     argumentMap,
@@ -129,24 +128,24 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
                     iqFactory,
                     substitutionFactory);
             SimpleMappingAssertionInfo otherSimpleMappingAssertionInfo = new SimpleMappingAssertionInfo(
-                    otherFilterInfo.relationDefinitionNode.getRelationDefinition(),
+                    otherFilterInfoRenamed.relationDefinitionNode.getRelationDefinition(),
                     otherArgumentMap,
-                    otherFilterInfo.tree,
-                    otherFilterInfo.rdfFactTemplates,
-                    otherFilterInfo.variableGenerator,
-                    otherFilterInfo.iqFactory,
-                    otherFilterInfo.substitutionFactory);
+                    otherFilterInfoRenamed.tree,
+                    otherFilterInfoRenamed.rdfFactTemplates,
+                    otherFilterInfoRenamed.variableGenerator,
+                    otherFilterInfoRenamed.iqFactory,
+                    otherFilterInfoRenamed.substitutionFactory);
             return simpleMappingAssertionInfo.merge(otherSimpleMappingAssertionInfo);
-        } else if (notSimplifiedFilterCondition.isEmpty() || otherFilterInfo.getNotSimplifiedFilterCondition().isEmpty()) {
+        } else if (notSimplifiedFilterCondition.isEmpty() || otherFilterInfoRenamed.getNotSimplifiedFilterCondition().isEmpty()) {
             return Optional.empty();
         }
 
         ImmutableExpression filterCondition = notSimplifiedFilterCondition.get();
-        ImmutableExpression otherFilterCondition = otherFilterInfo.getNotSimplifiedFilterCondition().get();
+        ImmutableExpression otherFilterCondition = otherFilterInfoRenamed.getNotSimplifiedFilterCondition().get();
         if (!haveSameFilterCondition(argumentMap, otherArgumentMap, filterCondition, otherFilterCondition)) {
             return Optional.empty();
         }
-        return Optional.of(mergeOnSameFilterCondition(argumentMap, filterCondition, otherFilterInfo));
+        return Optional.of(mergeOnSameFilterCondition(argumentMap, filterCondition, otherFilterInfoRenamed));
     }
 
     @Override
@@ -205,7 +204,7 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
         return iqFactory.createUnaryIQTree(newConstructionNode, tree.getChildren().get(0));
     }
 
-    private FilterMappingAssertionInfo renameConflictingVariables(VariableGenerator generator) {
+    public FilterMappingAssertionInfo renameConflictingVariables(VariableGenerator generator) {
         InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(generator, tree.getKnownVariables());
         IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
         IQTree filterSubtree = notSimplifiedFilterCondition.isPresent()

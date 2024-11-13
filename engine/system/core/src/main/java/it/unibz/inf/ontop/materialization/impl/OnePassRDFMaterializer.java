@@ -150,7 +150,8 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         ImmutableMap<String, ImmutableList<MappingAssertionInformation>> groupedByRelationMappingsInfo = mappingInformation.stream()
                 .filter(m -> !(m instanceof ComplexMappingAssertionInfo))
                 .collect(Collectors.collectingAndThen(
-                        Collectors.groupingBy(mapping -> mapping.getRelationsDefinitions().get(0).getAtomPredicate().getName(), ImmutableCollectors.toList()),
+                        Collectors.groupingBy(mapping -> mapping.getRelationsDefinitions().get(0).getAtomPredicate().getName(),
+                                ImmutableCollectors.toList()),
                         ImmutableMap::copyOf
                 ));
 
@@ -183,12 +184,12 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         RDFFactTemplates rdfTemplates = new RDFFactTemplatesImpl(ImmutableList.of((mappingAssertionIQ.getProjectionAtom().getArguments())));
 
         if (hasNotSupportedNode(tree)) {
-            return new ComplexMappingAssertionInfo(tree, rdfTemplates);
+            return new ComplexMappingAssertionInfo(tree, rdfTemplates, substitutionFactory);
         }
 
         ImmutableList<ExtensionalDataNode> extensionalNodes = findExtensionalNodes(tree);
         if (extensionalNodes.size() != 1) {
-            return new ComplexMappingAssertionInfo(tree, rdfTemplates);
+            return new ComplexMappingAssertionInfo(tree, rdfTemplates, substitutionFactory);
         }
         ExtensionalDataNode extensionalNode = extensionalNodes.get(0);
         RelationDefinition relation = extensionalNode.getRelationDefinition();
@@ -205,7 +206,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                             iqFactory,
                             termFactory,
                             substitutionFactory)
-                    : new ComplexMappingAssertionInfo(tree, rdfTemplates);
+                    : new ComplexMappingAssertionInfo(tree, rdfTemplates, substitutionFactory);
         }
 
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = extensionalNode.getArgumentMap();
@@ -225,9 +226,20 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                             k -> k,
                             k -> relation.getAttribute(k + 1)));
 
-            return new DictionaryPatternMappingAssertion(tree, rdfTemplates, constantAttributes, extensionalNode, mappingAssertionIQ.getVariableGenerator(), iqFactory, substitutionFactory, termFactory);
+            //return new ComplexMappingAssertionInfo(tree, rdfTemplates, substitutionFactory);
+
+            return new DictionaryPatternMappingAssertion(tree,
+                    rdfTemplates,
+                    constantAttributes,
+                    extensionalNode,
+                    mappingAssertionIQ.getVariableGenerator(),
+                    iqFactory,
+                    substitutionFactory,
+                    termFactory,
+                    queryTransformerFactory);
+
         } else {
-            return new ComplexMappingAssertionInfo(mappingAssertionIQ.getTree(), rdfTemplates);
+            return new ComplexMappingAssertionInfo(mappingAssertionIQ.getTree(), rdfTemplates, substitutionFactory);
         }
     }
 
@@ -249,7 +261,6 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
             return ImmutableList.of(iq);
         }
     }
-
 
     /**
      * Recursive

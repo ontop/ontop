@@ -99,27 +99,30 @@ public class SimpleMappingAssertionInfo implements MappingAssertionInformation {
             return Optional.empty();
         }
         variableGenerator.registerAdditionalVariables(otherSimpleAssertion.variableGenerator.getKnownVariables());
-        SimpleMappingAssertionInfo other = otherSimpleAssertion.renameConflictingVariables(variableGenerator);
+        SimpleMappingAssertionInfo otherRenamed = otherSimpleAssertion.renameConflictingVariables(variableGenerator);
 
-        ImmutableMap<Integer, Variable> mergedArgumentMap = mergeRelationArguments(other.argumentMap);
+        ImmutableMap<Integer, Variable> mergedArgumentMap = mergeRelationArguments(otherRenamed.argumentMap);
 
         ExtensionalDataNode relationDefinitionNode = iqFactory.createExtensionalDataNode(
                 relationDefinition,
                 mergedArgumentMap);
 
-        ConstructionNode optionalRenamingNode = createOptionalRenamingNode(other.argumentMap);
+        ConstructionNode optionalRenamingNode = createOptionalRenamingNode(otherRenamed.argumentMap);
 
-        Substitution<ImmutableTerm> rdfTermsConstructionSubstitution = topConstructSubstitution.compose(other.topConstructSubstitution);
+        Substitution<ImmutableTerm> rdfTermsConstructionSubstitution = topConstructSubstitution.compose(
+                otherRenamed.topConstructSubstitution);
         ImmutableSet<Variable> termsVariables = ImmutableSet.<Variable>builder()
                 .addAll(topConstructSubstitution.getDomain())
-                .addAll(other.topConstructSubstitution.getDomain())
+                .addAll(otherRenamed.topConstructSubstitution.getDomain())
                 .build();
-        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(termsVariables, rdfTermsConstructionSubstitution);
+        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(termsVariables,
+                rdfTermsConstructionSubstitution);
         IQTree mappingTree = iqFactory.createUnaryIQTree(topConstructionNode,
                 iqFactory.createUnaryIQTree(optionalRenamingNode, relationDefinitionNode));
 
-        RDFFactTemplates mergedRDFTemplates = rdfFactTemplates.merge(other.rdfFactTemplates);
-        var treeTemplatesPair = compressMappingAssertion(mappingTree.normalizeForOptimization(variableGenerator), mergedRDFTemplates);
+        RDFFactTemplates mergedRDFTemplates = rdfFactTemplates.merge(otherRenamed.rdfFactTemplates);
+        var treeTemplatesPair = compressMappingAssertion(mappingTree.normalizeForOptimization(variableGenerator),
+                mergedRDFTemplates);
 
         return Optional.of(new SimpleMappingAssertionInfo(relationDefinition,
                 mergedArgumentMap,
@@ -130,8 +133,9 @@ public class SimpleMappingAssertionInfo implements MappingAssertionInformation {
                 substitutionFactory));
     }
 
-    private SimpleMappingAssertionInfo renameConflictingVariables(VariableGenerator generator) {
-        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(generator, tree.getKnownVariables());
+    public SimpleMappingAssertionInfo renameConflictingVariables(VariableGenerator conflictingVariableGenerator) {
+        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
+                conflictingVariableGenerator, tree.getKnownVariables());
         IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
         RDFFactTemplates renamedRDFTemplates = rdfFactTemplates.apply(renamingSubstitution);
 
@@ -140,7 +144,6 @@ public class SimpleMappingAssertionInfo implements MappingAssertionInformation {
                         Map.Entry::getKey,
                         e -> (Variable) renamingSubstitution.apply(e.getValue())
                 ));
-        variableGenerator.registerAdditionalVariables(generator.getKnownVariables());
         return new SimpleMappingAssertionInfo(relationDefinition,
                 renamedArgumentMap,
                 renamedTree,
