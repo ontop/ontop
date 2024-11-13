@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.query.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.query.resultset.OntopCloseableIterator;
 import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -261,6 +262,6 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
                         throw new RuntimeException(e);
                     }
                 })
-                .collect(ImmutableList.toImmutableList());
+                .collect(ImmutableCollectors.toList());
     }
 }

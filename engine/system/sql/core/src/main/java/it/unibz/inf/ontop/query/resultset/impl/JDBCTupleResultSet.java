@@ -2,6 +2,10 @@ package it.unibz.inf.ontop.query.resultset.impl;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.NullRejectingDBConcatFunctionSymbol;
 import it.unibz.inf.ontop.query.resultset.OntopBinding;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
@@ -10,12 +14,14 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class JDBCTupleResultSet extends AbstractTupleResultSet {
 
@@ -24,6 +30,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
     private final Substitution<ImmutableTerm> sparqlVar2Term;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
+    private final ImmutableMultimap<Variable, Variable> lexicalVariableMap;
 
     public JDBCTupleResultSet(ResultSet rs,
                               ImmutableSortedSet<Variable> sqlSignature,
@@ -45,6 +52,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.sparqlVar2Term = constructionNode.getSubstitution();
+        this.lexicalVariableMap = extractLexicalVariablesDependencies();
     }
 
 
@@ -85,10 +93,11 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
 
     private Optional<OntopBinding> getBinding(Variable v, Substitution<Constant> sqlVar2Constant) {
         ImmutableTerm term = sparqlVar2Term.apply(v);
-        boolean isRDFTermNull = term.getVariableStream()
-                .filter(var -> sqlVar2Constant.get(var).isNull())
-                .anyMatch(var -> var.equals(((NonGroundFunctionalTerm)term).getTerm(0)));
+
         // hack: if the term is null we can skip the term simplification and return an empty binding
+        boolean isRDFTermNull = lexicalVariableMap.get(v).stream()
+                .map(sqlVar2Constant::get)
+                .anyMatch(Constant::isNull);
         if (isRDFTermNull) {
             return Optional.empty();
         }
@@ -100,7 +109,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
 
 
     private Optional<RDFConstant> evaluate(ImmutableTerm term) {
-        ImmutableTerm simplifiedTerm = term.simplify(null);
+        ImmutableTerm simplifiedTerm = term.simplify();
         if (simplifiedTerm instanceof RDFConstant) {
             return Optional.of((RDFConstant) simplifiedTerm);
         }
@@ -115,5 +124,34 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
             throw new SQLOntopBindingSet.InvalidConstantTypeInResultException("Unexpected constant type for " + simplifiedTerm);
         }
         throw new SQLOntopBindingSet.InvalidTermAsResultException(simplifiedTerm);
+    }
+
+    private ImmutableMultimap<Variable, Variable> extractLexicalVariablesDependencies() {
+        return sparqlVar2Term.stream()
+                .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm
+                        && ((ImmutableFunctionalTerm) e.getValue()).getFunctionSymbol() instanceof RDFTermFunctionSymbol)
+                .flatMap(e -> {
+                    ImmutableTerm rdfLexicalTerm = ((ImmutableFunctionalTerm) e.getValue()).getTerm(0);
+
+                    return getDependentVariables(e.getKey(), rdfLexicalTerm);
+                    })
+                .collect(ImmutableCollectors.toMultimap());
+    }
+
+    private Stream<ImmutableMap.Entry<Variable, Variable>> getDependentVariables(Variable sparqlIndependentVariable, ImmutableTerm rdfLexicalTerm) {
+        if (rdfLexicalTerm instanceof Variable) {
+            return rdfLexicalTerm.getVariableStream()
+                    .map(v -> Maps.immutableEntry(sparqlIndependentVariable, v));
+        }
+        if (rdfLexicalTerm instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) rdfLexicalTerm;
+            if (functionalTerm.getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol
+                    || functionalTerm.getFunctionSymbol() instanceof NullRejectingDBConcatFunctionSymbol
+                    || functionalTerm.getFunctionSymbol() instanceof DBTypeConversionFunctionSymbol) {
+                return rdfLexicalTerm.getVariableStream()
+                        .map(v -> Maps.immutableEntry(sparqlIndependentVariable, v));
+            }
+        }
+        return Stream.empty();
     }
 }
