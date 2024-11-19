@@ -73,7 +73,9 @@ public class DictionaryPatternMappingAssertion implements MappingAssertionInform
 
     @Override
     public Optional<MappingAssertionInformation> merge(MappingAssertionInformation other) {
-        if (other instanceof ComplexMappingAssertionInfo || other instanceof FilterMappingAssertionInfo) {
+        if (other instanceof ComplexMappingAssertionInfo
+                || other instanceof FilterMappingAssertionInfo
+                || other instanceof JoinMappingAssertionInfo) {
             return other.merge(this);
         }
 

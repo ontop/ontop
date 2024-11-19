@@ -35,7 +35,6 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class OnePassRDFMaterializer implements OntopRDFMaterializer {
@@ -147,34 +146,32 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                 .filter(m -> m instanceof ComplexMappingAssertionInfo)
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableMap<String, ImmutableList<MappingAssertionInformation>> groupedByRelationMappingsInfo = mappingInformation.stream()
-                .filter(m -> !(m instanceof ComplexMappingAssertionInfo))
-                .collect(Collectors.collectingAndThen(
-                        Collectors.groupingBy(mapping -> mapping.getRelationsDefinitions().get(0).getAtomPredicate().getName(),
-                                ImmutableCollectors.toList()),
-                        ImmutableMap::copyOf
-                ));
 
-        ArrayList<MappingAssertionInformation> unmergedMappingAssertionInfos = new ArrayList<>();
-        ImmutableList<MappingAssertionInformation> mergedMappingAssertionInfos = groupedByRelationMappingsInfo.values().stream()
-                .map( sameRelationMappings -> {
-                    MappingAssertionInformation mergedSameRelationMapping = sameRelationMappings.get(0);
-                    for (int i=1; i<sameRelationMappings.size(); i++) {
-                        var m1 = sameRelationMappings.get(i);
-                        Optional<MappingAssertionInformation> merged = mergedSameRelationMapping.merge(m1);
-                        if (merged.isPresent()) {
-                            mergedSameRelationMapping = merged.get();
-                        } else {
-                            unmergedMappingAssertionInfos.add(m1);
-                        }
-                    }
-                    return mergedSameRelationMapping;
-                })
+        ImmutableList<ImmutableList<MappingAssertionInformation>> groupedByJoinRelationsInfos = mappingInformation.stream()
+                .filter(m -> m instanceof JoinMappingAssertionInfo)
+                .map(m -> Map.entry(
+                        m.getRelationsDefinitions().stream()
+                                .map(rel -> rel.getAtomPredicate().getName())
+                                .collect(ImmutableCollectors.toSet()),
+                        m))
+                .collect(ImmutableCollectors.toMultimap())
+                .asMap().values().stream()
+                .map(ImmutableList::copyOf)
+                .collect(ImmutableCollectors.toList());
+
+        ImmutableList<ImmutableList<MappingAssertionInformation>> groupedBySingleRelationInfo = mappingInformation.stream()
+                .filter(m -> !(m instanceof ComplexMappingAssertionInfo || m instanceof JoinMappingAssertionInfo))
+                .map(m -> Map.entry(
+                        m.getRelationsDefinitions().get(0).getAtomPredicate().getName(),
+                        m))
+                .collect(ImmutableCollectors.toMultimap())
+                .asMap().values().stream()
+                .map(ImmutableList::copyOf)
                 .collect(ImmutableCollectors.toList());
 
         return ImmutableList.<MappingAssertionInformation>builder()
-                .addAll(mergedMappingAssertionInfos)
-                .addAll(unmergedMappingAssertionInfos)
+                .addAll(mergeCompatibleAssertionsInfos(groupedByJoinRelationsInfos))
+                .addAll(mergeCompatibleAssertionsInfos(groupedBySingleRelationInfo))
                 .addAll(complexMappingAssertionInfo)
                 .build();
     }
@@ -187,6 +184,18 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
             return new ComplexMappingAssertionInfo(tree, rdfTemplates, substitutionFactory);
         }
 
+        Optional<IQTree> joinSubtree = findJoinSubtree(tree);
+        if (joinSubtree.isPresent()) {
+            return new JoinMappingAssertionInfo(
+                    tree,
+                    rdfTemplates,
+                    joinSubtree.get(),
+                    mappingAssertionIQ.getVariableGenerator(),
+                    iqFactory,
+                    substitutionFactory);
+        }
+
+
         ImmutableList<ExtensionalDataNode> extensionalNodes = findExtensionalNodes(tree);
         if (extensionalNodes.size() != 1) {
             return new ComplexMappingAssertionInfo(tree, rdfTemplates, substitutionFactory);
@@ -194,7 +203,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         ExtensionalDataNode extensionalNode = extensionalNodes.get(0);
         RelationDefinition relation = extensionalNode.getRelationDefinition();
 
-        Optional<IQTree> filterSubtree = findFilterSubtrees(tree);
+        Optional<IQTree> filterSubtree = findFilterSubtree(tree);
         if (filterSubtree.isPresent()) {
             return filterSubtree.get().getRootNode() instanceof FilterNode
                     ? new FilterMappingAssertionInfo(
@@ -227,7 +236,6 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                             k -> relation.getAttribute(k + 1)));
 
             //return new ComplexMappingAssertionInfo(tree, rdfTemplates, substitutionFactory);
-
             return new DictionaryPatternMappingAssertion(tree,
                     rdfTemplates,
                     constantAttributes,
@@ -254,11 +262,52 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                     .map(unionChild -> {
                         IQTree newTree = iqFactory.createUnaryIQTree(
                                 (ConstructionNode) tree.getRootNode(), unionChild);
-                        return iqFactory.createIQ(iq.getProjectionAtom(), newTree.normalizeForOptimization(iq.getVariableGenerator()));
+                        return iqFactory.createIQ(iq.getProjectionAtom(),
+                                newTree.normalizeForOptimization(iq.getVariableGenerator()));
                     })
                     .collect(ImmutableCollectors.toList());
         } else {
             return ImmutableList.of(iq);
+        }
+    }
+
+    private ImmutableList<MappingAssertionInformation> mergeCompatibleAssertionsInfos(
+            ImmutableList<ImmutableList<MappingAssertionInformation>> compatibleAssertionInfos) {
+        ArrayList<MappingAssertionInformation> unmergedMappingAssertionInfos = new ArrayList<>();
+        ImmutableList<MappingAssertionInformation> mergedMappingAssertionInfos = compatibleAssertionInfos.stream()
+                .map( sameRelationMappings -> {
+                    MappingAssertionInformation mergedSameRelationMapping = sameRelationMappings.get(0);
+                    for (int i=1; i<sameRelationMappings.size(); i++) {
+                        var m1 = sameRelationMappings.get(i);
+                        Optional<MappingAssertionInformation> merged = mergedSameRelationMapping.merge(m1);
+                        if (merged.isPresent()) {
+                            mergedSameRelationMapping = merged.get();
+                        } else {
+                            unmergedMappingAssertionInfos.add(m1);
+                        }
+                    }
+                    return mergedSameRelationMapping;
+                })
+                .collect(ImmutableCollectors.toList());
+
+        return ImmutableList.<MappingAssertionInformation>builder()
+                .addAll(mergedMappingAssertionInfos)
+                .addAll(unmergedMappingAssertionInfos)
+                .build();
+    }
+
+    /**
+     * Recursive
+     */
+    private Optional<IQTree> findJoinSubtree(IQTree tree) {
+        if (tree.getRootNode() instanceof JoinLikeNode) {
+            return Optional.of(tree);
+        } else {
+            return tree.getChildren().stream()
+                    .map(this::findJoinSubtree)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .findAny();
         }
     }
 
@@ -283,12 +332,12 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
     /**
      * Recursive
      */
-    private Optional<IQTree> findFilterSubtrees(IQTree tree) {
-        if (tree.getRootNode() instanceof JoinOrFilterNode) {
+    private Optional<IQTree> findFilterSubtree(IQTree tree) {
+        if (tree.getRootNode() instanceof FilterNode) {
             return Optional.of(tree);
         } else {
             return tree.getChildren().stream()
-                    .map(this::findFilterSubtrees)
+                    .map(this::findFilterSubtree)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .findAny();
@@ -300,9 +349,9 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
      */
     private boolean hasNotSupportedNode(IQTree tree) {
         if (tree.getRootNode() instanceof QueryModifierNode
+                || tree.getRootNode() instanceof UnionNode
                 || tree.getRootNode() instanceof AggregationNode
-                || tree.getRootNode() instanceof ValuesNode
-                || tree.getRootNode() instanceof JoinLikeNode){
+                || tree.getRootNode() instanceof LeftJoinNode){
             return true;
         } else {
             return tree.getChildren().stream()

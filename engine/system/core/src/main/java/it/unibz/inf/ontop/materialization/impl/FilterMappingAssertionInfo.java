@@ -85,7 +85,7 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
 
     @Override
     public Optional<MappingAssertionInformation> merge(MappingAssertionInformation other) {
-        if (other instanceof ComplexMappingAssertionInfo) {
+        if (other instanceof ComplexMappingAssertionInfo || other instanceof JoinMappingAssertionInfo) {
             return Optional.empty();
         }
 
@@ -115,7 +115,7 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
 
         FilterMappingAssertionInfo otherFilterInfo = (FilterMappingAssertionInfo) other;
         variableGenerator.registerAdditionalVariables(otherFilterInfo.variableGenerator.getKnownVariables());
-        FilterMappingAssertionInfo otherFilterInfoRenamed = otherFilterInfo.renameConflictingVariables(otherFilterInfo.variableGenerator);
+        FilterMappingAssertionInfo otherFilterInfoRenamed = otherFilterInfo.renameConflictingVariables(variableGenerator);
 
         ImmutableMap<Integer, Variable> otherArgumentMap = (ImmutableMap<Integer, Variable>) otherFilterInfoRenamed.relationDefinitionNode.getArgumentMap();
         if (notSimplifiedFilterCondition.isEmpty() && otherFilterInfoRenamed.getNotSimplifiedFilterCondition().isEmpty()) {
