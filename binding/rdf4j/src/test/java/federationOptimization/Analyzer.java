@@ -44,6 +44,7 @@ public class Analyzer {
                 "# Fed. Unions", s -> Integer.toString(s.getNumUnionsFederated()),
                 "# SQL Tokens", s -> Integer.toString(s.getNumSqlTokens()),
                 "# Nodes", s -> Integer.toString(s.getNumNodes()),
+                "# Nodes Ontop", s -> Integer.toString(s.getNumNodesOntop()),
                 "Sources", s -> s.getSources().stream().map(Analyzer::rewriteSource).distinct().sorted()
                         .collect(Collectors.joining(",")),
                 "Rules", s -> s.getAppliedRules().stream().filter(r -> r != Rule.SJE).map(r -> r.name().toLowerCase()).sorted()
@@ -107,8 +108,9 @@ public class Analyzer {
 
     public static class Statistics {
 
-
         private int numNodes;
+
+        private int numNodesOntop;
 
         private int numJoins;
 
@@ -143,20 +145,22 @@ public class Analyzer {
             QueryNode node = tree.getRootNode();
             int arity = tree.getChildren().size();
 
-            ++numNodes;
+            ++numNodesOntop;
 
             if (node instanceof JoinLikeNode) {
+                numNodes += arity - 1;
                 numJoins += arity - 1;
                 if (getSources(tree, sourceMap).size() > 1) {
                     numJoinsFederated += arity - 1;
                 }
-            }
-
-            if (node instanceof UnionNode) {
+            } else if (node instanceof UnionNode) {
+                numNodes += arity - 1;
                 numUnions += arity - 1;
                 if (getSources(tree, sourceMap).size() > 1) {
                     numUnionsFederated += arity - 1;
                 }
+            } else {
+                ++numNodes;
             }
         }
 
@@ -188,6 +192,10 @@ public class Analyzer {
 
         public int getNumNodes() {
             return numNodes;
+        }
+
+        public int getNumNodesOntop() {
+            return numNodesOntop;
         }
 
         public int getNumJoins() {
@@ -228,6 +236,7 @@ public class Analyzer {
             }
             Statistics other = (Statistics) obj;
             return numNodes == other.numNodes &&
+                    numNodesOntop == other.numNodesOntop &&
                     numJoins == other.numJoins &&
                     numJoinsFederated == other.numJoinsFederated &&
                     numUnions == other.numUnions &&
@@ -239,14 +248,15 @@ public class Analyzer {
 
         @Override
         public int hashCode() {
-            return Objects.hash(numNodes, numJoins, numJoinsFederated, numUnions, numUnionsFederated, numSqlTokens,
-                    sources, appliedRules);
+            return Objects.hash(numNodes, numNodesOntop, numJoins, numJoinsFederated, numUnions, numUnionsFederated,
+                    numSqlTokens, sources, appliedRules);
         }
 
         @Override
         public String toString() {
             return "Statistics{" +
                     "numNodes=" + numNodes +
+                    ", numNodesOntop=" + numNodesOntop +
                     ", numJoins=" + numJoins +
                     ", numJoinsFederated=" + numJoinsFederated +
                     ", numUnions=" + numUnions +
