@@ -15,20 +15,25 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.node.impl.NativeNodeImpl;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Analyzer {
 
     @SuppressWarnings("DataFlowIssue")
-    public static void main(String... args) throws OBDASpecificationException, OntopKGQueryException, OntopReformulationException {
+    public static void main(String... args) throws OBDASpecificationException, OntopKGQueryException, OntopReformulationException, FileNotFoundException {
 
-        Tester.Federator federator = Tester.Federator.DENODO;
+        Federator federator = Federator.DENODO;
         PrintStream out = System.out;
-        boolean tsv = false;
+//        PrintStream out = new PrintStream(new FileOutputStream("src/test/resources/federation/query_analysis_results_" + federator.name().toLowerCase() + ".tsv"));
+        boolean tsv = true;
 
         Table<Optimization, Setting, List<Statistics>> stats = HashBasedTable.create();
         for (Optimization opt : Optimization.values()) {
@@ -48,7 +53,13 @@ public class Analyzer {
                 "Sources", s -> s.getSources().stream().map(Analyzer::rewriteSource).distinct().sorted()
                         .collect(Collectors.joining(",")),
                 "Rules", s -> s.getAppliedRules().stream().filter(r -> r != Rule.SJE).map(r -> r.name().toLowerCase()).sorted()
-                        .collect(Collectors.joining(","))
+                        .collect(Collectors.joining(",")),
+                "Mat. Views", s -> s.getMatViews().stream()
+                        .collect(Collectors.groupingBy(e -> e, TreeMap::new, Collectors.counting()))
+                        .entrySet().stream()
+                        .map(entry -> entry.getKey() + " (" + entry.getValue() + ")")
+                        .collect(Collectors.joining(", "))
+
         );
 
         emit(out, "property", "setting", Arrays.stream(Query.values()).map(Enum::name).collect(Collectors.toList()), tsv, false);
@@ -126,6 +137,8 @@ public class Analyzer {
 
         private final Set<Rule> appliedRules;
 
+        private final List<String> matViews;
+
         private Statistics(IQ optimizedIq, IQ executableIq, Set<Rule> appliedRules, Map<String, String> sourceMap) {
 
             String sqlQuery = ((NativeNodeImpl) executableIq.getTree().getChildren().get(0)).getNativeQueryString();
@@ -134,6 +147,7 @@ public class Analyzer {
             this.numSqlTokens = sqlQuery.split("\\s+").length;
             this.appliedRules = ImmutableSet.copyOf(appliedRules);
             analyze(optimizedIq.getTree(), sourceMap);
+            this.matViews = getMatViews(optimizedIq.getTree());
         }
 
         private void analyze(IQTree tree, Map<String, String> sourceMap) {
@@ -220,6 +234,26 @@ public class Analyzer {
 
         public Set<String> getSources() {
             return sources;
+        }
+
+        public List<String> getMatViews() {
+            return matViews;
+        }
+
+        private List<String> getMatViews(IQTree tree) {
+            List<String> matViews = Lists.newArrayList();
+            getMatViews(tree, matViews);
+            return ImmutableList.copyOf(matViews);
+        }
+
+        private void getMatViews(IQTree tree, List<String> matViews) {
+            String pattern = "\\b\\w*matv\\w*\\b";
+            Pattern r = Pattern.compile(pattern);
+            String text= tree.toString();
+            Matcher m = r.matcher(text);
+            while (m.find()) {
+                matViews.add(m.group());
+            }
         }
 
         public Set<Rule> getAppliedRules() {
