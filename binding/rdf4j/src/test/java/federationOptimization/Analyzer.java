@@ -4,6 +4,9 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.*;
 import federationOptimization.Tester.*;
+import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopKGQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
@@ -16,13 +19,10 @@ import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.node.impl.NativeNodeImpl;
 
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Analyzer {
@@ -55,11 +55,11 @@ public class Analyzer {
                 "Rules", s -> s.getAppliedRules().stream().filter(r -> r != Rule.SJE).map(r -> r.name().toLowerCase()).sorted()
                         .collect(Collectors.joining(",")),
                 "Mat. Views", s -> s.getMatViews().stream()
+                        .sorted()
                         .collect(Collectors.groupingBy(e -> e, TreeMap::new, Collectors.counting()))
                         .entrySet().stream()
                         .map(entry -> entry.getKey() + " (" + entry.getValue() + ")")
                         .collect(Collectors.joining(", "))
-
         );
 
         emit(out, "property", "setting", Arrays.stream(Query.values()).map(Enum::name).collect(Collectors.toList()), tsv, false);
@@ -137,7 +137,7 @@ public class Analyzer {
 
         private final Set<Rule> appliedRules;
 
-        private final List<String> matViews;
+        private final Multiset<String> matViews;
 
         private Statistics(IQ optimizedIq, IQ executableIq, Set<Rule> appliedRules, Map<String, String> sourceMap) {
 
@@ -146,8 +146,9 @@ public class Analyzer {
             this.sources = getSources(optimizedIq.getTree(), sourceMap);
             this.numSqlTokens = sqlQuery.split("\\s+").length;
             this.appliedRules = ImmutableSet.copyOf(appliedRules);
+            this.matViews = HashMultiset.create();
             analyze(optimizedIq.getTree(), sourceMap);
-            this.matViews = getMatViews(optimizedIq.getTree());
+//            this.matViews = getMatViews(optimizedIq.getTree());
         }
 
         private void analyze(IQTree tree, Map<String, String> sourceMap) {
@@ -172,6 +173,16 @@ public class Analyzer {
                 numUnions += arity - 1;
                 if (getSources(tree, sourceMap).size() > 1) {
                     numUnionsFederated += arity - 1;
+                }
+            } else if (node instanceof ExtensionalDataNode) {
+                ++numNodes;
+                RelationDefinition relation = ((ExtensionalDataNode) node).getRelationDefinition();
+                if (relation instanceof NamedRelationDefinition) {
+                    RelationID id = ((NamedRelationDefinition) relation).getID();
+                    String name = id.getTableOnlyID().getComponents().get(0).getName();
+                    if (name.startsWith("matv_")) {
+                        matViews.add(name);
+                    }
                 }
             } else {
                 ++numNodes;
@@ -236,24 +247,8 @@ public class Analyzer {
             return sources;
         }
 
-        public List<String> getMatViews() {
+        public Multiset<String> getMatViews() {
             return matViews;
-        }
-
-        private List<String> getMatViews(IQTree tree) {
-            List<String> matViews = Lists.newArrayList();
-            getMatViews(tree, matViews);
-            return ImmutableList.copyOf(matViews);
-        }
-
-        private void getMatViews(IQTree tree, List<String> matViews) {
-            String pattern = "\\b\\w*matv\\w*\\b";
-            Pattern r = Pattern.compile(pattern);
-            String text= tree.toString();
-            Matcher m = r.matcher(text);
-            while (m.find()) {
-                matViews.add(m.group());
-            }
         }
 
         public Set<Rule> getAppliedRules() {
