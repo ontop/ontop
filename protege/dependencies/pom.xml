@@ -6,7 +6,7 @@
     <parent>
         <artifactId>ontop-protege</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>5.2.0-SNAPSHOT</version>
+        <version>5.2.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-protege-dependencies</artifactId>
