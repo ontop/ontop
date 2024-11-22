@@ -20,7 +20,7 @@ public class OntopEndpointDownloadNoOntologyTest {
     @ClassRule
     public static ExternalResource h2Connection = new H2ExternalResourceForBookExample();
     private static final String PORT = "29833";
-    private static final String DBURL = "jdbc:h2:tcp://localhost:19123/./src/test/resources/h2/books.h2;ACCESS_MODE_DATA=r";
+    private static final String DBURL = "jdbc:h2:tcp://localhost:19123/./src/test/resources/h2/books;ACCESS_MODE_DATA=r";
     private static final String DBUSER = "sa";
     private static final String DBPASSWORD = "test";
 
