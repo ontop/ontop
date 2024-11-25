@@ -5,7 +5,7 @@
 
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop</artifactId>
-    <version>5.2.2-SNAPSHOT</version>
+    <version>5.2.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Ontop</name>
@@ -139,7 +139,7 @@
         <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
         <maven-jxr-plugin.version>3.3.0</maven-jxr-plugin.version>
         <maven-project-info-reports-plugin.version>3.4.2</maven-project-info-reports-plugin.version>
-        <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>
+        <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <maven-shade-plugin.version>3.5.0</maven-shade-plugin.version>
         <maven-site-plugin.version>4.0.0-M5</maven-site-plugin.version>
