@@ -407,6 +407,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         return super.computeVariableNonRequirement(children);
     }
 
+    @Override
+    public ImmutableSet<Variable> inferStrictDependents(NaryIQTree tree, ImmutableList<IQTree> children) {
+        // Default implementation
+        return IQTreeTools.computeStrictDependentsFromFunctionalDependencies(tree);
+    }
+
     private Stream<Map.Entry<IQTree, IQTree>> extractFunctionalDependencies(
             IQTree t1, IQTree t2, ImmutableMap<IQTree, ImmutableSet<ImmutableSet<Variable>>> constraintMap) {
 

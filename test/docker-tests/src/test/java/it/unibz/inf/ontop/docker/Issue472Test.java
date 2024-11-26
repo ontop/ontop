@@ -21,15 +21,12 @@ public class Issue472Test {
     private static final String databaseFile = "src/test/resources/issue472/database.sql";
 
     @BeforeClass
-    public static void before() throws SQLException {
+    public static void before() throws SQLException, FileNotFoundException {
 
         Connection sqlConnection = DriverManager.getConnection("jdbc:h2:mem:questjunitdb", "sa", "");
         try (java.sql.Statement s = sqlConnection.createStatement()) {
             String text = new Scanner(new File(databaseFile)).useDelimiter("\\A").next();
             s.execute(text);
-        }
-        catch (SQLException | FileNotFoundException e) {
-            System.out.println("Exception in creating db from script:" + e);
         }
     }
 

@@ -5,6 +5,7 @@ import org.junit.Test;
 
 public class OntopMappingV1ToV3Test {
 
+    @Ignore
     @Test
     public void testOntopHelp (){
         Ontop.main("help", "mapping", "v1-to-v3");

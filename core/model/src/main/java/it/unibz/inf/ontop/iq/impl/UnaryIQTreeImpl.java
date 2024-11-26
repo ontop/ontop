@@ -130,6 +130,11 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
+    protected ImmutableSet<Variable> computeStrictDependents() {
+        return getRootNode().inferStrictDependents(this, getChild());
+    }
+
+    @Override
     protected VariableNonRequirement computeVariableNonRequirement() {
         return getRootNode().computeVariableNonRequirement(getChild());
     }

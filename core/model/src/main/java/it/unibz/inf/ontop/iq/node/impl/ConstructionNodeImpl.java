@@ -30,7 +30,6 @@ import it.unibz.inf.ontop.utils.impl.VariableGeneratorImpl;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
@@ -247,6 +246,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .filter(projectedVariables::containsAll)
                 .collect(ImmutableCollectors.toSet());
 
+        if (substitution.isEmpty())
+            return preservedConstraints;
+
         VariableNullability variableNullability = getVariableNullability(child);
         ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap = getDeterminedByMap(variableNullability);
 
@@ -310,6 +312,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .filter(v -> previousUC.contains(v) || !Sets.intersection(previousUC, determinedByMap.get(v)).isEmpty())
                 .collect(ImmutableCollectors.toSet());
 
+        if (!includesAll(relatedVariables, previousUC, determinedByMap))
+            // Some determinants of the previous UC are projected out
+            return ImmutableSet.of();
+
         List<ImmutableList<Variable>> setsToCheck = relatedVariables.stream()
                 .map(ImmutableList::of)
                 .collect(Collectors.toList());
@@ -336,10 +342,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .collect(ImmutableCollectors.toSet());
     }
 
-    private static boolean includesAll(ImmutableList<Variable> variables, ImmutableSet<Variable> target, ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap) {
+    private static boolean includesAll(ImmutableCollection<Variable> variables, ImmutableSet<Variable> target, ImmutableMap<Variable, ImmutableSet<Variable>> determinedByMap) {
         return variables.stream()
-                .map(determinedByMap::get)
-                .reduce(Set.of(), Sets::union, Sets::union)
+                .flatMap(v -> Optional.ofNullable(determinedByMap.get(v)).orElseThrow().stream())
+                .collect(ImmutableSet.toImmutableSet())
                 .containsAll(target);
     }
 
@@ -436,6 +442,33 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     @Override
     public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
         return VariableNonRequirement.of(getVariables());
+    }
+
+    @Override
+    public ImmutableSet<Variable> inferStrictDependents(UnaryIQTree tree, IQTree child) {
+        ImmutableSet<Variable> childStrictDependents = child.inferStrictDependents();
+
+        if (childStrictDependents.isEmpty()) {
+            VariableNullability nullability = getVariableNullability(child);
+            return newDependenciesFromSubstitution(nullability)
+                    .filter(e -> projectedVariables.containsAll(e.getKey()))
+                    .flatMap(e -> e.getValue().stream())
+                    .collect(ImmutableSet.toImmutableSet());
+        }
+
+        Sets.SetView<Variable> childDeterminants = Sets.difference(child.getVariables(), childStrictDependents);
+
+        if (projectedVariables.containsAll(childDeterminants)) {
+            VariableNullability nullability = getVariableNullability(child);
+            return Stream.concat(
+                    Sets.intersection(childStrictDependents, projectedVariables).stream(),
+                    newDependenciesFromSubstitution(nullability)
+                            .filter(e -> projectedVariables.containsAll(e.getKey()))
+                            .flatMap(e -> e.getValue().stream()))
+                    .collect(ImmutableSet.toImmutableSet());
+        }
+
+        return IQTreeTools.computeStrictDependentsFromFunctionalDependencies(tree);
     }
 
     @Override
