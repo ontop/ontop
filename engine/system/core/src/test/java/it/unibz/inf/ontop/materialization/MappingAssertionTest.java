@@ -12,10 +12,10 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
-import it.unibz.inf.ontop.iq.node.JoinLikeNode;
 import it.unibz.inf.ontop.materialization.impl.*;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBOrFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -37,7 +37,7 @@ public class MappingAssertionTest {
         T1 = builder.createDatabaseRelation("person",
                 "id", dbTypeFactory.getDBStringType(), false,
                 "name", dbTypeFactory.getDBStringType(), false,
-                "age", dbTypeFactory.getDBLargeIntegerType(), false,
+                "age", dbTypeFactory.getDBLargeIntegerType(), true,
                 "works_at", dbTypeFactory.getDBStringType(), true);
 
         T2 = builder.createDatabaseRelation("shop",
@@ -59,6 +59,7 @@ public class MappingAssertionTest {
     private final Variable S1 = TERM_FACTORY.getVariable("s1");
     private final Variable P1 = TERM_FACTORY.getVariable("p1");
     private final Variable O1 = TERM_FACTORY.getVariable("o1");
+    private final Variable G1 = TERM_FACTORY.getVariable("g1");
     private final Variable S2 = TERM_FACTORY.getVariable("s2");
     private final Variable P2 = TERM_FACTORY.getVariable("p2");
     private final Variable O2 = TERM_FACTORY.getVariable("o2");
@@ -78,7 +79,7 @@ public class MappingAssertionTest {
     public void simpleAssertionMergeTest() {
         ExtensionalDataNode extensionalNode1 = IQ_FACTORY.createExtensionalDataNode(T1, ImmutableMap.of(0, ID1, 1, NAME1));
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode( ImmutableSet.of(S1, P1, O1),
-                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(ID1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(NAME_PROP),
                         O1, getRDFLiteral(NAME1)));
         IQ iq1 = IQ_FACTORY.createIQ(
@@ -93,7 +94,7 @@ public class MappingAssertionTest {
 
         ExtensionalDataNode extensionalNode2 = IQ_FACTORY.createExtensionalDataNode(T1, ImmutableMap.of(0, ID2, 2, AGE2));
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode( ImmutableSet.of(S2, P2, O2),
-                SUBSTITUTION_FACTORY.getSubstitution(S2, generatePersonURI(ID2),
+                SUBSTITUTION_FACTORY.getSubstitution(S2, generatePersonURI(PERSON_URI_TEMPLATE, ID2),
                         P2, getConstantIRI(AGE_PROP),
                         O2, getRDFLiteral(AGE2)));
         IQ iq2 = IQ_FACTORY.createIQ(
@@ -115,7 +116,7 @@ public class MappingAssertionTest {
     public void conflictingVariablesInRelationTest() {
         ExtensionalDataNode extensionalNode1 = IQ_FACTORY.createExtensionalDataNode(T1, ImmutableMap.of(0, ID1, 1, NAME1));
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode( ImmutableSet.of(S1, P1, O1),
-                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(ID1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(NAME_PROP),
                         O1, getRDFLiteral(NAME1)));
         IQ iq1 = IQ_FACTORY.createIQ(
@@ -130,7 +131,7 @@ public class MappingAssertionTest {
 
         ExtensionalDataNode extensionalNode2 = IQ_FACTORY.createExtensionalDataNode(T1, ImmutableMap.of(0, ID1, 1, AGE1));
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode( ImmutableSet.of(S1, P1, O1),
-                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(ID1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(AGE_PROP),
                         O1, getRDFLiteral(AGE1)));
         IQ iq2 = IQ_FACTORY.createIQ(
@@ -145,7 +146,7 @@ public class MappingAssertionTest {
 
         MappingAssertionInformation mergedAssertion = assertion1.merge(assertion2).get();
         assert ((ConstructionNode) mergedAssertion.getIQTree().getRootNode()).getSubstitution().getRangeSet()
-                .equals(ImmutableSet.of(generatePersonURI(ID1), getConstantIRI(NAME_PROP), getConstantIRI(AGE_PROP), getRDFLiteral(NAME1)));
+                .equals(ImmutableSet.of(generatePersonURI(PERSON_URI_TEMPLATE, ID1), getConstantIRI(NAME_PROP), getConstantIRI(AGE_PROP), getRDFLiteral(NAME1)));
     }
 
     @Test
@@ -153,7 +154,7 @@ public class MappingAssertionTest {
         ExtensionalDataNode extensionalNode1 = IQ_FACTORY.createExtensionalDataNode(T1, ImmutableMap.of(0, ID1, 1, NAME1, 2, AGE1));
         FilterNode nameFilter = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(NAME1));
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode( ImmutableSet.of(S1, P1, O1),
-                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(ID1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(NAME_PROP),
                         O1, getRDFLiteral(NAME1)));
         IQTree childTree = IQ_FACTORY.createUnaryIQTree(nameFilter, extensionalNode1);
@@ -164,7 +165,6 @@ public class MappingAssertionTest {
         MappingAssertionInformation info = new FilterMappingAssertionInfo(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 extensionalNode1,
-                childTree,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
         assert !hasFilterNode(info.getIQTree());
@@ -176,7 +176,7 @@ public class MappingAssertionTest {
         ExtensionalDataNode extensionalNode1 = IQ_FACTORY.createExtensionalDataNode(T1, ImmutableMap.of(0, ID1, 1, NAME1, 2, AGE1));
         FilterNode ageFilter = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(AGE1));
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode( ImmutableSet.of(S1, P1, O1),
-                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(ID1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(NAME_PROP),
                         O1, getRDFLiteral(NAME1)));
         IQTree childTree = IQ_FACTORY.createUnaryIQTree(ageFilter, extensionalNode1);
@@ -187,7 +187,6 @@ public class MappingAssertionTest {
         MappingAssertionInformation info = new FilterMappingAssertionInfo(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 extensionalNode1,
-                childTree,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -202,7 +201,7 @@ public class MappingAssertionTest {
                 TERM_FACTORY.getDBIsNotNull(ID1),
                 TERM_FACTORY.getDBIsNotNull(NAME1));
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode( ImmutableSet.of(S1, P1, O1),
-                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(ID1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(NAME_PROP),
                         O1, getRDFLiteral(NAME1)));
         IQTree childTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(conjunctionCondition), extensionalNode1);
@@ -213,7 +212,6 @@ public class MappingAssertionTest {
         MappingAssertionInformation info = new FilterMappingAssertionInfo(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 extensionalNode1,
-                childTree,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -227,7 +225,7 @@ public class MappingAssertionTest {
         var conjunctionCondition = TERM_FACTORY.getDBIsNotNull(
                 TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(AGE1, NAME1)));
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode( ImmutableSet.of(S1, P1, O1),
-                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(ID1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(NAME_PROP),
                         O1, getRDFLiteral(NAME1)));
         IQTree childTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(conjunctionCondition), extensionalNode1);
@@ -238,7 +236,6 @@ public class MappingAssertionTest {
         MappingAssertionInformation info = new FilterMappingAssertionInfo(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 extensionalNode1,
-                childTree,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -263,7 +260,7 @@ public class MappingAssertionTest {
         FilterNode ageFilter2 = IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(AGE2,
                 TERM_FACTORY.getDBConstant("20", dbTypeFactory.getDBLargeIntegerType())));
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode( ImmutableSet.of(S2, P2, O2),
-                SUBSTITUTION_FACTORY.getSubstitution(S2, generatePersonURI(ID2),
+                SUBSTITUTION_FACTORY.getSubstitution(S2, generatePersonURI(PERSON_URI_TEMPLATE, ID2),
                         P2, getConstantIRI(NAME_PROP),
                         O2, getRDFLiteral(NAME2)));
         IQTree childTree2 = IQ_FACTORY.createUnaryIQTree(ageFilter2, extensionalNode2);
@@ -274,14 +271,12 @@ public class MappingAssertionTest {
         MappingAssertionInformation assertion1 = new FilterMappingAssertionInfo(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 extensionalDataNode,
-                childTree,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
         MappingAssertionInformation assertion2 = new FilterMappingAssertionInfo(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 extensionalNode2,
-                childTree2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -307,7 +302,7 @@ public class MappingAssertionTest {
         FilterNode ageFilter2 = IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(AGE2,
                 TERM_FACTORY.getDBConstant("18", dbTypeFactory.getDBLargeIntegerType())));
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode( ImmutableSet.of(S2, P2, O2),
-                SUBSTITUTION_FACTORY.getSubstitution(S2, generatePersonURI(ID2),
+                SUBSTITUTION_FACTORY.getSubstitution(S2, generatePersonURI(PERSON_URI_TEMPLATE, ID2),
                         P2, getConstantIRI(NAME_PROP),
                         O2, getRDFLiteral(NAME2)));
         IQTree childTree2 = IQ_FACTORY.createUnaryIQTree(ageFilter2, extensionalNode2);
@@ -318,14 +313,12 @@ public class MappingAssertionTest {
         MappingAssertionInformation assertion1 = new FilterMappingAssertionInfo(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 extensionalDataNode,
-                childTree,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
         MappingAssertionInformation assertion2 = new FilterMappingAssertionInfo(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 extensionalNode2,
-                childTree2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -338,7 +331,7 @@ public class MappingAssertionTest {
         ExtensionalDataNode ext1 = IQ_FACTORY.createExtensionalDataNode(T2, ImmutableMap.of(0, ID1, 1, NAME1,
                 2, TERM_FACTORY.getDBConstant("Bar", dbTypeFactory.getDBStringType())));
         ConstructionNode constr1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1),
-                SUBSTITUTION_FACTORY.getSubstitution(S1, generateShopURI(ID1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(SHOP_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(RDF_TYPE_PROP),
                         O1, getConstantIRI(BAR_PROP)));
         IQ iq1 = IQ_FACTORY.createIQ(
@@ -348,7 +341,7 @@ public class MappingAssertionTest {
         ExtensionalDataNode ext2 = IQ_FACTORY.createExtensionalDataNode(T2, ImmutableMap.of(0, ID2, 1, NAME2,
                 2, TERM_FACTORY.getDBConstant("Restaurant", dbTypeFactory.getDBStringType())));
         ConstructionNode constr2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S2, P2, O2),
-                SUBSTITUTION_FACTORY.getSubstitution(S2, generateShopURI(ID2),
+                SUBSTITUTION_FACTORY.getSubstitution(S2, generatePersonURI(SHOP_URI_TEMPLATE, ID2),
                         P2, getConstantIRI(RDF_TYPE_PROP),
                         O2, getConstantIRI(RESTAURANT_PROP)));
         IQ iq2 = IQ_FACTORY.createIQ(
@@ -381,7 +374,7 @@ public class MappingAssertionTest {
                 1, TERM_FACTORY.getDBConstant("Name", dbTypeFactory.getDBStringType()),
                 2, TERM_FACTORY.getDBConstant("Restaurant", dbTypeFactory.getDBStringType())));
         ConstructionNode constr = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S2, P2, O2),
-                SUBSTITUTION_FACTORY.getSubstitution(S2, generateShopURI(ID2),
+                SUBSTITUTION_FACTORY.getSubstitution(S2, generatePersonURI(SHOP_URI_TEMPLATE, ID2),
                         P2, getConstantIRI(RDF_TYPE_PROP),
                         O2, getConstantIRI(RESTAURANT_PROP)));
         IQ iq2 = IQ_FACTORY.createIQ(
@@ -403,7 +396,7 @@ public class MappingAssertionTest {
                         TERM_FACTORY.getDBConstant("Name", dbTypeFactory.getDBStringType())),
                 TERM_FACTORY.getStrictEquality(TERM_FACTORY.getVariable("TYPE"),
                         TERM_FACTORY.getDBConstant("Restaurant", dbTypeFactory.getDBStringType())));
-        ImmutableFunctionalTerm subjectCondition = TERM_FACTORY.getIfElseNull(conjunctionCondition, generateShopURI(ID2));
+        ImmutableFunctionalTerm subjectCondition = TERM_FACTORY.getIfElseNull(conjunctionCondition, generatePersonURI(SHOP_URI_TEMPLATE, ID2));
         assert ((ConstructionNode) assertion2.getIQTree().getRootNode()).getSubstitution().get(S2).equals(subjectCondition);
     }
 
@@ -412,7 +405,7 @@ public class MappingAssertionTest {
         ExtensionalDataNode ext1 = IQ_FACTORY.createExtensionalDataNode(T2, ImmutableMap.of(0, ID1, 1, NAME1,
                 2, TERM_FACTORY.getDBConstant("Bar", dbTypeFactory.getDBStringType())));
         ConstructionNode constr1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1),
-                SUBSTITUTION_FACTORY.getSubstitution(S1, generateShopURI(ID1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(SHOP_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(RDF_TYPE_PROP),
                         O1, getConstantIRI(BAR_PROP)));
         IQ iq1 = IQ_FACTORY.createIQ(
@@ -422,7 +415,7 @@ public class MappingAssertionTest {
         ExtensionalDataNode ext2 = IQ_FACTORY.createExtensionalDataNode(T2, ImmutableMap.of(0, ID1, 1, NAME1,
                 2, TERM_FACTORY.getDBConstant("Restaurant", dbTypeFactory.getDBStringType())));
         ConstructionNode constr2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1),
-                SUBSTITUTION_FACTORY.getSubstitution(S1, generateShopURI(ID1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(SHOP_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(RDF_TYPE_PROP),
                         O1, getConstantIRI(RESTAURANT_PROP)));
         IQ iq2 = IQ_FACTORY.createIQ(
@@ -471,7 +464,7 @@ public class MappingAssertionTest {
         ExtensionalDataNode ext2 = IQ_FACTORY.createExtensionalDataNode(T2, ImmutableMap.of(0, ID2, 1, NAME2));
 
         ConstructionNode constr1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1),
-                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(ID1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(WORKS_PROP),
                         O1, getRDFLiteral(ID2)));
         IQTree joinSubtree =IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(ext1, ext2));
@@ -486,7 +479,7 @@ public class MappingAssertionTest {
 
 
         ConstructionNode constr2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1),
-                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(ID1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(NAME_PROP),
                         O1, getRDFLiteral(NAME1)));
         IQ iq2 = IQ_FACTORY.createIQ(
@@ -509,7 +502,7 @@ public class MappingAssertionTest {
         ExtensionalDataNode ext2 = IQ_FACTORY.createExtensionalDataNode(T2, ImmutableMap.of(0, ID2, 1, NAME2));
 
         ConstructionNode constr1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1),
-                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(ID1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(WORKS_PROP),
                         O1, getRDFLiteral(ID2)));
         IQTree joinSubtree =IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode()
@@ -526,7 +519,7 @@ public class MappingAssertionTest {
 
 
         ConstructionNode constr2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1),
-                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(ID1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(NAME_PROP),
                         O1, getRDFLiteral(NAME1)));
         IQ iq2 = IQ_FACTORY.createIQ(
@@ -549,7 +542,7 @@ public class MappingAssertionTest {
                 2, TERM_FACTORY.getDBConstant("Restaurant", dbTypeFactory.getDBStringType())));
 
         ConstructionNode constr1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1),
-                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(ID1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(WORKS_PROP),
                         O1, getRDFLiteral(ID2)));
         IQTree joinSubtree =IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(ext1, ext2));
@@ -564,7 +557,7 @@ public class MappingAssertionTest {
 
 
         ConstructionNode constr2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1),
-                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(ID1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(NAME_PROP),
                         O1, getRDFLiteral(NAME1)));
         IQ iq2 = IQ_FACTORY.createIQ(
@@ -580,20 +573,192 @@ public class MappingAssertionTest {
         assert mergedAssertion.isEmpty();
     }
 
-    private ImmutableFunctionalTerm generatePersonURI(VariableOrGroundTerm argument) {
-        return TERM_FACTORY.getIRIFunctionalTerm(PERSON_URI_TEMPLATE, ImmutableList.of(argument));
+    @Test
+    public void mergeWithSameNamedGraphTest(){
+        ExtensionalDataNode ext1 = IQ_FACTORY.createExtensionalDataNode(T1, ImmutableMap.of(0, ID1, 3, ID2));
+
+        ConstructionNode constr1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1, G1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
+                        P1, getConstantIRI(WORKS_PROP),
+                        O1, getRDFLiteral(ID2),
+                        G1, getConstantIRI(RDF_FACTORY.createIRI("http://example.org/graph1"))));
+        IQ iq1 = IQ_FACTORY.createIQ(
+                ATOM_FACTORY.getDistinctQuadAtom(S1, P1, O1, G1),
+                IQ_FACTORY.createUnaryIQTree(constr1, ext1));
+
+        SimpleMappingAssertionInfo assertion1 = new SimpleMappingAssertionInfo(T1,
+                (ImmutableMap<Integer, Variable>) ext1.getArgumentMap(),
+                iq1.getTree(),
+                new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
+                iq1.getVariableGenerator(),
+                IQ_FACTORY, SUBSTITUTION_FACTORY);
+
+        ExtensionalDataNode ext2 = IQ_FACTORY.createExtensionalDataNode(T1, ImmutableMap.of(0, ID1, 2, AGE2));
+        IQTree childTree = IQ_FACTORY.createUnaryIQTree( IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(AGE2)),
+                ext2);
+        ConstructionNode constr2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1, G1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
+                        P1, getConstantIRI(AGE_PROP),
+                        O1, getRDFLiteral(AGE2),
+                        G1, getConstantIRI(RDF_FACTORY.createIRI("http://example.org/graph1"))));
+        IQ iq2 = IQ_FACTORY.createIQ(
+                ATOM_FACTORY.getDistinctQuadAtom(S1, P1, O1, G1),
+                IQ_FACTORY.createUnaryIQTree(constr2, childTree));
+
+        FilterMappingAssertionInfo assertion2 = new FilterMappingAssertionInfo(iq2.getTree(),
+                new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
+                ext2,
+                iq2.getVariableGenerator(),
+                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
+
+        Optional<MappingAssertionInformation> mergedAssertion = assertion1.merge(assertion2);
+        assert mergedAssertion.isPresent()
+                && mergedAssertion.get().getRDFFactTemplates().getVariables().stream().filter(v -> v.getName().startsWith("g")).count() == 1;
     }
 
-    private ImmutableFunctionalTerm generateShopURI(VariableOrGroundTerm argument) {
-        return TERM_FACTORY.getIRIFunctionalTerm(SHOP_URI_TEMPLATE, ImmutableList.of(argument));
+    @Test
+    public void mergeWithDifferentNamedGraphTest(){
+        ExtensionalDataNode ext1 = IQ_FACTORY.createExtensionalDataNode(T1, ImmutableMap.of(0, ID1, 3, ID2));
+
+        ConstructionNode constr1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1, G1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
+                        P1, getConstantIRI(WORKS_PROP),
+                        O1, getRDFLiteral(ID2),
+                        G1, getConstantIRI(RDF_FACTORY.createIRI("http://example.org/graph1"))));
+        IQ iq1 = IQ_FACTORY.createIQ(
+                ATOM_FACTORY.getDistinctQuadAtom(S1, P1, O1, G1),
+                IQ_FACTORY.createUnaryIQTree(constr1, ext1));
+
+        SimpleMappingAssertionInfo assertion1 = new SimpleMappingAssertionInfo(T1,
+                (ImmutableMap<Integer, Variable>) ext1.getArgumentMap(),
+                iq1.getTree(),
+                new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
+                iq1.getVariableGenerator(),
+                IQ_FACTORY, SUBSTITUTION_FACTORY);
+
+        ExtensionalDataNode ext2 = IQ_FACTORY.createExtensionalDataNode(T1, ImmutableMap.of(0, ID1, 2, AGE2));
+        IQTree childTree = IQ_FACTORY.createUnaryIQTree( IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(AGE2)),
+                ext2);
+        ConstructionNode constr2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1, G1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
+                        P1, getConstantIRI(AGE_PROP),
+                        O1, getRDFLiteral(AGE2),
+                        G1, getConstantIRI(RDF_FACTORY.createIRI("http://example.org/graph2"))));
+        IQ iq2 = IQ_FACTORY.createIQ(
+                ATOM_FACTORY.getDistinctQuadAtom(S1, P1, O1, G1),
+                IQ_FACTORY.createUnaryIQTree(constr2, childTree));
+
+        FilterMappingAssertionInfo assertion2 = new FilterMappingAssertionInfo(iq2.getTree(),
+                new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
+                ext2,
+                iq2.getVariableGenerator(),
+                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
+
+        Optional<MappingAssertionInformation> mergedAssertion = assertion1.merge(assertion2);
+        assert mergedAssertion.isPresent()
+                && mergedAssertion.get().getRDFFactTemplates().getVariables().stream().filter(v -> v.getName().startsWith("g")).count() == 2;
     }
 
-    private IRIConstant getConstantIRI(IRI iri) {
-        return TERM_FACTORY.getConstantIRI(iri);
+    @Test
+    @Ignore("Not implemented yet")
+    public void weirdlyShapedIQTest1(){
+        ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(T1, ImmutableMap.of(0, ID1, 1, NAME1, 2, AGE1));
+        FilterNode ageFilter1 = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBNumericInequality(InequalityLabel.GT, AGE1,
+                TERM_FACTORY.getDBConstant("18", dbTypeFactory.getDBLargeIntegerType())));
+        ConstructionNode constr1 = IQ_FACTORY.createConstructionNode( ImmutableSet.of(S1, P1, O1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, getRDFLiteral(NAME1),
+                        P1, getConstantIRI(RDF_TYPE_PROP),
+                        O1, getConstantIRI(NAME_PROP)));
+        IQTree childTree = IQ_FACTORY.createUnaryIQTree(ageFilter1, extensionalDataNode);
+        IQ iq1 = IQ_FACTORY.createIQ(
+                ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
+                IQ_FACTORY.createUnaryIQTree(constr1, childTree));
+
+        ExtensionalDataNode extensionalNode2 = IQ_FACTORY.createExtensionalDataNode(T1, ImmutableMap.of(0, ID2, 1, NAME2, 2, AGE2));
+        FilterNode ageFilter2 = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBNumericInequality(InequalityLabel.GT, AGE2,
+                TERM_FACTORY.getDBConstant("18", dbTypeFactory.getDBLargeIntegerType())));
+        IQTree childTree2 = IQ_FACTORY.createUnaryIQTree(ageFilter2, extensionalNode2);
+        Variable CONCATVAR = TERM_FACTORY.getVariable("CONCAT");
+        ConstructionNode addedConstructionNode = IQ_FACTORY.createConstructionNode( ImmutableSet.of(ID2, NAME2, AGE2, CONCATVAR),
+                SUBSTITUTION_FACTORY.getSubstitution(CONCATVAR, TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(NAME2, AGE2))));
+        ConstructionNode topConstruction2 = IQ_FACTORY.createConstructionNode( ImmutableSet.of(S2, P2, O2),
+                SUBSTITUTION_FACTORY.getSubstitution(S2, generatePersonURI(PERSON_URI_TEMPLATE, ID2),
+                        P2, getConstantIRI(NAME_PROP),
+                        O2, getRDFLiteral(CONCATVAR)));
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(topConstruction2, IQ_FACTORY.createUnaryIQTree(addedConstructionNode, childTree2));
+        IQ iq2 = IQ_FACTORY.createIQ(ATOM_FACTORY.getDistinctTripleAtom(S2, P2, O2),tree);
+
+        MappingAssertionInformation assertion1 = new FilterMappingAssertionInfo(iq1.getTree(),
+                new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
+                extensionalDataNode,
+                iq1.getVariableGenerator(),
+                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
+
+        MappingAssertionInformation assertion2 = new FilterMappingAssertionInfo(iq2.getTree(),
+                new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
+                extensionalNode2,
+                iq2.getVariableGenerator(),
+                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
+
+        Optional<MappingAssertionInformation> mergedAssertion = assertion1.merge(assertion2);
+        assert mergedAssertion.isPresent();
     }
 
-    private ImmutableFunctionalTerm getRDFLiteral(VariableOrGroundTerm argument) {
-        return TERM_FACTORY.getRDFLiteralFunctionalTerm(argument, RDF_FACTORY.createIRI("http://www.w3.org/2001/XMLSchema#string"));
+    @Test
+    @Ignore("Not implemented yet")
+    public void weirdlyShapedIQTest2(){
+        // eg: Construct
+        // construct
+        // extensional with constant
+    }
+
+    @Test
+    @Ignore("Not implemented yet")
+    public void weirdlyShapedIQTest3(){
+        // eg: Construct
+        // construct
+        // join
+        // filter ext  ext
+    }
+
+    @Test
+    public void complexJoinSubtreeMergeTest(){
+        ExtensionalDataNode ext1 = IQ_FACTORY.createExtensionalDataNode(T1, ImmutableMap.of(0, ID1, 1, NAME1, 3, ID2));
+        ExtensionalDataNode ext2 = IQ_FACTORY.createExtensionalDataNode(T2, ImmutableMap.of(0, ID2, 1, NAME2));
+
+        ConstructionNode constr1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
+                        P1, getConstantIRI(WORKS_PROP),
+                        O1, getRDFLiteral(ID2)));
+        IQTree joinSubtree1 =IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(ext1, ext2));
+        IQ iq1 = IQ_FACTORY.createIQ(
+                ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
+                IQ_FACTORY.createUnaryIQTree(constr1, joinSubtree1));
+        JoinMappingAssertionInfo assertion1 = new JoinMappingAssertionInfo(iq1.getTree(),
+                new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
+                joinSubtree1,
+                iq1.getVariableGenerator(),
+                IQ_FACTORY, SUBSTITUTION_FACTORY);
+
+
+        ConstructionNode constr2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1),
+                SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
+                        P1, getConstantIRI(NAME_PROP),
+                        O1, getRDFLiteral(NAME1)));
+        FilterNode filter = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(NAME1));
+        IQTree joinSubtree = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(IQ_FACTORY.createUnaryIQTree(filter, ext1), ext2));
+        IQ iq2 = IQ_FACTORY.createIQ(
+                ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
+                IQ_FACTORY.createUnaryIQTree(constr2, joinSubtree));
+        JoinMappingAssertionInfo assertion2 = new JoinMappingAssertionInfo(iq2.getTree(),
+                new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
+                joinSubtree,
+                iq2.getVariableGenerator(),
+                IQ_FACTORY, SUBSTITUTION_FACTORY);
+
+        Optional<MappingAssertionInformation> mergedAssertion = assertion1.merge(assertion2);
+        assert mergedAssertion.isEmpty();
     }
 
     private boolean hasFilterNode(IQTree tree) {

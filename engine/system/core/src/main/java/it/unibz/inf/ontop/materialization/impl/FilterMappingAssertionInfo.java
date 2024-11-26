@@ -37,7 +37,6 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
     public FilterMappingAssertionInfo(IQTree originalTree,
                                       RDFFactTemplates rdfTemplates,
                                       ExtensionalDataNode relationDefinitionNode,
-                                      IQTree filterSubtree,
                                       VariableGenerator variableGenerator,
                                       IntermediateQueryFactory iqFactory,
                                       TermFactory termFactory,
@@ -49,22 +48,23 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
 
-        if (filterSubtree.isDeclaredAsEmpty()) {
+        Optional<IQTree> potentialFilterSubtree = findFilterSubtree(originalTree);
+        if (potentialFilterSubtree.isEmpty()) {
             this.notSimplifiedFilterCondition = Optional.empty();
             this.tree = originalTree;
         } else {
-            Optional<IQTree> potentiallySimplifiedTree = simplifyExplicitNotNullFilter(originalTree,
+            IQTree filterSubtree = potentialFilterSubtree.get();
+            Optional<IQTree> simplifiedTree = simplifyExplicitNotNullFilter(originalTree,
                     filterSubtree,
                     ((ConstructionNode) originalTree.getRootNode()).getSubstitution());
 
-            this.notSimplifiedFilterCondition = potentiallySimplifiedTree.isPresent()
+            this.notSimplifiedFilterCondition = simplifiedTree.isPresent()
                     ? Optional.empty()
                     : Optional.of(((FilterNode) filterSubtree.getRootNode()).getFilterCondition());
             ImmutableSet<Variable> nullableVariables = notSimplifiedFilterCondition.isEmpty()
                     ? Optional.of(((FilterNode) filterSubtree.getRootNode()).getFilterCondition()).get().getVariables()
                     : ImmutableSet.of();
-
-            this.tree = setPossiblyNullRDFDatatypes(potentiallySimplifiedTree.orElse(originalTree), nullableVariables);
+            this.tree = setNullRDFDatatypes(simplifiedTree.orElse(originalTree), nullableVariables);
         }
     }
 
@@ -181,7 +181,7 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
         return Optional.empty();
     }
 
-    private IQTree setPossiblyNullRDFDatatypes(IQTree tree, ImmutableSet<Variable> nullableVariables) {
+    private IQTree setNullRDFDatatypes(IQTree tree, ImmutableSet<Variable> nullableVariables) {
         ConstructionNode originalConstructionNode = (ConstructionNode) tree.getRootNode();
         Substitution<ImmutableTerm> originalSubstitution = originalConstructionNode.getSubstitution();
         ImmutableMap<Variable, ImmutableTerm> substitutionMap = originalSubstitution.getDomain().stream()
@@ -207,14 +207,10 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
     public FilterMappingAssertionInfo renameConflictingVariables(VariableGenerator generator) {
         InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(generator, tree.getKnownVariables());
         IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
-        IQTree filterSubtree = notSimplifiedFilterCondition.isPresent()
-                ? renamedTree.getChildren().get(0)
-                : iqFactory.createEmptyNode(renamedTree.getChildren().get(0).getKnownVariables());
 
         return new FilterMappingAssertionInfo(renamedTree,
                 rdfFactTemplates.apply(renamingSubstitution),
                 (ExtensionalDataNode) relationDefinitionNode.applyFreshRenaming(renamingSubstitution).getRootNode(),
-                filterSubtree,
                 variableGenerator,
                 iqFactory,
                 termFactory,
@@ -279,7 +275,6 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
                 treeTemplatePair.getKey(),
                 treeTemplatePair.getValue(),
                 relationDefinitionNode,
-                filterTree,
                 variableGenerator,
                 iqFactory,
                 termFactory,
@@ -354,6 +349,18 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
     private boolean isRDFFunctionalTerm(ImmutableTerm term) {
         return (term instanceof ImmutableFunctionalTerm)
                 && (((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof RDFTermFunctionSymbol);
+    }
+
+    private Optional<IQTree> findFilterSubtree(IQTree tree) {
+        if (tree.getRootNode() instanceof FilterNode) {
+            return Optional.of(tree);
+        } else {
+            return tree.getChildren().stream()
+                    .map(this::findFilterSubtree)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .findAny();
+        }
     }
 
 }

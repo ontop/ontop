@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerato
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.*;
@@ -48,6 +49,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
     private final GeneralStructuralAndSemanticIQOptimizer iqOptimizer;
     private final QueryPlanner queryPlanner;
     private final QueryLogger.Factory queryLoggerFactory;
+    private final QueryContext.Factory queryContextFactory;
     private final TermFactory termFactory;
     private final QueryTransformerFactory queryTransformerFactory;
 
@@ -69,6 +71,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         this.iqOptimizer = injector.getInstance(GeneralStructuralAndSemanticIQOptimizer.class);
         this.queryPlanner = injector.getInstance(QueryPlanner.class);
         this.queryLoggerFactory = injector.getInstance(QueryLogger.Factory.class);
+        this.queryContextFactory = injector.getInstance(QueryContext.Factory.class);
         this.termFactory = injector.getInstance(TermFactory.class);
         this.queryTransformerFactory = injector.getInstance(QueryTransformerFactory.class);
 
@@ -76,6 +79,11 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         ImmutableList<IQ> mappingAssertionsIQs = saturatedMapping.getRDFAtomPredicates().stream()
                 .map(saturatedMapping::getQueries)
                 .flatMap(Collection::stream)
+                //.map(iq -> iqFactory.createIQ(
+                //        iq.getProjectionAtom(),
+                //        iq.getTree().removeDistincts()))
+                //.map(this::splitPotentialUnionNode)
+                //.flatMap(Collection::stream)
                 .map(this::splitPotentialUnionNode)
                 .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toList());
@@ -98,7 +106,8 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                 iqFactory,
                 iqOptimizer,
                 queryPlanner,
-                queryLoggerFactory);
+                queryLoggerFactory,
+                queryContextFactory);
     }
 
     @Override
@@ -203,19 +212,15 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         ExtensionalDataNode extensionalNode = extensionalNodes.get(0);
         RelationDefinition relation = extensionalNode.getRelationDefinition();
 
-        Optional<IQTree> filterSubtree = findFilterSubtree(tree);
-        if (filterSubtree.isPresent()) {
-            return filterSubtree.get().getRootNode() instanceof FilterNode
-                    ? new FilterMappingAssertionInfo(
+        if (hasFilterNode(tree)) {
+            return  new FilterMappingAssertionInfo(
                             tree,
                             rdfTemplates,
                             extensionalNode,
-                            filterSubtree.get(),
                             mappingAssertionIQ.getVariableGenerator(),
                             iqFactory,
                             termFactory,
-                            substitutionFactory)
-                    : new ComplexMappingAssertionInfo(tree, rdfTemplates, substitutionFactory);
+                            substitutionFactory);
         }
 
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = extensionalNode.getArgumentMap();
@@ -332,15 +337,12 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
     /**
      * Recursive
      */
-    private Optional<IQTree> findFilterSubtree(IQTree tree) {
+    private boolean hasFilterNode(IQTree tree) {
         if (tree.getRootNode() instanceof FilterNode) {
-            return Optional.of(tree);
+            return true;
         } else {
             return tree.getChildren().stream()
-                    .map(this::findFilterSubtree)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .findAny();
+                    .anyMatch(this::hasFilterNode);
         }
     }
 
