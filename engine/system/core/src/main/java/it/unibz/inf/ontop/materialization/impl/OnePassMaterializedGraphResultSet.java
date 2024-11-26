@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -37,6 +38,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
     private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
     private final QueryPlanner queryPlanner;
     private final QueryLogger.Factory queryLoggerFactory;
+    private final QueryContext.Factory queryContextFactory;
 
     private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
     private final Iterator<MappingAssertionInformation> mappingAssertionsIterator;
@@ -66,7 +68,8 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
                                       IntermediateQueryFactory iqFactory,
                                       GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
                                       QueryPlanner queryPlanner,
-                                      QueryLogger.Factory queryLogger) {
+                                      QueryLogger.Factory queryLogger,
+                                      QueryContext.Factory queryContextFactory) {
         this.vocabulary = vocabulary;
         this.mappingAssertionsIterator = assertionsInfo.stream().iterator();
         this.queryEngine = queryEngine;
@@ -77,6 +80,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
         this.generalOptimizer = generalOptimizer;
         this.queryPlanner = queryPlanner;
         this.queryLoggerFactory = queryLogger;
+        this.queryContextFactory = queryContextFactory;
 
         this.possiblyIncompleteClassesAndProperties = new ArrayList<>();
         counter = 0;
@@ -129,7 +133,8 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
             try {
                 tmpStatement = ontopConnection.createStatement();
                 QueryLogger queryLogger = queryLoggerFactory.create(ImmutableMap.of());
-                IQ nativeQuery = translateIntoNativeQuery(assertionInfo, queryLogger);
+                QueryContext queryContext = queryContextFactory.create(ImmutableMap.of());
+                IQ nativeQuery = translateIntoNativeQuery(assertionInfo, queryLogger, queryContext);
                 tmpContextResultSet = tmpStatement.executeSelectQuery(nativeQuery, queryLogger);
 
                 if (tmpContextResultSet.hasNext()) {
@@ -167,7 +172,8 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
                     try {
                         tmpStatement = ontopConnection.createStatement();
                         QueryLogger queryLogger = queryLoggerFactory.create(ImmutableMap.of());
-                        IQ nativeQuery = translateIntoNativeQuery(assertionInfo, queryLogger);
+                        QueryContext queryContext = queryContextFactory.create(ImmutableMap.of());
+                        IQ nativeQuery = translateIntoNativeQuery(assertionInfo, queryLogger, queryContext);
                         tmpContextResultSet = tmpStatement.executeSelectQuery(nativeQuery, queryLogger);
                     } catch (OntopConnectionException e) {
                         if (canBeIncomplete) {
@@ -221,7 +227,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
         return ImmutableList.copyOf(possiblyIncompleteClassesAndProperties);
     }
 
-    private IQ translateIntoNativeQuery(MappingAssertionInformation assertionInfo, QueryLogger queryLogger) {
+    private IQ translateIntoNativeQuery(MappingAssertionInformation assertionInfo, QueryLogger queryLogger, QueryContext queryContext) {
         ImmutableList<Variable> variables = assertionInfo.getRDFFactTemplates().getVariables().asList();
         IQ tree = iqFactory.createIQ(
                 atomFactory.getDistinctVariableOnlyDataAtom(atomFactory.getRDFAnswerPredicate(variables.size()),
@@ -229,7 +235,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
                 assertionInfo.getIQTree()
         );
 
-        IQ optimizedQuery = generalOptimizer.optimize(tree, null);
+        IQ optimizedQuery = generalOptimizer.optimize(tree, queryContext);
         IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
         IQ executableQuery = nativeQueryGenerator.generateSourceQuery(plannedQuery, true, true);
         queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
