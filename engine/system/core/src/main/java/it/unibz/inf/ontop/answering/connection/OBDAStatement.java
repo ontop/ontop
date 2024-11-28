@@ -32,9 +32,6 @@ public interface OBDAStatement extends AutoCloseable {
 	<R extends OBDAResultSet> R execute(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders)
 			throws OntopReformulationException, OntopQueryEvaluationException, OntopConnectionException, OntopResultConversionException;
 
-	<R extends OBDAResultSet> R execute(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders, QueryContext queryContext)
-			throws OntopReformulationException, OntopQueryEvaluationException, OntopConnectionException, OntopResultConversionException;
-
 	int getMaxRows() throws OntopConnectionException;
 
 	void getMoreResults() throws OntopConnectionException;
