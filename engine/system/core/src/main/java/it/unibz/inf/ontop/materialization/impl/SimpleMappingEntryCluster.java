@@ -22,27 +22,18 @@ import java.util.Optional;
 /**
  * Its tree is composed of one construction node and one distinct-variable-only extensional node
  */
-public class SimpleMappingEntryCluster implements MappingEntryCluster {
+public class SimpleMappingEntryCluster extends AbstractMappingEntryCluster implements MappingEntryCluster {
     private final ExtensionalDataNode dataNode;
     private final Substitution<ImmutableTerm> topConstructSubstitution;
-    private final IQTree tree;
-    private final VariableGenerator variableGenerator;
-    private final RDFFactTemplates rdfFactTemplates;
-    private final IntermediateQueryFactory iqFactory;
-    private final SubstitutionFactory substitutionFactory;
 
     public SimpleMappingEntryCluster (IQTree tree,
-                                     RDFFactTemplates RDFTemplates,
+                                     RDFFactTemplates rdfTemplates,
                                      VariableGenerator variableGenerator,
                                      IntermediateQueryFactory iqFactory,
                                      SubstitutionFactory substitutionFactory) {
+        super(tree, rdfTemplates, variableGenerator, iqFactory, substitutionFactory);
         this.topConstructSubstitution = ((ConstructionNode) tree.getRootNode()).getSubstitution();
         this.dataNode = (ExtensionalDataNode) tree.getChildren().get(0);
-        this.tree = tree;
-        this.rdfFactTemplates = RDFTemplates;
-        this.variableGenerator = variableGenerator;
-        this.iqFactory = iqFactory;
-        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
@@ -52,16 +43,6 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
             return this.tree.equals(that.tree);
         }
         return false;
-    }
-
-    @Override
-    public IQTree getIQTree() {
-        return tree;
-    }
-
-    @Override
-    public RDFFactTemplates getRDFFactTemplates() {
-        return rdfFactTemplates;
     }
 
     @Override
@@ -90,7 +71,7 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
         return Optional.of(mergeWithSimpleCluster(otherSimpleCluster));
     }
 
-    private SimpleMappingEntryCluster mergeWithSimpleCluster(SimpleMappingEntryCluster otherSimpleCluster) {
+    private MappingEntryCluster mergeWithSimpleCluster(SimpleMappingEntryCluster otherSimpleCluster) {
         variableGenerator.registerAdditionalVariables(otherSimpleCluster.variableGenerator.getKnownVariables());
         SimpleMappingEntryCluster otherRenamed = otherSimpleCluster.renameConflictingVariables(variableGenerator);
 
@@ -111,7 +92,7 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
                         constructionNodeAfterUnification,
                         mergedDataNode));
 
-        RDFFactTemplates mergedRDFTemplates = rdfFactTemplates.merge(otherRenamed.rdfFactTemplates);
+        RDFFactTemplates mergedRDFTemplates = rdfTemplates.merge(otherRenamed.rdfTemplates);
 
         return compressCluster(
                 newTree.normalizeForOptimization(variableGenerator),
@@ -123,7 +104,7 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
         InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
                 conflictingVariableGenerator, tree.getKnownVariables());
         IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
-        RDFFactTemplates renamedRDFTemplates = rdfFactTemplates.apply(renamingSubstitution);
+        RDFFactTemplates renamedRDFTemplates = rdfTemplates.apply(renamingSubstitution);
 
         return new SimpleMappingEntryCluster(
                 renamedTree,
@@ -144,9 +125,7 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
                                 .orElseGet(() -> otherArgumentMap.get(idx))
                 ));
 
-        return iqFactory.createExtensionalDataNode(
-                dataNode.getRelationDefinition(),
-                mergedArgumentMap);
+        return iqFactory.createExtensionalDataNode(dataNode.getRelationDefinition(), mergedArgumentMap);
     }
 
     private ConstructionNode unify(SimpleMappingEntryCluster renamedOtherCluster) {
@@ -169,20 +148,8 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
                 .orElseGet(() -> iqFactory.createConstructionNode(allVariables));
     }
 
-    private SimpleMappingEntryCluster compressCluster(IQTree normalizedTree, RDFFactTemplates mergedRDFTemplates) {
-        Substitution<ImmutableTerm> normalizedSubstitution = ((ConstructionNode) normalizedTree.getRootNode()).getSubstitution();
-        RDFFactTemplates compressedTemplates = mergedRDFTemplates.compress(normalizedSubstitution.inverseMap().values().stream()
-                .filter(vs -> vs.size() > 1)
-                .map(ImmutableList::copyOf)
-                .collect(ImmutableCollectors.toSet()));
-
-        ImmutableSet<Variable> compressedVariables = compressedTemplates.getVariables();
-        Substitution<ImmutableTerm> compressedSubstitution = normalizedSubstitution.restrictDomainTo(compressedVariables);
-
-        IQTree compressedTree = iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(compressedVariables, compressedSubstitution),
-                normalizedTree.getChildren().get(0));
-
+    @Override
+    protected MappingEntryCluster buildCluster(IQTree compressedTree, RDFFactTemplates compressedTemplates) {
         return new SimpleMappingEntryCluster(
                 compressedTree,
                 compressedTemplates,
