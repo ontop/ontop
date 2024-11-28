@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Map;
 import java.util.Optional;
@@ -73,21 +72,24 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
     }
 
     @Override
-    public Optional<MappingEntryCluster> merge(MappingEntryCluster otherInfo) {
-        if (otherInfo instanceof ComplexMappingEntryCluster
-                || otherInfo instanceof FilterMappingEntryCluster
-                || otherInfo instanceof DictionaryPatternMappingEntryCluster
-                || otherInfo instanceof JoinMappingEntryCluster) {
-            return otherInfo.merge(this);
+    public Optional<MappingEntryCluster> merge(MappingEntryCluster otherCluster) {
+
+        // Not simple but having a potential for merging implemented somewhere else
+        if (otherCluster instanceof FilterMappingEntryCluster
+                || otherCluster instanceof DictionaryPatternMappingEntryCluster) {
+            return otherCluster.merge(this);
         }
 
-        SimpleMappingEntryCluster otherSimpleAssertion = (SimpleMappingEntryCluster) otherInfo;
-        if (!relationDefinition.getAtomPredicate().getName()
-                .equals(otherSimpleAssertion.getRelationsDefinitions().get(0).getAtomPredicate().getName())) {
+        if (!(otherCluster instanceof SimpleMappingEntryCluster)) {
             return Optional.empty();
         }
-        variableGenerator.registerAdditionalVariables(otherSimpleAssertion.variableGenerator.getKnownVariables());
-        SimpleMappingEntryCluster otherRenamed = otherSimpleAssertion.renameConflictingVariables(variableGenerator);
+
+        SimpleMappingEntryCluster otherSimpleCluster = (SimpleMappingEntryCluster) otherCluster;
+        if (!relationDefinition.equals(otherSimpleCluster.relationDefinition)) {
+            return Optional.empty();
+        }
+        variableGenerator.registerAdditionalVariables(otherSimpleCluster.variableGenerator.getKnownVariables());
+        SimpleMappingEntryCluster otherRenamed = otherSimpleCluster.renameConflictingVariables(variableGenerator);
 
         ImmutableMap<Integer, Variable> mergedArgumentMap = mergeRelationArguments(otherRenamed.argumentMap);
 
@@ -99,17 +101,21 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
 
         Substitution<ImmutableTerm> rdfTermsConstructionSubstitution = topConstructSubstitution.compose(
                 otherRenamed.topConstructSubstitution);
-        ImmutableSet<Variable> termsVariables = ImmutableSet.<Variable>builder()
-                .addAll(topConstructSubstitution.getDomain())
-                .addAll(otherRenamed.topConstructSubstitution.getDomain())
-                .build();
+
+        ImmutableSet<Variable> termsVariables = Sets.union(
+                topConstructSubstitution.getDomain(),
+                otherRenamed.topConstructSubstitution.getDomain()).immutableCopy();
+
         ConstructionNode topConstructionNode = iqFactory.createConstructionNode(termsVariables,
                 rdfTermsConstructionSubstitution);
+
         IQTree mappingTree = iqFactory.createUnaryIQTree(topConstructionNode,
                 iqFactory.createUnaryIQTree(optionalRenamingNode, relationDefinitionNode));
 
         RDFFactTemplates mergedRDFTemplates = rdfFactTemplates.merge(otherRenamed.rdfFactTemplates);
-        var treeTemplatesPair = compressMappingAssertion(mappingTree.normalizeForOptimization(variableGenerator),
+
+        var treeTemplatesPair = compressCluster(
+                mappingTree.normalizeForOptimization(variableGenerator),
                 mergedRDFTemplates);
 
         return Optional.of(new SimpleMappingEntryCluster(relationDefinition,
@@ -142,12 +148,8 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
     }
 
     private ImmutableMap<Integer, Variable> mergeRelationArguments(ImmutableMap <Integer, Variable > otherArgumentMap){
-        ImmutableSet<Integer> keys = ImmutableSet.<Integer>builder()
-                .addAll(argumentMap.keySet())
-                .addAll(otherArgumentMap.keySet())
-                .build();
 
-        return keys.stream()
+        return Sets.union(argumentMap.keySet(), otherArgumentMap.keySet()).stream()
                 .collect(ImmutableCollectors.toMap(
                         idx -> idx,
                         idx -> argumentMap.getOrDefault(idx, otherArgumentMap.get(idx))
@@ -155,12 +157,10 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
     }
 
     private ConstructionNode createOptionalRenamingNode(ImmutableMap<Integer, Variable> otherArgumentMap) {
-        ImmutableSet<Integer> keys = ImmutableSet.<Integer>builder()
-                .addAll(argumentMap.keySet())
-                .addAll(otherArgumentMap.keySet())
-                .build();
+        var keys = Sets.union(argumentMap.keySet(), otherArgumentMap.keySet()).stream();
+
         Optional<Substitution<Variable>> mergedSubstitution  = substitutionFactory.onVariables().unifierBuilder()
-                .unify(keys.stream(),
+                .unify(keys,
                         idx -> otherArgumentMap.getOrDefault(idx, argumentMap.get(idx)),
                         idx -> argumentMap.getOrDefault(idx, otherArgumentMap.get(idx)))
                 .build();
@@ -183,7 +183,7 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
         return optionalRenamingNode;
     }
 
-    private Map.Entry<IQTree, RDFFactTemplates> compressMappingAssertion(IQTree normalizedTree, RDFFactTemplates mergedRDFTemplates) {
+    private Map.Entry<IQTree, RDFFactTemplates> compressCluster(IQTree normalizedTree, RDFFactTemplates mergedRDFTemplates) {
         Substitution<ImmutableTerm> normalizedSubstitution = ((ConstructionNode) normalizedTree.getRootNode()).getSubstitution();
         RDFFactTemplates compressedTemplates = mergedRDFTemplates.compress(normalizedSubstitution.inverseMap().values().stream()
                 .filter(vs -> vs.size() > 1)
