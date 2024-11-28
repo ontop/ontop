@@ -19,6 +19,9 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Its tree is composed of one construction node and one extensional node
+ */
 public class SimpleMappingEntryCluster implements MappingEntryCluster {
     private final RelationDefinition relationDefinition;
     private final ImmutableMap<Integer, Variable> argumentMap;
@@ -28,6 +31,7 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
     private final RDFFactTemplates rdfFactTemplates;
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final ImmutableSet<Variable> dataNodeVariables;
 
     public SimpleMappingEntryCluster(RelationDefinition relationDefinition,
                                      ImmutableMap<Integer, Variable> argumentMap,
@@ -38,6 +42,7 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
                                      SubstitutionFactory substitutionFactory) {
         this.relationDefinition = relationDefinition;
         this.argumentMap = argumentMap;
+        this.dataNodeVariables = ImmutableSet.copyOf(argumentMap.values());
         this.tree = tree;
         this.rdfFactTemplates = RDFTemplates;
         this.variableGenerator = variableGenerator;
@@ -88,16 +93,21 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
         if (!relationDefinition.equals(otherSimpleCluster.relationDefinition)) {
             return Optional.empty();
         }
+
+        return Optional.of(mergeWithSimpleCluster(otherSimpleCluster));
+    }
+
+    private SimpleMappingEntryCluster mergeWithSimpleCluster(SimpleMappingEntryCluster otherSimpleCluster) {
         variableGenerator.registerAdditionalVariables(otherSimpleCluster.variableGenerator.getKnownVariables());
         SimpleMappingEntryCluster otherRenamed = otherSimpleCluster.renameConflictingVariables(variableGenerator);
+
+        ConstructionNode constructionNodeAfterUnification = unify(otherRenamed);
 
         ImmutableMap<Integer, Variable> mergedArgumentMap = mergeRelationArguments(otherRenamed.argumentMap);
 
         ExtensionalDataNode relationDefinitionNode = iqFactory.createExtensionalDataNode(
                 relationDefinition,
                 mergedArgumentMap);
-
-        ConstructionNode optionalRenamingNode = createOptionalRenamingNode(otherRenamed.argumentMap);
 
         Substitution<ImmutableTerm> rdfTermsConstructionSubstitution = topConstructSubstitution.compose(
                 otherRenamed.topConstructSubstitution);
@@ -110,7 +120,7 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
                 rdfTermsConstructionSubstitution);
 
         IQTree mappingTree = iqFactory.createUnaryIQTree(topConstructionNode,
-                iqFactory.createUnaryIQTree(optionalRenamingNode, relationDefinitionNode));
+                iqFactory.createUnaryIQTree(constructionNodeAfterUnification, relationDefinitionNode));
 
         RDFFactTemplates mergedRDFTemplates = rdfFactTemplates.merge(otherRenamed.rdfFactTemplates);
 
@@ -118,14 +128,15 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
                 mappingTree.normalizeForOptimization(variableGenerator),
                 mergedRDFTemplates);
 
-        return Optional.of(new SimpleMappingEntryCluster(relationDefinition,
+        return new SimpleMappingEntryCluster(relationDefinition,
                 mergedArgumentMap,
                 treeTemplatesPair.getKey(),
                 treeTemplatesPair.getValue(),
                 variableGenerator,
                 iqFactory,
-                substitutionFactory));
+                substitutionFactory);
     }
+
 
     public SimpleMappingEntryCluster renameConflictingVariables(VariableGenerator conflictingVariableGenerator) {
         InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
@@ -156,31 +167,21 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
                 ));
     }
 
-    private ConstructionNode createOptionalRenamingNode(ImmutableMap<Integer, Variable> otherArgumentMap) {
-        var keys = Sets.union(argumentMap.keySet(), otherArgumentMap.keySet()).stream();
+    private ConstructionNode unify(SimpleMappingEntryCluster renamedOtherCluster) {
+        var keys = Sets.union(argumentMap.keySet(), renamedOtherCluster.argumentMap.keySet()).stream();
 
-        Optional<Substitution<Variable>> mergedSubstitution  = substitutionFactory.onVariables().unifierBuilder()
+        var unifier = substitutionFactory.onVariables().unifierBuilder()
                 .unify(keys,
-                        idx -> otherArgumentMap.getOrDefault(idx, argumentMap.get(idx)),
-                        idx -> argumentMap.getOrDefault(idx, otherArgumentMap.get(idx)))
+                        idx -> renamedOtherCluster.argumentMap.getOrDefault(idx, argumentMap.get(idx)),
+                        idx -> argumentMap.getOrDefault(idx, renamedOtherCluster.argumentMap.get(idx)))
                 .build();
 
-        ConstructionNode optionalRenamingNode;
-        if (mergedSubstitution.isPresent()) {
-            ImmutableSet<Variable> originalRelationsVariables = Streams.concat(
-                    argumentMap.values().stream(),
-                    otherArgumentMap.values().stream(),
-                    mergedSubstitution.get().getRangeVariables().stream()
-            ).collect(ImmutableCollectors.toSet());
-            optionalRenamingNode = iqFactory.createConstructionNode(originalRelationsVariables, mergedSubstitution.get());
-        } else {
-            ImmutableSet<Variable> originalRelationsVariables = Streams.concat(
-                    argumentMap.values().stream(),
-                    otherArgumentMap.values().stream()
-            ).collect(ImmutableCollectors.toSet());
-            optionalRenamingNode = iqFactory.createConstructionNode(originalRelationsVariables);
-        }
-        return optionalRenamingNode;
+        var allVariables = Sets.union(dataNodeVariables, renamedOtherCluster.dataNodeVariables)
+                .immutableCopy();
+
+        return unifier
+                .map(s -> iqFactory.createConstructionNode(allVariables, s))
+                .orElseGet(() -> iqFactory.createConstructionNode(allVariables));
     }
 
     private Map.Entry<IQTree, RDFFactTemplates> compressCluster(IQTree normalizedTree, RDFFactTemplates mergedRDFTemplates) {
