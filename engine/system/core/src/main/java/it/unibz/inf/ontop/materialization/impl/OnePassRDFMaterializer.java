@@ -84,6 +84,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                 .flatMap(Collection::stream)
                 .map(this::splitPotentialUnionNode)
                 .flatMap(Collection::stream)
+                .map(IQ::normalizeForOptimization)
                 .collect(ImmutableCollectors.toList());
 
         ImmutableList<MappingAssertionInformation> tmpMappingInfo = mappingAssertionsIQs.stream()

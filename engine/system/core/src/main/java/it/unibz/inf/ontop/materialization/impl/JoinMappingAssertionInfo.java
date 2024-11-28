@@ -1,17 +1,16 @@
 package it.unibz.inf.ontop.materialization.impl;
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.node.JoinLikeNode;
-import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.materialization.MappingAssertionInformation;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -22,7 +21,6 @@ import org.eclipse.rdf4j.model.IRI;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class JoinMappingAssertionInfo implements MappingAssertionInformation {
     private final IQTree tree;
@@ -45,6 +43,7 @@ public class JoinMappingAssertionInfo implements MappingAssertionInformation {
         this.variableGenerator = variableGenerator;
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
+
         this.extensionalNodes = findExtensionalNodes(joinSubtree);
     }
 
@@ -84,14 +83,14 @@ public class JoinMappingAssertionInfo implements MappingAssertionInformation {
                         Map.Entry::getKey,
                         entry -> ImmutableList.copyOf(entry.getValue())
                 ));
-        boolean allArgumentsAreVars = relationDefinitionNodesMap.values().stream()
+        boolean areAllAttributesVars = relationDefinitionNodesMap.values().stream()
                 .flatMap(Collection::stream)
                 .map(ExtensionalDataNode::getArgumentMap)
                 .flatMap(map -> map.values().stream())
                 .allMatch(value -> value instanceof Variable);
         boolean sameJoinChildren = relationDefinitionNodesMap.values().stream()
                 .allMatch(nodes -> nodes.size() == 2);
-        if (allArgumentsAreVars && sameJoinChildren) {
+        if (areAllAttributesVars && sameJoinChildren && areJoinConditionsEqual(otherJoinInfoRenamed)) {
             return mergeJoinMappingAssertions(otherJoinInfoRenamed, relationDefinitionNodesMap);
         }
         return Optional.empty();
@@ -154,11 +153,6 @@ public class JoinMappingAssertionInfo implements MappingAssertionInformation {
                 })
                 .collect(ImmutableCollectors.toList());
 
-        JoinLikeNode joinNode = iqFactory.createInnerJoinNode(((JoinLikeNode)joinSubtree.getRootNode()).getOptionalFilterCondition());
-        IQTree joinTree = iqFactory.createNaryIQTree((NaryOperatorNode) joinNode, mergedJoinSubtrees);
-
-        RDFFactTemplates mergedRDFTemplates = rdfFactTemplates.merge(otherJoinInfoRenamed.getRDFFactTemplates());
-
         Substitution<ImmutableTerm> topConstructSubstitution = ((ConstructionNode) tree.getRootNode()).getSubstitution();
         Substitution<ImmutableTerm> otherTopConstructSubstitution = ((ConstructionNode) otherJoinInfoRenamed.tree.getRootNode()).getSubstitution();
         Substitution<ImmutableTerm> RDFTermsConstructionSubstitution = topConstructSubstitution.compose(otherTopConstructSubstitution);
@@ -167,11 +161,18 @@ public class JoinMappingAssertionInfo implements MappingAssertionInformation {
                 .addAll(otherTopConstructSubstitution.getDomain())
                 .build();
         ConstructionNode topConstructionNode = iqFactory.createConstructionNode(termsVariables, RDFTermsConstructionSubstitution);
+        IQTree joinTree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(), mergedJoinSubtrees);
         IQTree mappingTree = iqFactory.createUnaryIQTree(topConstructionNode, joinTree);
 
+        RDFFactTemplates mergedRDFTemplates = rdfFactTemplates.merge(otherJoinInfoRenamed.getRDFFactTemplates());
         Map.Entry<IQTree, RDFFactTemplates> treeTemplatePair = compressMappingAssertion(mappingTree.normalizeForOptimization(variableGenerator), mergedRDFTemplates);
         IQTree finalTree = treeTemplatePair.getKey();
-        return Optional.of(new JoinMappingAssertionInfo(finalTree, treeTemplatePair.getValue(), finalTree.getChildren().get(0), variableGenerator, iqFactory, substitutionFactory));
+        return Optional.of(new JoinMappingAssertionInfo(finalTree,
+                treeTemplatePair.getValue(),
+                finalTree.getChildren().get(0),
+                variableGenerator,
+                iqFactory,
+                substitutionFactory));
     }
 
     private ImmutableMap<Integer, Variable> mergeRelationArguments(ImmutableMap <Integer, Variable > argumentMap,
@@ -248,5 +249,49 @@ public class JoinMappingAssertionInfo implements MappingAssertionInformation {
                     .flatMap(ImmutableList::stream)
                     .collect(ImmutableCollectors.toList());
         }
+    }
+
+    private boolean areJoinConditionsEqual(JoinMappingAssertionInfo otherJoinInfoRenamed) {
+        if (((InnerJoinNode) joinSubtree.getRootNode()).getOptionalFilterCondition().isPresent()
+            || ((InnerJoinNode) otherJoinInfoRenamed.joinSubtree.getRootNode()).getOptionalFilterCondition().isPresent()) {
+            return false;
+        }
+        // the idea is that while different join subtrees can have different variables in the join condition for the same attribute,
+        // the underlying attribute in the extensional node stays the same
+        return getSharedAttributesIndexesInJoinSubtrees(extensionalNodes).equals(getSharedAttributesIndexesInJoinSubtrees(otherJoinInfoRenamed.extensionalNodes));
+    }
+
+    private ImmutableMap<ImmutableSet<Attribute>, ImmutableSet<RelationDefinition>> getSharedAttributesIndexesInJoinSubtrees(ImmutableList<ExtensionalDataNode> extensionalNodes) {
+        ImmutableMap<VariableOrGroundTerm, ImmutableList<ExtensionalDataNode>> sharedVarsInExtNodes = extensionalNodes.stream()
+                .flatMap(node -> node.getArgumentMap().values().stream()
+                        .map(var -> Map.entry(var, node)))
+                .collect(ImmutableCollectors.toMultimap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue
+                )).asMap().entrySet().stream().collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> ImmutableList.copyOf(entry.getValue())
+                ));
+
+        ImmutableMap<ImmutableSet<Attribute>, ImmutableSet<RelationDefinition>> tmp = sharedVarsInExtNodes.entrySet().stream()
+                .filter(entry -> entry.getValue().size() > 1)
+                .map(entry -> {
+                    var sharedVariable = entry.getKey();
+                    ImmutableSet<Attribute> sharedAttributes = entry.getValue().stream()
+                            .map(node -> {
+                                Integer index = node.getArgumentMap().entrySet().stream()
+                                        .filter(e -> e.getValue().equals(sharedVariable))
+                                        .map(Map.Entry::getKey)
+                                        .findFirst().orElseThrow(() -> new IllegalStateException("Common variable between extensional nodes not found in argument map"));
+                                return node.getRelationDefinition().getAttributes().get(index);
+                            })
+                            .collect(ImmutableCollectors.toSet());
+                    return Map.entry(sharedAttributes, entry.getValue().stream().map(ExtensionalDataNode::getRelationDefinition).collect(ImmutableCollectors.toSet()));
+                })
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue
+                ));
+        return tmp;
     }
 }
