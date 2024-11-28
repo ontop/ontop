@@ -140,7 +140,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
 
     private Stream<ImmutableMap.Entry<Variable, Variable>> getDependentVariables(Variable sparqlIndependentVariable, ImmutableTerm rdfLexicalTerm) {
         if (rdfLexicalTerm instanceof Variable) {
-            return rdfLexicalTerm.getVariableStream()
+            return Stream.of((Variable) rdfLexicalTerm)
                     .map(v -> Maps.immutableEntry(sparqlIndependentVariable, v));
         }
         if (rdfLexicalTerm instanceof ImmutableFunctionalTerm) {
@@ -148,7 +148,9 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
             if (functionalTerm.getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol
                     || functionalTerm.getFunctionSymbol() instanceof NullRejectingDBConcatFunctionSymbol
                     || functionalTerm.getFunctionSymbol() instanceof DBTypeConversionFunctionSymbol) {
-                return rdfLexicalTerm.getVariableStream()
+                return ((ImmutableFunctionalTerm) rdfLexicalTerm).getTerms().stream()
+                        .filter(t -> t instanceof Variable)
+                        .map(v -> (Variable) v)
                         .map(v -> Maps.immutableEntry(sparqlIndependentVariable, v));
             }
         }
