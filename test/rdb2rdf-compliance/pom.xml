@@ -128,6 +128,11 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>it.unibz.inf.ontop</groupId>
+            <artifactId>ontop-owlapi</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

@@ -38,7 +38,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
     private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
     private final QueryPlanner queryPlanner;
     private final QueryLogger.Factory queryLoggerFactory;
-    private final QueryContext.Factory queryContextFactory;
+    private final QueryContext queryContext;
 
     private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
     private final Iterator<MappingAssertionInformation> mappingAssertionsIterator;
@@ -80,7 +80,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
         this.generalOptimizer = generalOptimizer;
         this.queryPlanner = queryPlanner;
         this.queryLoggerFactory = queryLogger;
-        this.queryContextFactory = queryContextFactory;
+        this.queryContext = queryContextFactory.create(ImmutableMap.of());
 
         this.possiblyIncompleteClassesAndProperties = new ArrayList<>();
         counter = 0;
@@ -133,7 +133,6 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
             try {
                 tmpStatement = ontopConnection.createStatement();
                 QueryLogger queryLogger = queryLoggerFactory.create(ImmutableMap.of());
-                QueryContext queryContext = queryContextFactory.create(ImmutableMap.of());
                 IQ nativeQuery = translateIntoNativeQuery(assertionInfo, queryLogger, queryContext);
                 tmpContextResultSet = tmpStatement.executeSelectQuery(nativeQuery, queryLogger);
 
@@ -172,7 +171,6 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
                     try {
                         tmpStatement = ontopConnection.createStatement();
                         QueryLogger queryLogger = queryLoggerFactory.create(ImmutableMap.of());
-                        QueryContext queryContext = queryContextFactory.create(ImmutableMap.of());
                         IQ nativeQuery = translateIntoNativeQuery(assertionInfo, queryLogger, queryContext);
                         tmpContextResultSet = tmpStatement.executeSelectQuery(nativeQuery, queryLogger);
                     } catch (OntopConnectionException e) {
