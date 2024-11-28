@@ -20,11 +20,6 @@ public interface MappingEntryCluster {
 
     Optional<MappingEntryCluster> merge(MappingEntryCluster other);
 
-    /**
-     * Returns a new RDFFactTemplates with only the triples/quads that have a predicate in the given set
-     */
-    RDFFactTemplates restrict(ImmutableSet<IRI> predicates);
-
     ImmutableList<RelationDefinition> getRelationsDefinitions();
 
     MappingEntryCluster renameConflictingVariables(VariableGenerator conflictingVariableGenerator);

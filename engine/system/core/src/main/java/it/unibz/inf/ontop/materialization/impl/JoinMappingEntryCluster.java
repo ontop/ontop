@@ -97,19 +97,6 @@ public class JoinMappingEntryCluster implements MappingEntryCluster {
     }
 
     @Override
-    public RDFFactTemplates restrict(ImmutableSet<IRI> predicates) {
-        ImmutableCollection<ImmutableList<Variable>> filteredTemplates = rdfFactTemplates.getTriplesOrQuadsVariables().stream()
-                .filter(tripleOrQuad -> {
-                    Substitution<ImmutableTerm> topConstructSubstitution = ((ConstructionNode) tree.getRootNode()).getSubstitution();
-                    ImmutableTerm predicate = topConstructSubstitution.apply(tripleOrQuad.get(1));
-                    return predicate instanceof IRI && predicates.contains(predicate);
-                })
-                .collect(ImmutableCollectors.toList());
-
-        return new RDFFactTemplatesImpl(filteredTemplates);
-    }
-
-    @Override
     public ImmutableList<RelationDefinition> getRelationsDefinitions() {
         return extensionalNodes.stream()
                 .map(ExtensionalDataNode::getRelationDefinition)

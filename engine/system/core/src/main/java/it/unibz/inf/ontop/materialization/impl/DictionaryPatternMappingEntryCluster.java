@@ -103,19 +103,6 @@ public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster
 
     }
 
-
-    @Override
-    public RDFFactTemplates restrict(ImmutableSet<IRI> predicates) {
-        ImmutableCollection<ImmutableList<Variable>> filteredTemplates = rdfFactTemplates.getTriplesOrQuadsVariables().stream()
-                .filter(tripleOrQuad -> {
-                    ImmutableTerm predicate = ((ConstructionNode)tree.getRootNode()).getSubstitution().apply(tripleOrQuad.get(1));
-                    return predicate instanceof IRI && predicates.contains(predicate);
-                })
-                .collect(ImmutableCollectors.toList());
-
-        return new RDFFactTemplatesImpl(filteredTemplates);
-    }
-
     @Override
     public ImmutableList<RelationDefinition> getRelationsDefinitions() {
         return ImmutableList.of(relationDefinitionNode.getRelationDefinition());
