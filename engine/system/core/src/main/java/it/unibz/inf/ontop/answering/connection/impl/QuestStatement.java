@@ -200,11 +200,17 @@ public abstract class QuestStatement implements OntopStatement {
 	}
 
 	@Override
+	public <R extends OBDAResultSet> R execute(KGQuery<R> inputQuery, QueryContext queryContext) throws OntopConnectionException,
+			OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
+		return execute(inputQuery, ImmutableMultimap.of(), queryContext);
+	}
+
+	@Override
 	public <R extends OBDAResultSet> R execute(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders)
 			throws OntopConnectionException, OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
 
 		if (inputQuery instanceof SelectQuery) {
-			return (R) executeInThread((SelectQuery) inputQuery, httpHeaders, (inputQuery1, queryContext, queryLogger) -> executeSelectQuery(inputQuery1, queryContext, queryLogger));
+			return (R) executeInThread((SelectQuery) inputQuery, httpHeaders,(inputQuery1, queryContext, queryLogger) -> executeSelectQuery(inputQuery1, queryContext, queryLogger));
 		}
 		else if (inputQuery instanceof AskQuery) {
 			return (R) executeInThread((AskQuery) inputQuery, httpHeaders, (inputQuery1, queryContext, queryLogger) -> executeBooleanQuery(inputQuery1, queryContext, queryLogger));
@@ -213,7 +219,28 @@ public abstract class QuestStatement implements OntopStatement {
 			return (R) executeInThread((DescribeQuery) inputQuery, httpHeaders, (describeQuery, queryContext, queryLogger) -> executeDescribeQuery(describeQuery, queryContext, queryLogger));
 		}
 		else if (inputQuery instanceof ConstructQuery) {
-			return (R) executeInThread((ConstructQuery) inputQuery, httpHeaders, (constructQuery, queryContext, queryLogger) -> executeConstructQuery(constructQuery, queryContext, queryLogger));
+			return (R) executeInThread((ConstructQuery) inputQuery, httpHeaders,(constructQuery, queryContext, queryLogger) -> executeConstructQuery(constructQuery, queryContext, queryLogger));
+		}
+		else {
+			throw new OntopUnsupportedInputQueryException("Unsupported query type: " + inputQuery);
+		}
+	}
+
+	@Override
+	public <R extends OBDAResultSet> R execute(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders, QueryContext context)
+			throws OntopConnectionException, OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
+
+		if (inputQuery instanceof SelectQuery) {
+			return (R) executeInThread((SelectQuery) inputQuery, httpHeaders,(inputQuery1, queryContext, queryLogger) -> executeSelectQuery(inputQuery1, context, queryLogger));
+		}
+		else if (inputQuery instanceof AskQuery) {
+			return (R) executeInThread((AskQuery) inputQuery, httpHeaders, (inputQuery1, queryContext, queryLogger) -> executeBooleanQuery(inputQuery1, context, queryLogger));
+		}
+		else if (inputQuery instanceof DescribeQuery) {
+			return (R) executeInThread((DescribeQuery) inputQuery, httpHeaders, (describeQuery, queryContext, queryLogger) -> executeDescribeQuery(describeQuery, context, queryLogger));
+		}
+		else if (inputQuery instanceof ConstructQuery) {
+			return (R) executeInThread((ConstructQuery) inputQuery, httpHeaders,(constructQuery, queryContext, queryLogger) -> executeConstructQuery(constructQuery, context, queryLogger));
 		}
 		else {
 			throw new OntopUnsupportedInputQueryException("Unsupported query type: " + inputQuery);

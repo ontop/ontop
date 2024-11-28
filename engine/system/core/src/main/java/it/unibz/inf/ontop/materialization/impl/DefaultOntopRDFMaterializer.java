@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.exception.*;
@@ -40,6 +41,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
     private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
     private final TermFactory termFactory;
     private final RDF rdfFactory;
+    private final QueryContext.Factory queryContextFactory;
 
     public DefaultOntopRDFMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
         Injector injector = configuration.getInjector();
@@ -50,6 +52,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
         this.kgQueryFactory = injector.getInstance(KGQueryFactory.class);
         this.termFactory = injector.getInstance(TermFactory.class);
         this.rdfFactory = injector.getInstance(RDF.class);
+        this.queryContextFactory = injector.getInstance(QueryContext.Factory.class);
         this.vocabulary = extractVocabulary(specification.getSaturatedMapping());
 
         this.params = materializationParams;
@@ -57,12 +60,12 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 
     @Override
     public MaterializedGraphResultSet materialize() {
-        return new DefaultMaterializedGraphResultSet(vocabulary, params, queryEngine, kgQueryFactory, termFactory, rdfFactory);
+        return new DefaultMaterializedGraphResultSet(vocabulary, params, queryEngine, kgQueryFactory, termFactory, rdfFactory, queryContextFactory);
     }
 
     @Override
     public MaterializedGraphResultSet materialize(@Nonnull ImmutableSet<IRI> selectedVocabulary) {
-        return new DefaultMaterializedGraphResultSet(filterVocabularyEntries(selectedVocabulary), params, queryEngine, kgQueryFactory, termFactory, rdfFactory);
+        return new DefaultMaterializedGraphResultSet(filterVocabularyEntries(selectedVocabulary), params, queryEngine, kgQueryFactory, termFactory, rdfFactory, queryContextFactory);
     }
 
     private ImmutableMap<IRI, VocabularyEntry> filterVocabularyEntries(ImmutableSet<IRI> selectedVocabulary) {
