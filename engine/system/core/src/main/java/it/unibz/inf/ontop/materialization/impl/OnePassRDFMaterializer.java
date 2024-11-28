@@ -79,11 +79,9 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         ImmutableList<IQ> mappingAssertionsIQs = saturatedMapping.getRDFAtomPredicates().stream()
                 .map(saturatedMapping::getQueries)
                 .flatMap(Collection::stream)
-                //.map(iq -> iqFactory.createIQ(
-                //        iq.getProjectionAtom(),
-                //        iq.getTree().removeDistincts()))
-                //.map(this::splitPotentialUnionNode)
-                //.flatMap(Collection::stream)
+                .map(iq -> removeDistincts(iq, materializationParams.areDuplicatesAllowed()))
+                .map(this::splitPotentialUnionNode)
+                .flatMap(Collection::stream)
                 .map(this::splitPotentialUnionNode)
                 .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toList());
@@ -299,6 +297,12 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                 .addAll(mergedMappingAssertionInfos)
                 .addAll(unmergedMappingAssertionInfos)
                 .build();
+    }
+
+    private IQ removeDistincts(IQ iq, boolean allowDuplicates) {
+        return allowDuplicates
+            ? iqFactory.createIQ(iq.getProjectionAtom(), iq.getTree().removeDistincts())
+            : iq;
     }
 
     /**

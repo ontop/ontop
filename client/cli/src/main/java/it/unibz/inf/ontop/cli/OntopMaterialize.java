@@ -88,6 +88,10 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
             description = "All the SQL results of one big query will be stored in memory. Not recommended. Default: false.")
     private boolean noStream = false;
 
+    @Option(type = OptionType.COMMAND, name = {"--allow-duplicates"}, title = "allow duplicates in final materialized RDF graph",
+            description = " Duplicates will be included in the output file by removing DISTINCTs in the SQL queries. Default: false.")
+    private boolean allowDuplicates = false;
+
     public OntopMaterialize() {
     }
 
@@ -109,7 +113,7 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
 
             return RDF4JMaterializer.defaultMaterializer(
                     configurationBuilder.build(),
-                    MaterializationParams.defaultBuilder()
+                    MaterializationParams.defaultBuilder().allowDuplicates(allowDuplicates)
                             .build()
             );
         } catch (OBDASpecificationException e) {
