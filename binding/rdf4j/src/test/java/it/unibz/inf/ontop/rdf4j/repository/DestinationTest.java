@@ -320,4 +320,24 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(0, StringUtils.countMatches(sql, "UNION"));
     }
 
+    @Test
+    public void testOrderByValues() {
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "SELECT ?name ?email\n" +
+                "WHERE {\n" +
+                "  ?hotel a schema:Hotel .\n" +
+                "  ?hotel schema:name ?name .\n" +
+                "  ?hotel schema:email ?email .\n" +
+                "  VALUES (?name ?email) {\n" +
+                "    (\"Residence Bozen\"@it  \"residencbozen@gmail.com\")\n" +
+                "    (\"Residence Bozen\"@en  \"residencbozen@gmail.com\")\n" +
+                "    (\"Residence Bozen\"@de  \"residencbozen@gmail.com\")\n" +
+                "  }\n" +
+                "}\n" +
+                "ORDER BY DESC(?name)\n";
+
+        String sql = reformulateIntoNativeQuery(sparql);
+        assertEquals(0, StringUtils.countMatches(sql, "ORDER"));
+    }
+
 }

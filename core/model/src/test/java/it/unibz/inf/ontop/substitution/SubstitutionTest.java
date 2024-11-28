@@ -22,7 +22,7 @@ public class SubstitutionTest {
         Variable b = TERM_FACTORY.getVariable("b");
         Variable c = TERM_FACTORY.getVariable("c");
 
-        ImmutableList<Template.Component> template = Template.of("http://example.org/", 0, "/", 1);
+        ImmutableList<Template.Component> template = Template.builder().string("http://example.org/").placeholder().string("/").placeholder().build();
 
         ImmutableList<ImmutableTerm> firstArguments = ImmutableList.of(x, x);
 
@@ -41,7 +41,7 @@ public class SubstitutionTest {
         Variable b = TERM_FACTORY.getVariable("b");
         Variable c = TERM_FACTORY.getVariable("c");
 
-        ImmutableList<Template.Component> template = Template.of("http://example.org/", 0, "/", 1);
+        ImmutableList<Template.Component> template = Template.builder().string("http://example.org/").placeholder().string("/").placeholder().build();
 
         ImmutableList<ImmutableTerm> firstArguments = ImmutableList.of(x, x);
 

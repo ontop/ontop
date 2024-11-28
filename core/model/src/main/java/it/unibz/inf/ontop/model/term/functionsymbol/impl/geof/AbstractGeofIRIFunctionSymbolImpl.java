@@ -4,14 +4,13 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.ReduciblePositiveAritySPARQLFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.*;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public abstract class AbstractGeofIRIFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
+public abstract class AbstractGeofIRIFunctionSymbolImpl extends AbstractGeofFunctionSymbolImpl {
     private final RDFDatatype xsdAnyUri;
 
     protected AbstractGeofIRIFunctionSymbolImpl(

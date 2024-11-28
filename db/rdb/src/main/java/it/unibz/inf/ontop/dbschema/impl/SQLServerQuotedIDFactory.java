@@ -47,17 +47,21 @@ import java.util.Objects;
 @NonNullByDefault
 public class SQLServerQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
+	// both quoated and unquoted identifiers are case-insensitive (or, rather it depends on collation)
+	// https://learn.microsoft.com/en-us/sql/relational-databases/databases/database-identifiers
+	private static final boolean CASE_SENSITIVE = false;
+
 	@Override
 	protected QuotedID createFromString(String s) {
 		Objects.requireNonNull(s);
 
 		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING, true);
+			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING, CASE_SENSITIVE);
 
 		if (s.startsWith("[") && s.endsWith("]"))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING, true);
+			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING, CASE_SENSITIVE);
 
-		return new QuotedIDImpl(s, NO_QUOTATION, true);
+		return new QuotedIDImpl(s, NO_QUOTATION, CASE_SENSITIVE);
 	}
 
 	@Override

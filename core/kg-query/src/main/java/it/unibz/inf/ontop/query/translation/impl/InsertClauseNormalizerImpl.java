@@ -117,12 +117,12 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
             throw new RuntimeException("Was expecting at least one variable");
 
         Template.Builder templateBuilder = Template.builder()
-                .addSeparator("rule-" + UUID.randomUUID())
-                .addColumn();
+                .string("rule-" + UUID.randomUUID())
+                .placeholder();
 
         variables.stream()
                 .skip(1)
-                .forEach(v -> templateBuilder.addSeparator("/").addColumn());
+                .forEach(v -> templateBuilder.string("/").placeholder());
 
         ImmutableList<ImmutableFunctionalTerm> arguments = variables.stream()
                 .map(v -> termFactory.getDBCoalesce(

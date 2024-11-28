@@ -18,10 +18,7 @@ import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerIm
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -85,6 +82,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
 
         private final IQTreeTransformer lookForDistinctTransformer;
         private final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
+        private final DBConstant provenanceConstant;
 
         protected CardinalityInsensitiveTransformer(IQTreeTransformer lookForDistinctTransformer,
                                                     Supplier<VariableNullability> variableNullabilitySupplier,
@@ -96,14 +94,19 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
                     variableNullabilityTools, coreSingletons);
             this.lookForDistinctTransformer = lookForDistinctTransformer;
             this.requiredDataNodeExtractor = requiredDataNodeExtractor;
+            this.provenanceConstant = this.termFactory.getProvenanceSpecialConstant();
         }
 
         @Override
         protected Optional<IQTree> furtherTransformLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            if (!(rightChild instanceof ExtensionalDataNode))
+            var dataNodeAndProvenanceVariables = extractDataNodeAndProvenance(rightChild);
+
+            if (dataNodeAndProvenanceVariables.isEmpty())
                 return Optional.empty();
 
-            var rightNode = (ExtensionalDataNode) rightChild;
+            var rightNode = dataNodeAndProvenanceVariables.get().dataNode;
+            var provenanceVariables = dataNodeAndProvenanceVariables.get().provenanceVariables;
+
             var rightArgumentMap = rightNode.getArgumentMap();
 
             var nullableCoveringFDs = rightNode.getRelationDefinition().getOtherFunctionalDependencies().stream()
@@ -115,15 +118,29 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
                             .containsAll(rightArgumentMap.keySet()))
                     .collect(ImmutableCollectors.toList());
 
-            if (nullableCoveringFDs.isEmpty())
-                return Optional.empty();
-
             var transfer = requiredDataNodeExtractor.extractSomeRequiredNodes(leftChild, true)
                     .flatMap(left -> tryToTransfer(left, rightNode, nullableCoveringFDs).stream())
                     .findAny();
 
             return transfer
-                    .map(t -> updateLeftTree(t, leftChild, rootNode.getOptionalFilterCondition()));
+                    .map(t -> updateLeftTree(t, leftChild, rootNode.getOptionalFilterCondition(), provenanceVariables));
+        }
+
+        private Optional<DataNodeAndProvenanceVariables> extractDataNodeAndProvenance(IQTree rightChild) {
+            if (rightChild instanceof ExtensionalDataNode)
+                return Optional.of(new DataNodeAndProvenanceVariables((ExtensionalDataNode) rightChild, ImmutableSet.of()));
+
+            if (rightChild.getRootNode() instanceof ConstructionNode) {
+                var substitution = ((ConstructionNode) rightChild.getRootNode()).getSubstitution();
+                var subChild = rightChild.getChildren().get(0);
+
+                if ((subChild instanceof ExtensionalDataNode)
+                        // Should be the case for a normalized IQ tree
+                        && substitution.rangeAllMatch(t -> t.equals(provenanceConstant))) {
+                    return Optional.of(new DataNodeAndProvenanceVariables((ExtensionalDataNode) subChild, substitution.getDomain()));
+                }
+            }
+            return Optional.empty();
         }
 
         private Optional<Transfer> tryToTransfer(ExtensionalDataNode leftNode, ExtensionalDataNode rightNode,
@@ -145,7 +162,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
                     .filter(fd -> fd.getDeterminants().stream().allMatch(a -> commonArgumentMap.containsKey(a.getIndex() - 1)))
                     .findAny();
 
-            return selectedFD.map(fd -> {
+            var fdTransfer = selectedFD.map(fd -> {
                 var dependentIndexes = fd.getDependents().stream()
                         .map(a -> a.getIndex() - 1)
                         .collect(ImmutableCollectors.toSet());
@@ -160,14 +177,29 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
                         .filter(e -> dependentIndexes.contains(e.getKey()))
                         .collect(ImmutableCollectors.toMap()));
             });
+
+            if (fdTransfer.isPresent())
+                return fdTransfer;
+
+            // Trivial FD case (same dependents as determinants)
+            if (rightArgumentMap.equals(commonArgumentMap)) {
+                var determinantVariables = commonArgumentMap.values().stream()
+                        .filter(t -> t instanceof Variable)
+                        .map(t -> (Variable) t)
+                        .collect(ImmutableCollectors.toSet());
+
+                return Optional.of(new Transfer(leftNode, determinantVariables, ImmutableMap.of()));
+            }
+            return Optional.empty();
         }
 
-        private IQTree updateLeftTree(Transfer transfer, IQTree leftChild, Optional<ImmutableExpression> optionalFilterCondition) {
+        private IQTree updateLeftTree(Transfer transfer, IQTree leftChild, Optional<ImmutableExpression> optionalFilterCondition,
+                                      ImmutableSet<Variable> provenanceVariables) {
             var newLeftNode = transfer.generateNewLeftNode(variableGenerator, iqFactory);
             var leftVariables = leftChild.getVariables();
             var condition = computeRightTermCondition(newLeftNode, leftVariables,
                     transfer.determinantVariables, transfer.argumentsToTransfer, optionalFilterCondition);
-            var substitution = computeSubstitution(condition, leftVariables, transfer.argumentsToTransfer, newLeftNode);
+            var substitution = computeSubstitution(condition, leftVariables, transfer.argumentsToTransfer, newLeftNode, provenanceVariables);
             var newLeftTree = replaceNodeOnLeft(leftChild, transfer.leftNode, newLeftNode);
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(
@@ -215,10 +247,10 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
 
         private Substitution<? extends ImmutableTerm> computeSubstitution(ImmutableExpression condition, ImmutableSet<Variable> leftVariables,
                                                                           ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentsToTransfer,
-                                                                          ExtensionalDataNode newLeftNode) {
+                                                                          ExtensionalDataNode newLeftNode, ImmutableSet<Variable> provenanceVariables) {
             var leftArgumentMap = newLeftNode.getArgumentMap();
 
-            return argumentsToTransfer.asMultimap().inverse().asMap().entrySet().stream()
+            var argSubstitution = argumentsToTransfer.asMultimap().inverse().asMap().entrySet().stream()
                     .filter(e -> e.getKey() instanceof Variable)
                     .filter(e -> !leftVariables.contains((Variable)e.getKey()))
                     .collect(substitutionFactory.toSubstitution(
@@ -228,6 +260,14 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
                                     // Picking the first index
                                     leftArgumentMap.get(e.getValue().iterator().next())
                             )));
+
+            if (provenanceVariables.isEmpty())
+                return argSubstitution;
+
+            var provSubstitution = provenanceVariables.stream()
+                    .collect(substitutionFactory.toSubstitution(t -> termFactory.getIfElseNull(condition, provenanceConstant)));
+
+            return argSubstitution.compose(provSubstitution);
         }
 
         private IQTree replaceNodeOnLeft(IQTree leftChild, ExtensionalDataNode leftNode, ExtensionalDataNode newLeftNode) {
@@ -350,6 +390,16 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
             return newChildren.equals(children)
                     ? tree
                     : iqFactory.createNaryIQTree(rootNode, newChildren);
+        }
+    }
+
+    protected static class DataNodeAndProvenanceVariables {
+        public final ExtensionalDataNode dataNode;
+        public final ImmutableSet<Variable> provenanceVariables;
+
+        protected DataNodeAndProvenanceVariables(ExtensionalDataNode dataNode, ImmutableSet<Variable> provenanceVariables) {
+            this.dataNode = dataNode;
+            this.provenanceVariables = provenanceVariables;
         }
     }
 

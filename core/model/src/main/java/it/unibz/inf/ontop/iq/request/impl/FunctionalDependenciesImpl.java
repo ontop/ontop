@@ -40,8 +40,8 @@ public class FunctionalDependenciesImpl implements FunctionalDependencies {
                             || Sets.difference(Sets.difference(entry.getValue(), entry2.getKey()), entry2.getValue()).isEmpty()
                             || !Sets.union(entry2.getValue(), entry2.getKey()).containsAll(entry.getKey()))
                     continue;
-                entry2.getValue().addAll(Sets.difference(entry.getValue(), entry2.getKey()));
-                changed = true;
+                boolean localChange = entry2.getValue().addAll(Sets.difference(entry.getValue(), entry2.getKey()));
+                changed = localChange || changed;
             }
         }
         return changed;

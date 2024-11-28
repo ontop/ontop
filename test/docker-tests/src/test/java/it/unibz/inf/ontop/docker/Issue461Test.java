@@ -23,15 +23,12 @@ public class Issue461Test {
     private static final String obdaFilewithDuplicates = "src/test/resources/issue461/mappingwithduplicates.obda";
 
     @BeforeClass
-    public static void before() throws SQLException {
+    public static void before() throws SQLException, FileNotFoundException {
 
         Connection sqlConnection = DriverManager.getConnection("jdbc:h2:mem:questjunitdb", "sa", "");
         try (java.sql.Statement s = sqlConnection.createStatement()) {
             String text = new Scanner(new File(databaseFile)).useDelimiter("\\A").next();
             s.execute(text);
-        }
-        catch (SQLException | FileNotFoundException e) {
-            System.out.println("Exception in creating db from script:" + e);
         }
     }
 

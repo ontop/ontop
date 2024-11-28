@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.cli;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
-import com.github.rvesse.airline.annotations.help.BashCompletion;
+import com.github.rvesse.airline.annotations.help.bash.BashCompletion;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.collect.ImmutableList;
@@ -70,6 +70,9 @@ public class OntopQuery extends OntopMappingOntologyRelatedCommand {
         } else {
             configurationBuilder.nativeOntopMappingFile(mappingFile);
         }
+
+        if (constraintFile != null)
+            configurationBuilder.basicImplicitConstraintFile(constraintFile);
 
         if (dbMetadataFile != null)
             configurationBuilder.dbMetadataFile(dbMetadataFile);

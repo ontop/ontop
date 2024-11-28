@@ -200,6 +200,11 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
+    protected ImmutableSet<Variable> computeStrictDependents() {
+        return getRootNode().inferStrictDependents(this, leftChild, rightChild);
+    }
+
+    @Override
     protected VariableNonRequirement computeVariableNonRequirement() {
         return getRootNode().computeNotInternallyRequiredVariables(leftChild, rightChild);
     }

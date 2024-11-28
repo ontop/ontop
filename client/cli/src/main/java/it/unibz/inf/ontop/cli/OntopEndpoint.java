@@ -3,10 +3,11 @@ package it.unibz.inf.ontop.cli;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
-import com.github.rvesse.airline.annotations.help.BashCompletion;
+import com.github.rvesse.airline.annotations.help.bash.BashCompletion;
 import com.github.rvesse.airline.annotations.restrictions.RequiredOnlyIf;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.collect.Lists;
+import it.unibz.inf.ontop.cli.utils.Env;
 import it.unibz.inf.ontop.endpoint.OntopEndpointApplication;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
 
     @Option(type = OptionType.COMMAND, name = {"--portal"}, title = "endpoint portal file",
             description = "endpoint portal file (including title and queries)")
+    @Env("ONTOP_PORTAL_FILE")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String portalFile;
 
@@ -27,39 +29,47 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
 
     @Option(type = OptionType.COMMAND, name = {"--cors-allowed-origins"}, title = "origins",
             description = "CORS allowed origins")
+    @Env("ONTOP_CORS_ALLOWED_ORIGINS")
     private String corsAllowedOrigins;
 
     @Option(type = OptionType.COMMAND, name = {"--lazy"}, title = "lazy",
             description = "lazy initialization")
+    @Env("ONTOP_LAZY_INIT")
     private boolean lazy = false;
 
     @Option(type = OptionType.COMMAND, name = {"--dev"}, title = "dev",
             description = "development mode")
+    @Env("ONTOP_DEV_MODE")
     private boolean dev = false;
 
     @Option(type = OptionType.COMMAND, name = {"--predefined-config"}, title = "predefined query JSON config file",
             description = "predefined query config file")
+    @Env("ONTOP_PREDEFINED_CONFIG")
     @RequiredOnlyIf(names = {"--predefined-queries"})
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String predefinedConfig;
 
     @Option(type = OptionType.COMMAND, name = {"--predefined-queries"}, title = "predefined query TOML file",
             description = "predefined SPARQL queries file")
+    @Env("ONTOP_PREDEFINED_QUERIES")
     @RequiredOnlyIf(names = {"--predefined-config"})
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String predefinedQueries;
 
     @Option(type = OptionType.COMMAND, name = {"--contexts"}, title = "JSON-LD context file for predefined queries",
             description = "File containing JSON-LD contexts for predefined queries")
+    @Env("ONTOP_CONTEXTS")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String contexts;
 
     @Option(type = OptionType.COMMAND, name = {"--disable-portal-page"}, title = "disable the portal page",
             description = "Disable the portal page (/index.html) of the SPARQL endpoint. ")
+    @Env("ONTOP_DISABLE_PORTAL_PAGE")
     private boolean disablePortalPage = false;
 
     @Option(type = OptionType.COMMAND, name = {"--enable-download-ontology"}, title = "allow to download the ontology",
             description = "Allow to download the ontology as a plain text file (/ontology). Default: false")
+    @Env("ONTOP_ENABLE_DOWNLOAD_ONTOLOGY")
     private boolean enableDownloadOntology = false;
     
     @Override

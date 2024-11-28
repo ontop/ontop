@@ -70,7 +70,7 @@ RUN --mount=type=cache,target=/root/.m2 \
     mv build/distribution/target/ontop-cli-*/ ontop-docker && \
     cp client/docker/entrypoint.sh client/docker/healthcheck.sh ontop-docker && \
     cd ontop-docker && \
-    rm -rf ontop.bat ontop-completion.sh jdbc logback.xml log/logback-debug.xml
+    rm -rf ontop.bat ontop-completion.sh jdbc
 
 # ALTERNATIVE FINAL STAGE that uses pre-built binaries from ${ONTOP_CLI_BINDIR}
 # - stage used by build-image.sh and more convenient for developers, as it integrates with regular

@@ -40,8 +40,6 @@ public class GeoSPARQLTest {
         H2GISFunctions.load(sqlConnection);
         executeFromFile(sqlConnection, "src/test/resources/geosparql/create-h2.sql");
 
-//        org.h2.tools.Server.startWebServer(sqlConnection);
-
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFile)
                 .nativeOntopMappingFile(obdaFile)
@@ -598,8 +596,6 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
-    // it.unibz.inf.ontop.owlapi.exception.OntopOWLException: i
-    // t.unibz.inf.ontop.exception.OntopReformulationException: java.lang.IllegalArgumentException:
     // SRIDs do not match: <http://www.opengis.net/def/crs/OGC/1.3/CRS84> and <http://www.opengis.net/def/crs/EPSG/0/3044>
     @Test(expected = OntopOWLException.class) // test intersect with user input geometry (template)
     public void testAskIntersects4() throws Exception {
@@ -836,9 +832,7 @@ public class GeoSPARQLTest {
                 "BIND(geof:intersection(?xWkt, ?yWkt) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);
-        //assertFalse(val.startsWith("POLYGON ((0.9100"));
-        //assertEquals("POLYGON ((2 2, 7 2, 7 5, 2 5, 2 2))", val);
-        assertEquals("POLYGON ((2 2, 2 5, 7 5, 7 2, 2 2))", val);
+        assertEquals("POLYGON ((2 5, 7 5, 7 2, 2 2, 2 5))", val);
     }
 
     @Test // polygon vs. polygon intersection is a line
@@ -977,7 +971,7 @@ public class GeoSPARQLTest {
                 "}\n";
         String val = runQueryAndReturnString(query);
         // Output is polygon with hole
-        assertEquals("POLYGON ((1 1, 1 7, 8 7, 8 1, 1 1), (2 2, 7 2, 7 5, 2 5, 2 2))", val);
+        assertEquals("POLYGON ((1 7, 8 7, 8 1, 1 1, 1 7), (7 2, 7 5, 2 5, 2 2, 7 2))", val);
     }
 
     @Test // line vs. line difference - remainder of first line
@@ -1009,7 +1003,7 @@ public class GeoSPARQLTest {
                 "}\n";
         String val = runQueryAndReturnString(query);
         // In theory no effect, in practice the intersecting line adds 2 vertices
-        assertEquals("POLYGON ((8 2, 8 1, 1 1, 1 2, 1 7, 8 7, 8 2))", val);
+        assertEquals("POLYGON ((8 1, 1 1, 1 2, 1 7, 8 7, 8 2, 8 1))", val);
     }
 
     @Test // polygon vs. point difference - no effect
@@ -1025,7 +1019,7 @@ public class GeoSPARQLTest {
                 "}\n";
         String val = runQueryAndReturnString(query);
         // No effect
-        assertEquals("POLYGON ((2 2, 2 5, 7 5, 7 2, 2 2))", val);
+        assertEquals("POLYGON ((2 5, 7 5, 7 2, 2 2, 2 5))", val);
     }
 
     @Test // polygon vs. polygon difference - remainder of first polygon
@@ -1041,11 +1035,11 @@ public class GeoSPARQLTest {
                 "}\n";
         String val = runQueryAndReturnString(query);
         // No effect
-        assertEquals("POLYGON ((1 1, 1 7, 8 7, 8 1, 1 1), (2 2, 7 2, 7 5, 2 5, 2 2))", val);
+        assertEquals("POLYGON ((1 7, 8 7, 8 1, 1 1, 1 7), (7 2, 7 5, 2 5, 2 2, 7 2))", val);
     }
 
     @Test // polygon vs. polygon difference - remainder of first polygon
-    // case when second polygon is within the other, diff exists - ALSO case with full teamplate
+    // case when second polygon is within the other, diff exists - ALSO case with full template
     public void testSelectDifference7() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
@@ -1057,7 +1051,7 @@ public class GeoSPARQLTest {
                 "}\n";
         String val = runQueryAndReturnString(query);
         // No effect
-        assertEquals("POLYGON ((1 1, 1 7, 8 7, 8 1, 1 1), (2 2, 7 2, 7 5, 2 5, 2 2))", val);
+        assertEquals("POLYGON ((1 7, 8 7, 8 1, 1 1, 1 7), (7 2, 7 5, 2 5, 2 2, 7 2))", val);
     }
 
     @Test // Polygon vs Polygon
@@ -1073,7 +1067,7 @@ public class GeoSPARQLTest {
                 "}\n";
         String val = runQueryAndReturnString(query);
         // Multipolygon output
-        assertEquals("MULTIPOLYGON (((7 3, 7 2, 2 2, 2 5, 3 5, 3 3, 7 3)), ((7 3, 7 5, 3 5, 3 6, 8 6, 8 3, 7 3)))", val);
+        assertEquals("MULTIPOLYGON (((7 2, 2 2, 2 5, 3 5, 3 3, 7 3, 7 2)), ((7 5, 3 5, 3 6, 8 6, 8 3, 7 3, 7 5)))", val);
     }
 
     @Test // Line vs Line
@@ -1105,7 +1099,7 @@ public class GeoSPARQLTest {
                 "}\n";
         String val = runQueryAndReturnString(query);
         // All vertices are preserved in union
-        assertEquals("POLYGON ((3 3, 3 0, 0 0, 0 3, 0 6, 3 6, 3 3))", val);
+        assertEquals("POLYGON ((3 0, 0 0, 0 3, 0 6, 3 6, 3 3, 3 0))", val);
     }
 
     @Test // line + line
@@ -1439,16 +1433,6 @@ public class GeoSPARQLTest {
             final OWLBindingSet bindingSet = rs.next();
             OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
             return ind1.getLiteral();
-        }
-    }
-
-    private Integer runQueryAndReturnIntegerX(String query) throws Exception {
-        try (OWLStatement st = conn.createStatement()) {
-            TupleOWLResultSet rs = st.executeSelectQuery(query);
-            assertTrue(rs.hasNext());
-            final OWLBindingSet bindingSet = rs.next();
-            OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
-            return ind1.parseInteger();
         }
     }
 }

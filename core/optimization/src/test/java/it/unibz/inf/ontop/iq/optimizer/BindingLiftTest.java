@@ -29,9 +29,9 @@ public class BindingLiftTest {
     private final AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
 
     // TEMPORARY HACK!
-    private final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/ds1/", 0);
-    private final ImmutableList<Template.Component> URI_TEMPLATE_STR_2 =  Template.of("http://example.org/ds2/", 0);
-    private final ImmutableList<Template.Component> URI_TEMPLATE_STR_2_2 = Template.of("http://example.org/ds2/", 0, "/", 1);
+    private final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.builder().string("http://example.org/ds1/").placeholder().build();
+    private final ImmutableList<Template.Component> URI_TEMPLATE_STR_2 = Template.builder().string("http://example.org/ds2/").placeholder().build();
+    private final ImmutableList<Template.Component> URI_TEMPLATE_STR_2_2 = Template.builder().string("http://example.org/ds2/").placeholder().string("/").placeholder().build();
 
     private final ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
     private final ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, E));

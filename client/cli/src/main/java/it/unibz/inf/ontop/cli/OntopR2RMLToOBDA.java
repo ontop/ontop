@@ -36,6 +36,7 @@ public class OntopR2RMLToOBDA implements OntopCommand {
                 .jdbcUrl("jdbc:h2:tcp://localhost/DBName")
                 .jdbcUser("username")
                 .jdbcPassword("password")
+                .jdbcDriver("org.h2.Driver")
                 .build();
 
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();

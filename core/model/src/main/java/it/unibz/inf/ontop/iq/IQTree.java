@@ -155,6 +155,14 @@ public interface IQTree {
      */
     FunctionalDependencies inferFunctionalDependencies();
 
+
+    /**
+     * Strict dependents are dependents of some functional dependencies that never appear as
+     * determinants in any functional dependency.
+     * Lightweight alternative to functional dependencies (cheaper to compute).
+     */
+    ImmutableSet<Variable> inferStrictDependents();
+
     /**
      * Variables that the tree proposes for removal if the ancestor trees do not need them.
      * Some variables can only be removed if some others are removed too.
