@@ -18,8 +18,10 @@ public interface OntopRDFMaterializer {
             throws OBDASpecificationException;
 
     /**
-     * Materializes a sub-set of the saturated RDF graph corresponding the selected vocabulary
+     * Materializes a sub-set of the saturated RDF graph corresponding the selected vocabulary.
+     * DEPRECATED. Only supported by the legacy materializer.
      */
+    @Deprecated
     MaterializedGraphResultSet materialize(@Nonnull ImmutableSet<IRI> selectedVocabulary)
             throws OBDASpecificationException;
 

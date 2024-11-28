@@ -111,7 +111,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
 
     @Override
     public MaterializedGraphResultSet materialize(@Nonnull ImmutableSet<IRI> selectedVocabulary) {
-        throw new UnsupportedOperationException("To materialize different classes/properties in separate files, use the default materializer instead.");
+        throw new UnsupportedOperationException("To materialize different classes/properties in separate files, use the legacy materializer instead.");
     }
 
     @Override
