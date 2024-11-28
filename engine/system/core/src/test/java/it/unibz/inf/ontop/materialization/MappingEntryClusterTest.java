@@ -99,8 +99,7 @@ public class MappingEntryClusterTest {
         IQ iq1 = IQ_FACTORY.createIQ(
                     ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                     IQ_FACTORY.createUnaryIQTree(constructionNode1, extensionalNode1));
-        MappingEntryCluster assertion1 = new SimpleMappingEntryCluster(T1,
-                (ImmutableMap<Integer, Variable>) extensionalNode1.getArgumentMap(),
+        MappingEntryCluster assertion1 = new SimpleMappingEntryCluster(
                 iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),
@@ -114,8 +113,7 @@ public class MappingEntryClusterTest {
         IQ iq2 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S2, P2, O2),
                 IQ_FACTORY.createUnaryIQTree(constructionNode2, extensionalNode2));
-        MappingEntryCluster assertion2 = new SimpleMappingEntryCluster(T1,
-                (ImmutableMap<Integer, Variable>) extensionalNode2.getArgumentMap(),
+        MappingEntryCluster assertion2 = new SimpleMappingEntryCluster(
                 iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 iq2.getVariableGenerator(),
@@ -136,8 +134,7 @@ public class MappingEntryClusterTest {
         IQ iq1 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constructionNode1, extensionalNode1));
-        MappingEntryCluster assertion1 = new SimpleMappingEntryCluster(T1,
-                (ImmutableMap<Integer, Variable>) extensionalNode1.getArgumentMap(),
+        MappingEntryCluster assertion1 = new SimpleMappingEntryCluster(
                 iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),
@@ -151,8 +148,7 @@ public class MappingEntryClusterTest {
         IQ iq2 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constructionNode2, extensionalNode2));
-        MappingEntryCluster assertion2 = new SimpleMappingEntryCluster(T1,
-                (ImmutableMap<Integer, Variable>) extensionalNode2.getArgumentMap(),
+        MappingEntryCluster assertion2 = new SimpleMappingEntryCluster(
                 iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 iq2.getVariableGenerator(),
@@ -717,8 +713,7 @@ public class MappingEntryClusterTest {
                 ATOM_FACTORY.getDistinctQuadAtom(S1, P1, O1, G1),
                 IQ_FACTORY.createUnaryIQTree(constr1, ext1));
 
-        SimpleMappingEntryCluster assertion1 = new SimpleMappingEntryCluster(T1,
-                (ImmutableMap<Integer, Variable>) ext1.getArgumentMap(),
+        SimpleMappingEntryCluster assertion1 = new SimpleMappingEntryCluster(
                 iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),
@@ -760,8 +755,7 @@ public class MappingEntryClusterTest {
                 ATOM_FACTORY.getDistinctQuadAtom(S1, P1, O1, G1),
                 IQ_FACTORY.createUnaryIQTree(constr1, ext1));
 
-        SimpleMappingEntryCluster assertion1 = new SimpleMappingEntryCluster(T1,
-                (ImmutableMap<Integer, Variable>) ext1.getArgumentMap(),
+        SimpleMappingEntryCluster assertion1 = new SimpleMappingEntryCluster(
                 iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),

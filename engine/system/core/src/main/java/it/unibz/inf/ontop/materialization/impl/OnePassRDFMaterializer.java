@@ -224,8 +224,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
 
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = extensionalNode.getArgumentMap();
         if (argumentMap.values().stream().allMatch(v -> v instanceof Variable)) {
-            return new SimpleMappingEntryCluster(relation,
-                    (ImmutableMap<Integer, Variable>) argumentMap,
+            return new SimpleMappingEntryCluster(
                     tree,
                     rdfTemplates,
                     mappingAssertionIQ.getVariableGenerator(),

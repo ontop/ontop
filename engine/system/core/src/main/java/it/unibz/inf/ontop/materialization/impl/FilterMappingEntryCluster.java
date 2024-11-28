@@ -103,8 +103,6 @@ public class FilterMappingEntryCluster implements MappingEntryCluster {
         if (other instanceof SimpleMappingEntryCluster || other instanceof DictionaryPatternMappingEntryCluster) {
             return notSimplifiedFilterCondition.isEmpty()
                     ? other.merge(new SimpleMappingEntryCluster(
-                        relationDefinitionNode.getRelationDefinition(),
-                        argumentMap,
                         tree,
                         rdfFactTemplates,
                         variableGenerator,
@@ -120,16 +118,12 @@ public class FilterMappingEntryCluster implements MappingEntryCluster {
         ImmutableMap<Integer, Variable> otherArgumentMap = (ImmutableMap<Integer, Variable>) otherFilterInfoRenamed.relationDefinitionNode.getArgumentMap();
         if (notSimplifiedFilterCondition.isEmpty() && otherFilterInfoRenamed.getNotSimplifiedFilterCondition().isEmpty()) {
             SimpleMappingEntryCluster simpleMappingEntryCluster = new SimpleMappingEntryCluster(
-                    relationDefinitionNode.getRelationDefinition(),
-                    argumentMap,
                     tree,
                     rdfFactTemplates,
                     variableGenerator,
                     iqFactory,
                     substitutionFactory);
             SimpleMappingEntryCluster otherSimpleMappingEntryCluster = new SimpleMappingEntryCluster(
-                    otherFilterInfoRenamed.relationDefinitionNode.getRelationDefinition(),
-                    otherArgumentMap,
                     otherFilterInfoRenamed.tree,
                     otherFilterInfoRenamed.rdfFactTemplates,
                     otherFilterInfoRenamed.variableGenerator,
