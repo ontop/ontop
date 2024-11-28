@@ -3,9 +3,10 @@ package it.unibz.inf.ontop.cli;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
-import com.github.rvesse.airline.annotations.help.BashCompletion;
+import com.github.rvesse.airline.annotations.help.bash.BashCompletion;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
+import it.unibz.inf.ontop.cli.utils.Env;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper;
@@ -27,12 +28,14 @@ public class OntopBootstrap extends AbstractOntopCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-t", "--ontology"}, title = "ontology file",
             description = "Output OWL ontology file")
+    @Env("ONTOP_ONTOLOGY_FILE")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     @Required
     String owlFile;
 
     @Option(type = OptionType.COMMAND, name = {"-m", "--mapping"}, title = "mapping file",
             description = "Output mapping file in the Ontop native format (.obda)")
+    @Env("ONTOP_MAPPING_FILE")
     @Required
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String mappingFile;

@@ -93,4 +93,9 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
     public IQTree removeDistincts() {
         return this;
     }
+
+    @Override
+    public ImmutableSet<Variable> inferStrictDependents() {
+        return IQTreeTools.computeStrictDependentsFromFunctionalDependencies(this);
+    }
 }

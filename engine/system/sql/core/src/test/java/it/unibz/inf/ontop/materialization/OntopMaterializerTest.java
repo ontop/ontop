@@ -237,8 +237,8 @@ public class OntopMaterializerTest {
 		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
 		ImmutableFunctionalTerm personTemplate = termFactory.getIRIFunctionalTerm(
-				Template.builder().addSeparator("http://schools.com/person/")
-						.addColumn().addSeparator("-").addColumn().build(),
+				Template.builder().string("http://schools.com/person/")
+						.placeholder().string("-").placeholder().build(),
 				ImmutableList.of(
 					termFactory.getVariable("fn"),
 					termFactory.getVariable("ln")));
@@ -266,8 +266,8 @@ public class OntopMaterializerTest {
 		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
 		ImmutableFunctionalTerm personTemplate = termFactory.getIRIFunctionalTerm(
-				Template.builder().addSeparator("http://schools.com/person/")
-						.addColumn().addSeparator("-").addColumn().build(),
+				Template.builder().string("http://schools.com/person/")
+						.placeholder().string("-").placeholder().build(),
 				ImmutableList.of(
 					termFactory.getVariable("fn"),
 					termFactory.getVariable("ln")));

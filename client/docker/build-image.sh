@@ -49,7 +49,7 @@ if [ "${REVISION:+x}" ]; then
 fi
 
 # Handle -h or --help command line options
-if [[ "$@" = *--help ]] || [[ "$@" = *-h ]]; then cat <<EOF
+if [[ "$*" = *--help ]] || [[ "$*" = *-h ]]; then cat <<EOF
 Usage: $0 [options]
 
 Builds and/or pushes the Ontop Docker image, using Docker buildx.
@@ -92,18 +92,19 @@ exit 0
 fi
 
 # Parse script options, updating corresponding build variables
-while getopts cCnt:pxb:dq option
+while getopts cCnt:pxb:l:dq option
 do
+    # shellcheck disable=SC2220
     case "${option}" in
         c) CLEANARG="clean";;
         C) TARGET="ontop-image-from-sources";;
         n) NOCACHEARG="--no-cache";;
         t) [[ "${OPTARG}" =~ ^[^:]+[:][^:]+$ ]] || OPTARG=${OPTARG}:${TAG}
-           TAGARGS="${TAGARGS}"" -t ${OPTARG}";;
+           TAGARGS="${TAGARGS} -t ${OPTARG}";;
         p) PUSH=1;;
         x) CROSS_BUILD=1; PUSH=1;;
-        b) BUILDARGS=${BUILDARGS}" --build-arg "${OPTARG};;
-        l) LABELARGS=${LABELARGS}" --label "${OPTARG};;
+        b) BUILDARGS="${BUILDARGS} --build-arg ${OPTARG}";;
+        l) LABELARGS="${LABELARGS} --label ${OPTARG}";;
         d) JDEPS=1;;
         q) QUIETARG="-q";;
     esac
@@ -113,11 +114,11 @@ done
 if [ -z "${TAGARGS}" ]; then
     TAGARGS="-t ${NAME}:${TAG} -t ${NAME}:latest"
 fi
-NAMETAGS=`echo "${TAGARGS}" | sed -E 's/ -t / /g' | sed -E 's/^ //'`
+NAMETAGS=$(echo "${TAGARGS}" | sed -E 's/ -t / /g' | sed -E 's/^ //')
 
 # Helper function to log timestamped message (output suppressed if option -q is supplied)
 function log {
-    [ -z "$QUIETARG" ] && echo -e "[$(date "+%Y-%m-%d %H:%M:%S")] $1" || true
+    if [ -z "${QUIETARG}" ]; then echo -e "[$(date "+%Y-%m-%d %H:%M:%S")] $1"; fi
 }
 
 # Compile outside Docker (if -C not used or -d used), integrating with local Maven build workflow
@@ -131,7 +132,7 @@ if [ "${TARGET}" = "ontop-image-from-binaries" ] || [ "${JDEPS}" ]; then
     log "Assembling content of image ${NAMETAGS}"
     rm -rf ${BINDIR}
     mv build/distribution/target/ontop-cli-*/ ${BINDIR}
-    rm -rf ${BINDIR}/{ontop.bat,ontop-completion.sh,jdbc,logback.xml,log/logback-debug.xml}
+    rm -rf ${BINDIR}/{ontop.bat,ontop-completion.sh,jdbc}
     cp client/docker/{entrypoint.sh,healthcheck.sh} ${BINDIR}
 fi
 
@@ -153,10 +154,12 @@ fi
 if [ "${CROSS_BUILD}" != "false" ]; then
     # When cross-building, the generated multi-platform image cannot be stored locally but need to be pushed to a Docker repository
     log "Building & pushing multi-platform image ${NAMETAGS}"
+    # shellcheck disable=SC2086
     docker buildx build -f client/docker/Dockerfile --target ${TARGET} ${TAGARGS} ${NOCACHEARG} ${QUIETARG} ${BUILDARGS} ${LABELARGS} --push --platform "${PLATFORMS}" .
 else
     # When not cross-building, pushing the image is optional and is triggered by supplying option '-p'
     log "Building image ${NAMETAGS}"
+    # shellcheck disable=SC2086
     docker buildx build -f client/docker/Dockerfile --target ${TARGET} ${TAGARGS} ${NOCACHEARG} ${QUIETARG} ${BUILDARGS} ${LABELARGS} --load .
     if [ "${PUSH}" != "false" ]; then
         for NAMETAG in ${NAMETAGS}; do # need to iterate as --all-tags risks pushing also other local images with same name

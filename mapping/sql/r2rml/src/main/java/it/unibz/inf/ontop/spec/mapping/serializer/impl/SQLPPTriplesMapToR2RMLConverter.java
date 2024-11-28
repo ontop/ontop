@@ -40,7 +40,7 @@ public class SQLPPTriplesMapToR2RMLConverter {
 	private final RDF rdfFactory;
 	private final MappingFactory mappingFactory;
 
-	private static final String baseIRIString = "urn:";
+	private static final String baseIRIString = "urn:r2rml:";
 
 	private final Function<RDFTermType, TermMapFactory<GraphMap>> graphTermMapFactorySupplier;
 	private final Function<RDFTermType, TermMapFactory<SubjectMap>> subjectTermMapFactorySupplier;

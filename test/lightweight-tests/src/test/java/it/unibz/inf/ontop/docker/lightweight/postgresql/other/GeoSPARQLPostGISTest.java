@@ -2,8 +2,10 @@ package it.unibz.inf.ontop.docker.lightweight.postgresql.other;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.lightweight.AbstractDockerRDF4JTest;
+import it.unibz.inf.ontop.docker.lightweight.PostgreSQLLightweightTest;
 import org.junit.jupiter.api.*;
 
+@PostgreSQLLightweightTest
 public class GeoSPARQLPostGISTest extends AbstractDockerRDF4JTest {
 
     protected static final String OWL_FILE = "/geospatial/geospatial.owl";
@@ -23,7 +25,6 @@ public class GeoSPARQLPostGISTest extends AbstractDockerRDF4JTest {
     /**
      * Check if geof:sfIntersects works correctly with mixed GEOMETRY and GEOGRAPHY data types
      */
-    @Disabled
     @Test
     public void testAskIntersectsGeomGeog() {
         String query = "PREFIX : <http://ex.org/> \n" +

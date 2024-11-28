@@ -88,6 +88,10 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
             description = "All the SQL results of one big query will be stored in memory. Not recommended. Default: false.")
     private boolean noStream = false;
 
+    @Option(type = OptionType.COMMAND, name = {"--legacy"}, title = "use the legacy materializer",
+            description = "Uses the legacy materializer (main materializer until 5.4.0)")
+    private boolean useLegacyMaterializer = false;
+
     @Option(type = OptionType.COMMAND, name = {"--allow-duplicates"}, title = "allow duplicates in final materialized RDF graph",
             description = " Duplicates will be included in the output file by removing DISTINCTs in the SQL queries. Default: false.")
     private boolean allowDuplicates = false;
@@ -113,7 +117,8 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
 
             return RDF4JMaterializer.defaultMaterializer(
                     configurationBuilder.build(),
-                    MaterializationParams.defaultBuilder().allowDuplicates(allowDuplicates)
+                    MaterializationParams.defaultBuilder()
+                            .allowDuplicates(allowDuplicates)
                             .build()
             );
         } catch (OBDASpecificationException e) {
@@ -313,6 +318,9 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
         } else {
             configBuilder.nativeOntopMappingFile(mappingFile);
         }
+
+        if (constraintFile != null)
+            configBuilder.basicImplicitConstraintFile(constraintFile);
 
         if (dbMetadataFile != null)
             configBuilder.dbMetadataFile(dbMetadataFile);

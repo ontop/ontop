@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
+import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 
@@ -21,13 +22,15 @@ public class OptimizationSingletonsImpl implements OptimizationSingletons {
     private final OntopOptimizationSettings settings;
     private final GeneralStructuralAndSemanticIQOptimizer generalStructuralAndSemanticIQOptimizer;
     private final JoinLikeOptimizer joinLikeOptimizer;
+    private final QueryPlanner queryPlanner;
 
     @Inject
     protected OptimizationSingletonsImpl(OptimizerFactory optimizerFactory, CoreSingletons coreSingletons,
                                          UnionBasedQueryMerger unionBasedQueryMerger,
                                          RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor,
                                          GeneralStructuralAndSemanticIQOptimizer generalStructuralAndSemanticIQOptimizer,
-                                         JoinLikeOptimizer joinLikeOptimizer, OntopOptimizationSettings settings) {
+                                         JoinLikeOptimizer joinLikeOptimizer, QueryPlanner queryPlanner,
+                                         OntopOptimizationSettings settings) {
         this.optimizerFactory = optimizerFactory;
         this.coreSingletons = coreSingletons;
         this.unionBasedQueryMerger = unionBasedQueryMerger;
@@ -35,6 +38,7 @@ public class OptimizationSingletonsImpl implements OptimizationSingletons {
         this.settings = settings;
         this.generalStructuralAndSemanticIQOptimizer = generalStructuralAndSemanticIQOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
+        this.queryPlanner = queryPlanner;
     }
 
     @Override
@@ -70,5 +74,10 @@ public class OptimizationSingletonsImpl implements OptimizationSingletons {
     @Override
     public JoinLikeOptimizer getJoinLikeOptimizer() {
         return joinLikeOptimizer;
+    }
+
+    @Override
+    public QueryPlanner getQueryPlanner() {
+        return queryPlanner;
     }
 }

@@ -202,7 +202,7 @@ jobs:
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
-          docker-compose -f "docker-compose.lightweight.yml" up -d pgsql
+          docker compose -f "docker-compose.lightweight.yml" up -d pgsql
       - name: Run CI for PostgreSQL docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="pgsqllighttests" -DskipTests=false --fail-at-end
 
@@ -227,7 +227,7 @@ jobs:
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
-          docker-compose -f "docker-compose.lightweight.yml" up -d pgsql dremio
+          docker compose -f "docker-compose.lightweight.yml" up -d pgsql dremio
       - name: Sleep for 20 seconds
         run: sleep 20s
         shell: bash
@@ -256,7 +256,7 @@ jobs:
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
-          docker-compose -f "docker-compose.lightweight.yml" up -d mssql
+          docker compose -f "docker-compose.lightweight.yml" up -d mssql
       # Runs all tests specific to a db engine
       - name: Run CI for SQLServer docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="mssqllighttests" -DskipTests=false --fail-at-end
@@ -282,7 +282,7 @@ jobs:
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
-          docker-compose -f "docker-compose.lightweight.yml" up -d mysql-v8
+          docker compose -f "docker-compose.lightweight.yml" up -d mysql-v8
       # Runs all tests specific to a db engine
       - name: Run CI for MySQL docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="mysqllighttests" -DskipTests=false --fail-at-end
@@ -308,7 +308,7 @@ jobs:
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
-          docker-compose -f "docker-compose.lightweight.yml" up -d mysql-v5
+          docker compose -f "docker-compose.lightweight.yml" up -d mysql-v5
       # Runs all tests specific to a db engine
       - name: Set Environment Variable for MySQL 5 # Needed to skip tests
         run: echo "MYSQL_VERSION=5" >> $GITHUB_ENV
@@ -338,7 +338,7 @@ jobs:
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
-          docker-compose -f "docker-compose.lightweight.yml" up -d mariadb
+          docker compose -f "docker-compose.lightweight.yml" up -d mariadb
       # Runs all tests specific to a db engine
       - name: Run CI for MariaDB docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="mariadblighttests" -DskipTests=false --fail-at-end
@@ -364,7 +364,7 @@ jobs:
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
-          docker-compose -f "docker-compose.lightweight.yml" up -d oracle
+          docker compose -f "docker-compose.lightweight.yml" up -d oracle
       - name: Sleep for 60 seconds
         run: sleep 60s
         shell: bash
@@ -393,7 +393,7 @@ jobs:
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
-          docker-compose -f "docker-compose.lightweight.yml" up -d db2
+          docker compose -f "docker-compose.lightweight.yml" up -d db2
       - name: Sleep for 240 seconds
         run: sleep 240s
         shell: bash
@@ -423,7 +423,7 @@ jobs:
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
-          docker-compose -f "docker-compose.lightweight.yml" up -d spark
+          docker compose -f "docker-compose.lightweight.yml" up -d spark
       - name: Sleep for 150 seconds
         run: sleep 150s
         shell: bash
@@ -452,7 +452,7 @@ jobs:
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
-          docker-compose -f "docker-compose.lightweight.yml" up -d pgsql trino
+          docker compose -f "docker-compose.lightweight.yml" up -d pgsql trino
       - name: Sleep for 20 seconds
         run: sleep 20s
         shell: bash
@@ -481,7 +481,7 @@ jobs:
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
-          docker-compose -f "docker-compose.lightweight.yml" up -d pgsql presto
+          docker compose -f "docker-compose.lightweight.yml" up -d pgsql presto
       - name: Sleep for 20 seconds
         run: sleep 20s
         shell: bash

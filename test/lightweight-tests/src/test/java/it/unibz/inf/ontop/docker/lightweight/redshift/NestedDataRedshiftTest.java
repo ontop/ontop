@@ -29,9 +29,9 @@ public class NestedDataRedshiftTest extends AbstractNestedDataTest {
 
     @Override
     protected ImmutableMultiset getFlattenTimestampExpectedValues() {
-        return ImmutableMultiset.of( "\"2023-01-01T18:00:00+00\"^^xsd:dateTime", "\"2023-01-15T18:00:00+00\"^^xsd:dateTime", "\"2023-01-29T12:00:00+00\"^^xsd:dateTime",
-                "\"2023-02-12T18:00:00+00\"^^xsd:dateTime", "\"2023-02-26T18:00:00+00\"^^xsd:dateTime",
-                "\"2023-03-12T18:00:00+00\"^^xsd:dateTime", "\"2023-03-26T18:00:00+00\"^^xsd:dateTime");
+        return ImmutableMultiset.of( "\"2023-01-01T18:00:00+00:00\"^^xsd:dateTime", "\"2023-01-15T18:00:00+00:00\"^^xsd:dateTime", "\"2023-01-29T12:00:00+00:00\"^^xsd:dateTime",
+                "\"2023-02-12T18:00:00+00:00\"^^xsd:dateTime", "\"2023-02-26T18:00:00+00:00\"^^xsd:dateTime",
+                "\"2023-03-12T18:00:00+00:00\"^^xsd:dateTime", "\"2023-03-26T18:00:00+00:00\"^^xsd:dateTime");
     }
 
     @Override

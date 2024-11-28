@@ -80,9 +80,14 @@ public class MappingAssertionTest {
     private final IRI RESTAURANT_PROP = RDF_FACTORY.createIRI("http://example.org/restaurant");
     private final IRI WORKS_PROP = RDF_FACTORY.createIRI("http://example.org/works_at");
 
-    private static final ImmutableList<Template.Component> PERSON_URI_TEMPLATE = Template.of("http://example.org/person/", 0);
-    private final ImmutableList<Template.Component> SHOP_URI_TEMPLATE = Template.of("http://example.org/shop/", 0);
-
+    private static final ImmutableList<Template.Component> PERSON_URI_TEMPLATE = Template.builder()
+            .string("http://example.org/person/")
+            .placeholder()
+            .build();
+    private final ImmutableList<Template.Component> SHOP_URI_TEMPLATE = Template.builder()
+            .string("http://example.org/shop/")
+            .placeholder()
+            .build();
 
     @Test
     public void simpleAssertionMergeTest() {

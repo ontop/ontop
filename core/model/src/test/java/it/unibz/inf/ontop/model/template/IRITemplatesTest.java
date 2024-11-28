@@ -50,7 +50,7 @@ public class IRITemplatesTest {
     @Test
     public void testGetUriTemplateString1(){
         ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm(
-                Template.builder().addSeparator("http://example.org/").addColumn().addSeparator("/").addColumn().build(), //
+                Template.builder().string("http://example.org/").placeholder().string("/").placeholder().build(), //
                 ImmutableList.of(TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y")));
         assertEquals("http://example.org/{X}/{Y}", iriTemplateFactory.serializeTemplateTerm(f1));
     }
@@ -58,7 +58,7 @@ public class IRITemplatesTest {
     @Test
     public void testGetUriTemplateString2(){
         ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm(
-                Template.builder().addColumn().build(),
+                Template.builder().placeholder().build(),
                 ImmutableList.of(TERM_FACTORY.getVariable("X")));
         assertEquals("{X}", iriTemplateFactory.serializeTemplateTerm(f1));
     }
@@ -66,7 +66,7 @@ public class IRITemplatesTest {
     @Test
     public void testGetUriTemplateString3(){
         ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm(
-                Template.builder().addColumn().addSeparator("/").build(), //
+                Template.builder().placeholder().string("/").build(), //
                 ImmutableList.of(TERM_FACTORY.getVariable("X")));
         assertEquals("{X}/", iriTemplateFactory.serializeTemplateTerm(f1));
     }
@@ -74,8 +74,8 @@ public class IRITemplatesTest {
     @Test
     public void testGetUriTemplateString4(){
         ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm(
-                Template.builder().addSeparator("http://example.org/")
-                .addColumn().addSeparator("/").addColumn().addSeparator("/").build(), //
+                Template.builder().string("http://example.org/")
+                .placeholder().string("/").placeholder().string("/").build(), //
                 ImmutableList.of(TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y")));
         assertEquals("http://example.org/{X}/{Y}/", iriTemplateFactory.serializeTemplateTerm(f1));
     }
@@ -83,8 +83,8 @@ public class IRITemplatesTest {
     @Test
     public void testGetUriTemplateString5(){
         ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm(
-                Template.builder().addSeparator("http://example.org/")
-                .addColumn().addSeparator("/").addColumn().addSeparator("/").addColumn().build(), //
+                Template.builder().string("http://example.org/")
+                .placeholder().string("/").placeholder().string("/").placeholder().build(), //
                 ImmutableList.of(TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y"), TERM_FACTORY.getVariable("X")));
         assertEquals("http://example.org/{X}/{Y}/{X}", iriTemplateFactory.serializeTemplateTerm(f1));
     }

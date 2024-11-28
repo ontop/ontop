@@ -70,13 +70,13 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
     private boolean atMostOnePlaceholder(ImmutableList<Template.Component> components) {
         return components.stream()
-                .filter(Template.Component::isColumnNameReference)
+                .filter(Template.Component::isColumn)
                 .count() <= 1;
     }
 
     private static String getTemplateString(ImmutableList<Template.Component> components) {
         return components.stream()
-                .map(c -> c.isColumnNameReference() ? "{}" : c.getComponent())
+                .map(c -> c.isColumn() ? "{}" : c.getComponent())
                 .collect(Collectors.joining());
     }
 
@@ -85,7 +85,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         // TODO: require DB string instead
         TermType stringType = typeFactory.getXsdStringDatatype();
         return components.stream()
-                .filter(Template.Component::isColumnNameReference)
+                .filter(Template.Component::isColumn)
                 .map(c -> stringType)
                 .collect(ImmutableCollectors.toList());
     }
@@ -126,7 +126,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     protected String buildString(ImmutableList<DBConstant> newTerms, TermFactory termFactory,
                                  VariableNullability variableNullability) {
         return components.stream()
-                .map(c -> c.isColumnNameReference()
+                .map(c -> c.isColumn()
                         ? encodeParameter(newTerms.get(c.getIndex()), termFactory, variableNullability)
                         : c.getComponent())
                 .collect(Collectors.joining());
@@ -170,7 +170,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
 
         ImmutableList<ImmutableTerm> termsToConcatenate = components.stream()
-                .map(c -> c.isColumnNameReference()
+                .map(c -> c.isColumn()
                         ? termFactory.getR2RMLIRISafeEncodeFunctionalTerm(terms.get(c.getIndex()))
                             // Avoids the encoding when possible
                             .simplify()
@@ -255,8 +255,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         ImmutableList<Template.Component> components = safeSeparatorFragment.getComponents();
         ImmutableList<Template.Component> otherComponents = otherSafeSeparatorFragment.getComponents();
 
-        if (!components.get(0).isColumnNameReference()
-                && !otherComponents.get(0).isColumnNameReference()) {
+        if (!components.get(0).isColumn()
+                && !otherComponents.get(0).isColumn()) {
             String first = components.get(0).getComponent();
             String otherFirst = otherComponents.get(0).getComponent();
             if (first.startsWith(otherFirst)) {
@@ -274,8 +274,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 return Optional.empty();
         }
 
-        if (components.size() > 0 && !components.get(components.size() - 1).isColumnNameReference()
-                && otherComponents.size() > 0 && !otherComponents.get(otherComponents.size() - 1).isColumnNameReference()) {
+        if (components.size() > 0 && !components.get(components.size() - 1).isColumn()
+                && otherComponents.size() > 0 && !otherComponents.get(otherComponents.size() - 1).isColumn()) {
             String last = components.get(components.size() - 1).getComponent();
             String otherLast = otherComponents.get(otherComponents.size() - 1).getComponent();
             if (last.endsWith(otherLast)) {
@@ -312,7 +312,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                                           TermFactory termFactory) {
 
         ImmutableList<ImmutableTerm> args = components.stream()
-                .map(c -> c.isColumnNameReference()
+                .map(c -> c.isColumn()
                         ? subTermIterator.next()
                         : termFactory.getDBStringConstant(enDecoder.decode(c.getComponent())))
                 .collect(ImmutableCollectors.toList());
@@ -328,39 +328,39 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     }
 
     @Override
-    protected boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
-                                                           VariableNullability variableNullability,
-                                                           ImmutableList<? extends ImmutableTerm> otherTerms) {
+    protected Decomposability testDecomposabilityIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
+                                                         VariableNullability variableNullability,
+                                                         ImmutableList<? extends ImmutableTerm> otherTerms) {
         if (isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms())
-            return canBeSafelyDecomposedIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
+            return testDecomposabilityIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
 
         ImmutableSet<Integer> columnPositions = IntStream.range(0, components.size())
-                .filter(i -> components.get(i).isColumnNameReference())
+                .filter(i -> components.get(i).isColumn())
                 .boxed()
                 .collect(ImmutableCollectors.toSet());
 
         // Needs to have a separator between variables
         if (columnPositions.stream().anyMatch(i -> columnPositions.contains(i+1)))
-            return false;
+            return Decomposability.CANNOT_BE_DECOMPOSED;
 
         ImmutableSet<Integer> separatorPositions = IntStream.range(0, components.size())
-                .filter(i -> !components.get(i).isColumnNameReference())
+                .filter(i -> !components.get(i).isColumn())
                 .boxed()
                 .collect(ImmutableCollectors.toSet());
 
         // TODO: remove this restriction and tolerates consecutive separators
         if (IntStream.range(0, components.size() - 1)
                 .anyMatch(i -> separatorPositions.contains(i) && separatorPositions.contains(i+1)))
-            return false;
+            return Decomposability.CANNOT_BE_DECOMPOSED;
 
         if (separatorPositions.stream()
                 // Only those separating columns
                 .filter(i -> columnPositions.contains(i-1) && columnPositions.contains(i+1))
                 .allMatch(i -> isSafelySeparating(i, terms, otherTerms))) {
-            return canBeSafelyDecomposedIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
+            return testDecomposabilityIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
         }
 
-        return false;
+        return Decomposability.CANNOT_BE_DECOMPOSED;
     }
 
     private boolean isSafelySeparating(int separatorIndex, ImmutableList<? extends ImmutableTerm> terms,
@@ -433,7 +433,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     private Pattern getPattern() {
         if (injectivePattern == null) {
             String patternString = components.stream()
-                    .map(c -> c.isColumnNameReference()
+                    .map(c -> c.isColumn()
                             ? "(" + NOT_A_SAFE_SEPARATOR_REGEX + ")"
                             : SafeSeparatorFragment.makeRegexSafe(c.getComponent()))
                     .collect(Collectors.joining());

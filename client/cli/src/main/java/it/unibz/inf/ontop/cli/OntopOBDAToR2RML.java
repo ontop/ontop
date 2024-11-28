@@ -3,13 +3,14 @@ package it.unibz.inf.ontop.cli;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
-import com.github.rvesse.airline.annotations.help.BashCompletion;
+import com.github.rvesse.airline.annotations.help.bash.BashCompletion;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.cli.utils.Env;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.CachingMetadataLookup;
 import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
@@ -56,6 +57,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-t", "--ontology"}, title = "ontology.owl",
             description = "OWL ontology file")
+    @Env("ONTOP_ONTOLOGY_FILE")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     @Nullable // optional
     private String owlFile;
@@ -67,23 +69,25 @@ public class OntopOBDAToR2RML implements OntopCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-p", "--properties"}, title = "properties file",
             description = "Properties file")
+    @Env("ONTOP_PROPERTIES_FILE")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     @Nullable // optional
     private String propertiesFile;
 
     @Option(type = OptionType.COMMAND, name = {"-d", "--db-metadata"}, title = "db-metadata file",
             description = "User-supplied db-metadata file")
+    @Env("ONTOP_DB_METADATA_FILE")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String dbMetadataFile;
 
     @Option(type = OptionType.COMMAND, name = {"-l", "--lenses", "-v", "--ontop-views"}, title = "Lenses file",
             description = "User-supplied lenses file. Lenses were formerly named Ontop views.")
+    @Env("ONTOP_LENSES_FILE")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String ontopLensesFile;
 
     @Option(type = OptionType.COMMAND, name = {"--force"}, title = "Force the conversion",
             description = "Force the conversion in the absence of DB metadata", arity = 0)
-    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     @Nullable // optional
     private Boolean force;
 

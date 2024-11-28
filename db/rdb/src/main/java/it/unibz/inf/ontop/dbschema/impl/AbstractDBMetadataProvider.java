@@ -148,16 +148,14 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
     @Override
     public NamedRelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
+        LogOperation logOperation = new LogOperation();
         DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
         RelationID id = getCanonicalRelationId(id0);
-        try (ResultSet rs = metadata.getColumns(
-                getRelationCatalog(id), // catalog is not escaped
-                escapeRelationIdComponentPattern(getRelationSchema(id)),
-                escapeRelationIdComponentPattern(getRelationName(id)),
-                null)) {
+        try (ResultSet rs = getColumnsResultSet(id)) {
             Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
 
             while (rs.next()) {
+                logOperation.advanceCounter();
                 RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
                 checkSameRelationID(extractedId, id, "getColumns");
 
@@ -175,6 +173,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                         () -> rs.getInt("DECIMAL_DIGITS"));
                 builder.addAttribute(attributeId, termType, sqlTypeName, isNullable);
             }
+            LOGGER.debug("[DB-METADATA] Column info extracted in {} ms/column", logOperation.getAverageDuration());
 
             if (relations.entrySet().size() == 1) {
                 Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
@@ -187,6 +186,14 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
         }
+    }
+
+    protected ResultSet getColumnsResultSet(RelationID id) throws SQLException {
+        return metadata.getColumns(
+                getRelationCatalog(id), // catalog is not escaped
+                escapeRelationIdComponentPattern(getRelationSchema(id)),
+                escapeRelationIdComponentPattern(getRelationName(id)),
+                null);
     }
 
     protected String extractSQLTypeName(String typeName, int jdbcType, int columnSize,
@@ -247,12 +254,14 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     }
 
     private void insertPrimaryKey(NamedRelationDefinition relation) throws MetadataExtractionException, SQLException {
+        LogOperation logOperation = new LogOperation();
         RelationID id = getCanonicalRelationId(relation.getID());
         // Retrieves a description of the given table's primary key columns. They are ordered by COLUMN_NAME (sic!)
         try (ResultSet rs = getPrimaryKeysResultSet(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
             Map<Integer, QuotedID> primaryKeyAttributes = new HashMap<>();
             String currentPkName = null;
             while (rs.next()) {
+                logOperation.advanceCounter();
                 RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
                 checkSameRelationID(extractedId, id, "getPrimaryKeys");
 
@@ -282,6 +291,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                     }
             }
         }
+        LOGGER.debug("[DB-METADATA] Primary key(s) extracted in {} ms/column", logOperation.getAverageDuration());
     }
 
     protected boolean isUniqueConstraintDisabled(RelationID id, String constraintId) { return false; }
@@ -303,18 +313,20 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
      * @throws SQLException
      */
 
-    protected ResultSet getIndexInfo(String catalog, String schema, String name) throws SQLException {
+    protected ResultSet getIndexInfoResultSet(String catalog, String schema, String name) throws SQLException {
         return metadata.getIndexInfo(catalog, schema, name, true, true);
     }
 
     private void insertUniqueAttributes(NamedRelationDefinition relation) throws MetadataExtractionException, SQLException {
+        LogOperation logOperation = new LogOperation();
         RelationID id = getCanonicalRelationId(relation.getID());
         // extracting unique
-        try (ResultSet rs = getIndexInfo(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
+        try (ResultSet rs = getIndexInfoResultSet(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
             UniqueConstraint.Builder builder = null;
             List<String> columnsNotFound = new ArrayList<>();
             String constraintId = null;
             while (rs.next()) {
+                logOperation.advanceCounter();
                 RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
                 checkSameRelationID(extractedId, id, "getIndexInfo");
 
@@ -365,6 +377,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             }
             createUniqueConstraint(id, builder, constraintId, columnsNotFound);
         }
+        LOGGER.debug("[DB-METADATA] Unique constraints extracted in {} ms/column", logOperation.getAverageDuration());
     }
 
     private void createUniqueConstraint(RelationID id, UniqueConstraint.Builder builder, String constraintId, List<String> columnsNotFound) {
@@ -400,16 +413,18 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
      * @throws SQLException
      */
 
-    protected ResultSet getImportedKeys(String catalog, String schema, String name) throws SQLException {
+    protected ResultSet getImportedKeysResultSet(String catalog, String schema, String name) throws SQLException {
         return metadata.getImportedKeys(catalog, schema, name);
     }
 
     private void insertForeignKeys(NamedRelationDefinition relation, MetadataLookup dbMetadata) throws MetadataExtractionException, SQLException {
+        LogOperation logOperation = new LogOperation();
         RelationID id = getCanonicalRelationId(relation.getID());
-        try (ResultSet rs = getImportedKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
+        try (ResultSet rs = getImportedKeysResultSet(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
             ForeignKeyConstraint.Builder builder = null;
             String constraintId = null;
             while (rs.next()) {
+                logOperation.advanceCounter();
                 RelationID extractedId = getRelationID(rs, "FKTABLE_CAT", "FKTABLE_SCHEM","FKTABLE_NAME");
                 checkSameRelationID(extractedId, id, "getImportedKeys");
                 RelationID pkId = getRelationID(rs, "PKTABLE_CAT", "PKTABLE_SCHEM","PKTABLE_NAME");
@@ -418,11 +433,8 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                     int seq = rs.getShort("KEY_SEQ");
                     if (seq == 1) {
                         createForeignKeyConstraint(id, builder, constraintId);
-
                         constraintId = rs.getString("FK_NAME"); // String => foreign key name (may be null)
-
                         NamedRelationDefinition ref = dbMetadata.getRelation(pkId);
-
                         builder = ForeignKeyConstraint.builder(constraintId, relation, ref);
                     }
                     if (builder != null) {
@@ -443,6 +455,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             }
             createForeignKeyConstraint(id, builder, constraintId);
         }
+        LOGGER.debug("[DB-METADATA] Foreign keys extracted in {} ms/column", logOperation.getAverageDuration());
     }
 
     private void createForeignKeyConstraint(RelationID id, ForeignKeyConstraint.Builder builder, String constraintId) {
@@ -487,7 +500,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             return new ParserViewDefinition(builder, query);
 
         } catch (SQLException e) {
-            throw new MetadataExtractionException("Cannot extract metadata for a black-box view. ", e);
+            throw new MetadataExtractionException("Cannot extract metadata for a black-box view. " + e.getMessage(), e);
         }
     }
 
@@ -559,7 +572,28 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     protected abstract String getRelationName(RelationID id);
 
     @FunctionalInterface
-    interface PrecisionSupplier {
+    protected interface PrecisionSupplier {
         int getPrecision() throws SQLException;
     }
+
+    protected static class LogOperation {
+        private final long startTime;
+        private int count;
+
+        LogOperation() {
+            startTime = System.currentTimeMillis();
+        }
+
+        void advanceCounter() {
+            count++;
+        }
+
+        long getAverageDuration() {
+            if (count == 0)
+                return 0;
+            long endTime = System.currentTimeMillis();
+            return (endTime - startTime)/ count;
+        }
+    }
+
 }

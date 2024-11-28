@@ -5,16 +5,24 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.impl.TemplateParser;
 
-import javax.annotation.Nullable;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class SafeSeparatorFragment {
+    // the whole fragment as a string
     private final String fragment;
+    // individual components: either strings or placeholders
+    // (each two strings are separated by a placeholder); the list can be empty
     private final ImmutableList<Template.Component> components;
+    // the trailing safe separator
     private final char separator;
-    private final int firstPlaceholderIndex;
+    // the part before the first placehorder (can be empty)
+    private final String prefix;
+    // the part after the last placeholder
+    // (can be empty or can coincide with prefix, if there are no placeholders)
+    private final String suffix;
+    private final boolean hasPlaceholders;
 
     private static final Pattern TO_BE_ESCAPED = Pattern.compile("[<(\\[{\\\\^=$!|\\]})?*+.>]");
 
@@ -32,15 +40,22 @@ public class SafeSeparatorFragment {
             .collect(Collectors.joining())
             + "]*";
 
-    private SafeSeparatorFragment(String fragment, char separator, int firstPlaceholderIndex) {
+    private SafeSeparatorFragment(String fragment, char separator) {
         this.fragment = fragment;
         this.separator = separator;
-        this.firstPlaceholderIndex = firstPlaceholderIndex;
         this.components = TemplateParser.getComponents(fragment, true);
-    }
-
-    private SafeSeparatorFragment(String fragment, char separator) {
-        this(fragment, separator, fragment.indexOf('{'));
+        if (components.isEmpty()) {
+            prefix = "";
+            suffix = "";
+            hasPlaceholders = false;
+        }
+        else {
+            Template.Component first = components.get(0);
+            prefix = first.isColumn() ? "" : first.getComponent();
+            Template.Component last = components.get(components.size() - 1);
+            suffix = last.isColumn() ? "" : last.getComponent();
+            hasPlaceholders = components.size() > 1 || first.isColumn();
+        }
     }
 
     public String getFragment() {
@@ -55,7 +70,7 @@ public class SafeSeparatorFragment {
 
     @Override
     public String toString() {
-        return fragment + (separator != 0 ? separator : "") + (firstPlaceholderIndex != -1 ? "P" : "");
+        return fragment + (separator != 0 ? separator : "") + "(" + prefix + ":" + suffix + ")";
     }
 
     public static ImmutableList<SafeSeparatorFragment> split(String s) {
@@ -83,44 +98,27 @@ public class SafeSeparatorFragment {
         return -1;
     }
 
-    @Nullable
-    private Pattern pattern;
-
-    private Pattern getPattern() {
-        if (pattern == null) {
-            StringBuilder patternString = new StringBuilder();
-            int start = 0, end;
-            while ((end = fragment.indexOf('{', start)) != -1) {
-                patternString.append(makeRegexSafe(fragment.substring(start, end)))
-                        .append(NOT_A_SAFE_SEPARATOR_REGEX);
-                start = end + 2;
-            }
-            if (start < fragment.length())
-                patternString.append(makeRegexSafe(fragment.substring(start)));
-
-            pattern = Pattern.compile("^" + patternString + "$");
-        }
-        return pattern;
-    }
-
-    private int getPrefixLength() {
-        return firstPlaceholderIndex != -1 ? firstPlaceholderIndex : fragment.length();
-    }
-
     private static boolean matchFragments(SafeSeparatorFragment subTemplate1, SafeSeparatorFragment subTemplate2) {
-        boolean equal = subTemplate1.fragment.equals(subTemplate2.fragment);
-        if (equal)
-            return true;
+        if (subTemplate1.fragment.equals(subTemplate2.fragment))
+            return true; // this also handles the case when there are no placeholders in both fragments
 
-        if (subTemplate1.firstPlaceholderIndex == -1 && subTemplate2.firstPlaceholderIndex == -1)
-            return false;
+        if (subTemplate1.hasPlaceholders && !subTemplate2.hasPlaceholders) {
+            if (!subTemplate2.fragment.startsWith(subTemplate1.prefix))
+                return false;
+            String remainder = subTemplate2.fragment.substring(subTemplate1.prefix.length());
+            return remainder.endsWith(subTemplate1.suffix);
+        }
 
-        int prefix = Math.min(subTemplate1.getPrefixLength(), subTemplate2.getPrefixLength());
-        if (!subTemplate1.fragment.substring(0, prefix).equals(subTemplate2.fragment.substring(0, prefix)))
-            return false;
+        if (subTemplate2.hasPlaceholders && !subTemplate1.hasPlaceholders) {
+            if (!subTemplate1.fragment.startsWith(subTemplate2.prefix))
+                return false;
+            String remainder = subTemplate1.fragment.substring(subTemplate2.prefix.length());
+            return remainder.endsWith(subTemplate2.suffix);
+        }
 
-        return subTemplate1.firstPlaceholderIndex != -1 && subTemplate1.getPattern().matcher(subTemplate2.fragment).find()
-            || subTemplate2.firstPlaceholderIndex != -1 && subTemplate2.getPattern().matcher(subTemplate1.fragment).find();
+        // both contain placeholders
+        return (subTemplate1.prefix.startsWith(subTemplate2.prefix) || subTemplate2.prefix.startsWith(subTemplate1.prefix))
+                && (subTemplate1.suffix.startsWith(subTemplate2.suffix) || subTemplate2.suffix.startsWith(subTemplate1.suffix));
     }
 
     /**

@@ -46,7 +46,7 @@ public class TemplateParser {
 
     public static String getEncodedTemplateString(ImmutableList<Template.Component> components) {
         return components.stream()
-                .map(c -> c.isColumnNameReference() ? "{}" : encode(c.getComponent()))
+                .map(c -> c.isColumn() ? "{}" : encode(c.getComponent()))
                 .collect(Collectors.joining());
     }
 
@@ -64,7 +64,7 @@ public class TemplateParser {
                         if (insideCurlyBracket)
                             throw new IllegalArgumentException("Nested curly brackets are not allowed");
                         if (i > currentStart)
-                            builder.addSeparator(decode(template.substring(currentStart, i)));
+                            builder.string(decode(template.substring(currentStart, i)));
                         currentStart = i + 1;
                         insideCurlyBracket = true;
                         break;
@@ -73,7 +73,7 @@ public class TemplateParser {
                             throw new IllegalArgumentException("No matching opening curly bracket");
                         if (i == currentStart != emptyPlaceholders)
                             throw new IllegalArgumentException("Empty column reference");
-                        builder.addColumn(decode(template.substring(currentStart, i)));
+                        builder.column(decode(template.substring(currentStart, i)));
                         currentStart = i + 1;
                         insideCurlyBracket = false;
                         break;
@@ -88,7 +88,7 @@ public class TemplateParser {
         if (currentStart != template.length()) {
             if (insideCurlyBracket)
                 throw new IllegalArgumentException("No matching closing curly bracket");
-            builder.addSeparator(decode(template.substring(currentStart)));
+            builder.string(decode(template.substring(currentStart)));
         }
         return builder.build();
     }

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -8,14 +9,25 @@ import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.lang.reflect.Method;
 import java.sql.*;
+import java.util.Map;
+import java.util.Properties;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 
 public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     private final RelationID sysDualId;
+    private final boolean mapDateToTimestamp;
+    private final boolean j2ee13Compliant;
+    private final short versionNumber;
+    private final boolean includeSynonyms;
 
     @AssistedInject
     protected OracleDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
@@ -24,6 +36,38 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/functions207.htm#i79833
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/queries009.htm
         this.sysDualId = rawIdFactory.createRelationID("DUAL");
+
+        // see https://docs.oracle.com/en/database/oracle/oracle-database/23/jajdb/oracle/jdbc/OracleConnection.html
+        this.versionNumber = getProperty(connection, "getVersionNumber", null, null, (short)12000);
+        this.mapDateToTimestamp = getProperty(connection, "getMapDateToTimestamp", "oracle.jdbc.mapDateToTimestamp", Boolean::parseBoolean, true);
+        this.j2ee13Compliant = getProperty(connection, "getJ2EE13Compliant", "oracle.jdbc.J2EE13Compliant", Boolean::parseBoolean, true);
+        this.includeSynonyms = getProperty(connection, "getIncludeSynonyms", "includeSynonyms", Boolean::parseBoolean, false);
+
+        LOGGER.debug("[DB-METADATA] Oracle version {} with mapDateToTimestamp {}, j2ee13Compliant {} and includeSynonyms {}",
+                versionNumber, mapDateToTimestamp, j2ee13Compliant, includeSynonyms);
+    }
+
+    private static <T> T getProperty(Connection connection, String name, String property, Function<String, T> parser, T defValue) {
+        try {
+            Method m = connection.getClass().getMethod(name);
+            m.setAccessible(true);
+            return (T)m.invoke(connection);
+        }
+        catch (Exception e) {
+            if (property != null) {
+                try {
+                    Method pm = connection.getClass().getMethod("getProperties");
+                    pm.setAccessible(true);
+                    Properties props = (Properties) pm.invoke(connection);
+                    String v = props.getProperty(property);
+                    if (v != null)
+                        return parser.apply(v);
+                }
+                catch (Exception ignored) {
+                }
+            }
+        }
+        return defValue;
     }
 
     private boolean isDual(RelationID id) {
@@ -46,6 +90,204 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
         super.checkSameRelationID(extractedId, givenId, method);
     }
+
+    private static final int PREFETCH_SIZE = 4048;
+
+    @Override
+    protected ResultSet getColumnsResultSet(RelationID id) throws SQLException {
+        if (isDual(id))
+            return super.getColumnsResultSet(id);
+
+        try {
+            String query = getColumnsSql();
+            PreparedStatement stmt = connection.prepareStatement(query);
+            String schema = getRelationSchema(id);
+            stmt.setString(1, schema);
+            String table = getRelationName(id);
+            stmt.setString(2, table);
+            if (includeSynonyms) {
+                stmt.setString(3, schema);
+                stmt.setString(4, table);
+            }
+            stmt.closeOnCompletion();
+            stmt.setPoolable(false);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.getFetchSize() < PREFETCH_SIZE)
+                rs.setFetchSize(PREFETCH_SIZE);
+
+            return rs;
+        }
+        catch (Throwable e) {
+            LOGGER.debug("[DB-METADATA] Reverting to the default implementation: {}", e.toString());
+            return super.getColumnsResultSet(id);
+        }
+    }
+
+    private String getColumnsSql() {
+
+        ImmutableMap<String, String> otherColumns = ImmutableMap.of(
+                "COLUMN_NAME", sqlColumn("column_name"),
+                // see https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/Data-Types.htm
+                "DATA_TYPE", sqlDecode(sqlSubstring(sqlColumn("data_type"), 1, "TIMESTAMP".length()), ImmutableMap.of(
+                                // TIMESTAMP [(fractional_seconds_precision)], where fractional_seconds_precision is a single digit
+                                // TIMESTAMP [(fractional_seconds_precision)] WITH [LOCAL] TIME ZONE
+                                "TIMESTAMP", sqlDecode(sqlSubstring(sqlColumn("data_type"), "TIMESTAMP".length() + 1, 1),
+                                        ImmutableMap.of("(",
+                                                // with (fractional_seconds_precision)
+                                                sqlDecode(sqlSubstring(sqlColumn("data_type"), "TIMESTAMP(X) WITH ".length() + 1, "LOCAL".length()), ImmutableMap.of(
+                                                        "LOCAL", -102, "TIME", -101), Types.TIMESTAMP)),
+                                        // no (fractional_seconds_precision)
+                                        sqlDecode(sqlSubstring(sqlColumn("data_type"), "TIMESTAMP WITH ".length() + 1, "LOCAL".length()), ImmutableMap.of(
+                                                "LOCAL", -102, "TIME", -101), Types.TIMESTAMP)),
+                                // INTERVAL YEAR [(year_precision)] TO MONTH
+                                // INTERVAL DAY [(day_precision)] TO SECOND [(fractional_seconds_precision)]
+                                "INTERVAL", sqlDecode(sqlSubstring(sqlColumn("data_type"),  "INTERVAL ".length() + 1, "DAY".length()), ImmutableMap.of(
+                                        "DAY", -104, "YEA", -103))),
+                        sqlDecode(sqlColumn("data_type"),
+                                getSupportedSimpleTypes(),
+                                sqlDecode("(SELECT a.typecode " +
+                                                "                      FROM ALL_TYPES a " +
+                                                "                      WHERE a.type_name = t.data_type" +
+                                                "                           AND ((a.owner IS NULL AND t.data_type_owner IS NULL)" +
+                                                "                             OR (a.owner = t.data_type_owner)))", ImmutableMap.of(
+                                                "OBJECT", Types.STRUCT,
+                                                "COLLECTION", Types.ARRAY),
+                                        1111))),
+                "TYPE_NAME", sqlColumn("data_type"),
+                "COLUMN_SIZE", sqlDecodeNull(sqlColumn("data_precision"),
+                        sqlDecode(sqlColumn("data_type"), ImmutableMap.of(
+                                        "NUMBER", sqlDecodeNull(sqlColumn("data_scale"),
+                                                j2ee13Compliant ? "38" : "0", "38")),
+                                sqlDecode(sqlColumn("data_type"), ImmutableMap.of(
+                                                "CHAR", sqlColumn("char_length"),
+                                                "VARCHAR", sqlColumn("char_length"),
+                                                "VARCHAR2", sqlColumn("char_length"),
+                                                "NVARCHAR2", sqlColumn("char_length"),
+                                                "NCHAR", sqlColumn("char_length"),
+                                                "NUMBER", "0"),
+                                        sqlColumn("data_length"))),
+                        sqlColumn("data_precision")),
+                "DECIMAL_DIGITS", sqlDecode(sqlColumn("data_type"), ImmutableMap.of(
+                                "NUMBER", sqlDecodeNull(sqlColumn("data_precision"),
+                                        sqlDecodeNull(sqlColumn("data_scale"),
+                                                j2ee13Compliant ? "0" : "-127",
+                                                sqlColumn("data_scale")),
+                                        sqlColumn("data_scale"))),
+                        sqlColumn("data_scale")),
+                "NULLABLE", sqlDecode(sqlColumn("nullable"), ImmutableMap.of("N", 0), 1),
+                "ORDINAL_POSITION", sqlColumn("column_id"));
+
+        String queryHint = (includeSynonyms && versionNumber >= 10200 && versionNumber < 11100) ? "/*+ CHOOSE */" : "";
+        String allColumnsTable = versionNumber >= 12000 ? "all_tab_cols" : "all_tab_columns";
+        String userGeneratedFilter = versionNumber >= 12000 ? " AND " + sqlColumn("user_generated") + " = 'YES'" : "";
+
+        return sqlSelectFromWhere(queryHint, concat(ImmutableMap.of(
+                                "TABLE_CAT", "NULL",
+                                "TABLE_SCHEM", sqlColumn("owner"),
+                                "TABLE_NAME", sqlColumn("table_name")),
+                        otherColumns),
+                allColumnsTable + " t",
+                sqlColumn("owner") + " = ? AND " + sqlColumn("table_name") + " = ?" +
+                        userGeneratedFilter)
+
+                + (includeSynonyms
+                ? "\nUNION ALL\n"
+
+                + sqlSelectFromWhere(queryHint, concat(ImmutableMap.of(
+                                "TABLE_CAT", "NULL",
+                                "TABLE_SCHEM", "REGEXP_SUBSTR(LTRIM(s.owner, '/'), '[^/]+')",
+                                "TABLE_NAME", "REGEXP_SUBSTR(LTRIM(s.synonym_name, '/'), '[^/]+')"),
+                        otherColumns),
+                allColumnsTable + " t,\n" +
+                        "(SELECT SYS_CONNECT_BY_PATH(owner, '/') owner, " +
+                        "SYS_CONNECT_BY_PATH(synonym_name, '/') synonym_name, " +
+                        "table_owner, table_name\n" +
+                        "FROM all_synonyms\n" +
+                        "WHERE CONNECT_BY_ISLEAF = 1\n" +
+                        "AND db_link is NULL\n" +
+                        "START WITH owner = ? AND synonym_name = ?\n" +
+                        "CONNECT BY PRIOR table_name = synonym_name\n" +
+                        "AND PRIOR table_owner = owner) s",
+                sqlColumn("owner") + " = s.table_owner AND " + sqlColumn("table_name") + " = s.table_name " +
+                        userGeneratedFilter)
+                : "")
+
+                + "\n" + "ORDER BY " + String.join(", ", ImmutableList.of("TABLE_SCHEM", "TABLE_NAME", "ORDINAL_POSITION"));
+    }
+
+    private static ImmutableMap<String, String> concat(ImmutableMap<String, String> m1, ImmutableMap<String, String> m2) {
+        return Stream.concat(m1.entrySet().stream(), m2.entrySet().stream()).collect(ImmutableCollectors.toMap());
+    }
+
+    private static String sqlSubstring(String expression, int start, int length) {
+        return "substr(" + expression + ", " + start + ", " + length + ")";
+    }
+
+    private static String sqlColumn(String column) {
+        return "t." + column;
+    }
+
+    private static String sqlSelectFromWhere(String hint, ImmutableMap<String, String> columns, String from, String where) {
+        return "SELECT " + hint + " " +
+                columns.entrySet().stream()
+                        .map(e -> e.getValue() + " AS " + e.getKey())
+                        .collect(Collectors.joining(",\n")) +
+                "\nFROM " + from +
+                "\nWHERE " + where;
+    }
+
+    private static String sqlDecodeNull(String expression, Object nullValue, Object otherValue) {
+        return "DECODE(" + expression + ", NULL, " + nullValue + ", " + otherValue +  ")";
+    }
+
+
+    private static String sqlDecode(String expression, Map<String, ?> cases, Object defaultValue) {
+        return "DECODE(" + expression + ", " + cases.entrySet().stream()
+                .map(e -> "'" + e.getKey() + "', " + e.getValue())
+                .collect(Collectors.joining(", "))
+                +  ", " + defaultValue +  ")";
+    }
+
+    private static String sqlDecode(String expression, Map<String, ?> cases) {
+        return "DECODE(" + expression + ", " + cases.entrySet().stream()
+                .map(e -> "'" + e.getKey() + "', " + e.getValue())
+                .collect(Collectors.joining(", "))
+                +  ")";
+    }
+
+    private Map<String, Integer> getSupportedSimpleTypes() {
+        return ImmutableMap.ofEntries(
+                Map.entry("BINARY_DOUBLE", 101),
+                Map.entry("BINARY_FLOAT", 100),
+                Map.entry("BFILE", -13),
+                Map.entry("BLOB", Types.BLOB),
+                Map.entry("BOOLEAN", Types.BOOLEAN),
+                Map.entry("CHAR", Types.CHAR),
+                Map.entry("CLOB", Types.CLOB),
+                Map.entry("COLLECTION", Types.ARRAY),
+                Map.entry("DATE", (mapDateToTimestamp ? Types.TIMESTAMP : Types.DATE)),
+                Map.entry("FLOAT", Types.FLOAT),
+                Map.entry("JSON", 2016),
+                Map.entry("LONG", Types.LONGVARCHAR),
+                Map.entry("LONG RAW", Types.LONGVARBINARY),
+                Map.entry("NCHAR", Types.NCHAR),
+                Map.entry("NCLOB", Types.NCLOB),
+                Map.entry("NUMBER", Types.NUMERIC),
+                Map.entry("NVARCHAR", Types.NVARCHAR),
+                Map.entry("NVARCHAR2", Types.NVARCHAR),
+                Map.entry("OBJECT", Types.STRUCT),
+                Map.entry("OPAQUE/XMLTYPE", Types.SQLXML),
+                Map.entry("RAW", Types.VARBINARY),
+                Map.entry("REF", Types.REF),
+                Map.entry("ROWID", Types.ROWID),
+                Map.entry("SQLXML", Types.SQLXML),
+                Map.entry("UROWID" , Types.ROWID),
+                Map.entry("VARCHAR2", Types.VARCHAR),
+                Map.entry("VARRAY", Types.ARRAY),
+                Map.entry("VECTOR", -105),
+                Map.entry("XMLTYPE", Types.SQLXML));
+    }
+
 
     @Override
     protected String makeQueryMinimizeResultSet(String query) {
@@ -109,7 +351,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     private static final ImmutableSet<String> IGNORED_VIEW_PREFIXES = ImmutableSet.of("MVIEW_",
             "LOGMNR_" +
-            "AQ$_");
+                    "AQ$_");
 
     private static final ImmutableSet<String> IGNORED_VIEW_SCHEMAS = ImmutableSet.of("SYS",
             "GSMADMIN_INTERNAL",
@@ -128,7 +370,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             "APPQOSSYS",
             "AUDSYS");
 
-    private static ImmutableSet<String> IGNORED_SYSTEM_VIEWS = ImmutableSet.of("SCHEDULER_PROGRAM_ARGS",
+    private static final ImmutableSet<String> IGNORED_SYSTEM_VIEWS = ImmutableSet.of("SCHEDULER_PROGRAM_ARGS",
             "SCHEDULER_JOB_ARGS",
             "PRODUCT_PRIVS");
 
@@ -146,9 +388,9 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 || (schema.equals("SYSTEM") && IGNORED_SYSTEM_VIEWS.contains(table))
                 || (schema.equals("SYSTEM") && IGNORED_SYSTEM_TABLES.contains(table))
                 || IGNORED_VIEW_PREFIXES.stream()
-                    .anyMatch(table::startsWith)
+                .anyMatch(table::startsWith)
                 || IGNORED_TABLE_PREFIXES.stream()
-                    .anyMatch(table::startsWith);
+                .anyMatch(table::startsWith);
     }
 
     @Override

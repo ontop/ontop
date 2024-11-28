@@ -6,10 +6,12 @@ public class MaterializationParamsImpl implements MaterializationParams {
 
     private final boolean enableIncompleteMaterialization;
     private final boolean allowDuplicates;
+    private final boolean useLegacyMaterializer;
 
-    private MaterializationParamsImpl(boolean enableIncompleteMaterialization, boolean allowDuplicates) {
+    private MaterializationParamsImpl(boolean enableIncompleteMaterialization, boolean allowDuplicates, boolean useLegacyMaterializer) {
         this.enableIncompleteMaterialization = enableIncompleteMaterialization;
         this.allowDuplicates = allowDuplicates;
+        this.useLegacyMaterializer = useLegacyMaterializer;
     }
 
     @Override
@@ -22,14 +24,16 @@ public class MaterializationParamsImpl implements MaterializationParams {
         return allowDuplicates;
     }
 
+    @Override
+    public boolean useLegacyMaterializer() {
+        return useLegacyMaterializer;
+    }
+
     public static class DefaultBuilder implements Builder<DefaultBuilder> {
 
-        private boolean canMaterializationBeIncomplete;
-        private boolean canMaterializationAllowDuplicates;
-
-        public DefaultBuilder() {
-            this.canMaterializationBeIncomplete = false;
-        }
+        private boolean canMaterializationBeIncomplete = false;
+        private boolean canMaterializationAllowDuplicates = false;
+        private boolean useLegacyMaterializer = false;
 
         @Override
         public DefaultBuilder enableIncompleteMaterialization(boolean enable) {
@@ -44,8 +48,14 @@ public class MaterializationParamsImpl implements MaterializationParams {
         }
 
         @Override
+        public DefaultBuilder useLegacyMaterializer(boolean useLegacyMaterializer) {
+            this.useLegacyMaterializer = useLegacyMaterializer;
+            return this;
+        }
+
+        @Override
         public MaterializationParams build() {
-            return new MaterializationParamsImpl(canMaterializationBeIncomplete, canMaterializationAllowDuplicates);
+            return new MaterializationParamsImpl(canMaterializationBeIncomplete, canMaterializationAllowDuplicates, useLegacyMaterializer);
         }
     }
 

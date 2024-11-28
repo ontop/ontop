@@ -56,7 +56,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
     private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
     private final ImmutableList<MappingAssertionInformation> mappingInformation;
 
-    public OnePassRDFMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
+    protected OnePassRDFMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
         Injector injector = configuration.getInjector();
         OntopSystemFactory engineFactory = injector.getInstance(OntopSystemFactory.class);
 

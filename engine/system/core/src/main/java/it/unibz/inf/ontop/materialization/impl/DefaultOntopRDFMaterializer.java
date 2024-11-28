@@ -43,7 +43,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
     private final RDF rdfFactory;
     private final QueryContext.Factory queryContextFactory;
 
-    public DefaultOntopRDFMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
+    protected DefaultOntopRDFMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
         Injector injector = configuration.getInjector();
         OntopSystemFactory engineFactory = injector.getInstance(OntopSystemFactory.class);
 

@@ -1,3 +1,3 @@
 CREATE TABLE "v_accommodationsopen" (
-  "Id" int(11) primary key
+  "Id" integer primary key
 );

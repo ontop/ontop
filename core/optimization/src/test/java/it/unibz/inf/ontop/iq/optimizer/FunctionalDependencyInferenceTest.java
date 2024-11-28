@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.dbschema.UniqueConstraint;
@@ -9,6 +10,7 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.UUID;
@@ -20,9 +22,9 @@ import static junit.framework.TestCase.assertEquals;
 
 public class FunctionalDependencyInferenceTest {
 
-    private final ImmutableList<Template.Component> URI_TEMPLATE_INJECTIVE_2 = Template.of("http://example.org/ds1/", 0, "/", 1);
+    private final ImmutableList<Template.Component> URI_TEMPLATE_INJECTIVE_2 = Template.builder().string("http://example.org/ds1/").placeholder().string("/").placeholder().build();
 
-    private final ImmutableList<Template.Component> URI_TEMPLATE_INJECTIVE_2_1 = Template.of("http://example.org/ds3/", 0, "/", 1);
+    private final ImmutableList<Template.Component> URI_TEMPLATE_INJECTIVE_2_1 = Template.builder().string("http://example.org/ds3/").placeholder().string("/").placeholder().build();
 
     private final ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(PK_TABLE1_AR2, ImmutableList.of(A, B));
     private final ExtensionalDataNode DATA_NODE_1_WITH_ADDED_FD = createExtensionalDataNode(FD_TABLE1_AR2 , ImmutableList.of(A, B));
@@ -316,6 +318,18 @@ public class FunctionalDependencyInferenceTest {
         assertEquals(FunctionalDependencies.of(ImmutableSet.of(A, B, X), ImmutableSet.of(C)), tree2.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree2.getKnownVariables())).inferFunctionalDependencies());
     }
 
+    @Ignore("TODO: support this inference")
+    @Test
+    public void testUnionMixUCAndFD1() {
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(FD_TABLE1_AR6, ImmutableMap.of(0, A, 1, B, 2, C, 4, D, 5, F));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE8_AR5, ImmutableMap.of(0, A, 1, B, 2, C, 3, D, 4, F));
+        var unionTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(dataNode1.getVariables()),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        assertEquals(FunctionalDependencies.of(ImmutableSet.of(A, B), ImmutableSet.of(C)), inferFunctionalDependencies(unionTree));
+    }
+
     @Test
     public void testLeftJoinFromChildren1() {
         IQTree tree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
@@ -429,5 +443,11 @@ public class FunctionalDependencyInferenceTest {
                 ImmutableList.of(children.get(0), children.get(1))
         );
         assertEquals(FunctionalDependencies.of(ImmutableSet.of(A), ImmutableSet.of(B, D, C), ImmutableSet.of(C), ImmutableSet.of(B, D, A)), tree.normalizeForOptimization(CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables())).inferFunctionalDependencies());
+    }
+
+    private FunctionalDependencies inferFunctionalDependencies(IQTree tree) {
+        return tree.normalizeForOptimization(
+                        CORE_UTILS_FACTORY.createVariableGenerator(tree.getKnownVariables()))
+                .inferFunctionalDependencies();
     }
 }

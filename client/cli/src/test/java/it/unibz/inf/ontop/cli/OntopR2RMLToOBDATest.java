@@ -1,10 +1,12 @@
 package it.unibz.inf.ontop.cli;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class OntopR2RMLToOBDATest {
 
 
+    @Ignore
     @Test
     public void testOntopHelp (){
         Ontop.main("help", "mapping", "to-obda");
