@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.materialization.MappingAssertionInformation;
+import it.unibz.inf.ontop.materialization.MappingEntryCluster;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class DictionaryPatternMappingAssertion implements MappingAssertionInformation {
+public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster {
     private final IQTree tree;
     private final RDFFactTemplates rdfFactTemplates;
     private final ExtensionalDataNode relationDefinitionNode;
@@ -38,15 +38,15 @@ public class DictionaryPatternMappingAssertion implements MappingAssertionInform
     private final TermFactory termFactory;
     private final QueryTransformerFactory queryTransformerFactory;
 
-    public DictionaryPatternMappingAssertion(IQTree tree,
-                                             RDFFactTemplates rdfFactTemplates,
-                                             ImmutableMap<Integer, Attribute> constantAttributes,
-                                             ExtensionalDataNode relationDefinitionNode,
-                                             VariableGenerator variableGenerator,
-                                             IntermediateQueryFactory iqFactory,
-                                             SubstitutionFactory substitutionFactory,
-                                             TermFactory termFactory,
-                                             QueryTransformerFactory queryTransformerFactory) {
+    public DictionaryPatternMappingEntryCluster(IQTree tree,
+                                                RDFFactTemplates rdfFactTemplates,
+                                                ImmutableMap<Integer, Attribute> constantAttributes,
+                                                ExtensionalDataNode relationDefinitionNode,
+                                                VariableGenerator variableGenerator,
+                                                IntermediateQueryFactory iqFactory,
+                                                SubstitutionFactory substitutionFactory,
+                                                TermFactory termFactory,
+                                                QueryTransformerFactory queryTransformerFactory) {
         this.rdfFactTemplates = rdfFactTemplates;
         this.constantAttributes = constantAttributes;
         this.variableGenerator = variableGenerator;
@@ -72,10 +72,10 @@ public class DictionaryPatternMappingAssertion implements MappingAssertionInform
     }
 
     @Override
-    public Optional<MappingAssertionInformation> merge(MappingAssertionInformation other) {
-        if (other instanceof ComplexMappingAssertionInfo
-                || other instanceof FilterMappingAssertionInfo
-                || other instanceof JoinMappingAssertionInfo) {
+    public Optional<MappingEntryCluster> merge(MappingEntryCluster other) {
+        if (other instanceof ComplexMappingEntryCluster
+                || other instanceof FilterMappingEntryCluster
+                || other instanceof JoinMappingEntryCluster) {
             return other.merge(this);
         }
 
@@ -91,13 +91,13 @@ public class DictionaryPatternMappingAssertion implements MappingAssertionInform
         }
 
         variableGenerator.registerAdditionalVariables(other.getIQTree().getKnownVariables());
-        if (other instanceof SimpleMappingAssertionInfo) {
-            SimpleMappingAssertionInfo otherSimpleInfo = ((SimpleMappingAssertionInfo) other).renameConflictingVariables(variableGenerator);
+        if (other instanceof SimpleMappingEntryCluster) {
+            SimpleMappingEntryCluster otherSimpleInfo = ((SimpleMappingEntryCluster) other).renameConflictingVariables(variableGenerator);
             ImmutableMap<Integer, Variable> otherArgumentMap = (ImmutableMap<Integer, Variable>) findExtensionalNode(otherSimpleInfo.getIQTree()).getArgumentMap();
             return Optional.of(mergeOnSimpleMappingInfo(otherSimpleInfo, argumentMap, otherArgumentMap));
         }
 
-        DictionaryPatternMappingAssertion otherDictionaryInfo = ((DictionaryPatternMappingAssertion) other).renameConflictingVariables(variableGenerator);
+        DictionaryPatternMappingEntryCluster otherDictionaryInfo = ((DictionaryPatternMappingEntryCluster) other).renameConflictingVariables(variableGenerator);
         ImmutableMap<Integer, Variable> otherArgumentMap = (ImmutableMap<Integer, Variable>) otherDictionaryInfo.relationDefinitionNode.getArgumentMap();
         return Optional.of(mergeOnBothDictionaryMappingInfos(otherDictionaryInfo, argumentMap, otherArgumentMap));
 
@@ -183,9 +183,9 @@ public class DictionaryPatternMappingAssertion implements MappingAssertionInform
         }
     }
 
-    private DictionaryPatternMappingAssertion mergeOnBothDictionaryMappingInfos(DictionaryPatternMappingAssertion otherDictionaryInfo,
-                                                                              ImmutableMap<Integer, Variable> argumentMap,
-                                                                              ImmutableMap<Integer, Variable> otherArgumentMap) {
+    private DictionaryPatternMappingEntryCluster mergeOnBothDictionaryMappingInfos(DictionaryPatternMappingEntryCluster otherDictionaryInfo,
+                                                                                   ImmutableMap<Integer, Variable> argumentMap,
+                                                                                   ImmutableMap<Integer, Variable> otherArgumentMap) {
         ImmutableMap<Integer, Variable> mergedArgumentMap = mergeRelationArguments(argumentMap, otherArgumentMap);
 
         ExtensionalDataNode relationDefinitionNode = iqFactory.createExtensionalDataNode(
@@ -223,7 +223,7 @@ public class DictionaryPatternMappingAssertion implements MappingAssertionInform
                 Map.Entry::getValue,
                 (e1, e2) -> e1));
 
-        return new DictionaryPatternMappingAssertion(
+        return new DictionaryPatternMappingEntryCluster(
                 treeTemplatePair.getKey(),
                 treeTemplatePair.getValue(),
                 mergedConstantAttributes,
@@ -235,9 +235,9 @@ public class DictionaryPatternMappingAssertion implements MappingAssertionInform
                 queryTransformerFactory);
     }
 
-    private DictionaryPatternMappingAssertion mergeOnSimpleMappingInfo(SimpleMappingAssertionInfo otherSimpleInfo,
-                                                                                ImmutableMap<Integer, Variable> argumentMap,
-                                                                                ImmutableMap<Integer, Variable> otherArgumentMap) {
+    private DictionaryPatternMappingEntryCluster mergeOnSimpleMappingInfo(SimpleMappingEntryCluster otherSimpleInfo,
+                                                                          ImmutableMap<Integer, Variable> argumentMap,
+                                                                          ImmutableMap<Integer, Variable> otherArgumentMap) {
         ImmutableMap<Integer, Variable> mergedArgumentMap = mergeRelationArguments(argumentMap, otherArgumentMap);
 
         ExtensionalDataNode relationDefinitionNode = iqFactory.createExtensionalDataNode(
@@ -262,7 +262,7 @@ public class DictionaryPatternMappingAssertion implements MappingAssertionInform
 
         Map.Entry<IQTree, RDFFactTemplates> treeTemplatePair = compressMappingAssertion(mappingTree, mergedRDFTemplates);
 
-        return new DictionaryPatternMappingAssertion(
+        return new DictionaryPatternMappingEntryCluster(
                 treeTemplatePair.getKey(),
                 treeTemplatePair.getValue(),
                 constantAttributes,
@@ -379,11 +379,11 @@ public class DictionaryPatternMappingAssertion implements MappingAssertionInform
         return notIfElseNullTerms.compose(ifElseNullDisjunctionSubstitution);
     }
 
-    public DictionaryPatternMappingAssertion renameConflictingVariables(VariableGenerator generator) {
+    public DictionaryPatternMappingEntryCluster renameConflictingVariables(VariableGenerator generator) {
         InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(generator, tree.getKnownVariables());
         IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
 
-        return new DictionaryPatternMappingAssertion(
+        return new DictionaryPatternMappingEntryCluster(
                 renamedTree,
                 rdfFactTemplates.apply(renamingSubstitution),
                 constantAttributes,

@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
-import it.unibz.inf.ontop.materialization.MappingAssertionInformation;
+import it.unibz.inf.ontop.materialization.MappingEntryCluster;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -20,7 +20,7 @@ import org.eclipse.rdf4j.model.IRI;
 import java.util.Map;
 import java.util.Optional;
 
-public class SimpleMappingAssertionInfo implements MappingAssertionInformation {
+public class SimpleMappingEntryCluster implements MappingEntryCluster {
     private final RelationDefinition relationDefinition;
     private final ImmutableMap<Integer, Variable> argumentMap;
     private final Substitution<ImmutableTerm> topConstructSubstitution;
@@ -30,13 +30,13 @@ public class SimpleMappingAssertionInfo implements MappingAssertionInformation {
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
 
-    public SimpleMappingAssertionInfo(RelationDefinition relationDefinition,
-                                      ImmutableMap<Integer, Variable> argumentMap,
-                                      IQTree tree,
-                                      RDFFactTemplates RDFTemplates,
-                                      VariableGenerator variableGenerator,
-                                      IntermediateQueryFactory iqFactory,
-                                      SubstitutionFactory substitutionFactory) {
+    public SimpleMappingEntryCluster(RelationDefinition relationDefinition,
+                                     ImmutableMap<Integer, Variable> argumentMap,
+                                     IQTree tree,
+                                     RDFFactTemplates RDFTemplates,
+                                     VariableGenerator variableGenerator,
+                                     IntermediateQueryFactory iqFactory,
+                                     SubstitutionFactory substitutionFactory) {
         this.relationDefinition = relationDefinition;
         this.argumentMap = argumentMap;
         this.tree = tree;
@@ -50,8 +50,8 @@ public class SimpleMappingAssertionInfo implements MappingAssertionInformation {
 
     @Override
     public boolean equals(Object other) {
-        if (other instanceof SimpleMappingAssertionInfo) {
-            SimpleMappingAssertionInfo that = (SimpleMappingAssertionInfo) other;
+        if (other instanceof SimpleMappingEntryCluster) {
+            SimpleMappingEntryCluster that = (SimpleMappingEntryCluster) other;
             return this.tree.equals(that.tree);
         }
         return false;
@@ -86,21 +86,21 @@ public class SimpleMappingAssertionInfo implements MappingAssertionInformation {
     }
 
     @Override
-    public Optional<MappingAssertionInformation> merge(MappingAssertionInformation otherInfo) {
-        if (otherInfo instanceof ComplexMappingAssertionInfo
-                || otherInfo instanceof FilterMappingAssertionInfo
-                || otherInfo instanceof DictionaryPatternMappingAssertion
-                || otherInfo instanceof JoinMappingAssertionInfo) {
+    public Optional<MappingEntryCluster> merge(MappingEntryCluster otherInfo) {
+        if (otherInfo instanceof ComplexMappingEntryCluster
+                || otherInfo instanceof FilterMappingEntryCluster
+                || otherInfo instanceof DictionaryPatternMappingEntryCluster
+                || otherInfo instanceof JoinMappingEntryCluster) {
             return otherInfo.merge(this);
         }
 
-        SimpleMappingAssertionInfo otherSimpleAssertion = (SimpleMappingAssertionInfo) otherInfo;
+        SimpleMappingEntryCluster otherSimpleAssertion = (SimpleMappingEntryCluster) otherInfo;
         if (!relationDefinition.getAtomPredicate().getName()
                 .equals(otherSimpleAssertion.getRelationsDefinitions().get(0).getAtomPredicate().getName())) {
             return Optional.empty();
         }
         variableGenerator.registerAdditionalVariables(otherSimpleAssertion.variableGenerator.getKnownVariables());
-        SimpleMappingAssertionInfo otherRenamed = otherSimpleAssertion.renameConflictingVariables(variableGenerator);
+        SimpleMappingEntryCluster otherRenamed = otherSimpleAssertion.renameConflictingVariables(variableGenerator);
 
         ImmutableMap<Integer, Variable> mergedArgumentMap = mergeRelationArguments(otherRenamed.argumentMap);
 
@@ -125,7 +125,7 @@ public class SimpleMappingAssertionInfo implements MappingAssertionInformation {
         var treeTemplatesPair = compressMappingAssertion(mappingTree.normalizeForOptimization(variableGenerator),
                 mergedRDFTemplates);
 
-        return Optional.of(new SimpleMappingAssertionInfo(relationDefinition,
+        return Optional.of(new SimpleMappingEntryCluster(relationDefinition,
                 mergedArgumentMap,
                 treeTemplatesPair.getKey(),
                 treeTemplatesPair.getValue(),
@@ -134,7 +134,7 @@ public class SimpleMappingAssertionInfo implements MappingAssertionInformation {
                 substitutionFactory));
     }
 
-    public SimpleMappingAssertionInfo renameConflictingVariables(VariableGenerator conflictingVariableGenerator) {
+    public SimpleMappingEntryCluster renameConflictingVariables(VariableGenerator conflictingVariableGenerator) {
         InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
                 conflictingVariableGenerator, tree.getKnownVariables());
         IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
@@ -145,7 +145,7 @@ public class SimpleMappingAssertionInfo implements MappingAssertionInformation {
                         Map.Entry::getKey,
                         e -> (Variable) renamingSubstitution.apply(e.getValue())
                 ));
-        return new SimpleMappingAssertionInfo(relationDefinition,
+        return new SimpleMappingEntryCluster(relationDefinition,
                 renamedArgumentMap,
                 renamedTree,
                 renamedRDFTemplates,

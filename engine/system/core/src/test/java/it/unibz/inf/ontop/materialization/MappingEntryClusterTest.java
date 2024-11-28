@@ -25,7 +25,7 @@ import org.junit.Test;
 import java.util.Map;
 import java.util.Optional;
 
-public class MappingAssertionTest {
+public class MappingEntryClusterTest {
     private final static DBTypeFactory dbTypeFactory;
     private final static NamedRelationDefinition T1;
     private final static NamedRelationDefinition T2;
@@ -99,7 +99,7 @@ public class MappingAssertionTest {
         IQ iq1 = IQ_FACTORY.createIQ(
                     ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                     IQ_FACTORY.createUnaryIQTree(constructionNode1, extensionalNode1));
-        MappingAssertionInformation assertion1 = new SimpleMappingAssertionInfo(T1,
+        MappingEntryCluster assertion1 = new SimpleMappingEntryCluster(T1,
                 (ImmutableMap<Integer, Variable>) extensionalNode1.getArgumentMap(),
                 iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
@@ -114,14 +114,14 @@ public class MappingAssertionTest {
         IQ iq2 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S2, P2, O2),
                 IQ_FACTORY.createUnaryIQTree(constructionNode2, extensionalNode2));
-        MappingAssertionInformation assertion2 = new SimpleMappingAssertionInfo(T1,
+        MappingEntryCluster assertion2 = new SimpleMappingEntryCluster(T1,
                 (ImmutableMap<Integer, Variable>) extensionalNode2.getArgumentMap(),
                 iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
-        Optional<MappingAssertionInformation> mergedAssertion = assertion1.merge(assertion2);
+        Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isPresent();
 
     }
@@ -136,7 +136,7 @@ public class MappingAssertionTest {
         IQ iq1 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constructionNode1, extensionalNode1));
-        MappingAssertionInformation assertion1 = new SimpleMappingAssertionInfo(T1,
+        MappingEntryCluster assertion1 = new SimpleMappingEntryCluster(T1,
                 (ImmutableMap<Integer, Variable>) extensionalNode1.getArgumentMap(),
                 iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
@@ -151,14 +151,14 @@ public class MappingAssertionTest {
         IQ iq2 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constructionNode2, extensionalNode2));
-        MappingAssertionInformation assertion2 = new SimpleMappingAssertionInfo(T1,
+        MappingEntryCluster assertion2 = new SimpleMappingEntryCluster(T1,
                 (ImmutableMap<Integer, Variable>) extensionalNode2.getArgumentMap(),
                 iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
-        MappingAssertionInformation mergedAssertion = assertion1.merge(assertion2).get();
+        MappingEntryCluster mergedAssertion = assertion1.merge(assertion2).get();
         assert ((ConstructionNode) mergedAssertion.getIQTree().getRootNode()).getSubstitution().getRangeSet()
                 .equals(ImmutableSet.of(generatePersonURI(PERSON_URI_TEMPLATE, ID1), getConstantIRI(NAME_PROP), getConstantIRI(AGE_PROP), getRDFLiteral(NAME1)));
     }
@@ -176,7 +176,7 @@ public class MappingAssertionTest {
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constructionNode1, childTree));
 
-        MappingAssertionInformation info = new FilterMappingAssertionInfo(iq1.getTree(),
+        MappingEntryCluster info = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 extensionalNode1,
                 iq1.getVariableGenerator(),
@@ -198,7 +198,7 @@ public class MappingAssertionTest {
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constructionNode1, childTree));
 
-        MappingAssertionInformation info = new FilterMappingAssertionInfo(iq1.getTree(),
+        MappingEntryCluster info = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 extensionalNode1,
                 iq1.getVariableGenerator(),
@@ -223,7 +223,7 @@ public class MappingAssertionTest {
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constructionNode1, childTree));
 
-        MappingAssertionInformation info = new FilterMappingAssertionInfo(iq1.getTree(),
+        MappingEntryCluster info = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 extensionalNode1,
                 iq1.getVariableGenerator(),
@@ -247,7 +247,7 @@ public class MappingAssertionTest {
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constructionNode1, childTree));
 
-        MappingAssertionInformation info = new FilterMappingAssertionInfo(iq1.getTree(),
+        MappingEntryCluster info = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 extensionalNode1,
                 iq1.getVariableGenerator(),
@@ -282,19 +282,19 @@ public class MappingAssertionTest {
                 ATOM_FACTORY.getDistinctTripleAtom(S2, P2, O2),
                 IQ_FACTORY.createUnaryIQTree(constructionNode2, childTree2));
 
-        MappingAssertionInformation assertion1 = new FilterMappingAssertionInfo(iq1.getTree(),
+        MappingEntryCluster assertion1 = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 extensionalDataNode,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
-        MappingAssertionInformation assertion2 = new FilterMappingAssertionInfo(iq2.getTree(),
+        MappingEntryCluster assertion2 = new FilterMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 extensionalNode2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
-        Optional<MappingAssertionInformation> mergedAssertion = assertion1.merge(assertion2);
+        Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isEmpty();
     }
 
@@ -324,19 +324,19 @@ public class MappingAssertionTest {
                 ATOM_FACTORY.getDistinctTripleAtom(S2, P2, O2),
                 IQ_FACTORY.createUnaryIQTree(constructionNode2, childTree2));
 
-        MappingAssertionInformation assertion1 = new FilterMappingAssertionInfo(iq1.getTree(),
+        MappingEntryCluster assertion1 = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 extensionalDataNode,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
-        MappingAssertionInformation assertion2 = new FilterMappingAssertionInfo(iq2.getTree(),
+        MappingEntryCluster assertion2 = new FilterMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 extensionalNode2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
-        Optional<MappingAssertionInformation> mergedAssertion = assertion1.merge(assertion2);
+        Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isPresent();
     }
 
@@ -363,7 +363,7 @@ public class MappingAssertionTest {
                 IQ_FACTORY.createUnaryIQTree(constr2, ext2));
 
         ImmutableMap<Integer, Attribute> constantAttributes = ImmutableMap.of(2, T2.getAttribute(3));
-        MappingAssertionInformation assertion1 = new DictionaryPatternMappingAssertion(iq1.getTree(),
+        MappingEntryCluster assertion1 = new DictionaryPatternMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 constantAttributes,
                 ext1,
@@ -371,7 +371,7 @@ public class MappingAssertionTest {
                 IQ_FACTORY,
                 SUBSTITUTION_FACTORY,
                 TERM_FACTORY, QUERY_TRANSFORMER_FACTORY);
-        MappingAssertionInformation assertion2 = new DictionaryPatternMappingAssertion(iq2.getTree(),
+        MappingEntryCluster assertion2 = new DictionaryPatternMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 constantAttributes,
                 ext2,
@@ -396,7 +396,7 @@ public class MappingAssertionTest {
                 IQ_FACTORY.createUnaryIQTree(constr, ext));
 
         ImmutableMap<Integer, Attribute> constantAttributes = ImmutableMap.of(1, T2.getAttribute(2),2, T2.getAttribute(3));
-        MappingAssertionInformation assertion2 = new DictionaryPatternMappingAssertion(iq2.getTree(),
+        MappingEntryCluster assertion2 = new DictionaryPatternMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 constantAttributes,
                 ext,
@@ -437,7 +437,7 @@ public class MappingAssertionTest {
                 IQ_FACTORY.createUnaryIQTree(constr2, ext2));
 
         ImmutableMap<Integer, Attribute> constantAttributes = ImmutableMap.of(2, T2.getAttribute(3));
-        MappingAssertionInformation assertion1 = new DictionaryPatternMappingAssertion(iq1.getTree(),
+        MappingEntryCluster assertion1 = new DictionaryPatternMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 constantAttributes,
                 ext1,
@@ -445,7 +445,7 @@ public class MappingAssertionTest {
                 IQ_FACTORY,
                 SUBSTITUTION_FACTORY,
                 TERM_FACTORY, QUERY_TRANSFORMER_FACTORY);
-        MappingAssertionInformation assertion2 = new DictionaryPatternMappingAssertion(iq2.getTree(),
+        MappingEntryCluster assertion2 = new DictionaryPatternMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 constantAttributes,
                 ext2,
@@ -454,7 +454,7 @@ public class MappingAssertionTest {
                 SUBSTITUTION_FACTORY,
                 TERM_FACTORY, QUERY_TRANSFORMER_FACTORY);
 
-        DictionaryPatternMappingAssertion mergedAssertion = (DictionaryPatternMappingAssertion) assertion1.merge(assertion2).get();
+        DictionaryPatternMappingEntryCluster mergedAssertion = (DictionaryPatternMappingEntryCluster) assertion1.merge(assertion2).get();
         ImmutableSet<Variable> subjects = mergedAssertion.getRDFFactTemplates().getTriplesOrQuadsVariables().stream()
                 .map(t -> t.get(0)).collect(ImmutableSet.toImmutableSet());
         ImmutableSet<Variable> predicates = mergedAssertion.getRDFFactTemplates().getTriplesOrQuadsVariables().stream()
@@ -485,7 +485,7 @@ public class MappingAssertionTest {
         IQ iq1 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constr1, joinSubtree));
-        JoinMappingAssertionInfo assertion1 = new JoinMappingAssertionInfo(iq1.getTree(),
+        JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 joinSubtree,
                 iq1.getVariableGenerator(),
@@ -499,13 +499,13 @@ public class MappingAssertionTest {
         IQ iq2 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constr2, joinSubtree));
-        JoinMappingAssertionInfo assertion2 = new JoinMappingAssertionInfo(iq2.getTree(),
+        JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 joinSubtree,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
-        Optional<MappingAssertionInformation> mergedAssertion = assertion1.merge(assertion2);
+        Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isPresent();
     }
 
@@ -522,7 +522,7 @@ public class MappingAssertionTest {
         IQ iq1 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constr1, joinSubtree1));
-        JoinMappingAssertionInfo assertion1 = new JoinMappingAssertionInfo(iq1.getTree(),
+        JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 joinSubtree1,
                 iq1.getVariableGenerator(),
@@ -538,13 +538,13 @@ public class MappingAssertionTest {
         IQ iq2 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constr2, joinSubtree2));
-        JoinMappingAssertionInfo assertion2 = new JoinMappingAssertionInfo(iq2.getTree(),
+        JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 joinSubtree2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
-        Optional<MappingAssertionInformation> mergedAssertion = assertion1.merge(assertion2);
+        Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isEmpty();
     }
 
@@ -562,7 +562,7 @@ public class MappingAssertionTest {
         IQ iq1 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constr1, joinSubtree1));
-        JoinMappingAssertionInfo assertion1 = new JoinMappingAssertionInfo(iq1.getTree(),
+        JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 joinSubtree1,
                 iq1.getVariableGenerator(),
@@ -576,13 +576,13 @@ public class MappingAssertionTest {
         IQ iq2 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constr2, joinSubtree2));
-        JoinMappingAssertionInfo assertion2 = new JoinMappingAssertionInfo(iq2.getTree(),
+        JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 joinSubtree2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
-        Optional<MappingAssertionInformation> mergedAssertion = assertion1.merge(assertion2);
+        Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isPresent();
     }
 
@@ -600,7 +600,7 @@ public class MappingAssertionTest {
         IQ iq1 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constr1, joinSubtree1));
-        JoinMappingAssertionInfo assertion1 = new JoinMappingAssertionInfo(iq1.getTree(),
+        JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 joinSubtree1,
                 iq1.getVariableGenerator(),
@@ -617,13 +617,13 @@ public class MappingAssertionTest {
         IQ iq2 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constr2, joinSubtree2));
-        JoinMappingAssertionInfo assertion2 = new JoinMappingAssertionInfo(iq2.getTree(),
+        JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 joinSubtree2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
-        Optional<MappingAssertionInformation> mergedAssertion = assertion1.merge(assertion2);
+        Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isEmpty();
     }
 
@@ -642,7 +642,7 @@ public class MappingAssertionTest {
         IQ iq1 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constr1, joinSubtree));
-        JoinMappingAssertionInfo assertion1 = new JoinMappingAssertionInfo(iq1.getTree(),
+        JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 joinSubtree,
                 iq1.getVariableGenerator(),
@@ -656,13 +656,13 @@ public class MappingAssertionTest {
         IQ iq2 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constr2, joinSubtree));
-        JoinMappingAssertionInfo assertion2 = new JoinMappingAssertionInfo(iq2.getTree(),
+        JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 joinSubtree,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
-        Optional<MappingAssertionInformation> mergedAssertion = assertion1.merge(assertion2);
+        Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isEmpty();
     }
 
@@ -680,7 +680,7 @@ public class MappingAssertionTest {
         IQ iq1 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constr1, joinSubtree));
-        JoinMappingAssertionInfo assertion1 = new JoinMappingAssertionInfo(iq1.getTree(),
+        JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 joinSubtree,
                 iq1.getVariableGenerator(),
@@ -694,13 +694,13 @@ public class MappingAssertionTest {
         IQ iq2 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constr2, joinSubtree));
-        JoinMappingAssertionInfo assertion2 = new JoinMappingAssertionInfo(iq2.getTree(),
+        JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 joinSubtree,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
-        Optional<MappingAssertionInformation> mergedAssertion = assertion1.merge(assertion2);
+        Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isEmpty();
     }
 
@@ -717,7 +717,7 @@ public class MappingAssertionTest {
                 ATOM_FACTORY.getDistinctQuadAtom(S1, P1, O1, G1),
                 IQ_FACTORY.createUnaryIQTree(constr1, ext1));
 
-        SimpleMappingAssertionInfo assertion1 = new SimpleMappingAssertionInfo(T1,
+        SimpleMappingEntryCluster assertion1 = new SimpleMappingEntryCluster(T1,
                 (ImmutableMap<Integer, Variable>) ext1.getArgumentMap(),
                 iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
@@ -736,13 +736,13 @@ public class MappingAssertionTest {
                 ATOM_FACTORY.getDistinctQuadAtom(S1, P1, O1, G1),
                 IQ_FACTORY.createUnaryIQTree(constr2, childTree));
 
-        FilterMappingAssertionInfo assertion2 = new FilterMappingAssertionInfo(iq2.getTree(),
+        FilterMappingEntryCluster assertion2 = new FilterMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 ext2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
-        Optional<MappingAssertionInformation> mergedAssertion = assertion1.merge(assertion2);
+        Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isPresent()
                 && mergedAssertion.get().getRDFFactTemplates().getVariables().stream().filter(v -> v.getName().startsWith("g")).count() == 1;
     }
@@ -760,7 +760,7 @@ public class MappingAssertionTest {
                 ATOM_FACTORY.getDistinctQuadAtom(S1, P1, O1, G1),
                 IQ_FACTORY.createUnaryIQTree(constr1, ext1));
 
-        SimpleMappingAssertionInfo assertion1 = new SimpleMappingAssertionInfo(T1,
+        SimpleMappingEntryCluster assertion1 = new SimpleMappingEntryCluster(T1,
                 (ImmutableMap<Integer, Variable>) ext1.getArgumentMap(),
                 iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
@@ -779,13 +779,13 @@ public class MappingAssertionTest {
                 ATOM_FACTORY.getDistinctQuadAtom(S1, P1, O1, G1),
                 IQ_FACTORY.createUnaryIQTree(constr2, childTree));
 
-        FilterMappingAssertionInfo assertion2 = new FilterMappingAssertionInfo(iq2.getTree(),
+        FilterMappingEntryCluster assertion2 = new FilterMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 ext2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
-        Optional<MappingAssertionInformation> mergedAssertion = assertion1.merge(assertion2);
+        Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isPresent()
                 && mergedAssertion.get().getRDFFactTemplates().getVariables().stream().filter(v -> v.getName().startsWith("g")).count() == 2;
     }
@@ -803,7 +803,7 @@ public class MappingAssertionTest {
         IQ iq1 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constr1, joinSubtree1));
-        JoinMappingAssertionInfo assertion1 = new JoinMappingAssertionInfo(iq1.getTree(),
+        JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 joinSubtree1,
                 iq1.getVariableGenerator(),
@@ -820,13 +820,13 @@ public class MappingAssertionTest {
         IQ iq2 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constr2, joinSubtree));
-        JoinMappingAssertionInfo assertion2 = new JoinMappingAssertionInfo(iq2.getTree(),
+        JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 joinSubtree,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
-        Optional<MappingAssertionInformation> mergedAssertion = assertion1.merge(assertion2);
+        Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isEmpty();
     }
 

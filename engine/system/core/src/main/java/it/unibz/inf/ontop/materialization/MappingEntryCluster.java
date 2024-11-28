@@ -9,12 +9,17 @@ import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Optional;
 
-public interface MappingAssertionInformation {
+/**
+ * A MappingEntryCluster is the result of merging together different mapping entries sharing the same "source".
+ */
+public interface MappingEntryCluster {
 
     IQTree getIQTree();
+
     RDFFactTemplates getRDFFactTemplates();
 
-    Optional<MappingAssertionInformation> merge(MappingAssertionInformation other);
+    Optional<MappingEntryCluster> merge(MappingEntryCluster other);
+
     /**
      * Returns a new RDFFactTemplates with only the triples/quads that have a predicate in the given set
      */
@@ -22,7 +27,7 @@ public interface MappingAssertionInformation {
 
     ImmutableList<RelationDefinition> getRelationsDefinitions();
 
-    MappingAssertionInformation renameConflictingVariables(VariableGenerator conflictingVariableGenerator);
+    MappingEntryCluster renameConflictingVariables(VariableGenerator conflictingVariableGenerator);
 
 
 }

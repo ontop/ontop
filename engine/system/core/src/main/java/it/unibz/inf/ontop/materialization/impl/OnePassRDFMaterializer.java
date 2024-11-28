@@ -19,7 +19,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
-import it.unibz.inf.ontop.materialization.MappingAssertionInformation;
+import it.unibz.inf.ontop.materialization.MappingEntryCluster;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
@@ -54,7 +54,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
     private final QueryTransformerFactory queryTransformerFactory;
 
     private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
-    private final ImmutableList<MappingAssertionInformation> mappingInformation;
+    private final ImmutableList<MappingEntryCluster> mappingInformation;
 
     protected OnePassRDFMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
         Injector injector = configuration.getInjector();
@@ -87,7 +87,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                 .map(IQ::normalizeForOptimization)
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableList<MappingAssertionInformation> tmpMappingInfo = mappingAssertionsIQs.stream()
+        ImmutableList<MappingEntryCluster> tmpMappingInfo = mappingAssertionsIQs.stream()
                 .map(this::createMappingAssertionInfo)
                 .collect(ImmutableCollectors.toList());
 
@@ -149,14 +149,14 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         return Stream.concat(vocabularyClassStream, vocabularyPropertyStream);
     }
 
-    private ImmutableList<MappingAssertionInformation> mergeMappingInformation(ImmutableList<MappingAssertionInformation> mappingInformation) {
-        ImmutableList<MappingAssertionInformation> complexMappingAssertionInfo = mappingInformation.stream()
-                .filter(m -> m instanceof ComplexMappingAssertionInfo)
+    private ImmutableList<MappingEntryCluster> mergeMappingInformation(ImmutableList<MappingEntryCluster> mappingInformation) {
+        ImmutableList<MappingEntryCluster> complexMappingAssertionInfo = mappingInformation.stream()
+                .filter(m -> m instanceof ComplexMappingEntryCluster)
                 .collect(ImmutableCollectors.toList());
 
 
-        ImmutableList<ImmutableList<MappingAssertionInformation>> groupedByJoinRelationsInfos = mappingInformation.stream()
-                .filter(m -> m instanceof JoinMappingAssertionInfo)
+        ImmutableList<ImmutableList<MappingEntryCluster>> groupedByJoinRelationsInfos = mappingInformation.stream()
+                .filter(m -> m instanceof JoinMappingEntryCluster)
                 .map(m -> Map.entry(
                         m.getRelationsDefinitions().stream()
                                 .map(rel -> rel.getAtomPredicate().getName())
@@ -167,8 +167,8 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                 .map(ImmutableList::copyOf)
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableList<ImmutableList<MappingAssertionInformation>> groupedBySingleRelationInfo = mappingInformation.stream()
-                .filter(m -> !(m instanceof ComplexMappingAssertionInfo || m instanceof JoinMappingAssertionInfo))
+        ImmutableList<ImmutableList<MappingEntryCluster>> groupedBySingleRelationInfo = mappingInformation.stream()
+                .filter(m -> !(m instanceof ComplexMappingEntryCluster || m instanceof JoinMappingEntryCluster))
                 .map(m -> Map.entry(
                         m.getRelationsDefinitions().get(0).getAtomPredicate().getName(),
                         m))
@@ -177,24 +177,24 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                 .map(ImmutableList::copyOf)
                 .collect(ImmutableCollectors.toList());
 
-        return ImmutableList.<MappingAssertionInformation>builder()
+        return ImmutableList.<MappingEntryCluster>builder()
                 .addAll(mergeCompatibleAssertionsInfos(groupedByJoinRelationsInfos))
                 .addAll(mergeCompatibleAssertionsInfos(groupedBySingleRelationInfo))
                 .addAll(complexMappingAssertionInfo)
                 .build();
     }
 
-    private MappingAssertionInformation createMappingAssertionInfo(IQ mappingAssertionIQ) {
+    private MappingEntryCluster createMappingAssertionInfo(IQ mappingAssertionIQ) {
         IQTree tree = mappingAssertionIQ.getTree();
         RDFFactTemplates rdfTemplates = new RDFFactTemplatesImpl(ImmutableList.of((mappingAssertionIQ.getProjectionAtom().getArguments())));
 
         if (hasNotSupportedNode(tree)) {
-            return new ComplexMappingAssertionInfo(tree, rdfTemplates, substitutionFactory);
+            return new ComplexMappingEntryCluster(tree, rdfTemplates, substitutionFactory);
         }
 
         Optional<IQTree> joinSubtree = findJoinSubtree(tree);
         if (joinSubtree.isPresent()) {
-            return new JoinMappingAssertionInfo(
+            return new JoinMappingEntryCluster(
                     tree,
                     rdfTemplates,
                     joinSubtree.get(),
@@ -206,13 +206,13 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
 
         ImmutableList<ExtensionalDataNode> extensionalNodes = findExtensionalNodes(tree);
         if (extensionalNodes.size() != 1) {
-            return new ComplexMappingAssertionInfo(tree, rdfTemplates, substitutionFactory);
+            return new ComplexMappingEntryCluster(tree, rdfTemplates, substitutionFactory);
         }
         ExtensionalDataNode extensionalNode = extensionalNodes.get(0);
         RelationDefinition relation = extensionalNode.getRelationDefinition();
 
         if (hasFilterNode(tree)) {
-            return  new FilterMappingAssertionInfo(
+            return  new FilterMappingEntryCluster(
                             tree,
                             rdfTemplates,
                             extensionalNode,
@@ -224,7 +224,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
 
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = extensionalNode.getArgumentMap();
         if (argumentMap.values().stream().allMatch(v -> v instanceof Variable)) {
-            return new SimpleMappingAssertionInfo(relation,
+            return new SimpleMappingEntryCluster(relation,
                     (ImmutableMap<Integer, Variable>) argumentMap,
                     tree,
                     rdfTemplates,
@@ -240,7 +240,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                             k -> relation.getAttribute(k + 1)));
 
             //return new ComplexMappingAssertionInfo(tree, rdfTemplates, substitutionFactory);
-            return new DictionaryPatternMappingAssertion(tree,
+            return new DictionaryPatternMappingEntryCluster(tree,
                     rdfTemplates,
                     constantAttributes,
                     extensionalNode,
@@ -251,7 +251,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                     queryTransformerFactory);
 
         } else {
-            return new ComplexMappingAssertionInfo(mappingAssertionIQ.getTree(), rdfTemplates, substitutionFactory);
+            return new ComplexMappingEntryCluster(mappingAssertionIQ.getTree(), rdfTemplates, substitutionFactory);
         }
     }
 
@@ -275,15 +275,15 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         }
     }
 
-    private ImmutableList<MappingAssertionInformation> mergeCompatibleAssertionsInfos(
-            ImmutableList<ImmutableList<MappingAssertionInformation>> compatibleAssertionInfos) {
-        ArrayList<MappingAssertionInformation> unmergedMappingAssertionInfos = new ArrayList<>();
-        ImmutableList<MappingAssertionInformation> mergedMappingAssertionInfos = compatibleAssertionInfos.stream()
+    private ImmutableList<MappingEntryCluster> mergeCompatibleAssertionsInfos(
+            ImmutableList<ImmutableList<MappingEntryCluster>> compatibleAssertionInfos) {
+        ArrayList<MappingEntryCluster> unmergedMappingAssertionInfos = new ArrayList<>();
+        ImmutableList<MappingEntryCluster> mergedMappingAssertionInfos = compatibleAssertionInfos.stream()
                 .map( sameRelationMappings -> {
-                    MappingAssertionInformation mergedSameRelationMapping = sameRelationMappings.get(0);
+                    MappingEntryCluster mergedSameRelationMapping = sameRelationMappings.get(0);
                     for (int i=1; i<sameRelationMappings.size(); i++) {
                         var m1 = sameRelationMappings.get(i);
-                        Optional<MappingAssertionInformation> merged = mergedSameRelationMapping.merge(m1);
+                        Optional<MappingEntryCluster> merged = mergedSameRelationMapping.merge(m1);
                         if (merged.isPresent()) {
                             mergedSameRelationMapping = merged.get();
                         } else {
@@ -294,7 +294,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                 })
                 .collect(ImmutableCollectors.toList());
 
-        return ImmutableList.<MappingAssertionInformation>builder()
+        return ImmutableList.<MappingEntryCluster>builder()
                 .addAll(mergedMappingAssertionInfos)
                 .addAll(unmergedMappingAssertionInfos)
                 .build();

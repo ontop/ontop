@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
-import it.unibz.inf.ontop.materialization.MappingAssertionInformation;
+import it.unibz.inf.ontop.materialization.MappingEntryCluster;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-public class FilterMappingAssertionInfo implements MappingAssertionInformation {
+public class FilterMappingEntryCluster implements MappingEntryCluster {
     private final IQTree tree;
     private final RDFFactTemplates rdfFactTemplates;
     private final ExtensionalDataNode relationDefinitionNode;
@@ -34,13 +34,13 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
 
-    public FilterMappingAssertionInfo(IQTree originalTree,
-                                      RDFFactTemplates rdfTemplates,
-                                      ExtensionalDataNode relationDefinitionNode,
-                                      VariableGenerator variableGenerator,
-                                      IntermediateQueryFactory iqFactory,
-                                      TermFactory termFactory,
-                                      SubstitutionFactory substitutionFactory) {
+    public FilterMappingEntryCluster(IQTree originalTree,
+                                     RDFFactTemplates rdfTemplates,
+                                     ExtensionalDataNode relationDefinitionNode,
+                                     VariableGenerator variableGenerator,
+                                     IntermediateQueryFactory iqFactory,
+                                     TermFactory termFactory,
+                                     SubstitutionFactory substitutionFactory) {
         this.rdfFactTemplates = rdfTemplates;
         this.relationDefinitionNode = relationDefinitionNode;
         this.variableGenerator = variableGenerator;
@@ -84,8 +84,8 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
     }
 
     @Override
-    public Optional<MappingAssertionInformation> merge(MappingAssertionInformation other) {
-        if (other instanceof ComplexMappingAssertionInfo || other instanceof JoinMappingAssertionInfo) {
+    public Optional<MappingEntryCluster> merge(MappingEntryCluster other) {
+        if (other instanceof ComplexMappingEntryCluster || other instanceof JoinMappingEntryCluster) {
             return Optional.empty();
         }
 
@@ -100,9 +100,9 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
             return Optional.empty();
         }
 
-        if (other instanceof SimpleMappingAssertionInfo || other instanceof DictionaryPatternMappingAssertion ) {
+        if (other instanceof SimpleMappingEntryCluster || other instanceof DictionaryPatternMappingEntryCluster) {
             return notSimplifiedFilterCondition.isEmpty()
-                    ? other.merge(new SimpleMappingAssertionInfo(
+                    ? other.merge(new SimpleMappingEntryCluster(
                         relationDefinitionNode.getRelationDefinition(),
                         argumentMap,
                         tree,
@@ -113,13 +113,13 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
                     : Optional.empty();
         }
 
-        FilterMappingAssertionInfo otherFilterInfo = (FilterMappingAssertionInfo) other;
+        FilterMappingEntryCluster otherFilterInfo = (FilterMappingEntryCluster) other;
         variableGenerator.registerAdditionalVariables(otherFilterInfo.variableGenerator.getKnownVariables());
-        FilterMappingAssertionInfo otherFilterInfoRenamed = otherFilterInfo.renameConflictingVariables(variableGenerator);
+        FilterMappingEntryCluster otherFilterInfoRenamed = otherFilterInfo.renameConflictingVariables(variableGenerator);
 
         ImmutableMap<Integer, Variable> otherArgumentMap = (ImmutableMap<Integer, Variable>) otherFilterInfoRenamed.relationDefinitionNode.getArgumentMap();
         if (notSimplifiedFilterCondition.isEmpty() && otherFilterInfoRenamed.getNotSimplifiedFilterCondition().isEmpty()) {
-            SimpleMappingAssertionInfo simpleMappingAssertionInfo = new SimpleMappingAssertionInfo(
+            SimpleMappingEntryCluster simpleMappingEntryCluster = new SimpleMappingEntryCluster(
                     relationDefinitionNode.getRelationDefinition(),
                     argumentMap,
                     tree,
@@ -127,7 +127,7 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
                     variableGenerator,
                     iqFactory,
                     substitutionFactory);
-            SimpleMappingAssertionInfo otherSimpleMappingAssertionInfo = new SimpleMappingAssertionInfo(
+            SimpleMappingEntryCluster otherSimpleMappingEntryCluster = new SimpleMappingEntryCluster(
                     otherFilterInfoRenamed.relationDefinitionNode.getRelationDefinition(),
                     otherArgumentMap,
                     otherFilterInfoRenamed.tree,
@@ -135,7 +135,7 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
                     otherFilterInfoRenamed.variableGenerator,
                     otherFilterInfoRenamed.iqFactory,
                     otherFilterInfoRenamed.substitutionFactory);
-            return simpleMappingAssertionInfo.merge(otherSimpleMappingAssertionInfo);
+            return simpleMappingEntryCluster.merge(otherSimpleMappingEntryCluster);
         } else if (notSimplifiedFilterCondition.isEmpty() || otherFilterInfoRenamed.getNotSimplifiedFilterCondition().isEmpty()) {
             return Optional.empty();
         }
@@ -204,11 +204,11 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
         return iqFactory.createUnaryIQTree(newConstructionNode, tree.getChildren().get(0));
     }
 
-    public FilterMappingAssertionInfo renameConflictingVariables(VariableGenerator generator) {
+    public FilterMappingEntryCluster renameConflictingVariables(VariableGenerator generator) {
         InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(generator, tree.getKnownVariables());
         IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
 
-        return new FilterMappingAssertionInfo(renamedTree,
+        return new FilterMappingEntryCluster(renamedTree,
                 rdfFactTemplates.apply(renamingSubstitution),
                 (ExtensionalDataNode) relationDefinitionNode.applyFreshRenaming(renamingSubstitution).getRootNode(),
                 variableGenerator,
@@ -243,9 +243,9 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
         return sameOperation && sameTerms;
     }
 
-    private FilterMappingAssertionInfo mergeOnSameFilterCondition(ImmutableMap<Integer, Variable> argumentMap,
-                                                                  ImmutableExpression filterCondition,
-                                                                  FilterMappingAssertionInfo otherFilterInfo) {
+    private FilterMappingEntryCluster mergeOnSameFilterCondition(ImmutableMap<Integer, Variable> argumentMap,
+                                                                 ImmutableExpression filterCondition,
+                                                                 FilterMappingEntryCluster otherFilterInfo) {
         ImmutableMap<Integer, Variable> otherArgumentMap = (ImmutableMap<Integer, Variable>) otherFilterInfo.relationDefinitionNode.getArgumentMap();
         ImmutableMap<Integer, Variable> mergedArgumentMap = mergeRelationArguments(argumentMap, otherArgumentMap);
 
@@ -271,7 +271,7 @@ public class FilterMappingAssertionInfo implements MappingAssertionInformation {
 
         Map.Entry<IQTree, RDFFactTemplates> treeTemplatePair = compressMappingAssertion(mappingTree.normalizeForOptimization(variableGenerator), mergedRDFTemplates);
 
-        return new FilterMappingAssertionInfo(
+        return new FilterMappingEntryCluster(
                 treeTemplatePair.getKey(),
                 treeTemplatePair.getValue(),
                 relationDefinitionNode,

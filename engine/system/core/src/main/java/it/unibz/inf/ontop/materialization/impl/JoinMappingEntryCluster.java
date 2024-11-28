@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.materialization.MappingAssertionInformation;
+import it.unibz.inf.ontop.materialization.MappingEntryCluster;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-public class JoinMappingAssertionInfo implements MappingAssertionInformation {
+public class JoinMappingEntryCluster implements MappingEntryCluster {
     private final IQTree tree;
     private final RDFFactTemplates rdfFactTemplates;
     private final IQTree joinSubtree;
@@ -31,12 +31,12 @@ public class JoinMappingAssertionInfo implements MappingAssertionInformation {
     private final SubstitutionFactory substitutionFactory;
     private final ImmutableList<ExtensionalDataNode> extensionalNodes;
 
-    public JoinMappingAssertionInfo(IQTree tree,
-                                    RDFFactTemplates rdfFactTemplates,
-                                    IQTree joinSubtree,
-                                    VariableGenerator variableGenerator,
-                                    IntermediateQueryFactory iqFactory,
-                                    SubstitutionFactory substitutionFactory) {
+    public JoinMappingEntryCluster(IQTree tree,
+                                   RDFFactTemplates rdfFactTemplates,
+                                   IQTree joinSubtree,
+                                   VariableGenerator variableGenerator,
+                                   IntermediateQueryFactory iqFactory,
+                                   SubstitutionFactory substitutionFactory) {
         this.tree = tree;
         this.rdfFactTemplates = rdfFactTemplates;
         this.joinSubtree = joinSubtree;
@@ -58,8 +58,8 @@ public class JoinMappingAssertionInfo implements MappingAssertionInformation {
     }
 
     @Override
-    public Optional<MappingAssertionInformation> merge(MappingAssertionInformation other) {
-        if ( !(other instanceof JoinMappingAssertionInfo)) {
+    public Optional<MappingEntryCluster> merge(MappingEntryCluster other) {
+        if ( !(other instanceof JoinMappingEntryCluster)) {
             return Optional.empty();
         }
 
@@ -67,9 +67,9 @@ public class JoinMappingAssertionInfo implements MappingAssertionInformation {
             return Optional.empty();
         }
 
-        JoinMappingAssertionInfo otherJoin = (JoinMappingAssertionInfo) other;
+        JoinMappingEntryCluster otherJoin = (JoinMappingEntryCluster) other;
         variableGenerator.registerAdditionalVariables(otherJoin.variableGenerator.getKnownVariables());
-        JoinMappingAssertionInfo otherJoinInfoRenamed = otherJoin.renameConflictingVariables(variableGenerator);
+        JoinMappingEntryCluster otherJoinInfoRenamed = otherJoin.renameConflictingVariables(variableGenerator);
 
         ImmutableMap<RelationDefinition, ImmutableList<ExtensionalDataNode>> relationDefinitionNodesMap = Streams.concat(
                         joinSubtree.getChildren().stream(), otherJoinInfoRenamed.joinSubtree.getChildren().stream())
@@ -117,12 +117,12 @@ public class JoinMappingAssertionInfo implements MappingAssertionInformation {
     }
 
     @Override
-    public JoinMappingAssertionInfo renameConflictingVariables(VariableGenerator conflictingVariableGenerator) {
+    public JoinMappingEntryCluster renameConflictingVariables(VariableGenerator conflictingVariableGenerator) {
         InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(conflictingVariableGenerator,
                 tree.getKnownVariables());
         IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
 
-        return new JoinMappingAssertionInfo(
+        return new JoinMappingEntryCluster(
                 renamedTree,
                 rdfFactTemplates.apply(renamingSubstitution),
                 joinSubtree.applyFreshRenaming(renamingSubstitution),
@@ -131,8 +131,8 @@ public class JoinMappingAssertionInfo implements MappingAssertionInformation {
                 substitutionFactory);
     }
 
-    private Optional<MappingAssertionInformation> mergeJoinMappingAssertions(JoinMappingAssertionInfo otherJoinInfoRenamed,
-                                                                             ImmutableMap<RelationDefinition, ImmutableList<ExtensionalDataNode>> relationDefinitionNodesMap) {
+    private Optional<MappingEntryCluster> mergeJoinMappingAssertions(JoinMappingEntryCluster otherJoinInfoRenamed,
+                                                                     ImmutableMap<RelationDefinition, ImmutableList<ExtensionalDataNode>> relationDefinitionNodesMap) {
         ImmutableList<IQTree> mergedJoinSubtrees = relationDefinitionNodesMap.entrySet().stream()
                 .map(nodes -> {
                     ExtensionalDataNode node1 = nodes.getValue().get(0);
@@ -167,7 +167,7 @@ public class JoinMappingAssertionInfo implements MappingAssertionInformation {
         RDFFactTemplates mergedRDFTemplates = rdfFactTemplates.merge(otherJoinInfoRenamed.getRDFFactTemplates());
         Map.Entry<IQTree, RDFFactTemplates> treeTemplatePair = compressMappingAssertion(mappingTree.normalizeForOptimization(variableGenerator), mergedRDFTemplates);
         IQTree finalTree = treeTemplatePair.getKey();
-        return Optional.of(new JoinMappingAssertionInfo(finalTree,
+        return Optional.of(new JoinMappingEntryCluster(finalTree,
                 treeTemplatePair.getValue(),
                 finalTree.getChildren().get(0),
                 variableGenerator,
@@ -251,7 +251,7 @@ public class JoinMappingAssertionInfo implements MappingAssertionInformation {
         }
     }
 
-    private boolean areJoinConditionsEqual(JoinMappingAssertionInfo otherJoinInfoRenamed) {
+    private boolean areJoinConditionsEqual(JoinMappingEntryCluster otherJoinInfoRenamed) {
         if (((InnerJoinNode) joinSubtree.getRootNode()).getOptionalFilterCondition().isPresent()
             || ((InnerJoinNode) otherJoinInfoRenamed.joinSubtree.getRootNode()).getOptionalFilterCondition().isPresent()) {
             return false;

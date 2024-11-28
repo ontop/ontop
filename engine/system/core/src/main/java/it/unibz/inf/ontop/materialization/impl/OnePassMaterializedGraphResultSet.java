@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
-import it.unibz.inf.ontop.materialization.MappingAssertionInformation;
+import it.unibz.inf.ontop.materialization.MappingEntryCluster;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -41,7 +41,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
     private final QueryContext queryContext;
 
     private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
-    private final Iterator<MappingAssertionInformation> mappingAssertionsIterator;
+    private final Iterator<MappingEntryCluster> mappingAssertionsIterator;
     private final boolean canBeIncomplete;
     private int counter;
 
@@ -60,7 +60,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
     private final List<IRI> possiblyIncompleteClassesAndProperties;
 
     OnePassMaterializedGraphResultSet(ImmutableMap<IRI, VocabularyEntry> vocabulary,
-                                      ImmutableList<MappingAssertionInformation> assertionsInfo,
+                                      ImmutableList<MappingEntryCluster> assertionsInfo,
                                       MaterializationParams params,
                                       OntopQueryEngine queryEngine,
                                       NativeQueryGenerator nativeQueryGenerator,
@@ -127,7 +127,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
                 }
             }
 
-            MappingAssertionInformation assertionInfo = mappingAssertionsIterator.next();
+            MappingEntryCluster assertionInfo = mappingAssertionsIterator.next();
             currentRDFFactTemplates = assertionInfo.getRDFFactTemplates();
 
             try {
@@ -165,7 +165,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
             tmpRDFFactsIterator = toAssertions(resultTuple, currentRDFFactTemplates);
             while (!tmpRDFFactsIterator.hasNext()) {
                 if (!tmpContextResultSet.hasNext()) {
-                    MappingAssertionInformation assertionInfo = mappingAssertionsIterator.next();
+                    MappingEntryCluster assertionInfo = mappingAssertionsIterator.next();
                     currentRDFFactTemplates = assertionInfo.getRDFFactTemplates();
 
                     try {
@@ -225,7 +225,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
         return ImmutableList.copyOf(possiblyIncompleteClassesAndProperties);
     }
 
-    private IQ translateIntoNativeQuery(MappingAssertionInformation assertionInfo, QueryLogger queryLogger, QueryContext queryContext) {
+    private IQ translateIntoNativeQuery(MappingEntryCluster assertionInfo, QueryLogger queryLogger, QueryContext queryContext) {
         ImmutableList<Variable> variables = assertionInfo.getRDFFactTemplates().getVariables().asList();
         IQ tree = iqFactory.createIQ(
                 atomFactory.getDistinctVariableOnlyDataAtom(atomFactory.getRDFAnswerPredicate(variables.size()),
