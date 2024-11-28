@@ -20,7 +20,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 
 /**
- * Its tree is composed of one construction node and one extensional node
+ * Its tree is composed of one construction node and one distinct-variable-only extensional node
  */
 public class SimpleMappingEntryCluster implements MappingEntryCluster {
     private final ExtensionalDataNode dataNode;
@@ -98,23 +98,23 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
 
         ExtensionalDataNode mergedDataNode = mergeDataNodes(otherRenamed.dataNode);
 
-        Substitution<ImmutableTerm> rdfTermsConstructionSubstitution = topConstructSubstitution.compose(
+        Substitution<ImmutableTerm> mergedTopSubstitution = topConstructSubstitution.compose(
                 otherRenamed.topConstructSubstitution);
 
-        ImmutableSet<Variable> termsVariables = Sets.union(
-                topConstructSubstitution.getDomain(),
-                otherRenamed.topConstructSubstitution.getDomain()).immutableCopy();
+        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
+                Sets.union(tree.getVariables(), otherRenamed.tree.getVariables()).immutableCopy(),
+                mergedTopSubstitution);
 
-        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(termsVariables,
-                rdfTermsConstructionSubstitution);
-
-        IQTree mappingTree = iqFactory.createUnaryIQTree(topConstructionNode,
-                iqFactory.createUnaryIQTree(constructionNodeAfterUnification, mergedDataNode));
+        IQTree newTree = iqFactory.createUnaryIQTree(
+                topConstructionNode,
+                iqFactory.createUnaryIQTree(
+                        constructionNodeAfterUnification,
+                        mergedDataNode));
 
         RDFFactTemplates mergedRDFTemplates = rdfFactTemplates.merge(otherRenamed.rdfFactTemplates);
 
         return compressCluster(
-                mappingTree.normalizeForOptimization(variableGenerator),
+                newTree.normalizeForOptimization(variableGenerator),
                 mergedRDFTemplates);
     }
 
@@ -150,6 +150,7 @@ public class SimpleMappingEntryCluster implements MappingEntryCluster {
     }
 
     private ConstructionNode unify(SimpleMappingEntryCluster renamedOtherCluster) {
+        // Guaranteed for simple mapping entry clusters
         var argumentMap = (ImmutableMap<Integer, Variable>) dataNode.getArgumentMap();
         var otherArgumentMap = (ImmutableMap<Integer, Variable>) renamedOtherCluster.dataNode.getArgumentMap();
         var indexes = Sets.union(argumentMap.keySet(), otherArgumentMap.keySet()).stream();
