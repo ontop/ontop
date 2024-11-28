@@ -91,8 +91,8 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
             description = "Uses the legacy materializer (was the main materializer until 5.4.0)")
     private boolean useLegacyMaterializer = false;
 
-    @Option(type = OptionType.COMMAND, name = {"--allow-duplicates"}, title = "allow duplicates in final materialized RDF graph",
-            description = " Duplicates will be included in the output file by removing DISTINCTs in the SQL queries. Default: false.")
+    @Option(type = OptionType.COMMAND, name = {"--allow-duplicates"}, title = "allow duplicates in the materialized RDF graph",
+            description = " Duplicates may appear in the output file as DISTINCTs are removed from the generated SQL queries. Default: false.")
     private boolean allowDuplicates = false;
 
     public OntopMaterialize() {
