@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.materialization.RDFFactTemplates;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
-import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -20,94 +19,80 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster {
-    private final IQTree tree;
-    private final RDFFactTemplates rdfTemplates;
-    private final ExtensionalDataNode relationDefinitionNode;
+public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCluster implements MappingEntryCluster {
+    private final ExtensionalDataNode dataNode;
     private final ImmutableMap<Integer, Attribute> constantAttributes;
-    private final VariableGenerator variableGenerator;
-    private final IntermediateQueryFactory iqFactory;
-    private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
 
     public DictionaryPatternMappingEntryCluster(IQTree tree,
                                                 RDFFactTemplates rdfTemplates,
                                                 ImmutableMap<Integer, Attribute> constantAttributes,
-                                                ExtensionalDataNode relationDefinitionNode,
+                                                ExtensionalDataNode dataNode,
                                                 VariableGenerator variableGenerator,
                                                 IntermediateQueryFactory iqFactory,
                                                 SubstitutionFactory substitutionFactory,
                                                 TermFactory termFactory) {
-        this.rdfTemplates = rdfTemplates;
+        super(tree, rdfTemplates, variableGenerator, iqFactory, substitutionFactory);
         this.constantAttributes = constantAttributes;
-        this.variableGenerator = variableGenerator;
-        this.iqFactory = iqFactory;
-        this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
 
-        this.tree = relationDefinitionNode.getArgumentMap().values().stream().anyMatch(t -> t instanceof DBConstant)
-                ? makeEqualityConditionExplicit(tree, constantAttributes, relationDefinitionNode)
+        this.tree = dataNode.getArgumentMap().values().stream()
+                .anyMatch(t -> t instanceof DBConstant)
+                ? makeEqualityConditionExplicit(tree, constantAttributes, dataNode)
                 : tree;
-        this.relationDefinitionNode = findExtensionalNode(this.tree);
+        this.dataNode = (ExtensionalDataNode) this.getIQTree().getChildren().get(0);
     }
 
     @Override
-    public IQTree getIQTree() {
-        return tree;
-    }
-
-    @Override
-    public RDFFactTemplates getRDFFactTemplates() {
-        return rdfTemplates;
+    public ImmutableList<ExtensionalDataNode> getDataNodes() {
+        return ImmutableList.of(dataNode);
     }
 
     @Override
     public Optional<MappingEntryCluster> merge(MappingEntryCluster other) {
-        if (other instanceof ComplexMappingEntryCluster
-                || other instanceof FilterMappingEntryCluster
-                || other instanceof JoinMappingEntryCluster) {
+        if (other instanceof FilterMappingEntryCluster) {
             return other.merge(this);
         }
 
-        if (!(relationDefinitionNode.getArgumentMap().values().stream().allMatch(v -> v instanceof Variable))) {
+        if (!(other instanceof DictionaryPatternMappingEntryCluster
+                || other instanceof SimpleMappingEntryCluster)) {
             return Optional.empty();
         }
-        ImmutableMap<Integer, Variable> argumentMap = (ImmutableMap<Integer, Variable>) relationDefinitionNode.getArgumentMap();
 
-        boolean sameRelation = other.getDataNodes().get(0).getRelationDefinition().getAtomPredicate().getName()
-                .equals(relationDefinitionNode.getRelationDefinition().getAtomPredicate().getName());
-        if (!sameRelation) {
+        if (!(dataNode.getArgumentMap().values().stream().allMatch(v -> v instanceof Variable))) {
+            return Optional.empty();
+        }
+
+        if (!dataNode.getRelationDefinition().equals(
+                other.getDataNodes().get(0).getRelationDefinition())) {
             return Optional.empty();
         }
 
         variableGenerator.registerAdditionalVariables(other.getIQTree().getKnownVariables());
         if (other instanceof SimpleMappingEntryCluster) {
-            SimpleMappingEntryCluster otherSimpleInfo = ((SimpleMappingEntryCluster) other).renameConflictingVariables(variableGenerator);
-            ImmutableMap<Integer, Variable> otherArgumentMap = (ImmutableMap<Integer, Variable>) findExtensionalNode(otherSimpleInfo.getIQTree()).getArgumentMap();
-            return Optional.of(mergeOnSimpleMappingInfo(otherSimpleInfo, argumentMap, otherArgumentMap));
+            SimpleMappingEntryCluster otherSimpleCluster = ((SimpleMappingEntryCluster) other)
+                    .renameConflictingVariables(variableGenerator);
+            return Optional.of(mergeWithSimpleCluster(otherSimpleCluster));
         }
 
-        DictionaryPatternMappingEntryCluster otherDictionaryInfo = ((DictionaryPatternMappingEntryCluster) other).renameConflictingVariables(variableGenerator);
-        ImmutableMap<Integer, Variable> otherArgumentMap = (ImmutableMap<Integer, Variable>) otherDictionaryInfo.relationDefinitionNode.getArgumentMap();
-        return Optional.of(mergeOnBothDictionaryMappingInfos(otherDictionaryInfo, argumentMap, otherArgumentMap));
+        DictionaryPatternMappingEntryCluster otherDictionaryCluster = ((DictionaryPatternMappingEntryCluster) other)
+                .renameConflictingVariables(variableGenerator);
+        return Optional.of(mergeWithDictionaryCluster(otherDictionaryCluster));
 
     }
 
-    @Override
-    public ImmutableList<ExtensionalDataNode> getDataNodes() {
-        return ImmutableList.of(relationDefinitionNode);
-    }
-
-    private IQTree makeEqualityConditionExplicit(IQTree tree, ImmutableMap<Integer, Attribute> constantAttributes, ExtensionalDataNode relationDefinitionNode) {
-        ImmutableMap<Integer, ? extends VariableOrGroundTerm> originalArgumentMap = relationDefinitionNode.getArgumentMap();
+    private IQTree makeEqualityConditionExplicit(IQTree tree,
+                                                 ImmutableMap<Integer, Attribute> constantAttributes,
+                                                 ExtensionalDataNode dataNode) {
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> originalArgumentMap = dataNode.getArgumentMap();
         ImmutableMap<Integer, Variable> constantTermsVariables = constantAttributes.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> variableGenerator.generateNewVariable(e.getValue().getID().getName())));
+
         ImmutableList<DBConstant> constantValues = constantAttributes.keySet().stream()
                 .map(originalArgumentMap::get)
                 .map(v -> (DBConstant) v)
@@ -120,16 +105,18 @@ public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster
                                 ? constantTermsVariables.get(e.getKey())
                                 : e.getValue()));
 
-        ExtensionalDataNode newRelationDefinitionNode = iqFactory.createExtensionalDataNode(relationDefinitionNode.getRelationDefinition(), newArgumentMap);
         ConstructionNode topNode = (ConstructionNode) tree.getRootNode();
-        Substitution<ImmutableTerm> topSubstitution = topNode.getSubstitution();
-        Substitution<ImmutableTerm> newTopSubstitution = setPossiblyNullRDFTerms(topSubstitution, constantTermsVariables.values().asList(), constantValues);
+        Substitution<ImmutableTerm> newTopSubstitution = setPossiblyNullRDFTerms(
+                topNode.getSubstitution(), constantTermsVariables.values().asList(), constantValues);
         ConstructionNode newTopNode = iqFactory.createConstructionNode(topNode.getVariables(), newTopSubstitution);
 
-        return iqFactory.createUnaryIQTree(newTopNode, newRelationDefinitionNode);
+        ExtensionalDataNode variablesOnlyDataNode = iqFactory.createExtensionalDataNode(
+                dataNode.getRelationDefinition(), newArgumentMap);
+
+        return iqFactory.createUnaryIQTree(newTopNode, variablesOnlyDataNode);
     }
 
-    private Substitution<ImmutableTerm> setPossiblyNullRDFTerms(Substitution<ImmutableTerm> substitution,
+    private Substitution<ImmutableTerm> setPossiblyNullRDFTerms(Substitution<ImmutableTerm> rdfTermConstructionSubstitution,
                                                                 ImmutableList<Variable> constantVariables,
                                                                 ImmutableList<DBConstant> constantValues) {
         ImmutableExpression equalityCondition;
@@ -139,10 +126,12 @@ public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster
              equalityCondition = termFactory.getConjunction(
                     IntStream.range(0, constantValues.size())
                             .boxed()
-                            .map(i -> termFactory.getStrictEquality(constantVariables.get(i), constantValues.get(i)))
+                            .map(i -> termFactory.getStrictEquality(constantVariables.get(i),
+                                    constantValues.get(i)))
                             .collect(ImmutableCollectors.toList()));
         }
-        return substitution.stream()
+
+        return rdfTermConstructionSubstitution.stream()
                 .map(e -> Map.entry(
                         e.getKey(),
                         termFactory.getIfElseNull(equalityCondition, e.getValue())
@@ -150,151 +139,93 @@ public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster
                 .collect(substitutionFactory.toSubstitution());
     }
 
-    private ExtensionalDataNode findExtensionalNode(IQTree tree) {
-        if (tree.getChildren().isEmpty()) {
-            if (tree.getRootNode() instanceof ExtensionalDataNode) {
-                return (ExtensionalDataNode) tree.getRootNode();
-            } else {
-                throw new MinorOntopInternalBugException("The leaf node of a mapping assertion is expected to be an ExtensionalDataNode");
-            }
-        } else {
-            return tree.getChildren().stream()
-                    .map(this::findExtensionalNode)
-                    .findAny().orElseThrow(() -> new MinorOntopInternalBugException("The leaf node of a mapping assertion is expected to be an ExtensionalDataNode"));
-        }
-    }
+    private DictionaryPatternMappingEntryCluster mergeWithDictionaryCluster(DictionaryPatternMappingEntryCluster otherDictionaryCluster) {
+        ExtensionalDataNode mergedDataNode = mergeDataNodes(otherDictionaryCluster.dataNode);
 
-    private DictionaryPatternMappingEntryCluster mergeOnBothDictionaryMappingInfos(DictionaryPatternMappingEntryCluster otherDictionaryInfo,
-                                                                                   ImmutableMap<Integer, Variable> argumentMap,
-                                                                                   ImmutableMap<Integer, Variable> otherArgumentMap) {
-        ImmutableMap<Integer, Variable> mergedArgumentMap = mergeRelationArguments(argumentMap, otherArgumentMap);
+        IQTree newTree = createMergedIQTree(otherDictionaryCluster, mergedDataNode);
 
-        ExtensionalDataNode relationDefinitionNode = iqFactory.createExtensionalDataNode(
-                this.relationDefinitionNode.getRelationDefinition(),
-                mergedArgumentMap);
-
-        ConstructionNode optionalRenamingNode = createOptionalRenamingNode(argumentMap, otherArgumentMap);
-        IQTree childTree = iqFactory.createUnaryIQTree(optionalRenamingNode, relationDefinitionNode);
-
-        RDFFactTemplates mergedRDFTemplates = rdfTemplates.merge(otherDictionaryInfo.getRDFFactTemplates());
-
-        Substitution<ImmutableTerm> topConstructSubstitution = ((ConstructionNode) tree.getRootNode()).getSubstitution();
-        Substitution<ImmutableTerm> otherTopConstructSubstitution = ((ConstructionNode) otherDictionaryInfo.tree.getRootNode()).getSubstitution();
-        Substitution<ImmutableTerm> rdfTermsConstructionSubstitution = topConstructSubstitution.compose(otherTopConstructSubstitution);
-        ImmutableSet<Variable> termsVariables = ImmutableSet.<Variable>builder()
-                .addAll(topConstructSubstitution.getDomain())
-                .addAll(otherTopConstructSubstitution.getDomain())
-                .build();
-        IQTree mappingTree = iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(termsVariables, rdfTermsConstructionSubstitution),
-                childTree).normalizeForOptimization(variableGenerator);
+        RDFFactTemplates mergedRDFTemplates = rdfTemplates.merge(otherDictionaryCluster.getRDFFactTemplates());
 
         Substitution<ImmutableTerm> simplifiedSubstitution = compressIfElseNullTerms(
-                ((ConstructionNode)mappingTree.getRootNode()).getSubstitution(), mergedRDFTemplates.getVariables());
+                ((ConstructionNode)newTree.getRootNode()).getSubstitution(), mergedRDFTemplates.getVariables());
+        ConstructionNode simplifiedConstructionNode = iqFactory.createConstructionNode(
+                simplifiedSubstitution.getDomain(),
+                simplifiedSubstitution);
+        IQTree simplifiedTree = iqFactory.createUnaryIQTree(simplifiedConstructionNode, newTree.getChildren().get(0));
 
-        ConstructionNode simplifiedConstructionNode = iqFactory.createConstructionNode(simplifiedSubstitution.getDomain(), simplifiedSubstitution);
-        Map.Entry<IQTree, RDFFactTemplates> treeTemplatePair = compressMappingAssertion(
-                iqFactory.createUnaryIQTree(simplifiedConstructionNode, mappingTree.getChildren().get(0)), mergedRDFTemplates);
+        DictionaryPatternMappingEntryCluster compressedCluster =
+                (DictionaryPatternMappingEntryCluster) compressCluster(simplifiedTree, mergedRDFTemplates);
 
         ImmutableMap<Integer, Attribute> mergedConstantAttributes = Streams.concat(
                 constantAttributes.entrySet().stream(),
-                otherDictionaryInfo.constantAttributes.entrySet().stream()
+                otherDictionaryCluster.constantAttributes.entrySet().stream()
         ).collect(ImmutableCollectors.toMap(
                 Map.Entry::getKey,
                 Map.Entry::getValue,
                 (e1, e2) -> e1));
 
-        return new DictionaryPatternMappingEntryCluster(
-                treeTemplatePair.getKey(),
-                treeTemplatePair.getValue(),
-                mergedConstantAttributes,
-                relationDefinitionNode,
-                variableGenerator,
-                iqFactory,
-                substitutionFactory,
-                termFactory);
+        return compressedCluster.updateConstantAttributes(mergedConstantAttributes);
     }
 
-    private DictionaryPatternMappingEntryCluster mergeOnSimpleMappingInfo(SimpleMappingEntryCluster otherSimpleInfo,
-                                                                          ImmutableMap<Integer, Variable> argumentMap,
-                                                                          ImmutableMap<Integer, Variable> otherArgumentMap) {
-        ImmutableMap<Integer, Variable> mergedArgumentMap = mergeRelationArguments(argumentMap, otherArgumentMap);
+    private MappingEntryCluster mergeWithSimpleCluster(SimpleMappingEntryCluster otherSimpleCluster) {
+        ExtensionalDataNode mergedDataNode = mergeDataNodes(otherSimpleCluster.getDataNodes().get(0));
 
-        ExtensionalDataNode relationDefinitionNode = iqFactory.createExtensionalDataNode(
-                this.relationDefinitionNode.getRelationDefinition(),
-                mergedArgumentMap);
+        IQTree mappingTree = createMergedIQTree(otherSimpleCluster, mergedDataNode);
 
-        ConstructionNode optionalRenamingNode = createOptionalRenamingNode(argumentMap, otherArgumentMap);
-        IQTree childTree = iqFactory.createUnaryIQTree(optionalRenamingNode, relationDefinitionNode);
+        RDFFactTemplates mergedRDFTemplates = rdfTemplates.merge(otherSimpleCluster.getRDFFactTemplates());
 
-        RDFFactTemplates mergedRDFTemplates = rdfTemplates.merge(otherSimpleInfo.getRDFFactTemplates());
+        return compressCluster(mappingTree, mergedRDFTemplates);
+    }
+
+    private IQTree createMergedIQTree(MappingEntryCluster otherCluster, ExtensionalDataNode mergedDataNode){
+
+        ConstructionNode optionalRenamingNode = unify(otherCluster.getDataNodes().get(0));
+        IQTree childTree = iqFactory.createUnaryIQTree(optionalRenamingNode, mergedDataNode);
 
         Substitution<ImmutableTerm> topConstructSubstitution = ((ConstructionNode) tree.getRootNode()).getSubstitution();
-        Substitution<ImmutableTerm> otherTopConstructSubstitution = ((ConstructionNode) otherSimpleInfo.getIQTree().getRootNode()).getSubstitution();
-        Substitution<ImmutableTerm> RDFTermsConstructionSubstitution = topConstructSubstitution.compose(otherTopConstructSubstitution);
-        ImmutableSet<Variable> termsVariables = ImmutableSet.<Variable>builder()
-                .addAll(topConstructSubstitution.getDomain())
-                .addAll(otherTopConstructSubstitution.getDomain())
-                .build();
-        IQTree mappingTree = iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(termsVariables, RDFTermsConstructionSubstitution),
+        Substitution<ImmutableTerm> otherTopConstructSubstitution = ((ConstructionNode) otherCluster.getIQTree().getRootNode()).getSubstitution();
+        Substitution<ImmutableTerm> mergedTopSubstitution = topConstructSubstitution.compose(
+                otherTopConstructSubstitution);
+
+        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
+                Sets.union(tree.getVariables(), otherCluster.getIQTree().getVariables()).immutableCopy(),
+                mergedTopSubstitution);
+        return iqFactory.createUnaryIQTree(
+                topConstructionNode,
                 childTree).normalizeForOptimization(variableGenerator);
-
-        Map.Entry<IQTree, RDFFactTemplates> treeTemplatePair = compressMappingAssertion(mappingTree, mergedRDFTemplates);
-
-        return new DictionaryPatternMappingEntryCluster(
-                treeTemplatePair.getKey(),
-                treeTemplatePair.getValue(),
-                constantAttributes,
-                relationDefinitionNode,
-                variableGenerator,
-                iqFactory,
-                substitutionFactory,
-                termFactory);
     }
 
-    private ImmutableMap<Integer, Variable> mergeRelationArguments(ImmutableMap <Integer, Variable > argumentMap,
-                                                                   ImmutableMap <Integer, Variable > otherArgumentMap){
-        ImmutableSet<Integer> keys = ImmutableSet.<Integer>builder()
-                .addAll(argumentMap.keySet())
-                .addAll(otherArgumentMap.keySet())
-                .build();
+    private ExtensionalDataNode mergeDataNodes(ExtensionalDataNode otherDataNode){
+        var argumentMap = dataNode.getArgumentMap();
+        var otherArgumentMap = otherDataNode.getArgumentMap();
 
-        return keys.stream()
+        var mergedArgumentMap = Sets.union(argumentMap.keySet(), otherArgumentMap.keySet()).stream()
                 .collect(ImmutableCollectors.toMap(
                         idx -> idx,
-                        idx -> argumentMap.getOrDefault(idx, otherArgumentMap.get(idx))
+                        idx -> Optional.<VariableOrGroundTerm>ofNullable(argumentMap.get(idx))
+                                .orElseGet(() -> otherArgumentMap.get(idx))
                 ));
+
+        return iqFactory.createExtensionalDataNode(dataNode.getRelationDefinition(), mergedArgumentMap);
     }
 
-    private ConstructionNode createOptionalRenamingNode(ImmutableMap <Integer, Variable > argumentMap,
-                                                        ImmutableMap<Integer, Variable> otherArgumentMap) {
-        ImmutableSet<Integer> keys = ImmutableSet.<Integer>builder()
-                .addAll(argumentMap.keySet())
-                .addAll(otherArgumentMap.keySet())
-                .build();
-        Optional<Substitution<Variable>> mergedSubstitution = substitutionFactory.onVariables().unifierBuilder()
-                .unify(keys.stream(),
+    private ConstructionNode unify(ExtensionalDataNode otherDataNode) {
+        var argumentMap = (ImmutableMap<Integer, Variable>) dataNode.getArgumentMap();
+        var otherArgumentMap = (ImmutableMap<Integer, Variable>) otherDataNode.getArgumentMap();
+        var indexes = Sets.union(argumentMap.keySet(), otherArgumentMap.keySet()).stream();
+
+        var unifier = substitutionFactory.onVariables().unifierBuilder()
+                .unify(indexes,
                         idx -> otherArgumentMap.getOrDefault(idx, argumentMap.get(idx)),
                         idx -> argumentMap.getOrDefault(idx, otherArgumentMap.get(idx)))
                 .build();
 
-        ConstructionNode optionalRenamingNode;
-        if (mergedSubstitution.isPresent()) {
-            ImmutableSet<Variable> originalRelationsVariables = Streams.concat(
-                    argumentMap.values().stream(),
-                    otherArgumentMap.values().stream(),
-                    mergedSubstitution.get().getRangeVariables().stream()
-            ).collect(ImmutableCollectors.toSet());
-            optionalRenamingNode = iqFactory.createConstructionNode(originalRelationsVariables, mergedSubstitution.get());
-        } else {
-            ImmutableSet<Variable> originalRelationsVariables = Streams.concat(
-                    argumentMap.values().stream(),
-                    otherArgumentMap.values().stream()
-            ).collect(ImmutableCollectors.toSet());
-            optionalRenamingNode = iqFactory.createConstructionNode(originalRelationsVariables);
-        }
-        return optionalRenamingNode;
+        var allVariables = Sets.union(dataNode.getVariables(), otherDataNode.getVariables())
+                .immutableCopy();
+
+        return unifier
+                .map(s -> iqFactory.createConstructionNode(allVariables, s))
+                .orElseGet(() -> iqFactory.createConstructionNode(allVariables));
     }
 
     private Map.Entry<IQTree, RDFFactTemplates> compressMappingAssertion(IQTree normalizedTree, RDFFactTemplates mergedRDFTemplates) {
@@ -314,9 +245,9 @@ public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster
         return Map.entry(compressedTree, compressedTemplates);
     }
 
-    private Substitution<ImmutableTerm> compressIfElseNullTerms(Substitution<ImmutableTerm> substitution,
+    private Substitution<ImmutableTerm> compressIfElseNullTerms(Substitution<ImmutableTerm> rdfTermsConstructionSubstitution,
                                                                 ImmutableSet<Variable> projectedVariables) {
-        ImmutableMap<Variable, NonGroundFunctionalTerm> rdfFunctionalTerms = substitution.stream()
+        var rdfFunctionalTerms = rdfTermsConstructionSubstitution.stream()
                 .filter(e -> projectedVariables.contains(e.getKey())
                         && e.getValue() instanceof NonGroundFunctionalTerm
                         && ((NonGroundFunctionalTerm) e.getValue()).getFunctionSymbol() instanceof RDFTermFunctionSymbol)
@@ -328,56 +259,53 @@ public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster
         var rdfIfElseNullTerms = rdfFunctionalTerms.entrySet().stream()
                 .filter(e -> e.getValue().getTerm(0) instanceof ImmutableFunctionalTerm
                         && ( (ImmutableFunctionalTerm)e.getValue().getTerm(0)).getFunctionSymbol() instanceof DBIfElseNullFunctionSymbol)
-                .map(e -> Map.entry(e.getKey(), e.getValue().getTerms()))
-                .collect(ImmutableCollectors.toMap());
-
-        ImmutableMap<Variable, ImmutableTerm> thenLexicalTerms = rdfIfElseNullTerms.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
-                        e -> ((ImmutableFunctionalTerm)e.getValue().get(0)).getTerm(1)
+                        e -> e.getValue().getTerms()
                 ));
 
-        ImmutableMap<Variable, ImmutableTerm> thenTermsDatatypes = rdfIfElseNullTerms.entrySet().stream()
+        var thenLexicalTerms = rdfIfElseNullTerms.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
-                        e -> ((ImmutableFunctionalTerm)e.getValue().get(1)).getTerm(1)
+                        e -> ((ImmutableFunctionalTerm)e.getValue()
+                                .get(0)).getTerm(1)
                 ));
 
-        ImmutableMap<Variable, ImmutableExpression> equalityConditionsMap = rdfIfElseNullTerms.entrySet().stream()
+        var thenTermsDatatypes = rdfIfElseNullTerms.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
-                        e -> (ImmutableExpression) ((ImmutableFunctionalTerm)e.getValue().get(0)).getTerm(0)));
+                        e -> ((ImmutableFunctionalTerm)e.getValue()
+                                .get(1)).getTerm(1)
+                ));
+
+        var equalityConditionsMap = rdfIfElseNullTerms.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> (ImmutableExpression) ((ImmutableFunctionalTerm)e.getValue()
+                                .get(0)).getTerm(0)));
 
         Substitution<ImmutableTerm> ifElseNullDisjunctionSubstitution = createIfElseNullDisjunctionSubstitution(
                 thenLexicalTerms, thenTermsDatatypes, equalityConditionsMap);
 
-        Substitution<ImmutableTerm> notIfElseNullTerms = substitution.stream()
+        Substitution<ImmutableTerm> notIfElseNullTerms = rdfTermsConstructionSubstitution.stream()
                 .filter(e -> !thenLexicalTerms.containsKey(e.getKey()))
                 .collect(substitutionFactory.toSubstitution());
 
         return notIfElseNullTerms.compose(ifElseNullDisjunctionSubstitution);
     }
 
-    public DictionaryPatternMappingEntryCluster renameConflictingVariables(VariableGenerator generator) {
-        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(generator, tree.getKnownVariables());
-        IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
-
-        return new DictionaryPatternMappingEntryCluster(
-                renamedTree,
-                rdfTemplates.apply(renamingSubstitution),
-                constantAttributes,
-                (ExtensionalDataNode) relationDefinitionNode.applyFreshRenaming(renamingSubstitution).getRootNode(),
-                generator,
-                iqFactory,
-                substitutionFactory,
-                termFactory);
-    }
-
     private Substitution<ImmutableTerm> createIfElseNullDisjunctionSubstitution(ImmutableMap<Variable, ImmutableTerm> thenLexicalTerms,
                                                                                 ImmutableMap<Variable, ImmutableTerm> thenTermsDatatypes,
                                                                                 ImmutableMap<Variable, ImmutableExpression> equalityConditionsMap) {
         var thenTerms2sparqlVars = thenLexicalTerms.entrySet().stream()
-                .collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.mapping(Map.Entry::getKey, ImmutableCollectors.toList())));
+                .collect(ImmutableCollectors.toMultimap(
+                        Map.Entry::getValue,
+                        Map.Entry::getKey
+                )).asMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> ImmutableSet.copyOf(e.getValue())
+                ));
 
         return thenTerms2sparqlVars.values().stream()
                 .map(variables -> {
@@ -398,6 +326,46 @@ public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster
                 })
                 .flatMap(Streams::concat)
                 .collect(substitutionFactory.toSubstitution());
+    }
+
+    public DictionaryPatternMappingEntryCluster renameConflictingVariables(VariableGenerator generator) {
+        var renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(generator, tree.getKnownVariables());
+        IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
+
+        return new DictionaryPatternMappingEntryCluster(
+                renamedTree,
+                rdfTemplates.apply(renamingSubstitution),
+                constantAttributes,
+                (ExtensionalDataNode) dataNode.applyFreshRenaming(renamingSubstitution).getRootNode(),
+                generator,
+                iqFactory,
+                substitutionFactory,
+                termFactory);
+    }
+
+    private DictionaryPatternMappingEntryCluster updateConstantAttributes(ImmutableMap<Integer, Attribute> constantAttributes) {
+        return new DictionaryPatternMappingEntryCluster(
+                tree,
+                rdfTemplates,
+                constantAttributes,
+                dataNode,
+                variableGenerator,
+                iqFactory,
+                substitutionFactory,
+                termFactory);
+    }
+
+    @Override
+    protected MappingEntryCluster buildCluster(IQTree compressedTree, RDFFactTemplates compressedTemplates) {
+        return new DictionaryPatternMappingEntryCluster(
+                compressedTree,
+                compressedTemplates,
+                constantAttributes,
+                (ExtensionalDataNode) compressedTree.getChildren().get(0),
+                variableGenerator,
+                iqFactory,
+                substitutionFactory,
+                termFactory);
     }
 
 }
