@@ -16,7 +16,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 public abstract class AbstractMappingEntryCluster implements MappingEntryCluster {
 
-    protected final IQTree tree;
+    protected IQTree tree;
     protected final VariableGenerator variableGenerator;
     protected final RDFFactTemplates rdfTemplates;
     protected final IntermediateQueryFactory iqFactory;

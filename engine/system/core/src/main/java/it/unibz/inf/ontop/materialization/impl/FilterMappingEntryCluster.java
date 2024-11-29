@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBAndFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsNullOrNotFunctionSymbol;
-import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -23,15 +22,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-public class FilterMappingEntryCluster implements MappingEntryCluster {
-    private final IQTree tree;
-    private final RDFFactTemplates rdfFactTemplates;
+/**
+ * Its tree is composed of one construction node, one filter node and an extensional node.
+ * If the filter node is a NOT NULL filter, it is removed from the tree because it doesn't affect the materialization result.
+ */
+public class FilterMappingEntryCluster extends AbstractMappingEntryCluster implements MappingEntryCluster {
     private final ExtensionalDataNode dataNode;
     private final Optional<ImmutableExpression> filterCondition;
-    private final VariableGenerator variableGenerator;
-    private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
 
     public FilterMappingEntryCluster(IQTree originalTree,
                                      RDFFactTemplates rdfTemplates,
@@ -40,12 +38,9 @@ public class FilterMappingEntryCluster implements MappingEntryCluster {
                                      IntermediateQueryFactory iqFactory,
                                      TermFactory termFactory,
                                      SubstitutionFactory substitutionFactory) {
-        this.rdfFactTemplates = rdfTemplates;
+        super(originalTree, rdfTemplates, variableGenerator, iqFactory, substitutionFactory);
         this.dataNode = dataNode;
-        this.variableGenerator = variableGenerator;
-        this.iqFactory = iqFactory;
         this.termFactory = termFactory;
-        this.substitutionFactory = substitutionFactory;
 
         if (originalTree.getChildren().get(0).getRootNode() instanceof FilterNode) {
             IQTree filterSubtree = originalTree.getChildren().get(0);
@@ -69,16 +64,6 @@ public class FilterMappingEntryCluster implements MappingEntryCluster {
             this.filterCondition = Optional.empty();
             this.tree = originalTree;
         }
-    }
-
-    @Override
-    public IQTree getIQTree() {
-        return tree;
-    }
-
-    @Override
-    public RDFFactTemplates getRDFFactTemplates() {
-        return rdfFactTemplates;
     }
 
     @Override
@@ -178,7 +163,7 @@ public class FilterMappingEntryCluster implements MappingEntryCluster {
         IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
 
         return new FilterMappingEntryCluster(renamedTree,
-                rdfFactTemplates.apply(renamingSubstitution),
+                rdfTemplates.apply(renamingSubstitution),
                 (ExtensionalDataNode) dataNode.applyFreshRenaming(renamingSubstitution).getRootNode(),
                 variableGenerator,
                 iqFactory,
@@ -214,7 +199,7 @@ public class FilterMappingEntryCluster implements MappingEntryCluster {
         return sameOperation && sameTerms;
     }
 
-    private FilterMappingEntryCluster mergeOnSameFilterCondition(ImmutableMap<Integer, Variable> argumentMap,
+    private MappingEntryCluster mergeOnSameFilterCondition(ImmutableMap<Integer, Variable> argumentMap,
                                                                  ImmutableExpression filterCondition,
                                                                  FilterMappingEntryCluster otherFilterRenamed) {
         ConstructionNode constructionNodeAfterUnification = unify(otherFilterRenamed);
@@ -240,20 +225,11 @@ public class FilterMappingEntryCluster implements MappingEntryCluster {
                 topConstructionNode,
                 childTree);
 
-        RDFFactTemplates mergedRDFTemplates = rdfFactTemplates.merge(otherFilterRenamed.getRDFFactTemplates());
+        RDFFactTemplates mergedRDFTemplates = rdfTemplates.merge(otherFilterRenamed.getRDFFactTemplates());
 
-        Map.Entry<IQTree, RDFFactTemplates> treeTemplatePair = compressMappingAssertion(
+        return compressCluster(
                 newTree.normalizeForOptimization(variableGenerator),
                 mergedRDFTemplates);
-
-        return new FilterMappingEntryCluster(
-                treeTemplatePair.getKey(),
-                treeTemplatePair.getValue(),
-                mergedDataNode,
-                variableGenerator,
-                iqFactory,
-                termFactory,
-                substitutionFactory);
     }
     private ExtensionalDataNode mergeDataNodes(ExtensionalDataNode otherDataNode){
         var argumentMap = dataNode.getArgumentMap();
@@ -289,23 +265,6 @@ public class FilterMappingEntryCluster implements MappingEntryCluster {
                 .orElseGet(() -> iqFactory.createConstructionNode(allVariables));
     }
 
-    private Map.Entry<IQTree, RDFFactTemplates> compressMappingAssertion(IQTree normalizedTree, RDFFactTemplates mergedRDFTemplates) {
-        Substitution<ImmutableTerm> normalizedSubstitution = ((ConstructionNode) normalizedTree.getRootNode()).getSubstitution();
-        RDFFactTemplates compressedTemplates = mergedRDFTemplates.compress(normalizedSubstitution.inverseMap().values().stream()
-                .filter(vs -> vs.size() > 1)
-                .map(ImmutableList::copyOf)
-                .collect(ImmutableCollectors.toSet()));
-
-        ImmutableSet<Variable> compressedVariables = compressedTemplates.getVariables();
-        Substitution<ImmutableTerm> compressedSubstitution = normalizedSubstitution.restrictDomainTo(compressedVariables);
-
-        IQTree compressedTree = iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(compressedVariables, compressedSubstitution),
-                normalizedTree.getChildren().get(0));
-
-        return Map.entry(compressedTree, compressedTemplates);
-    }
-
     private boolean isNotNullFilterCondition(ImmutableExpression filterCondition) {
         return filterCondition.getFunctionSymbol() instanceof DBIsNullOrNotFunctionSymbol
                 && !((DBIsNullOrNotFunctionSymbol) filterCondition.getFunctionSymbol()).isTrueWhenNull();
@@ -319,9 +278,20 @@ public class FilterMappingEntryCluster implements MappingEntryCluster {
     private SimpleMappingEntryCluster asSimpleMappingEntryCluster() {
         return new SimpleMappingEntryCluster(
                 tree,
-                rdfFactTemplates,
+                rdfTemplates,
                 variableGenerator,
                 iqFactory,
+                substitutionFactory);
+    }
+
+    @Override
+    protected MappingEntryCluster buildCluster(IQTree compressedTree, RDFFactTemplates compressedTemplates) {
+        return new FilterMappingEntryCluster(compressedTree,
+                compressedTemplates,
+                dataNode,
+                variableGenerator,
+                iqFactory,
+                termFactory,
                 substitutionFactory);
     }
 }
