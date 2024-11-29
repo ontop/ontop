@@ -195,7 +195,6 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
             return new JoinMappingEntryCluster(
                     tree,
                     rdfTemplates,
-                    joinSubtree.get(),
                     mappingAssertionIQ.getVariableGenerator(),
                     iqFactory,
                     substitutionFactory);

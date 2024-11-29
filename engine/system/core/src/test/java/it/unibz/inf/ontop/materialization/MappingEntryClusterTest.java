@@ -483,7 +483,6 @@ public class MappingEntryClusterTest {
                 IQ_FACTORY.createUnaryIQTree(constr1, joinSubtree));
         JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
-                joinSubtree,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -497,7 +496,6 @@ public class MappingEntryClusterTest {
                 IQ_FACTORY.createUnaryIQTree(constr2, joinSubtree));
         JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
-                joinSubtree,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -520,7 +518,6 @@ public class MappingEntryClusterTest {
                 IQ_FACTORY.createUnaryIQTree(constr1, joinSubtree1));
         JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
-                joinSubtree1,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -536,7 +533,6 @@ public class MappingEntryClusterTest {
                 IQ_FACTORY.createUnaryIQTree(constr2, joinSubtree2));
         JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
-                joinSubtree2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -560,7 +556,6 @@ public class MappingEntryClusterTest {
                 IQ_FACTORY.createUnaryIQTree(constr1, joinSubtree1));
         JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
-                joinSubtree1,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -574,7 +569,6 @@ public class MappingEntryClusterTest {
                 IQ_FACTORY.createUnaryIQTree(constr2, joinSubtree2));
         JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
-                joinSubtree2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -598,7 +592,6 @@ public class MappingEntryClusterTest {
                 IQ_FACTORY.createUnaryIQTree(constr1, joinSubtree1));
         JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
-                joinSubtree1,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -615,7 +608,6 @@ public class MappingEntryClusterTest {
                 IQ_FACTORY.createUnaryIQTree(constr2, joinSubtree2));
         JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
-                joinSubtree2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -640,7 +632,6 @@ public class MappingEntryClusterTest {
                 IQ_FACTORY.createUnaryIQTree(constr1, joinSubtree));
         JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
-                joinSubtree,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -654,7 +645,6 @@ public class MappingEntryClusterTest {
                 IQ_FACTORY.createUnaryIQTree(constr2, joinSubtree));
         JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
-                joinSubtree,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -678,7 +668,6 @@ public class MappingEntryClusterTest {
                 IQ_FACTORY.createUnaryIQTree(constr1, joinSubtree));
         JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
-                joinSubtree,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -692,7 +681,6 @@ public class MappingEntryClusterTest {
                 IQ_FACTORY.createUnaryIQTree(constr2, joinSubtree));
         JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
-                joinSubtree,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -799,7 +787,6 @@ public class MappingEntryClusterTest {
                 IQ_FACTORY.createUnaryIQTree(constr1, joinSubtree1));
         JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
-                joinSubtree1,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -816,7 +803,6 @@ public class MappingEntryClusterTest {
                 IQ_FACTORY.createUnaryIQTree(constr2, joinSubtree));
         JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
-                joinSubtree,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, SUBSTITUTION_FACTORY);
 
