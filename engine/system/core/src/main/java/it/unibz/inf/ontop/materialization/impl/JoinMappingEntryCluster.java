@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Collection;
 import java.util.Map;
@@ -97,10 +96,8 @@ public class JoinMappingEntryCluster implements MappingEntryCluster {
     }
 
     @Override
-    public ImmutableList<RelationDefinition> getRelationsDefinitions() {
-        return extensionalNodes.stream()
-                .map(ExtensionalDataNode::getRelationDefinition)
-                .collect(ImmutableCollectors.toList());
+    public ImmutableList<ExtensionalDataNode> getDataNodes() {
+        return extensionalNodes;
     }
 
     @Override

@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.materialization.impl;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
@@ -67,8 +66,8 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
     }
 
     @Override
-    public ImmutableList<RelationDefinition> getRelationsDefinitions() {
-        return ImmutableList.of(dataNode.getRelationDefinition());
+    public ImmutableList<ExtensionalDataNode> getDataNodes() {
+        return ImmutableList.of(dataNode);
     }
 
     @Override

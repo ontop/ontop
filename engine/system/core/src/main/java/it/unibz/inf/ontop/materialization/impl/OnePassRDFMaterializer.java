@@ -51,7 +51,6 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
     private final QueryLogger.Factory queryLoggerFactory;
     private final QueryContext.Factory queryContextFactory;
     private final TermFactory termFactory;
-    private final QueryTransformerFactory queryTransformerFactory;
 
     private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
     private final ImmutableList<MappingEntryCluster> mappingInformation;
@@ -73,7 +72,6 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         this.queryLoggerFactory = injector.getInstance(QueryLogger.Factory.class);
         this.queryContextFactory = injector.getInstance(QueryContext.Factory.class);
         this.termFactory = injector.getInstance(TermFactory.class);
-        this.queryTransformerFactory = injector.getInstance(QueryTransformerFactory.class);
 
         Mapping saturatedMapping = specification.getSaturatedMapping();
         ImmutableList<IQ> mappingAssertionsIQs = saturatedMapping.getRDFAtomPredicates().stream()
@@ -158,8 +156,8 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         ImmutableList<ImmutableList<MappingEntryCluster>> groupedByJoinRelationsInfos = mappingInformation.stream()
                 .filter(m -> m instanceof JoinMappingEntryCluster)
                 .map(m -> Map.entry(
-                        m.getRelationsDefinitions().stream()
-                                .map(rel -> rel.getAtomPredicate().getName())
+                        m.getDataNodes().stream()
+                                .map(node -> node.getRelationDefinition().getAtomPredicate().getName())
                                 .collect(ImmutableCollectors.toSet()),
                         m))
                 .collect(ImmutableCollectors.toMultimap())
@@ -170,7 +168,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         ImmutableList<ImmutableList<MappingEntryCluster>> groupedBySingleRelationInfo = mappingInformation.stream()
                 .filter(m -> !(m instanceof ComplexMappingEntryCluster || m instanceof JoinMappingEntryCluster))
                 .map(m -> Map.entry(
-                        m.getRelationsDefinitions().get(0).getAtomPredicate().getName(),
+                        m.getDataNodes().get(0).getRelationDefinition().getAtomPredicate().getName(),
                         m))
                 .collect(ImmutableCollectors.toMultimap())
                 .asMap().values().stream()
@@ -246,8 +244,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                     mappingAssertionIQ.getVariableGenerator(),
                     iqFactory,
                     substitutionFactory,
-                    termFactory,
-                    queryTransformerFactory);
+                    termFactory);
 
         } else {
             return new ComplexMappingEntryCluster(mappingAssertionIQ.getTree(), rdfTemplates, substitutionFactory);

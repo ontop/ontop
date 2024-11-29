@@ -2,10 +2,8 @@ package it.unibz.inf.ontop.materialization.impl;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.Attribute;
-import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -19,7 +17,6 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Map;
 import java.util.Optional;
@@ -29,31 +26,28 @@ import java.util.stream.Stream;
 
 public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster {
     private final IQTree tree;
-    private final RDFFactTemplates rdfFactTemplates;
+    private final RDFFactTemplates rdfTemplates;
     private final ExtensionalDataNode relationDefinitionNode;
     private final ImmutableMap<Integer, Attribute> constantAttributes;
     private final VariableGenerator variableGenerator;
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
-    private final QueryTransformerFactory queryTransformerFactory;
 
     public DictionaryPatternMappingEntryCluster(IQTree tree,
-                                                RDFFactTemplates rdfFactTemplates,
+                                                RDFFactTemplates rdfTemplates,
                                                 ImmutableMap<Integer, Attribute> constantAttributes,
                                                 ExtensionalDataNode relationDefinitionNode,
                                                 VariableGenerator variableGenerator,
                                                 IntermediateQueryFactory iqFactory,
                                                 SubstitutionFactory substitutionFactory,
-                                                TermFactory termFactory,
-                                                QueryTransformerFactory queryTransformerFactory) {
-        this.rdfFactTemplates = rdfFactTemplates;
+                                                TermFactory termFactory) {
+        this.rdfTemplates = rdfTemplates;
         this.constantAttributes = constantAttributes;
         this.variableGenerator = variableGenerator;
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
-        this.queryTransformerFactory = queryTransformerFactory;
 
         this.tree = relationDefinitionNode.getArgumentMap().values().stream().anyMatch(t -> t instanceof DBConstant)
                 ? makeEqualityConditionExplicit(tree, constantAttributes, relationDefinitionNode)
@@ -68,7 +62,7 @@ public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster
 
     @Override
     public RDFFactTemplates getRDFFactTemplates() {
-        return rdfFactTemplates;
+        return rdfTemplates;
     }
 
     @Override
@@ -84,8 +78,8 @@ public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster
         }
         ImmutableMap<Integer, Variable> argumentMap = (ImmutableMap<Integer, Variable>) relationDefinitionNode.getArgumentMap();
 
-        boolean sameRelation = other.getRelationsDefinitions().get(0).getAtomPredicate().getName()
-                .equals(getRelationsDefinitions().get(0).getAtomPredicate().getName());
+        boolean sameRelation = other.getDataNodes().get(0).getRelationDefinition().getAtomPredicate().getName()
+                .equals(relationDefinitionNode.getRelationDefinition().getAtomPredicate().getName());
         if (!sameRelation) {
             return Optional.empty();
         }
@@ -104,8 +98,8 @@ public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster
     }
 
     @Override
-    public ImmutableList<RelationDefinition> getRelationsDefinitions() {
-        return ImmutableList.of(relationDefinitionNode.getRelationDefinition());
+    public ImmutableList<ExtensionalDataNode> getDataNodes() {
+        return ImmutableList.of(relationDefinitionNode);
     }
 
     private IQTree makeEqualityConditionExplicit(IQTree tree, ImmutableMap<Integer, Attribute> constantAttributes, ExtensionalDataNode relationDefinitionNode) {
@@ -166,7 +160,7 @@ public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster
         } else {
             return tree.getChildren().stream()
                     .map(this::findExtensionalNode)
-                    .findAny().orElseThrow( () -> new MinorOntopInternalBugException("The leaf node of a mapping assertion is expected to be an ExtensionalDataNode"));
+                    .findAny().orElseThrow(() -> new MinorOntopInternalBugException("The leaf node of a mapping assertion is expected to be an ExtensionalDataNode"));
         }
     }
 
@@ -182,7 +176,7 @@ public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster
         ConstructionNode optionalRenamingNode = createOptionalRenamingNode(argumentMap, otherArgumentMap);
         IQTree childTree = iqFactory.createUnaryIQTree(optionalRenamingNode, relationDefinitionNode);
 
-        RDFFactTemplates mergedRDFTemplates = rdfFactTemplates.merge(otherDictionaryInfo.getRDFFactTemplates());
+        RDFFactTemplates mergedRDFTemplates = rdfTemplates.merge(otherDictionaryInfo.getRDFFactTemplates());
 
         Substitution<ImmutableTerm> topConstructSubstitution = ((ConstructionNode) tree.getRootNode()).getSubstitution();
         Substitution<ImmutableTerm> otherTopConstructSubstitution = ((ConstructionNode) otherDictionaryInfo.tree.getRootNode()).getSubstitution();
@@ -218,8 +212,7 @@ public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster
                 variableGenerator,
                 iqFactory,
                 substitutionFactory,
-                termFactory,
-                queryTransformerFactory);
+                termFactory);
     }
 
     private DictionaryPatternMappingEntryCluster mergeOnSimpleMappingInfo(SimpleMappingEntryCluster otherSimpleInfo,
@@ -234,7 +227,7 @@ public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster
         ConstructionNode optionalRenamingNode = createOptionalRenamingNode(argumentMap, otherArgumentMap);
         IQTree childTree = iqFactory.createUnaryIQTree(optionalRenamingNode, relationDefinitionNode);
 
-        RDFFactTemplates mergedRDFTemplates = rdfFactTemplates.merge(otherSimpleInfo.getRDFFactTemplates());
+        RDFFactTemplates mergedRDFTemplates = rdfTemplates.merge(otherSimpleInfo.getRDFFactTemplates());
 
         Substitution<ImmutableTerm> topConstructSubstitution = ((ConstructionNode) tree.getRootNode()).getSubstitution();
         Substitution<ImmutableTerm> otherTopConstructSubstitution = ((ConstructionNode) otherSimpleInfo.getIQTree().getRootNode()).getSubstitution();
@@ -257,8 +250,7 @@ public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster
                 variableGenerator,
                 iqFactory,
                 substitutionFactory,
-                termFactory,
-                queryTransformerFactory);
+                termFactory);
     }
 
     private ImmutableMap<Integer, Variable> mergeRelationArguments(ImmutableMap <Integer, Variable > argumentMap,
@@ -372,14 +364,13 @@ public class DictionaryPatternMappingEntryCluster implements MappingEntryCluster
 
         return new DictionaryPatternMappingEntryCluster(
                 renamedTree,
-                rdfFactTemplates.apply(renamingSubstitution),
+                rdfTemplates.apply(renamingSubstitution),
                 constantAttributes,
                 (ExtensionalDataNode) relationDefinitionNode.applyFreshRenaming(renamingSubstitution).getRootNode(),
                 generator,
                 iqFactory,
                 substitutionFactory,
-                termFactory,
-                queryTransformerFactory);
+                termFactory);
     }
 
     private Substitution<ImmutableTerm> createIfElseNullDisjunctionSubstitution(ImmutableMap<Variable, ImmutableTerm> thenLexicalTerms,

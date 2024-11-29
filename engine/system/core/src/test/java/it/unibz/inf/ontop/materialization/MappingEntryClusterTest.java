@@ -366,7 +366,7 @@ public class MappingEntryClusterTest {
                 iq1.getVariableGenerator(),
                 IQ_FACTORY,
                 SUBSTITUTION_FACTORY,
-                TERM_FACTORY, QUERY_TRANSFORMER_FACTORY);
+                TERM_FACTORY);
         MappingEntryCluster assertion2 = new DictionaryPatternMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 constantAttributes,
@@ -374,7 +374,7 @@ public class MappingEntryClusterTest {
                 iq2.getVariableGenerator(),
                 IQ_FACTORY,
                 SUBSTITUTION_FACTORY,
-                TERM_FACTORY, QUERY_TRANSFORMER_FACTORY);
+                TERM_FACTORY);
         assert assertion1.merge(assertion2).isPresent();
     }
 
@@ -399,7 +399,7 @@ public class MappingEntryClusterTest {
                 iq2.getVariableGenerator(),
                 IQ_FACTORY,
                 SUBSTITUTION_FACTORY,
-                TERM_FACTORY, QUERY_TRANSFORMER_FACTORY);
+                TERM_FACTORY);
 
         ImmutableExpression conjunctionCondition = TERM_FACTORY.getConjunction(
                 TERM_FACTORY.getStrictEquality(TERM_FACTORY.getVariable("NAME"),
@@ -440,7 +440,7 @@ public class MappingEntryClusterTest {
                 iq1.getVariableGenerator(),
                 IQ_FACTORY,
                 SUBSTITUTION_FACTORY,
-                TERM_FACTORY, QUERY_TRANSFORMER_FACTORY);
+                TERM_FACTORY);
         MappingEntryCluster assertion2 = new DictionaryPatternMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 constantAttributes,
@@ -448,7 +448,7 @@ public class MappingEntryClusterTest {
                 iq2.getVariableGenerator(),
                 IQ_FACTORY,
                 SUBSTITUTION_FACTORY,
-                TERM_FACTORY, QUERY_TRANSFORMER_FACTORY);
+                TERM_FACTORY);
 
         DictionaryPatternMappingEntryCluster mergedAssertion = (DictionaryPatternMappingEntryCluster) assertion1.merge(assertion2).get();
         ImmutableSet<Variable> subjects = mergedAssertion.getRDFFactTemplates().getTriplesOrQuadsVariables().stream()

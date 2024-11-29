@@ -1,11 +1,9 @@
 package it.unibz.inf.ontop.materialization;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Optional;
 
@@ -20,7 +18,7 @@ public interface MappingEntryCluster {
 
     Optional<MappingEntryCluster> merge(MappingEntryCluster other);
 
-    ImmutableList<RelationDefinition> getRelationsDefinitions();
+    ImmutableList<ExtensionalDataNode> getDataNodes();
 
     MappingEntryCluster renameConflictingVariables(VariableGenerator conflictingVariableGenerator);
 

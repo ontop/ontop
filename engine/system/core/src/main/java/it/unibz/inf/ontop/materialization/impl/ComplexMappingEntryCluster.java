@@ -1,22 +1,15 @@
 package it.unibz.inf.ontop.materialization.impl;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
 import it.unibz.inf.ontop.materialization.MappingEntryCluster;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -48,7 +41,7 @@ public class ComplexMappingEntryCluster implements MappingEntryCluster {
     }
 
     @Override
-    public ImmutableList<RelationDefinition> getRelationsDefinitions() {
+    public ImmutableList<ExtensionalDataNode> getDataNodes() {
         return findRelations(tree);
     }
 
@@ -62,10 +55,10 @@ public class ComplexMappingEntryCluster implements MappingEntryCluster {
         return new ComplexMappingEntryCluster(renamedTree, renamedRDFTemplates, substitutionFactory);
     }
 
-    private ImmutableList<RelationDefinition> findRelations(IQTree tree) {
+    public ImmutableList<ExtensionalDataNode> findRelations(IQTree tree) {
         if (tree.getChildren().isEmpty()) {
             if (tree.getRootNode() instanceof ExtensionalDataNode) {
-                return ImmutableList.of(((ExtensionalDataNode) tree.getRootNode()).getRelationDefinition());
+                return ImmutableList.of(((ExtensionalDataNode) tree.getRootNode()));
             }
         } else {
             return tree.getChildren().stream()
