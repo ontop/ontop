@@ -5,6 +5,10 @@
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:lgd="http://linkedgeodata.org/resource/"
+     xmlns:lgdg="http://linkedgeodata.org/geometry/"
+     xmlns:lgdo="http://linkedgeodata.org/ontology/"
+     xmlns:bldg="http://www.opengis.net/citygml/building/2.0/"
      ontologyIRI="https://github.com/aghoshpro/OntoRaster/">
     <Prefix name="" IRI="https://github.com/aghoshpro/OntoRaster/"/>
     <Prefix name="geo" IRI="http://www.opengis.net/ont/geosparql#"/>
@@ -137,6 +141,9 @@
     </Declaration>
     <Declaration>
         <DataProperty abbreviatedIRI="rasdb:rasterName"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="lgdo:bldgType"/>
     </Declaration>
     <Declaration>
         <DataProperty abbreviatedIRI="rasdb:reason"/>
@@ -446,6 +453,10 @@
     </DataPropertyRange>
     <DataPropertyRange>
         <DataProperty abbreviatedIRI="rasdb:rasterName"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="lgdo:bldgType"/>
         <Datatype abbreviatedIRI="xsd:string"/>
     </DataPropertyRange>
     <DataPropertyRange>

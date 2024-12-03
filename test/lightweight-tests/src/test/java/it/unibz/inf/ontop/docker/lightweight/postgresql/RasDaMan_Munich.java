@@ -64,7 +64,7 @@ public class RasDaMan_Munich extends AbstractDockerRDF4JTest {
     }
 
     @Test
-    public void avgRasterSPATIAL_Munich() {
+    public void avgElevation_Munich() {
         String query2 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
@@ -79,11 +79,11 @@ public class RasDaMan_Munich extends AbstractDockerRDF4JTest {
                 + "BIND (rasdb:rasSpatialAverage(?timeStamp, ?regionWkt, ?rasterName) AS ?v)"
                 + "}\n";
 
-        executeAndCompareValues(query2, ImmutableList.of("\"531.421\"^^xsd:string")); //Actual   :["506"^^xsd:string, "532.064"^^xsd:string, "531.421"^^xsd:string] If target not set
+        executeAndCompareValues(query2, ImmutableList.of("\"531.421\"^^xsd:double")); //Actual   :["506"^^xsd:string, "532.064"^^xsd:string, "531.421"^^xsd:string] If target not set
     }
 
     @Test
-    public void avgRasterSPATIAL_Munich2() {
+    public void avgTemperature_Munich2() {
         String query3 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
@@ -98,25 +98,158 @@ public class RasDaMan_Munich extends AbstractDockerRDF4JTest {
                 + "BIND (rasdb:rasSpatialAverage(?timeStamp, ?regionWkt, ?rasterName) AS ?v)"
                 + "}\n";
 
-        executeAndCompareValues(query3, ImmutableList.of("\"13801.222\"^^xsd:string"));
+        executeAndCompareValues(query3, ImmutableList.of("\"13801.222\"^^xsd:double"));
     }
 
     @Test
-    public void avgRasterSPATIAL_Munich3() {
+    public void avgElevation_Munich3() {
         String query4 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
                 + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
                 + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
-                + "?vector rdfs:label ?regionName .\n"
-                + "?vector geo:asWKT ?regionWkt .\n"
+                + "?dist rdfs:label ?distName .\n"
+                + "?dist geo:asWKT ?distWkt .\n"
                 + "?raster rasdb:rasterName ?rasterName .\n"
-                + "FILTER (?regionName = 'Laim'\n)"
                 + "FILTER (CONTAINS(?rasterName, 'Elevation')\n)"
                 + "BIND ('2000-02-11T00:00:00+00:00'^^xsd:dateTime AS ?timeStamp\n)"
-                + "BIND (rasdb:rasSpatialAverage(?timeStamp, ?regionWkt, ?rasterName) AS ?v)"
+                + "BIND (rasdb:rasSpatialAverage(?timeStamp, ?distWkt, ?rasterName) AS ?v)"
+                + "FILTER (?v > 540.0\n)"
                 + "}\n";
 
-        executeAndCompareValues(query4, ImmutableList.of("\"531.421\"^^xsd:string"));
+        executeAndCompareValues(query4, ImmutableList.of("\"541.145\"^^xsd:double", "\"541.369\"^^xsd:double", "\"542.039\"^^xsd:double", "\"540.93\"^^xsd:double", "\"559.552\"^^xsd:double", "\"547.363\"^^xsd:double"));
     }
+
+    @Test
+    public void OSM_Munich() {
+        String query4 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
+                + "PREFIX lgdo:\t<http://linkedgeodata.org/ontology/>\n"
+                + "SELECT (COUNT (?v) AS ?count) {\n"
+                + "?bldg lgdo:bldgType ?bldgType .\n"
+                + "FILTER (?bldgType = 'church'\n)"
+                + "}\n";
+
+        executeAndCompareValues(query4, ImmutableList.of("\"266\"^^xsd:integer"));
+    }
+
+    @Test
+    public void OSM_Munich2() {
+        String query5 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
+                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
+                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
+                + "PREFIX geof:\t<http://www.opengis.net/def/function/geosparql/>\n"
+                + "PREFIX lgdo:\t<http://linkedgeodata.org/ontology/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
+                + "SELECT ?v {\n"
+                + "?dist rdfs:label ?distName .\n"
+                + "?dist geo:asWKT ?distWkt .\n"
+                + "?bldg lgdo:bldgType ?bldgType .\n"
+                + "?raster rasdb:rasterName ?rasterName .\n"
+                + "FILTER (CONTAINS(?rasterName, 'Elevation')\n)"
+                + "BIND ('2000-02-11T00:00:00+00:00'^^xsd:dateTime AS ?timeStamp\n)"
+                + "BIND (rasdb:rasSpatialAverage(?timeStamp, ?distWkt, ?rasterName) AS ?v)"
+                + "FILTER (?v < 520.0 && ?bldgType = 'synagogue'\n)"
+                + "}\n";
+
+
+        executeAndCompareValues(query5, ImmutableList.of("\"541.145\"^^xsd:double", "\"541.369\"^^xsd:double", "\"542.039\"^^xsd:double", "\"540.93\"^^xsd:double", "\"559.552\"^^xsd:double", "\"547.363\"^^xsd:double"));
+    }
+
+    @Test
+    public void OSM_Munich3() {
+        String query6 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
+                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
+                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
+                + "PREFIX geof:\t<http://www.opengis.net/def/function/geosparql/>\n"
+                + "PREFIX lgdo:\t<http://linkedgeodata.org/ontology/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
+                + "SELECT ?v {\n"
+//                + "?dist a :District .\n"
+                + "?dist rdfs:label ?distName .\n"
+                + "?dist geo:asWKT ?distWkt .\n"
+                + "?bldg a lgdo:Synagogue .\n"
+                + "?bldg geo:asWKT ?bldgWkt .\n"
+                + "FILTER (geof:sfWithin(?bldgWkt, ?distWkt)\n)"
+                + "?raster rasdb:rasterName ?rasterName .\n"
+                + "FILTER (CONTAINS(?rasterName, 'Elevation')\n)"
+                + "BIND ('2000-02-11T00:00:00+00:00'^^xsd:dateTime AS ?timeStamp\n)"
+                + "BIND (rasdb:rasSpatialAverage(?timeStamp, ?distWkt, ?rasterName) AS ?v)"
+//                + "FILTER (geof:sfWithin(?bldgWkt, ?distWkt) && ?bldgType = 'synagogue'\n)"
+                + "FILTER (?v < 520.0\n)"
+                + "}\n";
+
+        executeAndCompareValues(query6, ImmutableList.of("\"517.755\"^^xsd:double"));
+    }
+
+    @Test
+    public void OSM_Munich4() {
+        String query6 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
+                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
+                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
+                + "PREFIX geof:\t<http://www.opengis.net/def/function/geosparql/>\n"
+                + "PREFIX lgdo:\t<http://linkedgeodata.org/ontology/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
+                + "SELECT ?v {\n"
+                + "?dist rdfs:label ?distName .\n"
+                + "?dist geo:asWKT ?distWkt .\n"
+                + "?bldg a lgdo:Temple .\n"
+                + "?bldg geo:asWKT ?bldgWkt .\n"
+                + "FILTER (geof:sfWithin(?bldgWkt, ?distWkt)\n)"
+                + "?raster rasdb:rasterName ?rasterName .\n"
+                + "FILTER (CONTAINS(?rasterName, 'Elevation')\n)"
+                + "BIND ('2000-02-11T00:00:00+00:00'^^xsd:dateTime AS ?timeStamp\n)"
+                + "BIND (rasdb:rasSpatialAverage(?timeStamp, ?distWkt, ?rasterName) AS ?v)"
+                + "FILTER (?v < 530.0\n)"
+                + "}\n";
+
+        executeAndCompareValues(query6, ImmutableList.of("\"521.257\"^^xsd:double", "\"520.765\"^^xsd:double", "\"517.755\"^^xsd:double"));
+    }
+
+    @Test
+    public void OSM_Munich5() {
+        String query6 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
+                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
+                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
+                + "PREFIX geof:\t<http://www.opengis.net/def/function/geosparql/>\n"
+                + "PREFIX lgdo:\t<http://linkedgeodata.org/ontology/>\n"
+                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
+                + "SELECT ?v {\n"
+                + "?dist rdfs:label ?distName .\n"
+                + "?dist geo:asWKT ?distWkt .\n"
+                + "?bldg a lgdo:Church .\n"
+                + "?bldg geo:asWKT ?bldgWkt .\n"
+                + "FILTER (geof:sfWithin(?bldgWkt, ?distWkt)\n)"
+                + "?raster rasdb:rasterName ?rasterName .\n"
+                + "FILTER (CONTAINS(?rasterName, 'Elevation')\n)"
+                + "BIND ('2000-02-11T00:00:00+00:00'^^xsd:dateTime AS ?timeStamp\n)"
+                + "BIND (rasdb:rasSpatialAverage(?timeStamp, ?distWkt, ?rasterName) AS ?v)"
+                + "FILTER (?v > 545.0 && ?v < 550.0\n)"
+                + "}\n";
+
+        executeAndCompareValues(query6, ImmutableList.of("\"547.363\"^^xsd:double", "\"547.363\"^^xsd:double", "\"547.363\"^^xsd:double", "\"547.363\"^^xsd:double", "\"547.363\"^^xsd:double", "\"547.363\"^^xsd:double", "\"547.363\"^^xsd:double", "\"547.363\"^^xsd:double", "\"547.363\"^^xsd:double", "\"547.363\"^^xsd:double", "\"547.363\"^^xsd:double"));
+    }
+
+//    @Test
+//    public void OSM_Munich5() {
+//        String query6 = "PREFIX :\t<https://github.com/aghoshpro/OntoRaster/>\n"
+//                + "PREFIX rdfs:\t<http://www.w3.org/2000/01/rdf-schema#>\n"
+//                + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
+//                + "PREFIX geof:\t<http://www.opengis.net/def/function/geosparql/>\n"
+//                + "PREFIX lgdo:\t<http://linkedgeodata.org/ontology/>\n"
+//                + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
+//                + "SELECT ?v {\n"
+//                + "?dist geo:asWKT ?distWkt .\n"
+//                + "?bldg lgdo:bldgType ?bldgType .\n"
+//                + "?bldg geo:asWKT ?bldgWkt .\n"
+//                + "?raster rasdb:rasterName ?rasterName .\n"
+//                + "FILTER (CONTAINS(?rasterName, 'Elevation')\n)"
+//                + "BIND ('2000-02-11T00:00:00+00:00'^^xsd:dateTime AS ?timeStamp\n)"
+//                + "BIND (rasdb:rasSpatialAverage(?timeStamp, ?distWkt, ?rasterName) AS ?v)"
+//                + "FILTER (geof:sfWithin(?bldgWkt, ?distWkt) && ?bldgType = 'church'\n)"
+//                + "FILTER (?v > 545.0 && ?v < 550.0\n)"
+//                + "}\n";
+//
+//        executeAndCompareValues(query6, ImmutableList.of("\"517.755\"^^xsd:double", "\"521.257\"^^xsd:double", "\"520.765\"^^xsd:double"));
+//    }
+
 }

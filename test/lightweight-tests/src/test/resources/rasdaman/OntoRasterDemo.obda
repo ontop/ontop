@@ -17,41 +17,41 @@ rasdb:		https://github.com/aghoshpro/RasterDataCube/
 [MappingDeclaration] @collection [[
 ; ---------------- Mapping for All Regions in Sweden -----------------
 
-mappingId	Get_region_class_table_sweden
-target		:vector_region/sweden/{regionId} a :Region .
-source		SELECT gid AS regionId FROM public.region_sweden
+;mappingId	Get_region_class_table_sweden
+;target		:vector_region/sweden/{regionId} a :Region .
+;source		SELECT gid AS regionId FROM public.region_sweden
 
-mappingId	mapping_regionName_sweden
-target		:vector_region/sweden/{regionId} rdfs:label {regionName}^^xsd:string .
-source		SELECT gid AS regionId, name_2 AS regionName FROM public.region_sweden
+;mappingId	mapping_regionName_sweden
+;target		:vector_region/sweden/{regionId} rdfs:label {regionName}^^xsd:string .
+;source		SELECT gid AS regionId, name_2 AS regionName FROM public.region_sweden
 
-mappingId	mapping_region_regionWkt_sweden
-target		:vector_region/sweden/{regionId} geo:asWKT {regionWkt}^^geo:wktLiteral .
-source		SELECT gid AS regionId,
-                CASE
-                    WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
-                    ELSE ST_AsText(geom)
-                END AS regionWkt
-            FROM public.region_sweden
+;mappingId	mapping_region_regionWkt_sweden
+;target		:vector_region/sweden/{regionId} geo:asWKT {regionWkt}^^geo:wktLiteral .
+;source		SELECT gid AS regionId,
+;                CASE
+;                    WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
+;                    ELSE ST_AsText(geom)
+;                END AS regionWkt
+;            FROM public.region_sweden
 
 ; ---------------- Mapping for All Regions in Bavaria -----------------
 
-mappingId	Get_region_class_table_bavaria
-target		:vector_region/bavaria/{regionId} a :Region .
-source		SELECT gid AS regionId FROM public.region_bavaria
+;mappingId	Get_region_class_table_bavaria
+;target		:vector_region/bavaria/{regionId} a :Region .
+;source		SELECT gid AS regionId FROM public.region_bavaria
 
-mappingId	mapping_regionName_bavaria
-target		:vector_region/bavaria/{regionId} rdfs:label {regionName}^^xsd:string .
-source		SELECT gid AS regionId, name_2 AS regionName FROM public.region_bavaria
+;mappingId	mapping_regionName_bavaria
+;target		:vector_region/bavaria/{regionId} rdfs:label {regionName}^^xsd:string .
+;source		SELECT gid AS regionId, name_2 AS regionName FROM public.region_bavaria
 
-mappingId	mapping_region_regionWkt_bavaria
-target		:vector_region/bavaria/{regionId} geo:asWKT {regionWkt}^^geo:wktLiteral .
-source		SELECT gid AS regionId,
-                   CASE
-                       WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
-                       ELSE ST_AsText(geom)
-                   END AS regionWkt
-            FROM public.region_bavaria
+;mappingId	mapping_region_regionWkt_bavaria
+;target		:vector_region/bavaria/{regionId} geo:asWKT {regionWkt}^^geo:wktLiteral .
+;source		SELECT gid AS regionId,
+;                   CASE
+;                       WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
+;                       ELSE ST_AsText(geom)
+;                   END AS regionWkt
+;            FROM public.region_bavaria
 
 ; ---------------- 25 Districts of Munich -----------------
 
@@ -74,49 +74,74 @@ source		SELECT gid AS regionId,
 
 ; ---------------- 105 Sub-Districts of Munich -----------------
 
-mappingId	Munich_Sub_Districts_id
-target		:vector_region/bavaria/munich/subdistricts/{regionId} a :Region .
-source		SELECT gid AS regionId FROM public.munich_subdist105
+;mappingId	Munich_Sub_Districts_id
+;target		:vector_region/bavaria/munich/subdistricts/{regionId} a :Region .
+;source		SELECT gid AS regionId FROM public.munich_subdist105
 
-mappingId	Munich_Sub_Districts_name
-target		:vector_region/bavaria/munich/subdistricts/{regionId} rdfs:label {regionName}^^xsd:string .
-source		SELECT gid AS regionId, name AS regionName FROM public.munich_subdist105
+;mappingId	Munich_Sub_Districts_name
+;target		:vector_region/bavaria/munich/subdistricts/{regionId} rdfs:label {regionName}^^xsd:string .
+;source		SELECT gid AS regionId, name AS regionName FROM public.munich_subdist105
 
-mappingId	Munich_Sub_Districts_regionWkt
-target		:vector_region/bavaria/munich/subdistricts/{regionId} geo:asWKT {regionWkt}^^geo:wktLiteral .
-source		SELECT gid AS regionId,
-                   CASE
-                       WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
-                       ELSE ST_AsText(geom)
-                   END AS regionWkt
-            FROM public.munich_subdist105
+;mappingId	Munich_Sub_Districts_regionWkt
+;target		:vector_region/bavaria/munich/subdistricts/{regionId} geo:asWKT {regionWkt}^^geo:wktLiteral .
+;source		SELECT gid AS regionId,
+;                   CASE
+;                       WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
+;                       ELSE ST_AsText(geom)
+;                   END AS regionWkt
+;            FROM public.munich_subdist105
 
 ; ---------------- OSM Buildings Footprint of Munich -----------------
 
 mappingId	Munich_OSM_gid
-target		:osm/bavaria/munich/{buildingId} a :Osm .
+target		:osmlink/bavaria/munich/{buildingId} a :Osm .
 source		SELECT gid AS buildingId FROM public.munich_bldings_osm
 
 mappingId	Munich_OSM_id
-target		:osm/bavaria/munich/{buildingOsmId} a :Osm .
-source		SELECT osm_id AS buildingOsmId FROM public.munich_bldings_osm
+target		:osmlink/bavaria/munich/{buildingId} :hasosmid {osm_id} .
+source		SELECT gid AS buildingId, osm_id FROM public.munich_bldings_osm
 
-mappingId	Munich_OSM_building_name
-target		:osm/bavaria/munich/{buildingId} rdfs:label {buildingName}^^xsd:string .
-source		SELECT gid AS buildingId, name AS buildingName FROM public.munich_bldings_osm
+;mappingId	Munich_OSM_building_name
+;target		:osmlink/bavaria/munich/{buildingId} rdfs:label {buildingName}^^xsd:string .
+;source		SELECT gid AS buildingId, name AS buildingName FROM public.munich_bldings_osm
 
 mappingId	Munich_OSM_building_type
-target		:osm/bavaria/munich/{buildingId} rdfs:label {buildingType}^^xsd:string .
-source		SELECT gid AS buildingId, type AS buildingType FROM public.munich_bldings_osm
+target		:osmlink/bavaria/munich/{buildingId} a lgdo:{bldgType} .
+source		SELECT gid AS buildingId, initCap(type) AS bldgType FROM public.munich_bldings_osm
 
-mappingId	Munich_OSM_building_buildingWkt
-target		:osm/bavaria/munich/{buildingId} geo:asWKT {buildingWkt}^^geo:wktLiteral .
+mappingId	Munich_OSM_building_geometry
+target		:osmlink/bavaria/munich/{buildingId} geo:asWKT {bldgWkt}^^geo:wktLiteral .
 source		SELECT gid AS buildingId,
                    CASE
                        WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
                        ELSE ST_AsText(geom)
-                   END AS buildingWkt
+                   END AS bldgWkt
             FROM public.munich_bldings_osm
+
+
+
+;mappingId	Munich_OSM_building_id
+;target		:osmlink/lgd:relation{osm_id} rdfs:label lgdg:type{osm_id} .
+;source		SELECT osm_id FROM public.munich_bldings_osm
+
+;mappingId	Munich_OSM_building_name
+;target		:osmlinklgd:relation{osm_id} rdfs:label {buildingName}^^xsd:string .
+;source		SELECT osm_id, name AS buildingName FROM public.munich_bldings_osm
+
+;mappingId	Munich_OSM_building_type
+;target		:osmlinklgd:relation{osm_id} rdfs:label {buildingType}^^xsd:string .
+;source		SELECT osm_id, type AS buildingType FROM public.munich_bldings_osm
+
+;mappingId	Munich_OSM_building_geometry
+;target		:osmlinklgd:relation{osm_id} geo:asWKT {buildingWkt}^^geo:wktLiteral .
+;source		SELECT osm_id,
+;                   CASE
+;                       WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
+;                       ELSE ST_AsText(geom)
+;                   END AS buildingWkt
+;            FROM public.munich_bldings_osm
+
+
 
 
 ; ---------------- 3DCityGML Buildings Data of Munich -----------------
@@ -138,22 +163,22 @@ source		SELECT gid AS buildingId,
 
 ; ---------------- Mapping for All Regions in South Tyrol -----------------
 
-mappingId	Get_region_class_table_south_tyrol
-target		:vector_region/tyrol/{regionId} a :Region .
-source		SELECT gid AS regionId FROM public.region_south_tyrol
+;mappingId	Get_region_class_table_south_tyrol
+;target		:vector_region/tyrol/{regionId} a :Region .
+;source		SELECT gid AS regionId FROM public.region_south_tyrol
 
-mappingId	mapping_regionName_south_tyrol
-target		:vector_region/tyrol/{regionId} rdfs:label {regionName}^^xsd:string .
-source		SELECT gid AS regionId, name_3 AS regionName FROM public.region_south_tyrol
+;mappingId	mapping_regionName_south_tyrol
+;target		:vector_region/tyrol/{regionId} rdfs:label {regionName}^^xsd:string .
+;source		SELECT gid AS regionId, name_3 AS regionName FROM public.region_south_tyrol
 
-mappingId	mapping_region_regionWkt_south_tyrol
-target		:vector_region/tyrol/{regionId} geo:asWKT {regionWkt}^^geo:wktLiteral .
-source		SELECT gid AS regionId,
-                   CASE
-                       WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
-                       ELSE ST_AsText(geom)
-                   END AS regionWkt
-            FROM public.region_south_tyrol
+;mappingId	mapping_region_regionWkt_south_tyrol
+;target		:vector_region/tyrol/{regionId} geo:asWKT {regionWkt}^^geo:wktLiteral .
+;source		SELECT gid AS regionId,
+;                   CASE
+;                       WHEN ST_NumGeometries(geom) = 1 THEN ST_AsText(ST_GeometryN(geom, 1))
+;                       ELSE ST_AsText(geom)
+;                   END AS regionWkt
+;            FROM public.region_south_tyrol
 
 
 ; ---------------- Mapping for Raster Metadata Lookup Table -----------------
