@@ -29,6 +29,8 @@ import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
+import it.unibz.inf.ontop.materialization.MaterializationParams;
+import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
@@ -100,9 +102,9 @@ public class RDB2RDFTest {
 			// Timezone was not expected to be added. Same for milliseconds (not so relevant test)
 			"tc0016c",
 			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.
-			"dg0018",
+			//"dg0018",
 			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.
-			"tc0018a",
+			//"tc0018a",
 			// Should create an IRI based on a column and the base IRI. TODO: support the base IRI in R2RML
 			"tc0019a"
 	);
@@ -272,7 +274,7 @@ public class RDB2RDFTest {
         }
 	}
 
-	protected Repository createRepository() throws Exception {
+	protected OntopSystemConfiguration createSystemConfiguration() throws Exception {
 		logger.info("RDB2RDFTest " + name + " " + mappingFile);
 
 		OntopSQLOWLAPIConfiguration configuration;
@@ -288,9 +290,7 @@ public class RDB2RDFTest {
 		else {
 			configuration = bootstrapDMConfiguration();
 		}
-		OntopRepository repo = OntopRepository.defaultRepository(configuration);
-		repo.init();
-		return repo;
+		return configuration;
 	}
 
 	Builder<? extends Builder<?>> createStandardConfigurationBuilder() {
@@ -349,11 +349,11 @@ public class RDB2RDFTest {
 	}
 
 	@Test
-	public void runTest() throws Exception {
+	public void runTestWithConstructQuery() throws Exception {
 		assumeTrue(!IGNORE.contains(name));
 
 		try {
- 			runTestWithoutIgnores();
+ 			runTestWithoutIgnores(TestType.CONSTRUCT);
 		}
 		catch (Throwable e) {
 			FAILURES.add('"' + name + '"');
@@ -361,13 +361,41 @@ public class RDB2RDFTest {
 		}
 	}
 
-	private void runTestWithoutIgnores() throws Exception {
-		boolean outputExpected = (outputFile != null);
+	@Test
+	public void runTestWithLegacyMaterializer() throws Exception {
+		assumeTrue(!IGNORE.contains(name));
 
+		try {
+			runTestWithoutIgnores(TestType.LEGACY_MATERIALIZER);
+		}
+		catch (Throwable e) {
+			FAILURES.add('"' + name + '"');
+			throw e;
+		}
+	}
+
+	@Test
+	public void runTestWithOnePassMaterializer() throws Exception {
+		assumeTrue(!IGNORE.contains(name));
+
+		try {
+			runTestWithoutIgnores(TestType.ONEPASS_MATERIALIZER);
+		}
+		catch (Throwable e) {
+			FAILURES.add('"' + name + '"');
+			throw e;
+		}
+	}
+
+	private void runTestWithoutIgnores(TestType type) throws Exception {
+		boolean outputExpected = (outputFile != null);
+		OntopSystemConfiguration configuration;
 		Repository dataRep;
 
 		try {
-			dataRep = createRepository();
+			configuration = createSystemConfiguration();
+			dataRep = OntopRepository.defaultRepository(configuration);
+			dataRep.init();
 		}
 		catch (Exception e) {
 			// if the test is for invalid mappings then there won't be any expected output and exception here is fine
@@ -379,10 +407,29 @@ public class RDB2RDFTest {
 			return;
 		}
 
-
 		try (RepositoryConnection con = dataRep.getConnection()) {
-			String tripleQuery = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
-			GraphQuery gquery = con.prepareGraphQuery(QueryLanguage.SPARQL, tripleQuery);
+			GraphQuery gquery;
+			if (type == TestType.CONSTRUCT) {
+				String tripleQuery = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
+				gquery = con.prepareGraphQuery(QueryLanguage.SPARQL, tripleQuery);
+			} else {
+				MaterializationParams materializationParams;
+				if (type == TestType.LEGACY_MATERIALIZER) {
+					materializationParams = MaterializationParams.defaultBuilder()
+							.useLegacyMaterializer(true)
+							.build();
+				} else {
+					materializationParams = MaterializationParams.defaultBuilder()
+							.useLegacyMaterializer(false)
+							.build();
+				}
+
+				RDF4JMaterializer materializer = RDF4JMaterializer.defaultMaterializer(
+						configuration,
+						materializationParams
+				);
+				gquery = materializer.materialize();
+			}
 			Set<Statement> triples = QueryResults.asSet(gquery.evaluate());
 
 			TupleQuery namedGraphQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
@@ -444,6 +491,12 @@ public class RDB2RDFTest {
 		Rio.write(actual, pw, RDFFormat.NQUADS);
 		pw.flush();
 		return sw.toString();
+	}
+
+	private enum TestType {
+		CONSTRUCT,
+		LEGACY_MATERIALIZER,
+		ONEPASS_MATERIALIZER
 	}
 }
 
