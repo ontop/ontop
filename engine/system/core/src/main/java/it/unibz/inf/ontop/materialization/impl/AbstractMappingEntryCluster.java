@@ -11,8 +11,10 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.materialization.MappingEntryCluster;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -27,17 +29,20 @@ public abstract class AbstractMappingEntryCluster implements MappingEntryCluster
     protected final RDFFactTemplates rdfTemplates;
     protected final IntermediateQueryFactory iqFactory;
     protected final SubstitutionFactory substitutionFactory;
+    protected final TermFactory termFactory;
 
     protected AbstractMappingEntryCluster(IQTree tree,
                                           RDFFactTemplates rdfTemplates,
                                           VariableGenerator variableGenerator,
                                           IntermediateQueryFactory iqFactory,
-                                          SubstitutionFactory substitutionFactory) {
+                                          SubstitutionFactory substitutionFactory,
+                                          TermFactory termFactory) {
         this.tree = tree;
         this.rdfTemplates = rdfTemplates;
         this.variableGenerator = variableGenerator;
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
+        this.termFactory = termFactory;
     }
 
     @Override
@@ -48,6 +53,17 @@ public abstract class AbstractMappingEntryCluster implements MappingEntryCluster
     @Override
     public RDFFactTemplates getRDFFactTemplates() {
         return rdfTemplates;
+    }
+
+    @Override
+    public MappingEntryCluster renameConflictingVariables(VariableGenerator conflictingVariableGenerator) {
+        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory
+                .generateNotConflictingRenaming(conflictingVariableGenerator,
+                        tree.getKnownVariables());
+
+        return buildCluster(
+                tree.applyFreshRenaming(renamingSubstitution),
+                rdfTemplates.apply(renamingSubstitution));
     }
 
     protected ExtensionalDataNode mergeDataNodes(ExtensionalDataNode dataNode, ExtensionalDataNode otherDataNode){

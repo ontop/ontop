@@ -27,7 +27,6 @@ import java.util.stream.IntStream;
 public class FilterMappingEntryCluster extends AbstractMappingEntryCluster implements MappingEntryCluster {
     private final ExtensionalDataNode dataNode;
     private final Optional<ImmutableExpression> filterCondition;
-    private final TermFactory termFactory;
 
     public FilterMappingEntryCluster(IQTree originalTree,
                                      RDFFactTemplates rdfTemplates,
@@ -35,8 +34,7 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
                                      IntermediateQueryFactory iqFactory,
                                      TermFactory termFactory,
                                      SubstitutionFactory substitutionFactory) {
-        super(originalTree, rdfTemplates, variableGenerator, iqFactory, substitutionFactory);
-        this.termFactory = termFactory;
+        super(originalTree, rdfTemplates, variableGenerator, iqFactory, substitutionFactory, termFactory);
 
         if (originalTree.getChildren().get(0).getRootNode() instanceof FilterNode) {
             IQTree filterSubtree = originalTree.getChildren().get(0);
@@ -95,7 +93,7 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
     private Optional<MappingEntryCluster> mergeWithFilterCluster(FilterMappingEntryCluster otherFilterCluster) {
 
         variableGenerator.registerAdditionalVariables(otherFilterCluster.variableGenerator.getKnownVariables());
-        FilterMappingEntryCluster otherRenamed = otherFilterCluster.renameConflictingVariables(variableGenerator);
+        FilterMappingEntryCluster otherRenamed = (FilterMappingEntryCluster) otherFilterCluster.renameConflictingVariables(variableGenerator);
 
         if (!(dataNode.getArgumentMap().values().stream().allMatch(v -> v instanceof Variable))
                 || !(otherRenamed.dataNode.getArgumentMap().values().stream().allMatch(v -> v instanceof Variable))) {
@@ -157,19 +155,6 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
         return iqFactory.createConstructionNode(
                 originalConstructionNode.getVariables(),
                 newSubstitution);
-    }
-
-    public FilterMappingEntryCluster renameConflictingVariables(VariableGenerator generator) {
-        var renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(generator, tree.getKnownVariables());
-        IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
-
-        return new FilterMappingEntryCluster(renamedTree,
-                rdfTemplates.apply(renamingSubstitution),
-                variableGenerator,
-                iqFactory,
-                termFactory,
-                substitutionFactory
-        );
     }
 
     private boolean haveSameFilterCondition(ImmutableMap<Integer, Variable> argumentMap,
@@ -242,7 +227,8 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
                 rdfTemplates,
                 variableGenerator,
                 iqFactory,
-                substitutionFactory);
+                substitutionFactory,
+                termFactory);
     }
 
     @Override

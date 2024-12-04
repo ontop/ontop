@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 
 public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCluster implements MappingEntryCluster {
     private final ExtensionalDataNode dataNode;
-    private final TermFactory termFactory;
 
     public DictionaryPatternMappingEntryCluster(IQTree tree,
                                                 RDFFactTemplates rdfTemplates,
@@ -32,13 +31,12 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
                                                 IntermediateQueryFactory iqFactory,
                                                 SubstitutionFactory substitutionFactory,
                                                 TermFactory termFactory) {
-        super(tree, rdfTemplates, variableGenerator, iqFactory, substitutionFactory);
-        this.termFactory = termFactory;
+        super(tree, rdfTemplates, variableGenerator, iqFactory, substitutionFactory, termFactory);
 
-        var node = (ExtensionalDataNode) this.tree.getChildren().get(0);
-        this.tree = node.getArgumentMap().values().stream()
+        var originalDataNode = (ExtensionalDataNode) this.tree.getChildren().get(0);
+        this.tree = originalDataNode.getArgumentMap().values().stream()
                 .anyMatch(t -> t instanceof DBConstant)
-                ? makeEqualityConditionExplicit(tree, node)
+                ? makeEqualityConditionExplicit(tree, originalDataNode)
                 : tree;
         this.dataNode = (ExtensionalDataNode) this.tree.getChildren().get(0);
     }
@@ -69,15 +67,12 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
         }
 
         variableGenerator.registerAdditionalVariables(other.getIQTree().getKnownVariables());
-        if (other instanceof SimpleMappingEntryCluster) {
-            SimpleMappingEntryCluster otherSimpleCluster = ((SimpleMappingEntryCluster) other)
-                    .renameConflictingVariables(variableGenerator);
-            return Optional.of(mergeWithSimpleCluster(otherSimpleCluster));
+        MappingEntryCluster otherRenamed = other.renameConflictingVariables(variableGenerator);
+        if (otherRenamed instanceof SimpleMappingEntryCluster) {
+            return Optional.of(mergeWithSimpleCluster((SimpleMappingEntryCluster) otherRenamed));
         }
 
-        DictionaryPatternMappingEntryCluster otherDictionaryCluster = ((DictionaryPatternMappingEntryCluster) other)
-                .renameConflictingVariables(variableGenerator);
-        return Optional.of(mergeWithDictionaryCluster(otherDictionaryCluster));
+        return Optional.of(mergeWithDictionaryCluster((DictionaryPatternMappingEntryCluster) otherRenamed));
 
     }
 
@@ -264,19 +259,6 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
                 })
                 .flatMap(Streams::concat)
                 .collect(substitutionFactory.toSubstitution());
-    }
-
-    public DictionaryPatternMappingEntryCluster renameConflictingVariables(VariableGenerator generator) {
-        var renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(generator, tree.getKnownVariables());
-        IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
-
-        return new DictionaryPatternMappingEntryCluster(
-                renamedTree,
-                rdfTemplates.apply(renamingSubstitution),
-                generator,
-                iqFactory,
-                substitutionFactory,
-                termFactory);
     }
 
     @Override

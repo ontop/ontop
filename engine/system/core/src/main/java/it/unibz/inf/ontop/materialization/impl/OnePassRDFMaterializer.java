@@ -185,7 +185,12 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         RDFFactTemplates rdfTemplates = new RDFFactTemplatesImpl(ImmutableList.of((mappingAssertionIQ.getProjectionAtom().getArguments())));
 
         if (hasNotSupportedNode(tree)) {
-            return new ComplexMappingEntryCluster(tree, rdfTemplates, substitutionFactory);
+            return new ComplexMappingEntryCluster(tree,
+                    rdfTemplates,
+                    mappingAssertionIQ.getVariableGenerator(),
+                    iqFactory,
+                    substitutionFactory,
+                    termFactory);
         }
 
         Optional<IQTree> joinSubtree = findJoinSubtree(tree);
@@ -195,13 +200,19 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                     rdfTemplates,
                     mappingAssertionIQ.getVariableGenerator(),
                     iqFactory,
-                    substitutionFactory);
+                    substitutionFactory,
+                    termFactory);
         }
 
 
         ImmutableList<ExtensionalDataNode> extensionalNodes = findExtensionalNodes(tree);
         if (extensionalNodes.size() != 1) {
-            return new ComplexMappingEntryCluster(tree, rdfTemplates, substitutionFactory);
+            return new ComplexMappingEntryCluster(tree,
+                    rdfTemplates,
+                    mappingAssertionIQ.getVariableGenerator(),
+                    iqFactory,
+                    substitutionFactory,
+                    termFactory);
         }
         ExtensionalDataNode extensionalNode = extensionalNodes.get(0);
 
@@ -222,7 +233,8 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                     rdfTemplates,
                     mappingAssertionIQ.getVariableGenerator(),
                     iqFactory,
-                    substitutionFactory);
+                    substitutionFactory,
+                    termFactory);
         } else if (argumentMap.values().stream().anyMatch(v -> v instanceof DBConstant)) {
             //return new ComplexMappingAssertionInfo(tree, rdfTemplates, substitutionFactory);
             return new DictionaryPatternMappingEntryCluster(tree,
@@ -233,7 +245,12 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                     termFactory);
 
         } else {
-            return new ComplexMappingEntryCluster(mappingAssertionIQ.getTree(), rdfTemplates, substitutionFactory);
+            return new ComplexMappingEntryCluster(tree,
+                    rdfTemplates,
+                    mappingAssertionIQ.getVariableGenerator(),
+                    iqFactory,
+                    substitutionFactory,
+                    termFactory);
         }
     }
 

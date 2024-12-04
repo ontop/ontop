@@ -1,12 +1,12 @@
 package it.unibz.inf.ontop.materialization.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
 import it.unibz.inf.ontop.materialization.MappingEntryCluster;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -14,15 +14,15 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Collection;
 import java.util.Optional;
 
-public class ComplexMappingEntryCluster implements MappingEntryCluster {
-    private final IQTree tree;
-    private final RDFFactTemplates rdfFactTemplates;
-    private final SubstitutionFactory substitutionFactory;
+public class ComplexMappingEntryCluster extends AbstractMappingEntryCluster implements MappingEntryCluster {
 
-    public ComplexMappingEntryCluster(IQTree tree, RDFFactTemplates rdfFactTemplates, SubstitutionFactory substitutionFactory) {
-        this.tree = tree;
-        this.rdfFactTemplates = rdfFactTemplates;
-        this.substitutionFactory = substitutionFactory;
+    public ComplexMappingEntryCluster(IQTree tree,
+                                      RDFFactTemplates rdfFactTemplates,
+                                      VariableGenerator variableGenerator,
+                                      IntermediateQueryFactory iqFactory,
+                                      SubstitutionFactory substitutionFactory,
+                                      TermFactory termFactory) {
+        super(tree, rdfFactTemplates, variableGenerator, iqFactory, substitutionFactory, termFactory);
     }
 
     @Override
@@ -31,28 +31,18 @@ public class ComplexMappingEntryCluster implements MappingEntryCluster {
     }
 
     @Override
-    public IQTree getIQTree() {
-        return tree;
-    }
-
-    @Override
-    public RDFFactTemplates getRDFFactTemplates() {
-        return rdfFactTemplates;
-    }
-
-    @Override
     public ImmutableList<ExtensionalDataNode> getDataNodes() {
         return findRelations(tree);
     }
 
     @Override
-    public MappingEntryCluster renameConflictingVariables(VariableGenerator conflictingVariableGenerator) {
-        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
-                conflictingVariableGenerator, tree.getKnownVariables());
-        IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
-        RDFFactTemplates renamedRDFTemplates = rdfFactTemplates.apply(renamingSubstitution);
-
-        return new ComplexMappingEntryCluster(renamedTree, renamedRDFTemplates, substitutionFactory);
+    protected MappingEntryCluster buildCluster(IQTree compressedTree, RDFFactTemplates compressedTemplates) {
+        return new ComplexMappingEntryCluster(compressedTree,
+                compressedTemplates,
+                variableGenerator,
+                iqFactory,
+                substitutionFactory,
+                termFactory);
     }
 
     public ImmutableList<ExtensionalDataNode> findRelations(IQTree tree) {

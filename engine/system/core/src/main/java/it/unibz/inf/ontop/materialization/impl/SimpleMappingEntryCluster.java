@@ -7,8 +7,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
 import it.unibz.inf.ontop.materialization.MappingEntryCluster;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -20,12 +19,13 @@ import java.util.Optional;
 public class SimpleMappingEntryCluster extends AbstractMappingEntryCluster implements MappingEntryCluster {
     private final ExtensionalDataNode dataNode;
 
-    public SimpleMappingEntryCluster (IQTree tree,
+    public SimpleMappingEntryCluster(IQTree tree,
                                      RDFFactTemplates rdfTemplates,
                                      VariableGenerator variableGenerator,
                                      IntermediateQueryFactory iqFactory,
-                                     SubstitutionFactory substitutionFactory) {
-        super(tree, rdfTemplates, variableGenerator, iqFactory, substitutionFactory);
+                                     SubstitutionFactory substitutionFactory,
+                                     TermFactory termFactory) {
+        super(tree, rdfTemplates, variableGenerator, iqFactory, substitutionFactory, termFactory);
 
         this.dataNode = (ExtensionalDataNode) tree.getChildren().get(0);
     }
@@ -62,12 +62,12 @@ public class SimpleMappingEntryCluster extends AbstractMappingEntryCluster imple
             return Optional.empty();
         }
 
-        return Optional.of(mergeWithSimpleCluster(otherSimpleCluster));
+        variableGenerator.registerAdditionalVariables(otherSimpleCluster.variableGenerator.getKnownVariables());
+        SimpleMappingEntryCluster otherRenamed = (SimpleMappingEntryCluster) otherSimpleCluster.renameConflictingVariables(variableGenerator);
+        return Optional.of(mergeWithSimpleCluster(otherRenamed));
     }
 
-    private MappingEntryCluster mergeWithSimpleCluster(SimpleMappingEntryCluster otherSimpleCluster) {
-        variableGenerator.registerAdditionalVariables(otherSimpleCluster.variableGenerator.getKnownVariables());
-        SimpleMappingEntryCluster otherRenamed = otherSimpleCluster.renameConflictingVariables(variableGenerator);
+    private MappingEntryCluster mergeWithSimpleCluster(SimpleMappingEntryCluster otherRenamed) {
 
         ConstructionNode constructionNodeAfterUnification = unify(dataNode, otherRenamed.dataNode);
 
@@ -90,21 +90,6 @@ public class SimpleMappingEntryCluster extends AbstractMappingEntryCluster imple
                 mergedRDFTemplates);
     }
 
-
-    public SimpleMappingEntryCluster renameConflictingVariables(VariableGenerator conflictingVariableGenerator) {
-        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
-                conflictingVariableGenerator, tree.getKnownVariables());
-        IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
-        RDFFactTemplates renamedRDFTemplates = rdfTemplates.apply(renamingSubstitution);
-
-        return new SimpleMappingEntryCluster(
-                renamedTree,
-                renamedRDFTemplates,
-                variableGenerator,
-                iqFactory,
-                substitutionFactory);
-    }
-
     @Override
     protected MappingEntryCluster buildCluster(IQTree compressedTree, RDFFactTemplates compressedTemplates) {
         return new SimpleMappingEntryCluster(
@@ -112,6 +97,7 @@ public class SimpleMappingEntryCluster extends AbstractMappingEntryCluster imple
                 compressedTemplates,
                 variableGenerator,
                 iqFactory,
-                substitutionFactory);
+                substitutionFactory,
+                termFactory);
     }
 }

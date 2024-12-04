@@ -9,8 +9,8 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.materialization.MappingEntryCluster;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -27,8 +27,9 @@ public class JoinMappingEntryCluster extends AbstractMappingEntryCluster impleme
                                    RDFFactTemplates rdfFactTemplates,
                                    VariableGenerator variableGenerator,
                                    IntermediateQueryFactory iqFactory,
-                                   SubstitutionFactory substitutionFactory) {
-        super(tree, rdfFactTemplates, variableGenerator, iqFactory, substitutionFactory);
+                                   SubstitutionFactory substitutionFactory,
+                                   TermFactory termFactory) {
+        super(tree, rdfFactTemplates, variableGenerator, iqFactory, substitutionFactory, termFactory);
 
         this.joinSubtree = tree.getChildren().get(0);
         this.extensionalNodes = findExtensionalNodes(joinSubtree);
@@ -40,7 +41,8 @@ public class JoinMappingEntryCluster extends AbstractMappingEntryCluster impleme
                 compressedTemplates,
                 variableGenerator,
                 iqFactory,
-                substitutionFactory);
+                substitutionFactory,
+                termFactory);
     }
 
     @Override
@@ -60,7 +62,8 @@ public class JoinMappingEntryCluster extends AbstractMappingEntryCluster impleme
 
         JoinMappingEntryCluster otherJoinCluster = (JoinMappingEntryCluster) other;
         variableGenerator.registerAdditionalVariables(otherJoinCluster.variableGenerator.getKnownVariables());
-        JoinMappingEntryCluster otherJoinClusterRenamed = otherJoinCluster.renameConflictingVariables(variableGenerator);
+        JoinMappingEntryCluster otherJoinClusterRenamed = (JoinMappingEntryCluster) otherJoinCluster
+                .renameConflictingVariables(variableGenerator);
 
         ImmutableMap<RelationDefinition, ImmutableList<ExtensionalDataNode>> relationDefinitionNodesMap = Streams.concat(
                         joinSubtree.getChildren().stream(), otherJoinClusterRenamed.joinSubtree.getChildren().stream())
@@ -84,28 +87,13 @@ public class JoinMappingEntryCluster extends AbstractMappingEntryCluster impleme
                 .allMatch(nodes -> nodes.size() == 2);
 
         if (areAllAttributesVars && sameJoinChildren && areJoinConditionsEqual(otherJoinClusterRenamed)) {
-            return mergeJoinMappingAssertions(otherJoinClusterRenamed, relationDefinitionNodesMap);
+            return mergeWithJoinCluster(otherJoinClusterRenamed, relationDefinitionNodesMap);
         }
         return Optional.empty();
     }
 
-    @Override
-    public JoinMappingEntryCluster renameConflictingVariables(VariableGenerator conflictingVariableGenerator) {
-        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory
-                .generateNotConflictingRenaming(conflictingVariableGenerator,
-                        tree.getKnownVariables());
-        IQTree renamedTree = tree.applyFreshRenaming(renamingSubstitution);
-
-        return new JoinMappingEntryCluster(
-                renamedTree,
-                rdfTemplates.apply(renamingSubstitution),
-                variableGenerator,
-                iqFactory,
-                substitutionFactory);
-    }
-
-    private Optional<MappingEntryCluster> mergeJoinMappingAssertions(JoinMappingEntryCluster otherCluster,
-                                                                     ImmutableMap<RelationDefinition, ImmutableList<ExtensionalDataNode>> relationDefinitionNodesMap) {
+    private Optional<MappingEntryCluster> mergeWithJoinCluster(JoinMappingEntryCluster otherCluster,
+                                                               ImmutableMap<RelationDefinition, ImmutableList<ExtensionalDataNode>> relationDefinitionNodesMap) {
         ImmutableList<IQTree> mergedJoinSubtrees = relationDefinitionNodesMap.values().stream()
                 .map(extensionalDataNodes -> {
                     ExtensionalDataNode node1 = extensionalDataNodes.get(0);
