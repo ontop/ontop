@@ -182,14 +182,10 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
         ConstructionNode optionalRenamingNode = unify(dataNode, otherCluster.getDataNodes().get(0));
         IQTree childTree = iqFactory.createUnaryIQTree(optionalRenamingNode, mergedDataNode);
 
-        Substitution<ImmutableTerm> topConstructSubstitution = ((ConstructionNode) tree.getRootNode()).getSubstitution();
-        Substitution<ImmutableTerm> otherTopConstructSubstitution = ((ConstructionNode) otherCluster.getIQTree().getRootNode()).getSubstitution();
-        Substitution<ImmutableTerm> mergedTopSubstitution = topConstructSubstitution.compose(
-                otherTopConstructSubstitution);
+        ConstructionNode topConstructionNode = createMergedTopConstructionNode(
+                (ConstructionNode) tree.getRootNode(),
+                (ConstructionNode) otherCluster.getIQTree().getRootNode());
 
-        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
-                Sets.union(tree.getVariables(), otherCluster.getIQTree().getVariables()).immutableCopy(),
-                mergedTopSubstitution);
         return iqFactory.createUnaryIQTree(
                 topConstructionNode,
                 childTree).normalizeForOptimization(variableGenerator);

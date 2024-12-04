@@ -83,6 +83,17 @@ public abstract class AbstractMappingEntryCluster implements MappingEntryCluster
                 .orElseGet(() -> iqFactory.createConstructionNode(allVariables));
     }
 
+    protected ConstructionNode createMergedTopConstructionNode(ConstructionNode topConstructionNode, ConstructionNode otherTopConstructionNode) {
+        var topSubstitution = topConstructionNode.getSubstitution();
+        var otherTopSubstitution = otherTopConstructionNode.getSubstitution();
+        var mergedTopSubstitution = topSubstitution.compose(
+                otherTopSubstitution);
+
+        return iqFactory.createConstructionNode(
+                Sets.union(topConstructionNode.getVariables(), otherTopConstructionNode.getVariables()).immutableCopy(),
+                mergedTopSubstitution);
+    }
+
     protected MappingEntryCluster compressCluster(IQTree normalizedTree, RDFFactTemplates mergedRDFTemplates) {
         Substitution<ImmutableTerm> normalizedSubstitution = ((ConstructionNode) normalizedTree.getRootNode()).getSubstitution();
         RDFFactTemplates compressedTemplates = mergedRDFTemplates.compress(normalizedSubstitution.inverseMap().values().stream()

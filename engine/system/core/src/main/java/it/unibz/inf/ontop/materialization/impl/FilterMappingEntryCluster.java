@@ -203,14 +203,9 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
 
         ExtensionalDataNode mergedDataNode = mergeDataNodes(dataNode, otherFilterRenamed.dataNode);
 
-        var topConstructSubstitution = ((ConstructionNode) tree.getRootNode()).getSubstitution();
-        var otherTopConstructSubstitution = ((ConstructionNode) otherFilterRenamed.tree.getRootNode()).getSubstitution();
-        var mergedTopSubstitution = topConstructSubstitution.compose(
-                otherTopConstructSubstitution);
-
-        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
-                Sets.union(tree.getVariables(), otherFilterRenamed.tree.getVariables()).immutableCopy(),
-                mergedTopSubstitution);
+        ConstructionNode topConstructionNode = createMergedTopConstructionNode(
+                (ConstructionNode) tree.getRootNode(),
+                (ConstructionNode) otherFilterRenamed.tree.getRootNode());
 
         IQTree childTree = iqFactory.createUnaryIQTree(
                 constructionNodeAfterUnification,
@@ -258,4 +253,5 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
                 termFactory,
                 substitutionFactory);
     }
+
 }

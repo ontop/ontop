@@ -7,10 +7,8 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
 import it.unibz.inf.ontop.materialization.MappingEntryCluster;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -21,7 +19,6 @@ import java.util.Optional;
  */
 public class SimpleMappingEntryCluster extends AbstractMappingEntryCluster implements MappingEntryCluster {
     private final ExtensionalDataNode dataNode;
-    private final Substitution<ImmutableTerm> topConstructSubstitution;
 
     public SimpleMappingEntryCluster (IQTree tree,
                                      RDFFactTemplates rdfTemplates,
@@ -29,7 +26,7 @@ public class SimpleMappingEntryCluster extends AbstractMappingEntryCluster imple
                                      IntermediateQueryFactory iqFactory,
                                      SubstitutionFactory substitutionFactory) {
         super(tree, rdfTemplates, variableGenerator, iqFactory, substitutionFactory);
-        this.topConstructSubstitution = ((ConstructionNode) tree.getRootNode()).getSubstitution();
+
         this.dataNode = (ExtensionalDataNode) tree.getChildren().get(0);
     }
 
@@ -76,12 +73,9 @@ public class SimpleMappingEntryCluster extends AbstractMappingEntryCluster imple
 
         ExtensionalDataNode mergedDataNode = mergeDataNodes(dataNode, otherRenamed.dataNode);
 
-        Substitution<ImmutableTerm> mergedTopSubstitution = topConstructSubstitution.compose(
-                otherRenamed.topConstructSubstitution);
-
-        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
-                Sets.union(tree.getVariables(), otherRenamed.tree.getVariables()).immutableCopy(),
-                mergedTopSubstitution);
+        ConstructionNode topConstructionNode = createMergedTopConstructionNode(
+                (ConstructionNode) tree.getRootNode(),
+                (ConstructionNode) otherRenamed.tree.getRootNode());
 
         IQTree newTree = iqFactory.createUnaryIQTree(
                 topConstructionNode,

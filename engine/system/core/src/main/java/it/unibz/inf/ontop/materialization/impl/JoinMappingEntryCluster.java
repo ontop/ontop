@@ -9,10 +9,8 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.materialization.MappingEntryCluster;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -118,14 +116,9 @@ public class JoinMappingEntryCluster extends AbstractMappingEntryCluster impleme
                 })
                 .collect(ImmutableCollectors.toList());
 
-        Substitution<ImmutableTerm> topConstructSubstitution = ((ConstructionNode) tree.getRootNode()).getSubstitution();
-        Substitution<ImmutableTerm> otherTopConstructSubstitution = ((ConstructionNode) otherCluster.getIQTree().getRootNode()).getSubstitution();
-        Substitution<ImmutableTerm> mergedTopSubstitution = topConstructSubstitution.compose(
-                otherTopConstructSubstitution);
+        ConstructionNode topConstructionNode = createMergedTopConstructionNode((ConstructionNode) tree.getRootNode(),
+                (ConstructionNode) otherCluster.getIQTree().getRootNode());
 
-        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
-                Sets.union(tree.getVariables(), otherCluster.getIQTree().getVariables()).immutableCopy(),
-                mergedTopSubstitution);
         IQTree joinTree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(), mergedJoinSubtrees);
         IQTree mappingTree = iqFactory.createUnaryIQTree(topConstructionNode, joinTree)
                 .normalizeForOptimization(variableGenerator);
