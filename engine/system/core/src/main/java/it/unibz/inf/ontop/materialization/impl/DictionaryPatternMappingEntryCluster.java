@@ -140,7 +140,7 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
     }
 
     private DictionaryPatternMappingEntryCluster mergeWithDictionaryCluster(DictionaryPatternMappingEntryCluster otherDictionaryCluster) {
-        ExtensionalDataNode mergedDataNode = mergeDataNodes(otherDictionaryCluster.dataNode);
+        ExtensionalDataNode mergedDataNode = mergeDataNodes(dataNode, otherDictionaryCluster.dataNode);
 
         IQTree newTree = createMergedIQTree(otherDictionaryCluster, mergedDataNode);
 
@@ -168,7 +168,7 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
     }
 
     private MappingEntryCluster mergeWithSimpleCluster(SimpleMappingEntryCluster otherSimpleCluster) {
-        ExtensionalDataNode mergedDataNode = mergeDataNodes(otherSimpleCluster.getDataNodes().get(0));
+        ExtensionalDataNode mergedDataNode = mergeDataNodes(dataNode, otherSimpleCluster.getDataNodes().get(0));
 
         IQTree mappingTree = createMergedIQTree(otherSimpleCluster, mergedDataNode);
 
@@ -179,7 +179,7 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
 
     private IQTree createMergedIQTree(MappingEntryCluster otherCluster, ExtensionalDataNode mergedDataNode){
 
-        ConstructionNode optionalRenamingNode = unify(otherCluster.getDataNodes().get(0));
+        ConstructionNode optionalRenamingNode = unify(dataNode, otherCluster.getDataNodes().get(0));
         IQTree childTree = iqFactory.createUnaryIQTree(optionalRenamingNode, mergedDataNode);
 
         Substitution<ImmutableTerm> topConstructSubstitution = ((ConstructionNode) tree.getRootNode()).getSubstitution();
@@ -193,56 +193,6 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
         return iqFactory.createUnaryIQTree(
                 topConstructionNode,
                 childTree).normalizeForOptimization(variableGenerator);
-    }
-
-    private ExtensionalDataNode mergeDataNodes(ExtensionalDataNode otherDataNode){
-        var argumentMap = dataNode.getArgumentMap();
-        var otherArgumentMap = otherDataNode.getArgumentMap();
-
-        var mergedArgumentMap = Sets.union(argumentMap.keySet(), otherArgumentMap.keySet()).stream()
-                .collect(ImmutableCollectors.toMap(
-                        idx -> idx,
-                        idx -> Optional.<VariableOrGroundTerm>ofNullable(argumentMap.get(idx))
-                                .orElseGet(() -> otherArgumentMap.get(idx))
-                ));
-
-        return iqFactory.createExtensionalDataNode(dataNode.getRelationDefinition(), mergedArgumentMap);
-    }
-
-    private ConstructionNode unify(ExtensionalDataNode otherDataNode) {
-        var argumentMap = (ImmutableMap<Integer, Variable>) dataNode.getArgumentMap();
-        var otherArgumentMap = (ImmutableMap<Integer, Variable>) otherDataNode.getArgumentMap();
-        var indexes = Sets.union(argumentMap.keySet(), otherArgumentMap.keySet()).stream();
-
-        var unifier = substitutionFactory.onVariables().unifierBuilder()
-                .unify(indexes,
-                        idx -> otherArgumentMap.getOrDefault(idx, argumentMap.get(idx)),
-                        idx -> argumentMap.getOrDefault(idx, otherArgumentMap.get(idx)))
-                .build();
-
-        var allVariables = Sets.union(dataNode.getVariables(), otherDataNode.getVariables())
-                .immutableCopy();
-
-        return unifier
-                .map(s -> iqFactory.createConstructionNode(allVariables, s))
-                .orElseGet(() -> iqFactory.createConstructionNode(allVariables));
-    }
-
-    private Map.Entry<IQTree, RDFFactTemplates> compressMappingAssertion(IQTree normalizedTree, RDFFactTemplates mergedRDFTemplates) {
-        Substitution<ImmutableTerm> normalizedSubstitution = ((ConstructionNode) normalizedTree.getRootNode()).getSubstitution();
-        RDFFactTemplates compressedTemplates = mergedRDFTemplates.compress(normalizedSubstitution.inverseMap().values().stream()
-                .filter(vs -> vs.size() > 1)
-                .map(ImmutableList::copyOf)
-                .collect(ImmutableCollectors.toSet()));
-
-        ImmutableSet<Variable> compressedVariables = compressedTemplates.getVariables();
-        Substitution<ImmutableTerm> compressedSubstitution = normalizedSubstitution.restrictDomainTo(compressedVariables);
-
-        IQTree compressedTree = iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(compressedVariables, compressedSubstitution),
-                normalizedTree.getChildren().get(0));
-
-        return Map.entry(compressedTree, compressedTemplates);
     }
 
     private Substitution<ImmutableTerm> compressIfElseNullTerms(Substitution<ImmutableTerm> rdfTermsConstructionSubstitution,

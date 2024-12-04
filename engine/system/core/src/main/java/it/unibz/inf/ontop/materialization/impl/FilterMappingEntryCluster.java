@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBAndFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsNullOrNotFunctionSymbol;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
@@ -112,7 +111,7 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
         ImmutableExpression filterCondition = this.filterCondition.get();
         ImmutableExpression otherFilterCondition = otherRenamed.filterCondition.get();
         return haveSameFilterCondition(argumentMap, otherArgumentMap, filterCondition, otherFilterCondition)
-                ? Optional.of(mergeOnSameFilterCondition(argumentMap, filterCondition, otherRenamed))
+                ? Optional.of(mergeOnSameFilterCondition(filterCondition, otherRenamed))
                 : Optional.empty();
     }
 
@@ -198,12 +197,11 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
         return sameOperation && sameTerms;
     }
 
-    private MappingEntryCluster mergeOnSameFilterCondition(ImmutableMap<Integer, Variable> argumentMap,
-                                                                 ImmutableExpression filterCondition,
+    private MappingEntryCluster mergeOnSameFilterCondition(ImmutableExpression filterCondition,
                                                                  FilterMappingEntryCluster otherFilterRenamed) {
-        ConstructionNode constructionNodeAfterUnification = unify(otherFilterRenamed);
+        ConstructionNode constructionNodeAfterUnification = unify(dataNode, otherFilterRenamed.dataNode);
 
-        ExtensionalDataNode mergedDataNode = mergeDataNodes(otherFilterRenamed.dataNode);
+        ExtensionalDataNode mergedDataNode = mergeDataNodes(dataNode, otherFilterRenamed.dataNode);
 
         var topConstructSubstitution = ((ConstructionNode) tree.getRootNode()).getSubstitution();
         var otherTopConstructSubstitution = ((ConstructionNode) otherFilterRenamed.tree.getRootNode()).getSubstitution();
@@ -229,39 +227,6 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
         return compressCluster(
                 newTree.normalizeForOptimization(variableGenerator),
                 mergedRDFTemplates);
-    }
-    private ExtensionalDataNode mergeDataNodes(ExtensionalDataNode otherDataNode){
-        var argumentMap = dataNode.getArgumentMap();
-        var otherArgumentMap = otherDataNode.getArgumentMap();
-
-        var mergedArgumentMap = Sets.union(argumentMap.keySet(), otherArgumentMap.keySet()).stream()
-                .collect(ImmutableCollectors.toMap(
-                        idx -> idx,
-                        idx -> Optional.<VariableOrGroundTerm>ofNullable(argumentMap.get(idx))
-                                .orElseGet(() -> otherArgumentMap.get(idx))
-                ));
-
-        return iqFactory.createExtensionalDataNode(dataNode.getRelationDefinition(), mergedArgumentMap);
-    }
-
-    private ConstructionNode unify(FilterMappingEntryCluster renamedOtherCluster) {
-        // Guaranteed for filter mapping entry clusters at this point
-        var argumentMap = (ImmutableMap<Integer, Variable>) dataNode.getArgumentMap();
-        var otherArgumentMap = (ImmutableMap<Integer, Variable>) renamedOtherCluster.dataNode.getArgumentMap();
-        var indexes = Sets.union(argumentMap.keySet(), otherArgumentMap.keySet()).stream();
-
-        var unifier = substitutionFactory.onVariables().unifierBuilder()
-                .unify(indexes,
-                        idx -> otherArgumentMap.getOrDefault(idx, argumentMap.get(idx)),
-                        idx -> argumentMap.getOrDefault(idx, otherArgumentMap.get(idx)))
-                .build();
-
-        var allVariables = Sets.union(dataNode.getVariables(), renamedOtherCluster.dataNode.getVariables())
-                .immutableCopy();
-
-        return unifier
-                .map(s -> iqFactory.createConstructionNode(allVariables, s))
-                .orElseGet(() -> iqFactory.createConstructionNode(allVariables));
     }
 
     private boolean isNotNullFilterCondition(ImmutableExpression filterCondition) {

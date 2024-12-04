@@ -1,18 +1,24 @@
 package it.unibz.inf.ontop.materialization.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.materialization.MappingEntryCluster;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
+
+import java.util.Optional;
 
 public abstract class AbstractMappingEntryCluster implements MappingEntryCluster {
 
@@ -44,6 +50,38 @@ public abstract class AbstractMappingEntryCluster implements MappingEntryCluster
         return rdfTemplates;
     }
 
+    protected ExtensionalDataNode mergeDataNodes(ExtensionalDataNode dataNode, ExtensionalDataNode otherDataNode){
+        var argumentMap = dataNode.getArgumentMap();
+        var otherArgumentMap = otherDataNode.getArgumentMap();
+
+        var mergedArgumentMap = Sets.union(argumentMap.keySet(), otherArgumentMap.keySet()).stream()
+                .collect(ImmutableCollectors.toMap(
+                        idx -> idx,
+                        idx -> Optional.<VariableOrGroundTerm>ofNullable(argumentMap.get(idx))
+                                .orElseGet(() -> otherArgumentMap.get(idx))
+                ));
+
+        return iqFactory.createExtensionalDataNode(dataNode.getRelationDefinition(), mergedArgumentMap);
+    }
+
+    protected ConstructionNode unify(ExtensionalDataNode dataNode, ExtensionalDataNode otherDataNode) {
+        var argumentMap = (ImmutableMap<Integer, Variable>) dataNode.getArgumentMap();
+        var otherArgumentMap = (ImmutableMap<Integer, Variable>) otherDataNode.getArgumentMap();
+        var indexes = Sets.union(argumentMap.keySet(), otherArgumentMap.keySet()).stream();
+
+        var unifier = substitutionFactory.onVariables().unifierBuilder()
+                .unify(indexes,
+                        idx -> otherArgumentMap.getOrDefault(idx, argumentMap.get(idx)),
+                        idx -> argumentMap.getOrDefault(idx, otherArgumentMap.get(idx)))
+                .build();
+
+        var allVariables = Sets.union(dataNode.getVariables(), otherDataNode.getVariables())
+                .immutableCopy();
+
+        return unifier
+                .map(s -> iqFactory.createConstructionNode(allVariables, s))
+                .orElseGet(() -> iqFactory.createConstructionNode(allVariables));
+    }
 
     protected MappingEntryCluster compressCluster(IQTree normalizedTree, RDFFactTemplates mergedRDFTemplates) {
         Substitution<ImmutableTerm> normalizedSubstitution = ((ConstructionNode) normalizedTree.getRootNode()).getSubstitution();

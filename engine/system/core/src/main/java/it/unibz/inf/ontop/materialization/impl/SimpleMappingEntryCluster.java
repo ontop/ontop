@@ -9,11 +9,9 @@ import it.unibz.inf.ontop.materialization.RDFFactTemplates;
 import it.unibz.inf.ontop.materialization.MappingEntryCluster;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -74,9 +72,9 @@ public class SimpleMappingEntryCluster extends AbstractMappingEntryCluster imple
         variableGenerator.registerAdditionalVariables(otherSimpleCluster.variableGenerator.getKnownVariables());
         SimpleMappingEntryCluster otherRenamed = otherSimpleCluster.renameConflictingVariables(variableGenerator);
 
-        ConstructionNode constructionNodeAfterUnification = unify(otherRenamed);
+        ConstructionNode constructionNodeAfterUnification = unify(dataNode, otherRenamed.dataNode);
 
-        ExtensionalDataNode mergedDataNode = mergeDataNodes(otherRenamed.dataNode);
+        ExtensionalDataNode mergedDataNode = mergeDataNodes(dataNode, otherRenamed.dataNode);
 
         Substitution<ImmutableTerm> mergedTopSubstitution = topConstructSubstitution.compose(
                 otherRenamed.topConstructSubstitution);
@@ -111,40 +109,6 @@ public class SimpleMappingEntryCluster extends AbstractMappingEntryCluster imple
                 variableGenerator,
                 iqFactory,
                 substitutionFactory);
-    }
-
-    private ExtensionalDataNode mergeDataNodes(ExtensionalDataNode otherDataNode){
-        var argumentMap = dataNode.getArgumentMap();
-        var otherArgumentMap = otherDataNode.getArgumentMap();
-
-        var mergedArgumentMap = Sets.union(argumentMap.keySet(), otherArgumentMap.keySet()).stream()
-                .collect(ImmutableCollectors.toMap(
-                        idx -> idx,
-                        idx -> Optional.<VariableOrGroundTerm>ofNullable(argumentMap.get(idx))
-                                .orElseGet(() -> otherArgumentMap.get(idx))
-                ));
-
-        return iqFactory.createExtensionalDataNode(dataNode.getRelationDefinition(), mergedArgumentMap);
-    }
-
-    private ConstructionNode unify(SimpleMappingEntryCluster renamedOtherCluster) {
-        // Guaranteed for simple mapping entry clusters
-        var argumentMap = (ImmutableMap<Integer, Variable>) dataNode.getArgumentMap();
-        var otherArgumentMap = (ImmutableMap<Integer, Variable>) renamedOtherCluster.dataNode.getArgumentMap();
-        var indexes = Sets.union(argumentMap.keySet(), otherArgumentMap.keySet()).stream();
-
-        var unifier = substitutionFactory.onVariables().unifierBuilder()
-                .unify(indexes,
-                        idx -> otherArgumentMap.getOrDefault(idx, argumentMap.get(idx)),
-                        idx -> argumentMap.getOrDefault(idx, otherArgumentMap.get(idx)))
-                .build();
-
-        var allVariables = Sets.union(dataNode.getVariables(), renamedOtherCluster.dataNode.getVariables())
-                .immutableCopy();
-
-        return unifier
-                .map(s -> iqFactory.createConstructionNode(allVariables, s))
-                .orElseGet(() -> iqFactory.createConstructionNode(allVariables));
     }
 
     @Override
