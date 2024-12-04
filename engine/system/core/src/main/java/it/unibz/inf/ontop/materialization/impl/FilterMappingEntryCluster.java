@@ -31,13 +31,11 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
 
     public FilterMappingEntryCluster(IQTree originalTree,
                                      RDFFactTemplates rdfTemplates,
-                                     ExtensionalDataNode dataNode,
                                      VariableGenerator variableGenerator,
                                      IntermediateQueryFactory iqFactory,
                                      TermFactory termFactory,
                                      SubstitutionFactory substitutionFactory) {
         super(originalTree, rdfTemplates, variableGenerator, iqFactory, substitutionFactory);
-        this.dataNode = dataNode;
         this.termFactory = termFactory;
 
         if (originalTree.getChildren().get(0).getRootNode() instanceof FilterNode) {
@@ -52,6 +50,10 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
                     ? Optional.of((condition))
                     : Optional.empty();
 
+            this.dataNode = simplifiedTree.getChildren().get(0).getRootNode() instanceof ExtensionalDataNode
+                    ? (ExtensionalDataNode) simplifiedTree.getChildren().get(0).getRootNode()
+                    : (ExtensionalDataNode) simplifiedTree.getChildren().get(0).getChildren().get(0).getRootNode();
+
             ImmutableSet<Variable> nullableVariables = filterCondition.isEmpty()
                     ? Optional.of(condition).get().getVariables()
                     : ImmutableSet.of();
@@ -60,6 +62,7 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
             this.tree = iqFactory.createUnaryIQTree(newConstructionNode, simplifiedTree.getChildren().get(0));
         } else {
             this.filterCondition = Optional.empty();
+            this.dataNode = (ExtensionalDataNode) originalTree.getChildren().get(0).getRootNode();
             this.tree = originalTree;
         }
     }
@@ -162,7 +165,6 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
 
         return new FilterMappingEntryCluster(renamedTree,
                 rdfTemplates.apply(renamingSubstitution),
-                (ExtensionalDataNode) dataNode.applyFreshRenaming(renamingSubstitution).getRootNode(),
                 variableGenerator,
                 iqFactory,
                 termFactory,
@@ -247,7 +249,6 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
     protected MappingEntryCluster buildCluster(IQTree compressedTree, RDFFactTemplates compressedTemplates) {
         return new FilterMappingEntryCluster(compressedTree,
                 compressedTemplates,
-                dataNode,
                 variableGenerator,
                 iqFactory,
                 termFactory,

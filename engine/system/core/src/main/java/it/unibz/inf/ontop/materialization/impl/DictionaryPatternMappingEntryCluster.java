@@ -24,26 +24,23 @@ import java.util.stream.Stream;
 
 public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCluster implements MappingEntryCluster {
     private final ExtensionalDataNode dataNode;
-    private final ImmutableMap<Integer, Attribute> constantAttributes;
     private final TermFactory termFactory;
 
     public DictionaryPatternMappingEntryCluster(IQTree tree,
                                                 RDFFactTemplates rdfTemplates,
-                                                ImmutableMap<Integer, Attribute> constantAttributes,
-                                                ExtensionalDataNode dataNode,
                                                 VariableGenerator variableGenerator,
                                                 IntermediateQueryFactory iqFactory,
                                                 SubstitutionFactory substitutionFactory,
                                                 TermFactory termFactory) {
         super(tree, rdfTemplates, variableGenerator, iqFactory, substitutionFactory);
-        this.constantAttributes = constantAttributes;
         this.termFactory = termFactory;
 
-        this.tree = dataNode.getArgumentMap().values().stream()
+        var node = (ExtensionalDataNode) this.tree.getChildren().get(0);
+        this.tree = node.getArgumentMap().values().stream()
                 .anyMatch(t -> t instanceof DBConstant)
-                ? makeEqualityConditionExplicit(tree, constantAttributes, dataNode)
+                ? makeEqualityConditionExplicit(tree, node)
                 : tree;
-        this.dataNode = (ExtensionalDataNode) this.getIQTree().getChildren().get(0);
+        this.dataNode = (ExtensionalDataNode) this.tree.getChildren().get(0);
     }
 
     @Override
@@ -84,10 +81,16 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
 
     }
 
-    private IQTree makeEqualityConditionExplicit(IQTree tree,
-                                                 ImmutableMap<Integer, Attribute> constantAttributes,
-                                                 ExtensionalDataNode dataNode) {
+    private IQTree makeEqualityConditionExplicit(IQTree tree, ExtensionalDataNode dataNode) {
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> originalArgumentMap = dataNode.getArgumentMap();
+
+        ImmutableMap<Integer, Attribute> constantAttributes = originalArgumentMap.entrySet().stream()
+                .filter(e -> e.getValue() instanceof DBConstant)
+                .map(Map.Entry::getKey)
+                .collect(ImmutableCollectors.toMap(
+                        k -> k,
+                        k -> dataNode.getRelationDefinition().getAttribute(k + 1)));
+
         ImmutableMap<Integer, Variable> constantTermsVariables = constantAttributes.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
@@ -139,7 +142,7 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
                 .collect(substitutionFactory.toSubstitution());
     }
 
-    private DictionaryPatternMappingEntryCluster mergeWithDictionaryCluster(DictionaryPatternMappingEntryCluster otherDictionaryCluster) {
+    private MappingEntryCluster mergeWithDictionaryCluster(DictionaryPatternMappingEntryCluster otherDictionaryCluster) {
         ExtensionalDataNode mergedDataNode = mergeDataNodes(dataNode, otherDictionaryCluster.dataNode);
 
         IQTree newTree = createMergedIQTree(otherDictionaryCluster, mergedDataNode);
@@ -153,18 +156,7 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
                 simplifiedSubstitution);
         IQTree simplifiedTree = iqFactory.createUnaryIQTree(simplifiedConstructionNode, newTree.getChildren().get(0));
 
-        DictionaryPatternMappingEntryCluster compressedCluster =
-                (DictionaryPatternMappingEntryCluster) compressCluster(simplifiedTree, mergedRDFTemplates);
-
-        ImmutableMap<Integer, Attribute> mergedConstantAttributes = Streams.concat(
-                constantAttributes.entrySet().stream(),
-                otherDictionaryCluster.constantAttributes.entrySet().stream()
-        ).collect(ImmutableCollectors.toMap(
-                Map.Entry::getKey,
-                Map.Entry::getValue,
-                (e1, e2) -> e1));
-
-        return compressedCluster.updateConstantAttributes(mergedConstantAttributes);
+        return compressCluster(simplifiedTree, mergedRDFTemplates);
     }
 
     private MappingEntryCluster mergeWithSimpleCluster(SimpleMappingEntryCluster otherSimpleCluster) {
@@ -281,21 +273,7 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
         return new DictionaryPatternMappingEntryCluster(
                 renamedTree,
                 rdfTemplates.apply(renamingSubstitution),
-                constantAttributes,
-                (ExtensionalDataNode) dataNode.applyFreshRenaming(renamingSubstitution).getRootNode(),
                 generator,
-                iqFactory,
-                substitutionFactory,
-                termFactory);
-    }
-
-    private DictionaryPatternMappingEntryCluster updateConstantAttributes(ImmutableMap<Integer, Attribute> constantAttributes) {
-        return new DictionaryPatternMappingEntryCluster(
-                tree,
-                rdfTemplates,
-                constantAttributes,
-                dataNode,
-                variableGenerator,
                 iqFactory,
                 substitutionFactory,
                 termFactory);
@@ -306,8 +284,6 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
         return new DictionaryPatternMappingEntryCluster(
                 compressedTree,
                 compressedTemplates,
-                constantAttributes,
-                (ExtensionalDataNode) compressedTree.getChildren().get(0),
                 variableGenerator,
                 iqFactory,
                 substitutionFactory,

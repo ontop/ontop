@@ -174,7 +174,6 @@ public class MappingEntryClusterTest {
 
         MappingEntryCluster info = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
-                extensionalNode1,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
         assert !hasFilterNode(info.getIQTree());
@@ -196,7 +195,6 @@ public class MappingEntryClusterTest {
 
         MappingEntryCluster info = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
-                extensionalNode1,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -221,7 +219,6 @@ public class MappingEntryClusterTest {
 
         MappingEntryCluster info = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
-                extensionalNode1,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -245,7 +242,6 @@ public class MappingEntryClusterTest {
 
         MappingEntryCluster info = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
-                extensionalNode1,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -280,13 +276,11 @@ public class MappingEntryClusterTest {
 
         MappingEntryCluster assertion1 = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
-                extensionalDataNode,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
         MappingEntryCluster assertion2 = new FilterMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
-                extensionalNode2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -322,13 +316,11 @@ public class MappingEntryClusterTest {
 
         MappingEntryCluster assertion1 = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
-                extensionalDataNode,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
         MappingEntryCluster assertion2 = new FilterMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
-                extensionalNode2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -358,19 +350,14 @@ public class MappingEntryClusterTest {
                 ATOM_FACTORY.getDistinctTripleAtom(S2, P2, O2),
                 IQ_FACTORY.createUnaryIQTree(constr2, ext2));
 
-        ImmutableMap<Integer, Attribute> constantAttributes = ImmutableMap.of(2, T2.getAttribute(3));
         MappingEntryCluster assertion1 = new DictionaryPatternMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
-                constantAttributes,
-                ext1,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY,
                 SUBSTITUTION_FACTORY,
                 TERM_FACTORY);
         MappingEntryCluster assertion2 = new DictionaryPatternMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
-                constantAttributes,
-                ext2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY,
                 SUBSTITUTION_FACTORY,
@@ -391,11 +378,8 @@ public class MappingEntryClusterTest {
                 ATOM_FACTORY.getDistinctTripleAtom(S2, P2, O2),
                 IQ_FACTORY.createUnaryIQTree(constr, ext));
 
-        ImmutableMap<Integer, Attribute> constantAttributes = ImmutableMap.of(1, T2.getAttribute(2),2, T2.getAttribute(3));
         MappingEntryCluster assertion2 = new DictionaryPatternMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
-                constantAttributes,
-                ext,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY,
                 SUBSTITUTION_FACTORY,
@@ -432,19 +416,14 @@ public class MappingEntryClusterTest {
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
                 IQ_FACTORY.createUnaryIQTree(constr2, ext2));
 
-        ImmutableMap<Integer, Attribute> constantAttributes = ImmutableMap.of(2, T2.getAttribute(3));
         MappingEntryCluster assertion1 = new DictionaryPatternMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
-                constantAttributes,
-                ext1,
                 iq1.getVariableGenerator(),
                 IQ_FACTORY,
                 SUBSTITUTION_FACTORY,
                 TERM_FACTORY);
         MappingEntryCluster assertion2 = new DictionaryPatternMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
-                constantAttributes,
-                ext2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY,
                 SUBSTITUTION_FACTORY,
@@ -721,7 +700,6 @@ public class MappingEntryClusterTest {
 
         FilterMappingEntryCluster assertion2 = new FilterMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
-                ext2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 
@@ -763,7 +741,6 @@ public class MappingEntryClusterTest {
 
         FilterMappingEntryCluster assertion2 = new FilterMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
-                ext2,
                 iq2.getVariableGenerator(),
                 IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY);
 

@@ -8,8 +8,6 @@ import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
-import it.unibz.inf.ontop.dbschema.Attribute;
-import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
@@ -206,13 +204,11 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
             return new ComplexMappingEntryCluster(tree, rdfTemplates, substitutionFactory);
         }
         ExtensionalDataNode extensionalNode = extensionalNodes.get(0);
-        RelationDefinition relation = extensionalNode.getRelationDefinition();
 
         if (hasFilterNode(tree)) {
-            return  new FilterMappingEntryCluster(
+            return new FilterMappingEntryCluster(
                             tree,
                             rdfTemplates,
-                            extensionalNode,
                             mappingAssertionIQ.getVariableGenerator(),
                             iqFactory,
                             termFactory,
@@ -228,18 +224,9 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                     iqFactory,
                     substitutionFactory);
         } else if (argumentMap.values().stream().anyMatch(v -> v instanceof DBConstant)) {
-            ImmutableMap<Integer, Attribute> constantAttributes = argumentMap.entrySet().stream()
-                    .filter(e -> e.getValue() instanceof DBConstant)
-                    .map(Map.Entry::getKey)
-                    .collect(ImmutableCollectors.toMap(
-                            k -> k,
-                            k -> relation.getAttribute(k + 1)));
-
             //return new ComplexMappingAssertionInfo(tree, rdfTemplates, substitutionFactory);
             return new DictionaryPatternMappingEntryCluster(tree,
                     rdfTemplates,
-                    constantAttributes,
-                    extensionalNode,
                     mappingAssertionIQ.getVariableGenerator(),
                     iqFactory,
                     substitutionFactory,
