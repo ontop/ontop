@@ -23,7 +23,7 @@ source		SELECT gid AS regionId FROM region_sweden
 
 mappingId	mapping_regionName_sweden
 target		:vector_region/sweden/{regionId} rdfs:label {regionName}^^xsd:string .
-source		SELECT gid AS regionId, name_2 AS regionName FROM region_sweden
+source		SELECT gid AS regionId, name_2 AS regionName, create_auxiliary_table(name_2) FROM region_sweden
 
 mappingId	mapping_region_regionWkt_sweden
 target		:vector_region/sweden/{regionId} geo:asWKT {regionWkt}^^geo:wktLiteral .
@@ -77,19 +77,57 @@ source		SELECT gid AS regionId,
 
 mappingId	mapping_rasterid_lookup
 target		:raster/{raster_id} a :Raster .
-source		SELECT raster_id FROM raster_lookup_x1
+source		SELECT raster_id FROM raster_lookup
 
-mappingId	mapping_raster_name_lookup
-target		:raster/{raster_id} rasdb:rasterName {raster_name}^^xsd:string .
-source		SELECT raster_id, raster_name FROM raster_lookup_x1
+
+;-------------------- Field Based Raster Search Mappings -------------------
 
 mappingId	mapping_raster_field_lookup
-target		:raster/{raster_id} rasdb:rasterField {field}^^xsd:string .
-source		SELECT raster_id, field_name AS field FROM raster_lookup_x1
+target		:raster/{raster_id} rasdb:fieldName {field_name}^^xsd:string .
+source		SELECT raster_id, field_name FROM raster_lookup_live
 
-;-------------------- Experimental Mappings -------------------
+;mappingId	mapping_raster_name_lookup
+;target		:raster/{raster_id} rasdb:rasterName {raster_name}^^xsd:string .
+;source		SELECT raster_id, raster_name FROM raster_lookup_live WHERE raster_name LIKE CONCAT('%', raster_name, '%') AND field_name LIKE CONCAT('%', field_name, '%')
 
-;mappingId	Get_raster_name_based_on_regionName_lookup
+;SELECT raster_id, raster_name FROM raster_lookup_live
+
+
+;-------------------- Region Based Raster Search Mappings -------------------
+
+mappingId	Get_raster_name_based_on_region
+target		:raster/{raster_id} rasdb:rasterName {raster_name}^^xsd:string .
+source		SELECT raster_id, raster_name
+            FROM raster_lookup
+            WHERE ST_Contains(ST_AsText(ST_MakeEnvelope(min_lon, min_lat, max_lon, max_lat, 4326)), (SELECT ST_AsText(geom) AS regionWkt FROM auxiliary))
+
+; Solution 1
+;WHERE ST_Contains(ST_AsText(ST_MakeEnvelope(min_lon, min_lat, max_lon, max_lat, 4326)), (SELECT ST_AsText(geom) FROM region_sweden WHERE name_2 = 'Linköping'))
+
+; Solution 2 - DROP & CREATE an auxiliary table that consist only one ROI
+;WHERE ST_Contains(ST_AsText(ST_MakeEnvelope(min_lon, min_lat, max_lon, max_lat, 4326)), (SELECT ST_AsText(geom) FROM auxiliary))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;mappingId	Get_raster_name_based_on_region
 ;target		:raster/{raster_id} rasdb:rasterName {raster_name}^^xsd:string .
 ;source		SELECT raster_id, raster_name
 ;            FROM raster_lookup
@@ -99,7 +137,7 @@ source		SELECT raster_id, field_name AS field FROM raster_lookup_x1
 ;              AND min_lon < (SELECT  ST_XMin(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM sample_regions_of_interest as m WHERE   m.name_2 = 'Stockholm')
 
 
-;mappingId	Get_raster_name_based_on_regionName_lookup
+;mappingId	Get_raster_name_based_on_region
 ;target		:raster/{raster_id} rasdb:rasterName {raster_name}^^xsd:string .
 ;source		SELECT raster_id, raster_name
 ;            FROM raster_lookup
@@ -107,4 +145,6 @@ source		SELECT raster_id, field_name AS field FROM raster_lookup_x1
 ;              AND min_lat < (SELECT  ST_YMin(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM region_bavaria as m WHERE   m.name_2 = 'Rosenheim' LIMIT 1)
 ;              AND max_lon > (SELECT  ST_XMax(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM region_bavaria as m WHERE   m.name_2 = 'Rosenheim' LIMIT 1)
 ;              AND min_lon < (SELECT  ST_XMin(ST_GeomFromText(ST_AsText((ST_Dump(m.geom)).geom))) FROM region_bavaria as m WHERE   m.name_2 = 'Rosenheim' LIMIT 1)
+
+
 ]]

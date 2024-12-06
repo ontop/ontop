@@ -1062,6 +1062,13 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
+    @Override
+    protected String serializeRAS_SPATIAL_AVERAGE_FIELD(ImmutableList<? extends ImmutableTerm> terms,
+                                                        Function<ImmutableTerm, String> termConverter,
+                                                        TermFactory termFactory){
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
     protected String serializeRAS_TEMPORAL_AVERAGE(ImmutableList<? extends ImmutableTerm> terms,
                                                    Function<ImmutableTerm, String> termConverter,
                                                    TermFactory termFactory){

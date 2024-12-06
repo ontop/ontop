@@ -9,11 +9,11 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-public class RasterMaximumFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
+public class RasterAverageFieldFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
 
-    public RasterMaximumFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdDatetime, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType, RDFDatatype xsdDoubleDatatype) {
-        super("RAS_SPATIAL_MAXIMUM", functionIRI, ImmutableList.of(xsdDatetime,  wktLiteralType, xsdStringDatatype),
-                xsdDoubleDatatype);
+    public RasterAverageFieldFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdDatetime, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType) {
+        super("RAS_SPATIAL_AVERAGE_FIELD", functionIRI, ImmutableList.of(xsdDatetime,  wktLiteralType, xsdStringDatatype, xsdStringDatatype),
+                xsdStringDatatype);
     }
 
     @Override
@@ -22,8 +22,7 @@ public class RasterMaximumFunctionSymbolImpl extends AbstractRasterFunctionSymbo
         // return termFactory.getRESPECTIVEDBFUNCTIONSymbols;  --------------------------------[STEP 01b]-----------------------------------
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
-        return termFactory.getRasterSpatialMaximum(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2));
-
+        return termFactory.getRasterSpatialAverageField(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2), subLexicalTerms.get(3));
     }
 
 }

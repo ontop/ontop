@@ -12,7 +12,7 @@ import java.sql.SQLException;
 public class RasDaMan_Experimental_Raster_Functions extends AbstractDockerRDF4JTest {
     private static final String PROPERTIES_FILE = "/rasdaman/OntoRaster.properties";
     private static final String OBDA_FILE = "/rasdaman/OntoRasterExperimental.obda";
-    private static final String OWL_FILE = "/rasdaman/rasdaman.owl";
+    private static final String OWL_FILE = "/rasdaman/OntoRasterX.owl";
 
     @BeforeAll
     public static void before() throws IOException, SQLException {
@@ -58,15 +58,15 @@ public class RasDaMan_Experimental_Raster_Functions extends AbstractDockerRDF4JT
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
                 + "?raster rasdb:rasterName ?raster_name .\n"
-                + "?raster rasdb:rasterField ?field .\n"
-                + "FILTER (?vector_region_name = 'Linköping'\n)" //Vector region = Linköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00), München (2023-07-24T00:00:00+00:00)
+                + "?raster rasdb:fieldName ?field .\n"
+                + "FILTER (?vector_region_name = 'Linköping'\n)" //Vector region = Linköping, Göteborg (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00), München (2023-07-24T00:00:00+00:00)
                 + "FILTER (CONTAINS(?raster_name, 'Sweden')\n)"
-                + "FILTER (CONTAINS(?field, 'Temperature')\n)"
+                + "FILTER (CONTAINS(?field, 'Snow')\n)"
                 + "BIND ('2022-08-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)" // Missing DateTime Issue
                 + "BIND (rasdb:rasSpatialAverageField(?timestamp, ?vector_region_wkt, ?field, ?raster_name) AS ?v)"
                 + "}\n";
 
-        executeAndCompareValues(queryField, ImmutableList.of("\"14164.257\"^^xsd:string"));
+        executeAndCompareValues(queryField, ImmutableList.of("\"14308.944\"^^xsd:string"));
     }
     ///////////////////////////////////////////////////
     ////// Region Based Raster Search Functions ///////
@@ -102,7 +102,7 @@ public class RasDaMan_Experimental_Raster_Functions extends AbstractDockerRDF4JT
                 + "?vector rdfs:label ?vector_region_name .\n"
                 + "?vector geo:asWKT ?vector_region_wkt .\n"
                 + "?raster rasdb:rasterName ?raster_name .\n"
-                + "FILTER (?vector_region_name = 'Stockholm'\n)" //Vector region = Linköping (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  München (2023-07-24T00:00:00+00:00)
+                + "FILTER (?vector_region_name = 'Linköping'\n)" //Vector region = Linköping, Kungsbacka, Kinda  (2022-08-24T00:00:00+00:00), Ultimo (2023-09-24T00:00:00+00:00),  München, Würzburg (2023-07-24T00:00:00+00:00)
                 + "BIND ('2022-08-24T00:00:00+00:00'^^xsd:dateTime AS ?timestamp\n)"
                 + "BIND (rasdb:rasSpatialAverage(?timestamp, ?vector_region_wkt, ?raster_name) AS ?v)"
                 + "}\n";

@@ -258,6 +258,7 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDate2Grid();
 //    DBFunctionSymbol getRasterSpatialAverage();
     DBFunctionSymbol getRasterSpatialAverageFinal();
+    DBFunctionSymbol getRasterSpatialAverageField();
     DBFunctionSymbol getRasterSpatialAverageX();
     DBFunctionSymbol getRasterTemporalAverage();
 

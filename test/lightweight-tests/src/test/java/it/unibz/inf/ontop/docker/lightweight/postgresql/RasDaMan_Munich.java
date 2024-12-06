@@ -43,7 +43,7 @@ public class RasDaMan_Munich extends AbstractDockerRDF4JTest {
                 + "BIND (rasdb:rasSpatialAverage(?timeStamp, ?regionWkt, ?rasterName) AS ?v)"
                 + "}\n";
 
-        executeAndCompareValues(query0, ImmutableList.of("\"14331.952\"^^xsd:string"));
+        executeAndCompareValues(query0, ImmutableList.of("\"14331.952\"^^xsd:double"));
     }
 
     /////////////////////////////////////////
@@ -70,6 +70,7 @@ public class RasDaMan_Munich extends AbstractDockerRDF4JTest {
                 + "PREFIX geo:\t<http://www.opengis.net/ont/geosparql#>\n"
                 + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
+                + "?vector a :District .\n"
                 + "?vector rdfs:label ?regionName .\n"
                 + "?vector geo:asWKT ?regionWkt .\n"
                 + "?raster rasdb:rasterName ?rasterName .\n"
@@ -164,7 +165,7 @@ public class RasDaMan_Munich extends AbstractDockerRDF4JTest {
                 + "PREFIX lgdo:\t<http://linkedgeodata.org/ontology/>\n"
                 + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
-//                + "?dist a :District .\n"
+                + "?dist a :District .\n"
                 + "?dist rdfs:label ?distName .\n"
                 + "?dist geo:asWKT ?distWkt .\n"
                 + "?bldg a lgdo:Synagogue .\n"
@@ -190,6 +191,7 @@ public class RasDaMan_Munich extends AbstractDockerRDF4JTest {
                 + "PREFIX lgdo:\t<http://linkedgeodata.org/ontology/>\n"
                 + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
+                + "?dist a :District .\n"
                 + "?dist rdfs:label ?distName .\n"
                 + "?dist geo:asWKT ?distWkt .\n"
                 + "?bldg a lgdo:Temple .\n"
@@ -214,6 +216,7 @@ public class RasDaMan_Munich extends AbstractDockerRDF4JTest {
                 + "PREFIX lgdo:\t<http://linkedgeodata.org/ontology/>\n"
                 + "PREFIX rasdb:\t<https://github.com/aghoshpro/RasterDataCube/>\n"
                 + "SELECT ?v {\n"
+                + "?dist a :District .\n"
                 + "?dist rdfs:label ?distName .\n"
                 + "?dist geo:asWKT ?distWkt .\n"
                 + "?bldg a lgdo:Church .\n"

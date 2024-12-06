@@ -627,6 +627,11 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getRasterSpatialAverageField(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbFieldName, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialAverageField(), ImmutableList.of(TimeSnap, dbRegionGeom, dbFieldName, dbRasterName));
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getRasterTemporalAverage(ImmutableTerm dbStartTime, ImmutableTerm dbEndTime, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName){
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterTemporalAverage(), ImmutableList.of(dbStartTime, dbEndTime, dbRegionGeom, dbRasterName));
 	}

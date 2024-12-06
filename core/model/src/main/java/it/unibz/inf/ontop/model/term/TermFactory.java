@@ -591,6 +591,8 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getRasterSpatialAverageFinal(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
 
+	ImmutableFunctionalTerm getRasterSpatialAverageField(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbFieldName, ImmutableTerm dbRasterName);
+
 	ImmutableFunctionalTerm getRasterTemporalAverage(ImmutableTerm dbStartTime, ImmutableTerm dbEndTime, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
 
 	ImmutableFunctionalTerm getClipRaster(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);

@@ -11,9 +11,9 @@ import javax.annotation.Nonnull;
 
 public class RasterAverageFinalFunctionSymbolImpl extends AbstractRasterFunctionSymbolImpl{
 
-    public RasterAverageFinalFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdDatetime, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType) {
+    public RasterAverageFinalFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype xsdDatetime, RDFDatatype xsdStringDatatype, RDFDatatype wktLiteralType, RDFDatatype xsdDoubleDatatype) {
         super("RAS_SPATIAL_AVERAGE_FINAL", functionIRI, ImmutableList.of(xsdDatetime,  wktLiteralType, xsdStringDatatype),
-                xsdStringDatatype);
+                xsdDoubleDatatype);
     }
 
     @Override

@@ -1586,6 +1586,22 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     }
 
+    protected String serializeRAS_SPATIAL_AVERAGE_FIELD(ImmutableList<? extends ImmutableTerm> terms,
+                                                        Function<ImmutableTerm, String> termConverter,
+                                                        TermFactory termFactory) {
+
+        String time = termConverter.apply(terms.get(0));
+        String region = termConverter.apply(terms.get(1));
+        String field_name = termConverter.apply(terms.get(2));
+        String raster_name = termConverter.apply(terms.get(3));
+
+        return String.format("rasdaman_op.query2numeric(CONCAT('select avg_cells(clip(c[',rasdaman_op.timestamp2grid(%s, %s),', 0:* , 0:*],' , "
+                        + "rasdaman_op.geo2grid_final(%s, rasdaman_op.get_min_longitude_x(%s, %s), rasdaman_op.get_max_latitude_x(%s, %s)," +
+                        " rasdaman_op.get_res_lon_x(%s, %s), rasdaman_op.get_res_lat_x(%s, %s)),')) from ', %s, ' as c'))",
+                time, raster_name, region, raster_name, field_name, raster_name, field_name, raster_name, field_name, raster_name, field_name, raster_name);
+    }
+
+
     protected String serializeRAS_TEMPORAL_AVERAGE(ImmutableList<? extends ImmutableTerm> terms,
                                                    Function<ImmutableTerm, String> termConverter,
                                                    TermFactory termFactory) {

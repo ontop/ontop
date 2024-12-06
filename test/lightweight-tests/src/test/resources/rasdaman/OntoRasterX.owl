@@ -53,6 +53,20 @@
         <Class IRI="Region"/>
     </Declaration>
     <Declaration>
+        <Class IRI="District"/>
+    </Declaration>
+        <Declaration>
+        <Class IRI="SubDistrict"/>
+        </Declaration>
+    <SubClassOf>
+        <Class IRI="District"/>
+        <Class IRI="Region"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="SubDistrict"/>
+        <Class IRI="District"/>
+    </SubClassOf>
+    <Declaration>
         <Class IRI="RegularGridDomain"/>
     </Declaration>
     <Declaration>
