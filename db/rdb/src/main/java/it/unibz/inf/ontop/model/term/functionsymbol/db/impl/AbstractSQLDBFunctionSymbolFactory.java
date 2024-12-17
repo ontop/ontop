@@ -1797,7 +1797,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         String filename= termConverter.apply(terms.get(3));
         String fillNAN = termConverter.apply(terms.get(4));
 
-        return String.format("rasdaman_op.query2geotiff02(CONCAT('select clip(c[',rasdaman_op.timestamp2grid(%s, %s),', 0:* , 0:*],' , "
+        return String.format("rasdaman_op.query2geotiff(CONCAT('select clip(c[',rasdaman_op.timestamp2grid(%s, %s),', 0:* , 0:*],' , "
                         + "rasdaman_op.geo2grid_final(%s, rasdaman_op.get_min_longitude(%s), rasdaman_op.get_max_latitude(%s)," +
                         " rasdaman_op.get_res_lon(%s), rasdaman_op.get_res_lat(%s)),') from ', %s, ' as c'), %s , %s, %s)",
                 time, raster_name, region, raster_name, raster_name, raster_name, raster_name, raster_name, region, filename, fillNAN);
