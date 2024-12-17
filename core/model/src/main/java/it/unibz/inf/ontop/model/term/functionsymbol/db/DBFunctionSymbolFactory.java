@@ -272,6 +272,7 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getClipRaster();
     DBFunctionSymbol getClipRasterAnyGeom();
+    DBFunctionSymbol getGeoTIF();
     DBFunctionSymbol getRasterSmallArrayTemp();
     DBFunctionSymbol getRasterSmallArraySpatial();
 

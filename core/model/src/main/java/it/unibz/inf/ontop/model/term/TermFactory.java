@@ -597,6 +597,8 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getClipRaster(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
 
+	ImmutableFunctionalTerm getGeoTIF(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName, ImmutableTerm dbRegionName, ImmutableTerm dbFillVal);
+
 	ImmutableFunctionalTerm getClipRasterAnyGeom(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
 
 	ImmutableFunctionalTerm getRasterSmallArrayTemp(ImmutableTerm StartTime, ImmutableTerm EndTime, ImmutableTerm dbRasterName);

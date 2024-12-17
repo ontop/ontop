@@ -63,6 +63,8 @@ public class RASDB {
 
     public static final IRI RAS_CLIP_RASTER_SPATIAL_ANY_GEOM;
 
+    public static final IRI RAS_GEOTIFF;
+
     public static final IRI RAS_CLIP_SMALL_ARRAY_SPATIAL;
 
     public static final IRI RAS_CLIP_SMALL_ARRAY_TEMPORAL;
@@ -120,6 +122,8 @@ public class RASDB {
         RAS_CLIP_RASTER_SPATIAL = factory.createIRI(PREFIX + "rasClipRaster");
 
         RAS_CLIP_RASTER_SPATIAL_ANY_GEOM = factory.createIRI(PREFIX + "rasClipRasterAnyGeom");
+
+        RAS_GEOTIFF = factory.createIRI(PREFIX + "rasGeoTIFF");
 
         RAS_CLIP_SMALL_ARRAY_SPATIAL = factory.createIRI(PREFIX + "rasSmallRasterArraySpatial");
 

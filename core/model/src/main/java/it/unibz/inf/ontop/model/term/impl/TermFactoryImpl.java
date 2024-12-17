@@ -653,6 +653,11 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getGeoTIF(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName, ImmutableTerm dbRegionName, ImmutableTerm dbFillVal){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getGeoTIF(), ImmutableList.of(TimeSnap, dbRegionGeom, dbRasterName, dbRegionName, dbFillVal));
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getClipRasterAnyGeom(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName){
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getClipRasterAnyGeom(), ImmutableList.of(TimeSnap, dbRegionGeom, dbRasterName));
 	}

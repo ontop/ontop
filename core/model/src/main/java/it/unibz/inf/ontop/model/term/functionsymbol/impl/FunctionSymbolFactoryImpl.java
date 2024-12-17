@@ -35,6 +35,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterTemporalMa
 
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.ClipRasterFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.ClipRasterAnyGeomFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.GeoTIFFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterSmallArrayTempFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterSmallArraySpatialFunctionSymbolImpl;
 
@@ -391,6 +392,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new ClipRasterFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL, xsdDatetime, xsdString, wktLiteral),
 
                 new ClipRasterAnyGeomFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL_ANY_GEOM, xsdDatetime, xsdString),
+
+                new GeoTIFFunctionSymbolImpl(RASDB.RAS_GEOTIFF, xsdDatetime, wktLiteral, xsdString, xsdDecimal),
 
                 new RasterSmallArrayTempFunctionSymbolImpl(RASDB.RAS_CLIP_SMALL_ARRAY_TEMPORAL, xsdInteger, xsdInteger, xsdString),
 

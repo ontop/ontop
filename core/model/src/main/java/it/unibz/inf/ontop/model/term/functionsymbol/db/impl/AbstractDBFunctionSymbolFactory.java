@@ -185,6 +185,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBFunctionSymbol getRasterTemporalAverageFunctionSymbol;
     private DBFunctionSymbol getClipRasterFunctionSymbol;
     private DBFunctionSymbol getClipRasterAnyGeomFunctionSymbol;
+    private DBFunctionSymbol getGeoTIFFunctionSymbol;
     private DBFunctionSymbol getRasterSmallArrayTempFunctionSymbol;
     private DBFunctionSymbol getRasterSmallArraySpatialFunctionSymbol;
 
@@ -527,6 +528,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         getRasterTemporalMinimumFunctionSymbol = createRasterTemporalMinimumFunctionSymbol();
         getClipRasterFunctionSymbol = createClipRasterFunctionSymbol();
         getClipRasterAnyGeomFunctionSymbol = createClipRasterAnyGeomFunctionSymbol();
+        getGeoTIFFunctionSymbol = createGeoTIFFunctionSymbol();
         getRasterSmallArrayTempFunctionSymbol = createRasterSmallArrayTempFunctionSymbol();
         getRasterSmallArraySpatialFunctionSymbol = createRasterSmallArraySpatialFunctionSymbol();
 
@@ -1411,6 +1413,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     public DBFunctionSymbol getClipRasterAnyGeom(){return getClipRasterAnyGeomFunctionSymbol;}
 
+    public DBFunctionSymbol getGeoTIF(){return getGeoTIFFunctionSymbol;}
+
     public DBFunctionSymbol getRasterSmallArrayTemp(){return getRasterSmallArrayTempFunctionSymbol;}
 
     public DBFunctionSymbol getRasterSmallArraySpatial(){return getRasterSmallArraySpatialFunctionSymbol;}
@@ -2065,6 +2069,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 this::serializeRAS_CLIP_RASTER_SPATIAL_ANY_GEOM);
     }
 
+    protected DBFunctionSymbol createGeoTIFFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RAS_GEOTIFF", ImmutableList.of(dbDateTimestampType, rootDBType, dbStringType, dbStringType, dbDoubleType), dbStringType, false,
+                this::serializeRAS_GEOTIFF);
+    }
+
     protected DBFunctionSymbol createRasterSmallArrayTempFunctionSymbol() {
         return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SMALL_ARRAY_TEMPORAL", ImmutableList.of(dbIntegerType, dbIntegerType, dbStringType), dbStringType, false,
                 this::serializeRAS_CLIP_SMALL_ARRAY_TEMPORAL);
@@ -2143,6 +2152,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract String serializeRAS_CLIP_RASTER_SPATIAL_ANY_GEOM(ImmutableList<? extends ImmutableTerm> terms,
                                                                Function<ImmutableTerm, String> termConverter,
                                                                TermFactory termFactory);
+
+    protected abstract String serializeRAS_GEOTIFF(ImmutableList<? extends ImmutableTerm> terms,
+                                                   Function<ImmutableTerm, String> termConverter,
+                                                   TermFactory termFactory);
 
     protected abstract String serializeRAS_CLIP_SMALL_ARRAY_TEMPORAL(ImmutableList<? extends ImmutableTerm> terms,
                                                                Function<ImmutableTerm, String> termConverter,
