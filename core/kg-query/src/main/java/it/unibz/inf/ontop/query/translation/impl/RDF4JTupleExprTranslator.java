@@ -16,11 +16,13 @@ import it.unibz.inf.ontop.iq.impl.QueryNodeRenamer;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.HomogeneousIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -361,6 +363,11 @@ public class RDF4JTupleExprTranslator {
     private TranslationResult translateJoinLikeNode(BinaryTupleOperator join) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
         TranslationResult leftTranslation = translate(join.getLeftArg());
+
+        Optional<TranslationResult> optionalSpecialCaseResult = translateJoinSpecialCase(join, leftTranslation, join.getRightArg());
+        if (optionalSpecialCaseResult.isPresent())
+            return optionalSpecialCaseResult.get();
+
         TranslationResult rightTranslation = translate(join.getRightArg());
 
         Sets.SetView<Variable> nullableVariablesLeftOrRight = Sets.union(leftTranslation.nullableVariables, rightTranslation.nullableVariables);
@@ -430,6 +437,56 @@ public class RDF4JTupleExprTranslator {
         IQTree joinQuery = iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, topSubstitution, () -> projectedVariables);
 
         return createTranslationResult(joinQuery, nullableVariables.immutableCopy());
+    }
+
+    /**
+     * For some cases where the general case is not handled
+     */
+    private Optional<TranslationResult> translateJoinSpecialCase(BinaryTupleOperator join, TranslationResult leftTranslation,
+                                                                 TupleExpr rightArg) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
+        if ((rightArg instanceof ArbitraryLengthPath) && (join instanceof Join)) {
+            if (leftTranslation.iqTree instanceof IntensionalDataNode) {
+                var leftAtom = ((IntensionalDataNode) leftTranslation.iqTree).getProjectionAtom();
+                if (leftAtom.getTerm(1).equals(termFactory.getConstantIRI(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE))) {
+                    var subRightTree = translate(((ArbitraryLengthPath) rightArg).getPathExpression())
+                            .iqTree;
+                    if (subRightTree instanceof IntensionalDataNode) {
+                        var rightAtom = ((IntensionalDataNode) subRightTree).getProjectionAtom();
+
+                        /*
+                         * ?s rdf:type/subClassOf* ?c --> ?s rdf:type ?c
+                         * As Ontop exposes the saturated graph
+                         *
+                         * NB: provides a partial translation (missing possible values) for
+                         * ?s rdf:type ?o . ?o subClassOf* ?c -> ?s rdf:type ?c . BIND(?c AS ?o)
+                         * TODO: replace this hack by a more general implementation
+                         *
+                         * Also not correct from a cardinality PoW (property path with / can introduce duplicates but not *)
+                         *
+                         */
+                        if (leftAtom.getPredicate().equals(rightAtom.getPredicate())
+                                && (leftAtom.getPredicate() instanceof TriplePredicate)
+                                && leftAtom.getTerm(2).equals(rightAtom.getTerm(0))
+                                && (rightAtom.getTerm(0) instanceof Variable)
+                                && rightAtom.getTerm(1).equals(termFactory.getConstantIRI(RDFS.SUBCLASSOF))) {
+                            var newDataNode = iqFactory.createIntensionalDataNode(
+                                    atomFactory.getIntensionalTripleAtom(leftAtom.getTerm(0), leftAtom.getTerm(1), rightAtom.getTerm(2)));
+                            var intermediateVariable = (Variable) rightAtom.getTerm(0);
+                            if (!newDataNode.getVariables().contains(intermediateVariable)) {
+                                var substitution = substitutionFactory.getSubstitution(intermediateVariable, rightAtom.getTerm(2));
+                                var newTree = iqFactory.createUnaryIQTree(
+                                        iqFactory.createConstructionNode(
+                                                Sets.union(substitution.getDomain(), newDataNode.getVariables()).immutableCopy(),
+                                                substitution),
+                                        newDataNode);
+                                return Optional.of(createTranslationResult(newTree, ImmutableSet.of()));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     private ImmutableExpression generateCompatibleExpression(Variable outputVariable,
