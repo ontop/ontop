@@ -340,4 +340,20 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(0, StringUtils.countMatches(sql, "ORDER"));
     }
 
+    @Test
+    public void testSubClassOfPropertyPath() {
+        int count = runQueryAndCount("PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "\n" +
+                "SELECT ?h ?posLabel ?posColor\n" +
+                "WHERE {\n" +
+                "  ?h rdf:type/rdfs:subClassOf* schema:LodgingBusiness .\n" +
+                "}\n" +
+                "LIMIT 1\n");
+        assertEquals(1, count);
+    }
+
 }
