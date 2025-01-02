@@ -13,6 +13,8 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.ExternalResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -24,6 +26,7 @@ public class OntopEndpointNoPortalTest {
     @ClassRule
     public static ExternalResource h2Connection = new H2ExternalResourceForBookExample();
     private static final String PORT = "29839";
+    private static final Logger LOGGER = LoggerFactory.getLogger(OntopEndpointNoPortalTest.class);
 
 
     @BeforeClass
@@ -56,8 +59,7 @@ public class OntopEndpointNoPortalTest {
             try (TupleQueryResult result = tupleQuery.evaluate()) {
                 while (result.hasNext()) {  // iterate over the result
                     BindingSet bindingSet = result.next();
-                    //Value movie = bindingSet.getValue("teacher");
-                    System.out.println(bindingSet);
+                    LOGGER.debug(bindingSet.toString());
                 }
             }
         }

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.cli;
 
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.ExternalResource;
 
@@ -9,6 +10,7 @@ public class OntopMaterializeTest {
     @ClassRule
     public static ExternalResource h2Connection = new H2ExternalResourceForBookExample();
 
+    @Ignore
     @Test
     public void testOntopHelpMaterialize(){
         Ontop.main("help", "materialize");

@@ -339,21 +339,30 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         .allMatch(c -> c.inferUniqueConstraints().contains(uc)))
                 .collect(ImmutableCollectors.partitioningBy(uc -> areDisjoint(children, uc)));
 
-        if (ucsPartitionedByDisjointness.get(false).isEmpty())
-            return ImmutableSet.copyOf(ucsPartitionedByDisjointness.get(true));
+        var nonDisjointUcs = Optional.ofNullable(ucsPartitionedByDisjointness.get(false))
+                .orElseGet(ImmutableList::of);
+        var disjointUcs = Optional.ofNullable(ucsPartitionedByDisjointness.get(true))
+                .orElseGet(ImmutableList::of);
 
-        // By definition not parts of the non-disjoint UCs
-        var disjointVariables = firstChild.getVariables().stream()
-                .filter(v -> areDisjoint(children, ImmutableSet.of(v)))
-                .filter(v -> ucsPartitionedByDisjointness.get(true).stream().noneMatch(set -> set.size() == 1 && set.stream().findFirst().get().equals(v)))
+        if (nonDisjointUcs.isEmpty())
+            return ImmutableSet.copyOf(disjointUcs);
+
+        var singleVariableDisjointUcs = disjointUcs.stream()
+                .filter(uc -> uc.size() == 1)
+                .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toSet());
 
-        return Stream.concat(
-                ucsPartitionedByDisjointness.get(true).stream(),
-                ucsPartitionedByDisjointness.get(false).stream()
-                        .flatMap(uc -> disjointVariables.stream()
-                                        .map(v -> Sets.union(uc, ImmutableSet.of(v)).immutableCopy()))
-                ).collect(ImmutableCollectors.toSet());
+        var additionalVariablesToConsider = Sets.difference(getVariables(), singleVariableDisjointUcs);
+
+        // At the moment, we are only considering one extra variable
+        var extendedUcStream = nonDisjointUcs.stream()
+                .flatMap(uc -> additionalVariablesToConsider.stream()
+                        .filter(v -> !uc.contains(v))
+                        .map(v -> Sets.union(uc, ImmutableSet.of(v)).immutableCopy())
+                        .filter(extendedUc -> areDisjoint(children, extendedUc)));
+
+        return Stream.concat(disjointUcs.stream(), extendedUcStream)
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -398,12 +407,21 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 Sets.difference(fd.getValue(), vSet).immutableCopy());
     }
 
+    @Override
+    public ImmutableSet<Variable> inferStrictDependents(NaryIQTree tree, ImmutableList<IQTree> children) {
+        return children.stream()
+                .<Set<Variable>>map(IQTree::inferStrictDependents)
+                .reduce(Sets::intersection)
+                .map(ImmutableSet::copyOf)
+                .orElseThrow(() -> new InvalidIntermediateQueryException("At least 2 children are expected for a union"));
+    }
 
-    private boolean areDisjoint(ImmutableList<IQTree> children, ImmutableSet<Variable> uc) {
+
+    private boolean areDisjoint(ImmutableList<IQTree> children, ImmutableSet<Variable> vars) {
         int childrenCount = children.size();
         return IntStream.range(0, childrenCount)
                 .allMatch(i -> IntStream.range(i + 1, childrenCount)
-                        .allMatch(j -> areDisjoint(children.get(i), children.get(j), uc)));
+                        .allMatch(j -> areDisjoint(children.get(i), children.get(j), vars)));
     }
 
     /**

@@ -27,6 +27,8 @@ Provide the log file (more information on how to obtain it in the guidelines)
 
 ### Versions
 
+Which data source are you using, which JDBC driver and which versions (both the data source and the JDBC driver)
+
 Which version of Ontop are you using and in which setting (Protege, SPARQL endpoint, Cli, Java API, ...)
 
 ### Additional Information

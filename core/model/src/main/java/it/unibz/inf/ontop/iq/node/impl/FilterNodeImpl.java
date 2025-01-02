@@ -178,6 +178,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
+    public ImmutableSet<Variable> inferStrictDependents(UnaryIQTree tree, IQTree child) {
+        return child.inferStrictDependents();
+    }
+
+    @Override
     public boolean isConstructed(Variable variable, IQTree child) {
         return child.isConstructed(variable);
     }
