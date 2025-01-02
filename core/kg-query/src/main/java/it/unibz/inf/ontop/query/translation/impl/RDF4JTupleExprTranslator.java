@@ -58,6 +58,7 @@ public class RDF4JTupleExprTranslator {
     private final TypeFactory typeFactory;
 
     private final IQTreeTools iqTreeTools;
+    private final IRIConstant subClassOfConstant;
 
     public RDF4JTupleExprTranslator(ImmutableMap<Variable, GroundTerm> externalBindings,
                                     @Nullable Dataset dataset,
@@ -83,6 +84,7 @@ public class RDF4JTupleExprTranslator {
         this.rdfFactory = rdfFactory;
         this.typeFactory = typeFactory;
         this.iqTreeTools = iqTreeTools;
+        this.subClassOfConstant = termFactory.getConstantIRI(RDFS.SUBCLASSOF);
     }
 
     public IQTree getTree(TupleExpr node) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
@@ -137,6 +139,10 @@ public class RDF4JTupleExprTranslator {
 
         if (node instanceof Order)
             return translate((Order) node);
+
+        if (node instanceof ArbitraryLengthPath) {
+            return translate((ArbitraryLengthPath) node);
+        }
 
         throw new OntopUnsupportedKGQueryException("Unsupported SPARQL operator: " + node.toString());
     }
@@ -281,6 +287,39 @@ public class RDF4JTupleExprTranslator {
                     child.nullableVariables);
     }
 
+    /**
+     * ?s rdfs:subClassOf* <some-iri> is supported.
+     *    Translated into SELECT DISTINCT ?s { { BIND (<some-iri> AS ?s } UNION { ?s rdfs:subClassOf <some-iri> } }
+     */
+    private TranslationResult translate(ArbitraryLengthPath arbitraryLengthPath) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+        var childTree = translate(arbitraryLengthPath.getPathExpression())
+                            .iqTree;
+        if (childTree instanceof IntensionalDataNode) {
+            var childAtom = ((IntensionalDataNode) childTree).getProjectionAtom();
+            if ((childAtom.getPredicate() instanceof TriplePredicate)
+                    && (childAtom.getTerm(0) instanceof Variable)
+                    && childAtom.getTerm(1).equals(subClassOfConstant)
+                    // TODO: relax
+                    && (childAtom.getTerm(2).isGround())) {
+                var pathZeroDepthChild = iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(childTree.getVariables(),
+                                substitutionFactory.getSubstitution((Variable) childAtom.getTerm(0), childAtom.getTerm(2))),
+                        iqFactory.createTrueNode());
+                var newTree = iqFactory.createUnaryIQTree(
+                        iqFactory.createDistinctNode(),
+                        iqFactory.createNaryIQTree(
+                                iqFactory.createUnionNode(childTree.getVariables()),
+                                ImmutableList.of(
+                                        pathZeroDepthChild,
+                                        // Depth 1. Takes advantage that Ontop computes the transitive closure of rdfs:subClassOf
+                                        childTree)
+                        ));
+                return createTranslationResult(newTree, ImmutableSet.of());
+            }
+        }
+        throw new OntopUnsupportedKGQueryException("Unsupported arbitrary length path: " + arbitraryLengthPath);
+    }
+
 
     private TranslationResult translate(BindingSetAssignment node) {
 
@@ -363,11 +402,6 @@ public class RDF4JTupleExprTranslator {
     private TranslationResult translateJoinLikeNode(BinaryTupleOperator join) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
         TranslationResult leftTranslation = translate(join.getLeftArg());
-
-        Optional<TranslationResult> optionalSpecialCaseResult = translateJoinSpecialCase(join, leftTranslation, join.getRightArg());
-        if (optionalSpecialCaseResult.isPresent())
-            return optionalSpecialCaseResult.get();
-
         TranslationResult rightTranslation = translate(join.getRightArg());
 
         Sets.SetView<Variable> nullableVariablesLeftOrRight = Sets.union(leftTranslation.nullableVariables, rightTranslation.nullableVariables);
@@ -437,56 +471,6 @@ public class RDF4JTupleExprTranslator {
         IQTree joinQuery = iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, topSubstitution, () -> projectedVariables);
 
         return createTranslationResult(joinQuery, nullableVariables.immutableCopy());
-    }
-
-    /**
-     * For some cases where the general case is not handled
-     */
-    private Optional<TranslationResult> translateJoinSpecialCase(BinaryTupleOperator join, TranslationResult leftTranslation,
-                                                                 TupleExpr rightArg) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
-        if ((rightArg instanceof ArbitraryLengthPath) && (join instanceof Join)) {
-            if (leftTranslation.iqTree instanceof IntensionalDataNode) {
-                var leftAtom = ((IntensionalDataNode) leftTranslation.iqTree).getProjectionAtom();
-                if (leftAtom.getTerm(1).equals(termFactory.getConstantIRI(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE))) {
-                    var subRightTree = translate(((ArbitraryLengthPath) rightArg).getPathExpression())
-                            .iqTree;
-                    if (subRightTree instanceof IntensionalDataNode) {
-                        var rightAtom = ((IntensionalDataNode) subRightTree).getProjectionAtom();
-
-                        /*
-                         * ?s rdf:type/subClassOf* ?c --> ?s rdf:type ?c
-                         * As Ontop exposes the saturated graph
-                         *
-                         * NB: provides a partial translation (missing possible values) for
-                         * ?s rdf:type ?o . ?o subClassOf* ?c -> ?s rdf:type ?c . BIND(?c AS ?o)
-                         * TODO: replace this hack by a more general implementation
-                         *
-                         * Also not correct from a cardinality PoW (property path with / can introduce duplicates but not *)
-                         *
-                         */
-                        if (leftAtom.getPredicate().equals(rightAtom.getPredicate())
-                                && (leftAtom.getPredicate() instanceof TriplePredicate)
-                                && leftAtom.getTerm(2).equals(rightAtom.getTerm(0))
-                                && (rightAtom.getTerm(0) instanceof Variable)
-                                && rightAtom.getTerm(1).equals(termFactory.getConstantIRI(RDFS.SUBCLASSOF))) {
-                            var newDataNode = iqFactory.createIntensionalDataNode(
-                                    atomFactory.getIntensionalTripleAtom(leftAtom.getTerm(0), leftAtom.getTerm(1), rightAtom.getTerm(2)));
-                            var intermediateVariable = (Variable) rightAtom.getTerm(0);
-                            if (!newDataNode.getVariables().contains(intermediateVariable)) {
-                                var substitution = substitutionFactory.getSubstitution(intermediateVariable, rightAtom.getTerm(2));
-                                var newTree = iqFactory.createUnaryIQTree(
-                                        iqFactory.createConstructionNode(
-                                                Sets.union(substitution.getDomain(), newDataNode.getVariables()).immutableCopy(),
-                                                substitution),
-                                        newDataNode);
-                                return Optional.of(createTranslationResult(newTree, ImmutableSet.of()));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return Optional.empty();
     }
 
     private ImmutableExpression generateCompatibleExpression(Variable outputVariable,

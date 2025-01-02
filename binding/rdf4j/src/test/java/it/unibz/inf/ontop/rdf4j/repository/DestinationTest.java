@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
+import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -341,19 +342,34 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void testSubClassOfPropertyPath() {
+    public void testSubClassOfPropertyPath1() {
         int count = runQueryAndCount("PREFIX schema: <http://schema.org/>\n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                 "\n" +
-                "SELECT ?h ?posLabel ?posColor\n" +
+                "SELECT DISTINCT ?h \n" +
                 "WHERE {\n" +
                 "  ?h rdf:type/rdfs:subClassOf* schema:LodgingBusiness .\n" +
-                "}\n" +
-                "LIMIT 1\n");
+                "}\n");
         assertEquals(1, count);
+    }
+
+    @Test
+    public void testSubClassOfPropertyPath2() {
+        runQueryAndCompare("PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "\n" +
+                "SELECT ?h ?v \n" +
+                "WHERE {\n" +
+                "  ?h rdf:type ?v . \n" +
+                "  ?v rdfs:subClassOf* schema:LodgingBusiness .\n" +
+                "}\n",
+                ImmutableSet.of("http://schema.org/LodgingBusiness", "http://schema.org/Campground")); ;
     }
 
 }
