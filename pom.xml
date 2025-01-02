@@ -202,7 +202,7 @@
         <semargl-sesame.version>0.6.1</semargl-sesame.version>
         <semargl.version>0.7</semargl.version>
         <thymeleaf.version>3.0.15.RELEASE</thymeleaf.version>
-        <tomcat-embed-core.version>9.0.91</tomcat-embed-core.version>
+        <tomcat-embed-core.version>9.0.98</tomcat-embed-core.version>
         <log4j2.version>2.19.0</log4j2.version>
 
         <!-- JDK version -->
