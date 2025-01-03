@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
 
     private static final String BNODE_PREFIX = "ontop-bnode-";
-    private static final String PLACEHOLDER = "{}";
 
     /**
      * Name (in the DB dialect), arity -> predefined REGULAR DBFunctionSymbol
@@ -988,12 +987,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public ImmutableSet<ObjectStringTemplateFunctionSymbol> getObjectTemplates() {
-        ImmutableSet.Builder<ObjectStringTemplateFunctionSymbol> builder = ImmutableSet.builder();
-        for (Map.Entry<ImmutableList<Template.Component>, IRIStringTemplateFunctionSymbol> entry : iriTemplateMap.entrySet()) {
-            builder.add(entry.getValue());
-        }
-        ImmutableSet<ObjectStringTemplateFunctionSymbol> iriTemplateSet = builder.build();
-        return iriTemplateSet;
+        return Stream.concat(bnodeTemplateMap.values().stream(), iriTemplateMap.values().stream())
+                .collect(ImmutableSet.toImmutableSet());
     }
 
     @Override
