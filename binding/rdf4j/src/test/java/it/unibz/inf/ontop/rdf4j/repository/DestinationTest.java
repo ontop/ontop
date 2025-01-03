@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
+import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -1137,5 +1138,41 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "    }";
         int count = runQueryAndCount(sparql);
         assertEquals(0, count);
+    }
+
+    @Test
+    public void testMetaFilterByLiteral1() {
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "SELECT ?subject ?pred ?v {\n" +
+                "  ?subject ?pred ?v ; \n" +
+                "       schema:name \"Glorenza\"@it  \n" +
+                "}";
+        runQueryAndCompare(sparql, ImmutableSet.of("Glorenza", "Glurns", "Glorenza/Glurns",
+                "http://destination.example.org/ontology/dest#Municipality",
+                "http://destination.example.org/data/geo/municipality/021036"));
+    }
+
+    @Test
+    public void testMetaJoinByLiteral1() {
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX : <http://destination.example.org/ontology/dest#>" +
+                "SELECT ?subject ?pred ?v {\n" +
+                "   ?subject ?pred ?v . \n" +
+                "   <http://destination.example.org/data/municipality/021036> schema:name ?v \n" +
+                "}";
+        runQueryAndCompare(sparql, ImmutableSet.of("Glorenza", "Glurns", "Glorenza/Glurns"));
+    }
+
+    @Test
+    public void testMetaJoinByLiteral2() {
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX : <http://destination.example.org/ontology/dest#>" +
+                "SELECT ?subject ?pred ?v {\n" +
+                "    ?subject ?pred ?v . \n" +
+                "    <http://destination.example.org/data/municipality/021036> schema:name ?v \n" +
+                "    FILTER (langMatches(lang(?v), 'en'))\n" +
+                "}";
+        int count = runQueryAndCount(sparql);
+        assertEquals(1, count);
     }
 }
