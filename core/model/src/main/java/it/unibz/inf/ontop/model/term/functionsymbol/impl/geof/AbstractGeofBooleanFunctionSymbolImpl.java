@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.ReduciblePositiveAritySPARQLFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -14,16 +13,14 @@ import org.apache.commons.rdf.api.IRI;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public abstract class AbstractGeofBooleanFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
+public abstract class AbstractGeofBooleanFunctionSymbolImpl extends AbstractGeofFunctionSymbolImpl {
     private final RDFDatatype xsdBooleanType;
 
     protected AbstractGeofBooleanFunctionSymbolImpl(
             @Nonnull String functionSymbolName,
             @Nonnull IRI functionIRI,
-            //RDFDatatype wktLiteralType,
             ImmutableList<TermType> inputTypes,
             RDFDatatype xsdBooleanType) {
-        //super(functionSymbolName, functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType));
         super(functionSymbolName, functionIRI, inputTypes);
         this.xsdBooleanType = xsdBooleanType;
     }

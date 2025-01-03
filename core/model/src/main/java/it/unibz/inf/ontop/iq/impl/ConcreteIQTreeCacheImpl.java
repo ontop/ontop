@@ -47,6 +47,9 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     private FunctionalDependencies functionalDependencies;
 
     @Nullable
+    private  ImmutableSet<Variable> strictDependents;
+
+    @Nullable
     private Boolean isDistinct;
 
     @Inject
@@ -132,6 +135,11 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
         return functionalDependencies;
     }
 
+    @Override
+    public @Nullable ImmutableSet<Variable> getStrictDependents() {
+        return strictDependents;
+    }
+
     @Nullable
     @Override
     public Boolean isDistinct() {
@@ -210,6 +218,13 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
         if (this.functionalDependencies != null)
             throw new IllegalStateException("Functional dependencies already present. Only call this method once");
         this.functionalDependencies = functionalDependencies;
+    }
+
+    @Override
+    public void setStrictDependents(@Nonnull ImmutableSet<Variable> strictDependents) {
+        if (this.strictDependents != null)
+            throw new IllegalStateException("Strict dependents already present. Only call this method once");
+        this.strictDependents = strictDependents;
     }
 
     @Override

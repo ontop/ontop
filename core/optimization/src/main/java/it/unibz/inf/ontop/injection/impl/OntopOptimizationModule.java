@@ -17,18 +17,21 @@ import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 
 public class OntopOptimizationModule extends OntopAbstractModule {
 
-    private OntopOptimizationConfiguration configuration;
+    private final OntopOptimizationSettings settings;
+
+    protected OntopOptimizationModule(OntopOptimizationSettings settings) {
+        super(settings);
+        this.settings = settings;
+    }
 
     protected OntopOptimizationModule(OntopOptimizationConfiguration configuration) {
-        super(configuration.getSettings());
-        // Temporary (will be dropped)
-        this.configuration = configuration;
+        this(configuration.getSettings());
     }
 
 
     @Override
     protected void configure() {
-        bind(OntopOptimizationSettings.class).toInstance(configuration.getSettings());
+        bind(OntopOptimizationSettings.class).toInstance(settings);
 
         // Executors
         bindFromSettings(JoinLikeOptimizer.class);
@@ -68,7 +71,5 @@ public class OntopOptimizationModule extends OntopAbstractModule {
                 DefinitionPushDownTransformer.class),
                 OptimizerFactory.class);
         install(optimizerModule);
-        // Releases the configuration (enables some GC)
-        this.configuration = null;
     }
 }

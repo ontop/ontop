@@ -6,6 +6,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.github.rvesse.airline.parser.errors.ParseOptionUnexpectedException;
 import it.unibz.inf.ontop.cli.utils.Env;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,6 +36,18 @@ public class OntopEnvVarTest {
 
         // Set logging level to DEBUG to detect DEBUG error messages
         logbackLogger.setLevel(Level.DEBUG);
+    }
+
+    @After
+    public void clean() {
+        Logger logbackLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+
+        listAppender = new ListAppender<>();
+        listAppender.start();
+        logbackLogger.addAppender(listAppender);
+
+        // Set logging level to DEBUG to detect DEBUG error messages
+        logbackLogger.setLevel(Level.ERROR);
     }
 
     @Test

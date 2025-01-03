@@ -31,7 +31,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNode {
 
@@ -263,6 +262,11 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
         return child.getVariableNonRequirement()
                 .filter((v, conds) -> !v.equals(flattenedVariable));
+    }
+
+    @Override
+    public ImmutableSet<Variable> inferStrictDependents(UnaryIQTree tree, IQTree child) {
+        return IQTreeTools.computeStrictDependentsFromFunctionalDependencies(tree);
     }
 
     @Override

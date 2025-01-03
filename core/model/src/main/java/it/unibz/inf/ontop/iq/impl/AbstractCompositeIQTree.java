@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -275,6 +274,19 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         }
         return dependencies;
     }
+
+    @Override
+    public synchronized ImmutableSet<Variable> inferStrictDependents() {
+        // Non-final
+        ImmutableSet<Variable> dependents = treeCache.getStrictDependents();
+        if (dependents == null) {
+            dependents = computeStrictDependents();
+            treeCache.setStrictDependents(dependents);
+        }
+        return dependents;
+    }
+
+    protected abstract ImmutableSet<Variable> computeStrictDependents();
 
     protected abstract FunctionalDependencies computeFunctionalDependencies();
 

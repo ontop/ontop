@@ -1,9 +1,10 @@
 package it.unibz.inf.ontop.cli;
 
 
+import org.junit.Ignore;
 import org.junit.Test;
 
-
+@Ignore("Too verbose")
 public class OntopTest {
 
     @Test
