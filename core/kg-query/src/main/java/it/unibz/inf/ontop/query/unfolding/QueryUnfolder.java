@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.spec.mapping.Mapping;
  */
 public interface QueryUnfolder extends IQOptimizer {
 
+
     interface Factory {
         QueryUnfolder create(Mapping mapping);
     }

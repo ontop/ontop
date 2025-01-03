@@ -113,6 +113,7 @@ public class JDBCConnector implements DBConnector {
      */
     @Override
     public OntopConnection getConnection() throws OntopConnectionException {
+
         return new SQLConnection(this, queryReformulator, getSQLPoolConnection(),
                 termFactory, rdfFactory, substitutionFactory, statementInitializer, settings);
     }
