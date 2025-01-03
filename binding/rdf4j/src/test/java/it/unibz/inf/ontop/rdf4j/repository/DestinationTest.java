@@ -320,9 +320,8 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(0, StringUtils.countMatches(sql, "UNION"));
     }
 
-    //TODO TEST LASCIATI PER SICUREZZA PER AVERE DELLE QUERY DA TESTARE. ELIMINALI ALLA FINE DEL TIROCINIO
     @Test
-    public void andreaTest1(){
+    public void testPerf1(){
         String sparql = "SELECT DISTINCT ?p\n" +
                 "WHERE\n" +
                 "{\n" +
@@ -334,18 +333,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest2(){
-        String sparql = "PREFIX schema: <http://schema.org/>\n" +
-                "SELECT ?hotel\n" +
-                "WHERE {\n" +
-                "  ?hotel a schema:Hotel .\n" +
-                "}";
-        int count = runQueryAndCount(sparql);
-        assertEquals(0, count);
-    }
-
-    @Test
-    public void andreaTest3(){
+    public void testPerf3(){
         String sparql = "PREFIX : <http://schema.org/>\n" +
                 "SELECT ?s\n" +
                 "WHERE\n" +
@@ -359,7 +347,7 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(10, count);
     }
     @Test
-    public void andreaTest4(){
+    public void testPerf4(){
         String sparql = "PREFIX schema: <http://schema.org/>\n" +
                 "PREFIX : <http://destination.example.org/ontology/dest#>\n" +
                 "SELECT ?name\n" +
@@ -373,7 +361,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest5(){
+    public void testPerf5(){
         String sparql = "PREFIX : <http://destination.example.org/ontology/dest#>\n" +
                 "PREFIX schema: <http://schema.org/>\n" +
                 "SELECT ?s ?o\n" +
@@ -388,7 +376,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest6(){
+    public void testPerf6(){
         String sparql = "PREFIX schema: <http://schema.org/>\n" +
                 "PREFIX : <http://destination.example.org/ontology/dest#>\n" +
                 "SELECT ?municipality ?name\n" +
@@ -403,7 +391,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest7(){
+    public void testPerf7(){
         String sparql = "PREFIX : <http://destination.example.org/ontology/dest#>\n" +
                 "PREFIX schema: <http://schema.org/>\n" +
                 "SELECT ?s ?o ?name\n" +
@@ -419,7 +407,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest8(){
+    public void testPerf8(){
         String sparql = "PREFIX : <http://destination.example.org/ontology/dest#>\n" +
                 "PREFIX schema: <http://schema.org/>\n" +
                 "SELECT ?s ?o ?name\n" +
@@ -436,7 +424,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest9(){
+    public void testPerf9(){
         String sparql = "SELECT ?o {\n" +
                 "  <http://destination.example.org/data/weather/observation/202268> ?p ?o\n" +
                 "    }\n" +
@@ -446,7 +434,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest10(){
+    public void testPerf10(){
         String sparql = "SELECT ?subject {\n" +
                 "  ?subject ?p <http://destination.example.org/data/weather/observation/202268> \n" +
                 "}\n" +
@@ -456,7 +444,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest11(){
+    public void testPerf11(){
         String sparql = "SELECT DISTINCT ?subject ?class {\n" +
                 "          ?subject a ?class .\n" +
                 "          { ?subject ?p <http://destination.example.org/data/source1/hospitality/60E1EE8CE9647B98CF711E8B78F09955> }\n" +
@@ -468,7 +456,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest12(){
+    public void testPerf12(){
         String sparql = "SELECT DISTINCT ?subject ?class {\n" +
                 "          ?subject a ?class .\n" +
                 "        { ?subject ?p <http://destination.example.org/data/weather/observation/202268> }\n" +
@@ -482,7 +470,7 @@ public class DestinationTest extends AbstractRDF4JTest {
 
     @Ignore("TODO: enable (too slow)")
     @Test
-    public void andreaTest13(){
+    public void testPerf13(){
         String sparql = "PREFIX schema: <http://schema.org/>\n" +
                 "\n" +
                 "    SELECT DISTINCT ?c WHERE {\n" +
@@ -495,24 +483,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest14(){
-        String sparql = "PREFIX schema: <http://schema.org/>\n" +
-                "SELECT ?name ?email\n" +
-                "WHERE {\n" +
-                "  ?hotel a schema:Hotel .\n" +
-                "  ?hotel schema:name ?name .\n" +
-                "  ?hotel schema:email ?email .\n" +
-                "  VALUES (?name ?email) {\n" +
-                "    (\"Residence Bozen\"@it  \"residencbozen@gmail.com\")\n" +
-                "    (\"Residence Bozen\"@en  \"residencbozen@gmail.com\")\n" +
-                "  }\n" +
-                "}";
-        int count = runQueryAndCount(sparql);
-        assertEquals(0, count);
-    }
-
-    @Test
-    public void andreaTest15(){
+    public void testPerf15(){
         String sparql = "SELECT ?class (COUNT(?subject) AS ?count) {\n" +
                 "  ?subject a ?class .\n" +
                 "  { ?subject ?p <http://destination.example.org/data/weather/observation/202268> }\n" +
@@ -526,17 +497,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest16(){
-        String sparql = "SELECT * WHERE {\n" +
-                "  <http://destination.example.org/data/source1/hospitality/60E1EE8CE9647B98CF711E8B78F09955> ?pred ?obj .\n" +
-                "    }\n" +
-                "    LIMIT 10";
-        int count = runQueryAndCount(sparql);
-        assertEquals(0, count);
-    }
-
-    @Test
-    public void andreaTest17(){
+    public void testPerf17(){
         String sparql = "PREFIX schema: <http://schema.org/>\n" +
                 "SELECT ?hotel ?o\n" +
                 "WHERE {\n" +
@@ -548,7 +509,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest18(){
+    public void testPerf18(){
         String sparql = "PREFIX schema: <http://schema.org/>\n" +
                 "PREFIX : <http://destination.example.org/ontology/dest#>\n" +
                 "SELECT ?hotel ?p1 ?o1 ?mun ?p2 ?o2\n" +
@@ -564,7 +525,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest19(){
+    public void testPerf19(){
         String sparql = "PREFIX : <http://destination.example.org/ontology/dest#>\n" +
                 "PREFIX schema: <http://schema.org/>\n" +
                 "SELECT ?s ?p ?o\n" +
@@ -579,7 +540,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest20(){
+    public void testPerf20(){
         String sparql = "PREFIX : <http://destination.example.org/ontology/dest#>\n" +
                 "PREFIX schema: <http://schema.org/>\n" +
                 "SELECT ?s ?p ?o\n" +
@@ -594,7 +555,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest21(){
+    public void testPerf21(){
         String sparql = "PREFIX schema: <http://schema.org/>\n" +
                 "PREFIX : <http://destination.example.org/ontology/dest#>\n" +
                 "SELECT ?s ?p1 ?o1 ?p2\n" +
@@ -615,7 +576,7 @@ public class DestinationTest extends AbstractRDF4JTest {
 
     @Ignore("TODO: enable it (too slow)")
     @Test
-    public void andreaTest22(){
+    public void testPerf22(){
         String sparql = "PREFIX schema: <http://schema.org/>\n" +
                 "PREFIX : <http://destination.example.org/ontology/dest#>\n" +
                 "\n" +
@@ -635,7 +596,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest23(){
+    public void testPerf23(){
         String sparql = "PREFIX sc: <http://purl.org/science/owl/sciencecommons/>\n" +
                 "PREFIX schema: <http://schema.org/>\n" +
                 "PREFIX dest: <http://destination.example.org/ontology/dest#>\n" +
@@ -657,7 +618,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest24(){
+    public void testPerf24(){
         String sparql = "PREFIX schema: <http://schema.org/>\n" +
                 "\n" +
                 "SELECT ?s ?place ?p ?o\n" +
@@ -674,7 +635,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest25(){
+    public void testPerf25(){
         String sparql = "PREFIX schema: <http://schema.org/>\n" +
                 "SELECT ?s ?place ?p ?o\n" +
                 "WHERE {\n" +
@@ -691,7 +652,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest26(){
+    public void testPerf26(){
         String sparql = "PREFIX schema: <http://schema.org/>\n" +
                 "SELECT ?s {\n" +
                 "  ?s schema:containedInPlace ?h .\n" +
@@ -704,7 +665,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest27(){
+    public void testPerf27(){
         String sparql = "PREFIX sc: <http://purl.org/science/owl/sciencecommons/>\n" +
                 "PREFIX schema: <http://schema.org/>\n" +
                 "\n" +
@@ -720,21 +681,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest28(){
-        String sparql = "PREFIX sc: <http://purl.org/science/owl/sciencecommons/>\n" +
-                "PREFIX schema: <http://schema.org/>\n" +
-                "SELECT * \n" +
-                "WHERE {\n" +
-                "  <http://destination.example.org/data/source1/hospitality/EFF0FACBA54C11D1AD760020AFF92740> a schema:Hotel .\n" +
-                "  <http://destination.example.org/data/source1/hospitality/EFF0FACBA54C11D1AD760020AFF92740> ?p ?o .\n" +
-                "}\n" +
-                "LIMIT 10\n";
-        int count = runQueryAndCount(sparql);
-        assertEquals(0, count);
-    }
-
-    @Test
-    public void andreaTest29(){
+    public void testPerf29(){
         String sparql =
                 "SELECT DISTINCT ?subject ?class {\n" +
                         "?subject a ?class .\n" +
@@ -757,7 +704,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest31(){
+    public void testPerf31(){
         String sparql =
                 "SELECT DISTINCT *\n" +
                         "{\n" +
@@ -769,24 +716,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest32(){
-        String sparql =
-                "PREFIX schema: <http://schema.org/>\n" +
-                        "SELECT DISTINCT * \n" +
-                        "{ ?s a schema:Hotel . }";
-        int count = runQueryAndCount(sparql);
-        assertEquals(0, count);
-    }
-
-    @Test
-    public void andreaTest33(){
-        String sparql = "SELECT * WHERE { ?subject ?p <http://destination.example.org/data/source1/hospitality/A1B9B1850E0B035D21D93D3FCD3AA257> . }";
-        int count = runQueryAndCount(sparql);
-        assertEquals(0, count);
-    }
-
-    @Test
-    public void andreaTest34(){
+    public void testPerf34(){
         String sparql = "PREFIX schema: <http://schema.org/>\n" +
                 "\n" +
                 "SELECT DISTINCT ?subject {\n" +
@@ -829,7 +759,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest36(){
+    public void testPerf36(){
         String sparql = "PREFIX schema: <http://schema.org/>\n" +
                 "PREFIX : <http://destination.example.org/ontology/dest#>\n" +
                 "SELECT ?subject ?pToSubject\n" +
@@ -843,7 +773,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest37(){
+    public void testPerf37(){
         String sparql = "SELECT DISTINCT ?subject ?pToSubject ?pFromSubject {\n" +
                 "          BIND(<http://destination.example.org/data/municipality/021114> AS ?argument)\n" +
                 "          VALUES ?subjectClass { <http://schema.org/BedAndBreakfast> }\n" +
@@ -866,7 +796,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest38(){
+    public void testPerf38(){
         String sparql = "SELECT ?subject ?pred ?value ?subjectClass ?pToSubject ?pFromSubject {\n" +
                 "  ?subject a ?subjectClass;\n" +
                 "           ?pred ?value {\n" +
@@ -893,7 +823,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void andreaTest39(){
+    public void testPerf39(){
         String sparql = "SELECT ?subject ?pred ?value ?subjectClass ?pToSubject ?pFromSubject {\n" +
                 "  ?subject a ?subjectClass;\n" +
                 "           ?pred ?value {\n" +
@@ -920,7 +850,7 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
     
     @Test
-    public void andreaTest40(){
+    public void testPerf40(){
         String sparql =
                 "SELECT * {\n" +
                         "  ?subject a ?subjectClass .\n" +
@@ -938,7 +868,19 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(28, count);
     }
 
-    //TODO QUESTI DI GRAPH EXPLORER INVECE PUOI LASCIARLI
+    @Test
+    public void testPerf41(){
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "SELECT *\n" +
+                "WHERE\n" +
+                "{\n" +
+                "  BIND( schema:Hotel AS ?c )\n" +
+                "  ?s a ?c .\n" +
+                "  ?s schema:name ?o1 .\n" +
+                "}\n" +
+                "LIMIT 10";
+        runQuery(sparql);
+    }
 
     @Test
     public void graphExplorerCriticalQuery1(){
@@ -1195,19 +1137,5 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "    }";
         int count = runQueryAndCount(sparql);
         assertEquals(0, count);
-    }
-
-    @Test
-    public void test1(){
-        String sparql = "PREFIX schema: <http://schema.org/>\n" +
-                "SELECT *\n" +
-                "WHERE\n" +
-                "{\n" +
-                "  BIND( schema:Hotel AS ?c )\n" +
-                "  ?s a ?c .\n" +
-                "  ?s schema:name ?o1 .\n" +
-                "}\n" +
-                "LIMIT 10";
-        runQuery(sparql);
     }
 }
