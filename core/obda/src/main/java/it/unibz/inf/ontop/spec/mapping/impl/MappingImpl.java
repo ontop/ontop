@@ -25,9 +25,9 @@ public class MappingImpl implements Mapping {
 
     private final ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyDefinitions;
     private final ImmutableTable<RDFAtomPredicate, IRI, IQ> classDefinitions;
-    private final Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitionsFromSubjSAC;
-    private final Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitionsFromSubjSPO;
-    private final Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitionsFromObjSPO;
+    private final Map<RDFAtomPredicate, Map<ObjectStringTemplateFunctionSymbol, IQ>> compatibleDefinitionsFromSubjSAC;
+    private final Map<RDFAtomPredicate, Map<ObjectStringTemplateFunctionSymbol, IQ>> compatibleDefinitionsFromSubjSPO;
+    private final Map<RDFAtomPredicate, Map<ObjectStringTemplateFunctionSymbol, IQ>> compatibleDefinitionsFromObjSPO;
     private final TermFactory termFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final IntermediateQueryFactory iqFactory;
@@ -44,9 +44,9 @@ public class MappingImpl implements Mapping {
         this.termFactory = termFactory;
         this.queryMerger = queryMerger;
         this.iqFactory = iqFactory;
-        this.compatibleDefinitionsFromSubjSPO = HashBasedTable.create();
-        this.compatibleDefinitionsFromObjSPO = HashBasedTable.create();
-        this.compatibleDefinitionsFromSubjSAC = HashBasedTable.create();
+        this.compatibleDefinitionsFromSubjSPO = Maps.newConcurrentMap();
+        this.compatibleDefinitionsFromObjSPO = Maps.newConcurrentMap();
+        this.compatibleDefinitionsFromSubjSAC = Maps.newConcurrentMap();
         this.allDefinitionMergedMap = Maps.newHashMap();
         this.allClassMergedMap = Maps.newHashMap();
     }
@@ -83,40 +83,35 @@ public class MappingImpl implements Mapping {
 
     @Override
     public Optional<IQ> getCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate, RDFAtomIndexPattern indexPattern,
-                                                 ObjectStringTemplateFunctionSymbol templateFunctionSymbol, VariableGenerator variableGenerator) {
+                                                 ObjectStringTemplateFunctionSymbol templateFunctionSymbol,
+                                                 VariableGenerator variableGenerator) {
         switch (indexPattern) {
             case SUBJECT_OF_ALL_DEFINITIONS:
                 return getMergedDefinitions(rdfAtomPredicate)
-                        .map(d -> getCompatibleDefinitions(rdfAtomPredicate, indexPattern, templateFunctionSymbol, variableGenerator,
-                                compatibleDefinitionsFromSubjSPO, d));
+                        .map(d -> getCompatibleDefinitions(indexPattern, templateFunctionSymbol, variableGenerator,
+                                compatibleDefinitionsFromSubjSPO.computeIfAbsent(
+                                        rdfAtomPredicate, p -> Maps.newConcurrentMap()), d));
             case OBJECT_OF_ALL_DEFINITIONS:
                 return getMergedDefinitions(rdfAtomPredicate)
-                        .map(d -> getCompatibleDefinitions(rdfAtomPredicate, indexPattern, templateFunctionSymbol, variableGenerator,
-                                compatibleDefinitionsFromObjSPO, d));
+                        .map(d -> getCompatibleDefinitions(indexPattern, templateFunctionSymbol, variableGenerator,
+                                compatibleDefinitionsFromObjSPO.computeIfAbsent(
+                                        rdfAtomPredicate, p -> Maps.newConcurrentMap()), d));
             case SUBJECT_OF_ALL_CLASSES:
                 return getMergedClassDefinitions(rdfAtomPredicate)
-                        .map(d -> getCompatibleDefinitions(rdfAtomPredicate, indexPattern, templateFunctionSymbol, variableGenerator,
-                                compatibleDefinitionsFromSubjSAC, d));
+                        .map(d -> getCompatibleDefinitions(indexPattern, templateFunctionSymbol, variableGenerator,
+                                compatibleDefinitionsFromSubjSAC.computeIfAbsent(
+                                        rdfAtomPredicate, p -> Maps.newConcurrentMap()), d));
             default:
                 throw new MinorOntopInternalBugException("Unsupported RDFAtomIndexPattern: " + indexPattern);
         }
     }
 
-    private IQ getCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate, RDFAtomIndexPattern indexPattern,
-                                                  ObjectStringTemplateFunctionSymbol templateFunctionSymbol, VariableGenerator variableGenerator,
-                                                  Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitions,
-                                                  IQ mergedDefinition) {
-
-        // Just an optimization to avoid parallel computations of the same thing
-        synchronized (templateFunctionSymbol) {
-            Optional<IQ> result = Optional.ofNullable(compatibleDefinitions.get(rdfAtomPredicate, templateFunctionSymbol));
-            if (result.isPresent())
-                return result.get();
-
-            IQ definition = pruneMergedDefinitionWithTemplate(variableGenerator, mergedDefinition, indexPattern, templateFunctionSymbol);
-            compatibleDefinitions.put(rdfAtomPredicate, templateFunctionSymbol, definition);
-            return definition;
-        }
+    private IQ getCompatibleDefinitions(RDFAtomIndexPattern indexPattern,
+                                        ObjectStringTemplateFunctionSymbol templateFunctionSymbol, VariableGenerator variableGenerator,
+                                        Map<ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitions,
+                                        IQ mergedDefinition) {
+        return compatibleDefinitions.computeIfAbsent(templateFunctionSymbol,
+                    t -> pruneMergedDefinitionWithTemplate(variableGenerator, mergedDefinition, indexPattern, t));
     }
 
     private IQ pruneMergedDefinitionWithTemplate(VariableGenerator variableGenerator, IQ mergedDefinition, RDFAtomIndexPattern indexPattern,
