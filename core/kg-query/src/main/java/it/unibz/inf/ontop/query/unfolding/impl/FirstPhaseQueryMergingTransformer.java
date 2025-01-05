@@ -20,12 +20,12 @@ import static it.unibz.inf.ontop.spec.mapping.Mapping.RDFAtomIndexPattern.*;
 
 public class FirstPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryMergingTransformer {
 
-    private boolean areIntensionalNodeRemaining; //(?s ?p ?o) or (?s ?p ?o ?g)
+    private boolean areSomeIntensionalNodesRemaining; //(?s ?p ?o) or (?s ?p ?o ?g)
 
     protected FirstPhaseQueryMergingTransformer(Mapping mapping, VariableGenerator variableGenerator,
                                                 CoreSingletons coreSingletons) {
         super(mapping, variableGenerator, coreSingletons);
-        this.areIntensionalNodeRemaining = false;
+        this.areSomeIntensionalNodesRemaining = false;
     }
 
     @Override
@@ -92,7 +92,7 @@ public class FirstPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryMe
 
         if ((atomPredicate instanceof RDFAtomPredicate)
                 && ((RDFAtomPredicate) atomPredicate).getPredicateIRI(projectionAtom.getArguments()).isEmpty()) {
-            areIntensionalNodeRemaining = true;
+            areSomeIntensionalNodesRemaining = true;
             return dataNode;
         }
 
@@ -100,6 +100,6 @@ public class FirstPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryMe
     }
 
     public boolean areIntensionalNodesRemaining() {
-        return areIntensionalNodeRemaining;
+        return areSomeIntensionalNodesRemaining;
     }
 }

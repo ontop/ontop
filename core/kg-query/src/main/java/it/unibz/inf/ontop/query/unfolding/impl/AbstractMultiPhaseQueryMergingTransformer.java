@@ -5,9 +5,12 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -22,14 +25,23 @@ public abstract class AbstractMultiPhaseQueryMergingTransformer extends Abstract
 
     protected final TermFactory termFactory;
     protected final Mapping mapping;
-    private final ImmutableSet<ObjectStringTemplateFunctionSymbol> objectTemplates;
+    private final ImmutableSet<ObjectStringTemplateFunctionSymbol> iriTemplates;
+    private final ImmutableSet<ObjectStringTemplateFunctionSymbol> bnodeTemplates;
     protected final VariableGenerator variableGenerator;
 
     protected AbstractMultiPhaseQueryMergingTransformer(Mapping mapping, VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
         super(variableGenerator, coreSingletons);
         this.mapping = mapping;
         this.termFactory = coreSingletons.getTermFactory();
-        this.objectTemplates = this.termFactory.getDBFunctionSymbolFactory().getObjectTemplates();
+        var objectTemplates = this.termFactory.getDBFunctionSymbolFactory().getObjectTemplates();
+        this.iriTemplates = objectTemplates.stream()
+                .filter(t -> t instanceof IRIStringTemplateFunctionSymbol)
+                .map(t -> (IRIStringTemplateFunctionSymbol)t)
+                .collect(ImmutableSet.toImmutableSet());
+        this.bnodeTemplates = objectTemplates.stream()
+                .filter(t -> t instanceof BnodeStringTemplateFunctionSymbol)
+                .map(t -> (BnodeStringTemplateFunctionSymbol)t)
+                .collect(ImmutableSet.toImmutableSet());
         this.variableGenerator = variableGenerator;
     }
 
@@ -49,9 +61,18 @@ public abstract class AbstractMultiPhaseQueryMergingTransformer extends Abstract
                 .isEmpty();
     }
 
+    /**
+     * TODO: introduce some cache?
+     * TODO: use an index data structure based on prefixes and/or suffixes?
+     *
+     */
     private Optional<ObjectStringTemplateFunctionSymbol> selectCompatibleTemplateWithConstant(ObjectConstant objectConstant) {
-        // TODO: cache it?
-        return objectTemplates.stream()
+        if (objectConstant instanceof IRIConstant)
+            return iriTemplates.stream()
+                    .filter(t -> isTemplateCompatibleWithConstant(t, objectConstant))
+                    .findAny();
+
+        return bnodeTemplates.stream()
                 .filter(t -> isTemplateCompatibleWithConstant(t, objectConstant))
                 .findAny();
     }

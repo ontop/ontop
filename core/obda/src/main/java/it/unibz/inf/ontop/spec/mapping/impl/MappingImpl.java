@@ -86,35 +86,36 @@ public class MappingImpl implements Mapping {
                                                  ObjectStringTemplateFunctionSymbol templateFunctionSymbol, VariableGenerator variableGenerator) {
         switch (indexPattern) {
             case SUBJECT_OF_ALL_DEFINITIONS:
-                return getCompatibleDefinitions(rdfAtomPredicate, indexPattern, templateFunctionSymbol, variableGenerator,
-                        compatibleDefinitionsFromSubjSPO, getMergedDefinitions(rdfAtomPredicate));
+                return getMergedDefinitions(rdfAtomPredicate)
+                        .map(d -> getCompatibleDefinitions(rdfAtomPredicate, indexPattern, templateFunctionSymbol, variableGenerator,
+                                compatibleDefinitionsFromSubjSPO, d));
             case OBJECT_OF_ALL_DEFINITIONS:
-                return getCompatibleDefinitions(rdfAtomPredicate, indexPattern, templateFunctionSymbol, variableGenerator,
-                        compatibleDefinitionsFromObjSPO, getMergedDefinitions(rdfAtomPredicate));
+                return getMergedDefinitions(rdfAtomPredicate)
+                        .map(d -> getCompatibleDefinitions(rdfAtomPredicate, indexPattern, templateFunctionSymbol, variableGenerator,
+                                compatibleDefinitionsFromObjSPO, d));
             case SUBJECT_OF_ALL_CLASSES:
-                return getCompatibleDefinitions(rdfAtomPredicate, indexPattern, templateFunctionSymbol, variableGenerator,
-                        compatibleDefinitionsFromSubjSAC, getMergedClassDefinitions(rdfAtomPredicate));
+                return getMergedClassDefinitions(rdfAtomPredicate)
+                        .map(d -> getCompatibleDefinitions(rdfAtomPredicate, indexPattern, templateFunctionSymbol, variableGenerator,
+                                compatibleDefinitionsFromSubjSAC, d));
             default:
                 throw new MinorOntopInternalBugException("Unsupported RDFAtomIndexPattern: " + indexPattern);
         }
     }
 
-    private Optional<IQ> getCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate, RDFAtomIndexPattern indexPattern,
+    private IQ getCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate, RDFAtomIndexPattern indexPattern,
                                                   ObjectStringTemplateFunctionSymbol templateFunctionSymbol, VariableGenerator variableGenerator,
                                                   Table<RDFAtomPredicate, ObjectStringTemplateFunctionSymbol, IQ> compatibleDefinitions,
-                                                  Optional<IQ> mergedDefinition) {
-        if (mergedDefinition.isEmpty())
-            return Optional.empty();
+                                                  IQ mergedDefinition) {
 
         // Just an optimization to avoid parallel computations of the same thing
         synchronized (templateFunctionSymbol) {
             Optional<IQ> result = Optional.ofNullable(compatibleDefinitions.get(rdfAtomPredicate, templateFunctionSymbol));
             if (result.isPresent())
-                return result;
+                return result.get();
 
-            IQ definition = pruneMergedDefinitionWithTemplate(variableGenerator, mergedDefinition.get(), indexPattern, templateFunctionSymbol);
+            IQ definition = pruneMergedDefinitionWithTemplate(variableGenerator, mergedDefinition, indexPattern, templateFunctionSymbol);
             compatibleDefinitions.put(rdfAtomPredicate, templateFunctionSymbol, definition);
-            return Optional.of(definition);
+            return definition;
         }
     }
 
