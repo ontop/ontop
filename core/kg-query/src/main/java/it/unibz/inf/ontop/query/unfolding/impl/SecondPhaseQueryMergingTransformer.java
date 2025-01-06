@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
-import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -273,7 +272,7 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
 
         if (canBeSeparatedByPrefix(constraints)) {
             return queryMerger.mergeDefinitions(
-                    getMatchingDefinitionsForSafeConstraints(rdfAtomPredicate, constraints, atomIndexPattern));
+                    getMatchingDefinitionsSafely(rdfAtomPredicate, constraints, atomIndexPattern));
         }
         return Optional.empty();
     }
@@ -321,8 +320,8 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
         return prefix1.startsWith(prefix2) || prefix2.startsWith(prefix1);
     }
 
-    private Collection<IQ> getMatchingDefinitionsForSafeConstraints(RDFAtomPredicate rdfAtomPredicate,
-                                                                    ImmutableSet<RDFSelector> constraints, Mapping.RDFAtomIndexPattern indexPattern) {
+    private Collection<IQ> getMatchingDefinitionsSafely(RDFAtomPredicate rdfAtomPredicate,
+                                                        ImmutableSet<RDFSelector> constraints, Mapping.RDFAtomIndexPattern indexPattern) {
         var matchingDefinitions = constraints.stream()
                 .flatMap(c -> c.getObjectTemplate()
                         .map(t -> mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern, t, variableGenerator))
