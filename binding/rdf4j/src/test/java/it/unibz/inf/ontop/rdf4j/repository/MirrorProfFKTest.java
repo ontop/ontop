@@ -67,4 +67,26 @@ public class MirrorProfFKTest extends AbstractRDF4JTest {
         runQueryAndCompare(query, ImmutableSet.of("http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/10"));
     }
 
+    @Test
+    public void testStartsWith3()  {
+        String query = "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "SELECT  ?v \n" +
+                "WHERE {\n" +
+                " ?v a :Teacher . \n" +
+                " FILTER(STRSTARTS(str(?v), \"http://nowhere.org/unrelatedURL\")) \n" +
+                "}";
+        runQueryAndCompare(query, ImmutableSet.of());
+    }
+
+    @Test
+    public void testStartsWith4()  {
+        String query = "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "SELECT  ?v \n" +
+                "WHERE {\n" +
+                " ?v a :Teacher . \n" +
+                " FILTER(STRSTARTS(str(?v), \"http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor-longer-prefix\")) \n" +
+                "}";
+        runQueryAndCompare(query, ImmutableSet.of());
+    }
+
 }
