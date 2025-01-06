@@ -99,7 +99,7 @@ public class FirstPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryMe
         return iqFactory.createEmptyNode(dataNode.getVariables());
     }
 
-    public boolean areIntensionalNodesRemaining() {
+    public boolean areSomeIntensionalNodesRemaining() {
         return areSomeIntensionalNodesRemaining;
     }
 }

@@ -107,7 +107,7 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
 
     private Optional<RDFSelector> extractSelectorFromTerm(ImmutableTerm term) {
         ImmutableTerm simplifiedTerm = term.simplify();
-        // Template case
+        // RDF functional term case
         if ((simplifiedTerm instanceof ImmutableFunctionalTerm)
                 && (((ImmutableFunctionalTerm) simplifiedTerm).getFunctionSymbol() instanceof RDFTermFunctionSymbol)) {
             ImmutableTerm lexicalTerm = ((ImmutableFunctionalTerm) simplifiedTerm).getTerm(0);
@@ -123,10 +123,15 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
                 return Optional.of(new RDFSelector());
             }
         }
-        // Constant case
+        // IRI/BNode constant case
         else if (simplifiedTerm instanceof ObjectConstant) {
             return Optional.of(new RDFSelector((ObjectConstant) simplifiedTerm));
         }
+        // Literal constant case
+        else if (simplifiedTerm instanceof RDFLiteralConstant) {
+            return Optional.of(new RDFSelector());
+        }
+
         // No constraint extracted (will be treated as unconstrained)
         return Optional.empty();
     }
@@ -167,55 +172,95 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
                                 .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to be a constant"))));
     }
 
-    /**
-     * Filters using the prefix of the template
-     */
-    private IQTree filteredTreeToPreventInsecureUnion(IQTree currentIQTree, ImmutableTerm var, String prefix) {
-        ImmutableFunctionalTerm sparqlSTRSTARTSFunctionWithParameters = termFactory.getImmutableFunctionalTerm(
-                functionSymbolFactory.getSPARQLFunctionSymbol(XPathFunction.STARTS_WITH.getIRIString(), 2).get(),
-                termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.STR, 1)
-                        .orElseThrow(() -> new MinorOntopInternalBugException("STR function missing")), var),
-                termFactory.getRDFLiteralConstant(
-                        prefix,
-                        termFactory.getTypeFactory().getXsdStringDatatype()
-                )
-        );
-        ImmutableExpression filterCondition = termFactory.getRDF2DBBooleanFunctionalTerm(sparqlSTRSTARTSFunctionWithParameters);
-        FilterNode filterNode = iqFactory.createFilterNode(filterCondition);
-        IQTree iqTreeWithFilter = iqFactory.createUnaryIQTree(filterNode, currentIQTree);
-        return iqTreeWithFilter;
+    @Override
+    public final IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+        ImmutableList<IQTree> newChildren = children.stream()
+                .map(this::transformChildWithNewTransformer)
+                .collect(ImmutableCollectors.toList());
+
+        return newChildren.equals(children) && rootNode.equals(tree.getRootNode())
+                ? tree
+                : iqFactory.createNaryIQTree(rootNode, newChildren);
     }
 
-    private Optional<IQ> getFilteredMatchingDefinitionFromTemplate(RDFAtomPredicate rdfAtomPredicate,
-                                                                   ObjectStringTemplateFunctionSymbol template, Mapping.RDFAtomIndexPattern indexPattern) {
-        Optional<IQ> filteredDefinition = mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern, template, variableGenerator);
-        if (filteredDefinition.isEmpty())
-            return Optional.empty();
-
-        IQ definition = filteredDefinition.get();
-        Variable var = definition.getProjectionAtom().getArguments().get(indexPattern.getPosition());
-
-        // TODO: only apply filter when there are more than one possible constraint
-        String templatePrefix = template.getTemplateComponents().get(0).getComponent();
-        return Optional.of(
-                iqFactory.createIQ(definition.getProjectionAtom(),
-                        filteredTreeToPreventInsecureUnion(definition.getTree(), var, templatePrefix)));
+    @Override
+    public final IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        IQTree newLeftChild = leftChild.acceptTransformer(this);
+        IQTree newRightChild = transformChildWithNewTransformer(rightChild);
+        return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild) && rootNode.equals(tree.getRootNode())
+                ? tree
+                : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild);
     }
 
-    private Optional<IQ> getFilteredMatchingDefinitionFromConstant(RDFAtomPredicate rdfAtomPredicate, ObjectConstant objectConstant,
-                                                                   Mapping.RDFAtomIndexPattern indexPattern) {
-        return getDefinitionCompatibleWithConstant(rdfAtomPredicate, indexPattern, objectConstant)
-                .map(d -> {
-                    DistinctVariableOnlyDataAtom projectionAtom = d.getProjectionAtom();
-                    Variable indexVariable = projectionAtom.getArguments().get(indexPattern.getPosition());
+    @Override
+    public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+        return transformUnaryTreeUsingLocalDefinitions(tree, rootNode, child);
+    }
 
-                    ImmutableExpression filterCondition = termFactory.getStrictEquality(indexVariable, objectConstant);
-                    IQTree filteredTree = iqFactory.createUnaryIQTree(
-                            iqFactory.createFilterNode(filterCondition),
-                            d.getTree());
-                    return iqFactory.createIQ(projectionAtom, filteredTree.normalizeForOptimization(variableGenerator));
-                });
+    public IQTree transformUnaryTreeUsingLocalDefinitions(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+        IQTree newChild = transformChildWithNewTransformer(child);
+        return newChild.equals(child)
+                ? tree
+                : iqFactory.createUnaryIQTree(rootNode, newChild);
+    }
 
+    private IQTree transformChildWithNewTransformer(IQTree child) {
+        return child.acceptTransformer(
+                new SecondPhaseQueryMergingTransformer(child.getPossibleVariableDefinitions(),
+                        mapping, variableGenerator, constraintMap, coreSingletons));
+    }
+
+    @Override
+    public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
+        return transformUnaryTreeUsingLocalDefinitions(tree, rootNode, child);
+    }
+
+    @Override
+    protected Optional<IQ> getDefinition(IntensionalDataNode dataNode) {
+        DataAtom<AtomPredicate> atom = dataNode.getProjectionAtom();
+        return Optional.of(atom)
+                .map(DataAtom::getPredicate)
+                .filter(p -> p instanceof RDFAtomPredicate)
+                .map(p -> (RDFAtomPredicate) p)
+                .flatMap(p -> getDefinition(p, atom.getArguments()));
+    }
+
+    private Optional<IQ> getDefinition(RDFAtomPredicate predicate,
+                                       ImmutableList<? extends VariableOrGroundTerm> arguments) {
+        return predicate.getPropertyIRI(arguments)
+                // The other property IRIs should already have been handled by the first phase
+                .filter(i -> i.equals(RDF.TYPE))
+                .map(i -> getClassDefinition(predicate, arguments))
+                .orElseGet(() -> getAllDefinitions(predicate, arguments));
+    }
+
+    private Optional<IQ> getAllDefinitions(RDFAtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> arguments) {
+        VariableOrGroundTerm subject = predicate.getSubject(arguments);
+        if (subject instanceof Variable) {
+            Optional<IQ> definition = getCompatibleDefinition(predicate, SUBJECT_OF_ALL_DEFINITIONS, (Variable) subject);
+            if (definition.isPresent())
+                return definition;
+        }
+
+        VariableOrGroundTerm object = predicate.getObject(arguments);
+        if (object instanceof Variable) {
+            Optional<IQ> definition = getCompatibleDefinition(predicate, OBJECT_OF_ALL_DEFINITIONS, (Variable) object);
+            if (definition.isPresent())
+                return definition;
+        }
+        return mapping.getMergedDefinitions(predicate);
+    }
+
+    private Optional<IQ> getClassDefinition(RDFAtomPredicate predicate,
+                                            ImmutableList<? extends VariableOrGroundTerm> arguments) {
+        VariableOrGroundTerm subject = predicate.getSubject(arguments);
+        if (subject instanceof Variable) {
+            Optional<IQ> definition = getCompatibleDefinition(predicate, SUBJECT_OF_ALL_CLASSES, (Variable) subject);
+            if (definition.isPresent())
+                return definition;
+        }
+
+        return mapping.getMergedClassDefinitions(predicate);
     }
 
     private Optional<IQ> getCompatibleDefinition(RDFAtomPredicate rdfAtomPredicate,
@@ -291,103 +336,57 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
                 .collect(ImmutableCollectors.toList());
     }
 
-    @Override
-    public final IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(child -> transformChildWithNewTransformer(child))
-                .collect(ImmutableCollectors.toList());
+    private Optional<IQ> getFilteredMatchingDefinitionFromTemplate(RDFAtomPredicate rdfAtomPredicate,
+                                                                   ObjectStringTemplateFunctionSymbol template, Mapping.RDFAtomIndexPattern indexPattern) {
+        Optional<IQ> filteredDefinition = mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern, template, variableGenerator);
+        if (filteredDefinition.isEmpty())
+            return Optional.empty();
 
-        return newChildren.equals(children) && rootNode.equals(tree.getRootNode())
-                ? tree
-                : iqFactory.createNaryIQTree(rootNode, newChildren);
+        IQ definition = filteredDefinition.get();
+        Variable var = definition.getProjectionAtom().getArguments().get(indexPattern.getPosition());
+
+        // TODO: only apply filter when there are more than one possible constraint
+        String templatePrefix = template.getTemplateComponents().get(0).getComponent();
+        return Optional.of(
+                iqFactory.createIQ(definition.getProjectionAtom(),
+                        filteredTreeToPreventInsecureUnion(definition.getTree(), var, templatePrefix)));
     }
 
-    @Override
-    public final IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        IQTree newLeftChild = leftChild.acceptTransformer(this);
-        IQTree newRightChild = transformChildWithNewTransformer(rightChild);
-        return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild) && rootNode.equals(tree.getRootNode())
-                ? tree
-                : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild);
+    /**
+     * Filters using the prefix of the template
+     */
+    private IQTree filteredTreeToPreventInsecureUnion(IQTree currentIQTree, ImmutableTerm var, String prefix) {
+        ImmutableFunctionalTerm sparqlSTRSTARTSFunctionWithParameters = termFactory.getImmutableFunctionalTerm(
+                functionSymbolFactory.getSPARQLFunctionSymbol(XPathFunction.STARTS_WITH.getIRIString(), 2)
+                        .orElseThrow(() -> new MinorOntopInternalBugException("SPARQL STARTS_WITH function missing")),
+                termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.STR, 1)
+                        .orElseThrow(() -> new MinorOntopInternalBugException("STR function missing")), var),
+                termFactory.getRDFLiteralConstant(
+                        prefix,
+                        termFactory.getTypeFactory().getXsdStringDatatype()
+                )
+        );
+        ImmutableExpression filterCondition = termFactory.getRDF2DBBooleanFunctionalTerm(sparqlSTRSTARTSFunctionWithParameters);
+        FilterNode filterNode = iqFactory.createFilterNode(filterCondition);
+        return iqFactory.createUnaryIQTree(filterNode, currentIQTree);
     }
 
-    @Override
-    public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
-        return transformUnaryTreeUsingLocalDefinitions(tree, rootNode, child);
+    private Optional<IQ> getFilteredMatchingDefinitionFromConstant(RDFAtomPredicate rdfAtomPredicate, ObjectConstant objectConstant,
+                                                                   Mapping.RDFAtomIndexPattern indexPattern) {
+        return getDefinitionCompatibleWithConstant(rdfAtomPredicate, indexPattern, objectConstant)
+                .map(d -> {
+                    DistinctVariableOnlyDataAtom projectionAtom = d.getProjectionAtom();
+                    Variable indexVariable = projectionAtom.getArguments().get(indexPattern.getPosition());
+
+                    ImmutableExpression filterCondition = termFactory.getStrictEquality(indexVariable, objectConstant);
+                    IQTree filteredTree = iqFactory.createUnaryIQTree(
+                            iqFactory.createFilterNode(filterCondition),
+                            d.getTree());
+                    return iqFactory.createIQ(projectionAtom, filteredTree.normalizeForOptimization(variableGenerator));
+                });
+
     }
 
-    public IQTree transformUnaryTreeUsingLocalDefinitions(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-        IQTree newChild = transformChildWithNewTransformer(child);
-        return newChild.equals(child)
-                ? tree
-                : iqFactory.createUnaryIQTree(rootNode, newChild);
-    }
-
-    private IQTree transformChildWithNewTransformer(IQTree child) {
-        return child.acceptTransformer(
-                new SecondPhaseQueryMergingTransformer(child.getPossibleVariableDefinitions(),
-                        mapping, variableGenerator, constraintMap, coreSingletons));
-    }
-
-    @Override
-    public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
-        return transformUnaryTreeUsingLocalDefinitions(tree, rootNode, child);
-    }
-
-    @Override
-    protected Optional<IQ> getDefinition(IntensionalDataNode dataNode) {
-        DataAtom<AtomPredicate> atom = dataNode.getProjectionAtom();
-        return Optional.of(atom)
-                .map(DataAtom::getPredicate)
-                .filter(p -> p instanceof RDFAtomPredicate)
-                .map(p -> (RDFAtomPredicate) p)
-                .flatMap(p -> getDefinition(p, atom.getArguments()));
-    }
-
-    private Optional<IQ> getDefinition(RDFAtomPredicate predicate,
-                                       ImmutableList<? extends VariableOrGroundTerm> arguments) {
-        return predicate.getPropertyIRI(arguments)
-                .filter(i -> i.equals(RDF.TYPE))
-                .map(i -> getClassDefinition(predicate, arguments))
-                .orElseGet(() -> getAllDefinitions(predicate, arguments));
-    }
-
-    private Optional<IQ> getAllDefinitions(RDFAtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> arguments) {
-        VariableOrGroundTerm subject = predicate.getSubject(arguments);
-        if (subject instanceof Variable) {
-            Optional<IQ> definition = getCompatibleDefinition(predicate, SUBJECT_OF_ALL_DEFINITIONS, (Variable) subject);
-            if (definition.isPresent())
-                return definition;
-        }
-
-        VariableOrGroundTerm object = predicate.getObject(arguments);
-        if (object instanceof Variable) {
-            Optional<IQ> definition = getCompatibleDefinition(predicate, OBJECT_OF_ALL_DEFINITIONS, (Variable) object);
-            if (definition.isPresent())
-                return definition;
-        }
-        return getStarDefinition(predicate);
-    }
-
-    private Optional<IQ> getClassDefinition(RDFAtomPredicate predicate,
-                                            ImmutableList<? extends VariableOrGroundTerm> arguments) {
-        VariableOrGroundTerm subject = predicate.getSubject(arguments);
-        if (subject instanceof Variable) {
-            Optional<IQ> definition = getCompatibleDefinition(predicate, SUBJECT_OF_ALL_CLASSES, (Variable) subject);
-            if (definition.isPresent())
-                return definition;
-        }
-
-        return getStarClassDefinition(predicate);
-    }
-
-    private Optional<IQ> getStarClassDefinition(RDFAtomPredicate predicate) {
-        return mapping.getMergedClassDefinitions(predicate);
-    }
-
-    private Optional<IQ> getStarDefinition(RDFAtomPredicate predicate) {
-        return mapping.getMergedDefinitions(predicate);
-    }
 
     @Override
     protected IQTree handleIntensionalWithoutDefinition(IntensionalDataNode dataNode) {

@@ -54,7 +54,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         IQTree partiallyUnfoldedIQ = tree.acceptTransformer(firstPhaseTransformer);
         LOGGER.debug("First phase query unfolding time: {}", System.currentTimeMillis() - before);
 
-        if (!firstPhaseTransformer.areIntensionalNodesRemaining())
+        if (!firstPhaseTransformer.areSomeIntensionalNodesRemaining())
             return partiallyUnfoldedIQ;
 
         return executeSecondPhaseUnfolding(partiallyUnfoldedIQ, variableGenerator);

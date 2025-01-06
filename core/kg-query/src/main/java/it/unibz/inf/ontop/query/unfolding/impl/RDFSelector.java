@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 
-class RDFSelector {
+public class RDFSelector {
 
     @Nullable
     private final ObjectStringTemplateFunctionSymbol objectTemplate;
@@ -79,7 +79,7 @@ class RDFSelector {
         }
     }
 
-    protected enum RDFSelectorType {
+    public enum RDFSelectorType {
         OBJECT_TEMPLATE,
         OBJECT_CONSTANT,
         LITERAL
