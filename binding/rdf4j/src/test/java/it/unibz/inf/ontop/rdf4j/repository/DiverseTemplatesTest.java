@@ -130,4 +130,18 @@ public class DiverseTemplatesTest extends AbstractRDF4JTest {
 
         runQueryAndCompare(query, ImmutableList.of("http://example.org/tpl1/1/2", "http://example.org/tpl1/1/2"));
     }
+
+    @Test
+    public void test8() {
+        var query = "PREFIX : <http://example.org/>\n" +
+                "SELECT * {\n" +
+                "BIND (<http://example.org/tpl1/2/2> AS ?s)\n" +
+                "?s a :C ;\n " +
+                "   ?p ?o .\n" +
+                "?o ?p2 ?v\n" +
+                "}\n" +
+                "ORDER BY ?v";
+
+        runQueryAndCompare(query, ImmutableList.of("100"));
+    }
 }
