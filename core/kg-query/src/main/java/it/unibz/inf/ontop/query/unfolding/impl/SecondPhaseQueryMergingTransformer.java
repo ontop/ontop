@@ -237,14 +237,14 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
     private Optional<IQ> getAllDefinitions(RDFAtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> arguments) {
         VariableOrGroundTerm subject = predicate.getSubject(arguments);
         if (subject instanceof Variable) {
-            Optional<IQ> definition = getCompatibleDefinition(predicate, SUBJECT_OF_ALL_DEFINITIONS, (Variable) subject);
+            Optional<IQ> definition = getCompatibleConstrainedDefinition(predicate, SUBJECT_OF_ALL_DEFINITIONS, (Variable) subject);
             if (definition.isPresent())
                 return definition;
         }
 
         VariableOrGroundTerm object = predicate.getObject(arguments);
         if (object instanceof Variable) {
-            Optional<IQ> definition = getCompatibleDefinition(predicate, OBJECT_OF_ALL_DEFINITIONS, (Variable) object);
+            Optional<IQ> definition = getCompatibleConstrainedDefinition(predicate, OBJECT_OF_ALL_DEFINITIONS, (Variable) object);
             if (definition.isPresent())
                 return definition;
         }
@@ -255,7 +255,7 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
                                             ImmutableList<? extends VariableOrGroundTerm> arguments) {
         VariableOrGroundTerm subject = predicate.getSubject(arguments);
         if (subject instanceof Variable) {
-            Optional<IQ> definition = getCompatibleDefinition(predicate, SUBJECT_OF_ALL_CLASSES, (Variable) subject);
+            Optional<IQ> definition = getCompatibleConstrainedDefinition(predicate, SUBJECT_OF_ALL_CLASSES, (Variable) subject);
             if (definition.isPresent())
                 return definition;
         }
@@ -263,11 +263,11 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
         return mapping.getMergedClassDefinitions(predicate);
     }
 
-    private Optional<IQ> getCompatibleDefinition(RDFAtomPredicate rdfAtomPredicate,
-                                                 Mapping.RDFAtomIndexPattern atomIndexPattern, Variable subjOrObj) {
+    private Optional<IQ> getCompatibleConstrainedDefinition(RDFAtomPredicate rdfAtomPredicate,
+                                                            Mapping.RDFAtomIndexPattern atomIndexPattern, Variable subjOrObj) {
 
         Optional<ImmutableSet<RDFSelector>> optionalConstraints = Optional.ofNullable(constraintMap.get(subjOrObj))
-                .flatMap(selectors -> handleLiterals(selectors, atomIndexPattern));
+                .flatMap(selectors -> handleLiteralSelectors(selectors, atomIndexPattern));
 
         if (optionalConstraints.isEmpty())
             return Optional.empty();
@@ -281,8 +281,8 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
         return Optional.empty();
     }
 
-    private Optional<ImmutableSet<RDFSelector>> handleLiterals(ImmutableSet<RDFSelector> selectors,
-                                                               Mapping.RDFAtomIndexPattern atomIndexPattern) {
+    private Optional<ImmutableSet<RDFSelector>> handleLiteralSelectors(ImmutableSet<RDFSelector> selectors,
+                                                                       Mapping.RDFAtomIndexPattern atomIndexPattern) {
         if (!atomIndexPattern.canBeLiteral())
             // Literal constraints can be eliminated
             return Optional.of(selectors.stream()
@@ -303,8 +303,9 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
         ImmutableList<Template.Component> templateFirstComponents = constraints.stream()
                 .filter(RDFSelector::isObjectTemplate)
                 .map(s -> s.getObjectTemplate().orElseThrow().getTemplateComponents())
-                .filter(components -> !components.isEmpty())
-                .map(components -> components.get(0))
+                .map(components -> components.stream()
+                        .findFirst()
+                        .orElseThrow(() -> new MinorOntopInternalBugException("A template should have at least one component")))
                 .collect(ImmutableList.toImmutableList());
 
         return IntStream.range(0, templateFirstComponents.size())

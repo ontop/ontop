@@ -43,6 +43,9 @@ public interface Mapping {
      */
     ImmutableSet<IRI> getRDFClasses(RDFAtomPredicate rdfAtomPredicate);
 
+    /**
+     * Returns no IQ if no definition is compatible with the template at the given position
+     */
     Optional<IQ> getCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate,
                                           RDFAtomIndexPattern RDFAtomIndexPattern,
                                           ObjectStringTemplateFunctionSymbol templateFunctionSymbol,
