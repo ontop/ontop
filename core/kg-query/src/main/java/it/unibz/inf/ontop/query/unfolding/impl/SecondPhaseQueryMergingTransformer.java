@@ -25,10 +25,7 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -326,31 +323,35 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
 
     private Collection<IQ> getMatchingDefinitionsForSafeConstraints(RDFAtomPredicate rdfAtomPredicate,
                                                                     ImmutableSet<RDFSelector> constraints, Mapping.RDFAtomIndexPattern indexPattern) {
-        return constraints.stream()
+        var matchingDefinitions = constraints.stream()
                 .flatMap(c -> c.getObjectTemplate()
-                        .map(t -> getFilteredMatchingDefinitionFromTemplate(rdfAtomPredicate, t, indexPattern))
-                        .orElseGet(() -> getFilteredMatchingDefinitionFromConstant(rdfAtomPredicate,
-                                c.getObjectConstant()
-                                        .orElseThrow(() -> new MinorOntopInternalBugException("Should be a constant")),
-                                indexPattern))
+                        .map(t -> mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern, t, variableGenerator))
+                        .orElseGet(() -> getDefinitionCompatibleWithConstant(rdfAtomPredicate, indexPattern, c.getObjectConstant()
+                                .orElseThrow(() -> new MinorOntopInternalBugException("Should be a constant"))))
+                        .map(iq -> Maps.immutableEntry(c, iq))
                         .stream())
+                .collect(ImmutableCollectors.toMap());
+
+        if (matchingDefinitions.size() < 2)
+            return matchingDefinitions.values();
+
+        return matchingDefinitions.entrySet().stream()
+                .map(e -> e.getKey().getObjectTemplate()
+                        .map(t -> filterDefinitionWithPrefix(e.getValue(), t, indexPattern))
+                        .orElseGet(() -> filterDefinitionWithConstant(e.getValue(),
+                                e.getKey().getObjectConstant()
+                                        .orElseThrow(() -> new MinorOntopInternalBugException("Should be a constant")),
+                                indexPattern)))
                 .collect(ImmutableCollectors.toList());
     }
 
-    private Optional<IQ> getFilteredMatchingDefinitionFromTemplate(RDFAtomPredicate rdfAtomPredicate,
-                                                                   ObjectStringTemplateFunctionSymbol template, Mapping.RDFAtomIndexPattern indexPattern) {
-        Optional<IQ> filteredDefinition = mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern, template, variableGenerator);
-        if (filteredDefinition.isEmpty())
-            return Optional.empty();
-
-        IQ definition = filteredDefinition.get();
+    private IQ filterDefinitionWithPrefix(IQ definition, ObjectStringTemplateFunctionSymbol template,
+                                                    Mapping.RDFAtomIndexPattern indexPattern) {
         Variable var = definition.getProjectionAtom().getArguments().get(indexPattern.getPosition());
 
-        // TODO: only apply filter when there are more than one possible constraint
         String templatePrefix = template.getTemplateComponents().get(0).getComponent();
-        return Optional.of(
-                iqFactory.createIQ(definition.getProjectionAtom(),
-                        filteredTreeToPreventInsecureUnion(definition.getTree(), var, templatePrefix)));
+        return iqFactory.createIQ(definition.getProjectionAtom(),
+                        filteredTreeToPreventInsecureUnion(definition.getTree(), var, templatePrefix));
     }
 
     /**
@@ -372,20 +373,16 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
         return iqFactory.createUnaryIQTree(filterNode, currentIQTree);
     }
 
-    private Optional<IQ> getFilteredMatchingDefinitionFromConstant(RDFAtomPredicate rdfAtomPredicate, ObjectConstant objectConstant,
-                                                                   Mapping.RDFAtomIndexPattern indexPattern) {
-        return getDefinitionCompatibleWithConstant(rdfAtomPredicate, indexPattern, objectConstant)
-                .map(d -> {
-                    DistinctVariableOnlyDataAtom projectionAtom = d.getProjectionAtom();
-                    Variable indexVariable = projectionAtom.getArguments().get(indexPattern.getPosition());
+    private IQ filterDefinitionWithConstant(IQ definition, ObjectConstant objectConstant,
+                                            Mapping.RDFAtomIndexPattern indexPattern) {
+        DistinctVariableOnlyDataAtom projectionAtom = definition.getProjectionAtom();
+        Variable indexVariable = projectionAtom.getArguments().get(indexPattern.getPosition());
 
-                    ImmutableExpression filterCondition = termFactory.getStrictEquality(indexVariable, objectConstant);
-                    IQTree filteredTree = iqFactory.createUnaryIQTree(
-                            iqFactory.createFilterNode(filterCondition),
-                            d.getTree());
-                    return iqFactory.createIQ(projectionAtom, filteredTree.normalizeForOptimization(variableGenerator));
-                });
-
+        ImmutableExpression filterCondition = termFactory.getStrictEquality(indexVariable, objectConstant);
+        IQTree filteredTree = iqFactory.createUnaryIQTree(
+                iqFactory.createFilterNode(filterCondition),
+                definition.getTree());
+        return iqFactory.createIQ(projectionAtom, filteredTree.normalizeForOptimization(variableGenerator));
     }
 
 
