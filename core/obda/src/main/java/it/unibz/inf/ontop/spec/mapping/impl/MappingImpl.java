@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -119,13 +120,17 @@ public class MappingImpl implements Mapping {
         DistinctVariableOnlyDataAtom projectionAtom = mergedDefinition.getProjectionAtom();
         Variable targetedVariable = projectionAtom.getArguments().get(indexPattern.getPosition());
 
+        ImmutableFunctionalTerm lexicalTerm = termFactory.getImmutableFunctionalTerm(
+                template,
+                IntStream.range(0, template.getArity())
+                        .mapToObj(i -> variableGenerator.generateNewVariable())
+                        .collect(ImmutableCollectors.toList()));
+
         ImmutableExpression strictEquality = termFactory.getStrictEquality(
                 targetedVariable,
-                termFactory.getIRIFunctionalTerm(termFactory.getImmutableFunctionalTerm(
-                        template,
-                        IntStream.range(0, template.getArity())
-                                .mapToObj(i -> variableGenerator.generateNewVariable())
-                                .collect(ImmutableCollectors.toList()))));
+                (template instanceof IRIStringTemplateFunctionSymbol)
+                        ? termFactory.getIRIFunctionalTerm(lexicalTerm)
+                        : termFactory.getBnodeFunctionalTerm(lexicalTerm));
 
         IQTree prunedIQTree = mergedDefinition.getTree().propagateDownConstraint(strictEquality, variableGenerator);
         return iqFactory.createIQ(projectionAtom, prunedIQTree)
