@@ -361,8 +361,7 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
         ImmutableFunctionalTerm sparqlSTRSTARTSFunctionWithParameters = termFactory.getImmutableFunctionalTerm(
                 functionSymbolFactory.getSPARQLFunctionSymbol(XPathFunction.STARTS_WITH.getIRIString(), 2)
                         .orElseThrow(() -> new MinorOntopInternalBugException("SPARQL STARTS_WITH function missing")),
-                termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.STR, 1)
-                        .orElseThrow(() -> new MinorOntopInternalBugException("STR function missing")), var),
+                termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getBNodeTolerantSPARQLStrFunctionSymbol(), var),
                 termFactory.getRDFLiteralConstant(
                         prefix,
                         termFactory.getTypeFactory().getXsdStringDatatype()
