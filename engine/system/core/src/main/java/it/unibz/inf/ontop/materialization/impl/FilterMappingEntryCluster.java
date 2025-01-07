@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.materialization.impl;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -18,7 +19,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 /**
  * Its tree is composed of one construction node, one filter node and an extensional node.
@@ -27,15 +27,18 @@ import java.util.stream.IntStream;
 public class FilterMappingEntryCluster extends AbstractMappingEntryCluster implements MappingEntryCluster {
     private final ExtensionalDataNode dataNode;
     private final Optional<ImmutableExpression> filterCondition;
+    private final QueryTransformerFactory queryTransformerFactory;
 
     public FilterMappingEntryCluster(IQTree originalTree,
                                      RDFFactTemplates rdfTemplates,
                                      VariableGenerator variableGenerator,
                                      IntermediateQueryFactory iqFactory,
                                      TermFactory termFactory,
-                                     SubstitutionFactory substitutionFactory) {
+                                     SubstitutionFactory substitutionFactory,
+                                     QueryTransformerFactory queryTransformerFactory) {
         super(originalTree, rdfTemplates, variableGenerator, iqFactory, substitutionFactory, termFactory);
 
+        this.queryTransformerFactory = queryTransformerFactory;
         if (originalTree.getChildren().get(0).getRootNode() instanceof FilterNode) {
             IQTree filterSubtree = originalTree.getChildren().get(0);
             ImmutableExpression condition = ((FilterNode) filterSubtree.getRootNode()).getFilterCondition();
@@ -99,8 +102,6 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
                 || !(otherRenamed.dataNode.getArgumentMap().values().stream().allMatch(v -> v instanceof Variable))) {
             return Optional.empty();
         }
-        ImmutableMap<Integer, Variable> argumentMap = (ImmutableMap<Integer, Variable>) dataNode.getArgumentMap();
-        ImmutableMap<Integer, Variable> otherArgumentMap = (ImmutableMap<Integer, Variable>) otherRenamed.dataNode.getArgumentMap();
 
         if (filterCondition.isEmpty() && otherRenamed.filterCondition.isEmpty()) {
             return asSimpleMappingEntryCluster().merge(otherRenamed.asSimpleMappingEntryCluster());
@@ -109,11 +110,7 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
             return Optional.empty();
         }
 
-        ImmutableExpression filterCondition = this.filterCondition.get();
-        ImmutableExpression otherFilterCondition = otherRenamed.filterCondition.get();
-        return haveSameFilterCondition(argumentMap, otherArgumentMap, filterCondition, otherFilterCondition)
-                ? Optional.of(mergeOnSameFilterCondition(filterCondition, otherRenamed))
-                : Optional.empty();
+        return mergeWithBothFilterConditions(filterCondition.get(), otherRenamed);
     }
 
     private IQTree simplifyExplicitNotNullFilter(IQTree tree, IQTree filterSubtree, Substitution<ImmutableTerm> rdfTermConstructionSubstitution) {
@@ -157,39 +154,37 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
                 newSubstitution);
     }
 
-    private boolean haveSameFilterCondition(ImmutableMap<Integer, Variable> argumentMap,
-                                            ImmutableMap<Integer, Variable> otherArgumentMap,
+
+    private boolean haveSameFilterCondition(Substitution<ImmutableTerm> unificationSubstitution,
                                             ImmutableExpression filterCondition,
-                                            ImmutableExpression otherFilterCondition) {
-        boolean sameOperation = filterCondition.getFunctionSymbol().equals(otherFilterCondition.getFunctionSymbol());
-        boolean sameTerms = IntStream.range(0, filterCondition.getTerms().size())
-                .allMatch(i -> {
-                    ImmutableTerm term = filterCondition.getTerms().get(i);
-                    ImmutableTerm otherTerm = otherFilterCondition.getTerms().get(i);
-                    if (term instanceof Variable && otherTerm instanceof Variable) {
-                        Optional<Integer> attributeIndex = argumentMap.entrySet().stream()
-                                .filter(entry -> entry.getValue().equals(term))
-                                .map(Map.Entry::getKey)
-                                .findFirst();
-                        Optional<Integer> otherAttributeIndex = otherArgumentMap.entrySet().stream()
-                                .filter(entry -> entry.getValue().equals(otherTerm))
-                                .map(Map.Entry::getKey)
-                                .findFirst();
-                        return attributeIndex.isPresent()
-                                && otherAttributeIndex.isPresent()
-                                && attributeIndex.get().equals(otherAttributeIndex.get());
-                    }
-                    return term.equals(otherTerm);
-                });
-        return sameOperation && sameTerms;
+                                            FilterMappingEntryCluster otherFilterRenamed) {
+                var renamingSubstitution = unificationSubstitution.stream()
+                .filter(e -> e.getValue() instanceof Variable)
+                .map(e -> Map.entry(e.getKey(), (Variable) e.getValue()))
+                .collect(substitutionFactory.toSubstitution());
+
+        IQTree renamedOtherFilter = queryTransformerFactory.createRenamer(renamingSubstitution.injective()).transform(otherFilterRenamed.tree);
+        var tmpCluster = new FilterMappingEntryCluster(renamedOtherFilter,
+                otherFilterRenamed.rdfTemplates,
+                otherFilterRenamed.variableGenerator,
+                otherFilterRenamed.iqFactory,
+                otherFilterRenamed.termFactory,
+                otherFilterRenamed.substitutionFactory,
+                queryTransformerFactory);
+
+        return tmpCluster.filterCondition.isPresent() && filterCondition.equals(tmpCluster.filterCondition.get());
     }
 
-    private MappingEntryCluster mergeOnSameFilterCondition(ImmutableExpression filterCondition,
-                                                                 FilterMappingEntryCluster otherFilterRenamed) {
+
+    private Optional<MappingEntryCluster> mergeWithBothFilterConditions(ImmutableExpression filterCondition,
+                                                                        FilterMappingEntryCluster otherFilterRenamed) {
         ConstructionNode constructionNodeAfterUnification = unify(dataNode, otherFilterRenamed.dataNode);
 
-        ExtensionalDataNode mergedDataNode = mergeDataNodes(dataNode, otherFilterRenamed.dataNode);
+        if (!haveSameFilterCondition(constructionNodeAfterUnification.getSubstitution(), filterCondition, otherFilterRenamed)){
+            return Optional.empty();
+        }
 
+        ExtensionalDataNode mergedDataNode = mergeDataNodes(dataNode, otherFilterRenamed.dataNode);
         ConstructionNode topConstructionNode = createMergedTopConstructionNode(
                 (ConstructionNode) tree.getRootNode(),
                 (ConstructionNode) otherFilterRenamed.tree.getRootNode());
@@ -206,9 +201,9 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
 
         RDFFactTemplates mergedRDFTemplates = rdfTemplates.merge(otherFilterRenamed.getRDFFactTemplates());
 
-        return compressCluster(
+        return Optional.of(compressCluster(
                 newTree.normalizeForOptimization(variableGenerator),
-                mergedRDFTemplates);
+                mergedRDFTemplates));
     }
 
     private boolean isNotNullFilterCondition(ImmutableExpression filterCondition) {
@@ -238,7 +233,8 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
                 variableGenerator,
                 iqFactory,
                 termFactory,
-                substitutionFactory);
+                substitutionFactory,
+                queryTransformerFactory);
     }
 
 }

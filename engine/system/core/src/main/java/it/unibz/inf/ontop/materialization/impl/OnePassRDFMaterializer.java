@@ -48,6 +48,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
     private final QueryPlanner queryPlanner;
     private final QueryLogger.Factory queryLoggerFactory;
     private final QueryContext.Factory queryContextFactory;
+    private final QueryTransformerFactory queryTransformerFactory;
     private final TermFactory termFactory;
 
     private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
@@ -69,6 +70,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         this.queryPlanner = injector.getInstance(QueryPlanner.class);
         this.queryLoggerFactory = injector.getInstance(QueryLogger.Factory.class);
         this.queryContextFactory = injector.getInstance(QueryContext.Factory.class);
+        this.queryTransformerFactory = injector.getInstance(QueryTransformerFactory.class);
         this.termFactory = injector.getInstance(TermFactory.class);
 
         Mapping saturatedMapping = specification.getSaturatedMapping();
@@ -223,7 +225,8 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                             mappingAssertionIQ.getVariableGenerator(),
                             iqFactory,
                             termFactory,
-                            substitutionFactory);
+                            substitutionFactory,
+                            queryTransformerFactory);
         }
 
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = extensionalNode.getArgumentMap();
