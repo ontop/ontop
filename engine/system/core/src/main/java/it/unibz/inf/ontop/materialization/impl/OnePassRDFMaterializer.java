@@ -52,7 +52,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
     private final TermFactory termFactory;
 
     private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
-    private final ImmutableList<MappingEntryCluster> mappingInformation;
+    private final ImmutableList<MappingEntryCluster> mappingClusters;
 
     protected OnePassRDFMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
         Injector injector = configuration.getInjector();
@@ -74,7 +74,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         this.termFactory = injector.getInstance(TermFactory.class);
 
         Mapping saturatedMapping = specification.getSaturatedMapping();
-        ImmutableList<IQ> mappingAssertionsIQs = saturatedMapping.getRDFAtomPredicates().stream()
+        ImmutableList<IQ> mappingEntriesIQs = saturatedMapping.getRDFAtomPredicates().stream()
                 .map(saturatedMapping::getQueries)
                 .flatMap(Collection::stream)
                 .map(iq -> removeDistincts(iq, materializationParams.areDuplicatesAllowed()))
@@ -85,17 +85,17 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                 .map(IQ::normalizeForOptimization)
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableList<MappingEntryCluster> tmpMappingInfo = mappingAssertionsIQs.stream()
-                .map(this::createMappingAssertionInfo)
+        ImmutableList<MappingEntryCluster> tmpMappingClusters = mappingEntriesIQs.stream()
+                .map(this::createMappingEntryCluster)
                 .collect(ImmutableCollectors.toList());
 
-        mappingInformation = mergeMappingInformation(tmpMappingInfo);
+        mappingClusters = mergeMappingEntryClusters(tmpMappingClusters);
     }
 
     @Override
     public MaterializedGraphResultSet materialize() {
         return new OnePassMaterializedGraphResultSet(vocabulary,
-                mappingInformation,
+                mappingClusters,
                 params,
                 queryEngine,
                 nativeQueryGenerator,
@@ -139,21 +139,21 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
     }
 
     private static Stream<VocabularyEntry> extractTripleVocabulary(Mapping mapping, RDFAtomPredicate tripleOrQuadPredicate) {
-        Stream<VocabularyEntry> vocabularyPropertyStream = mapping.getRDFProperties(tripleOrQuadPredicate).stream()
+        var vocabularyPropertyStream = mapping.getRDFProperties(tripleOrQuadPredicate).stream()
                 .map(p -> new VocabularyEntry(p, 2));
 
-        Stream<VocabularyEntry> vocabularyClassStream = mapping.getRDFClasses(tripleOrQuadPredicate).stream()
+        var vocabularyClassStream = mapping.getRDFClasses(tripleOrQuadPredicate).stream()
                 .map(p -> new VocabularyEntry(p, 1));
         return Stream.concat(vocabularyClassStream, vocabularyPropertyStream);
     }
 
-    private ImmutableList<MappingEntryCluster> mergeMappingInformation(ImmutableList<MappingEntryCluster> mappingInformation) {
-        ImmutableList<MappingEntryCluster> complexMappingAssertionInfo = mappingInformation.stream()
+    private ImmutableList<MappingEntryCluster> mergeMappingEntryClusters(ImmutableList<MappingEntryCluster> mappingEntryClusters) {
+        var complexMappingEntryCluster = mappingEntryClusters.stream()
                 .filter(m -> m instanceof ComplexMappingEntryCluster)
                 .collect(ImmutableCollectors.toList());
 
 
-        ImmutableList<ImmutableList<MappingEntryCluster>> groupedByJoinRelationsInfos = mappingInformation.stream()
+        var groupedByJoinRelationsEntries = mappingEntryClusters.stream()
                 .filter(m -> m instanceof JoinMappingEntryCluster)
                 .map(m -> Map.entry(
                         m.getDataNodes().stream()
@@ -165,7 +165,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                 .map(ImmutableList::copyOf)
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableList<ImmutableList<MappingEntryCluster>> groupedBySingleRelationInfo = mappingInformation.stream()
+        var groupedBySingleRelationEntries = mappingEntryClusters.stream()
                 .filter(m -> !(m instanceof ComplexMappingEntryCluster || m instanceof JoinMappingEntryCluster))
                 .map(m -> Map.entry(
                         m.getDataNodes().get(0).getRelationDefinition().getAtomPredicate().getName(),
@@ -176,73 +176,80 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                 .collect(ImmutableCollectors.toList());
 
         return ImmutableList.<MappingEntryCluster>builder()
-                .addAll(mergeCompatibleAssertionsInfos(groupedByJoinRelationsInfos))
-                .addAll(mergeCompatibleAssertionsInfos(groupedBySingleRelationInfo))
-                .addAll(complexMappingAssertionInfo)
+                .addAll(mergeCompatibleClusters(groupedByJoinRelationsEntries))
+                .addAll(mergeCompatibleClusters(groupedBySingleRelationEntries))
+                .addAll(complexMappingEntryCluster)
                 .build();
     }
 
-    private MappingEntryCluster createMappingAssertionInfo(IQ mappingAssertionIQ) {
-        IQTree tree = mappingAssertionIQ.getTree();
-        RDFFactTemplates rdfTemplates = new RDFFactTemplatesImpl(ImmutableList.of((mappingAssertionIQ.getProjectionAtom().getArguments())));
+    private MappingEntryCluster createMappingEntryCluster(IQ entryIQ) {
+        IQTree tree = entryIQ.getTree();
+        RDFFactTemplates rdfTemplates = new RDFFactTemplatesImpl(ImmutableList.of((entryIQ.getProjectionAtom().getArguments())));
 
         if (hasNotSupportedNode(tree)) {
             return new ComplexMappingEntryCluster(tree,
                     rdfTemplates,
-                    mappingAssertionIQ.getVariableGenerator(),
+                    entryIQ.getVariableGenerator(),
                     iqFactory,
                     substitutionFactory,
                     termFactory);
         }
 
-        Optional<IQTree> joinSubtree = findJoinSubtree(tree);
-        if (joinSubtree.isPresent()) {
+        if (tree.getChildren().get(0) instanceof JoinLikeNode) {
             return new JoinMappingEntryCluster(
                     tree,
                     rdfTemplates,
-                    mappingAssertionIQ.getVariableGenerator(),
+                    entryIQ.getVariableGenerator(),
                     iqFactory,
                     substitutionFactory,
                     termFactory);
         }
 
-
-        ImmutableList<ExtensionalDataNode> extensionalNodes = findExtensionalNodes(tree);
+        var extensionalNodes = findExtensionalNodes(tree);
         if (extensionalNodes.size() != 1) {
             return new ComplexMappingEntryCluster(tree,
                     rdfTemplates,
-                    mappingAssertionIQ.getVariableGenerator(),
+                    entryIQ.getVariableGenerator(),
                     iqFactory,
                     substitutionFactory,
                     termFactory);
         }
-        ExtensionalDataNode extensionalNode = extensionalNodes.get(0);
+        var extensionalNode = extensionalNodes.get(0);
 
-        if (hasFilterNode(tree)) {
+        if (tree.getChildren().get(0) instanceof FilterNode) {
             return new FilterMappingEntryCluster(
                             tree,
                             rdfTemplates,
-                            mappingAssertionIQ.getVariableGenerator(),
+                            entryIQ.getVariableGenerator(),
                             iqFactory,
                             termFactory,
                             substitutionFactory,
                             queryTransformerFactory);
         }
 
-        ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = extensionalNode.getArgumentMap();
+        if (!(tree.getChildren().get(0) instanceof ExtensionalDataNode)) {
+            return new ComplexMappingEntryCluster(tree,
+                    rdfTemplates,
+                    entryIQ.getVariableGenerator(),
+                    iqFactory,
+                    substitutionFactory,
+                    termFactory);
+        }
+
+        var argumentMap = extensionalNode.getArgumentMap();
         if (argumentMap.values().stream().allMatch(v -> v instanceof Variable)) {
             return new SimpleMappingEntryCluster(
                     tree,
                     rdfTemplates,
-                    mappingAssertionIQ.getVariableGenerator(),
+                    entryIQ.getVariableGenerator(),
                     iqFactory,
                     substitutionFactory,
                     termFactory);
         } else if (argumentMap.values().stream().anyMatch(v -> v instanceof DBConstant)) {
-            //return new ComplexMappingAssertionInfo(tree, rdfTemplates, substitutionFactory);
+            //return new ComplexMappingEntryCluster(tree, rdfTemplates, entryIQ.getVariableGenerator(), iqFactory, substitutionFactory, termFactory);
             return new DictionaryPatternMappingEntryCluster(tree,
                     rdfTemplates,
-                    mappingAssertionIQ.getVariableGenerator(),
+                    entryIQ.getVariableGenerator(),
                     iqFactory,
                     substitutionFactory,
                     termFactory);
@@ -250,7 +257,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         } else {
             return new ComplexMappingEntryCluster(tree,
                     rdfTemplates,
-                    mappingAssertionIQ.getVariableGenerator(),
+                    entryIQ.getVariableGenerator(),
                     iqFactory,
                     substitutionFactory,
                     termFactory);
@@ -258,12 +265,12 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
     }
 
     private ImmutableList<IQ> splitPotentialUnionNode(IQ iq) {
-        IQTree tree = iq.getTree();
+        var tree = iq.getTree();
         if (!(tree.getRootNode() instanceof ConstructionNode)) {
             throw new MinorOntopInternalBugException("The root node of a mapping is expected to be a ConstructionNode");
         }
         if (tree.getChildren().get(0).getRootNode() instanceof UnionNode) {
-            ImmutableList<IQTree> unionChildren = tree.getChildren().get(0).getChildren();
+            var unionChildren = tree.getChildren().get(0).getChildren();
             return unionChildren.stream()
                     .map(unionChild -> {
                         IQTree newTree = iqFactory.createUnaryIQTree(
@@ -277,28 +284,30 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         }
     }
 
-    private ImmutableList<MappingEntryCluster> mergeCompatibleAssertionsInfos(
-            ImmutableList<ImmutableList<MappingEntryCluster>> compatibleAssertionInfos) {
-        ArrayList<MappingEntryCluster> unmergedMappingAssertionInfos = new ArrayList<>();
-        ImmutableList<MappingEntryCluster> mergedMappingAssertionInfos = compatibleAssertionInfos.stream()
-                .map( sameRelationMappings -> {
-                    MappingEntryCluster mergedSameRelationMapping = sameRelationMappings.get(0);
-                    for (int i=1; i<sameRelationMappings.size(); i++) {
-                        var m1 = sameRelationMappings.get(i);
-                        Optional<MappingEntryCluster> merged = mergedSameRelationMapping.merge(m1);
+    private ImmutableList<MappingEntryCluster> mergeCompatibleClusters(
+            ImmutableList<ImmutableList<MappingEntryCluster>> compatibleClusters) {
+
+        ArrayList<MappingEntryCluster> unmergedClusterEntries = new ArrayList<>(); // mutable!
+
+        var mergedClusters = compatibleClusters.stream()
+                .map( sameRelationClusterEntries -> {
+                    var mergedSameRelationEntries = sameRelationClusterEntries.get(0);
+                    for (int i=1; i<sameRelationClusterEntries.size(); i++) {
+                        var m1 = sameRelationClusterEntries.get(i);
+                        var merged = mergedSameRelationEntries.merge(m1);
                         if (merged.isPresent()) {
-                            mergedSameRelationMapping = merged.get();
+                            mergedSameRelationEntries = merged.get();
                         } else {
-                            unmergedMappingAssertionInfos.add(m1);
+                            unmergedClusterEntries.add(m1);
                         }
                     }
-                    return mergedSameRelationMapping;
+                    return mergedSameRelationEntries;
                 })
                 .collect(ImmutableCollectors.toList());
 
         return ImmutableList.<MappingEntryCluster>builder()
-                .addAll(mergedMappingAssertionInfos)
-                .addAll(unmergedMappingAssertionInfos)
+                .addAll(mergedClusters)
+                .addAll(unmergedClusterEntries)
                 .build();
     }
 
@@ -306,21 +315,6 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         return allowDuplicates
             ? iqFactory.createIQ(iq.getProjectionAtom(), iq.getTree().removeDistincts())
             : iq;
-    }
-
-    /**
-     * Recursive
-     */
-    private Optional<IQTree> findJoinSubtree(IQTree tree) {
-        if (tree.getRootNode() instanceof JoinLikeNode) {
-            return Optional.of(tree);
-        } else {
-            return tree.getChildren().stream()
-                    .map(this::findJoinSubtree)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .findAny();
-        }
     }
 
     /**
@@ -338,18 +332,6 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                     .map(this::findExtensionalNodes)
                     .flatMap(Collection::stream)
                     .collect(ImmutableCollectors.toList());
-        }
-    }
-
-    /**
-     * Recursive
-     */
-    private boolean hasFilterNode(IQTree tree) {
-        if (tree.getRootNode() instanceof FilterNode) {
-            return true;
-        } else {
-            return tree.getChildren().stream()
-                    .anyMatch(this::hasFilterNode);
         }
     }
 
