@@ -195,18 +195,35 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                     termFactory);
         }
 
-        if (tree.getChildren().get(0) instanceof JoinLikeNode) {
-            return new JoinMappingEntryCluster(
-                    tree,
-                    rdfTemplates,
-                    entryIQ.getVariableGenerator(),
-                    iqFactory,
-                    substitutionFactory,
-                    termFactory);
+        if (hasFilterOrJoinNode(tree)) {
+            if (tree.getChildren().get(0).getRootNode() instanceof JoinLikeNode) {
+                return new JoinMappingEntryCluster(
+                        tree,
+                        rdfTemplates,
+                        entryIQ.getVariableGenerator(),
+                        iqFactory,
+                        substitutionFactory,
+                        termFactory);
+            } else if (tree.getChildren().get(0).getRootNode() instanceof FilterNode) {
+                return new FilterMappingEntryCluster(
+                        tree,
+                        rdfTemplates,
+                        entryIQ.getVariableGenerator(),
+                        iqFactory,
+                        termFactory,
+                        substitutionFactory,
+                        queryTransformerFactory);
+            } else {
+                return new ComplexMappingEntryCluster(tree,
+                        rdfTemplates,
+                        entryIQ.getVariableGenerator(),
+                        iqFactory,
+                        substitutionFactory,
+                        termFactory);
+            }
         }
 
-        var extensionalNodes = findExtensionalNodes(tree);
-        if (extensionalNodes.size() != 1) {
+        if ( !(tree.getChildren().get(0).getRootNode() instanceof ExtensionalDataNode)) {
             return new ComplexMappingEntryCluster(tree,
                     rdfTemplates,
                     entryIQ.getVariableGenerator(),
@@ -214,28 +231,8 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                     substitutionFactory,
                     termFactory);
         }
-        var extensionalNode = extensionalNodes.get(0);
 
-        if (tree.getChildren().get(0) instanceof FilterNode) {
-            return new FilterMappingEntryCluster(
-                            tree,
-                            rdfTemplates,
-                            entryIQ.getVariableGenerator(),
-                            iqFactory,
-                            termFactory,
-                            substitutionFactory,
-                            queryTransformerFactory);
-        }
-
-        if (!(tree.getChildren().get(0) instanceof ExtensionalDataNode)) {
-            return new ComplexMappingEntryCluster(tree,
-                    rdfTemplates,
-                    entryIQ.getVariableGenerator(),
-                    iqFactory,
-                    substitutionFactory,
-                    termFactory);
-        }
-
+        var extensionalNode = (ExtensionalDataNode) tree.getChildren().get(0).getRootNode();
         var argumentMap = extensionalNode.getArgumentMap();
         if (argumentMap.values().stream().allMatch(v -> v instanceof Variable)) {
             return new SimpleMappingEntryCluster(
@@ -320,18 +317,12 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
     /**
      * Recursive
      */
-    private ImmutableList<ExtensionalDataNode> findExtensionalNodes(IQTree tree) {
-        if (tree.getChildren().isEmpty()) {
-            if (tree.getRootNode() instanceof ExtensionalDataNode) {
-                return ImmutableList.of((ExtensionalDataNode) tree.getRootNode());
-            } else {
-                return ImmutableList.of();
-            }
+    private boolean hasFilterOrJoinNode(IQTree tree) {
+        if (tree.getRootNode() instanceof JoinOrFilterNode){
+            return true;
         } else {
             return tree.getChildren().stream()
-                    .map(this::findExtensionalNodes)
-                    .flatMap(Collection::stream)
-                    .collect(ImmutableCollectors.toList());
+                    .anyMatch(this::hasFilterOrJoinNode);
         }
     }
 
