@@ -1,0 +1,13 @@
+[PrefixDeclaration]
+:   http://example.org/tde
+ns:  http://example.org/ns#
+time: http://www.w3.org/2006/time#
+schema: http://www.schema.org
+
+
+[MappingDeclaration] @collection [[
+mappingId	mapping1
+target	:{ts} a time:TimeInstant ; ns:current {curr} ; ns:voltage {voltage} ; ns:phase {phase} ; ns:group {group_id} .
+source	SELECT ts, curr, voltage, phase, location, group_id from power.meters
+]]
+
