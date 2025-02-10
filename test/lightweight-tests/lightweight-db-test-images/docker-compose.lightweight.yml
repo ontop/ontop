@@ -98,3 +98,14 @@ services:
       - "8051:8051"  # Spark worker
       - "7078:7078"
       - "10000:10000"  # ThriftServer JDBC endpoint
+
+  tdengine:
+    build: ./tdengine
+    ports:
+      - "6041:6041" # rest endopoint
+      - "6030:6030" # native endpoint
+      - "6043-6060:6043-6060"
+      - "6043-6060:6043-6060/udp"
+    hostname: localhost
+    environment:
+      TAOS_FQDN: "localhost"

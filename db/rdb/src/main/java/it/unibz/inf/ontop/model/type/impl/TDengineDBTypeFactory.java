@@ -106,7 +106,7 @@ public class TDengineDBTypeFactory extends DefaultSQLDBTypeFactory {
          */
 
 
-        map.put(DefaultTypeCode.DECIMAL, SMALLINT_UNSIGNED);
+        //map.put(DefaultTypeCode.DECIMAL, SMALLINT_UNSIGNED);
         map.put(DefaultTypeCode.BOOLEAN, BOOLEAN);
         map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMP);
 
