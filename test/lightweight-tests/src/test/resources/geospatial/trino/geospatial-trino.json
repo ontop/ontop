@@ -1,0 +1,37 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"", "\"geoms\""],
+      "baseRelation": ["\"geoms\""],
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "\"IdConstraint\"",
+            "determinants": ["\"id\""],
+            "isPrimaryKey": true
+          }
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"newgeoms\""],
+      "baseRelation": ["\"newgeoms\""],
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "\"IdConstraint\"",
+            "determinants": ["\"id\""],
+            "isPrimaryKey": true
+          },
+          {
+            "name": "\"GeomConstraint\"",
+            "determinants": ["\"geom\""],
+            "isPrimaryKey": false
+          }
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}

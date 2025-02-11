@@ -349,4 +349,9 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         return super.getDBDateTrunc(datePart);
     }
 
+    @Override
+    public DBFunctionSymbol getDBSTDistanceSphere() {
+
+        return getRegularDBFunctionSymbol(ST_DISTANCE, 2);
+    }
 }

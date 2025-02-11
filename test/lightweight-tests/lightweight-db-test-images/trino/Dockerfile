@@ -1,3 +1,3 @@
-FROM trinodb/trino:406
+FROM trinodb/trino:470
 
 COPY ./catalog/* /etc/trino/catalog/
