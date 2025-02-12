@@ -351,7 +351,16 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     @Override
     public DBFunctionSymbol getDBSTDistanceSphere() {
-
-        return getRegularDBFunctionSymbol(ST_DISTANCE, 2);
+        return new DBFunctionSymbolWithSerializerImpl(
+                ST_DISTANCE,
+                ImmutableList.of(dbTypeFactory.getDBGeometryType(), dbTypeFactory.getDBGeometryType()),
+                dbStringType,
+                false,
+                (terms, converter, factory) ->
+                    String.format(
+                            "ST_DISTANCE(TO_SPHERICAL_GEOGRAPHY(ST_GeometryFromText(%s)), TO_SPHERICAL_GEOGRAPHY(ST_GeometryFromText(%s)))",
+                            //"ST_DISTANCE(TO_SPHERICAL_GEOGRAPHY(%s), TO_SPHERICAL_GEOGRAPHY(%s))",
+                            converter.apply(terms.get(0)), converter.apply(terms.get(1))
+                    ));
     }
 }

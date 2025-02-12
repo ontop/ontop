@@ -10,6 +10,14 @@ mappingId	geoms
 target		:{id} a :Geom ; geo:asWKT {"geom_wkt"}^^geo:wktLiteral ; rdfs:label {"name"}^^xsd:string .
 source		SELECT id, name, ST_ASTEXT(geom) AS geom_wkt FROM "lenses"."geoms";
 
+mappingId	geoms
+target		:epsg3044/{id} a :Geom ; geo:asWKT "<http://www.opengis.net/def/crs/EPSG/0/3044> {geom_wkt}"^^geo:wktLiteral ; rdfs:label {name}^^xsd:string .
+source		SELECT id, name, ST_ASTEXT(geom) as geom_wkt FROM "lenses"."geoms" WHERE id=3 OR id=4
+
+mappingId	geoms
+target		:epsg4326/{id} a :Geom ; geo:asWKT "<http://www.opengis.net/def/crs/EPSG/0/4326> {geom_wkt}"^^geo:wktLiteral ; rdfs:label {name}^^xsd:string .
+source		SELECT id, name, ST_ASTEXT(geom) as geom_wkt FROM "lenses"."geoms" WHERE id=3 OR id=4
+
 mappingId	newgeoms
 target		:newgeom/{"id"} a :NewGeom ; geo:asWKT {"geom_wkt"}^^geo:wktLiteral ; rdfs:label {"name"}^^xsd:string .
 source		SELECT id, name, ST_ASTEXT(geom) AS geom_wkt FROM "lenses"."newgeoms";
