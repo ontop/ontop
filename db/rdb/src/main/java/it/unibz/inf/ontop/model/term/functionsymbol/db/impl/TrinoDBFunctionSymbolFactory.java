@@ -354,12 +354,12 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         return new DBFunctionSymbolWithSerializerImpl(
                 ST_DISTANCE,
                 ImmutableList.of(dbTypeFactory.getDBGeometryType(), dbTypeFactory.getDBGeometryType()),
-                dbStringType,
+                dbDoubleType,
                 false,
                 (terms, converter, factory) ->
                     String.format(
+                            // TODO: Remove conversion from text to Geometry, type should already be a Geometry
                             "ST_DISTANCE(TO_SPHERICAL_GEOGRAPHY(ST_GeometryFromText(%s)), TO_SPHERICAL_GEOGRAPHY(ST_GeometryFromText(%s)))",
-                            //"ST_DISTANCE(TO_SPHERICAL_GEOGRAPHY(%s), TO_SPHERICAL_GEOGRAPHY(%s))",
                             converter.apply(terms.get(0)), converter.apply(terms.get(1))
                     ));
     }
