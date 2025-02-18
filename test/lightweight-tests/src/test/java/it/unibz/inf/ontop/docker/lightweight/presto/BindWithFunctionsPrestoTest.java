@@ -61,15 +61,6 @@ public class BindWithFunctionsPrestoTest extends AbstractBindTestWithFunctions {
         super.testSecondsBetweenMappingInput();
     }
 
-    @Disabled("Since Presto does not have unique constraint information, a 'DISTINCT' must be enforced. This DISTINCT" +
-            "causes the remaining query to be packed into a sub-query, including the 'ORDER BY'. Selecting from sub" +
-            "queries does not conserve order in Presto, so while the results are correct, they are in the wrong order")
-    @Test
-    @Override
-    public void testREPLACE() {
-        super.testREPLACE();
-    }
-
     @Disabled("Presto does not support SHA384")
     @Test
     @Override
