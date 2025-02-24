@@ -12,6 +12,15 @@
           }
         ]
       },
+      "columns": {
+        "added": [
+          {
+            "name": "geom_from_txt",
+            "expression": "st_geometryfromtext(st_astext(geom))"
+          }
+        ],
+        "hidden": []
+      },
       "type": "BasicLens"
     },
     {
