@@ -92,7 +92,7 @@ jobs:
           path: ~/.m2/repository
           key: cache-${{ runner.os }}-java-${{ matrix.jdk }}-${{ github.sha }}
           restore-keys: |
-            cache-global-${{ runner.os }}-java-${{ matrix.jdk }}-
+            cache-global-${{ runner.os }}-java-${{ matrix.jdk }}-${{ hashFiles('**/pom.xml') }}
 
       - name: Run CI without docker tests
         run: ./mvnw install --fail-at-end
@@ -125,6 +125,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: cache-${{ runner.os }}-java-${{ matrix.jdk }}-${{ github.sha }}
+          fail-on-cache-miss: true
+          
       - name: Run CI for Snowflake lightweight tests
         env:
           SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}
@@ -160,6 +162,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: cache-${{ runner.os }}-java-${{ matrix.jdk }}-${{ github.sha }}
+          fail-on-cache-miss: true
+
       - name: Run CI for Athena lightweight tests
         env:
           ATHENA_USER: ${{ secrets.ATHENA_USER }}
@@ -254,6 +258,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: cache-${{ runner.os }}-java-${{ matrix.jdk }}-${{ github.sha }}
+          fail-on-cache-miss: true 
+
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
           docker compose -f "docker-compose.lightweight.yml" up -d pgsql
@@ -284,6 +290,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: cache-${{ runner.os }}-java-${{ matrix.jdk }}-${{ github.sha }}
+          fail-on-cache-miss: true
+
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
           docker compose -f "docker-compose.lightweight.yml" up -d pgsql dremio
@@ -318,6 +326,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: cache-${{ runner.os }}-java-${{ matrix.jdk }}-${{ github.sha }}
+          fail-on-cache-miss: true
+
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
           docker compose -f "docker-compose.lightweight.yml" up -d mssql
@@ -349,6 +359,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: cache-${{ runner.os }}-java-${{ matrix.jdk }}-${{ github.sha }}
+          fail-on-cache-miss: true
+          
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
           docker compose -f "docker-compose.lightweight.yml" up -d mysql-v8
@@ -380,6 +392,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: cache-${{ runner.os }}-java-${{ matrix.jdk }}-${{ github.sha }}
+          fail-on-cache-miss: true
+
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
           docker compose -f "docker-compose.lightweight.yml" up -d mysql-v5
@@ -415,6 +429,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: cache-${{ runner.os }}-java-${{ matrix.jdk }}-${{ github.sha }}
+          fail-on-cache-miss: true
+
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
           docker compose -f "docker-compose.lightweight.yml" up -d mariadb
@@ -446,6 +462,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: cache-${{ runner.os }}-java-${{ matrix.jdk }}-${{ github.sha }}
+          fail-on-cache-miss: true
+
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
           docker compose -f "docker-compose.lightweight.yml" up -d oracle
@@ -480,6 +498,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: cache-${{ runner.os }}-java-${{ matrix.jdk }}-${{ github.sha }}
+          fail-on-cache-miss: true
+
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
           docker compose -f "docker-compose.lightweight.yml" up -d db2
@@ -515,6 +535,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: cache-${{ runner.os }}-java-${{ matrix.jdk }}-${{ github.sha }}
+          fail-on-cache-miss: true
+
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
           docker compose -f "docker-compose.lightweight.yml" up -d spark
@@ -549,6 +571,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: cache-${{ runner.os }}-java-${{ matrix.jdk }}-${{ github.sha }}
+          fail-on-cache-miss: true
+
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
           docker compose -f "docker-compose.lightweight.yml" up -d pgsql trino
@@ -583,6 +607,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: cache-${{ runner.os }}-java-${{ matrix.jdk }}-${{ github.sha }}
+          fail-on-cache-miss: true
+
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
           docker compose -f "docker-compose.lightweight.yml" up -d pgsql presto
@@ -617,6 +643,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: cache-${{ runner.os }}-java-${{ matrix.jdk }}-${{ github.sha }}
+          fail-on-cache-miss: true
+
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images
       - name: Sleep for 20 seconds
