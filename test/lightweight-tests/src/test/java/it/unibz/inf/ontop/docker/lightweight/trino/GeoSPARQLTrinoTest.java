@@ -3,9 +3,9 @@ package it.unibz.inf.ontop.docker.lightweight.trino;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.lightweight.AbstractDockerRDF4JTest;
 import it.unibz.inf.ontop.docker.lightweight.TrinoLightweightTest;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @TrinoLightweightTest
@@ -82,8 +82,8 @@ public class GeoSPARQLTrinoTest extends AbstractDockerRDF4JTest {
         executeAndCompareValues(query, ImmutableList.of("\"3.050877576151497\"^^xsd:double"));
     }
 
-    @Ignore("Trino doesn't support DISTINCT on Geometry types. Since some of the geometries are defined in a lense as st_geometryfromtext(geom_text) a distinct is added above the union")
     @Test
+    @Disabled("Trino doesn't support DISTINCT on Geometry types. Since some of the geometries are defined in a lense as st_geometryfromtext(geom_text) a distinct is added and the query fails")
     public void testPointDistanceLensTransformation() {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
