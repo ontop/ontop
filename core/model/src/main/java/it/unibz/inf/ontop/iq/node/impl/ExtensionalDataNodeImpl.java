@@ -359,7 +359,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
             return renamedTree.getPossibleVariableDefinitions();
         }
-        return ImmutableSet.of();
+        return ImmutableSet.of(substitutionFactory.getSubstitution());
     }
 
     public static IQTree merge(ExtensionalDataNode dataNode, IQ definition, VariableGenerator variableGenerator,
