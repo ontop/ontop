@@ -52,6 +52,26 @@ public class CastTrinoTest extends AbstractCastFunctionsTest {
     }
 
     @Override
+    @Test
+    @Disabled("Trino add TZ dependent on local time")
+    public void testCastDateTimeFromDate1() {
+        super.testCastDateTimeFromDate1();
+    }
+
+    @Override
+    @Test
+    @Disabled("Timestamp format not supported by Trino")
+    public void testCastDateTimeFromDate2() {
+        super.testCastDateTimeFromDate2();
+    }
+
+    @Override
+    @Test
+    @Disabled("Timestamp format not supported by Trino")
+    public void testCastDateTimeFromDate3() {
+        super.testCastDateTimeFromDate3();
+    }
+    @Override
     protected ImmutableMultiset<String> getCastFloatFromDecimal1ExpectedValues() {
         return ImmutableMultiset.of("\"0.2\"^^xsd:float", "\"0.25\"^^xsd:float", "\"0.2\"^^xsd:float",
                 "\"0.15\"^^xsd:float");
@@ -86,20 +106,5 @@ public class CastTrinoTest extends AbstractCastFunctionsTest {
     @Override
     protected ImmutableSet<String> getCastDecimalFromString3ExpectedValues() {
         return ImmutableSet.of("\"2.000000000000000000\"^^xsd:decimal");
-    }
-
-    @Override
-    protected ImmutableSet<String> getCastDateTimeFromDate1ExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14 00:00:00.000 UTC\"^^xsd:dateTime");
-    }
-
-    @Override
-    protected ImmutableSet<String> getCastDateTimeFromDate2ExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14 00:00:00.000 UTC\"^^xsd:dateTime");
-    }
-
-    @Override
-    protected ImmutableSet<String> getCastDateTimeFromDate3ExpectedValues() {
-        return ImmutableSet.of("\"1999-12-14 00:00:00.000 +01:00\"^^xsd:dateTime");
     }
 }

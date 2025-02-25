@@ -17,7 +17,6 @@ public class OptimizationSingletonsImpl implements OptimizationSingletons {
 
     private final OptimizerFactory optimizerFactory;
     private final CoreSingletons coreSingletons;
-    private final UnionBasedQueryMerger unionBasedQueryMerger;
     private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
     private final OntopOptimizationSettings settings;
     private final GeneralStructuralAndSemanticIQOptimizer generalStructuralAndSemanticIQOptimizer;
@@ -26,14 +25,12 @@ public class OptimizationSingletonsImpl implements OptimizationSingletons {
 
     @Inject
     protected OptimizationSingletonsImpl(OptimizerFactory optimizerFactory, CoreSingletons coreSingletons,
-                                         UnionBasedQueryMerger unionBasedQueryMerger,
                                          RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor,
                                          GeneralStructuralAndSemanticIQOptimizer generalStructuralAndSemanticIQOptimizer,
                                          JoinLikeOptimizer joinLikeOptimizer, QueryPlanner queryPlanner,
                                          OntopOptimizationSettings settings) {
         this.optimizerFactory = optimizerFactory;
         this.coreSingletons = coreSingletons;
-        this.unionBasedQueryMerger = unionBasedQueryMerger;
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         this.settings = settings;
         this.generalStructuralAndSemanticIQOptimizer = generalStructuralAndSemanticIQOptimizer;
@@ -49,11 +46,6 @@ public class OptimizationSingletonsImpl implements OptimizationSingletons {
     @Override
     public OptimizerFactory getOptimizerFactory() {
         return optimizerFactory;
-    }
-
-    @Override
-    public UnionBasedQueryMerger getUnionBasedQueryMerger() {
-        return unionBasedQueryMerger;
     }
 
     @Override

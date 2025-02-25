@@ -21,8 +21,6 @@ public interface OptimizationSingletons {
      */
     OptimizerFactory getOptimizerFactory();
 
-    UnionBasedQueryMerger getUnionBasedQueryMerger();
-
     RequiredExtensionalDataNodeExtractor getRequiredExtensionalDataNodeExtractor();
 
     GeneralStructuralAndSemanticIQOptimizer getGeneralStructuralAndSemanticIQOptimizer();

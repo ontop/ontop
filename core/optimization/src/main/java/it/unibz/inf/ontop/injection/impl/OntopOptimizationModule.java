@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.optimizer.splitter.PreventDistinctProjectionSplitter;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
-import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transformer.*;
 import it.unibz.inf.ontop.iq.lens.LensUnfolder;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
@@ -35,7 +34,6 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bind(OntopOptimizationSettings.class).toInstance(settings);
 
         // Executors
-        bindFromSettings(UnionBasedQueryMerger.class);
         bindFromSettings(JoinLikeOptimizer.class);
         bindFromSettings(UnionAndBindingLiftOptimizer.class);
         bindFromSettings(UnionFlattener.class);
