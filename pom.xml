@@ -5,7 +5,7 @@
 
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop</artifactId>
-    <version>5.3.0-SNAPSHOT</version>
+    <version>5.3.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Ontop</name>
@@ -184,7 +184,7 @@
         <proj4j.version>1.1.1</proj4j.version>
         <protege-xmlcatalog.version>1.0.5</protege-xmlcatalog.version>
         <r2rml-api.version>0.9.1</r2rml-api.version>
-        <rdf4j.version>5.0.3</rdf4j.version>
+        <rdf4j.version>5.1.0</rdf4j.version>
         <servlet2-api.version>2.5</servlet2-api.version>
         <servlet4-api.version>4.0.1</servlet4-api.version>
         <slf4j.version>1.7.36</slf4j.version>
@@ -202,7 +202,7 @@
         <semargl-sesame.version>0.6.1</semargl-sesame.version>
         <semargl.version>0.7</semargl.version>
         <thymeleaf.version>3.0.15.RELEASE</thymeleaf.version>
-        <tomcat-embed-core.version>9.0.91</tomcat-embed-core.version>
+        <tomcat-embed-core.version>9.0.98</tomcat-embed-core.version>
         <log4j2.version>2.19.0</log4j2.version>
 
         <!-- JDK version -->

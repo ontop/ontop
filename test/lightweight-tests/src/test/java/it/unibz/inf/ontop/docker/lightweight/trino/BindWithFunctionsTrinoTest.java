@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.docker.lightweight.trino;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
-import it.unibz.inf.ontop.docker.lightweight.SnowflakeLightweightTest;
 import it.unibz.inf.ontop.docker.lightweight.TrinoLightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -54,6 +52,15 @@ public class BindWithFunctionsTrinoTest extends AbstractBindTestWithFunctions {
     @Override
     protected ImmutableList<String> getConstantIntegerDivideExpectedResults() {
         return ImmutableList.of("\"0.500000000000000000\"^^xsd:decimal");
+    }
+
+    @Disabled("Since Trino does not have unique constraint information, a 'DISTINCT' must be enforced. This DISTINCT" +
+            "causes the remaining query to be packed into a sub-query, including the 'ORDER BY'. Selecting from sub" +
+            "queries does not conserve order in Trino, so while the results are correct, they are in the wrong order")
+    @Test
+    @Override
+    public void testSimpleDateTrunc() {
+        super.testSimpleDateTrunc();
     }
 
     @Disabled("Trino counts one hour less on two results")
