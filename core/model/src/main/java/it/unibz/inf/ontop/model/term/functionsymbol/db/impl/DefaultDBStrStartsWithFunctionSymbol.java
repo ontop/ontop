@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -55,13 +57,25 @@ public class DefaultDBStrStartsWithFunctionSymbol extends DBBooleanFunctionSymbo
             if (newTerms.get(0) instanceof ImmutableFunctionalTerm) {
                 ImmutableFunctionalTerm firstFunctionalTerm = (ImmutableFunctionalTerm) newTerms.get(0);
                 if (firstFunctionalTerm.getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol) {
-                    IRIStringTemplateFunctionSymbol iriTemplate = (IRIStringTemplateFunctionSymbol) firstFunctionalTerm.getFunctionSymbol();
-                    ImmutableTerm simplifiedTerm = iriTemplate.getTemplate().startsWith(prefixString)
-                            ? termFactory.getTrueOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNotNull(firstFunctionalTerm)))
-                            : termFactory.getFalseOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNull(firstFunctionalTerm)));
-                    return simplifiedTerm.simplify(variableNullability);
+                    Template.Component firstComponent = ((IRIStringTemplateFunctionSymbol) firstFunctionalTerm.getFunctionSymbol())
+                            .getTemplateComponents().stream().findFirst()
+                            .orElseThrow(() -> new MinorOntopInternalBugException("A template should have at least one component"));
+                    if (!firstComponent.isColumn()) {
+                        String firstComponentString = firstComponent.getComponent();
+                        if (firstComponentString.startsWith(prefixString))
+                            // True (or null)
+                            return termFactory.getTrueOrNullFunctionalTerm(
+                                    ImmutableList.of(termFactory.getDBIsNotNull(firstFunctionalTerm)))
+                                    .simplify(variableNullability);
+                        else if ((prefixString.length() <= firstComponentString.length())
+                                || (! firstComponentString.startsWith(prefixString.substring(0, firstComponentString.length())))) {
+                            // False (or null)
+                            return termFactory.getFalseOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNull(firstFunctionalTerm)))
+                                    .simplify(variableNullability);
+                        }
+                    }
+                    // TODO: shall we further simplify the other cases?
                 }
-
             }
         }
 
