@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.docker.lightweight.trino;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.lightweight.AbstractLeftJoinProfTest;
-import it.unibz.inf.ontop.docker.lightweight.SnowflakeLightweightTest;
 import it.unibz.inf.ontop.docker.lightweight.TrinoLightweightTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
@@ -25,11 +24,6 @@ public class LeftJoinProfTrinoTest extends AbstractLeftJoinProfTest {
     @AfterAll
     public static void after() throws SQLException {
         release();
-    }
-
-    @Override
-    protected ImmutableList<String> getExpectedValuesAvgStudents1() {
-        return  ImmutableList.of("\"11.2\"^^xsd:decimal");
     }
 
     @Override
@@ -64,10 +58,6 @@ public class LeftJoinProfTrinoTest extends AbstractLeftJoinProfTest {
     @Disabled("This test requires integrity constraints that are not currently supported by trino.")
     @Test
     public void testCourseJoinOnLeft1() { super.testCourseJoinOnLeft1(); }
-
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
-    @Test
-    public void testCourseJoinOnLeft2() { super.testCourseJoinOnLeft2(); }
 
     @Disabled("This test requires integrity constraints that are not currently supported by trino.")
     @Test
@@ -113,16 +103,4 @@ public class LeftJoinProfTrinoTest extends AbstractLeftJoinProfTest {
     @Test
     public void testUselessRightPart2() { super.testUselessRightPart2(); }
 
-    @Disabled("This test requires avoiding applying ORDER BY to a sub-query")
-    @Test
-    @Override
-    public void testDistinctAsGroupBy1() {
-        super.testDistinctAsGroupBy1();
-    }
-
-    @Test
-    public void testMinusMultitypedAvg() { super.testMinusMultitypedAvg(); }
-
-    @Test
-    public void testMinusMultitypedSum() { super.testMinusMultitypedSum(); }
 }
