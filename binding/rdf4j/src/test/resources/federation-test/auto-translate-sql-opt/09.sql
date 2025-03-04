@@ -1,3 +1,0 @@
-SELECT v2."country" AS "country3m1", v2."mbox_sha1sum" AS "mbox_sha1sum1m47", v3."nr" AS "nr0m4", v1."person" AS "person2m7", v3."product" AS "product2m4", v3."title" AS "title2m11"
-FROM "ss2"."review" v1, "ss2"."person" v2, "ss2"."review" v3
-WHERE (v2."name" IS NOT NULL AND v2."mbox_sha1sum" IS NOT NULL AND v2."country" IS NOT NULL AND v3."product" IS NOT NULL AND v3."title" IS NOT NULL AND v1."person" = v2."nr" AND v1."person" = v3."person" AND 88 = v1."nr")

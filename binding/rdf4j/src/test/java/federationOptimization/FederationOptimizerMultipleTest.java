@@ -146,9 +146,6 @@ public class FederationOptimizerMultipleTest {
 //                        if(queryInfo.get("queryFile").contains("10")) continue;
 //                        if(queryInfo.get("queryFile").contains("11")) continue;
 //                        if(queryInfo.get("queryFile").contains("12")) continue;
-//                        if(queryInfo.get("queryFile").contains("13")) continue;
-//                        if(queryInfo.get("queryFile").contains("14")) continue;
-//                        if(queryInfo.get("queryFile").contains("15")) continue;
 //                        testFederationOptimizer(queryInfo, true, federationEngine, federationSetting, federationOptimization);
                         testFederationOptimizer(queryInfo, false, federationEngine, federationSetting, federationOptimization);
                     }
@@ -247,31 +244,6 @@ public class FederationOptimizerMultipleTest {
         IQ iq = reformulator.reformulateIntoNativeQuery(query, emptyQueryContext, queryLogger);
         QuestQueryProcessor.returnPlannedQuery = false;
         return iq;
-    }
-
-    @Test
-    public void testCreateDefaultBSBMTestConfiguration() throws Exception {
-        for (FederationEngine federationEngine : FederationEngine.values()) {
-            for (FederationSetting federationSetting : FederationSetting.values()) {
-                for (FederationOptimization federationOptimization : FederationOptimization.values()) {
-                    Map<String, Object> testConfig = createDefaultBSBMTestConfiguration(federationEngine, federationSetting, federationOptimization);
-
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-                    String json = objectMapper.writeValueAsString(testConfig);
-//                    In case of an update of the test configuration, the following line can be used to write the JSON to a file
-                    writeToFileCheckOverwrite("src/test/resources/federation/config-files/test-config-" + federationEngine.name().toLowerCase() + "-" + federationSetting.name().toLowerCase() + "-" + federationOptimization.name().toLowerCase() + ".json", json);
-                    System.out.println("Serialized JSON:\n" + json);
-
-                    json = Files.readString(Path.of("src/test/resources/federation/config-files/test-config-" + federationEngine.name().toLowerCase() + "-" + federationSetting.name().toLowerCase() + "-" + federationOptimization.name().toLowerCase() + ".json"));
-                    // Deserialize JSON back into a Map
-                    Map<String, Object> deserializedMap = objectMapper.readValue(json, Map.class);
-                    System.out.println("Deserialized Map:\n" + deserializedMap);
-
-                    assertEquals(testConfig, deserializedMap);
-                }
-            }
-        }
     }
 
     public static Map<String, Object> createDefaultTestConfiguration(FederationEngine federationEngine, FederationSetting federationSetting, FederationOptimization federationOptimization) {

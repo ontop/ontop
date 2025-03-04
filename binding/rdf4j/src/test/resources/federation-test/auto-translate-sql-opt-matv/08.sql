@@ -1,3 +1,0 @@
-SELECT v2."name" AS "name1m12", v1."person" AS "person2m7", v1."rating3" AS "rating1m13", v1."rating4" AS "rating1m15", v1."rating1" AS "rating1m16", v1."rating2" AS "rating1m17", v1."reviewdate" AS "reviewdate2m43", v1."text" AS "text2m14", v1."title" AS "title2m11"
-FROM "ss2"."review" v1, "ss2"."person" v2
-WHERE (v2."name" IS NOT NULL AND v1."title" IS NOT NULL AND v1."text" IS NOT NULL AND v1."reviewdate" IS NOT NULL AND v1."rating1" IS NOT NULL AND v1."rating2" IS NOT NULL AND v1."rating3" IS NOT NULL AND v1."rating4" IS NOT NULL AND v1."person" = v2."nr" AND 88 = v1."product")

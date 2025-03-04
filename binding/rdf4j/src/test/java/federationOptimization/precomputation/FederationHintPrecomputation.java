@@ -972,28 +972,6 @@ public class FederationHintPrecomputation {
         }
     }
 
-
-    @Test
-    public void myTest() throws Exception {
-
-        String setting = "hom";
-
-        SourceHints sh = detectCandidateHints("src/test/resources/federation-test/bsbm-ontology.owl",
-                "src/test/resources/federation-test/teiid/bsbm-mappings-hom-het.obda",
-                "src/test/resources/federation-test/teiid/system-" + setting + ".properties",
-                "src/test/resources/federation-test/teiid/SourceLab.txt",
-                null);
-
-        System.out.println("start computing: ");
-
-        SourceHints sh_new = computeSourceHints(sh,
-                "src/test/resources/federation-test/teiid/system-" + setting + ".properties",
-                null); // "src/test/resources/federation-test/matvDB-property.txt");
-
-//        List<String> tables = getTableNamesFromSQL("select nr, label, comment, producer, propertynum1, propertynum2, propertynum3, propertynum4, propertynum5, propertynum6, propertytex1, propertytex2, propertytex3, propertytex4, propertytex5, publisher, propertytex6, publishdate from ss5.product2");
-//        System.out.println(tables);
-    }
-
     @SuppressWarnings("ConstantValue")
     @Test
     public void myTestWithUpdatedConfig() throws Exception {

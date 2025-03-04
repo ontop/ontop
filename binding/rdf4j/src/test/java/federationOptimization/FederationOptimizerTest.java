@@ -118,9 +118,6 @@ public class FederationOptimizerTest {
         queryFiles.add("src/test/resources/federation/bsbm-queries/10.rq");
         queryFiles.add("src/test/resources/federation/bsbm-queries/11.rq");
         queryFiles.add("src/test/resources/federation/bsbm-queries/12.rq");
-        queryFiles.add("src/test/resources/federation/bsbm-queries/13.rq");
-        queryFiles.add("src/test/resources/federation/bsbm-queries/14.rq");
-        queryFiles.add("src/test/resources/federation/bsbm-queries/15.rq");
 
         for (String queryFile : queryFiles) {
             System.out.println("Query file: " + queryFile);

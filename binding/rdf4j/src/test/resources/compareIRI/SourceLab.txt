@@ -1,2 +1,0 @@
-s1-STATIC
-s2-STATIC
