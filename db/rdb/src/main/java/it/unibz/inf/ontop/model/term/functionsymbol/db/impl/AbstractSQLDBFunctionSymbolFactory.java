@@ -21,6 +21,8 @@ import java.util.stream.IntStream;
 
 public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFactory {
 
+    protected static final String JSON_EXTRACT = "JSON_EXTRACT";
+    protected static final String FORMAT = "FORMAT";
     protected static final String UPPER_STR = "UPPER";
     protected static final String UCASE_STR = "UCASE";
     protected static final String LOWER_STR = "LOWER";
@@ -74,6 +76,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     protected static final String ST_TRANSFORM = "ST_TRANSFORM";
     protected static final String ST_GEOMFROMTEXT = "ST_GEOMFROMTEXT";
+    protected static final String ST_GEOMETRYFROMTEXT = "ST_GEOMETRYFROMTEXT";
     protected static final String ST_MAKEPOINT = "ST_MAKEPOINT";
     protected static final String ST_SETSRID = "ST_SETSRID";
 
@@ -207,6 +210,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
         ImmutableTable.Builder<String, Integer, DBFunctionSymbol> builder = ImmutableTable.builder();
 
+        DBFunctionSymbol formatFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(FORMAT, 3, dbStringType,
+                false, abstractRootDBType); // TODO FORMAT (https://trino.io/docs/current/functions/conversion.html) can accept 1 or more arguments (not just 3 arguments)
+        builder.put(FORMAT, 3, formatFunctionSymbol);
+        DBFunctionSymbol jsonExtractFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(JSON_EXTRACT, 2, dbStringType,
+                false, abstractRootDBType);
+        builder.put(JSON_EXTRACT, 2, jsonExtractFunctionSymbol);
         // TODO: provide the base input types
         DBFunctionSymbol upperFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(UPPER_STR, 1, dbStringType,
                 false, abstractRootDBType);
@@ -389,6 +398,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol geomfromtextSymbol = new GeoDBTypedFunctionSymbol(ST_GEOMFROMTEXT, 1, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_GEOMFROMTEXT, 1, geomfromtextSymbol);
+
+        DBFunctionSymbol geometryFromTextSymbol = new GeoDBTypedFunctionSymbol(ST_GEOMETRYFROMTEXT, 1, dbStringType, false, abstractRootDBType);
+        builder.put(ST_GEOMETRYFROMTEXT, 1, geometryFromTextSymbol);
+
 
         DBFunctionSymbol makepointSymbol = new GeoDBTypedFunctionSymbol(ST_MAKEPOINT, 2, dbStringType, false,
                 abstractRootDBType);

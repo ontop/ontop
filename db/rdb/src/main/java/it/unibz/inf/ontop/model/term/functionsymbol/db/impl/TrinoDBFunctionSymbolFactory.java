@@ -19,6 +19,7 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     private static final String RANDOM_STR = "RANDOM";
     private static final String UUID_STRING_STR = "UUID";
+    private static final String TO_SPHERICAL_GEOGRAPHY = "TO_SPHERICAL_GEOGRAPHY";
     private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for Trino";
 
     private DBFunctionSymbol dbRight;
@@ -35,6 +36,10 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
             TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
+        DBTermType dbGeometryType;
+        DBTermType dbStringType;
+        dbGeometryType = dbTypeFactory.getDBGeometryType();
+        dbStringType = dbTypeFactory.getDBStringType();
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
@@ -43,6 +48,12 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
                 CURRENT_TIMESTAMP_STR,
                 dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
         table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
+
+        // DBFunctionSymbol toSphericalGeographySymbol = new GeoDBTypedFunctionSymbol(TO_SPHERICAL_GEOGRAPHY, 1, dbGeometryType, false, 
+        //         abstractRootDBType); // QUESTION: why isn't this the way to declare TO_SPHERICAL_GEOGRAPHY? it is a function that accepts a Geometry type as its argument.
+        DBFunctionSymbol toSphericalGeographySymbol = new GeoDBTypedFunctionSymbol(TO_SPHERICAL_GEOGRAPHY, 1, dbStringType, false,
+                abstractRootDBType);
+        table.put(TO_SPHERICAL_GEOGRAPHY, 1, toSphericalGeographySymbol);
 
         return ImmutableTable.copyOf(table);
     }
