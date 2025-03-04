@@ -218,45 +218,49 @@
 
     <profiles>
         <profile>
-            <id>obdf</id>
+            <id>obdf-tests</id>
             <repositories>
-                <!-- Extra repositories for Dremio (public) and Denodo (private, need editing ~/.m2/settings.xml) -->
-                <repository>
-                    <id>ontop-3rd-party-maven-repo-private</id>
-                    <url>https://gitlab.inf.unibz.it/api/v4/projects/5722/packages/maven</url>
-                </repository>
+                <!-- Extra repositories for Dremio (public) -->
                 <repository>
                     <id>dremio-free</id>
                     <url>https://maven.dremio.com/free/</url>
                 </repository>
             </repositories>
-
             <dependencies>
-                <!-- additional JDBC drivers for launching Ontop using Dremio, Denodo, Teiid and PostgreSQL -->
+                <!-- Additional JDBC drivers for launching Ontop using Dremio, Teiid and PostgreSQL -->
                 <dependency>
                     <groupId>com.dremio.distribution</groupId>
                     <artifactId>dremio-jdbc-driver</artifactId>
                     <version>24.0.0-202302100528110223-3a169b7c</version>
-                    <!--<scope>test</scope>-->
-                </dependency>
-                <dependency>
-                    <groupId>com.denodo</groupId>
-                    <artifactId>denodo</artifactId>
-                    <version>8.0</version>
-                    <!--<scope>test</scope>-->
                 </dependency>
                 <dependency>
                     <groupId>org.postgresql</groupId>
                     <artifactId>postgresql</artifactId>
                     <version>42.5.4</version>
-                    <!--<scope>test</scope>-->
                 </dependency>
                 <dependency>
                     <groupId>org.teiid</groupId>
                     <artifactId>teiid</artifactId>
                     <classifier>jdbc</classifier>
                     <version>16.0.0</version>
-                    <!--<scope>test</scope>-->
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>obdf-tests-denodo</id>
+            <repositories>
+                <!-- Extra repository for Denodo (private, need entering credentials in ~/.m2/settings.xml) -->
+                <repository>
+                    <id>ontop-3rd-party-maven-repo-private</id>
+                    <url>https://gitlab.inf.unibz.it/api/v4/projects/5722/packages/maven</url>
+                </repository>
+            </repositories>
+            <dependencies>
+                <!-- Additional JDBC drivers for Denodo -->
+                <dependency>
+                    <groupId>com.denodo</groupId>
+                    <artifactId>denodo</artifactId>
+                    <version>8.0</version>
                 </dependency>
             </dependencies>
         </profile>
