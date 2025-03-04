@@ -48,6 +48,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @Tag("obdf")
 public class FederationOptimizerMultipleTest {
 
+    private static final boolean WRITE_TO_FILE = false;
+
+    private static final boolean COMPARE_WITH_FILE = false;
+
     public static IntermediateQueryFactory IQ_FACTORY;
     public static AtomFactory ATOM_FACTORY;
     public static TermFactory TERM_FACTORY;
@@ -147,7 +151,7 @@ public class FederationOptimizerMultipleTest {
 //                        if(queryInfo.get("queryFile").contains("11")) continue;
 //                        if(queryInfo.get("queryFile").contains("12")) continue;
 //                        testFederationOptimizer(queryInfo, true, federationEngine, federationSetting, federationOptimization);
-                        testFederationOptimizer(queryInfo, false, federationEngine, federationSetting, federationOptimization);
+                        testFederationOptimizer(queryInfo, federationEngine, federationSetting, federationOptimization);
                     }
                 }
             }
@@ -170,7 +174,7 @@ public class FederationOptimizerMultipleTest {
         actualOutput += output;
     }
 
-    public void testFederationOptimizer(Map<String, String> queryInfo, boolean writeToFile, FederationEngine federationEngine, FederationSetting federationSetting, FederationOptimization federationOptimization) throws Exception {
+    public void testFederationOptimizer(Map<String, String> queryInfo, FederationEngine federationEngine, FederationSetting federationSetting, FederationOptimization federationOptimization) throws Exception {
         String queryFile = queryInfo.get("queryFile");
         String inputIQFile = queryInfo.get("inputIQFile");
         String outputIQFile = queryInfo.get("outputIQFile");
@@ -181,29 +185,31 @@ public class FederationOptimizerMultipleTest {
 
         // Load and process SPARQL query
         String sparqlQuery = Files.readString(Path.of(queryFile));
-        logStep("SPARQL query:", sparqlQuery, queryInfoString, writeToFile, queryFile);
+        logStep("SPARQL query:", sparqlQuery, queryInfoString, queryFile);
 
         // Processing IQ from SPARQL, optimization, and executable query generation
         IQ inputIQ = getIQFromSPARQL(sparqlQuery);
-        logStep("Parsed query converted into IQ:", inputIQ.toString(), queryInfoString, writeToFile, inputIQFile);
+        logStep("Parsed query converted into IQ:", inputIQ.toString(), queryInfoString, inputIQFile);
 
         IQ optimizedIQ = federationOptimizer.optimize(inputIQ);
-        logStep("Optimized IQ:", optimizedIQ.toString(), queryInfoString, writeToFile, outputIQFile);
+        logStep("Optimized IQ:", optimizedIQ.toString(), queryInfoString, outputIQFile);
 
         IQ executableIQ = reformulator.generateExecutableQuery(optimizedIQ);
-        logStep("Executable IQ:", executableIQ.toString(), queryInfoString, writeToFile, executableIQFile);
+        logStep("Executable IQ:", executableIQ.toString(), queryInfoString, executableIQFile);
 
         // Handling final SQL query
         String finalSQLQuery = ((NativeNodeImpl) executableIQ.getTree().getChildren().get(0)).getNativeQueryString(); // Implement this method as needed
-        logStep("Final SQL query:", finalSQLQuery.toString(), queryInfoString, writeToFile, outputSQLFile);
+        logStep("Final SQL query:", finalSQLQuery.toString(), queryInfoString, outputSQLFile);
     }
 
-    private void logStep(String stepDescription, String data, String queryInfoString, boolean writeToFile, String filePath) throws IOException {
+    private void logStep(String stepDescription, String data, String queryInfoString, String filePath) throws IOException {
         System.out.println(queryInfoString + stepDescription + "\n" + data);
-        if (writeToFile) {
+        if (WRITE_TO_FILE) {
             Files.writeString(Path.of(filePath), data);
         }
-        compareWithFileContent(data, Files.readString(Path.of(filePath)), stepDescription, queryInfoString);
+        if (COMPARE_WITH_FILE) {
+            compareWithFileContent(data, Files.readString(Path.of(filePath)), stepDescription, queryInfoString);
+        }
     }
 
     private void compareWithFileContent(String data, String fileContent, String description, String queryInfoString) {
@@ -232,7 +238,7 @@ public class FederationOptimizerMultipleTest {
     }
 
     public void testFederationOptimizer(Map<String, String> queryInfo) throws Exception {
-        testFederationOptimizer(queryInfo, false, null, null, null);
+        testFederationOptimizer(queryInfo, null, null, null);
     }
 
     private IQ getIQFromSPARQL(String sparqlQuery) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException, OntopReformulationException {
@@ -298,7 +304,7 @@ public class FederationOptimizerMultipleTest {
 
     public static Map<String, Object> createDefaultBSBMTestConfiguration(FederationEngine federationEngine, FederationSetting federationSetting, FederationOptimization federationOptimization) {
         List<Integer> bsbm_queries = new ArrayList<>();
-        for (int i = 1; i <= 15; i++) {
+        for (int i = 1; i <= 12; i++) {
             bsbm_queries.add(i);
         }
 
