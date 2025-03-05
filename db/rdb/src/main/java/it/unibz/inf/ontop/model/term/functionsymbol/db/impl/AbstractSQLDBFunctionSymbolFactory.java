@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.model.type.impl.DateDBTermType;
 import it.unibz.inf.ontop.model.type.impl.DatetimeDBTermType;
 
 import java.util.Map;
@@ -203,7 +202,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
         DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
         DBTermType dbDoubleType = dbTypeFactory.getDBDoubleType();
-        DBTermType dbIntegerType = dbTypeFactory.getDBLargeIntegerType();
+        DBTermType dbGeometryType = dbTypeFactory.getDBGeometryType();
 
         ImmutableTable.Builder<String, Integer, DBFunctionSymbol> builder = ImmutableTable.builder();
 
@@ -334,35 +333,35 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 abstractRootDBType);
         builder.put(ST_ASTEXT, 1, asTextSymbol);
 
-        DBFunctionSymbol bufferSymbol = new GeoDBTypedFunctionSymbol(ST_BUFFER, 2, dbStringType, false,
+        DBFunctionSymbol bufferSymbol = new GeoDBTypedFunctionSymbol(ST_BUFFER, 2, dbGeometryType, false,
                 abstractRootDBType);
         builder.put(ST_BUFFER, 2, bufferSymbol);
 
-        DBFunctionSymbol intersectionSymbol = new GeoDBTypedFunctionSymbol(ST_INTERSECTION, 2, dbStringType, false,
+        DBFunctionSymbol intersectionSymbol = new GeoDBTypedFunctionSymbol(ST_INTERSECTION, 2, dbGeometryType, false,
                 abstractRootDBType);
         builder.put(ST_INTERSECTION, 2, intersectionSymbol);
 
-        DBFunctionSymbol boundarySymbol = new GeoDBTypedFunctionSymbol(ST_BOUNDARY, 1, dbStringType, false,
+        DBFunctionSymbol boundarySymbol = new GeoDBTypedFunctionSymbol(ST_BOUNDARY, 1, dbGeometryType, false,
                 abstractRootDBType);
         builder.put(ST_BOUNDARY, 1, boundarySymbol);
 
-        DBFunctionSymbol convexhullSymbol = new GeoDBTypedFunctionSymbol(ST_CONVEXHULL, 1, dbStringType, false,
+        DBFunctionSymbol convexhullSymbol = new GeoDBTypedFunctionSymbol(ST_CONVEXHULL, 1, dbGeometryType, false,
                 abstractRootDBType);
         builder.put(ST_CONVEXHULL, 1, convexhullSymbol);
 
-        DBFunctionSymbol differenceSymbol = new GeoDBTypedFunctionSymbol(ST_DIFFERENCE, 2, dbStringType, false,
+        DBFunctionSymbol differenceSymbol = new GeoDBTypedFunctionSymbol(ST_DIFFERENCE, 2, dbGeometryType, false,
                 abstractRootDBType);
         builder.put(ST_DIFFERENCE, 2, differenceSymbol);
 
-        DBFunctionSymbol symdifferenceSymbol = new GeoDBTypedFunctionSymbol(ST_SYMDIFFERENCE, 2, dbStringType, false,
+        DBFunctionSymbol symdifferenceSymbol = new GeoDBTypedFunctionSymbol(ST_SYMDIFFERENCE, 2, dbGeometryType, false,
                 abstractRootDBType);
         builder.put(ST_SYMDIFFERENCE, 2, symdifferenceSymbol);
 
-        DBFunctionSymbol envelopeSymbol = new GeoDBTypedFunctionSymbol(ST_ENVELOPE, 1, dbStringType, false,
+        DBFunctionSymbol envelopeSymbol = new GeoDBTypedFunctionSymbol(ST_ENVELOPE, 1, dbGeometryType, false,
                 abstractRootDBType);
         builder.put(ST_ENVELOPE, 1, envelopeSymbol);
 
-        DBFunctionSymbol unionSymbol = new GeoDBTypedFunctionSymbol(ST_UNION, 2, dbStringType, false,
+        DBFunctionSymbol unionSymbol = new GeoDBTypedFunctionSymbol(ST_UNION, 2, dbGeometryType, false,
                 abstractRootDBType);
         builder.put(ST_UNION, 2, unionSymbol);
 
@@ -378,19 +377,19 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 abstractRootDBType);
         builder.put(ST_SRID, 1, getsridSymbol);
 
-        DBFunctionSymbol setsridSymbol = new GeoDBTypedFunctionSymbol(ST_SETSRID, 2, dbStringType, false,
+        DBFunctionSymbol setsridSymbol = new GeoDBTypedFunctionSymbol(ST_SETSRID, 2, dbGeometryType, false,
                 abstractRootDBType);
         builder.put(ST_SETSRID, 2, setsridSymbol);
 
-        DBFunctionSymbol transformSymbol = new GeoDBTypedFunctionSymbol(ST_TRANSFORM, 2, dbStringType, false,
+        DBFunctionSymbol transformSymbol = new GeoDBTypedFunctionSymbol(ST_TRANSFORM, 2, dbGeometryType, false,
                 abstractRootDBType);
         builder.put(ST_TRANSFORM, 2, transformSymbol);
 
-        DBFunctionSymbol geomfromtextSymbol = new GeoDBTypedFunctionSymbol(ST_GEOMFROMTEXT, 1, dbStringType, false,
+        DBFunctionSymbol geomfromtextSymbol = new GeoDBTypedFunctionSymbol(ST_GEOMFROMTEXT, 1, dbGeometryType, false,
                 abstractRootDBType);
         builder.put(ST_GEOMFROMTEXT, 1, geomfromtextSymbol);
 
-        DBFunctionSymbol makepointSymbol = new GeoDBTypedFunctionSymbol(ST_MAKEPOINT, 2, dbStringType, false,
+        DBFunctionSymbol makepointSymbol = new GeoDBTypedFunctionSymbol(ST_MAKEPOINT, 2, dbGeometryType, false,
                 abstractRootDBType);
         builder.put(ST_MAKEPOINT, 2, makepointSymbol);
 
@@ -872,11 +871,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol() {
         return new DefaultBooleanDenormFunctionSymbol(dbBooleanType, dbStringType);
-    }
-
-    @Override
-    protected DBTypeConversionFunctionSymbol createGeometryNormFunctionSymbol(DBTermType geoType) {
-        return new DefaultSimpleDBCastFunctionSymbol(geoType, geoType, Serializers.getCastSerializer(geoType));
     }
 
     @Override
