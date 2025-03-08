@@ -227,9 +227,12 @@ public class RDF4JTupleExprTranslator {
             throw new Sparql2IqConversionException("Unexpected parsed SPARQL query: nested complex projections appear " +
                     "within an RDF4J Group node: " + group);
         }
+        ImmutableSet<Variable> childVariables = child.iqTree.getVariables();
+
         AggregationNode an = iqFactory.createAggregationNode(
                 group.getGroupBindingNames().stream()
                         .map(termFactory::getVariable)
+                        .filter(childVariables::contains)
                         .collect(ImmutableCollectors.toSet()),
                 mergedVarDefs.get(0).transform(t -> (ImmutableFunctionalTerm)t)); // only one substitution guaranteed by the if
 
