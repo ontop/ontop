@@ -21,7 +21,6 @@ import java.util.stream.IntStream;
 
 public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFactory {
 
-    protected static final String JSON_EXTRACT = "JSON_EXTRACT";
     protected static final String FORMAT = "FORMAT";
     protected static final String UPPER_STR = "UPPER";
     protected static final String UCASE_STR = "UCASE";
@@ -213,9 +212,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol formatFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(FORMAT, 3, dbStringType,
                 false, abstractRootDBType); // TODO FORMAT (https://trino.io/docs/current/functions/conversion.html) can accept 1 or more arguments (not just 3 arguments)
         builder.put(FORMAT, 3, formatFunctionSymbol);
-        DBFunctionSymbol jsonExtractFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(JSON_EXTRACT, 2, dbStringType,
-                false, abstractRootDBType);
-        builder.put(JSON_EXTRACT, 2, jsonExtractFunctionSymbol);
         // TODO: provide the base input types
         DBFunctionSymbol upperFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(UPPER_STR, 1, dbStringType,
                 false, abstractRootDBType);

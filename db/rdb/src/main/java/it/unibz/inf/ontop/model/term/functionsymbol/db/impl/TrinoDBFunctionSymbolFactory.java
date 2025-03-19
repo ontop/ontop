@@ -17,6 +17,7 @@ import static it.unibz.inf.ontop.model.type.impl.SnowflakeDBTypeFactory.TIMESTAM
 
 public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
+    private static final String JSON_EXTRACT = "JSON_EXTRACT";
     private static final String RANDOM_STR = "RANDOM";
     private static final String UUID_STRING_STR = "UUID";
     private static final String TO_SPHERICAL_GEOGRAPHY = "TO_SPHERICAL_GEOGRAPHY";
@@ -54,6 +55,10 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         DBFunctionSymbol toSphericalGeographySymbol = new GeoDBTypedFunctionSymbol(TO_SPHERICAL_GEOGRAPHY, 1, dbStringType, false,
                 abstractRootDBType);
         table.put(TO_SPHERICAL_GEOGRAPHY, 1, toSphericalGeographySymbol);
+
+        DBFunctionSymbol jsonExtractFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(JSON_EXTRACT, 2, dbStringType,
+                false, abstractRootDBType);
+        table.put(JSON_EXTRACT, 2, jsonExtractFunctionSymbol);
 
         return ImmutableTable.copyOf(table);
     }
