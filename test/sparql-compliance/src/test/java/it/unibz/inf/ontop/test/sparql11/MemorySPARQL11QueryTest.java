@@ -62,8 +62,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			constructManifest + "constructwhere04", // CONSTRUCT FROM <data.ttl> not supported by the SPARQL-to-IQ translation
 
 			/* NEGATION */
-            negationManifest + "subset-by-exclusion-nex-1", // EXISTS not supported by the SPARQL-to-IQ translation
-			negationManifest + "temporal-proximity-by-exclusion-nex-1", // EXISTS not supported by the SPARQL-to-IQ translation
 			negationManifest + "subset-01", // EXISTS not supported by the SPARQL-to-IQ translation
 			negationManifest + "subset-02", // EXISTS not supported by the SPARQL-to-IQ translation
 			negationManifest + "set-equals-1", // EXISTS not supported by the SPARQL-to-IQ translation
