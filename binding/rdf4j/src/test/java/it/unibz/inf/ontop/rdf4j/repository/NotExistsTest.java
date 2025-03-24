@@ -50,6 +50,7 @@ public class NotExistsTest extends AbstractRDF4JTest {
         assertEquals(0, countResults);
     }
 
+    @Ignore("Constants subjects in the not exists condition are not supported")
     @Test
     public void testFilterConstants() {
         String sparql = "PREFIX : <http://person.example.org/>\n" +

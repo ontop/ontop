@@ -353,9 +353,14 @@ public class RDF4JTupleExprTranslator {
             throw new OntopUnsupportedKGQueryException("The NOT EXISTS operator is not supported when there is no non-nullable common variable");
         }
 
-        ImmutableSet<Variable> allVars = new VariableCollector(termFactory).collectVariables(exists.getSubQuery());
-        if (!Sets.difference(allVars, rightTranslation.iqTree.getKnownVariables()).isEmpty()) {
+        RDF4JVarsCollector collector = new RDF4JVarsCollector(termFactory);
+        collector.visitTree(exists.getSubQuery());
+        if (!Sets.difference(collector.getVariables(), rightTranslation.iqTree.getKnownVariables()).isEmpty()) {
             throw new OntopUnsupportedKGQueryException("The NOT EXISTS operator is not supported when the subtree contains variables defined outside the subtree");
+        }
+
+        if(!collector.getConstantSubjects().isEmpty()) {
+            throw new OntopUnsupportedKGQueryException("The NOT EXISTS operator is not supported when triple patterns have constant subjects");
         }
 
         return translateMinusOperation(leftTranslation, rightTranslation, sharedVariables);
@@ -804,11 +809,12 @@ public class RDF4JTupleExprTranslator {
         return new RDF4JValueExprTranslator(knownVariables, externalBindings, treatBNodeAsVariable, termFactory, rdfFactory, typeFactory, functionSymbolFactory);
     }
 
-    private static class VariableCollector extends AbstractQueryModelVisitor<RuntimeException> {
+    private static class RDF4JVarsCollector extends AbstractQueryModelVisitor<RuntimeException> {
         private final Set<Variable> variables = new HashSet<>();
+        private final Set<Var> constantSubjects = new HashSet<>();
         private final TermFactory termFactory;
 
-        public VariableCollector(TermFactory termFactory) {
+        public RDF4JVarsCollector(TermFactory termFactory) {
             super();
             this.termFactory = termFactory;
         }
@@ -821,9 +827,23 @@ public class RDF4JTupleExprTranslator {
             super.meet(node); // Continue traversal
         }
 
-        public ImmutableSet<Variable> collectVariables(TupleExpr expr) {
+        @Override
+        public void meet(StatementPattern node) {
+            if (node.getSubjectVar().hasValue())
+                constantSubjects.add(node.getSubjectVar());
+            super.meet(node);
+        }
+
+        public void visitTree(TupleExpr expr) {
             expr.visit(this);
+        }
+
+        public ImmutableSet<Variable> getVariables() {
             return ImmutableSet.copyOf(variables);
+        }
+
+        public ImmutableSet<Var> getConstantSubjects() {
+            return ImmutableSet.copyOf(constantSubjects);
         }
     }
 
