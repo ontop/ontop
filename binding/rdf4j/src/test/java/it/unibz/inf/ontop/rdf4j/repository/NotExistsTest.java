@@ -50,19 +50,31 @@ public class NotExistsTest extends AbstractRDF4JTest {
         assertEquals(0, countResults);
     }
 
-    @Ignore("Constants subjects in the not exists condition are not supported")
     @Test
-    public void testFilterConstants() {
+    public void testFilterConstants1() {
         String sparql = "PREFIX : <http://person.example.org/>\n" +
                 "\n" +
                 "SELECT ?v \n" +
                 "WHERE { ?v :firstName ?fname ; \n" +
-                "       FILTER NOT EXISTS { :1 :firstName ?fname } \n" +
+                "       FILTER NOT EXISTS { <http://person.example.org/person/1> :firstName ?fname } \n" +
                 "}\n";
         runQueryAndCompare(sparql, ImmutableSet.of("http://person.example.org/person/2"));
     }
 
-    @Ignore("Variables in the not exists condition must be defined in the filter itself")
+    @Ignore("At least one variable must be present in the not exists graph pattern")
+    @Test
+    public void testFilterConstants2() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "\n" +
+                "SELECT ?v \n" +
+                "WHERE { ?v :firstName ?fname ; \n" +
+                "       FILTER NOT EXISTS { <http://person.example.org/person/1> :firstName \"Roger\" } \n" +
+                "}\n";
+        int countResults = runQueryAndCount(sparql);
+        assertEquals(0, countResults);
+    }
+
+    @Ignore("The inner filter variables must be bound in the not exists graph pattern")
     @Test
     public void testFilterUnboundVariable() {
         String sparql = "PREFIX : <http://person.example.org/>\n" +
