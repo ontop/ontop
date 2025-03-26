@@ -62,8 +62,8 @@ public class NotExistsTest extends AbstractRDF4JTest {
         runQueryAndCompare(sparql, ImmutableSet.of("http://person.example.org/person/2"));
     }
 
-    @Ignore("At least one variable must be present in the not exists graph pattern")
-    @Test
+    // Not supported (no present in the not exists graph pattern)
+    @Test(expected = QueryEvaluationException.class)
     public void testFilterConstants2() {
         String sparql = "PREFIX : <http://person.example.org/>\n" +
                 "\n" +

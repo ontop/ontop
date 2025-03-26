@@ -349,7 +349,7 @@ public class RDF4JTupleExprTranslator {
         }
 
         if (sharedVariables.stream().allMatch(v -> v.isNullable(leftTranslation.nullableVariables)
-                && v.isNullable(rightTranslation.nullableVariables))) {
+                || v.isNullable(rightTranslation.nullableVariables))) {
             throw new OntopUnsupportedKGQueryException("The NOT EXISTS operator is not supported when there is no non-nullable common variable");
         }
 
