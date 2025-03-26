@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
 import com.google.common.collect.ImmutableSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -39,8 +40,8 @@ public class NotExistsTest extends AbstractRDF4JTest {
         runQueryAndCompare(sparql, ImmutableSet.of("http://person.example.org/person/3", "http://person.example.org/person/4"));
     }
 
-    @Ignore("Non overlapping variables are not supported")
-    @Test
+    // Non overlapping variables are not supported
+    @Test(expected = QueryEvaluationException.class)
     public void testNonOverlappingVariables() {
         String sparql = "SELECT * \n" +
                 "WHERE { ?s ?p ?o \n" +
@@ -74,8 +75,8 @@ public class NotExistsTest extends AbstractRDF4JTest {
         assertEquals(0, countResults);
     }
 
-    @Ignore("The inner filter variables must be bound in the not exists graph pattern")
-    @Test
+    // The inner filter variables not bound in the not exists graph pattern is not supported
+    @Test(expected = QueryEvaluationException.class)
     public void testFilterUnboundVariable() {
         String sparql = "PREFIX : <http://person.example.org/>\n" +
                 "SELECT ?v WHERE {\n" +
@@ -128,5 +129,20 @@ public class NotExistsTest extends AbstractRDF4JTest {
                 "    ?v :nickname ?sharedName\n" +
                 "}\n";
         runQueryAndCompare(sparql, ImmutableSet.of("http://person.example.org/person/1", "http://person.example.org/person/3", "http://person.example.org/person/4"));
+    }
+
+    // Not yet supported
+    @Test(expected = QueryEvaluationException.class)
+    public void testNullableOrTheRight() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "\n" +
+                "SELECT ?v \n" +
+                "WHERE \n" +
+                "{\n" +
+                "    ?v a :Person .\n" +
+                "    FILTER NOT EXISTS { ?person a :Person . OPTIONAL { ?person :locality ?sharedName } }\n" +
+                "    ?v :nickname ?sharedName\n" +
+                "}\n";
+        runQueryAndCompare(sparql, ImmutableSet.of());
     }
 }
