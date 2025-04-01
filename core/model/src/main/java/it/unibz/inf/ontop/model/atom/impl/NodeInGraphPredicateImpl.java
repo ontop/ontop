@@ -1,18 +1,18 @@
 package it.unibz.inf.ontop.model.atom.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.atom.NodeGraphPredicate;
+import it.unibz.inf.ontop.model.atom.NodeInGraphPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 
 import java.util.Optional;
 
-public class NodeGraphPredicateImpl extends AtomPredicateImpl
-        implements NodeGraphPredicate {
+public class NodeInGraphPredicateImpl extends AtomPredicateImpl
+        implements NodeInGraphPredicate {
 
     private final boolean isInDefaultGraph;
 
-    protected NodeGraphPredicateImpl(ObjectRDFType rdfObjectType, boolean isInDefaultGraph) {
+    protected NodeInGraphPredicateImpl(ObjectRDFType rdfObjectType, boolean isInDefaultGraph) {
         super(isInDefaultGraph
                         ? "nodeInDefaultGraph"
                         : "nodeInGraph",
