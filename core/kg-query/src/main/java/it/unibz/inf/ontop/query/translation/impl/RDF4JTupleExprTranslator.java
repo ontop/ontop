@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.impl.QueryNodeRenamer;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.HomogeneousIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
@@ -288,23 +289,47 @@ public class RDF4JTupleExprTranslator {
     }
 
     /**
-     * ?s rdfs:subClassOf* <some-iri> is supported.
-     *    Translated into SELECT DISTINCT ?s { { BIND (<some-iri> AS ?s } UNION { ?s rdfs:subClassOf <some-iri> } }
+     * rdfs:subClassOf* is supported.
      */
     private TranslationResult translate(ArbitraryLengthPath arbitraryLengthPath) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         var childTree = translate(arbitraryLengthPath.getPathExpression())
                             .iqTree;
         if (childTree instanceof IntensionalDataNode) {
             var childAtom = ((IntensionalDataNode) childTree).getProjectionAtom();
-            if ((childAtom.getPredicate() instanceof TriplePredicate)
-                    && (childAtom.getTerm(0) instanceof Variable)
-                    && childAtom.getTerm(1).equals(subClassOfConstant)
-                    // TODO: relax
-                    && (childAtom.getTerm(2).isGround())) {
-                var pathZeroDepthChild = iqFactory.createUnaryIQTree(
-                        iqFactory.createConstructionNode(childTree.getVariables(),
-                                substitutionFactory.getSubstitution((Variable) childAtom.getTerm(0), childAtom.getTerm(2))),
-                        iqFactory.createTrueNode());
+            var atomArguments = childAtom.getArguments();
+
+            if ((childAtom.getPredicate() instanceof RDFAtomPredicate)
+                    && childAtom.getTerm(1).equals(subClassOfConstant)) {
+                var atomPredicate = (RDFAtomPredicate) childAtom.getPredicate();
+                VariableOrGroundTerm subject = atomPredicate.getSubject(atomArguments);
+                VariableOrGroundTerm object = atomPredicate.getObject(atomArguments);
+
+                IQTree pathZeroDepthChild;
+                if ((!subject.isGround()) && object.isGround()) {
+                     pathZeroDepthChild = iqFactory.createUnaryIQTree(
+                            iqFactory.createConstructionNode(childTree.getVariables(),
+                                    substitutionFactory.getSubstitution((Variable) subject, object)),
+                            iqFactory.createTrueNode());
+                }
+                else if (subject.isGround() && object.isGround()) {
+                    pathZeroDepthChild = iqFactory.createUnaryIQTree(
+                            iqFactory.createFilterNode(termFactory.getStrictEquality(subject, object)),
+                            iqFactory.createTrueNode());
+                }
+                // Var - Var case
+                else {
+                    var graphTerm = atomPredicate.getGraph(atomArguments);
+
+                    var zeroDepthAtom = graphTerm
+                            .map(g -> atomFactory.getGraphNodeAtom(object, g))
+                            .orElseGet(() -> atomFactory.getDefaultGraphNodeAtom(object));
+
+                    pathZeroDepthChild = iqFactory.createUnaryIQTree(
+                            iqFactory.createConstructionNode(childTree.getVariables(),
+                                    substitutionFactory.getSubstitution((Variable) subject, object)),
+                            iqFactory.createIntensionalDataNode(zeroDepthAtom));
+                }
+
                 var newTree = iqFactory.createUnaryIQTree(
                         iqFactory.createDistinctNode(),
                         iqFactory.createNaryIQTree(

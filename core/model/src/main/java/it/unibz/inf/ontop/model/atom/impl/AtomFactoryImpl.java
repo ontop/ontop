@@ -18,6 +18,8 @@ public class AtomFactoryImpl implements AtomFactory {
     private final QuadPredicate quadPredicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final NodeGraphPredicate nodeInGraphPredicate;
+    private final NodeGraphPredicate nodeInDefaultGraphPredicate;
 
     @Inject
     private AtomFactoryImpl(TermFactory termFactory, TypeFactory typeFactory, org.apache.commons.rdf.api.RDF rdfFactory) {
@@ -37,6 +39,8 @@ public class AtomFactoryImpl implements AtomFactory {
                 typeFactory.getAbstractRDFTermType(),
                 typeFactory.getIRITermType()),
                 iriType, rdfFactory);
+        nodeInGraphPredicate = new NodeGraphPredicateImpl(typeFactory.getAbstractObjectRDFType(), false);
+        nodeInDefaultGraphPredicate = new NodeGraphPredicateImpl(typeFactory.getAbstractObjectRDFType(), true);
     }
 
     @Override
@@ -112,5 +116,15 @@ public class AtomFactoryImpl implements AtomFactory {
     public DistinctVariableOnlyDataAtom getDistinctQuadAtom(Variable subject, Variable property, Variable object,
                                                             Variable namedGraph) {
         return getDistinctVariableOnlyDataAtom(quadPredicate, subject, property, object, namedGraph);
+    }
+
+    @Override
+    public DataAtom<AtomPredicate> getGraphNodeAtom(VariableOrGroundTerm node, VariableOrGroundTerm graph) {
+        return getDataAtom(nodeInGraphPredicate, node, graph);
+    }
+
+    @Override
+    public DataAtom<AtomPredicate> getDefaultGraphNodeAtom(VariableOrGroundTerm node) {
+        return getDataAtom(nodeInDefaultGraphPredicate, node);
     }
 }
