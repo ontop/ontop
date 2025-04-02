@@ -64,6 +64,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(DisjunctionOfEqualitiesMergingSimplifier.class);
         bindFromSettings(AuthorizationFunctionEvaluator.class);
         bindFromSettings(AllQueryContextFunctionSymbolEvaluator.class);
+        bindFromSettings(NodeInGraphOptimizer.class);
 
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
 
