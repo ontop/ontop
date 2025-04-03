@@ -410,4 +410,21 @@ public class DestinationTest extends AbstractRDF4JTest {
                 ImmutableSet.of()); ;
     }
 
+    @Test
+    public void testSubClassOfPropertyPath5() {
+        runQueryAndCompare("PREFIX schema: <http://schema.org/>\n" +
+                        "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                        "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "\n" +
+                        "SELECT ?v \n" +
+                        "WHERE {\n" +
+                        "  BIND(schema:LodgingBusiness AS ?c)\n" +
+                        "  <http://destination.example.org/data/source1/hospitality/aaa> rdf:type ?v . \n" +
+                        "  ?v rdfs:subClassOf* ?c .\n" +
+                        "}\n",
+                ImmutableSet.of("http://schema.org/LodgingBusiness", "http://schema.org/Campground")); ;
+    }
+
 }
