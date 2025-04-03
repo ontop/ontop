@@ -49,7 +49,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
      */
     protected static abstract class QueryMergingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        private final VariableGenerator variableGenerator;
+        protected final VariableGenerator variableGenerator;
         private final SubstitutionFactory substitutionFactory;
         private final QueryTransformerFactory transformerFactory;
         private final AtomFactory atomFactory;

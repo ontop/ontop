@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.NodeInGraphPredicate;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -40,7 +40,6 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
     @Override
     public IQ optimize(IQ query) {
         var tree = query.getTree();
-        // TODO: add a transformer for simplifying node(<cst>) or node(<cst>,g)
         var transformer = new Transformer(coreSingletons);
         var newTree = tree.acceptTransformer(transformer)
                 .normalizeForOptimization(query.getVariableGenerator());
@@ -51,6 +50,9 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
 
     }
 
+    /**
+     * Only deals with nodeInGraph atoms where the node is a variable
+     */
     protected static class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
         private final SubstitutionFactory substitutionFactory;
 
@@ -91,6 +93,9 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                             .filter(t -> t instanceof IntensionalDataNode)
                             .map(t -> ((IntensionalDataNode) t).getProjectionAtom())
                             .filter(a -> a.getPredicate() instanceof NodeInGraphPredicate)
+                            .filter(a -> !((NodeInGraphPredicate) a.getPredicate())
+                                    .getNode(a.getArguments())
+                                    .isGround())
                             .map(a -> Maps.immutableEntry(
                                     extractContext(a, (ConstructionNode) constructTree.getRootNode()),
                                     unionTree))
@@ -100,7 +105,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
         private static NodeInGraphContext extractContext(DataAtom<AtomPredicate> atom,
                                                                      ConstructionNode constructionNode) {
             var nodeInGraphAtom = (DataAtom<NodeInGraphPredicate>)(DataAtom<?>) atom;
-            var firstNode = nodeInGraphAtom.getPredicate().getNode(nodeInGraphAtom.getArguments());
+            var firstNode = (Variable) nodeInGraphAtom.getPredicate().getNode(nodeInGraphAtom.getArguments());
             var nodes = Stream.concat(
                     Stream.of(firstNode),
                     constructionNode.getSubstitution().stream()
@@ -243,10 +248,10 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
 
 
     private static class NodeInGraphContext {
-        private final ImmutableSet<VariableOrGroundTerm> nodeArguments;
+        private final ImmutableSet<Variable> nodeArguments;
         private final DataAtom<NodeInGraphPredicate> atom;
 
-        private NodeInGraphContext(ImmutableSet<VariableOrGroundTerm> nodeArguments, DataAtom<NodeInGraphPredicate> atom) {
+        private NodeInGraphContext(ImmutableSet<Variable> nodeArguments, DataAtom<NodeInGraphPredicate> atom) {
             this.nodeArguments = nodeArguments;
             this.atom = atom;
         }
