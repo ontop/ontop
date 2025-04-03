@@ -48,4 +48,9 @@ public class OntopOBDASettingsImpl extends OntopModelSettingsImpl implements Ont
     public boolean exposeSystemTables() {
         return getRequiredBoolean(EXPOSE_SYSTEM_TABLES);
     }
+
+    @Override
+    public String dbInitializationScript() {
+        return getProperty(DB_INITIALIZATION_SCRIPT).orElse("");
+    }
 }

@@ -107,6 +107,11 @@ public interface OBDASpecInput {
         default Builder addSparqlRuleReader(Reader sparqlRuleReader) {
             return addReader(SPARQL_RULES_KEY, sparqlRuleReader);
         }
+
+        default Builder addDbInitFile(File dbInitFile) {
+            return addFile(DB_INIT_KEY, dbInitFile);
+        }
+
     }
 
 
@@ -120,6 +125,7 @@ public interface OBDASpecInput {
     String LENSES_KEY = "lenses";
 
     String SPARQL_RULES_KEY = "sparql-rules";
+    String DB_INIT_KEY = "db-init";
 
 
 }

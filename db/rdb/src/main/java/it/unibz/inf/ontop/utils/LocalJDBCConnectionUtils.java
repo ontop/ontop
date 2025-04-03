@@ -21,9 +21,10 @@ public class LocalJDBCConnectionUtils {
         settings.getJdbcPassword()
                 .ifPresent(p -> jdbcInfo.put("password", p));
 
+        Connection connection;
         try {
             // This should work in most cases (e.g. from CLI, Protege, or Jetty)
-            return DriverManager.getConnection(settings.getJdbcUrl(), jdbcInfo);
+            connection = DriverManager.getConnection(settings.getJdbcUrl(), jdbcInfo);
         } catch (SQLException ex) {
             // HACKY(xiao): This part is still necessary for Tomcat.
             // Otherwise, JDBC drivers are not initialized by default.
@@ -33,7 +34,20 @@ public class LocalJDBCConnectionUtils {
                 throw new SQLException("Cannot load the driver: " + e.getMessage());
             }
 
-            return DriverManager.getConnection(settings.getJdbcUrl(), jdbcInfo);
+            connection = DriverManager.getConnection(settings.getJdbcUrl(), jdbcInfo);
+        }
+        if (!settings.dbInitializationScript().isEmpty()) {
+            runInitializationScript(connection, settings.dbInitializationScript());
+        }
+        return connection;
+    }
+
+    private static void runInitializationScript(Connection connection, String dbInitScript) throws SQLException {
+
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate("ATTACH '" + dbInitScript + "'");
+        } catch (SQLException e) {
+            throw new SQLException("Cannot execute the initialization script: " + e.getMessage());
         }
     }
 

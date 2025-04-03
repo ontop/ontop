@@ -1,0 +1,9 @@
+[PrefixDeclaration]
+:         http://duckdb.example.org/
+
+[MappingDeclaration] [[
+mappingId  Person
+target      :person/{id} a :Person ; :name {name} .
+source     SELECT * FROM person;
+
+]]
