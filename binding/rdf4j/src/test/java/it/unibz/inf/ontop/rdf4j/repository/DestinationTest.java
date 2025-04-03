@@ -382,11 +382,13 @@ public class DestinationTest extends AbstractRDF4JTest {
                         "\n" +
                         "SELECT ?h ?v \n" +
                         "WHERE {\n" +
-                        "  ?h rdf:type ?v . \n" +
+                        "  <http://destination.example.org/data/source1/hospitality/aaa> rdf:type ?v . \n" +
                         "  ?v rdfs:subClassOf* ?c .\n" +
                         "  FILTER (strends(str(?c), 'Business'))\n" +
                         "}\n",
-                ImmutableSet.of("http://schema.org/LodgingBusiness", "http://schema.org/Campground")); ;
+                ImmutableSet.of("http://schema.org/LodgingBusiness", "http://schema.org/Campground",
+                        "http://schema.org/CivicStructure", "http://schema.org/LocalBusiness",
+                        "http://schema.org/Organization", "http://schema.org/Place", "http://schema.org/Thing")); ;
     }
 
     @Test

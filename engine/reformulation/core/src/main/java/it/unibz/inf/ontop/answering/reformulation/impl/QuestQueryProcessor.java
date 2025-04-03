@@ -103,6 +103,7 @@ public class QuestQueryProcessor implements QueryReformulator {
                 LOGGER.debug("Rewritten IQ:\n{}\n", rewrittenIQ);
 
 				IQ simplifiedQuery = nodeInGraphOptimizer.optimize(rewrittenIQ);
+				LOGGER.debug("IQ after nodeInGraph simplification:\n{}\n", simplifiedQuery);
 
                 LOGGER.debug("Start the unfolding...");
                 IQ unfoldedIQ = queryUnfolder.optimize(simplifiedQuery);
