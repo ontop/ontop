@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.NodeInGraphPredicate;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -55,10 +56,12 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
      */
     protected static class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
         private final SubstitutionFactory substitutionFactory;
+        private final TermFactory termFactory;
 
         protected Transformer(CoreSingletons coreSingletons) {
             super(coreSingletons);
             this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+            this.termFactory = coreSingletons.getTermFactory();
         }
 
         @Override
@@ -219,9 +222,16 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                         && (((IntensionalDataNode) child).getProjectionAtom().getPredicate() instanceof NodeInGraphPredicate)) {
                     var intensionalVariables = pushedIntensionalNode.getVariables();
                     var treeVariables = tree.getVariables();
-                    if (intensionalVariables.containsAll(treeVariables))
-                        // TODO: add a filter with an equality between the vars
-                        return pushedIntensionalNode;
+                    if (intensionalVariables.containsAll(treeVariables)) {
+                        var filterCondition = termFactory.getConjunction(
+                                ((ConstructionNode) rootNode).getSubstitution().stream()
+                                        .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())));
+                        return filterCondition
+                                .map(c -> (IQTree) iqFactory.createUnaryIQTree(
+                                        iqFactory.createFilterNode(c),
+                                        pushedIntensionalNode))
+                                .orElse(pushedIntensionalNode);
+                    }
 
                     var commonTerm = pushedIntensionalNode.getProjectionAtom().getArguments().stream()
                             // Eliminates the named graph
