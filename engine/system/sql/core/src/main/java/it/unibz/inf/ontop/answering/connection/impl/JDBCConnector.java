@@ -91,12 +91,7 @@ public class JDBCConnector implements DBConnector {
 
     public synchronized Connection getSQLPoolConnection() throws OntopConnectionException {
         try {
-            Connection conn = connectionPool.getConnection();
-            if (!settings.dbInitializationScript().isEmpty()) {
-                Statement statement = conn.createStatement();
-                statement.execute("ATTACH '" + settings.dbInitializationScript() + "'");
-            }
-            return conn;
+            return connectionPool.getConnection();
         } catch (SQLException e) {
             throw new OntopConnectionException(e);
         }

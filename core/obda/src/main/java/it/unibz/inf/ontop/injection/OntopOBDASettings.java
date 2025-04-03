@@ -23,7 +23,7 @@ public interface OntopOBDASettings extends OntopModelSettings {
     boolean exposeSystemTables();
 
     /**
-     *
+     * The SQL script that is executed each time a new connection is created.
      */
     String dbInitializationScript();
     //--------------------------

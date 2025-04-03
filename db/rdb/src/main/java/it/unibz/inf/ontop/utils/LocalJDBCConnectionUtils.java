@@ -43,9 +43,8 @@ public class LocalJDBCConnectionUtils {
     }
 
     private static void runInitializationScript(Connection connection, String dbInitScript) throws SQLException {
-
         try (Statement statement = connection.createStatement()) {
-            statement.executeUpdate("ATTACH '" + dbInitScript + "'");
+            statement.executeUpdate(dbInitScript);
         } catch (SQLException e) {
             throw new SQLException("Cannot execute the initialization script: " + e.getMessage());
         }
