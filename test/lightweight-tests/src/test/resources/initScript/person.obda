@@ -3,7 +3,7 @@
 
 [MappingDeclaration] [[
 mappingId  Person
-target      :person/{id} a :Person ; :name {name} .
+target     :person/{id} a :Person ; :name {name}; :age {age}.
 source     SELECT * FROM person;
 
 ]]
