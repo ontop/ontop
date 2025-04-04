@@ -18,6 +18,8 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -58,11 +60,13 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
     protected static class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
         private final SubstitutionFactory substitutionFactory;
         private final TermFactory termFactory;
+        private final FunctionSymbolFactory functionSymbolFactory;
 
         protected Transformer(CoreSingletons coreSingletons) {
             super(coreSingletons);
             this.substitutionFactory = coreSingletons.getSubstitutionFactory();
             this.termFactory = coreSingletons.getTermFactory();
+            this.functionSymbolFactory = coreSingletons.getFunctionSymbolFactory();
         }
 
         @Override
@@ -85,30 +89,46 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
         protected ImmutableMultimap<NodeInGraphContext, IQTree> extractNodeInGraphContexts(ImmutableList<IQTree> children) {
             return children.stream()
                     .filter(c -> c.getRootNode() instanceof UnionNode)
-                    .flatMap(c -> extractNodeInGraphContextsFromUnionNode(c))
+                    .flatMap(c -> extractNodeInGraphContextsFromUnionNode(c).stream())
                     .collect(ImmutableCollectors.toMultimap());
         }
 
-        private Stream<Map.Entry<NodeInGraphContext, IQTree>> extractNodeInGraphContextsFromUnionNode(
+        private Optional<Map.Entry<NodeInGraphContext, IQTree>> extractNodeInGraphContextsFromUnionNode(
                 IQTree unionTree) {
             return unionTree.getChildren().stream()
-                    .filter(t -> t.getRootNode() instanceof ConstructionNode)
-                    .flatMap(constructTree -> constructTree.getChildren().stream().findFirst()
-                            .filter(t -> t instanceof IntensionalDataNode)
-                            .map(t -> ((IntensionalDataNode) t).getProjectionAtom())
-                            .filter(a -> a.getPredicate() instanceof NodeInGraphPredicate)
-                            .filter(a -> !((NodeInGraphPredicate) a.getPredicate())
-                                    .getNode(a.getArguments())
-                                    .isGround())
-                            .map(a -> Maps.immutableEntry(
-                                    extractContext(a, (ConstructionNode) constructTree.getRootNode()),
-                                    unionTree))
-                            .stream());
+                    .flatMap(t -> extractContext(t)
+                            .map(c -> Maps.immutableEntry(c, unionTree))
+                            .stream())
+                    .findAny();
         }
 
-        private static NodeInGraphContext extractContext(DataAtom<AtomPredicate> atom,
-                                                                     ConstructionNode constructionNode) {
-            var nodeInGraphAtom = (DataAtom<NodeInGraphPredicate>)(DataAtom<?>) atom;
+        private Optional<NodeInGraphContext> extractContext(IQTree childOfUnion) {
+            var rootNode = childOfUnion.getRootNode();
+            if (rootNode instanceof ConstructionNode) {
+                return childOfUnion.getChildren().stream()
+                        .findFirst()
+                        .flatMap(this::extractNodeInGraphAtomWithVariable)
+                        .map(a -> extractContext(a, (ConstructionNode) rootNode));
+            }
+            return extractNodeInGraphAtomWithVariable(childOfUnion)
+                    .map(a -> new NodeInGraphContext(
+                            ImmutableSet.of((Variable) a.getPredicate().getNode(a.getArguments())),
+                            a));
+        }
+
+        private Optional<DataAtom<NodeInGraphPredicate>> extractNodeInGraphAtomWithVariable(IQTree tree) {
+            return Optional.of(tree)
+                    .filter(t -> t instanceof IntensionalDataNode)
+                    .map(t -> ((IntensionalDataNode) t).getProjectionAtom())
+                    .filter(a -> a.getPredicate() instanceof NodeInGraphPredicate)
+                    .filter(a -> !((NodeInGraphPredicate) a.getPredicate())
+                            .getNode(a.getArguments())
+                            .isGround())
+                    .map(a -> (DataAtom<NodeInGraphPredicate>)(DataAtom<?>) a);
+        }
+
+        private NodeInGraphContext extractContext(DataAtom<NodeInGraphPredicate> nodeInGraphAtom,
+                                                  ConstructionNode constructionNode) {
             var firstNode = (Variable) nodeInGraphAtom.getPredicate().getNode(nodeInGraphAtom.getArguments());
             var nodes = Stream.concat(
                     Stream.of(firstNode),
@@ -237,7 +257,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                     var commonTerm = pushedIntensionalNode.getProjectionAtom().getArguments().stream()
                             // Eliminates the named graph
                             .limit(3)
-                            .filter(t -> treeVariables.contains(t))
+                            .filter(treeVariables::contains)
                             .findAny()
                             .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting to find a common term"));
 
@@ -250,10 +270,27 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                             pushedIntensionalNode);
                 }
             }
-            // TODO: consider the case where there is no construction node (?v :p* ?v)
+            if ((rootNode instanceof IntensionalDataNode)
+                    && (((IntensionalDataNode)rootNode).getProjectionAtom().getPredicate() instanceof NodeInGraphPredicate)) {
+
+                return iqFactory.createUnaryIQTree(
+                        createNotLiteralFilterNode(((IntensionalDataNode) rootNode).getProjectionAtom().getTerm(0)),
+                        pushedIntensionalNode);
+            }
             return iqFactory.createNaryIQTree(
                 iqFactory.createInnerJoinNode(),
                     ImmutableList.of(tree, pushedIntensionalNode));
+        }
+
+        private FilterNode createNotLiteralFilterNode(VariableOrGroundTerm nodeTerm) {
+            var condition = termFactory.getDBNot(
+                    termFactory.getRDF2DBBooleanFunctionalTerm(
+                            termFactory.getImmutableFunctionalTerm(
+                                    functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.IS_LITERAL, 1)
+                                            .orElseThrow(),
+                                    nodeTerm
+                                    )));
+            return iqFactory.createFilterNode(condition);
         }
     }
 
