@@ -28,6 +28,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+
+/**
+ * Tries to eliminate nodeInGraph atoms where the node is a variable
+ */
 public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
 
     private final CoreSingletons coreSingletons;
@@ -86,7 +90,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                         : iqFactory.createNaryIQTree(rootNode, newChildren);
         }
 
-        protected ImmutableMultimap<NodeInGraphContext, IQTree> extractNodeInGraphContexts(ImmutableList<IQTree> children) {
+        private ImmutableMultimap<NodeInGraphContext, IQTree> extractNodeInGraphContexts(ImmutableList<IQTree> children) {
             return children.stream()
                     .filter(c -> c.getRootNode() instanceof UnionNode)
                     .flatMap(c -> extractNodeInGraphContextsFromUnionNode(c).stream())
@@ -160,17 +164,20 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
 
         }
 
+        /**
+         * Test if the triple or quad guarantees that the node is in the default or the named graph.
+         * NB: the special case of literals will be filtered out later on.
+         */
         private boolean isPresenceInGraphGuaranteed(NodeInGraphContext nodeInGraphContext, DataAtom<RDFAtomPredicate> tripleOrQuadAtom) {
             var tripleOrQuadArguments = tripleOrQuadAtom.getArguments();
 
-            var nodeInGraphPredicate = nodeInGraphContext.atom.getPredicate();
             var tripleOrQuadPredicate = tripleOrQuadAtom.getPredicate();
 
             if (!(nodeInGraphContext.nodeArguments.contains(tripleOrQuadPredicate.getSubject(tripleOrQuadArguments))
                     || nodeInGraphContext.nodeArguments.contains(tripleOrQuadPredicate.getObject(tripleOrQuadArguments))))
                 return false;
 
-            if (nodeInGraphPredicate.isInDefaultGraph())
+            if (nodeInGraphContext.isInDefaultGraph())
                 return tripleOrQuadPredicate.getArity() == 3;
 
             return tripleOrQuadPredicate.getGraph(tripleOrQuadArguments)
@@ -240,73 +247,81 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             if (rootNode instanceof ConstructionNode) {
                 var child = ((UnaryIQTree) tree).getChild();
                 if ((child instanceof IntensionalDataNode)
-                        && (((IntensionalDataNode) child).getProjectionAtom().getPredicate() instanceof NodeInGraphPredicate)) {
-                    var intensionalVariables = pushedIntensionalNode.getVariables();
-                    var treeVariables = tree.getVariables();
-                    if (intensionalVariables.containsAll(treeVariables)) {
-                        var filterCondition = termFactory.getConjunction(
-                                ((ConstructionNode) rootNode).getSubstitution().stream()
-                                        .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())));
-                        return filterCondition
-                                .map(c -> (IQTree) iqFactory.createUnaryIQTree(
-                                        iqFactory.createFilterNode(c),
-                                        pushedIntensionalNode))
-                                .orElse(pushedIntensionalNode);
-                    }
-
-                    var commonTerm = pushedIntensionalNode.getProjectionAtom().getArguments().stream()
-                            // Eliminates the named graph
-                            .limit(3)
-                            .filter(treeVariables::contains)
-                            .findAny()
-                            .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting to find a common term"));
-
-                    var newSubstitution = Sets.difference(treeVariables, intensionalVariables).stream()
-                            .collect(substitutionFactory.toSubstitution(v -> commonTerm));
-
-                    var constructionTree = iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(Sets.union(intensionalVariables, treeVariables).immutableCopy(),
-                                    newSubstitution),
-                            pushedIntensionalNode);
-
-                    return iqFactory.createUnaryIQTree(
-                            createNotLiteralFilterNode(commonTerm),
-                            constructionTree);
-                }
+                        && (((IntensionalDataNode) child).getProjectionAtom().getPredicate() instanceof NodeInGraphPredicate))
+                    return pushDataAtomIntoConstructionTreeWithNodeInGraph(tree, pushedIntensionalNode, (ConstructionNode) rootNode);
             }
-            if ((rootNode instanceof IntensionalDataNode)
+            else if ((rootNode instanceof IntensionalDataNode)
                     && (((IntensionalDataNode)rootNode).getProjectionAtom().getPredicate() instanceof NodeInGraphPredicate)) {
 
                 return iqFactory.createUnaryIQTree(
                         createNotLiteralFilterNode(((IntensionalDataNode) rootNode).getProjectionAtom().getTerm(0)),
                         pushedIntensionalNode);
             }
+
+            // Other children: join with the pushed down intentional node
             return iqFactory.createNaryIQTree(
-                iqFactory.createInnerJoinNode(),
+                    iqFactory.createInnerJoinNode(),
                     ImmutableList.of(tree, pushedIntensionalNode));
         }
 
+        private IQTree pushDataAtomIntoConstructionTreeWithNodeInGraph(IQTree tree, IntensionalDataNode pushedIntensionalNode, ConstructionNode rootNode) {
+            var intensionalVariables = pushedIntensionalNode.getVariables();
+            var treeVariables = tree.getVariables();
+            if (intensionalVariables.containsAll(treeVariables)) {
+                var filterCondition = termFactory.getConjunction(
+                        rootNode.getSubstitution().stream()
+                                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())));
+                return filterCondition
+                        .map(c -> (IQTree) iqFactory.createUnaryIQTree(
+                                iqFactory.createFilterNode(c),
+                                pushedIntensionalNode))
+                        .orElse(pushedIntensionalNode);
+            }
+
+            var commonTerm = pushedIntensionalNode.getProjectionAtom().getArguments().stream()
+                    // Eliminates the named graph
+                    .limit(3)
+                    .filter(treeVariables::contains)
+                    .findAny()
+                    .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting to find a common term"));
+
+            var newSubstitution = Sets.difference(treeVariables, intensionalVariables).stream()
+                    .collect(substitutionFactory.toSubstitution(v -> commonTerm));
+
+            var constructionTree = iqFactory.createUnaryIQTree(
+                    iqFactory.createConstructionNode(Sets.union(intensionalVariables, treeVariables).immutableCopy(),
+                            newSubstitution),
+                    pushedIntensionalNode);
+
+            return iqFactory.createUnaryIQTree(
+                    createNotLiteralFilterNode(commonTerm),
+                    constructionTree);
+        }
+
+        /**
+         * Makes sure the node term is never a literal
+         */
         private FilterNode createNotLiteralFilterNode(VariableOrGroundTerm nodeTerm) {
             var condition = termFactory.getDBNot(
                     termFactory.getRDF2DBBooleanFunctionalTerm(
                             termFactory.getImmutableFunctionalTerm(
                                     functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.IS_LITERAL, 1)
                                             .orElseThrow(),
-                                    nodeTerm
-                                    )));
+                                    nodeTerm)));
             return iqFactory.createFilterNode(condition);
         }
     }
 
 
+    /**
+     * May have multiple node arguments or graph arguments due to aliases
+     */
     private static class NodeInGraphContext {
         private final ImmutableSet<Variable> nodeArguments;
         private final ImmutableSet<? extends VariableOrGroundTerm> graphArguments;
-        private final DataAtom<NodeInGraphPredicate> atom;
 
         private NodeInGraphContext(ImmutableSet<Variable> nodeArguments, DataAtom<NodeInGraphPredicate> atom) {
             this.nodeArguments = nodeArguments;
-            this.atom = atom;
             var firstGraphArgument = atom.getPredicate().getGraph(atom.getArguments());
             this.graphArguments = firstGraphArgument
                     .map(g -> nodeArguments.contains(g)
@@ -320,12 +335,17 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
         public boolean equals(Object o) {
             if (!(o instanceof NodeInGraphContext)) return false;
             NodeInGraphContext that = (NodeInGraphContext) o;
-            return Objects.equals(nodeArguments, that.nodeArguments) && Objects.equals(atom, that.atom);
+            return Objects.equals(nodeArguments, that.nodeArguments)
+                    && Objects.equals(graphArguments, that.graphArguments);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(nodeArguments, atom);
+            return Objects.hash(nodeArguments, graphArguments);
+        }
+
+        public boolean isInDefaultGraph() {
+            return graphArguments.isEmpty();
         }
     }
 
