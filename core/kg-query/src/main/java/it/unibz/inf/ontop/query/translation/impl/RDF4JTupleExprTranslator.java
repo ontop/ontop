@@ -324,9 +324,13 @@ public class RDF4JTupleExprTranslator {
                             .map(g -> atomFactory.getGraphNodeAtom(object, g))
                             .orElseGet(() -> atomFactory.getDefaultGraphNodeAtom(object));
 
-                    pathZeroDepthChild = iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(childTree.getVariables(),
-                                    substitutionFactory.getSubstitution((Variable) subject, object)),
+                    var parentNode = graphTerm.filter(g -> g.equals(subject))
+                            .map(g -> (UnaryOperatorNode) iqFactory.createFilterNode(
+                                    termFactory.getStrictEquality(g, object)))
+                            .orElseGet(() -> iqFactory.createConstructionNode(childTree.getVariables(),
+                                    substitutionFactory.getSubstitution((Variable) subject, object)));
+
+                    pathZeroDepthChild = iqFactory.createUnaryIQTree(parentNode,
                             iqFactory.createIntensionalDataNode(zeroDepthAtom));
                 }
 
