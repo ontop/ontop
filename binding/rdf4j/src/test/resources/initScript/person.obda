@@ -1,5 +1,5 @@
 [PrefixDeclaration]
-:         http://duckdb.example.org/
+:         http://example.org/
 
 [MappingDeclaration] [[
 mappingId  Person
