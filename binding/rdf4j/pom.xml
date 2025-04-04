@@ -162,6 +162,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.duckdb</groupId>
+            <artifactId>duckdb_jdbc</artifactId>
+            <version>0.7.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>com.moandjiezana.toml</groupId>
             <artifactId>toml4j</artifactId>
         </dependency>
