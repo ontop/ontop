@@ -137,7 +137,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 			queryLogger.declareReformulationException(reformulationException);
 			throw reformulationException;
 		}
-		catch (OntopUnsupportedKGQueryException e) {
+		catch (OntopUnsupportedKGQueryException | OntopUnsupportedKGQueryRuntimeException e) {
 			OntopUnsupportedInputQueryException reformulationException = new OntopUnsupportedInputQueryException(e.getMessage());
 			queryLogger.declareReformulationException(reformulationException);
 			throw reformulationException;

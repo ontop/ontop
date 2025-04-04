@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryRuntimeException;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -84,7 +85,10 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
                     return Optional.of(createTrueDefinition(dataNode));
                 }
                 // TODO: in the case of a constant node but a variable graph, shall we list all the possible graphs?
-                throw new RuntimeException("Unfolding NodeInGraphPredicate is not yet supported");
+                throw new OntopUnsupportedKGQueryRuntimeException(
+                        "Unfolding NodeInGraphPredicate is not supported. " +
+                                "Please consider joining the variables of ZeroOrOne or ZeroOrMany property paths " +
+                                "with triple or quad patterns over the same graphs (default or named).");
             }
             return Optional.empty();
         }

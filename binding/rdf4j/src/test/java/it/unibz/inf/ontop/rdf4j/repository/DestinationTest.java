@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -10,8 +12,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class DestinationTest extends AbstractRDF4JTest {
 
@@ -536,6 +537,48 @@ public class DestinationTest extends AbstractRDF4JTest {
                         "  FILTER (strends(str(?c), 'Business'))\n" +
                         "}\n",
                 ImmutableSet.of()); ;
+    }
+
+    @Test
+    public void testSubClassOfPropertyPath12() {
+        try {
+            runQuery("PREFIX schema: <http://schema.org/>\n" +
+                    "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                    "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                    "\n" +
+                    "SELECT ?v ?c \n" +
+                    "WHERE {\n" +
+                    " ?v rdfs:subClassOf* ?c .\n" +
+                    "}\n");
+        } catch (QueryEvaluationException e) {
+            assertTrue(e.getCause() instanceof OntopUnsupportedInputQueryException);
+            return;
+        }
+        fail();
+    }
+
+    @Test
+    public void testSubClassOfPropertyPath13() {
+        try {
+            runQuery("PREFIX schema: <http://schema.org/>\n" +
+                    "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                    "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                    "\n" +
+                    "SELECT ?v ?c \n" +
+                    "WHERE {\n" +
+                    " GRAPH ?g {\n" +
+                    "    ?v rdfs:subClassOf* ?c .\n" +
+                    "  }\n" +
+                    "}\n");
+        } catch (QueryEvaluationException e) {
+            assertTrue(e.getCause() instanceof OntopUnsupportedInputQueryException);
+            return;
+        }
+        fail();
     }
 
 }
