@@ -264,10 +264,14 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                     var newSubstitution = Sets.difference(treeVariables, intensionalVariables).stream()
                             .collect(substitutionFactory.toSubstitution(v -> commonTerm));
 
-                    return iqFactory.createUnaryIQTree(
+                    var constructionTree = iqFactory.createUnaryIQTree(
                             iqFactory.createConstructionNode(Sets.union(intensionalVariables, treeVariables).immutableCopy(),
                                     newSubstitution),
                             pushedIntensionalNode);
+
+                    return iqFactory.createUnaryIQTree(
+                            createNotLiteralFilterNode(commonTerm),
+                            constructionTree);
                 }
             }
             if ((rootNode instanceof IntensionalDataNode)
