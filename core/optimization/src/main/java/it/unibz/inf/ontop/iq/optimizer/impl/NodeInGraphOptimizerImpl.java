@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.model.atom.NodeInGraphPredicate;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -141,7 +142,6 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
 
         private boolean isPresenceInGraphGuaranteed(NodeInGraphContext nodeInGraphContext, DataAtom<RDFAtomPredicate> tripleOrQuadAtom) {
             var tripleOrQuadArguments = tripleOrQuadAtom.getArguments();
-            var nodeInGraphArguments = nodeInGraphContext.atom.getArguments();
 
             var nodeInGraphPredicate = nodeInGraphContext.atom.getPredicate();
             var tripleOrQuadPredicate = tripleOrQuadAtom.getPredicate();
@@ -153,8 +153,9 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             if (nodeInGraphPredicate.isInDefaultGraph())
                 return tripleOrQuadPredicate.getArity() == 3;
 
-            return nodeInGraphPredicate.getGraph(nodeInGraphArguments)
-                    .equals(tripleOrQuadPredicate.getGraph(tripleOrQuadArguments));
+            return tripleOrQuadPredicate.getGraph(tripleOrQuadArguments)
+                    .filter(nodeInGraphContext.graphArguments::contains)
+                    .isPresent();
         }
 
         private ImmutableList<IQTree> simplifyChildren(ImmutableMap<NodeInGraphContext, DataAtom<RDFAtomPredicate>> removableMap,
@@ -259,11 +260,19 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
 
     private static class NodeInGraphContext {
         private final ImmutableSet<Variable> nodeArguments;
+        private final ImmutableSet<? extends VariableOrGroundTerm> graphArguments;
         private final DataAtom<NodeInGraphPredicate> atom;
 
         private NodeInGraphContext(ImmutableSet<Variable> nodeArguments, DataAtom<NodeInGraphPredicate> atom) {
             this.nodeArguments = nodeArguments;
             this.atom = atom;
+            var firstGraphArgument = atom.getPredicate().getGraph(atom.getArguments());
+            this.graphArguments = firstGraphArgument
+                    .map(g -> nodeArguments.contains(g)
+                            ? nodeArguments
+                            : ImmutableSet.of(g))
+                    .orElseGet(ImmutableSet::of);
+
         }
 
         @Override
