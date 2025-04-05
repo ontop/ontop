@@ -16,8 +16,6 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
-import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -61,13 +59,11 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
     protected static class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
         private final SubstitutionFactory substitutionFactory;
         private final TermFactory termFactory;
-        private final FunctionSymbolFactory functionSymbolFactory;
 
         protected Transformer(CoreSingletons coreSingletons) {
             super(coreSingletons);
             this.substitutionFactory = coreSingletons.getSubstitutionFactory();
             this.termFactory = coreSingletons.getTermFactory();
-            this.functionSymbolFactory = coreSingletons.getFunctionSymbolFactory();
         }
 
         /**
@@ -264,9 +260,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             else if ((rootNode instanceof IntensionalDataNode)
                     && (((IntensionalDataNode)rootNode).getProjectionAtom().getPredicate() instanceof NodeInGraphPredicate)) {
 
-                return iqFactory.createUnaryIQTree(
-                        createNotLiteralFilterNode(((IntensionalDataNode) rootNode).getProjectionAtom().getTerm(0)),
-                        pushedIntensionalNode);
+                return pushedIntensionalNode;
             }
 
             // Other children: join with the pushed down intentional node
@@ -299,27 +293,10 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             var newSubstitution = Sets.difference(treeVariables, intensionalVariables).stream()
                     .collect(substitutionFactory.toSubstitution(v -> commonTerm));
 
-            var constructionTree = iqFactory.createUnaryIQTree(
+            return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(Sets.union(intensionalVariables, treeVariables).immutableCopy(),
                             newSubstitution),
                     pushedIntensionalNode);
-
-            return iqFactory.createUnaryIQTree(
-                    createNotLiteralFilterNode(commonTerm),
-                    constructionTree);
-        }
-
-        /**
-         * Makes sure the node term is never a literal
-         */
-        private FilterNode createNotLiteralFilterNode(VariableOrGroundTerm nodeTerm) {
-            var condition = termFactory.getDBNot(
-                    termFactory.getRDF2DBBooleanFunctionalTerm(
-                            termFactory.getImmutableFunctionalTerm(
-                                    functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.IS_LITERAL, 1)
-                                            .orElseThrow(),
-                                    nodeTerm)));
-            return iqFactory.createFilterNode(condition);
         }
     }
 
