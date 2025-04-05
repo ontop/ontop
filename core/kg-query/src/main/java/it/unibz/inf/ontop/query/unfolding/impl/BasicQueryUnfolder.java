@@ -78,7 +78,7 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
                 // TODO: in the case of a constant node but a variable graph, shall we list all the possible graphs?
                 throw new OntopUnsupportedKGQueryRuntimeException(
                         "Unfolding NodeInGraphPredicate is not supported. " +
-                                "Please consider joining the variables of ZeroOrOne or ZeroOrMany property paths " +
+                                "Please consider joining the variables of ZeroOrOne or ZeroOrMore property paths " +
                                 "with triple or quad patterns over the same graphs (default or named).");
             }
             return Optional.empty();

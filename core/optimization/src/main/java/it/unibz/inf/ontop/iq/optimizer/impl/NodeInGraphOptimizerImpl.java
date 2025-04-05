@@ -93,7 +93,11 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             return newChildren.equals(children)
                     ? tree
                     : newChildren.size() == 1
-                        ? newChildren.iterator().next()
+                        ? rootNode.getOptionalFilterCondition()
+                            .map(f -> (IQTree) iqFactory.createUnaryIQTree(
+                                    iqFactory.createFilterNode(f),
+                                    newChildren.iterator().next()))
+                            .orElseGet(() -> newChildren.iterator().next())
                         : iqFactory.createNaryIQTree(rootNode, newChildren);
         }
 
