@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.query.unfolding.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryRuntimeException;
@@ -25,7 +24,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 /**
  * See {@link QueryUnfolder.Factory} for creating a new instance.
@@ -77,13 +75,6 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
                         .flatMap(p -> getDefinition(p, atom.getArguments()));
             }
             if (atomPredicate instanceof NodeInGraphPredicate) {
-                /*
-                 * Taking advantage of an inconsistency of SPARQL 1.1 regarding the usage of the nodes(G) function.
-                 * For constants, it is never inserted.
-                 */
-                if (dataNode.getProjectionAtom().getArguments().stream().allMatch(ImmutableTerm::isGround)) {
-                    return Optional.of(createTrueDefinition(dataNode));
-                }
                 // TODO: in the case of a constant node but a variable graph, shall we list all the possible graphs?
                 throw new OntopUnsupportedKGQueryRuntimeException(
                         "Unfolding NodeInGraphPredicate is not supported. " +
@@ -91,26 +82,6 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
                                 "with triple or quad patterns over the same graphs (default or named).");
             }
             return Optional.empty();
-        }
-
-        private IQ createTrueDefinition(IntensionalDataNode dataNode) {
-            var atomArguments = dataNode.getProjectionAtom().getArguments();
-            var newArguments = atomArguments.stream()
-                    .map(t -> variableGenerator.generateNewVariable())
-                    .collect(ImmutableCollectors.toList());
-
-            var substitution = IntStream.range(0, newArguments.size())
-                    .mapToObj(i -> Maps.immutableEntry(newArguments.get(i), atomArguments.get(i)))
-                    .collect(substitutionFactory.toSubstitution());
-
-            var newProjectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(
-                    dataNode.getProjectionAtom().getPredicate(), newArguments);
-
-            var newTree = iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(ImmutableSet.copyOf(newArguments), substitution),
-                    iqFactory.createTrueNode());
-
-            return iqFactory.createIQ(newProjectionAtom, newTree);
         }
 
         private Optional<IQ> getDefinition(RDFAtomPredicate predicate,

@@ -11,10 +11,8 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.NodeInGraphOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.NodeInGraphPredicate;
-import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.atom.*;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -30,7 +28,9 @@ import java.util.stream.Stream;
 
 
 /**
- * Tries to eliminate nodeInGraph atoms where the node is a variable
+ * Tries to eliminate nodeInGraph atoms where:
+ *    - the node is a variable
+ *    - all arguments are ground
  */
 public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
 
@@ -58,9 +58,6 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
 
     }
 
-    /**
-     * Only deals with nodeInGraph atoms where the node is a variable
-     */
     protected static class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
         private final SubstitutionFactory substitutionFactory;
         private final TermFactory termFactory;
@@ -71,6 +68,20 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             this.substitutionFactory = coreSingletons.getSubstitutionFactory();
             this.termFactory = coreSingletons.getTermFactory();
             this.functionSymbolFactory = coreSingletons.getFunctionSymbolFactory();
+        }
+
+        /**
+         * Taking advantage of an inconsistency of SPARQL 1.1 regarding the usage of the nodes(G) function.
+         * For constants, the function is never inserted.
+         */
+        @Override
+        public IQTree transformIntensionalData(IntensionalDataNode dataNode) {
+            var atom = dataNode.getProjectionAtom();
+            if ((atom.getPredicate() instanceof NodeInGraphPredicate)
+                    && atom.getArguments().stream().allMatch(ImmutableTerm::isGround)) {
+                return iqFactory.createTrueNode();
+            }
+            return dataNode;
         }
 
         @Override
@@ -328,7 +339,6 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                             ? nodeArguments
                             : ImmutableSet.of(g))
                     .orElseGet(ImmutableSet::of);
-
         }
 
         @Override
