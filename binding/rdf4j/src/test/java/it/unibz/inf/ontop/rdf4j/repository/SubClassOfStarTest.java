@@ -69,7 +69,7 @@ public class SubClassOfStarTest extends AbstractRDF4JTest {
     }
 
     /**
-     * TODO: shall we optimize this case, by relaxing the "same-graph" condition?
+     * Disabled until unfolding of nodeInGraph is supported
      */
     @Test(expected = QueryEvaluationException.class)
     public void testSubClassOfStar5() {
@@ -84,7 +84,7 @@ public class SubClassOfStarTest extends AbstractRDF4JTest {
     }
 
     /**
-     * TODO: shall we optimize this case, by relaxing the "same-graph" condition?
+     * Disabled until unfolding of nodeInGraph is supported
      */
     @Test(expected = QueryEvaluationException.class)
     public void testSubClassOfStar6() {
