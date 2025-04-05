@@ -118,8 +118,13 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         IQTree sliceLiftedTree = liftSlice(subTree);
         LOGGER.debug("New query after lifting the slice:\n{}\n", sliceLiftedTree);
 
+        // ORDER BY lifting
+        // pattern CONSTRUCTION, DISTINCT, ORDER BY becomes CONSTRUCTION, ORDER BY, DISTINCT
+        IQTree treeAfterOrderByLifting = liftOrderByAboveDistinct(sliceLiftedTree);
+        LOGGER.debug("New query after lifting order by above distinct:\n{}\n", treeAfterOrderByLifting);
+
         // TODO: check if still needed
-        IQTree flattenSubTree = unionFlattener.optimize(sliceLiftedTree, variableGenerator);
+        IQTree flattenSubTree = unionFlattener.optimize(treeAfterOrderByLifting, variableGenerator);
         LOGGER.debug("New query after flattening the union:\n{}\n", flattenSubTree);
 
         IQTree pushedDownSubTree = pushDownTransformer.transform(flattenSubTree);
@@ -198,6 +203,28 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
             }
             return subTree;
         }
+    }
+
+    private IQTree liftOrderByAboveDistinct(IQTree subTree) {
+        if (subTree.getRootNode() instanceof ConstructionNode) {
+            IQTree childTree = ((UnaryIQTree) subTree).getChild();
+            if (childTree.getRootNode() instanceof DistinctNode) {
+                IQTree grandChildTree = ((UnaryIQTree) childTree).getChild();
+                if (grandChildTree.getRootNode() instanceof OrderByNode) {
+                    IQTree newGrandChildTree = iqFactory.createUnaryIQTree(
+                            (UnaryOperatorNode) childTree.getRootNode(),
+                            grandChildTree.getChildren().get(0));
+                    IQTree newChildTree = iqFactory.createUnaryIQTree(
+                            (UnaryOperatorNode) grandChildTree.getRootNode(),
+                            newGrandChildTree);
+
+                    return iqFactory.createUnaryIQTree(
+                            (UnaryOperatorNode) subTree.getRootNode(),
+                            newChildTree);
+                }
+            }
+        }
+        return subTree;
     }
 
     private NativeNode generateNativeNode(IQTree normalizedSubTree, boolean tolerateUnknownTypes) {
