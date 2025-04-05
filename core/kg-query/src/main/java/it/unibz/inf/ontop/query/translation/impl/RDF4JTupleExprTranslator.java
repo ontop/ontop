@@ -34,6 +34,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.RDF;
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.query.algebra.*;
@@ -275,7 +276,9 @@ public class RDF4JTupleExprTranslator {
             var atomArguments = childAtom.getArguments();
 
             if ((childAtom.getPredicate() instanceof RDFAtomPredicate)
-                    && childAtom.getTerm(1).equals(subClassOfConstant)) {
+                    && (childAtom.getTerm(1).equals(subClassOfConstant))
+                    // HACK: TODO: remove!
+                    || (childAtom.getTerm(1).equals(termFactory.getConstantIRI(OWL.PRIORVERSION.stringValue())))) {
                 var atomPredicate = (RDFAtomPredicate) childAtom.getPredicate();
                 VariableOrGroundTerm subject = atomPredicate.getSubject(atomArguments);
                 VariableOrGroundTerm object = atomPredicate.getObject(atomArguments);

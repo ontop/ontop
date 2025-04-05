@@ -1414,4 +1414,21 @@ public class DestinationTest extends AbstractRDF4JTest {
         fail();
     }
 
+    // HACK. TODO: remove this test (temporary)
+    @Test
+    public void testSubClassOfPropertyPathHack() {
+        runQuery("PREFIX schema: <http://schema.org/>\n" +
+                        "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                        "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                        "\n" +
+                        "SELECT ?h ?v \n" +
+                        "WHERE {\n" +
+                        "  <http://destination.example.org/data/source1/hospitality/aaa> rdf:type ?v . \n" +
+                        "  ?v owl:priorVersion* ?c .\n" +
+                        "}\n");
+    }
+
 }
