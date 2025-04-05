@@ -1,12 +1,14 @@
 package it.unibz.inf.ontop.query.unfolding.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryRuntimeException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.NodeInGraphPredicate;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -31,11 +33,20 @@ public class FirstPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryMe
     @Override
     protected Optional<IQ> getDefinition(IntensionalDataNode dataNode) {
         DataAtom<AtomPredicate> atom = dataNode.getProjectionAtom();
-        return Optional.of(atom)
-                .map(DataAtom::getPredicate)
-                .filter(p -> p instanceof RDFAtomPredicate)
-                .map(p -> (RDFAtomPredicate) p)
-                .flatMap(p -> getDefinition(p, atom.getArguments()));
+        AtomPredicate atomPredicate = atom.getPredicate();
+
+        if (atomPredicate instanceof RDFAtomPredicate) {
+            return Optional.of((RDFAtomPredicate) atomPredicate)
+                    .flatMap(p -> getDefinition(p, atom.getArguments()));
+        }
+        if (atomPredicate instanceof NodeInGraphPredicate) {
+            // TODO: in the case of a constant node but a variable graph, shall we list all the possible graphs?
+            throw new OntopUnsupportedKGQueryRuntimeException(
+                    "Unfolding NodeInGraphPredicate is not supported. " +
+                            "Please consider joining the variables of ZeroOrOne or ZeroOrMore property paths " +
+                            "with triple or quad patterns over the same graphs (default or named).");
+        }
+        return Optional.empty();
     }
 
     private Optional<IQ> getDefinition(RDFAtomPredicate predicate,

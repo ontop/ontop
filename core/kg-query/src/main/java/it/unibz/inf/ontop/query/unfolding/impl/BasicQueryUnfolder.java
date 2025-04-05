@@ -5,7 +5,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryRuntimeException;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
+import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
@@ -14,10 +16,6 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -71,11 +69,20 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
         @Override
         protected Optional<IQ> getDefinition(IntensionalDataNode dataNode) {
             DataAtom<AtomPredicate> atom = dataNode.getProjectionAtom();
-            return Optional.of(atom)
-                    .map(DataAtom::getPredicate)
-                    .filter(p -> p instanceof RDFAtomPredicate)
-                    .map(p -> (RDFAtomPredicate) p)
-                    .flatMap(p -> getDefinition(p, atom.getArguments()));
+            AtomPredicate atomPredicate = atom.getPredicate();
+
+            if (atomPredicate instanceof RDFAtomPredicate) {
+                return Optional.of((RDFAtomPredicate) atomPredicate)
+                        .flatMap(p -> getDefinition(p, atom.getArguments()));
+            }
+            if (atomPredicate instanceof NodeInGraphPredicate) {
+                // TODO: in the case of a constant node but a variable graph, shall we list all the possible graphs?
+                throw new OntopUnsupportedKGQueryRuntimeException(
+                        "Unfolding NodeInGraphPredicate is not supported. " +
+                                "Please consider joining the variables of ZeroOrOne or ZeroOrMore property paths " +
+                                "with triple or quad patterns over the same graphs (default or named).");
+            }
+            return Optional.empty();
         }
 
         private Optional<IQ> getDefinition(RDFAtomPredicate predicate,

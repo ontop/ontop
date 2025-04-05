@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -10,8 +12,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class DestinationTest extends AbstractRDF4JTest {
 
@@ -849,7 +850,7 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "}\n";
         runQuery(sparql);
     }
-    
+
     @Test
     public void testPerf40(){
         String sparql =
@@ -1175,4 +1176,242 @@ public class DestinationTest extends AbstractRDF4JTest {
         int count = runQueryAndCount(sparql);
         assertEquals(1, count);
     }
+    @Test
+    public void testSubClassOfPropertyPath1() {
+        int count = runQueryAndCount("PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "\n" +
+                "SELECT DISTINCT ?h \n" +
+                "WHERE {\n" +
+                "  ?h rdf:type/rdfs:subClassOf* schema:LodgingBusiness .\n" +
+                "}\n");
+        assertEquals(1, count);
+    }
+
+    @Test
+    public void testSubClassOfPropertyPath2() {
+        runQueryAndCompare("PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "\n" +
+                "SELECT ?h ?v \n" +
+                "WHERE {\n" +
+                "  ?h rdf:type ?v . \n" +
+                "  ?v rdfs:subClassOf* schema:LodgingBusiness .\n" +
+                "}\n",
+                ImmutableSet.of("http://schema.org/LodgingBusiness", "http://schema.org/Campground")); ;
+    }
+
+    @Test
+    public void testSubClassOfPropertyPath3() {
+        runQueryAndCompare("PREFIX schema: <http://schema.org/>\n" +
+                        "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                        "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "\n" +
+                        "SELECT ?h ?v \n" +
+                        "WHERE {\n" +
+                        "  <http://destination.example.org/data/source1/hospitality/aaa> rdf:type ?v . \n" +
+                        "  ?v rdfs:subClassOf* ?c .\n" +
+                        "  FILTER (strends(str(?c), 'Business'))\n" +
+                        "}\n",
+                ImmutableSet.of("http://schema.org/LodgingBusiness", "http://schema.org/Campground",
+                        "http://schema.org/LocalBusiness")); ;
+    }
+
+    @Test
+    public void testSubClassOfPropertyPath4() {
+        runQueryAndCompare("PREFIX schema: <http://schema.org/>\n" +
+                        "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                        "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "\n" +
+                        "SELECT ?h ?v \n" +
+                        "WHERE {\n" +
+                        "  GRAPH ?g {\n" +
+                        "   ?h rdf:type ?v . \n" +
+                        "   ?v rdfs:subClassOf* ?c .\n" +
+                        "  }\n" +
+                        "  FILTER (strends(str(?c), 'Business'))\n" +
+                        "}\n",
+                ImmutableSet.of()); ;
+    }
+
+    @Test
+    public void testSubClassOfPropertyPath5() {
+        runQueryAndCompare("PREFIX schema: <http://schema.org/>\n" +
+                        "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                        "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "\n" +
+                        "SELECT ?v \n" +
+                        "WHERE {\n" +
+                        "  BIND(schema:LodgingBusiness AS ?c)\n" +
+                        "  <http://destination.example.org/data/source1/hospitality/aaa> rdf:type ?v . \n" +
+                        "  ?v rdfs:subClassOf* ?c .\n" +
+                        "}\n",
+                ImmutableSet.of("http://schema.org/LodgingBusiness", "http://schema.org/Campground")); ;
+    }
+
+    @Ignore("Too inefficient")
+    @Test
+    public void testSubClassOfPropertyPath6() {
+        runQueryAndCompare("PREFIX schema: <http://schema.org/>\n" +
+                        "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                        "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "\n" +
+                        "SELECT ?v \n" +
+                        "WHERE {\n" +
+                        "  ?c rdf:type ?v . \n" +
+                        "  ?v rdfs:subClassOf* ?c .\n" +
+                        "}\n",
+                ImmutableSet.of()); ;
+    }
+
+    @Test
+    public void testSubClassOfPropertyPath7() {
+        runQueryAndCompare("PREFIX schema: <http://schema.org/>\n" +
+                        "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                        "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "\n" +
+                        "SELECT ?h ?v \n" +
+                        "WHERE {\n" +
+                        "  GRAPH ?x {\n" +
+                        "   ?h rdf:type ?v . \n" +
+                        "   ?v rdfs:subClassOf* ?x .\n" +
+                        "  }\n" +
+                        "  FILTER (strends(str(?x), 'Business'))\n" +
+                        "}\n",
+                ImmutableSet.of()); ;
+    }
+
+    @Test
+    public void testSubClassOfPropertyPath8() {
+        runQueryAndCompare("PREFIX schema: <http://schema.org/>\n" +
+                        "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                        "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "\n" +
+                        "SELECT ?h ?v \n" +
+                        "WHERE {\n" +
+                        "  GRAPH ?x {\n" +
+                        "   ?h rdf:type ?x . \n" +
+                        "   ?x rdfs:subClassOf* ?v .\n" +
+                        "  }\n" +
+                        "  FILTER (strends(str(?v), 'Business'))\n" +
+                        "}\n",
+                ImmutableSet.of()); ;
+    }
+
+    @Ignore("Too inefficient")
+    @Test
+    public void testSubClassOfPropertyPath9() {
+        runQueryAndCompare("PREFIX schema: <http://schema.org/>\n" +
+                        "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                        "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "\n" +
+                        "SELECT ?h ?v \n" +
+                        "WHERE {\n" +
+                        "  ?h rdf:type ?v . \n" +
+                        "  ?v rdfs:subClassOf* ?v .\n" +
+                        "  FILTER (strends(str(?v), 'Business'))\n" +
+                        "}\n",
+                ImmutableSet.of()); ;
+    }
+
+    @Test
+    public void testSubClassOfPropertyPath10() {
+        runQueryAndCompare("PREFIX schema: <http://schema.org/>\n" +
+                        "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                        "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "\n" +
+                        "SELECT ?h ?v \n" +
+                        "WHERE {\n" +
+                        "  GRAPH ?g {\n" +
+                        "   ?h rdf:type ?v . \n" +
+                        "   ?v rdfs:subClassOf* ?v .\n" +
+                        "  }\n" +
+                        "  FILTER (strends(str(?v), 'Business'))\n" +
+                        "}\n",
+                ImmutableSet.of()); ;
+    }
+
+    @Test
+    public void testSubClassOfPropertyPath11() {
+        runQueryAndCompare("PREFIX schema: <http://schema.org/>\n" +
+                        "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                        "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "\n" +
+                        "SELECT ?h ?v \n" +
+                        "WHERE {\n" +
+                        "  GRAPH :not-existing-graph {\n" +
+                        "   ?h rdf:type ?v . \n" +
+                        "   ?v rdfs:subClassOf* ?c .\n" +
+                        "  }\n" +
+                        "  FILTER (strends(str(?c), 'Business'))\n" +
+                        "}\n",
+                ImmutableSet.of()); ;
+    }
+
+    @Test
+    public void testSubClassOfPropertyPath12() {
+        try {
+            runQuery("PREFIX schema: <http://schema.org/>\n" +
+                    "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                    "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                    "\n" +
+                    "SELECT ?v ?c \n" +
+                    "WHERE {\n" +
+                    " ?v rdfs:subClassOf* ?c .\n" +
+                    "}\n");
+        } catch (QueryEvaluationException e) {
+            assertTrue(e.getCause() instanceof OntopUnsupportedInputQueryException);
+            return;
+        }
+        fail();
+    }
+
+    @Test
+    public void testSubClassOfPropertyPath13() {
+        try {
+            runQuery("PREFIX schema: <http://schema.org/>\n" +
+                    "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                    "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                    "\n" +
+                    "SELECT ?v ?c \n" +
+                    "WHERE {\n" +
+                    " GRAPH ?g {\n" +
+                    "    ?v rdfs:subClassOf* ?c .\n" +
+                    "  }\n" +
+                    "}\n");
+        } catch (QueryEvaluationException e) {
+            assertTrue(e.getCause() instanceof OntopUnsupportedInputQueryException);
+            return;
+        }
+        fail();
+    }
+
 }
