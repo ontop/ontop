@@ -388,8 +388,7 @@ public class DestinationTest extends AbstractRDF4JTest {
                         "  FILTER (strends(str(?c), 'Business'))\n" +
                         "}\n",
                 ImmutableSet.of("http://schema.org/LodgingBusiness", "http://schema.org/Campground",
-                        "http://schema.org/CivicStructure", "http://schema.org/LocalBusiness",
-                        "http://schema.org/Organization", "http://schema.org/Place", "http://schema.org/Thing")); ;
+                        "http://schema.org/LocalBusiness")); ;
     }
 
     @Test
