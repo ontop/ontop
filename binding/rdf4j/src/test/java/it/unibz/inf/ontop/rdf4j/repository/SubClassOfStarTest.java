@@ -97,4 +97,31 @@ public class SubClassOfStarTest extends AbstractRDF4JTest {
                 "}";
         runQuery(query);
     }
+
+    @Test
+    public void testSubClassOfStar7() {
+        String query = "SELECT DISTINCT ?x ?v " +
+                "WHERE { \n" +
+                " GRAPH ?g {\n" +
+                "   ?s <http://example.org/ontology#p1> ?x . " +
+                "   ?x rdfs:subClassOf* ?v \n" +
+                " }" +
+                "}";
+        runQueryAndCompare(query, ImmutableSet.of("1", "2", "3"));
+    }
+
+    /**
+     * NB: ?s rdfs:subClassOf ?s is currently not inserted in the graph
+     */
+    @Test
+    public void testSubClassOfStar8() {
+        String query = "SELECT DISTINCT ?v " +
+                "WHERE { \n" +
+                " GRAPH ?v {\n" +
+                "   ?s <http://example.org/ontology#p1> ?v . " +
+                "   ?v rdfs:subClassOf* ?v \n" +
+                " }" +
+                "}";
+        runQueryAndCompare(query, ImmutableSet.of());
+    }
 }
