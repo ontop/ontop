@@ -1,0 +1,13 @@
+[PrefixDeclaration]
+: http://example.org/ontology#
+rdfs: http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration]` @collection [[
+mappingId	map1
+target		GRAPH :t1/{id} { :t1/{id} a :Person . }
+source		select * from t1
+
+mappingId	only-for-testing-purposes-donot-reproduce-at-home
+target		GRAPH :Person { :t1/{id} a :Person . :Person rdfs:subClassOf :Mammal . }
+source		select * from t1
+]]
