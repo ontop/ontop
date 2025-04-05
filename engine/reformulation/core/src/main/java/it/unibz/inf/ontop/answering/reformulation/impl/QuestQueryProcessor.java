@@ -115,7 +115,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 				LOGGER.debug("Unfolded query:\n{}\n", unfoldedIQ);
 
-                IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ, queryContext);
+				IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ, queryContext);
 				IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
 				LOGGER.debug("Planned query:\n{}\n", plannedQuery);
 
