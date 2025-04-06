@@ -1378,6 +1378,7 @@
                              are killed along with the JVM. We make it faster (default 30s). An [ERROR] is still logged to
                              allow investigating the issue with the test code not stopping non-daemon threads. -->
                         <forkedProcessExitTimeoutInSeconds>5</forkedProcessExitTimeoutInSeconds>
+                        <argLine>--add-opens java.base/java.io=ALL-UNNAMED</argLine>
                     </configuration>
                 </plugin>
                 <plugin>
