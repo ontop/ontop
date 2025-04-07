@@ -27,7 +27,7 @@ public class HikariConnectionPool implements JDBCConnectionPool {
         settings.getJdbcPassword()
                 .ifPresent(config::setPassword);
         config.setDriverClassName(settings.getJdbcDriver());
-        config.setConnectionInitSql(settings.dbInitializationScript());
+        config.setConnectionInitSql(settings.initScript());
 
         config.setMinimumIdle(settings.getConnectionPoolInitialSize());
         config.setMaximumPoolSize(settings.getConnectionPoolMaxSize());

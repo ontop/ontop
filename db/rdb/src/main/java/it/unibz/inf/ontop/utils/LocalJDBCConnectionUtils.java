@@ -36,8 +36,8 @@ public class LocalJDBCConnectionUtils {
 
             connection = DriverManager.getConnection(settings.getJdbcUrl(), jdbcInfo);
         }
-        if (!settings.dbInitializationScript().isEmpty()) {
-            runInitializationScript(connection, settings.dbInitializationScript());
+        if (!settings.initScript().isEmpty()) {
+            runInitializationScript(connection, settings.initScript());
         }
         return connection;
     }
