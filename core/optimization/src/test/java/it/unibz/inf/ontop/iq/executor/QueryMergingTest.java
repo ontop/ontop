@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.template.Template;
@@ -812,12 +813,12 @@ public class QueryMergingTest {
         }
 
         @Override
-        protected QueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
+        protected AbstractQueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
             VariableGenerator variableGenerator = CORE_UTILS_FACTORY.createVariableGenerator(knownVariables);
             return new BasicQueryMergingTransformer(variableGenerator);
         }
 
-        private class BasicQueryMergingTransformer extends QueryMergingTransformer {
+        private class BasicQueryMergingTransformer extends AbstractQueryMergingTransformer {
 
             protected BasicQueryMergingTransformer(VariableGenerator variableGenerator) {
                 super(variableGenerator, IQ_FACTORY, SUBSTITUTION_FACTORY, ATOM_FACTORY, TRANSFORMER_FACTORY);
