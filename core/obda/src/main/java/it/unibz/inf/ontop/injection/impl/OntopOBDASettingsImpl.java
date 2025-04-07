@@ -50,7 +50,7 @@ public class OntopOBDASettingsImpl extends OntopModelSettingsImpl implements Ont
     }
 
     @Override
-    public String dbInitializationScript() {
-        return getProperty(DB_INITIALIZATION_SCRIPT).orElse("");
+    public String initScript() {
+        return getProperty(INIT_SCRIPT).orElse("");
     }
 }
