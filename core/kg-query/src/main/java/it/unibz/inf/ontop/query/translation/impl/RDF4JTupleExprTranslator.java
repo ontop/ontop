@@ -402,11 +402,72 @@ public class RDF4JTupleExprTranslator {
             Exists exists = (Exists) ((Not) condition).getArg();
             return translateNotExists(exists, child);
         }
+
+        if (condition instanceof Exists) {
+            Exists exists = (Exists) condition;
+            return translateExists(exists, child);
+        }
+
         return createTranslationResult(
                 iqFactory.createUnaryIQTree(
                         iqFactory.createFilterNode(getFilterExpression(condition, child.iqTree.getVariables())),
                         child.iqTree),
                 child.nullableVariables);
+    }
+
+    private TranslationResult translateExists(Exists exists, TranslationResult leftTranslation) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
+        TranslationResult rightTranslation = translate(exists.getSubQuery());
+
+        Sets.SetView<Variable> nullableVariablesLeftOrRight = Sets.union(leftTranslation.nullableVariables, rightTranslation.nullableVariables);
+
+        Sets.SetView<Variable> sharedVariables = getSharedVariables(leftTranslation, rightTranslation);
+
+        Sets.SetView<Variable> toCoalesce = Sets.intersection(sharedVariables, nullableVariablesLeftOrRight);
+
+        VariableGenerator variableGenerator = getVariableGenerator(leftTranslation, rightTranslation);
+
+        // May update the variable generator!!
+        InjectiveSubstitution<Variable> leftRenamingSubstitution = toCoalesce.stream()
+                .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
+
+        InjectiveSubstitution<Variable> rightRenamingSubstitution = toCoalesce.stream()
+                .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
+
+        Substitution<ImmutableTerm> topSubstitution = toCoalesce.stream()
+                .collect(substitutionFactory.toSubstitution(
+                        v -> termFactory.getImmutableFunctionalTerm(
+                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.COALESCE, 2),
+                                leftRenamingSubstitution.get(v),
+                                rightRenamingSubstitution.get(v))));
+
+        ImmutableSet<Variable> projectedVariables = Sets.union(
+                Sets.difference(
+                        Sets.union(leftTranslation.iqTree.getVariables(), rightTranslation.iqTree.getVariables()),
+                        toCoalesce),
+                topSubstitution.getDomain()).immutableCopy();
+
+        InjectiveSubstitution<Variable> leftNonProjVarsRenaming = getNonProjVarsRenaming(leftTranslation, rightTranslation, variableGenerator);
+        InjectiveSubstitution<Variable> rightNonProjVarsRenaming = getNonProjVarsRenaming(rightTranslation, leftTranslation, variableGenerator);
+
+        IQTree leftTree = applyInDepthRenaming(
+                leftTranslation.iqTree.applyDescendingSubstitutionWithoutOptimizing(leftRenamingSubstitution, variableGenerator),
+                leftNonProjVarsRenaming);
+        IQTree rightTree = applyInDepthRenaming(
+                rightTranslation.iqTree.applyDescendingSubstitutionWithoutOptimizing(rightRenamingSubstitution, variableGenerator),
+                rightNonProjVarsRenaming);
+
+        Stream<ImmutableExpression> coalescingStream = toCoalesce.stream()
+                .map(v -> generateCompatibleExpression(v, leftRenamingSubstitution, rightRenamingSubstitution));
+
+        Optional<ImmutableExpression> joinCondition = termFactory.getConjunction(Optional.empty(), coalescingStream);
+
+        IQTree joinTree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(joinCondition), ImmutableList.of(leftTree, rightTree));
+
+        ImmutableSet<Variable> nullableVariables = Sets.difference(nullableVariablesLeftOrRight, sharedVariables).immutableCopy();
+
+        IQTree joinQuery = iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, topSubstitution, () -> projectedVariables);
+
+        return createTranslationResult(joinQuery, nullableVariables);
     }
 
     private TranslationResult translateNotExists(Exists exists, TranslationResult leftTranslation) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
