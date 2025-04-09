@@ -398,7 +398,8 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         Statement stmt = connection.createStatement();
         stmt.closeOnCompletion();
         // Obtain the relational objects (i.e., tables and views)
-        return stmt.executeQuery("SELECT NULL AS TABLE_CAT, OWNER as TABLE_SCHEM, table_name as TABLE_NAME " +
+        return stmt.executeQuery(
+                "SELECT NULL AS TABLE_CAT, OWNER as TABLE_SCHEM, table_name as TABLE_NAME " +
                 "FROM all_tables " +
                 "UNION ALL " +
                 "SELECT NULL AS TABLE_CAT, owner as TABLE_SCHEM, view_name as TABLE_NAME " +
@@ -437,18 +438,16 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 "SELECT status, owner\n" +
                         "FROM all_constraints\n" +
                         "WHERE constraint_name = :1\n" +
-                        "  AND table_name = :2\n"// +
-                        //"  AND owner = :3"
-        )) {
+                        "  AND table_name = :2\n" +
+                        "  AND (owner = :3 OR owner = \"SYSTEM\"")) {
             stmt.setString(1, constraintId);
             stmt.setString(2, getRelationName(id));
-            //stmt.setString(3, getRelationSchema(id));
+            stmt.setString(3, getRelationSchema(id));
             stmt.closeOnCompletion();
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 String status = rs.getString("status");
                 String owner = rs.getString("owner");
-                System.out.println("STATUS: " + status + " OWNER: " + owner);
                 return "DISABLED".equals(status);
             }
             throw new MinorOntopInternalBugException("Constraint " + constraintId + " in " + id + " not found");
@@ -471,7 +470,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "FROM all_indexes\n" +
                         "WHERE index_name = :1\n" +
                         "  AND table_name = :2\n" +
-                        "  AND owner = :3")) {
+                        "  AND (owner = :3 OR owner = \"SYSTEM\"")) {
             stmt.setString(1, indexId);
             stmt.setString(2, getRelationName(id));
             stmt.setString(3, getRelationSchema(id));
@@ -479,7 +478,6 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 String status = rs.getString("status");
-                System.out.println("STATUS UC: " + status);
                 return !"VALID".equals(status);
             }
             throw new MinorOntopInternalBugException("Unique index " + indexId + " in " + id + " not found");
