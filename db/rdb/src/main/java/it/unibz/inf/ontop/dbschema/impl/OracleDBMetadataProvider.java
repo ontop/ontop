@@ -434,11 +434,12 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             STATUS	VARCHAR2(8)	 	Enforcement status of constraint (ENABLED or DISABLED)
      */
         try (PreparedStatement stmt = connection.prepareStatement(
-                "SELECT status\n" +
+                "SELECT status, owner\n" +
                         "FROM all_constraints\n" +
                         "WHERE constraint_name = :1\n" +
-                        "  AND table_name = :2\n" +
-                        "  AND owner = :3")) {
+                        "  AND table_name = :2\n"// +
+                        //"  AND owner = :3"
+        )) {
             stmt.setString(1, constraintId);
             stmt.setString(2, getRelationName(id));
             stmt.setString(3, getRelationSchema(id));
@@ -446,7 +447,8 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 String status = rs.getString("status");
-                System.out.println("STATUS: " + status);
+                String owner = rs.getString("owner");
+                System.out.println("STATUS: " + status + " OWNER: " + owner);
                 return "DISABLED".equals(status);
             }
             throw new MinorOntopInternalBugException("Constraint " + constraintId + " in " + id + " not found");
