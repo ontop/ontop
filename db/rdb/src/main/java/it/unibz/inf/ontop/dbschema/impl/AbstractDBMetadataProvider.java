@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
@@ -281,9 +282,22 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                 else
                     try {
                         // use the KEY_SEQ values to restore the correct order of attributes in the PK
-                        UniqueConstraint.Builder builder = UniqueConstraint.primaryKeyBuilder(relation, currentPkName);
+                        Attribute[] attributes = new Attribute[primaryKeyAttributes.size()];
                         for (int i = 1; i <= primaryKeyAttributes.size(); i++)
-                            builder.addDeterminant(primaryKeyAttributes.get(i));
+                            attributes[i - 1] = relation.getAttribute(primaryKeyAttributes.get(i));
+
+                        UniqueConstraint.Builder builder;
+                        boolean hasNullableAttributes = Stream.of(attributes).anyMatch(Attribute::isNullable);
+                        if (hasNullableAttributes) {
+                            LOGGER.error("WARNING: primary key {} in table {} is downgraded to a unique constraint as it contains NULLable columns.", currentPkName, id);
+                            builder = UniqueConstraint.builder(relation, currentPkName);
+                        }
+                        else {
+                            builder = UniqueConstraint.primaryKeyBuilder(relation, currentPkName);
+                        }
+
+                        for (Attribute attribute : attributes)
+                            builder.addDeterminant(attribute.getIndex());
                         builder.build();
                     }
                     catch (AttributeNotFoundException e) {
