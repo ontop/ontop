@@ -442,7 +442,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         )) {
             stmt.setString(1, constraintId);
             stmt.setString(2, getRelationName(id));
-            stmt.setString(3, getRelationSchema(id));
+            //stmt.setString(3, getRelationSchema(id));
             stmt.closeOnCompletion();
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
