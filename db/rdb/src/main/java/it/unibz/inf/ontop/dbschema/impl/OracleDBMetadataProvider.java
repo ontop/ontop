@@ -316,7 +316,6 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             "APPQOSSYS",
             "LBACSYS",
             "DVSYS",
-            "APPQOSSYS",
             "WMSYS",
             "ORDDATA",
             "AUDSYS");
@@ -349,9 +348,10 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             "HELP",
             "ROLLING$STATUS");
 
-    private static final ImmutableSet<String> IGNORED_VIEW_PREFIXES = ImmutableSet.of("MVIEW_",
-            "LOGMNR_" +
-                    "AQ$_");
+    private static final ImmutableSet<String> IGNORED_VIEW_PREFIXES = ImmutableSet.of(
+            "MVIEW_",
+            "LOGMNR_",
+            "AQ$_");
 
     private static final ImmutableSet<String> IGNORED_VIEW_SCHEMAS = ImmutableSet.of("SYS",
             "GSMADMIN_INTERNAL",
@@ -446,6 +446,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 String status = rs.getString("status");
+                System.out.println("STATUS: " + status);
                 return "DISABLED".equals(status);
             }
             throw new MinorOntopInternalBugException("Constraint " + constraintId + " in " + id + " not found");
@@ -476,6 +477,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 String status = rs.getString("status");
+                System.out.println("STATUS UC: " + status);
                 return !"VALID".equals(status);
             }
             throw new MinorOntopInternalBugException("Unique index " + indexId + " in " + id + " not found");
