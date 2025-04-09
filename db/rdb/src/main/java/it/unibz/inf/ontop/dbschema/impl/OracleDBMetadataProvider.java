@@ -439,7 +439,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "FROM all_constraints\n" +
                         "WHERE constraint_name = :1\n" +
                         "  AND table_name = :2\n" +
-                        "  AND (owner = :3 OR owner = \"SYSTEM\"")) {
+                        "  AND (owner = :3 OR owner = 'SYSTEM')")) {
             stmt.setString(1, constraintId);
             stmt.setString(2, getRelationName(id));
             stmt.setString(3, getRelationSchema(id));
@@ -470,7 +470,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "FROM all_indexes\n" +
                         "WHERE index_name = :1\n" +
                         "  AND table_name = :2\n" +
-                        "  AND (owner = :3 OR owner = \"SYSTEM\"")) {
+                        "  AND (owner = :3 OR owner = 'SYSTEM')")) {
             stmt.setString(1, indexId);
             stmt.setString(2, getRelationName(id));
             stmt.setString(3, getRelationSchema(id));
