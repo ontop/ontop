@@ -432,7 +432,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 String status = rs.getString("status");
                 String table_name = rs.getString("table_name");
                 String owner = rs.getString("owner");
-                System.out.println("CONSTRAINT: " + constraintId + " STATUS: " + status + " TABLE: " + table_name + " OWNER: " + owner);
+                System.out.println(id + " CONSTRAINT: " + constraintId + " STATUS: " + status + " TABLE: " + table_name + " OWNER: " + owner);
             }
         }
         catch (SQLException e) {}
@@ -455,7 +455,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "FROM all_constraints\n" +
                         "WHERE constraint_name = :1\n" +
                         "  AND table_name = :2\n" +
-                        "  AND (owner = :3 OR owner = 'SYSTEM')")) {
+                        "  AND owner = :3)")) {
             stmt.setString(1, constraintId);
             stmt.setString(2, getRelationName(id));
             stmt.setString(3, getRelationSchema(id));
@@ -465,6 +465,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 String status = rs.getString("status");
                 return "DISABLED".equals(status);
             }
+            System.out.println("NOT FOUND!");
             throw new MinorOntopInternalBugException("Constraint " + constraintId + " in " + id + " not found");
         }
         catch (SQLException e) {
@@ -484,7 +485,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 String status = rs.getString("status");
                 String table_name = rs.getString("table_name");
                 String owner = rs.getString("owner");
-                System.out.println("UNIQUE INDEX: " + indexId + " STATUS: " + status + " TABLE: " + table_name + " OWNER: " + owner);
+                System.out.println(id + "UNIQUE INDEX: " + indexId + " STATUS: " + status + " TABLE: " + table_name + " OWNER: " + owner);
             }
         }
         catch (SQLException e) {}
@@ -500,7 +501,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "FROM all_indexes\n" +
                         "WHERE index_name = :1\n" +
                         "  AND table_name = :2\n" +
-                        "  AND (owner = :3 OR owner = 'SYSTEM')")) {
+                        "  AND owner = :3)")) {
             stmt.setString(1, indexId);
             stmt.setString(2, getRelationName(id));
             stmt.setString(3, getRelationSchema(id));
@@ -510,6 +511,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 String status = rs.getString("status");
                 return !"VALID".equals(status);
             }
+            System.out.println("NOT FOUND!");
             throw new MinorOntopInternalBugException("Unique index " + indexId + " in " + id + " not found");
         }
         catch (SQLException e) {
