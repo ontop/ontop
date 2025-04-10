@@ -349,7 +349,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
     private class PrimaryKeyBuilder extends UniqueConstraintAbstractBuilder {
 
-        PrimaryKeyBuilder(NamedRelationDefinition relation, String constraintName) {
+        PrimaryKeyBuilder(NamedRelationDefinition relation, String constraintName) throws MetadataExtractionException {
             super("primary key", relation, constraintName,
                     AbstractDBMetadataProvider.this::isPrimaryKeyDisabled);
         }
@@ -358,7 +358,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         protected BiFunction<NamedRelationDefinition, String, FunctionalDependency.Builder> getBuilderConstructor(ImmutableList<Attribute> attributes) {
             if (attributes.stream().anyMatch(Attribute::isNullable)) {
                 LOGGER.error("WARNING: {} {} in table {} is downgraded to a unique constraint as it contains NULLable columns.",
-                        constraintType, constraintName, relation.getID());
+                        constraintType, constraintName, relationId);
                 return UniqueConstraint::builder;
             }
             return UniqueConstraint::primaryKeyBuilder;
@@ -367,7 +367,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
     private class UniqueConstraintBuilder extends UniqueConstraintAbstractBuilder {
 
-        UniqueConstraintBuilder(NamedRelationDefinition relation, String constraintName) {
+        UniqueConstraintBuilder(NamedRelationDefinition relation, String constraintName) throws MetadataExtractionException {
             super("unique index", relation, constraintName,
                     AbstractDBMetadataProvider.this::isUniqueConstraintDisabled);
         }
@@ -388,6 +388,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
     private abstract class UniqueConstraintAbstractBuilder {
         protected final NamedRelationDefinition relation;
+        protected final RelationID relationId;
         protected final String constraintName;
         protected final String constraintType;
         protected final BiPredicate<RelationID, String> isDisabled;
@@ -396,9 +397,10 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         private boolean valid = true;
 
         UniqueConstraintAbstractBuilder(String constraintType, NamedRelationDefinition relation, String constraintName,
-                                        BiPredicate<RelationID, String> isDisabled) {
+                                        BiPredicate<RelationID, String> isDisabled) throws MetadataExtractionException {
             this.constraintType = constraintType;
             this.relation = relation;
+            this.relationId = getCanonicalRelationId(relation.getID());
             this.constraintName = constraintName;
             this.isDisabled = isDisabled;
         }
@@ -408,7 +410,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             if (previous != null) {
                 valid = false;
                 LOGGER.error("WARNING: {} {} in table {} contains two columns, {} and {}, at the same position {}",
-                        constraintType, constraintName, relation.getID(), previous, column, pos);
+                        constraintType, constraintName, relationId, previous, column, pos);
             }
         }
 
@@ -430,7 +432,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
             if (columns.isEmpty()) {
                 LOGGER.error("WARNING: {} {} in table {} has no columns.",
-                        constraintType, constraintName, relation.getID());
+                        constraintType, constraintName, relationId);
                 return ImmutableList.of();
             }
 
@@ -449,7 +451,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
                 if (!emptyPositions.isEmpty()) {
                     LOGGER.error("WARNING: position{} {} not found for the {} {} (table {}): the constraint will not be used in optimizations.",
-                            emptyPositions.size() == 1 ? "" : "s", String.join(", ", emptyPositions), constraintType, constraintName, relation.getID());
+                            emptyPositions.size() == 1 ? "" : "s", String.join(", ", emptyPositions), constraintType, constraintName, relationId);
                     return ImmutableList.of();
                 }
 
@@ -459,7 +461,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                         .collect(ImmutableCollectors.toList());
 
                 LOGGER.error("WARNING: column{} {} not found for the {} {} (table {}): the constraint will not be used in optimizations.",
-                        columnsNotFound.size() == 1 ? "" : "s", String.join(", ", columnsNotFound), constraintType, constraintName, relation.getID());
+                        columnsNotFound.size() == 1 ? "" : "s", String.join(", ", columnsNotFound), constraintType, constraintName, relationId);
                 return ImmutableList.of();
             }
 
@@ -467,10 +469,9 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         }
 
         void build() {
-            System.out.println("ALL IDS: " + relation.getAllIDs());
-            if (constraintName != null && isDisabled.test(relation.getID(), constraintName)) {
+            if (constraintName != null && isDisabled.test(relationId, constraintName)) {
                 LOGGER.error("WARNING: {} {} in table {} is disabled and will not be used in optimizations.",
-                        constraintType, constraintName, relation.getID());
+                        constraintType, constraintName, relationId);
                 return;
             }
             ImmutableList<Attribute> attributes = getAttributes();
