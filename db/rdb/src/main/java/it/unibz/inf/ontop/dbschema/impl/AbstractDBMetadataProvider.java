@@ -270,7 +270,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                 if (builder.isEmpty()) {
                     builder = Optional.of(new PrimaryKeyBuilder(relation, pkName));
                 }
-                else if (pkName != null && !builder.get().constraintName.equals(pkName))
+                else if (!Objects.equals(pkName, builder.get().constraintName))
                     throw new MetadataExtractionException("Two primary keys for the same table " + id + ": " + builder.get().constraintName + " and " + pkName);
 
                 int seq = rs.getShort("KEY_SEQ");
