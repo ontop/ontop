@@ -467,6 +467,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         }
 
         void build() {
+            System.out.println("ALL IDS: " + relation.getAllIDs());
             if (constraintName != null && isDisabled.test(relation.getID(), constraintName)) {
                 LOGGER.error("WARNING: {} {} in table {} is disabled and will not be used in optimizations.",
                         constraintType, constraintName, relation.getID());
