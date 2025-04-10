@@ -1,0 +1,13 @@
+[PrefixDeclaration]
+: http://example.org/
+
+[MappingDeclaration] @collection [[
+mappingId	t1
+target		:tpl1/{id1}/{id2} a :A, :C ; :p1 _:tpl2/{id1}/{id2} . _:tpl2/{id1}/{id2} :value {price} .
+source		select * from T1
+
+mappingId	t2
+target		:tpl1/1/{id2} a :B, :C ; :p1 _:tpl2/1/{id2} ; :p2 _:tpl2/1/{id2} .
+source		select * from T2
+
+]]

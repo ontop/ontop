@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
 
     private static final String BNODE_PREFIX = "ontop-bnode-";
-    private static final String PLACEHOLDER = "{}";
 
     /**
      * Name (in the DB dialect), arity -> predefined REGULAR DBFunctionSymbol
@@ -984,6 +983,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         Optional<DBFunctionSymbol> dbFunctionSymbol = createCeilFunctionSymbol(dbTermType);
         dbFunctionSymbol.ifPresent(fs -> ceilMap.put(dbTermType, fs));
         return dbFunctionSymbol;
+    }
+
+    @Override
+    public ImmutableSet<ObjectStringTemplateFunctionSymbol> getObjectTemplates() {
+        return Stream.concat(bnodeTemplateMap.values().stream(), iriTemplateMap.values().stream())
+                .collect(ImmutableSet.toImmutableSet());
     }
 
     @Override
