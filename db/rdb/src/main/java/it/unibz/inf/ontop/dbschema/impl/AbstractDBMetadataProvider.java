@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.spec.sqlparser.DefaultSelectQueryAttributeExtractor;
 import it.unibz.inf.ontop.spec.sqlparser.JSqlParserTools;
 import it.unibz.inf.ontop.spec.sqlparser.ParserViewDefinition;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.TokenMgrException;
 import net.sf.jsqlparser.statement.select.Select;
@@ -28,8 +29,11 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.sql.*;
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
@@ -323,7 +327,6 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                 int pos = rs.getShort("ORDINAL_POSITION");
                 if (pos == 1) {
                     builder.ifPresent(UniqueConstraintAbstractBuilder::build);
-
                     builder = rs.getBoolean("NON_UNIQUE")
                             ? Optional.empty()
                             : Optional.of(new UniqueConstraintBuilder(relation, rs.getString("INDEX_NAME")));
@@ -347,86 +350,57 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     private class PrimaryKeyBuilder extends UniqueConstraintAbstractBuilder {
 
         PrimaryKeyBuilder(NamedRelationDefinition relation, String constraintName) {
-            super("primary key", relation, constraintName);
+            super("primary key", relation, constraintName,
+                    AbstractDBMetadataProvider.this::isPrimaryKeyDisabled);
         }
 
         @Override
-        protected Optional<Attribute> getAttribute(String column) {
-            QuotedID id = rawIdFactory.createAttributeID(column);
-            try {
-                return Optional.of(relation.getAttribute(id));
-            }
-            catch (AttributeNotFoundException e) {
-                return Optional.empty();
-            }
-        }
-
-        @Override
-        protected FunctionalDependency.Builder getBuilder(Attribute[] attributes) {
-            boolean hasNullableAttributes = Stream.of(attributes).anyMatch(Attribute::isNullable);
-            if (hasNullableAttributes) {
+        protected BiFunction<NamedRelationDefinition, String, FunctionalDependency.Builder> getBuilderConstructor(ImmutableList<Attribute> attributes) {
+            if (attributes.stream().anyMatch(Attribute::isNullable)) {
                 LOGGER.error("WARNING: {} {} in table {} is downgraded to a unique constraint as it contains NULLable columns.",
                         constraintType, constraintName, relation.getID());
-                return UniqueConstraint.builder(relation, constraintName);
+                return UniqueConstraint::builder;
             }
-            else {
-                return UniqueConstraint.primaryKeyBuilder(relation, constraintName);
-            }
-        }
-
-        @Override
-        protected boolean isDisabled() {
-            return isPrimaryKeyDisabled(relation.getID(), constraintName);
+            return UniqueConstraint::primaryKeyBuilder;
         }
     }
 
     private class UniqueConstraintBuilder extends UniqueConstraintAbstractBuilder {
 
         UniqueConstraintBuilder(NamedRelationDefinition relation, String constraintName) {
-            super("unique index", relation, constraintName);
+            super("unique index", relation, constraintName,
+                    AbstractDBMetadataProvider.this::isUniqueConstraintDisabled);
         }
 
         @Override
         protected Optional<Attribute> getAttribute(String column) {
-            QuotedID id = rawIdFactory.createAttributeID(column);
-            try {
-                return Optional.of(relation.getAttribute(id));
-            }
-            catch (AttributeNotFoundException e) {
-                try {
-                    // bug in PostgreSQL JBDC driver: it strips off the quotation marks
-                    QuotedID altId = rawIdFactory.createAttributeID("\"" + column + "\"");
-                    return Optional.of(relation.getAttribute(altId));
-                }
-                catch (AttributeNotFoundException ex) {
-                   return Optional.empty();
-                }
-            }
+            return super.getAttribute(column)
+                    // bug in PostgreSQL JDBC driver:
+                    // it strips off the quotation marks
+                    .or(() -> super.getAttribute("\"" + column + "\""));
         }
 
         @Override
-        protected FunctionalDependency.Builder getBuilder(Attribute[] attributes) {
-            return UniqueConstraint.builder(relation, constraintName);
-        }
-
-        @Override
-        protected boolean isDisabled() {
-            return isUniqueConstraintDisabled(relation.getID(), constraintName);
+        protected BiFunction<NamedRelationDefinition, String, FunctionalDependency.Builder> getBuilderConstructor(ImmutableList<Attribute> attributes) {
+            return UniqueConstraint::builder;
         }
     }
 
-    private abstract static class UniqueConstraintAbstractBuilder {
+    private abstract class UniqueConstraintAbstractBuilder {
         protected final NamedRelationDefinition relation;
         protected final String constraintName;
         protected final String constraintType;
+        protected final BiPredicate<RelationID, String> isDisabled;
 
         private final Map<Integer, String> columns = new HashMap<>();
         private boolean valid = true;
 
-        UniqueConstraintAbstractBuilder(String constraintType, NamedRelationDefinition relation, String constraintName) {
+        UniqueConstraintAbstractBuilder(String constraintType, NamedRelationDefinition relation, String constraintName,
+                                        BiPredicate<RelationID, String> isDisabled) {
             this.constraintType = constraintType;
             this.relation = relation;
             this.constraintName = constraintName;
+            this.isDisabled = isDisabled;
         }
 
         void addColumn(int pos, String column) {
@@ -438,59 +412,72 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             }
         }
 
-        protected abstract Optional<Attribute> getAttribute(String column);
-
-        protected abstract FunctionalDependency.Builder getBuilder(Attribute[] attributes);
-
-        protected abstract boolean isDisabled();
-
-        Optional<Attribute[]> getAttributes() {
-            if (!valid)
-                return Optional.empty();
-
-            Attribute[] attributes = new Attribute[columns.size()];
-            List<String> columnsNotFound = new ArrayList<>();
-            for (int i = 1; i <= columns.size(); i++) {
-                String column = columns.get(i);
-                if (column == null) {
-                    LOGGER.error("WARNING: position {} not found for the {} {} (table {}): the constraint will not be used in optimizations.",
-                            i, constraintType, constraintName, relation.getID());
-                    return Optional.empty();
-                }
-                Optional<Attribute> attribute = getAttribute(column);
-                if (attribute.isPresent())
-                    attributes[i - 1] = attribute.get();
-                else
-                    columnsNotFound.add(column);
+        protected Optional<Attribute> getAttribute(String column) {
+            QuotedID id = rawIdFactory.createAttributeID(column);
+            try {
+                return Optional.of(relation.getAttribute(id));
             }
-            if (!columnsNotFound.isEmpty()) {
-                LOGGER.error("WARNING: column{} {} not found for the {} {} (table {}): the constraint will not be used in optimizations.",
-                        columnsNotFound.size() == 1 ? "" : "s", String.join(", ", columnsNotFound), constraintType, constraintName, relation.getID());
+            catch (AttributeNotFoundException e) {
                 return Optional.empty();
             }
-            return Optional.of(attributes);
         }
 
-        public void build() {
-            if (constraintName != null && isDisabled()) {
+        protected abstract BiFunction<NamedRelationDefinition, String, FunctionalDependency.Builder> getBuilderConstructor(ImmutableList<Attribute> attributes);
+
+        protected ImmutableList<Attribute> getAttributes() {
+            if (!valid)
+                return ImmutableList.of();
+
+            if (columns.isEmpty()) {
+                LOGGER.error("WARNING: {} {} in table {} has no columns.",
+                        constraintType, constraintName, relation.getID());
+                return ImmutableList.of();
+            }
+
+            ImmutableList<Attribute> attributes = IntStream.rangeClosed(1, columns.size())
+                    .mapToObj(columns::get)
+                    .filter(Objects::nonNull)
+                    .map(this::getAttribute)
+                    .flatMap(Optional::stream)
+                    .collect(ImmutableCollectors.toList());
+
+            if (attributes.size() != columns.size()) {
+                ImmutableList<String> emptyPositions = IntStream.rangeClosed(1, columns.size())
+                        .filter(i -> columns.get(i) == null)
+                        .mapToObj(Integer::toString)
+                        .collect(ImmutableCollectors.toList());
+
+                if (!emptyPositions.isEmpty()) {
+                    LOGGER.error("WARNING: position{} {} not found for the {} {} (table {}): the constraint will not be used in optimizations.",
+                            emptyPositions.size() == 1 ? "" : "s", String.join(", ", emptyPositions), constraintType, constraintName, relation.getID());
+                    return ImmutableList.of();
+                }
+
+                ImmutableList<String> columnsNotFound = IntStream.rangeClosed(1, columns.size())
+                        .mapToObj(columns::get)
+                        .filter(c -> getAttribute(c).isEmpty())
+                        .collect(ImmutableCollectors.toList());
+
+                LOGGER.error("WARNING: column{} {} not found for the {} {} (table {}): the constraint will not be used in optimizations.",
+                        columnsNotFound.size() == 1 ? "" : "s", String.join(", ", columnsNotFound), constraintType, constraintName, relation.getID());
+                return ImmutableList.of();
+            }
+
+            return attributes;
+        }
+
+        void build() {
+            if (constraintName != null && isDisabled.test(relation.getID(), constraintName)) {
                 LOGGER.error("WARNING: {} {} in table {} is disabled and will not be used in optimizations.",
                         constraintType, constraintName, relation.getID());
+                return;
             }
-            else {
-                Optional<Attribute[]> optionalAttributes = getAttributes();
-                if (optionalAttributes.isPresent()) {
-                    Attribute[] attributes = optionalAttributes.get();
-                    if (attributes.length == 0) {
-                        LOGGER.error("WARNING: {} {} in table {} has no columns.",
-                                constraintType, constraintName, relation.getID());
-                    }
-                    else {
-                        FunctionalDependency.Builder builder = getBuilder(attributes);
-                        for (Attribute attribute : attributes)
-                            builder.addDeterminant(attribute.getIndex());
-                        builder.build();
-                    }
-                }
+            ImmutableList<Attribute> attributes = getAttributes();
+            if (!attributes.isEmpty()) {
+                FunctionalDependency.Builder builder = getBuilderConstructor(attributes).apply(relation, constraintName);
+                for (Attribute attribute : attributes)
+                    builder.addDeterminant(attribute.getIndex());
+                builder.build();
             }
         }
     }
