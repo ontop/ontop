@@ -421,6 +421,22 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
 
     private boolean isConstraintDisabled(RelationID id, String constraintId) {
+        try (PreparedStatement stmt = connection.prepareStatement(
+                "SELECT status, table_name, owner\n" +
+                "FROM all_constraints\n" +
+                "WHERE constraint_name = :1\n")) {
+            stmt.setString(1, constraintId);
+            stmt.closeOnCompletion();
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                String status = rs.getString("status");
+                String table_name = rs.getString("table_name");
+                String owner = rs.getString("owner");
+                System.out.println("CONSTRAINT: " + constraintId + " STATUS: " + status + " TABLE: " + table_name + " OWNER: " + owner);
+            }
+        }
+        catch (SQLException e) {}
+
         /*
             OWNER	VARCHAR2(30)	NOT NULL	Owner of the constraint definition
             CONSTRAINT_NAME	VARCHAR2(30)	NOT NULL	Name of the constraint definition
@@ -435,7 +451,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             STATUS	VARCHAR2(8)	 	Enforcement status of constraint (ENABLED or DISABLED)
      */
         try (PreparedStatement stmt = connection.prepareStatement(
-                "SELECT status, owner\n" +
+                "SELECT status\n" +
                         "FROM all_constraints\n" +
                         "WHERE constraint_name = :1\n" +
                         "  AND table_name = :2\n" +
@@ -447,7 +463,6 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 String status = rs.getString("status");
-                String owner = rs.getString("owner");
                 return "DISABLED".equals(status);
             }
             throw new MinorOntopInternalBugException("Constraint " + constraintId + " in " + id + " not found");
@@ -458,6 +473,21 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     }
 
     private boolean isUniqueIndexDisabled(RelationID id, String indexId) {
+        try (PreparedStatement stmt = connection.prepareStatement(
+                "SELECT status, table_name, owner\n" +
+                        "FROM all_indexes\n" +
+                        "WHERE index_name = :1\n")) {
+            stmt.setString(1, indexId);
+            stmt.closeOnCompletion();
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                String status = rs.getString("status");
+                String table_name = rs.getString("table_name");
+                String owner = rs.getString("owner");
+                System.out.println("UNIQUE INDEX: " + indexId + " STATUS: " + status + " TABLE: " + table_name + " OWNER: " + owner);
+            }
+        }
+        catch (SQLException e) {}
         /*
             OWNER VARCHAR2(128) NOT NULL Owner of the index
             INDEX_NAME VARCHAR2(128) NOT NULL Name of the index
