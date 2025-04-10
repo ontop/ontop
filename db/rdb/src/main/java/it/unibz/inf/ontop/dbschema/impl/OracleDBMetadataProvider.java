@@ -83,12 +83,10 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     }
 
     @Override
-    protected void checkSameRelationID(RelationID extractedId, RelationID givenId, String method) throws MetadataExtractionException {
+    protected boolean equalRelationIDs(RelationID extractedId, RelationID givenId) {
         // DUAL is retrieved as SYS.DUAL, but its canonical name is DUAL
-        if (isDual(extractedId) && isDual(givenId))
-            return;
-
-        super.checkSameRelationID(extractedId, givenId, method);
+        return (isDual(extractedId) && isDual(givenId))
+                || super.equalRelationIDs(extractedId, givenId);
     }
 
     private static final int PREFETCH_SIZE = 4048;

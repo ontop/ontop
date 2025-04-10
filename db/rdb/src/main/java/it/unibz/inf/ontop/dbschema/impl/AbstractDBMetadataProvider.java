@@ -135,9 +135,15 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     protected abstract RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColum) throws SQLException;
 
     // can be overridden, 4 usages
-    protected void checkSameRelationID(RelationID extractedId, RelationID givenId, String method) throws MetadataExtractionException {
-        if (!extractedId.equals(givenId))
-            throw new MetadataExtractionException("Relation IDs mismatch: for relation " + givenId + ", the JDBC " + method + " returns " + extractedId);
+    protected boolean equalRelationIDs(RelationID extractedId, RelationID givenId)  {
+        return extractedId.equals(givenId);
+    }
+
+    protected RelationID extractRelationID(RelationID givenId, ResultSet rs, String[] columnNames, String method) throws SQLException, MetadataExtractionException {
+        RelationID extractedId = getRelationID(rs, columnNames[0], columnNames[1], columnNames[2]);
+        if (!equalRelationIDs(givenId, extractedId))
+              throw new MetadataExtractionException("Relation IDs mismatch: for relation " + givenId + ", the JDBC method "  + method + " returns " + extractedId);
+        return extractedId;
     }
 
     protected @Nullable String escapeRelationIdComponentPattern(@Nullable String s) {
@@ -146,6 +152,8 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                 : s.replace("_", escape + "_")
                     .replace("%", escape + "%");
     }
+
+    private static final String[] TABLE_NAME_COLUMNS = new String[] { "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME" };
 
     @Override
     public NamedRelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
@@ -157,8 +165,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
             while (rs.next()) {
                 logOperation.advanceCounter();
-                RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
-                checkSameRelationID(extractedId, id, "getColumns");
+                RelationID extractedId = extractRelationID(id, rs, TABLE_NAME_COLUMNS, "getColumns");
 
                 RelationDefinition.AttributeListBuilder builder = relations.computeIfAbsent(extractedId,
                         i -> DatabaseTableDefinition.attributeListBuilder());
@@ -262,8 +269,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             Optional<PrimaryKeyBuilder> builder = Optional.empty();
             while (rs.next()) {
                 logOperation.advanceCounter();
-                RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
-                checkSameRelationID(extractedId, id, "getPrimaryKeys");
+                RelationID extractedId = extractRelationID(id, rs, TABLE_NAME_COLUMNS, "getPrimaryKeys");
 
                 String pkName = rs.getString("PK_NAME"); // may be null
                 if (builder.isEmpty()) {
@@ -311,8 +317,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             Optional<UniqueConstraintBuilder> builder = Optional.empty();
             while (rs.next()) {
                 logOperation.advanceCounter();
-                RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
-                checkSameRelationID(extractedId, id, "getIndexInfo");
+                RelationID extractedId = extractRelationID(id, rs, TABLE_NAME_COLUMNS, "getIndexInfo");
 
                 // TYPE: tableIndexStatistic - this identifies table statistics that are returned in conjunction with a table's index descriptions
                 //       tableIndexClustered - this is a clustered index
@@ -518,8 +523,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             String constraintId = null;
             while (rs.next()) {
                 logOperation.advanceCounter();
-                RelationID extractedId = getRelationID(rs, "FKTABLE_CAT", "FKTABLE_SCHEM","FKTABLE_NAME");
-                checkSameRelationID(extractedId, id, "getImportedKeys");
+                RelationID extractedId = extractRelationID(id, rs, new String[]{"FKTABLE_CAT", "FKTABLE_SCHEM","FKTABLE_NAME"}, "getImportedKeys");
                 RelationID pkId = getRelationID(rs, "PKTABLE_CAT", "PKTABLE_SCHEM","PKTABLE_NAME");
 
                 try {
