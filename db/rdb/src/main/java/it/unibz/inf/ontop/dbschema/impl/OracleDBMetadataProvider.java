@@ -424,7 +424,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         try (PreparedStatement stmt = connection.prepareStatement(
                 "SELECT status, table_name, owner\n" +
                 "FROM all_constraints\n" +
-                "WHERE constraint_name = :1\n")) {
+                "WHERE constraint_name = :1")) {
             stmt.setString(1, constraintId);
             stmt.closeOnCompletion();
             ResultSet rs = stmt.executeQuery();
@@ -455,7 +455,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "FROM all_constraints\n" +
                         "WHERE constraint_name = :1\n" +
                         "  AND table_name = :2\n" +
-                        "  AND owner = :3)")) {
+                        "  AND owner = :3")) {
             stmt.setString(1, constraintId);
             stmt.setString(2, getRelationName(id));
             stmt.setString(3, getRelationSchema(id));
@@ -477,7 +477,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         try (PreparedStatement stmt = connection.prepareStatement(
                 "SELECT status, table_name, owner\n" +
                         "FROM all_indexes\n" +
-                        "WHERE index_name = :1\n")) {
+                        "WHERE index_name = :1")) {
             stmt.setString(1, indexId);
             stmt.closeOnCompletion();
             ResultSet rs = stmt.executeQuery();
@@ -501,7 +501,7 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "FROM all_indexes\n" +
                         "WHERE index_name = :1\n" +
                         "  AND table_name = :2\n" +
-                        "  AND owner = :3)")) {
+                        "  AND owner = :3")) {
             stmt.setString(1, indexId);
             stmt.setString(2, getRelationName(id));
             stmt.setString(3, getRelationSchema(id));
