@@ -28,7 +28,7 @@ public class ConstraintSQLServerTest extends AbstractConstraintTest {
 
     private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-mssql.properties";
 
-    public ConstraintSQLServerTest(String method) {
-        super(method, PROPERTIES_FILE);
+    public ConstraintSQLServerTest() {
+        super(PROPERTIES_FILE);
     }
 }

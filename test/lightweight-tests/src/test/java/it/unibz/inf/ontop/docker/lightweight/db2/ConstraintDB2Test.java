@@ -29,8 +29,8 @@ public class ConstraintDB2Test extends AbstractConstraintTest {
 
     private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-db2.properties";
 
-    public ConstraintDB2Test(String method) {
-        super(method, PROPERTIES_FILE);
+    public ConstraintDB2Test() {
+        super(PROPERTIES_FILE);
     }
 }
 
