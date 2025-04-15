@@ -10,8 +10,8 @@ quest:		http://obda.org/quest#
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-person
-target		:person/{id} a :Person ; :firstName {firstName} ; :lastName {lastName} ; :nickname {nickname} ; :country {country} ; :locality {locality} .
-source		SELECT "id", "firstName", "lastName", "nickname", "country", "locality" FROM "person";
+target		:person/{id} a :Person ; :firstName {firstName} ; :lastName {lastName} ; :nickname {nickname} ; :nickname {moniker}; :country {country} ; :locality {locality} .
+source		SELECT "id", "firstName", "lastName", "nickname", "moniker", "country", "locality" FROM "person";
 
 mappingId	MAPID-person-graph
 target      GRAPH <http://person.example.org/graph> { :person/{id} a :Person ; :firstName {firstName} ; :lastName {lastName} ; :nickname {nickname} ; :country {country} ; :locality {locality} . }
