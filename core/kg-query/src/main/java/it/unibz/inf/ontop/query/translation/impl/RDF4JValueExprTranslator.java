@@ -15,8 +15,8 @@ import it.unibz.inf.ontop.model.vocabulary.AGG;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.RDF;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.algebra.*;
@@ -33,8 +33,8 @@ public class RDF4JValueExprTranslator {
     private final TermFactory termFactory;
     private final RDF rdfFactory;
     private final FunctionSymbolFactory functionSymbolFactory;
-    private final CoreUtilsFactory coreUtilsFactory;
     private final RDF4JValueTranslator valueTranslator;
+    private final VariableGenerator variableGenerator;
 
     public RDF4JValueExprTranslator(Set<Variable> knownVariables,
                                     ImmutableMap<Variable, GroundTerm> externalBindings,
@@ -42,17 +42,18 @@ public class RDF4JValueExprTranslator {
                                     TermFactory termFactory,
                                     RDF rdfFactory,
                                     TypeFactory typeFactory,
-                                    CoreUtilsFactory coreUtilsFactory,
-                                    FunctionSymbolFactory functionSymbolFactory) {
+                                    FunctionSymbolFactory functionSymbolFactory,
+                                    VariableGenerator variableGenerator){
         this.knownVariables = knownVariables;
         this.externalBindings = externalBindings;
         this.treatBNodeAsVariable = treatBNodeAsVariable;
         this.termFactory = termFactory;
         this.rdfFactory = rdfFactory;
         this.functionSymbolFactory = functionSymbolFactory;
-        this.coreUtilsFactory = coreUtilsFactory;
 
         this.valueTranslator = new RDF4JValueTranslator(termFactory, rdfFactory, typeFactory);
+
+        this.variableGenerator = variableGenerator;
     }
 
 
@@ -141,7 +142,7 @@ public class RDF4JValueExprTranslator {
                     existsMap);
         }
         if (expr instanceof Exists) {
-            Variable freshVariable = coreUtilsFactory.createVariableGenerator(knownVariables).generateNewVariable("prov");
+            Variable freshVariable = variableGenerator.generateNewVariable("prov");
             ImmutableFunctionalTerm boundTerm = getFunctionalTerm(SPARQL.BOUND,
                     termFactory.getRDFLiteralFunctionalTerm(freshVariable, XSD.STRING));
 

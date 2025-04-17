@@ -3,10 +3,7 @@ package it.unibz.inf.ontop.rdf4j.repository;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import static org.junit.Assert.assertEquals;
 
@@ -375,4 +372,31 @@ public class ExistsTest extends AbstractRDF4JTest {
                 "}\n";
         runQueryAndCompare(sparql, ImmutableSet.of());
     }
+
+    @Test
+    public void testProvenanceVariableOverlap() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT * WHERE {\n" +
+                "   ?v a :Person .\n" +
+                "   FILTER EXISTS { ?v :lastName ?prov . FILTER EXISTS { ?v :firstName ?fname } }\n" +
+                "   ?v :lastName ?prov\n" +
+                "} \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1"));
+    }
+
+    @Test
+    public void testBindProvenanceVarsOverlap() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT * WHERE {\n" +
+                "   ?v a :Person .\n" +
+                "   BIND(EXISTS { ?v :firstName ?prov } AS ?hasFirstName)\n" +
+                "   BIND(EXISTS { ?v :lastName ?var } AS ?hasLastName)\n" +
+                "   BIND(EXISTS { ?v :nickname ?var } AS ?hasNickname)\n" +
+                "   FILTER(?hasFirstName = true && ?hasLastName = true && ?hasNickname = true)\n" +
+                "} \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1"));
+    }
+
 }

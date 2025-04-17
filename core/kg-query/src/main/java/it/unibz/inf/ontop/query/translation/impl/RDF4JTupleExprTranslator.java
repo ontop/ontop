@@ -49,7 +49,6 @@ public class RDF4JTupleExprTranslator {
     private final @Nullable Dataset dataset;
     private final boolean treatBNodeAsVariable;
 
-    private final CoreUtilsFactory coreUtilsFactory;
     private final SubstitutionFactory substitutionFactory;
     private final IntermediateQueryFactory iqFactory;
     private final AtomFactory atomFactory;
@@ -60,8 +59,7 @@ public class RDF4JTupleExprTranslator {
 
     private final IQTreeTools iqTreeTools;
     private final IRIConstant subClassOfConstant;
-
-    private final Set<Variable> knownProvenanceVariables;
+    private final VariableGenerator variableGenerator;
 
     public RDF4JTupleExprTranslator(ImmutableMap<Variable, GroundTerm> externalBindings,
                                     @Nullable Dataset dataset,
@@ -78,7 +76,6 @@ public class RDF4JTupleExprTranslator {
         this.externalBindings = externalBindings;
         this.dataset = dataset;
         this.treatBNodeAsVariable = treatBNodeAsVariable;
-        this.coreUtilsFactory = coreUtilsFactory;
         this.substitutionFactory = substitutionFactory;
         this.iqFactory = iqFactory;
         this.atomFactory = atomFactory;
@@ -88,7 +85,7 @@ public class RDF4JTupleExprTranslator {
         this.typeFactory = typeFactory;
         this.iqTreeTools = iqTreeTools;
         this.subClassOfConstant = termFactory.getConstantIRI(RDFS.SUBCLASSOF);
-        this.knownProvenanceVariables = new HashSet<>();
+        this.variableGenerator = coreUtilsFactory.createVariableGenerator(externalBindings.keySet());
     }
 
     public IQTree getTree(TupleExpr node) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
@@ -153,10 +150,6 @@ public class RDF4JTupleExprTranslator {
 
     private static Sets.SetView<Variable> getSharedVariables(TranslationResult left, TranslationResult right) {
         return Sets.intersection(left.iqTree.getVariables(), right.iqTree.getVariables());
-    }
-
-    private VariableGenerator getVariableGenerator(TranslationResult left, TranslationResult right) {
-        return coreUtilsFactory.createVariableGenerator(Sets.union(left.iqTree.getKnownVariables(), right.iqTree.getKnownVariables()));
     }
 
     private TranslationResult translate(Difference diff) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
@@ -425,7 +418,7 @@ public class RDF4JTupleExprTranslator {
         }
 
         if (filterCondition.getExistsMap().size() > 1) {
-            throw new OntopUnsupportedKGQueryException("EXISTS operator is not supported: " + filter);
+            throw new OntopUnsupportedKGQueryException("Multiple EXISTS in the same operator are not supported: " + filter);
         }
 
         Map.Entry<Variable, ValueExpr> exists = filterCondition.getExistsMap().entrySet().stream()
@@ -439,17 +432,17 @@ public class RDF4JTupleExprTranslator {
     }
 
     private IQTree translateExists(Exists exists, Variable rightProvenanceVar, TranslationResult leftTranslation) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
-        knownProvenanceVariables.add(rightProvenanceVar);
+        variableGenerator.registerAdditionalVariables(ImmutableList.of(rightProvenanceVar));
         TranslationResult rightTranslation = translate(exists.getSubQuery());
 
         checkIfExistsIsTranslatable(leftTranslation, rightTranslation, exists.getSubQuery());
 
         Sets.SetView<Variable> sharedVariables = getSharedVariables(rightTranslation, leftTranslation);
-        VariableGenerator vGen = getVariableGenerator(leftTranslation, rightTranslation);
-        vGen.registerAdditionalVariables(ImmutableList.of(rightProvenanceVar));
+        variableGenerator.registerAdditionalVariables(Sets.union(
+                leftTranslation.iqTree.getKnownVariables(), rightTranslation.iqTree.getKnownVariables()));
 
         InjectiveSubstitution<Variable> sharedVarsRenaming = sharedVariables.stream()
-                .collect(substitutionFactory.toFreshRenamingSubstitution(vGen));
+                .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
         ImmutableExpression ljCond = termFactory.getConjunction(Stream.concat(
                         sharedVarsRenaming.builder()
@@ -458,24 +451,26 @@ public class RDF4JTupleExprTranslator {
                         Stream.of(termFactory.getDisjunction(sharedVarsRenaming.builder()
                                 .toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList()))))
                 .collect(ImmutableCollectors.toList()));
-
-        InjectiveSubstitution<Variable> leftNonProjVarsRenaming = getNonProjVarsRenaming(leftTranslation, rightTranslation, vGen);
-        InjectiveSubstitution<Variable> rightNonProjVarsRenaming = getNonProjVarsRenaming(rightTranslation, leftTranslation, vGen);
+        InjectiveSubstitution<Variable> leftNonProjVarsRenaming = getNonProjVarsRenaming(leftTranslation, rightTranslation);
+        InjectiveSubstitution<Variable> rightNonProjVarsRenaming = getNonProjVarsRenaming(rightTranslation, leftTranslation);
 
         IQTree rightTree = applyInDepthRenaming(
-                        rightTranslation.iqTree.applyDescendingSubstitutionWithoutOptimizing(sharedVarsRenaming, vGen),
+                        rightTranslation.iqTree.applyDescendingSubstitutionWithoutOptimizing(sharedVarsRenaming, variableGenerator),
                         rightNonProjVarsRenaming);
+
+        IQTree renamedRightTree = applyInDepthRenaming(rightTree,
+                getRightConflictingProvenanceRenaming(rightTranslation, rightProvenanceVar));
 
         ImmutableSet<Variable> projectedVariables = ImmutableSet.<Variable>builder()
                 .add(rightProvenanceVar)
-                .addAll(Sets.intersection(sharedVarsRenaming.getRangeSet(), rightTree.getVariables()))
+                .addAll(Sets.intersection(sharedVarsRenaming.getRangeSet(), renamedRightTree.getVariables()))
                 .build();
         ConstructionNode rightConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                 substitutionFactory.getSubstitution(rightProvenanceVar, termFactory.getProvenanceSpecialConstant()));
 
         IQTree distinctRightTree = iqFactory.createUnaryIQTree(
                 iqFactory.createDistinctNode(),
-                iqFactory.createUnaryIQTree(rightConstructionNode, rightTree));
+                iqFactory.createUnaryIQTree(rightConstructionNode, renamedRightTree));
 
         return iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
                     Sets.union(leftTranslation.iqTree.getVariables(), ImmutableSet.of(rightProvenanceVar)).immutableCopy()),
@@ -494,10 +489,11 @@ public class RDF4JTupleExprTranslator {
     }
 
     private TranslationResult translateMinusOperation(TranslationResult leftTranslation, TranslationResult rightTranslation, Sets.SetView<Variable> sharedVariables) {
-        VariableGenerator vGen = getVariableGenerator(leftTranslation, rightTranslation);
+        variableGenerator.registerAdditionalVariables(Sets.union(
+                leftTranslation.iqTree.getKnownVariables(), rightTranslation.iqTree.getKnownVariables()));
 
         InjectiveSubstitution<Variable> sharedVarsRenaming = sharedVariables.stream()
-                .collect(substitutionFactory.toFreshRenamingSubstitution(vGen));
+                .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
         ImmutableExpression ljCond = termFactory.getConjunction(Stream.concat(
                         sharedVarsRenaming.builder()
@@ -511,8 +507,8 @@ public class RDF4JTupleExprTranslator {
                 .map(termFactory::getDBIsNull)
                 .collect(ImmutableCollectors.toList()));
 
-        InjectiveSubstitution<Variable> leftNonProjVarsRenaming = getNonProjVarsRenaming(leftTranslation, rightTranslation, vGen);
-        InjectiveSubstitution<Variable> rightNonProjVarsRenaming = getNonProjVarsRenaming(rightTranslation, leftTranslation, vGen);
+        InjectiveSubstitution<Variable> leftNonProjVarsRenaming = getNonProjVarsRenaming(leftTranslation, rightTranslation);
+        InjectiveSubstitution<Variable> rightNonProjVarsRenaming = getNonProjVarsRenaming(rightTranslation, leftTranslation);
 
         return createTranslationResult(
                 iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(leftTranslation.iqTree.getVariables()),
@@ -520,7 +516,7 @@ public class RDF4JTupleExprTranslator {
                                 iqFactory.createBinaryNonCommutativeIQTree(iqFactory.createLeftJoinNode(ljCond),
                                         applyInDepthRenaming(leftTranslation.iqTree, leftNonProjVarsRenaming),
                                         applyInDepthRenaming(
-                                                rightTranslation.iqTree.applyDescendingSubstitutionWithoutOptimizing(sharedVarsRenaming, vGen),
+                                                rightTranslation.iqTree.applyDescendingSubstitutionWithoutOptimizing(sharedVarsRenaming, variableGenerator),
                                                 rightNonProjVarsRenaming)))),
                 leftTranslation.nullableVariables);
     }
@@ -554,7 +550,8 @@ public class RDF4JTupleExprTranslator {
 
         Sets.SetView<Variable> toCoalesce = Sets.intersection(sharedVariables, nullableVariablesLeftOrRight);
 
-        VariableGenerator variableGenerator = getVariableGenerator(leftTranslation, rightTranslation);
+        variableGenerator.registerAdditionalVariables(Sets.union(
+                leftTranslation.iqTree.getKnownVariables(), rightTranslation.iqTree.getKnownVariables()));
 
         // May update the variable generator!!
         InjectiveSubstitution<Variable> leftRenamingSubstitution = toCoalesce.stream()
@@ -576,8 +573,8 @@ public class RDF4JTupleExprTranslator {
                         toCoalesce),
                 topSubstitution.getDomain()).immutableCopy();
 
-        InjectiveSubstitution<Variable> leftNonProjVarsRenaming = getNonProjVarsRenaming(leftTranslation, rightTranslation, variableGenerator);
-        InjectiveSubstitution<Variable> rightNonProjVarsRenaming = getNonProjVarsRenaming(rightTranslation, leftTranslation, variableGenerator);
+        InjectiveSubstitution<Variable> leftNonProjVarsRenaming = getNonProjVarsRenaming(leftTranslation, rightTranslation);
+        InjectiveSubstitution<Variable> rightNonProjVarsRenaming = getNonProjVarsRenaming(rightTranslation, leftTranslation);
 
         IQTree leftTree = applyInDepthRenaming(
                 leftTranslation.iqTree.applyDescendingSubstitutionWithoutOptimizing(leftRenamingSubstitution, variableGenerator),
@@ -647,9 +644,7 @@ public class RDF4JTupleExprTranslator {
         if (substitution.isEmpty() && projectedVars.equals(child.iqTree.getVariables())) {
             return child;
         }
-
-        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
-                Sets.union(child.iqTree.getKnownVariables(), projectedVars));
+        variableGenerator.registerAdditionalVariables(Sets.union(child.iqTree.getKnownVariables(), projectedVars));
 
         IQTree subQuery = child.iqTree.applyDescendingSubstitutionWithoutOptimizing(substitution, variableGenerator);
 
@@ -669,8 +664,8 @@ public class RDF4JTupleExprTranslator {
     private TranslationResult translate(Union union) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         TranslationResult leftTranslation = translate(union.getLeftArg());
         TranslationResult rightTranslation = translate(union.getRightArg());
-
-        VariableGenerator variableGenerator = getVariableGenerator(leftTranslation, rightTranslation);
+        variableGenerator.registerAdditionalVariables(Sets.union(
+                leftTranslation.iqTree.getKnownVariables(), rightTranslation.iqTree.getKnownVariables()));
 
         ImmutableSet<Variable> leftVariables = leftTranslation.iqTree.getVariables();
         ImmutableSet<Variable> rightVariables = rightTranslation.iqTree.getVariables();
@@ -689,8 +684,8 @@ public class RDF4JTupleExprTranslator {
         ConstructionNode rightCn = iqFactory.createConstructionNode(rootVariables, nullOnRight.stream()
                 .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant())));
 
-        InjectiveSubstitution<Variable> leftNonProjVarsRenaming = getNonProjVarsRenaming(leftTranslation, rightTranslation, variableGenerator);
-        InjectiveSubstitution<Variable> rightNonProjVarsRenaming = getNonProjVarsRenaming(rightTranslation, leftTranslation, variableGenerator);
+        InjectiveSubstitution<Variable> leftNonProjVarsRenaming = getNonProjVarsRenaming(leftTranslation, rightTranslation);
+        InjectiveSubstitution<Variable> rightNonProjVarsRenaming = getNonProjVarsRenaming(rightTranslation, leftTranslation);
 
         return createTranslationResult(
                 iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(rootVariables),
@@ -792,11 +787,8 @@ public class RDF4JTupleExprTranslator {
         // So we may need to nest them
 
         // Assumption: every variable used in a definition is itself defined either in the subtree of in a previous ExtensionElem
-        ImmutableSet<Variable> allVars = ImmutableSet.<Variable>builder().
-                addAll(childTranslation.iqTree.getVariables())
-                .addAll(knownProvenanceVariables)
-                .build();
-        ValueExpressionResult<ImmutableList<Substitution<ImmutableTerm>>> varDefsResult = getVarDefs(node.getElements(), allVars);
+        ImmutableSet<Variable> childVars = childTranslation.iqTree.getVariables();
+        ValueExpressionResult<ImmutableList<Substitution<ImmutableTerm>>> varDefsResult = getVarDefs(node.getElements(), childVars);
 
         ImmutableList<Substitution<ImmutableTerm>> mergedVarDefs = varDefsResult.getResult();
         if (mergedVarDefs.isEmpty()) {
@@ -804,12 +796,9 @@ public class RDF4JTupleExprTranslator {
         }
 
         if (varDefsResult.getExistsMap().size() > 1) {
-            throw new OntopUnsupportedKGQueryException("EXISTS operator is not supported: " + node);
+            throw new OntopUnsupportedKGQueryException("Multiple EXISTS in the same operator are not supported: " + node);
         }
 
-        if (!varDefsResult.getExistsMap().isEmpty() && mergedVarDefs.size() > 1) {
-            throw new OntopUnsupportedKGQueryException("Case not supported: " + node);
-        }
         Optional<Map.Entry<Variable, ValueExpr>> exists = varDefsResult.getExistsMap().entrySet().stream()
                 .findAny();
 
@@ -884,11 +873,16 @@ public class RDF4JTupleExprTranslator {
     /** Returns the injective substitution that renames the non-projected variables from the left
      * that are also present in the right operand
      */
-    private InjectiveSubstitution<Variable> getNonProjVarsRenaming(TranslationResult left, TranslationResult right,
-                                                                   VariableGenerator variableGenerator) {
+    private InjectiveSubstitution<Variable> getNonProjVarsRenaming(TranslationResult left, TranslationResult right) {
         return Sets.intersection(
                         Sets.difference(left.iqTree.getKnownVariables(), left.iqTree.getVariables()),
                         right.iqTree.getKnownVariables()).stream()
+                .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
+    }
+
+    private InjectiveSubstitution<Variable> getRightConflictingProvenanceRenaming(TranslationResult translation, Variable provenanceVariable) {
+        return Sets.intersection(
+                        translation.iqTree.getKnownVariables(), ImmutableSet.of(provenanceVariable)).stream()
                 .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
     }
 
@@ -899,11 +893,7 @@ public class RDF4JTupleExprTranslator {
      */
 
     private ValueExpressionResult<ImmutableExpression> getFilterExpression(ValueExpr expr, Set<Variable> childVariables) {
-        ImmutableSet<Variable> allVars = ImmutableSet.<Variable>builder()
-                .addAll(childVariables)
-                .addAll(knownProvenanceVariables)
-                .build();
-        RDF4JValueExprTranslator.ExtendedTerm extendedTerm = getValueTranslator(allVars).getTerm(expr);
+        RDF4JValueExprTranslator.ExtendedTerm extendedTerm = getValueTranslator(childVariables).getTerm(expr);
 
         ImmutableTerm xsdBooleanTerm = extendedTerm.getTerm().inferType()
                 .flatMap(TermTypeInference::getTermType)
@@ -976,7 +966,7 @@ public class RDF4JTupleExprTranslator {
     }
 
     private RDF4JValueExprTranslator getValueTranslator(Set<Variable> knownVariables) {
-        return new RDF4JValueExprTranslator(knownVariables, externalBindings, treatBNodeAsVariable, termFactory, rdfFactory, typeFactory, coreUtilsFactory, functionSymbolFactory);
+        return new RDF4JValueExprTranslator(knownVariables, externalBindings, treatBNodeAsVariable, termFactory, rdfFactory, typeFactory, functionSymbolFactory, variableGenerator);
     }
 
     private static class RDF4JVarsCollector extends AbstractQueryModelVisitor<RuntimeException> {
