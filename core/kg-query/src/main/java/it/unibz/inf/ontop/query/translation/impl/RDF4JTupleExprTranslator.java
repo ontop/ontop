@@ -266,10 +266,6 @@ public class RDF4JTupleExprTranslator {
                         o -> Optional.of(translator.getTerm(o.getExpr()))
                 ));
 
-        if (orderElements.values().stream().anyMatch(t -> t.isPresent() && !t.get().getExistsMap().isEmpty())) {
-            throw new OntopUnsupportedKGQueryException("EXISTS is not supported inside an ORDER BY: " + order);
-        }
-
         ImmutableList<OrderByNode.OrderComparator> comparators = orderElements.entrySet().stream()
                 .map(e -> e.getValue()
                         .filter(t -> t.getTerm() instanceof NonGroundTerm)
@@ -278,10 +274,33 @@ public class RDF4JTupleExprTranslator {
                 .flatMap(Optional::stream)
                 .collect(ImmutableCollectors.toList());
 
+        var existsMaps = orderElements.values().stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(RDF4JValueExprTranslator.ExtendedTerm::getExistsMap)
+                .filter(map -> !map.isEmpty())
+                .collect(ImmutableCollectors.toList());
+        if (existsMaps.size() > 1) {
+            throw new OntopUnsupportedKGQueryException("Multiple EXISTS in the same operator are not supported: " + order);
+        }
+
+        IQTree childTree;
+        if (existsMaps.isEmpty()) {
+            childTree = child.iqTree;
+        } else {
+            if (existsMaps.get(0).size() > 1) {
+                throw new OntopUnsupportedKGQueryException("Multiple EXISTS in the same operator are not supported: " + order);
+            }
+            Map.Entry<Variable, ValueExpr> entry = existsMaps.get(0).entrySet().stream()
+                    .findFirst()
+                    .orElseThrow(() -> new MinorOntopInternalBugException("No entry in the EXISTS map"));
+            childTree = translateExists((Exists) entry.getValue(), entry.getKey(), child);
+        }
+
         return comparators.isEmpty()
-                ? child
+                ? createTranslationResult(childTree, child.nullableVariables)
                 : createTranslationResult(
-                    iqFactory.createUnaryIQTree(iqFactory.createOrderByNode(comparators), child.iqTree),
+                    iqFactory.createUnaryIQTree(iqFactory.createOrderByNode(comparators), childTree),
                     child.nullableVariables);
     }
 

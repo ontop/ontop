@@ -349,25 +349,35 @@ public class ExistsTest extends AbstractRDF4JTest {
         runQueryAndCompare(sparql, ImmutableList.of("1", "1", "1", "1", "1", "1"));
     }
 
-    // exists inside order by not yet supported
-    @Test(expected = QueryEvaluationException.class)
-    public void testExistsWithOrderBy() {
+    @Test
+    public void testExistsWithOrderByNullsFirst() {
         String sparql = "PREFIX  : <http://person.example.org/> \n" +
                 "SELECT ?v WHERE {\n" +
                 "   ?v a :Person .\n" +
-                "} ORDER BY DESC(EXISTS { ?v :firstName ?fname })";
+                "} ORDER BY DESC(EXISTS { ?v :firstName ?fname }) DESC(?v) \n";
 
-        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1", "http://person.example.org/person/2", "http://person.example.org/person/5",
-                "http://person.example.org/person/3", "http://person.example.org/person/4", "http://person.example.org/person/6"));
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/5", "http://person.example.org/person/2", "http://person.example.org/person/1",
+                "http://person.example.org/person/6", "http://person.example.org/person/4", "http://person.example.org/person/3"));
     }
 
-    // exists inside order by not yet supported
-    @Test(expected = QueryEvaluationException.class)
-    public void testExistsWithOrderByNoSharedVars() {
+    @Test
+    public void testExistsWithOrderByNullsLast() {
         String sparql = "PREFIX  : <http://person.example.org/> \n" +
                 "SELECT ?v WHERE {\n" +
                 "   ?v a :Person .\n" +
-                "} ORDER BY DESC(EXISTS { ?s :firstName ?fname })";
+                "} ORDER BY ASC(EXISTS { ?v :firstName ?fname }) DESC(?v) \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/6", "http://person.example.org/person/4", "http://person.example.org/person/3",
+                "http://person.example.org/person/5", "http://person.example.org/person/2", "http://person.example.org/person/1"));
+    }
+
+    // multiple exists are not supported
+    @Test(expected = QueryEvaluationException.class)
+    public void testOrderByMultipleExists() {
+        String sparql = "PREFIX  : <http://person.example.org/> \n" +
+                "SELECT ?v WHERE {\n" +
+                "   ?v a :Person .\n" +
+                "} ORDER BY DESC(EXISTS { ?s :firstName ?fname }) ASC(EXISTS { ?s :lastName ?lname }) \n";
 
         runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1", "http://person.example.org/person/2", "http://person.example.org/person/3",
                 "http://person.example.org/person/4", "http://person.example.org/person/5", "http://person.example.org/person/6"));
