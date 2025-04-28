@@ -197,15 +197,29 @@ public class RDF4JTupleExprTranslator {
         TranslationResult child = translate(group.getArg());
 
         // Assumption: every variable used in a definition is itself defined either in the subtree of in a previous ExtensionElem
-        ImmutableList<Substitution<ImmutableTerm>> mergedVarDefs =
+        ValueExpressionResult<ImmutableList<Substitution<ImmutableTerm>>> varDefsResult =
                 getGroupVarDefs(group.getGroupElements(), child.iqTree.getVariables());
 
+        ImmutableList<Substitution<ImmutableTerm>> mergedVarDefs = varDefsResult.getResult();
         if (mergedVarDefs.size() > 1) {
             throw new Sparql2IqConversionException("Unexpected parsed SPARQL query: nested complex projections appear " +
                     "within an RDF4J Group node: " + group);
         }
-        ImmutableSet<Variable> childVariables = child.iqTree.getVariables();
 
+        IQTree childTree;
+        if (varDefsResult.existsMap.isEmpty()) {
+            childTree = child.iqTree;
+        } else {
+            if (varDefsResult.getExistsMap().size() > 1) {
+                throw new OntopUnsupportedKGQueryException("Multiple EXISTS in the same operator are not supported: " + group);
+            }
+            Map.Entry<Variable, ValueExpr> entry = varDefsResult.getExistsMap().entrySet().stream()
+                    .findFirst()
+                    .orElseThrow(() -> new MinorOntopInternalBugException("No entry in the EXISTS map"));
+            childTree = translateExists((Exists) entry.getValue(), entry.getKey(), child);
+        }
+
+        ImmutableSet<Variable> childVariables = childTree.getVariables();
         AggregationNode an = iqFactory.createAggregationNode(
                 group.getGroupBindingNames().stream()
                         .map(termFactory::getVariable)
@@ -213,7 +227,7 @@ public class RDF4JTupleExprTranslator {
                         .collect(ImmutableCollectors.toSet()),
                 mergedVarDefs.get(0).transform(t -> (ImmutableFunctionalTerm)t)); // only one substitution guaranteed by the if
 
-        UnaryIQTree aggregationTree = iqFactory.createUnaryIQTree(an, child.iqTree);
+        UnaryIQTree aggregationTree = iqFactory.createUnaryIQTree(an, childTree);
 
         ImmutableSet<Variable> nullableVariables = Sets.union(
                         Sets.intersection(an.getGroupingVariables(), child.nullableVariables),
@@ -224,22 +238,22 @@ public class RDF4JTupleExprTranslator {
         return createTranslationResult(iqTree, nullableVariables);
     }
 
-    private ImmutableList<Substitution<ImmutableTerm>> getGroupVarDefs(List<GroupElem> list,
+    private ValueExpressionResult<ImmutableList<Substitution<ImmutableTerm>>> getGroupVarDefs(List<GroupElem> list,
                                                                        ImmutableSet<Variable> childVariables) throws OntopUnsupportedKGQueryException {
         List<VarDef> result = new ArrayList<>();
         Set<Variable> allowedVars = new HashSet<>(childVariables); // mutable: accumulator
+        ImmutableMap.Builder<Variable, ValueExpr> existsBuilder = ImmutableMap.builder();
 
         for (GroupElem elem : list) {
             RDF4JValueExprTranslator.ExtendedTerm term = getValueTranslator(allowedVars).getTerm(elem.getOperator());
-            if (!term.getExistsMap().isEmpty()) {
-                throw new OntopUnsupportedKGQueryException("EXISTS is not supported inside aggregation functions: " + elem);
-            }
+
             Variable definedVar = termFactory.getVariable(elem.getName());
             allowedVars.add(definedVar);
 
             result.add(new VarDef(definedVar, term.getTerm()));
+            existsBuilder.putAll(term.getExistsMap());
         }
-        return mergeVarDefs(ImmutableList.copyOf(result));
+        return new ValueExpressionResult<>(mergeVarDefs(ImmutableList.copyOf(result)), existsBuilder.build());
     }
 
     private TranslationResult translate(Order order) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
@@ -644,7 +658,7 @@ public class RDF4JTupleExprTranslator {
         if (substitution.isEmpty() && projectedVars.equals(child.iqTree.getVariables())) {
             return child;
         }
-        variableGenerator.registerAdditionalVariables(Sets.union(child.iqTree.getKnownVariables(), projectedVars));
+        //variableGenerator.registerAdditionalVariables(Sets.union(child.iqTree.getKnownVariables(), projectedVars));
 
         IQTree subQuery = child.iqTree.applyDescendingSubstitutionWithoutOptimizing(substitution, variableGenerator);
 

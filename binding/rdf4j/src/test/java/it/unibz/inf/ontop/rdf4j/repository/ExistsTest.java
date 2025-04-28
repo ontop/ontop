@@ -311,8 +311,7 @@ public class ExistsTest extends AbstractRDF4JTest {
                 "http://person.example.org/person/5"));
     }
 
-    // exists inside aggregation not supported
-    @Test(expected = QueryEvaluationException.class)
+    @Test
     public void testExistsWithAggregation() {
         String sparql = "PREFIX  : <http://person.example.org/> \n" +
                 "SELECT ?person (SUM(IF(EXISTS { ?person :firstName ?fname . } , 1, 0)) AS ?v)\n" +
@@ -324,7 +323,20 @@ public class ExistsTest extends AbstractRDF4JTest {
         runQueryAndCompare(sparql, ImmutableList.of("1", "1", "0", "0", "1", "0"));
     }
 
-    // exists inside aggregation not yet supported
+    @Test
+    public void testAggregationCardinality() {
+        String sparql = "PREFIX  : <http://person.example.org/> \n" +
+                "SELECT ?person (GROUP_CONCAT(IF(EXISTS { ?person :nickname ?nick . }, ?nick, \"\")) AS ?v)\n" +
+                "WHERE {\n" +
+                "  ?person a :Person ;" +
+                "           :nickname ?nick\n" +
+                "} GROUP BY ?person \n" +
+                "ORDER BY ?person";
+
+        runQueryAndCompare(sparql, ImmutableList.of("Roger Smith", "John", "Corto Maltese", "Rog", "Spence Spencer"));
+    }
+
+    // non overlapping variables are not supported
     @Test(expected = QueryEvaluationException.class)
     public void testExistsWithAggregationNoSharedVars() {
         String sparql = "PREFIX  : <http://person.example.org/> \n" +
@@ -399,4 +411,26 @@ public class ExistsTest extends AbstractRDF4JTest {
         runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1"));
     }
 
+    @Test(expected = QueryEvaluationException.class)
+    public void testExistsConjunction1() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?v WHERE {\n" +
+                "   ?v a :Person .\n" +
+                "   BIND(EXISTS { ?v :firstName ?fname } && EXISTS { ?v :lastName ?lname } AS ?hasFullName)\n" +
+                "   FILTER(?hasFullName = true)\n" +
+                "} ORDER BY ?v \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1"));
+    }
+
+    @Test(expected = QueryEvaluationException.class)
+    public void testExistsConjunction2() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?v WHERE {\n" +
+                "   ?v a :Person .\n" +
+                "   FILTER(EXISTS { ?v :firstName ?fname } && EXISTS { ?v :lastName ?lname } )\n" +
+                "} ORDER BY ?v \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1"));
+    }
 }
