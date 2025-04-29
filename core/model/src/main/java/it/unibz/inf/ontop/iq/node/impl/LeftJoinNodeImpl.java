@@ -205,7 +205,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     /**
-     * NB: the constraint is only propagate to the left child
+     * NB: the constraint is only propagated to the left child
      */
     @Override
     public IQTree applyDescendingSubstitution(

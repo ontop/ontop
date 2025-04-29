@@ -280,8 +280,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 .map(c -> cardinalityMultimap.containsKey(c)
                         ? c
                         : iqFactory.createUnaryIQTree(
-                        iqFactory.createSliceNode(0, limit - sum),
-                        c))
+                        iqFactory.createSliceNode(0, limit - sum), c))
                 .collect(ImmutableCollectors.toList());
 
         IQTree newUnionTree = iqFactory.createNaryIQTree(childRoot, newChildren)
