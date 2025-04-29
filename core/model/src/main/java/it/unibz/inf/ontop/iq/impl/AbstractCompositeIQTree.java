@@ -139,12 +139,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         return toString().hashCode();
     }
 
-    protected Optional<Substitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution)
-            throws IQTreeTools.UnsatisfiableDescendingSubstitutionException {
-        return iqTreeTools.normalizeDescendingSubstitution(this, descendingSubstitution);
-    }
-
     @Override
     public IQTree applyDescendingSubstitution(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
@@ -154,14 +148,14 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
         try {
             Optional<Substitution<? extends VariableOrGroundTerm>> normalizedSubstitution =
-                    normalizeDescendingSubstitution(descendingSubstitution);
+                    iqTreeTools.normalizeDescendingSubstitution(this, descendingSubstitution);
 
             Optional<ImmutableExpression> newConstraint = normalizeConstraint(constraint, descendingSubstitution);
 
             return normalizedSubstitution
                     .flatMap(s -> iqTreeTools.extractFreshRenaming(s, variables))
                     // Fresh renaming
-                    .map(s -> applyFreshRenaming(s, true))
+                    .map(this::applyRestrictedFreshRenaming)
                     .map(t -> newConstraint
                             .map(c -> t.propagateDownConstraint(c, variableGenerator))
                             .orElse(t))
@@ -179,8 +173,16 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     @Override
     public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        return applyFreshRenaming(freshRenamingSubstitution, false);
+        return applyRestrictedFreshRenaming(freshRenamingSubstitution.restrictDomainTo(getVariables()));
     }
+
+    protected IQTree applyRestrictedFreshRenaming(InjectiveSubstitution<Variable> selectedSubstitution) {
+        return selectedSubstitution.isEmpty()
+                ? this
+                : applyNonEmptyFreshRenaming(selectedSubstitution);
+    }
+
+    protected abstract IQTree applyNonEmptyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution);
 
     private Optional<ImmutableExpression> normalizeConstraint(Optional<ImmutableExpression> constraint,
                                                               Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
@@ -197,7 +199,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
                 .filter(e -> e.getVariableStream().anyMatch(newVariables::contains)));
     }
 
-    protected abstract IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution, boolean alreadyNormalized);
 
     protected abstract IQTree applyRegularDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                                  Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator);
@@ -286,4 +287,70 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         }
         return value;
     }
+
+    @Override
+    public IQTree removeDistincts() {
+        IQTreeCache treeCache = getTreeCache();
+        return treeCache.areDistinctAlreadyRemoved()
+                ? this
+                : doRemoveDistincts(treeCache);
+    }
+
+    protected abstract IQTree doRemoveDistincts(IQTreeCache treeCache);
+
+    @Override
+    public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
+        IQTreeCache treeCache = getTreeCache();
+        return treeCache.isNormalizedForOptimization()
+                ? this
+                : doNormalizeForOptimization(variableGenerator, treeCache);
+    }
+
+    protected abstract IQTree doNormalizeForOptimization(VariableGenerator variableGenerator, IQTreeCache treeCache);
+
+    @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            VariableGenerator variableGenerator) {
+        try {
+            return iqTreeTools.normalizeDescendingSubstitution(this, descendingSubstitution)
+                    .map(s -> doApplyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
+                    .orElse(this);
+        }
+        catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
+            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
+        }
+    }
+
+    protected abstract IQTree doApplyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator);
+
+    @Override
+    public IQTree replaceSubTree(IQTree subTreeToReplace, IQTree newSubTree) {
+        if (equals(subTreeToReplace))
+            return newSubTree;
+
+        ImmutableList<IQTree> newChildren = getChildren().stream()
+                .map(c -> c.replaceSubTree(subTreeToReplace, newSubTree))
+                .collect(ImmutableCollectors.toList());
+
+        return createIQTree(newChildren);
+    }
+
+    protected abstract IQTree createIQTree(ImmutableList<IQTree> newChildren);
+
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
+        IQTree newTree = doPropagateDownConstraint(constraint, variableGenerator);
+        return equals(newTree)
+                ? this
+                : newTree;
+    }
+
+    protected abstract IQTree doPropagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator);
+
+    @Override
+    public boolean isDeclaredAsEmpty() {
+        return false;
+    }
+
 }

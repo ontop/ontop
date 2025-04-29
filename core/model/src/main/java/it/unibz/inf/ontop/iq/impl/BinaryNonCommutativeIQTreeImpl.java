@@ -14,9 +14,6 @@ import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -28,10 +25,6 @@ import java.util.Optional;
 
 public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<BinaryNonCommutativeOperatorNode>
         implements BinaryNonCommutativeIQTree {
-
-    private final IQTree leftChild;
-    private final IQTree rightChild;
-
 
     /**
      * See {@link IntermediateQueryFactory#createBinaryNonCommutativeIQTree(
@@ -45,8 +38,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
                                            IntermediateQueryFactory iqFactory, TermFactory termFactory,
                                            OntopModelSettings settings, SubstitutionFactory substitutionFactory) {
         super(rootNode, ImmutableList.of(leftChild, rightChild), treeCache, iqTreeTools, iqFactory, termFactory, substitutionFactory);
-        this.leftChild = leftChild;
-        this.rightChild = rightChild;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -71,134 +62,103 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     @Override
     public IQTree getLeftChild() {
-        return leftChild;
+        return getChildren().get(0);
     }
 
     @Override
     public IQTree getRightChild() {
-        return rightChild;
+        return getChildren().get(1);
+    }
+
+    @Override
+    protected IQTree doApplyDescendingSubstitutionWithoutOptimizing(
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            VariableGenerator variableGenerator) {
+        return getRootNode().applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, getLeftChild(), getRightChild(), variableGenerator);
     }
 
 
     @Override
-    public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
-        IQTreeCache treeCache = getTreeCache();
-        if (treeCache.isNormalizedForOptimization())
-            return this;
-        return getRootNode().normalizeForOptimization(leftChild, rightChild, variableGenerator, treeCache);
+    protected IQTree doNormalizeForOptimization(VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        return getRootNode().normalizeForOptimization(getLeftChild(), getRightChild(), variableGenerator, treeCache);
     }
 
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, VariableGenerator variableGenerator) {
-        return getRootNode().liftIncompatibleDefinitions(variable, leftChild, rightChild, variableGenerator);
+        return getRootNode().liftIncompatibleDefinitions(variable, getLeftChild(), getRightChild(), variableGenerator);
     }
 
     @Override
-    protected IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, boolean alreadyNormalized) {
-        InjectiveSubstitution<Variable> selectedSubstitution = alreadyNormalized
-                ? renamingSubstitution
-                : renamingSubstitution.restrictDomainTo(getVariables());
-
-        return selectedSubstitution.isEmpty()
-                ? this
-                : getRootNode().applyFreshRenaming(renamingSubstitution, leftChild, rightChild, getTreeCache());
+    protected IQTree applyNonEmptyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return getRootNode().applyFreshRenaming(renamingSubstitution, getLeftChild(), getRightChild(), getTreeCache());
     }
 
     @Override
     protected IQTree applyRegularDescendingSubstitution(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
-        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, leftChild, rightChild, variableGenerator);
+        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getLeftChild(), getRightChild(), variableGenerator);
     }
 
-    @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            VariableGenerator variableGenerator) {
-        try {
-            return normalizeDescendingSubstitution(descendingSubstitution)
-                    .map(s -> getRootNode().applyDescendingSubstitutionWithoutOptimizing(s, leftChild, rightChild, variableGenerator))
-                    .orElse(this);
-        }
-        catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
-            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
-        }
-    }
 
     @Override
     public boolean isConstructed(Variable variable) {
-        return getVariables().contains(variable)
-                && getRootNode().isConstructed(variable, leftChild, rightChild);
+        return getVariables().contains(variable) && getRootNode().isConstructed(variable, getLeftChild(), getRightChild());
     }
 
     @Override
     protected boolean computeIsDistinct() {
-        return getRootNode().isDistinct(this, leftChild, rightChild);
-    }
-
-    @Override
-    public boolean isDeclaredAsEmpty() {
-        return false;
+        return getRootNode().isDistinct(this, getLeftChild(), getRightChild());
     }
 
     @Override
     protected VariableNullability computeVariableNullability() {
-        return getRootNode().getVariableNullability(leftChild, rightChild);
+        return getRootNode().getVariableNullability(getLeftChild(), getRightChild());
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
-        IQTree newTree = getRootNode().propagateDownConstraint(constraint, leftChild, rightChild, variableGenerator);
-        return newTree.equals(this)
-                ? this
-                : newTree;
+    protected IQTree doPropagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
+        return getRootNode().propagateDownConstraint(constraint, getLeftChild(), getRightChild(), variableGenerator);
     }
 
     @Override
-    public IQTree removeDistincts() {
-        IQTreeCache properties = getTreeCache();
-        return properties.areDistinctAlreadyRemoved()
-                ? this
-                : getRootNode().removeDistincts(leftChild, rightChild, properties);
+    protected IQTree doRemoveDistincts(IQTreeCache treeCache) {
+        return getRootNode().removeDistincts(getLeftChild(), getRightChild(), treeCache);
     }
 
     @Override
-    public IQTree replaceSubTree(IQTree subTreeToReplace, IQTree newSubTree) {
-        if (equals(subTreeToReplace))
-            return newSubTree;
-
+    protected IQTree createIQTree(ImmutableList<IQTree> newChildren) {
         return iqFactory.createBinaryNonCommutativeIQTree(getRootNode(),
-                leftChild.replaceSubTree(subTreeToReplace, newSubTree),
-                rightChild.replaceSubTree(subTreeToReplace, newSubTree));
+                newChildren.get(0), newChildren.get(1));
     }
 
     @Override
     protected ImmutableSet<Substitution<NonVariableTerm>> computePossibleVariableDefinitions() {
-        return getRootNode().getPossibleVariableDefinitions(leftChild, rightChild);
+        return getRootNode().getPossibleVariableDefinitions(getLeftChild(), getRightChild());
     }
 
     @Override
     protected void validateNode() throws InvalidIntermediateQueryException {
-        getRootNode().validateNode(leftChild, rightChild);
+        getRootNode().validateNode(getLeftChild(), getRightChild());
     }
 
     @Override
     protected ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints() {
-        return getRootNode().inferUniqueConstraints(leftChild, rightChild);
+        return getRootNode().inferUniqueConstraints(getLeftChild(), getRightChild());
     }
 
     @Override
     protected ImmutableSet<Variable> computeStrictDependents() {
-        return getRootNode().inferStrictDependents(this, leftChild, rightChild);
+        return getRootNode().inferStrictDependents(this, getLeftChild(), getRightChild());
     }
 
     @Override
     protected VariableNonRequirement computeVariableNonRequirement() {
-        return getRootNode().computeNotInternallyRequiredVariables(leftChild, rightChild);
+        return getRootNode().computeNotInternallyRequiredVariables(getLeftChild(), getRightChild());
     }
 
     @Override
     protected FunctionalDependencies computeFunctionalDependencies() {
-        return getRootNode().inferFunctionalDependencies(leftChild, rightChild, inferUniqueConstraints(), getVariables());
+        return getRootNode().inferFunctionalDependencies(getLeftChild(), getRightChild(), inferUniqueConstraints(), getVariables());
     }
 }
