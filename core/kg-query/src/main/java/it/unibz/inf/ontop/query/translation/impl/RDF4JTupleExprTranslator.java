@@ -213,10 +213,10 @@ public class RDF4JTupleExprTranslator {
             if (varDefsResult.getExistsMap().size() > 1) {
                 throw new OntopUnsupportedKGQueryException("Multiple EXISTS in the same operator are not supported: " + group);
             }
-            Map.Entry<Variable, ValueExpr> entry = varDefsResult.getExistsMap().entrySet().stream()
+            Map.Entry<Variable, Exists> entry = varDefsResult.getExistsMap().entrySet().stream()
                     .findFirst()
                     .orElseThrow(() -> new MinorOntopInternalBugException("No entry in the EXISTS map"));
-            childTree = translateExists((Exists) entry.getValue(), entry.getKey(), child);
+            childTree = translateExists(entry.getValue(), entry.getKey(), child);
         }
 
         ImmutableSet<Variable> childVariables = childTree.getVariables();
@@ -242,7 +242,7 @@ public class RDF4JTupleExprTranslator {
                                                                        ImmutableSet<Variable> childVariables) throws OntopUnsupportedKGQueryException {
         List<VarDef> result = new ArrayList<>();
         Set<Variable> allowedVars = new HashSet<>(childVariables); // mutable: accumulator
-        ImmutableMap.Builder<Variable, ValueExpr> existsBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, Exists> existsBuilder = ImmutableMap.builder();
 
         for (GroupElem elem : list) {
             RDF4JValueExprTranslator.ExtendedTerm term = getValueTranslator(allowedVars).getTerm(elem.getOperator());
@@ -291,10 +291,10 @@ public class RDF4JTupleExprTranslator {
             if (existsMaps.get(0).size() > 1) {
                 throw new OntopUnsupportedKGQueryException("Multiple EXISTS in the same operator are not supported: " + order);
             }
-            Map.Entry<Variable, ValueExpr> entry = existsMaps.get(0).entrySet().stream()
+            Map.Entry<Variable, Exists> entry = existsMaps.get(0).entrySet().stream()
                     .findFirst()
                     .orElseThrow(() -> new MinorOntopInternalBugException("No entry in the EXISTS map"));
-            childTree = translateExists((Exists) entry.getValue(), entry.getKey(), child);
+            childTree = translateExists(entry.getValue(), entry.getKey(), child);
         }
 
         return comparators.isEmpty()
@@ -454,18 +454,17 @@ public class RDF4JTupleExprTranslator {
             throw new OntopUnsupportedKGQueryException("Multiple EXISTS in the same operator are not supported: " + filter);
         }
 
-        Map.Entry<Variable, ValueExpr> exists = filterCondition.getExistsMap().entrySet().stream()
+        Map.Entry<Variable, Exists> exists = filterCondition.getExistsMap().entrySet().stream()
                 .findAny()
                 .orElseThrow(() -> new MinorOntopInternalBugException("No EXISTS subquery found in filter: " + filter));
 
-        IQTree existsSubTree = translateExists((Exists) exists.getValue(), exists.getKey(), child);
+        IQTree existsSubTree = translateExists(exists.getValue(), exists.getKey(), child);
         return createTranslationResult(
                 iqFactory.createUnaryIQTree(iqFactory.createFilterNode(filterCondition.getResult()), existsSubTree),
                 child.nullableVariables);
     }
 
     private IQTree translateExists(Exists exists, Variable rightProvenanceVar, TranslationResult leftTranslation) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
-        variableGenerator.registerAdditionalVariables(ImmutableList.of(rightProvenanceVar));
         TranslationResult rightTranslation = translate(exists.getSubQuery());
 
         checkIfExistsIsTranslatable(leftTranslation, rightTranslation, exists.getSubQuery());
@@ -677,7 +676,6 @@ public class RDF4JTupleExprTranslator {
         if (substitution.isEmpty() && projectedVars.equals(child.iqTree.getVariables())) {
             return child;
         }
-        //variableGenerator.registerAdditionalVariables(Sets.union(child.iqTree.getKnownVariables(), projectedVars));
 
         IQTree subQuery = child.iqTree.applyDescendingSubstitutionWithoutOptimizing(substitution, variableGenerator);
 
@@ -832,7 +830,7 @@ public class RDF4JTupleExprTranslator {
             throw new OntopUnsupportedKGQueryException("Multiple EXISTS in the same operator are not supported: " + node);
         }
 
-        Optional<Map.Entry<Variable, ValueExpr>> exists = varDefsResult.getExistsMap().entrySet().stream()
+        Optional<Map.Entry<Variable, Exists>> exists = varDefsResult.getExistsMap().entrySet().stream()
                 .findAny();
 
         TranslationResult result = createTranslationResult(childTranslation.iqTree, childTranslation.nullableVariables);
@@ -849,7 +847,7 @@ public class RDF4JTupleExprTranslator {
 
             IQTree subTree;
             if (exists.isPresent()) {
-                subTree = translateExists((Exists) exists.get().getValue(), exists.get().getKey(), result);
+                subTree = translateExists(exists.get().getValue(), exists.get().getKey(), result);
             } else {
                 subTree = result.iqTree;
             }
@@ -866,7 +864,7 @@ public class RDF4JTupleExprTranslator {
                                                                                          ImmutableSet<Variable> childVars) {
         List<VarDef> result = new ArrayList<>();
         Set<Variable> allowedVars = new HashSet<>(childVars); // mutable: accumulator
-        ImmutableMap.Builder<Variable, ValueExpr> builder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, Exists> builder = ImmutableMap.builder();
 
         for (ExtensionElem elem : list) {
             if (!(elem.getExpr() instanceof Var && elem.getName().equals(((Var) elem.getExpr()).getName()))) {
@@ -1027,9 +1025,9 @@ public class RDF4JTupleExprTranslator {
 
     protected static final class ValueExpressionResult<T> {
         private final T result;
-        private final ImmutableMap<Variable, ValueExpr> existsMap;
+        private final ImmutableMap<Variable, Exists> existsMap;
 
-        public ValueExpressionResult(T result, ImmutableMap<Variable, ValueExpr> existsMap) {
+        public ValueExpressionResult(T result, ImmutableMap<Variable, Exists> existsMap) {
             this.result = result;
             this.existsMap = existsMap;
         }
@@ -1038,7 +1036,7 @@ public class RDF4JTupleExprTranslator {
             return result;
         }
 
-        public ImmutableMap<Variable, ValueExpr> getExistsMap() {
+        public ImmutableMap<Variable, Exists> getExistsMap() {
             return existsMap;
         }
     }

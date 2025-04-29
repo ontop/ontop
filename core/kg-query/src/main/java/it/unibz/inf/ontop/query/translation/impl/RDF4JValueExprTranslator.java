@@ -97,7 +97,8 @@ public class RDF4JValueExprTranslator {
             ImmutableList<ImmutableTerm> terms = extendedTerms.stream()
                     .map(ExtendedTerm::getTerm)
                     .collect(ImmutableCollectors.toList());
-            ImmutableMap<Variable, ValueExpr> existsMap = extendedTerms.stream()
+
+            ImmutableMap<Variable, Exists> existsMap = extendedTerms.stream()
                     .map(ExtendedTerm::getExistsMap)
                     .flatMap(s -> s.entrySet().stream())
                     .collect(ImmutableCollectors.toMap());
@@ -130,11 +131,12 @@ public class RDF4JValueExprTranslator {
             ExtendedTerm thenTerm = getTerm(ifExpr.getResult());
             ExtendedTerm elseTerm = getTerm(ifExpr.getAlternative());
 
-            ImmutableMap<Variable, ValueExpr> existsMap = ImmutableMap.<Variable, ValueExpr>builder()
+            ImmutableMap<Variable, Exists> existsMap = ImmutableMap.<Variable, Exists>builder()
                     .putAll(condition.getExistsMap())
                     .putAll(thenTerm.getExistsMap())
                     .putAll(elseTerm.getExistsMap())
                     .build();
+
             return new ExtendedTerm(getFunctionalTerm(SPARQL.IF,
                         convertToXsdBooleanTerm(condition.getTerm()),
                         thenTerm.getTerm(),
@@ -147,7 +149,7 @@ public class RDF4JValueExprTranslator {
                     termFactory.getRDFLiteralFunctionalTerm(freshVariable, XSD.STRING));
 
             return new ExtendedTerm(boundTerm,
-                    ImmutableMap.of(freshVariable, expr));
+                    ImmutableMap.of(freshVariable, (Exists)expr));
         }
         // other subclasses
         // SubQueryValueOperator
@@ -169,24 +171,22 @@ public class RDF4JValueExprTranslator {
         if (expr instanceof AbstractAggregateOperator) {
             AbstractAggregateOperator aggExpr = (AbstractAggregateOperator) expr;
             if (aggExpr instanceof Count) { //Unary count
-                ImmutableFunctionalTerm aggTerm = getAggregateFunctionalTerm(SPARQL.COUNT, aggExpr.isDistinct(), extendedTerm.getTerm());
-                return new ExtendedTerm(aggTerm, extendedTerm.getExistsMap());
+                return getAggregateExtendedTerm(SPARQL.COUNT, aggExpr.isDistinct(), extendedTerm);
             }
             if (aggExpr instanceof Avg) {
-                ImmutableFunctionalTerm aggTerm = getAggregateFunctionalTerm(SPARQL.AVG, aggExpr.isDistinct(), extendedTerm.getTerm());
-                return new ExtendedTerm(aggTerm, extendedTerm.getExistsMap());
+                return getAggregateExtendedTerm(SPARQL.AVG, aggExpr.isDistinct(), extendedTerm);
             }
             if (aggExpr instanceof Sum) {
                 return new ExtendedTerm(getAggregateFunctionalTerm(SPARQL.SUM, aggExpr.isDistinct(), extendedTerm.getTerm()), extendedTerm.getExistsMap());
             }
             if (aggExpr instanceof Min) {
-                return new ExtendedTerm(getFunctionalTerm(SPARQL.MIN, extendedTerm.getTerm()), extendedTerm.getExistsMap());
+                return getFunctionalExtendedTerm(SPARQL.MIN, extendedTerm);
             }
             if (aggExpr instanceof Max) {
-                return new ExtendedTerm(getFunctionalTerm(SPARQL.MAX, extendedTerm.getTerm()), extendedTerm.getExistsMap());
+                return getFunctionalExtendedTerm(SPARQL.MAX, extendedTerm);
             }
             if (aggExpr instanceof Sample) {
-                return new ExtendedTerm(getFunctionalTerm(SPARQL.SAMPLE, extendedTerm.getTerm()), extendedTerm.getExistsMap());
+                return getFunctionalExtendedTerm(SPARQL.SAMPLE, extendedTerm);
             }
             if (aggExpr instanceof GroupConcat) {
                 String separator = Optional.ofNullable(((GroupConcat) aggExpr).getSeparator())
@@ -213,26 +213,26 @@ public class RDF4JValueExprTranslator {
         }
         if (expr instanceof IsNumeric) {
             // isNumeric (Sec 17.4.2.4) for checking whether the argument is a numeric value
-            return new ExtendedTerm(getFunctionalTerm(SPARQL.IS_NUMERIC, extendedTerm.getTerm()), extendedTerm.getExistsMap());
+            return getFunctionalExtendedTerm(SPARQL.IS_NUMERIC, extendedTerm);
         }
         if (expr instanceof IsLiteral) {
-            return new ExtendedTerm(getFunctionalTerm(SPARQL.IS_LITERAL, extendedTerm.getTerm()), extendedTerm.getExistsMap());
+            return getFunctionalExtendedTerm(SPARQL.IS_LITERAL, extendedTerm);
         }
         if (expr instanceof IsURI) {
-            return new ExtendedTerm(getFunctionalTerm(SPARQL.IS_IRI, extendedTerm.getTerm()), extendedTerm.getExistsMap());
+            return getFunctionalExtendedTerm(SPARQL.IS_IRI, extendedTerm);
         }
         if (expr instanceof Str) {
-            return new ExtendedTerm(getFunctionalTerm(SPARQL.STR, extendedTerm.getTerm()), extendedTerm.getExistsMap());
+            return getFunctionalExtendedTerm(SPARQL.STR, extendedTerm);
         }
         if (expr instanceof Datatype) {
-            return new ExtendedTerm(getFunctionalTerm(SPARQL.DATATYPE, extendedTerm.getTerm()), extendedTerm.getExistsMap());
+            return getFunctionalExtendedTerm(SPARQL.DATATYPE, extendedTerm);
         }
         if (expr instanceof IsBNode) {
-            return new ExtendedTerm(getFunctionalTerm(SPARQL.IS_BLANK, extendedTerm.getTerm()), extendedTerm.getExistsMap());
+            return getFunctionalExtendedTerm(SPARQL.IS_BLANK, extendedTerm);
         }
         if (expr instanceof Lang) {
             if (expr.getArg() instanceof Var) {
-                return new ExtendedTerm(getFunctionalTerm(SPARQL.LANG, extendedTerm.getTerm()), extendedTerm.getExistsMap());
+                return getFunctionalExtendedTerm(SPARQL.LANG, extendedTerm);
             }
             throw new RuntimeException(new OntopUnsupportedKGQueryException("A variable or a value is expected in " + expr));
         }
@@ -257,11 +257,21 @@ public class RDF4JValueExprTranslator {
         throw new RuntimeException(new OntopUnsupportedKGQueryException("The expression " + expr + " is not supported yet!"));
     }
 
+    private ExtendedTerm getAggregateExtendedTerm(String functionName, boolean isDistinct, ExtendedTerm extendedTerm) {
+        ImmutableFunctionalTerm aggTerm = getAggregateFunctionalTerm(functionName, isDistinct, extendedTerm.getTerm());
+        return new ExtendedTerm(aggTerm, extendedTerm.getExistsMap());
+    }
+
+    private ExtendedTerm getFunctionalExtendedTerm(String functionName, ExtendedTerm extendedTerm) {
+        return new ExtendedTerm(getFunctionalTerm(functionName, extendedTerm.getTerm()), extendedTerm.getExistsMap());
+    }
+
     private ExtendedTerm getTerm(BinaryValueOperator expr) {
 
         ExtendedTerm extendedTerm1 = getTerm(expr.getLeftArg());
         ExtendedTerm extendedTerm2 = getTerm(expr.getRightArg());
-        ImmutableMap<Variable, ValueExpr> existsMap = ImmutableMap.<Variable, ValueExpr>builder()
+
+        ImmutableMap<Variable, Exists> existsMap = ImmutableMap.<Variable, Exists>builder()
                 .putAll(extendedTerm1.getExistsMap())
                 .putAll(extendedTerm2.getExistsMap())
                 .build();
@@ -288,7 +298,7 @@ public class RDF4JValueExprTranslator {
             Regex reg = (Regex) expr;
             if (reg.getFlagsArg() != null) {
                 ExtendedTerm flagsTerm = getTerm(reg.getFlagsArg());
-                ImmutableMap<Variable, ValueExpr> updatedExistsMap = ImmutableMap.<Variable, ValueExpr>builder()
+                ImmutableMap<Variable, Exists> updatedExistsMap = ImmutableMap.<Variable, Exists>builder()
                         .putAll(existsMap)
                         .putAll(flagsTerm.getExistsMap())
                         .build();
@@ -347,7 +357,8 @@ public class RDF4JValueExprTranslator {
         ImmutableList<ImmutableTerm> terms = extendedTerms.stream()
                 .map(ExtendedTerm::getTerm)
                 .collect(ImmutableCollectors.toList());
-        ImmutableMap<Variable, ValueExpr> existsMap = extendedTerms.stream()
+
+        ImmutableMap<Variable, Exists> existsMap = extendedTerms.stream()
                 .map(ExtendedTerm::getExistsMap)
                 .flatMap(s -> s.entrySet().stream())
                 .collect(ImmutableCollectors.toMap());
@@ -468,19 +479,19 @@ public class RDF4JValueExprTranslator {
 
     public static class ExtendedTerm {
         private final ImmutableTerm term;
-        private final ImmutableMap<Variable, ValueExpr> existsMap ;
+        private final ImmutableMap<Variable, Exists> existsMap ;
 
         public ExtendedTerm(ImmutableTerm term) {
             this.existsMap = ImmutableMap.of();
             this.term = term;
         }
 
-        public ExtendedTerm(ImmutableTerm term, ImmutableMap<Variable, ValueExpr> existsMap) {
+        public ExtendedTerm(ImmutableTerm term, ImmutableMap<Variable, Exists> existsMap) {
             this.existsMap = existsMap;
             this.term = term;
         }
 
-        public ImmutableMap<Variable, ValueExpr> getExistsMap() {
+        public ImmutableMap<Variable, Exists> getExistsMap() {
             return ImmutableMap.copyOf(existsMap);
         }
 
