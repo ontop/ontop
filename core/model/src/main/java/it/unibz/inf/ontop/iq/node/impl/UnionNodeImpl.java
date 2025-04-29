@@ -53,17 +53,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public void acceptVisitor(QueryNodeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public UnionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
-
-    @Override
     public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(ImmutableList<IQTree> children) {
         return children.stream()
                 .flatMap(c -> c.getPossibleVariableDefinitions().stream())
@@ -274,22 +263,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 children.stream()
                         .map(c -> c.propagateDownConstraint(constraint, variableGenerator))
                         .collect(ImmutableCollectors.toList()));
-    }
-
-    @Override
-    public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, ImmutableList<IQTree> children) {
-        return transformer.transformUnion(tree,this, children);
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer,
-                                    ImmutableList<IQTree> children, T context) {
-        return transformer.transformUnion(tree,this, children, context);
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor, ImmutableList<IQTree> children) {
-        return visitor.visitUnion(this, children);
     }
 
     @Override

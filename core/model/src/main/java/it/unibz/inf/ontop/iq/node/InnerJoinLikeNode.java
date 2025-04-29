@@ -9,9 +9,5 @@ import java.util.Optional;
 public interface InnerJoinLikeNode extends CommutativeJoinNode {
 
     @Override
-    InnerJoinLikeNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException;
-
-    @Override
     InnerJoinLikeNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
 }

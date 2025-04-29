@@ -3,9 +3,13 @@ package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -29,10 +33,28 @@ public interface ValuesNode extends LeafIQTree {
     Stream<Constant> getValueStream(Variable variable);
 
     @Override
-    ValuesNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException;
+    ValuesNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution);
+
 
     @Override
-    ValuesNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution);
+    default ValuesNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
+        return transformer.transform(this);
+    }
+
+    @Override
+    default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
+        return transformer.transformValues(this);
+    }
+
+    @Override
+    default <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
+        return transformer.transformValues(this, context);
+    }
+
+    @Override
+    default <T> T acceptVisitor(IQVisitor<T> visitor) {
+        return visitor.visitValues(this);
+    }
+
 
 }

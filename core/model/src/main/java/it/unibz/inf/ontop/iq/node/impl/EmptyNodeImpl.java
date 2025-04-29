@@ -43,16 +43,6 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
         this.substitutionFactory = substitutionFactory;
     }
 
-    @Override
-    public void acceptVisitor(QueryNodeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public EmptyNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
@@ -67,21 +57,6 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     @Override
     public ImmutableSet<Variable> getVariables() {
         return projectedVariables;
-    }
-
-    @Override
-    public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        return transformer.transformEmpty(this);
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
-        return transformer.transformEmpty(this, context);
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor) {
-        return visitor.visitEmpty(this);
     }
 
     @Override

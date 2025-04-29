@@ -39,16 +39,6 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
         return ImmutableSet.of();
     }
 
-    @Override
-    public void acceptVisitor(QueryNodeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public TrueNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
 
     @Override
     public String toString() {
@@ -81,20 +71,6 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
         return EMPTY_VARIABLE_SET;
     }
 
-    @Override
-    public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        return transformer.transformTrue(this);
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
-        return transformer.transformTrue(this, context);
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor) {
-        return visitor.visitTrue(this);
-    }
 
     @Override
     public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {

@@ -21,7 +21,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
     }
 
     protected DefaultRecursiveIQTreeVisitingTransformer(CoreSingletons coreSingletons) {
-        this.iqFactory = coreSingletons.getIQFactory();
+        this(coreSingletons.getIQFactory());
     }
 
     @Override

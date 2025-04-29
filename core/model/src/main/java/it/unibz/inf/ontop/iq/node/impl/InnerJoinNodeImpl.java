@@ -73,17 +73,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public void acceptVisitor(QueryNodeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public InnerJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
-
-    @Override
     public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(ImmutableList<IQTree> children) {
         return children.stream()
                 .map(IQTree::getPossibleVariableDefinitions)
@@ -252,22 +241,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .findFirst()
                 .map(e -> liftUnionChild(e.getKey(), (NaryIQTree) e.getValue(), children, variableGenerator))
                 .orElseGet(() -> iqFactory.createNaryIQTree(this, children));
-    }
-
-    @Override
-    public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, ImmutableList<IQTree> children) {
-        return transformer.transformInnerJoin(tree,this, children);
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, ImmutableList<IQTree> children,
-                             T context) {
-        return transformer.transformInnerJoin(tree,this, children, context);
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor, ImmutableList<IQTree> children) {
-        return visitor.visitInnerJoin(this, children);
     }
 
     @Override

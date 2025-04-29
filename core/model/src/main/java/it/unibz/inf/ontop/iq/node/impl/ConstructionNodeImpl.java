@@ -119,12 +119,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    public ConstructionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
-
-    @Override
     public ImmutableSet<Variable> getChildVariables() {
         return childVariables;
     }
@@ -173,21 +167,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         return iqFactory.createUnaryIQTree(this, newChild);
     }
 
-
-    @Override
-    public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
-        return transformer.transformConstruction(tree,this, child);
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
-        return transformer.transformConstruction(tree,this, child, context);
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
-        return visitor.visitConstruction(this, child);
-    }
 
     @Override
     public void validateNode(IQTree child) throws InvalidQueryNodeException, InvalidIntermediateQueryException {
@@ -494,11 +473,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     @Override
     public int hashCode() {
         return Objects.hash(projectedVariables, substitution);
-    }
-
-    @Override
-    public void acceptVisitor(QueryNodeVisitor visitor) {
-        visitor.visit(this);
     }
 
     @Override

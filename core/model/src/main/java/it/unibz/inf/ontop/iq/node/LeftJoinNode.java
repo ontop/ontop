@@ -2,7 +2,11 @@ package it.unibz.inf.ontop.iq.node;
 
 import java.util.Optional;
 
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
@@ -12,9 +16,26 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 public interface LeftJoinNode extends JoinLikeNode, BinaryNonCommutativeOperatorNode {
 
     @Override
-    LeftJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException;
+    LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
 
     @Override
-    LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
+    default IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree leftChild, IQTree rightChild) {
+        return transformer.transformLeftJoin(tree,this, leftChild, rightChild);
+    }
+
+    @Override
+    default <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree leftChild,
+                                        IQTree rightChild, T context) {
+        return transformer.transformLeftJoin(tree,this, leftChild, rightChild, context);
+    }
+
+    @Override
+    default <T> T acceptVisitor(IQVisitor<T> visitor, IQTree leftChild, IQTree rightChild) {
+        return visitor.visitLeftJoin(this, leftChild, rightChild);
+    }
+
+    @Override
+    default LeftJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
+        return transformer.transform(this);
+    }
 }

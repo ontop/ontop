@@ -104,6 +104,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         return iqFactory.createEmptyNode(newVariables);
     }
 
+    @Override
     public TrueNode transform(TrueNode trueNode) {
         return iqFactory.createTrueNode();
     }

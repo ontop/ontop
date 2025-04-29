@@ -60,20 +60,6 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         return getRootNode().getVariableNullability(getChildren());
     }
 
-    @Override
-    public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        return getRootNode().acceptTransformer(this, transformer, getChildren());
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
-        return getRootNode().acceptTransformer(this, transformer, getChildren(), context);
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor) {
-        return getRootNode().acceptVisitor(visitor, getChildren());
-    }
 
     @Override
     public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {

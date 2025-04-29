@@ -17,14 +17,6 @@ public interface QueryNode {
      *
      * To be implemented by leaf classes.
      *
-     */
-    void acceptVisitor(QueryNodeVisitor visitor);
-
-    /**
-     * "Accept" method for the "Visitor" pattern.
-     *
-     * To be implemented by leaf classes.
-     *
      * If the transformation cannot be done,
      * throw a QueryNodeTransformationException
      *

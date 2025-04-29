@@ -74,16 +74,6 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     }
 
     @Override
-    public void acceptVisitor(QueryNodeVisitor visitor) {
-        throw new UnsupportedOperationException("Should NativeNode support visitors?");
-    }
-
-    @Override
-    public LeafIQTree acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocalVariables() {
         return variables;
     }
@@ -121,21 +111,6 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     @Override
     public ImmutableMap<Variable, QuotedID> getColumnNames() {
         return columnNames;
-    }
-
-    @Override
-    public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
-        throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor) {
-        return visitor.visitNative(this);
     }
 
     @Override

@@ -43,38 +43,12 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
         this.substitutionFactory = substitutionFactory;
     }
 
-    @Override
-    public void acceptVisitor(QueryNodeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public IntensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        return transformer.transformIntensionalData(this);
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
-        return transformer.transformIntensionalData(this, context);
-    }
-
     /**
      * Intensional data nodes are assumed to correspond to triple/quad patterns, which are distinct by definition
      */
     @Override
     public boolean isDistinct() {
         return true;
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor) {
-        return visitor.visitIntensionalData(this);
     }
 
     @Override
