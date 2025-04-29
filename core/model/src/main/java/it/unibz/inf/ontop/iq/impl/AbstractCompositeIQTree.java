@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class AbstractCompositeIQTree<N extends QueryNode> implements CompositeIQTree<N> {
@@ -80,10 +81,10 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     public synchronized ImmutableSet<Variable> getVariables() {
         // Non-final
         ImmutableSet<Variable> variables = treeCache.getVariables();
-        if (variables != null)
-            return variables;
-        variables = computeVariables();
-        treeCache.setVariables(variables);
+        if (variables == null) {
+            variables = computeVariables();
+            treeCache.setVariables(variables);
+        }
         return variables;
     }
 
@@ -125,7 +126,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         return offset + subTree.getRootNode() + "\n"
                 + subTree.getChildren().stream()
                     .map(c -> printSubtree(c, childOffset))
-                    .reduce("", (c, a) -> c + a);
+                    .collect(Collectors.joining(""));
     }
 
     @Override
@@ -224,11 +225,10 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     public synchronized VariableNullability getVariableNullability() {
         // Non-final
         VariableNullability variableNullability = treeCache.getVariableNullability();
-        if (variableNullability != null)
-            return variableNullability;
-
-        variableNullability = computeVariableNullability();
-        treeCache.setVariableNullability(variableNullability);
+        if (variableNullability == null) {
+            variableNullability = computeVariableNullability();
+            treeCache.setVariableNullability(variableNullability);
+        }
         return variableNullability;
     }
 
@@ -294,11 +294,10 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     public synchronized VariableNonRequirement getVariableNonRequirement() {
         // Non-final
         VariableNonRequirement notInternallyRequiredVariables = treeCache.getVariableNonRequirement();
-        if (notInternallyRequiredVariables != null)
-            return notInternallyRequiredVariables;
-
-        notInternallyRequiredVariables = computeVariableNonRequirement();
-        treeCache.setVariableNonRequirement(notInternallyRequiredVariables);
+        if (notInternallyRequiredVariables == null) {
+            notInternallyRequiredVariables = computeVariableNonRequirement();
+            treeCache.setVariableNonRequirement(notInternallyRequiredVariables);
+        }
         return notInternallyRequiredVariables;
     }
 

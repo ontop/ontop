@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.transform.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
@@ -8,7 +9,6 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.AbstractMap;
 import java.util.Map;
 
 public abstract class LazyRecursiveIQTreeVisitingTransformer implements IQTreeVisitingTransformer {
@@ -88,16 +88,18 @@ public abstract class LazyRecursiveIQTreeVisitingTransformer implements IQTreeVi
 
     private IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
         IQTree newChild = child.acceptTransformer(this);
-        return (child == newChild) ? tree : iqFactory.createUnaryIQTree(rootNode, newChild);
+        return (child == newChild)
+                ? tree
+                : iqFactory.createUnaryIQTree(rootNode, newChild);
     }
 
-    protected ImmutableList<AbstractMap.SimpleImmutableEntry<IQTree, IQTree>> transformChildren(ImmutableList<IQTree> children) {
+    protected ImmutableList<Map.Entry<IQTree, IQTree>> transformChildren(ImmutableList<IQTree> children) {
         return children.stream()
-                .map(t -> new AbstractMap.SimpleImmutableEntry<>(t, t.acceptTransformer(this)))
+                .map(t -> Maps.immutableEntry(t, t.acceptTransformer(this)))
                 .collect(ImmutableCollectors.toList());
     }
 
-    protected ImmutableList<IQTree> extractChildren(ImmutableList<AbstractMap.SimpleImmutableEntry<IQTree, IQTree>> newChildren) {
+    protected ImmutableList<IQTree> extractChildren(ImmutableList<Map.Entry<IQTree, IQTree>> newChildren) {
         return newChildren.stream()
                 .map(Map.Entry::getValue)
                 .collect(ImmutableCollectors.toList());
@@ -105,14 +107,15 @@ public abstract class LazyRecursiveIQTreeVisitingTransformer implements IQTreeVi
 
 
     protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<AbstractMap.SimpleImmutableEntry<IQTree, IQTree>> childrenReplacement = transformChildren(children);
+        ImmutableList<Map.Entry<IQTree, IQTree>> childrenReplacement = transformChildren(children);
         return childrenReplacement.stream().allMatch(e -> e.getKey() == e.getValue())
                 ? tree
                 : iqFactory.createNaryIQTree(rootNode, extractChildren(childrenReplacement));
     }
 
     protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
-        IQTree newLeftChild = leftChild.acceptTransformer(this), newRightChild = rightChild.acceptTransformer(this);
+        IQTree newLeftChild = leftChild.acceptTransformer(this);
+        IQTree newRightChild = rightChild.acceptTransformer(this);
         return (leftChild == newLeftChild) && (rightChild == newRightChild)
                 ? tree
                 : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild);
