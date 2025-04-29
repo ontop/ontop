@@ -107,7 +107,9 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
         IQTree newTree = getRootNode().propagateDownConstraint(constraint, getChild(), variableGenerator);
-        return newTree.equals(this) ? this : newTree;
+        return newTree.equals(this)
+                ? this
+                : newTree;
     }
 
     @Override
@@ -142,7 +144,6 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @Override
     public IQTree removeDistincts() {
         IQTreeCache treeCache = getTreeCache();
-
         return treeCache.areDistinctAlreadyRemoved()
             ? this
             : getRootNode().removeDistincts(getChild(), treeCache);
