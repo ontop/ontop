@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -21,12 +20,6 @@ public interface LeftJoinNode extends JoinLikeNode, BinaryNonCommutativeOperator
     @Override
     default IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree leftChild, IQTree rightChild) {
         return transformer.transformLeftJoin(tree,this, leftChild, rightChild);
-    }
-
-    @Override
-    default <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree leftChild,
-                                        IQTree rightChild, T context) {
-        return transformer.transformLeftJoin(tree,this, leftChild, rightChild, context);
     }
 
     @Override

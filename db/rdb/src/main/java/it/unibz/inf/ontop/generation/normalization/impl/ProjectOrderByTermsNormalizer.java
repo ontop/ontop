@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeExtendedTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
@@ -26,176 +26,183 @@ import java.util.stream.Stream;
 
 public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
 
-    private final CoreSingletons coreSingletons;
     private final boolean onlyInPresenceOfDistinct;
     private final SubstitutionFactory substitutionFactory;
+    private final IntermediateQueryFactory iqFactory;
 
     protected ProjectOrderByTermsNormalizer(boolean onlyInPresenceOfDistinct, CoreSingletons coreSingletons) {
-        this.coreSingletons = coreSingletons;
         this.onlyInPresenceOfDistinct = onlyInPresenceOfDistinct;
+        this.iqFactory = coreSingletons.getIQFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-
-        return tree.acceptTransformer(new DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator>(coreSingletons) {
-            @Override
-            public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child, VariableGenerator variableGenerator) {
-                return transformConstructionSliceDistinctOrOrderByTree(tree, variableGenerator);
-            }
-
-            @Override
-            public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child, VariableGenerator variableGenerator) {
-                return transformConstructionSliceDistinctOrOrderByTree(tree, variableGenerator);
-            }
-
-            @Override
-            public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child, VariableGenerator variableGenerator) {
-                return transformConstructionSliceDistinctOrOrderByTree(tree, variableGenerator);
-            }
-
-            @Override
-            public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child, VariableGenerator variableGenerator) {
-                return transformConstructionSliceDistinctOrOrderByTree(tree, variableGenerator);
-            }
-
-            protected IQTree transformConstructionSliceDistinctOrOrderByTree(IQTree tree, VariableGenerator variableGenerator) {
-                IQTree newTree = applyTransformerToDescendantTree(tree, variableGenerator);
-
-                Decomposition decomposition = Decomposition.decomposeTree(newTree);
-
-                return decomposition.orderByNode
-                        .filter(o -> decomposition.distinctNode.isPresent() || (!onlyInPresenceOfDistinct))
-                        .map(o -> new Analysis(decomposition.distinctNode.isPresent(), decomposition.constructionNode, o.getComparators(),
-                                decomposition.distinctNode.isPresent()
-                                        ? decomposition.descendantTree
-                                        .normalizeForOptimization(variableGenerator)
-                                        .inferFunctionalDependencies()
-                                        : FunctionalDependencies.empty()))
-                        .map(a -> normalize(newTree, a, variableGenerator))
-                        .orElse(newTree);
-            }
-
-            /**
-             * Applies the transformer to a descendant tree, and rebuilds the parent tree.
-             *
-             * The root node of the parent tree must be a ConstructionNode, a SliceNode, a DistinctNode or an OrderByNode
-             */
-            private IQTree applyTransformerToDescendantTree(IQTree tree, VariableGenerator variableGenerator) {
-                Decomposition decomposition = Decomposition.decomposeTree(tree);
-
-                //Recursive
-                IQTree newDescendantTree = transform(decomposition.descendantTree, variableGenerator);
-
-                return decomposition.descendantTree.equals(newDescendantTree)
-                        ? tree
-                        : decomposition.rebuildWithNewDescendantTree(newDescendantTree, iqFactory);
-            }
-
-            private IQTree normalize(IQTree tree, Analysis analysis, VariableGenerator variableGenerator) {
-
-                ImmutableSet<Variable> projectedVariables = tree.getVariables();
-
-                ImmutableSet<ImmutableTerm> alreadyDefinedTerms = Sets.union(
-                                projectedVariables,
-                                analysis.getSubstitution().getRangeSet())
-                        .immutableCopy();
-
-                ImmutableMap<Variable, NonGroundTerm> newBindings = analysis.sortConditions.stream()
-                        .map(OrderByNode.OrderComparator::getTerm)
-                        .filter(t -> !alreadyDefinedTerms.contains(t))
-                        .distinct() // keep only the first occurrence of the sorting term
-                        .map(t -> Maps.immutableEntry(
-                                (t instanceof Variable)
-                                        ? (Variable) t
-                                        : variableGenerator.generateNewVariable(),
-                                t))
-                        .collect(ImmutableCollectors.toMap());
-
-                if (newBindings.isEmpty())
-                    return tree;
-
-                // decides whether the new bindings can be added
-                if (analysis.hasDistinct && newBindings.values().stream()
-                        .anyMatch(t -> mayImpactDistinct(t, alreadyDefinedTerms, analysis.descendantTreeFunctionalDependencies))) {
-                    throw new DistinctOrderByDialectLimitationException();
-                }
-
-                ImmutableSet<Variable> newProjectedVariables = Sets.union(projectedVariables, newBindings.keySet()).immutableCopy();
-
-                Substitution<ImmutableTerm> newSubstitution = substitutionFactory.union(
-                        newBindings.entrySet().stream().collect(substitutionFactory.toSubstitutionSkippingIdentityEntries()),
-                        analysis.getSubstitution());
-
-                ConstructionNode newConstructionNode = iqFactory.createConstructionNode(newProjectedVariables, newSubstitution);
-
-                return analysis.constructionNode
-                        .map(n -> updateTopConstructionNode(tree, newConstructionNode))
-                        .orElseGet(() -> insertConstructionNode(tree, newConstructionNode));
-            }
-
-            /**
-             * TODO: explain
-             */
-            private boolean mayImpactDistinct(ImmutableTerm term, ImmutableSet<ImmutableTerm> alreadyProjectedTerms,
-                                                FunctionalDependencies descendantTreeFunctionalDependencies) {
-                if (term instanceof ImmutableFunctionalTerm) {
-                    ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
-                    if (functionalTerm.getFunctionSymbol() instanceof NonDeterministicDBFunctionSymbol)
-                        return true;
-                    else if (alreadyProjectedTerms.contains(term))
-                        return false;
-                    else
-                        return functionalTerm.getTerms().stream()
-                                // Recursive
-                                .anyMatch(t -> mayImpactDistinct(t, alreadyProjectedTerms, descendantTreeFunctionalDependencies));
-                }
-                else if (term instanceof Variable) {
-                    if (alreadyProjectedTerms.contains(term))
-                        return false;
-                    return descendantTreeFunctionalDependencies.getDeterminantsOf((Variable) term).stream()
-                            .noneMatch(alreadyProjectedTerms::containsAll);
-                }
-                // Constant
-                else
-                    return false;
-            }
-
-            /**
-             * Recursive
-             */
-            private IQTree updateTopConstructionNode(IQTree tree, ConstructionNode newConstructionNode) {
-                QueryNode rootNode = tree.getRootNode();
-                if (rootNode instanceof ConstructionNode)
-                    return iqFactory.createUnaryIQTree(newConstructionNode,
-                            ((UnaryIQTree)tree).getChild());
-                else if (rootNode instanceof UnaryOperatorNode)
-                    return iqFactory.createUnaryIQTree(
-                            (UnaryOperatorNode) rootNode,
-                            // Recursive
-                            updateTopConstructionNode(((UnaryIQTree)tree).getChild(), newConstructionNode));
-                else
-                    throw new MinorOntopInternalBugException("Was expected to reach a ConstructionNode before a non-unary node");
-            }
-
-            /**
-             * Recursive
-             */
-            private IQTree insertConstructionNode(IQTree tree, ConstructionNode newConstructionNode) {
-                QueryNode rootNode = tree.getRootNode();
-                if ((rootNode instanceof DistinctNode)
-                        || (rootNode instanceof SliceNode))
-                    return iqFactory.createUnaryIQTree(
-                            (UnaryOperatorNode) rootNode,
-                            // Recursive
-                            insertConstructionNode(((UnaryIQTree)tree).getChild(), newConstructionNode));
-                else
-                    return iqFactory.createUnaryIQTree(newConstructionNode, tree);
-            }
-        }, variableGenerator);
+        return tree.acceptTransformer(new Transformer(variableGenerator));
     }
 
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
+        private final VariableGenerator variableGenerator;
+
+        Transformer(VariableGenerator variableGenerator) {
+            super(ProjectOrderByTermsNormalizer.this.iqFactory);
+            this.variableGenerator = variableGenerator;
+        }
+
+        @Override
+        public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+            return transformConstructionSliceDistinctOrOrderByTree(tree);
+        }
+
+        @Override
+        public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
+            return transformConstructionSliceDistinctOrOrderByTree(tree);
+        }
+
+        @Override
+        public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
+            return transformConstructionSliceDistinctOrOrderByTree(tree);
+        }
+
+        @Override
+        public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+            return transformConstructionSliceDistinctOrOrderByTree(tree);
+        }
+
+        private IQTree transformConstructionSliceDistinctOrOrderByTree(IQTree tree) {
+            IQTree newTree = applyTransformerToDescendantTree(tree);
+
+            Decomposition decomposition = Decomposition.decomposeTree(newTree);
+
+            return decomposition.orderByNode
+                    .filter(o -> decomposition.distinctNode.isPresent() || (!onlyInPresenceOfDistinct))
+                    .map(o -> new Analysis(decomposition.distinctNode.isPresent(), decomposition.constructionNode, o.getComparators(),
+                            decomposition.distinctNode.isPresent()
+                                    ? decomposition.descendantTree
+                                    .normalizeForOptimization(variableGenerator)
+                                    .inferFunctionalDependencies()
+                                    : FunctionalDependencies.empty()))
+                    .map(a -> normalize(newTree, a))
+                    .orElse(newTree);
+        }
+
+        /**
+         * Applies the transformer to a descendant tree, and rebuilds the parent tree.
+         *
+         * The root node of the parent tree must be a ConstructionNode, a SliceNode, a DistinctNode or an OrderByNode
+         */
+        private IQTree applyTransformerToDescendantTree(IQTree tree) {
+            Decomposition decomposition = Decomposition.decomposeTree(tree);
+
+            //Recursive
+            IQTree newDescendantTree = transform(decomposition.descendantTree);
+
+            return decomposition.descendantTree.equals(newDescendantTree)
+                    ? tree
+                    : decomposition.rebuildWithNewDescendantTree(newDescendantTree, iqFactory);
+        }
+
+        private IQTree normalize(IQTree tree, Analysis analysis) {
+
+            ImmutableSet<Variable> projectedVariables = tree.getVariables();
+
+            ImmutableSet<ImmutableTerm> alreadyDefinedTerms = Sets.union(
+                            projectedVariables,
+                            analysis.getSubstitution().getRangeSet())
+                    .immutableCopy();
+
+            ImmutableMap<Variable, NonGroundTerm> newBindings = analysis.sortConditions.stream()
+                    .map(OrderByNode.OrderComparator::getTerm)
+                    .filter(t -> !alreadyDefinedTerms.contains(t))
+                    .distinct() // keep only the first occurrence of the sorting term
+                    .map(t -> Maps.immutableEntry(
+                            (t instanceof Variable)
+                                    ? (Variable) t
+                                    : variableGenerator.generateNewVariable(),
+                            t))
+                    .collect(ImmutableCollectors.toMap());
+
+            if (newBindings.isEmpty())
+                return tree;
+
+            // decides whether the new bindings can be added
+            if (analysis.hasDistinct && newBindings.values().stream()
+                    .anyMatch(t -> mayImpactDistinct(t, alreadyDefinedTerms, analysis.descendantTreeFunctionalDependencies))) {
+                throw new DistinctOrderByDialectLimitationException();
+            }
+
+            ImmutableSet<Variable> newProjectedVariables = Sets.union(projectedVariables, newBindings.keySet()).immutableCopy();
+
+            Substitution<ImmutableTerm> newSubstitution = substitutionFactory.union(
+                    newBindings.entrySet().stream().collect(substitutionFactory.toSubstitutionSkippingIdentityEntries()),
+                    analysis.getSubstitution());
+
+            ConstructionNode newConstructionNode = iqFactory.createConstructionNode(newProjectedVariables, newSubstitution);
+
+            return analysis.constructionNode
+                    .map(n -> updateTopConstructionNode(tree, newConstructionNode))
+                    .orElseGet(() -> insertConstructionNode(tree, newConstructionNode));
+        }
+
+        /**
+         * TODO: explain
+         */
+        private boolean mayImpactDistinct(ImmutableTerm term, ImmutableSet<ImmutableTerm> alreadyProjectedTerms,
+                FunctionalDependencies descendantTreeFunctionalDependencies) {
+            if (term instanceof ImmutableFunctionalTerm) {
+                ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
+                if (functionalTerm.getFunctionSymbol() instanceof NonDeterministicDBFunctionSymbol)
+                    return true;
+                else if (alreadyProjectedTerms.contains(term))
+                    return false;
+                else
+                    return functionalTerm.getTerms().stream()
+                            // Recursive
+                            .anyMatch(t -> mayImpactDistinct(t, alreadyProjectedTerms, descendantTreeFunctionalDependencies));
+            }
+            else if (term instanceof Variable) {
+                if (alreadyProjectedTerms.contains(term))
+                    return false;
+                return descendantTreeFunctionalDependencies.getDeterminantsOf((Variable) term).stream()
+                        .noneMatch(alreadyProjectedTerms::containsAll);
+            }
+            // Constant
+            else
+                return false;
+        }
+
+        /**
+         * Recursive
+         */
+        private IQTree updateTopConstructionNode(IQTree tree, ConstructionNode newConstructionNode) {
+            QueryNode rootNode = tree.getRootNode();
+            if (rootNode instanceof ConstructionNode)
+                return iqFactory.createUnaryIQTree(newConstructionNode,
+                        ((UnaryIQTree)tree).getChild());
+            else if (rootNode instanceof UnaryOperatorNode)
+                return iqFactory.createUnaryIQTree(
+                        (UnaryOperatorNode) rootNode,
+                        // Recursive
+                        updateTopConstructionNode(((UnaryIQTree)tree).getChild(), newConstructionNode));
+            else
+                throw new MinorOntopInternalBugException("Was expected to reach a ConstructionNode before a non-unary node");
+        }
+
+        /**
+         * Recursive
+         */
+        private IQTree insertConstructionNode(IQTree tree, ConstructionNode newConstructionNode) {
+            QueryNode rootNode = tree.getRootNode();
+            if ((rootNode instanceof DistinctNode)
+                    || (rootNode instanceof SliceNode))
+                return iqFactory.createUnaryIQTree(
+                        (UnaryOperatorNode) rootNode,
+                        // Recursive
+                        insertConstructionNode(((UnaryIQTree)tree).getChild(), newConstructionNode));
+            else
+                return iqFactory.createUnaryIQTree(newConstructionNode, tree);
+        }
+    }
 
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

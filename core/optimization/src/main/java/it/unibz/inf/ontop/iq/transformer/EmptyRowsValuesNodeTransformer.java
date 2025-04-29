@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.transformer;
 
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 /**

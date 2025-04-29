@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq;
 
 import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 
@@ -15,10 +14,6 @@ public interface NaryIQTree extends CompositeIQTree<NaryOperatorNode> {
         return getRootNode().acceptTransformer(this, transformer, getChildren());
     }
 
-    @Override
-    default <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
-        return getRootNode().acceptTransformer(this, transformer, getChildren(), context);
-    }
 
     @Override
     default <T> T acceptVisitor(IQVisitor<T> visitor) {

@@ -5,7 +5,6 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -22,12 +21,6 @@ public interface InnerJoinNode extends InnerJoinLikeNode {
     @Override
     default IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, ImmutableList<IQTree> children) {
         return transformer.transformInnerJoin(tree,this, children);
-    }
-
-    @Override
-    default <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, ImmutableList<IQTree> children,
-                                        T context) {
-        return transformer.transformInnerJoin(tree,this, children, context);
     }
 
     @Override

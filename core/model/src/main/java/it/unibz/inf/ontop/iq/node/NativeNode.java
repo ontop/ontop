@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -42,11 +41,6 @@ public interface NativeNode extends LeafIQTree {
 
     @Override
     default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
-    }
-
-    @Override
-    default <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
         throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
     }
 

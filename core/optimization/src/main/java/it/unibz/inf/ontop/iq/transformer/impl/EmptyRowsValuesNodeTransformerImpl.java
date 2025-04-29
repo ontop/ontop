@@ -2,52 +2,64 @@ package it.unibz.inf.ontop.iq.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ValuesNode;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeExtendedTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transformer.EmptyRowsValuesNodeTransformer;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.impl.DBConstantImpl;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
+import java.util.AbstractCollection;
 import java.util.stream.IntStream;
 
 public class EmptyRowsValuesNodeTransformerImpl implements EmptyRowsValuesNodeTransformer {
 
-    private final CoreSingletons coreSingletons;
+    private final IntermediateQueryFactory iqFactory;
+    private final DBTypeFactory dbTypeFactory;
 
     @Inject
     protected EmptyRowsValuesNodeTransformerImpl(CoreSingletons coreSingletons) {
-        this.coreSingletons = coreSingletons;
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.dbTypeFactory = coreSingletons.getTypeFactory().getDBTypeFactory();
     }
 
     @Override
     public IQTree transform(IQTree iqTree, VariableGenerator variableGenerator) {
-        return iqTree.acceptTransformer(new DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator>(coreSingletons) {
-            /**
-             * Override transform Values method to handle case of VALUES [] () ()
-             */
-            @Override
-            public IQTree transformValues(ValuesNode valuesNode, VariableGenerator variableGenerator) {
-                return valuesNode.getValues().stream()
-                        .map(a -> a.size()).reduce(0, Integer::sum).equals(0)
-                        ? normalize(valuesNode, variableGenerator)
-                        : valuesNode;
-            }
+        return iqTree.acceptTransformer(new Transformer(variableGenerator));
+    }
 
-            private ValuesNode normalize(ValuesNode valuesNode, VariableGenerator variableGenerator) {
-                DBConstant placeholder = new DBConstantImpl("placeholder",
-                        coreSingletons.getTypeFactory().getDBTypeFactory().getDBStringType());
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
+        private final VariableGenerator variableGenerator;
 
-                ImmutableList<ImmutableList<Constant>> newValues = IntStream.range(0, valuesNode.getValues().size())
-                        .mapToObj(i -> ImmutableList.of((Constant) placeholder))
-                        .collect(ImmutableCollectors.toList());
+        Transformer(VariableGenerator variableGenerator) {
+            super(EmptyRowsValuesNodeTransformerImpl.this.iqFactory);
+            this.variableGenerator = variableGenerator;
+        }
 
-                return iqFactory.createValuesNode(ImmutableList.of(variableGenerator.generateNewVariable()), newValues);
-            }
-        }, variableGenerator);
+        /**
+         * Override transform Values method to handle the case of VALUES [] () ()
+         */
+        @Override
+        public IQTree transformValues(ValuesNode valuesNode) {
+            return valuesNode.getValues().stream().allMatch(AbstractCollection::isEmpty)
+                    ? normalize(valuesNode)
+                    : valuesNode;
+        }
+
+        private ValuesNode normalize(ValuesNode valuesNode) {
+            DBConstant placeholder = new DBConstantImpl("placeholder", dbTypeFactory.getDBStringType());
+
+            ImmutableList<ImmutableList<Constant>> newValues = IntStream.range(0, valuesNode.getValues().size())
+                    .mapToObj(i -> ImmutableList.<Constant>of(placeholder))
+                    .collect(ImmutableCollectors.toList());
+
+            return iqFactory.createValuesNode(ImmutableList.of(variableGenerator.generateNewVariable()), newValues);
+        }
     }
 }

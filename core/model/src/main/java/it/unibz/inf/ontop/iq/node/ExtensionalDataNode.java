@@ -6,17 +6,12 @@ import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -36,11 +31,6 @@ public interface ExtensionalDataNode extends LeafIQTree {
     @Override
     default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         return transformer.transformExtensionalData(this);
-    }
-
-    @Override
-    default <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
-        return transformer.transformExtensionalData(this, context);
     }
 
     @Override

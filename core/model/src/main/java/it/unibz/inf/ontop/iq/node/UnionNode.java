@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.node;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -31,12 +30,6 @@ public interface UnionNode extends ExplicitVariableProjectionNode, NaryOperatorN
     @Override
     default IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, ImmutableList<IQTree> children) {
         return transformer.transformUnion(tree,this, children);
-    }
-
-    @Override
-    default <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer,
-                                        ImmutableList<IQTree> children, T context) {
-        return transformer.transformUnion(tree,this, children, context);
     }
 
     @Override
