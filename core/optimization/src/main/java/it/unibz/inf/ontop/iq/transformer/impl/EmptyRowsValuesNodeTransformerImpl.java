@@ -15,36 +15,39 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import javax.inject.Inject;
 import java.util.stream.IntStream;
 
-public class EmptyRowsValuesNodeTransformerImpl extends DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator>
-        implements EmptyRowsValuesNodeTransformer {
+public class EmptyRowsValuesNodeTransformerImpl implements EmptyRowsValuesNodeTransformer {
 
     private final CoreSingletons coreSingletons;
 
     @Inject
     protected EmptyRowsValuesNodeTransformerImpl(CoreSingletons coreSingletons) {
-        super(coreSingletons);
         this.coreSingletons = coreSingletons;
     }
 
-    /**
-     * Ovverride transform Values method to handle case of VALUES [] () ()
-     */
     @Override
-    public IQTree transformValues(ValuesNode valuesNode, VariableGenerator variableGenerator) {
-        return valuesNode.getValues().stream()
-                .map(a -> a.size()).reduce(0, Integer::sum).equals(0)
-                ? normalize(valuesNode, variableGenerator)
-                : valuesNode;
-    }
+    public IQTree transform(IQTree iqTree, VariableGenerator variableGenerator) {
+        return iqTree.acceptTransformer(new DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator>(coreSingletons) {
+            /**
+             * Override transform Values method to handle case of VALUES [] () ()
+             */
+            @Override
+            public IQTree transformValues(ValuesNode valuesNode, VariableGenerator variableGenerator) {
+                return valuesNode.getValues().stream()
+                        .map(a -> a.size()).reduce(0, Integer::sum).equals(0)
+                        ? normalize(valuesNode, variableGenerator)
+                        : valuesNode;
+            }
 
-    private ValuesNode normalize(ValuesNode valuesNode, VariableGenerator variableGenerator) {
-        DBConstant placeholder = new DBConstantImpl("placeholder",
-                coreSingletons.getTypeFactory().getDBTypeFactory().getDBStringType());
+            private ValuesNode normalize(ValuesNode valuesNode, VariableGenerator variableGenerator) {
+                DBConstant placeholder = new DBConstantImpl("placeholder",
+                        coreSingletons.getTypeFactory().getDBTypeFactory().getDBStringType());
 
-        ImmutableList<ImmutableList<Constant>> newValues = IntStream.range(0, valuesNode.getValues().size())
+                ImmutableList<ImmutableList<Constant>> newValues = IntStream.range(0, valuesNode.getValues().size())
                         .mapToObj(i -> ImmutableList.of((Constant) placeholder))
                         .collect(ImmutableCollectors.toList());
 
-        return iqFactory.createValuesNode(ImmutableList.of(variableGenerator.generateNewVariable()), newValues);
+                return iqFactory.createValuesNode(ImmutableList.of(variableGenerator.generateNewVariable()), newValues);
+            }
+        }, variableGenerator);
     }
 }

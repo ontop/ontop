@@ -16,10 +16,6 @@ public abstract class DefaultRecursiveIQTreeExtendedTransformer<T> implements IQ
 
     protected final IntermediateQueryFactory iqFactory;
 
-    protected DefaultRecursiveIQTreeExtendedTransformer(IntermediateQueryFactory iqFactory) {
-        this.iqFactory = iqFactory;
-    }
-
     protected DefaultRecursiveIQTreeExtendedTransformer(CoreSingletons coreSingletons) {
         this.iqFactory = coreSingletons.getIQFactory();
     }

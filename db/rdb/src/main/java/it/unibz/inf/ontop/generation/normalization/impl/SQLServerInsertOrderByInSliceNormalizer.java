@@ -16,62 +16,55 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-public class SQLServerInsertOrderByInSliceNormalizer extends DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator>
-        implements DialectExtraNormalizer {
+public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNormalizer {
 
-    private final IntermediateQueryFactory iqFactory;
+    private final CoreSingletons coreSingletons;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
 
     @Inject
-    protected SQLServerInsertOrderByInSliceNormalizer(IntermediateQueryFactory iqFactory, TermFactory termFactory,
-                                                      SubstitutionFactory substitutionFactory, CoreSingletons coreSingletons) {
-        super(coreSingletons);
-        this.iqFactory = iqFactory;
-        this.substitutionFactory = substitutionFactory;
-        this.termFactory = termFactory;
+    protected SQLServerInsertOrderByInSliceNormalizer(CoreSingletons coreSingletons) {
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.coreSingletons = coreSingletons;
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator context) {
-        return super.transform(tree, context);
+        return tree.acceptTransformer(new DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator>(coreSingletons) {
+            @Override
+            public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child, VariableGenerator context) {
+                if (isOrderByPresent(child)) {
+                    return iqFactory.createUnaryIQTree(
+                            sliceNode,
+                            transform(child, context));
+                }
+                var topConstruct = iqFactory.createConstructionNode(tree.getVariables(), substitutionFactory.getSubstitution());
+                var sortVariable = context.generateNewVariable("slice_sort_column");
+                var bottomConstruct = iqFactory.createConstructionNode(
+                        Sets.union(tree.getVariables(), ImmutableSet.of(sortVariable)).immutableCopy(),
+                        substitutionFactory.getSubstitution(
+                                sortVariable,
+                                termFactory.getDBConstant("", termFactory.getTypeFactory().getDBTypeFactory().getDBStringType())));
+                var orderByNode = iqFactory.createOrderByNode(ImmutableList.of(iqFactory.createOrderComparator(sortVariable, true)));
+
+                return iqFactory.createUnaryIQTree(
+                        sliceNode,
+                        iqFactory.createUnaryIQTree(
+                                topConstruct,
+                                iqFactory.createUnaryIQTree(
+                                        orderByNode,
+                                        iqFactory.createUnaryIQTree(
+                                                bottomConstruct,
+                                                transform(child, context)))));
+            }
+        }, context);
     }
 
     private boolean isOrderByPresent(IQTree child) {
         return child.acceptVisitor(new OrderBySearcher());
     }
 
-    @Override
-    public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child, VariableGenerator context) {
-        if(isOrderByPresent(child)) {
-            return iqFactory.createUnaryIQTree(
-                    sliceNode,
-                    transform(child, context)
-            );
-        }
-        var topConstruct = iqFactory.createConstructionNode(tree.getVariables(), substitutionFactory.getSubstitution());
-        var sortVariable = context.generateNewVariable("slice_sort_column");
-        var bottomConstruct = iqFactory.createConstructionNode(
-                Sets.union(tree.getVariables(), ImmutableSet.of(sortVariable)).immutableCopy(),
-                substitutionFactory.getSubstitution(
-                        sortVariable,
-                        termFactory.getDBConstant("", termFactory.getTypeFactory().getDBTypeFactory().getDBStringType())));
-        var orderByNode = iqFactory.createOrderByNode(ImmutableList.of(iqFactory.createOrderComparator(sortVariable, true)));
-
-        return iqFactory.createUnaryIQTree(
-                sliceNode,
-                iqFactory.createUnaryIQTree(
-                        topConstruct,
-                        iqFactory.createUnaryIQTree(
-                                orderByNode,
-                                iqFactory.createUnaryIQTree(
-                                        bottomConstruct,
-                                        transform(child, context)
-                                )
-                        )
-                )
-        );
-    }
 
     /**
      * Search for an ORDER BY clause in the child IQTree. Keep searching until a node is found that will cause a new sub-query.

@@ -19,30 +19,29 @@ import java.util.stream.IntStream;
 /**
 Used to get rid of limits in sub-queries that are not necessary, for dialects like Denodo, that don't allow limits in sub-queries.
  */
-public class EliminateLimitsFromSubQueriesNormalizer extends DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator> implements DialectExtraNormalizer {
+public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNormalizer {
 
-    private CoreSingletons coreSingletons;
+    private final CoreSingletons coreSingletons;
 
     @Inject
     protected EliminateLimitsFromSubQueriesNormalizer(CoreSingletons coreSingletons) {
-        super(coreSingletons);
         this.coreSingletons = coreSingletons;
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptTransformer(this, variableGenerator);
-    }
+        return tree.acceptTransformer(new DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator>(coreSingletons) {
+            @Override
+            public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child, VariableGenerator context) {
+                //We only perform this normalization if there is no OFFSET
+                if(sliceNode.getOffset() != 0 || sliceNode.getLimit().isEmpty())
+                    return super.transformSlice(tree, sliceNode, child, context);
 
-    @Override
-    public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child, VariableGenerator context) {
-        //We only perform this normalization if there is no OFFSET
-        if(sliceNode.getOffset() != 0 || sliceNode.getLimit().isEmpty())
-            return super.transformSlice(tree, sliceNode, child, context);
+                var subLimitTransformer = new SubLimitTransformer(sliceNode.getLimit().get(), this, coreSingletons);
 
-        var subLimitTransformer = new SubLimitTransformer(sliceNode.getLimit().get(), this, coreSingletons);
-
-        return iqFactory.createUnaryIQTree(sliceNode, subLimitTransformer.transform(child, context));
+                return iqFactory.createUnaryIQTree(sliceNode, child.acceptTransformer(subLimitTransformer, context));
+            }
+        }, variableGenerator);
     }
 
     /**
@@ -50,19 +49,14 @@ public class EliminateLimitsFromSubQueriesNormalizer extends DefaultRecursiveIQT
      */
     private static class SubLimitTransformer extends DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator> {
 
-        private final EliminateLimitsFromSubQueriesNormalizer eliminateLimitsFromSubQueriesNormalizer;
+        private final DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator> eliminateLimitsFromSubQueriesNormalizer;
         private final long currentBounds;
 
-        protected SubLimitTransformer(long currentBounds, EliminateLimitsFromSubQueriesNormalizer eliminateLimitsFromSubQueriesNormalizer,
+        protected SubLimitTransformer(long currentBounds, DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator> eliminateLimitsFromSubQueriesNormalizer,
                                       CoreSingletons coreSingletons) {
             super(coreSingletons);
             this.eliminateLimitsFromSubQueriesNormalizer = eliminateLimitsFromSubQueriesNormalizer;
             this.currentBounds = currentBounds;
-        }
-
-        @Override
-        public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-            return tree.acceptTransformer(this, variableGenerator);
         }
 
         /**If the child slice has a lower limit than the parent, we cannot drop it
