@@ -14,14 +14,13 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
 /**
  * Tries to push down the expression given.
- * If it succeeds, return a IQTree, otherwise nothing.
+ * If it succeeds, return an IQTree, otherwise nothing.
  *
  * ONLY CARES about the expression given as input.
  *
@@ -32,7 +31,6 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
     private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
 
     protected BooleanExpressionPusher(ImmutableExpression expressionToPushDown,
                                       CoreSingletons coreSingletons) {
@@ -40,7 +38,6 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
         this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
-        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
     }
 
     @Override
@@ -99,9 +96,9 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
         Optional<Variable> indexVariable = rootNode.getIndexVariable();
         return expressionToPushDown.getVariableStream()
                     .anyMatch(v -> v.equals(rootNode.getOutputVariable()) ||
-                            (indexVariable.isPresent() && v.equals(indexVariable.get())))?
-                Optional.empty():
-                visitPassingUnaryNode(rootNode, child);
+                            (indexVariable.isPresent() && v.equals(indexVariable.get())))
+                ? Optional.empty()
+                : visitPassingUnaryNode(rootNode, child);
     }
 
     @Override

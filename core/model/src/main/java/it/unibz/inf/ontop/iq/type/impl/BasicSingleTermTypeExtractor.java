@@ -214,9 +214,8 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         public Optional<TermType> visitInnerJoin(InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             return children.stream()
                     .map(c -> c.acceptVisitor(this))
-                    .filter(Optional::isPresent)
-                    .findAny()
-                    .orElse(Optional.empty());
+                    .flatMap(Optional::stream)
+                    .findAny();
         }
 
         @Override

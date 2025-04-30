@@ -7,9 +7,6 @@ import java.util.stream.Stream;
 
 public class RelationExtractor extends AbstractPredicateExtractor<ExtensionalDataNode> {
 
-    public RelationExtractor() {
-    }
-
     @Override
     public Stream<ExtensionalDataNode> visitIntensionalData(IntensionalDataNode dataNode) {
         return Stream.empty();
