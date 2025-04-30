@@ -654,7 +654,7 @@ public class RDF4JTupleExprTranslator {
             Optional<ImmutableExpression> joinCondition;
             if (leftJoin.hasCondition()) {
                 ValueExpressionResult<ImmutableExpression> filterResult = getFilterExpression(leftJoin.getCondition(), variables);
-                ImmutableExpression filterExpression = filterResult.getResult();
+                ImmutableExpression filterExpression =  topSubstitution.apply(filterResult.getResult());
 
                 if (!filterResult.getExistsMap().isEmpty()) {
                     rightTree = translateExists(filterResult.getExistsMap(), new TranslationResult(rightTree, rightTranslation.nullableVariables));
