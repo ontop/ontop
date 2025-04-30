@@ -421,8 +421,8 @@ public class ExistsTest extends AbstractRDF4JTest {
         runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1"));
     }
 
-    @Test(expected = QueryEvaluationException.class)
-    public void testExistsConjunction1() {
+    @Test
+    public void testExistsBindConjunction() {
         String sparql = "PREFIX : <http://person.example.org/>\n" +
                 "SELECT ?v WHERE {\n" +
                 "   ?v a :Person .\n" +
@@ -433,8 +433,8 @@ public class ExistsTest extends AbstractRDF4JTest {
         runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1"));
     }
 
-    @Test(expected = QueryEvaluationException.class)
-    public void testExistsConjunction2() {
+    @Test
+    public void testExistsFilterConjunction() {
         String sparql = "PREFIX : <http://person.example.org/>\n" +
                 "SELECT ?v WHERE {\n" +
                 "   ?v a :Person .\n" +
@@ -443,4 +443,118 @@ public class ExistsTest extends AbstractRDF4JTest {
 
         runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1"));
     }
+
+    @Test
+    public void testExistsConjunctionNoSharedSubtreeVars() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?v WHERE {\n" +
+                "   ?v a :Person ;\n" +
+                "       :firstName ?fname ;\n" +
+                "   FILTER(EXISTS { ?x :firstName ?fname } && EXISTS { ?v :lastName ?lname } )\n" +
+                "} ORDER BY ?v \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1"));
+    }
+
+    @Test
+    public void testSharedNonProjectedVariable() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?v WHERE {\n" +
+                "   ?v a :Person ;\n" +
+                "       :firstName ?fname ;" +
+                "       :lastName ?lname\n" +
+                "   FILTER(EXISTS { ?x :firstName ?fname } && EXISTS { ?x :lastName ?lname } )\n" +
+                "} ORDER BY ?v \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1"));
+    }
+
+    @Test
+    public void testNestedBind() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?v WHERE {\n" +
+                "   ?v a :Person .\n" +
+                "   BIND(" +
+                "       EXISTS {\n" +
+                "           BIND(\"Roger\" AS ?constant)\n" +
+                "           ?v :firstName ?constant } \n" +
+                "       && NOT EXISTS { ?v :lastName ?lname} " +
+                "   AS ?test)\n" +
+                "   FILTER(?test = true)\n" +
+                "} ORDER BY ?v \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/5"));
+    }
+
+    @Test
+    public void testComplexCondition() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?v WHERE {\n" +
+                "   ?v a :Person .\n" +
+                "   BIND(EXISTS { ?v :firstName ?fname } && EXISTS { ?v :lastName ?lname } && NOT EXISTS {?v :locality ?loc} AS ?x)\n" +
+                "   FILTER(?x = true)\n" +
+                "} ORDER BY ?v \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1"));
+    }
+
+    @Test
+    public void testRepeatedCondition() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?v WHERE {\n" +
+                "   ?v a :Person .\n" +
+                "   FILTER( EXISTS { ?v :firstName ?fname } && EXISTS { ?v :firstName ?fname })\n" +
+                "} ORDER BY ?v \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1", "http://person.example.org/person/2",
+                "http://person.example.org/person/5"));
+    }
+
+    @Test
+    public void testSharedVariableBetweenExists() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?v WHERE {\n" +
+                "   ?v a :Person .\n" +
+                "   FILTER( EXISTS { ?v :firstName ?x } && EXISTS { ?v :lastName ?x })\n" +
+                "} ORDER BY ?v \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1"));
+    }
+
+    @Test
+    public void testComplexOrderBy() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?v WHERE {\n" +
+                "   ?v a :Person .\n" +
+                "} ORDER BY ASC(NOT EXISTS { ?v :firstName ?fname } && NOT EXISTS { ?v :lastName ?lname }) ASC(?v) \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1", "http://person.example.org/person/2", "http://person.example.org/person/3",
+                "http://person.example.org/person/5", "http://person.example.org/person/4", "http://person.example.org/person/6"));
+    }
+
+    @Test
+    public void testMultipleExistsOrderBy() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?v WHERE {\n" +
+                "   ?v a :Person .\n" +
+                "} ORDER BY ASC(EXISTS { ?v :firstName ?fname } && EXISTS { ?v :lastName ?lname }) " +
+                "ASC(EXISTS { ?v :firstName ?fname } || EXISTS { ?v :lastName ?lname }) ASC(?v) \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/4", "http://person.example.org/person/6", "http://person.example.org/person/2",
+                "http://person.example.org/person/3", "http://person.example.org/person/5", "http://person.example.org/person/1"));
+    }
+
+     @Test
+    public void testMultipleAggregation() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?person (SUM(IF(EXISTS { ?person :firstName ?fname } , 1, 0)) AS ?hasFirstName) \n" +
+                "(SUM(IF(EXISTS { ?person :locality ?loc } , 1, 0)) AS ?hasCity) (IF(?hasFirstName + ?hasCity = 2, true, false) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?person a :Person; \n" +
+                "       :firstName ?fname ;\n" +
+                "} GROUP BY ?person  \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("false", "true", "true"));
+    }
+
 }
