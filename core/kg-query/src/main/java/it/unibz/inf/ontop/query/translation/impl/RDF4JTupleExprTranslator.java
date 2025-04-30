@@ -649,9 +649,21 @@ public class RDF4JTupleExprTranslator {
         IQTree joinTree;
         if (join instanceof LeftJoin) {
             Sets.SetView<Variable> variables = Sets.union(leftTranslation.iqTree.getVariables(), rightTranslation.iqTree.getVariables());
-            Optional<ImmutableExpression> filterExpression = Optional.ofNullable(((LeftJoin) join).getCondition())
-                    .map(c -> topSubstitution.apply(getFilterExpression(c, variables).getResult()));
-            Optional<ImmutableExpression> joinCondition = termFactory.getConjunction(filterExpression, coalescingStream);
+
+            LeftJoin leftJoin = (LeftJoin) join;
+            Optional<ImmutableExpression> joinCondition;
+            if (leftJoin.hasCondition()) {
+                ValueExpressionResult<ImmutableExpression> filterResult = getFilterExpression(leftJoin.getCondition(), variables);
+                ImmutableExpression filterExpression = filterResult.getResult();
+
+                if (!filterResult.getExistsMap().isEmpty()) {
+                    rightTree = translateExists(filterResult.getExistsMap(), new TranslationResult(rightTree, rightTranslation.nullableVariables));
+                }
+                joinCondition = termFactory.getConjunction(Optional.of(filterExpression), coalescingStream);
+            }
+            else {
+                joinCondition = termFactory.getConjunction(coalescingStream);
+            }
 
             joinTree = iqFactory.createBinaryNonCommutativeIQTree(iqFactory.createLeftJoinNode(joinCondition), leftTree, rightTree);
 

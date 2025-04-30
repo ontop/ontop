@@ -557,4 +557,53 @@ public class ExistsTest extends AbstractRDF4JTest {
         runQueryAndCompare(sparql, ImmutableList.of("false", "true", "true"));
     }
 
+    @Test
+    public void testOptionalFilterExists() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?v ?fname ?country \n" +
+                "WHERE {\n" +
+                "  ?v a :Person ;\n" +
+                "\n" +
+                "  OPTIONAL {\n" +
+                "    ?v :firstName ?fname .\n" +
+                "    ?v :country ?country .\n" +
+                "    FILTER (STRLEN(?country) = 2)\n" +
+                "    FILTER NOT EXISTS { ?v :lastName ?lname }\n" +
+                "  }\n" +
+                "} ORDER BY DESC(?fname) ?v";
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/5", "http://person.example.org/person/2", "http://person.example.org/person/1",
+                "http://person.example.org/person/3", "http://person.example.org/person/4", "http://person.example.org/person/6"));
+    }
+
+    @Test
+    public void testOptionalCardinalityConsistency() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?v ?shared \n" +
+                "WHERE {\n" +
+                "  ?v a :Person ;\n" +
+                "\n" +
+                "  OPTIONAL {\n" +
+                "    ?v :firstName ?shared .\n" +
+                "    FILTER EXISTS { ?v :nickname ?shared }\n" +
+                "  }\n" +
+                "} ORDER BY DESC(?shared) ?v";
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/2", "http://person.example.org/person/1", "http://person.example.org/person/3",
+                "http://person.example.org/person/4", "http://person.example.org/person/5", "http://person.example.org/person/6"));
+    }
+
+    @Test(expected = QueryEvaluationException.class)
+    public void testOptionalNestedSharedVariable() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?v ?shared ?city \n" +
+                "WHERE {\n" +
+                "  ?v a :Person ;\n" +
+                "  :firstName ?shared .\n" +
+                "\n" +
+                "  OPTIONAL {\n" +
+                "    ?v :locality ?city .\n" +
+                "    FILTER EXISTS { ?x :nickname ?shared }\n" +
+                "  }\n" +
+                "} ORDER BY DESC(?city) ?v";
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/2", "http://person.example.org/person/1", "http://person.example.org/person/5"));
+    }
 }
