@@ -29,7 +29,7 @@ public interface AggregationNode extends ExtendedProjectionNode {
 
     @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
-        return visitor.visitAggregation(tree, this, child);
+        return visitor.transformAggregation(tree, this, child);
     }
 
 }

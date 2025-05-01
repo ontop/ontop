@@ -10,14 +10,7 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 public interface NaryIQTree extends CompositeIQTree<NaryOperatorNode> {
 
     @Override
-    default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        return getRootNode().acceptTransformer(this, transformer, getChildren());
-    }
-
-
-    @Override
     default <T> T acceptVisitor(IQVisitor<T> visitor) {
         return getRootNode().acceptVisitor(this, visitor, getChildren());
     }
-
 }

@@ -29,7 +29,7 @@ public interface FilterNode extends CommutativeJoinOrFilterNode, UnaryOperatorNo
 
     @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
-        return visitor.visitFilter(tree, this, child);
+        return visitor.transformFilter(tree, this, child);
     }
 
 }

@@ -27,7 +27,7 @@ public interface ConstructionNode extends ExtendedProjectionNode {
 
     @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
-        return visitor.visitConstruction(tree, this, child);
+        return visitor.transformConstruction(tree, this, child);
     }
 
 }

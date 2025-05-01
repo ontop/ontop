@@ -28,9 +28,11 @@ public interface IQTree {
      */
     ImmutableSet<Variable> getVariables();
 
-    IQTree acceptTransformer(IQTreeVisitingTransformer transformer);
-
     <T> T acceptVisitor(IQVisitor<T> visitor);
+
+    default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
+        return acceptVisitor(transformer);
+    }
 
     IQTree normalizeForOptimization(VariableGenerator variableGenerator);
 

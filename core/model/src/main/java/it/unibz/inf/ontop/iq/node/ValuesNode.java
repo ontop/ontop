@@ -5,9 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -36,13 +34,8 @@ public interface ValuesNode extends LeafIQTree {
 
 
     @Override
-    default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        return transformer.transformValues(this);
-    }
-
-    @Override
     default <T> T acceptVisitor(IQVisitor<T> visitor) {
-        return visitor.visitValues(this);
+        return visitor.transformValues(this);
     }
 
 

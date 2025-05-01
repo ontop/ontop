@@ -29,7 +29,7 @@ public interface SliceNode extends QueryModifierNode {
 
     @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
-        return visitor.visitSlice(tree, this, child);
+        return visitor.transformSlice(tree, this, child);
     }
 
 }

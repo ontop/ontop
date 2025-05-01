@@ -38,7 +38,7 @@ public interface OrderByNode extends QueryModifierNode {
 
     @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
-        return visitor.visitOrderBy(tree, this, child);
+        return visitor.transformOrderBy(tree, this, child);
     }
 
 }

@@ -30,7 +30,7 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptTransformer(new Transformer(variableGenerator));
+        return tree.acceptVisitor(new Transformer(variableGenerator));
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -81,82 +81,82 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
     static class OrderBySearcher implements IQVisitor<Boolean> {
 
         @Override
-        public Boolean visitIntensionalData(IntensionalDataNode dataNode) {
+        public Boolean transformIntensionalData(IntensionalDataNode dataNode) {
             return false;
         }
 
         @Override
-        public Boolean visitExtensionalData(ExtensionalDataNode dataNode) {
+        public Boolean transformExtensionalData(ExtensionalDataNode dataNode) {
             return false;
         }
 
         @Override
-        public Boolean visitEmpty(EmptyNode node) {
+        public Boolean transformEmpty(EmptyNode node) {
             return false;
         }
 
         @Override
-        public Boolean visitTrue(TrueNode node) {
+        public Boolean transformTrue(TrueNode node) {
             return false;
         }
 
         @Override
-        public Boolean visitNative(NativeNode nativeNode) {
+        public Boolean transformNative(NativeNode nativeNode) {
             return false;
         }
 
         @Override
-        public Boolean visitValues(ValuesNode valuesNode) {
+        public Boolean transformValues(ValuesNode valuesNode) {
             return false;
         }
 
         @Override
-        public Boolean visitConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+        public Boolean transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
             return false;
         }
 
         @Override
-        public Boolean visitAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child) {
+        public Boolean transformAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child) {
             return false;
         }
 
         @Override
-        public Boolean visitFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+        public Boolean transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
             return child.acceptVisitor(this);
         }
 
         @Override
-        public Boolean visitFlatten(IQTree tree, FlattenNode rootNode, IQTree child) {
+        public Boolean transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child) {
             return false;
         }
 
         @Override
-        public Boolean visitDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
+        public Boolean transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
             return child.acceptVisitor(this);
         }
 
         @Override
-        public Boolean visitSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
+        public Boolean transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
             return false;
         }
 
         @Override
-        public Boolean visitOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+        public Boolean transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
             return true;
         }
 
         @Override
-        public Boolean visitLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        public Boolean transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             return false;
         }
 
         @Override
-        public Boolean visitInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+        public Boolean transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             return false;
         }
 
         @Override
-        public Boolean visitUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+        public Boolean transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
             return false;
         }
     }

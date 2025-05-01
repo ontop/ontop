@@ -2,9 +2,7 @@ package it.unibz.inf.ontop.iq.node;
 
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 
 /**
@@ -17,12 +15,7 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 public interface EmptyNode extends LeafIQTree {
 
     @Override
-    default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        return transformer.transformEmpty(this);
-    }
-
-    @Override
     default <T> T acceptVisitor(IQVisitor<T> visitor) {
-        return visitor.visitEmpty(this);
+        return visitor.transformEmpty(this);
     }
 }

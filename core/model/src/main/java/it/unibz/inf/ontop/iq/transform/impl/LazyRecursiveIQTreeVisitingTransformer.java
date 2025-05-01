@@ -73,7 +73,7 @@ public abstract class LazyRecursiveIQTreeVisitingTransformer implements IQTreeVi
     public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) { return transformNaryCommutativeNode(tree, rootNode, children); }
 
     private IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-        IQTree newChild = child.acceptTransformer(this);
+        IQTree newChild = child.acceptVisitor(this);
         return (child == newChild)
                 ? tree
                 : iqFactory.createUnaryIQTree(rootNode, newChild);
@@ -81,7 +81,7 @@ public abstract class LazyRecursiveIQTreeVisitingTransformer implements IQTreeVi
 
     protected ImmutableList<Map.Entry<IQTree, IQTree>> transformChildren(ImmutableList<IQTree> children) {
         return children.stream()
-                .map(t -> Maps.immutableEntry(t, t.acceptTransformer(this)))
+                .map(t -> Maps.immutableEntry(t, t.acceptVisitor(this)))
                 .collect(ImmutableCollectors.toList());
     }
 
@@ -100,8 +100,8 @@ public abstract class LazyRecursiveIQTreeVisitingTransformer implements IQTreeVi
     }
 
     protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
-        IQTree newLeftChild = leftChild.acceptTransformer(this);
-        IQTree newRightChild = rightChild.acceptTransformer(this);
+        IQTree newLeftChild = leftChild.acceptVisitor(this);
+        IQTree newRightChild = rightChild.acceptVisitor(this);
         return (leftChild == newLeftChild) && (rightChild == newRightChild)
                 ? tree
                 : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild);

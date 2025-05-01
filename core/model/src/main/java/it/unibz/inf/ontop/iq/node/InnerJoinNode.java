@@ -25,7 +25,7 @@ public interface InnerJoinNode extends InnerJoinLikeNode {
 
     @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, ImmutableList<IQTree> children) {
-        return visitor.visitInnerJoin(tree, this, children);
+        return visitor.transformInnerJoin(tree, this, children);
     }
 
     @Override

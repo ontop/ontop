@@ -22,7 +22,7 @@ public interface LeftJoinNode extends JoinLikeNode, BinaryNonCommutativeOperator
 
     @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree leftChild, IQTree rightChild) {
-        return visitor.visitLeftJoin(tree, this, leftChild, rightChild);
+        return visitor.transformLeftJoin(tree, this, leftChild, rightChild);
     }
 
 }

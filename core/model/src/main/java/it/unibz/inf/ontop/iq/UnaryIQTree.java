@@ -12,11 +12,6 @@ public interface UnaryIQTree extends CompositeIQTree<UnaryOperatorNode> {
     IQTree getChild();
 
     @Override
-    default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        return getRootNode().acceptTransformer(this, transformer, getChild());
-    }
-
-    @Override
     default <T> T acceptVisitor(IQVisitor<T> visitor) {
         return getRootNode().acceptVisitor(this, visitor, getChild());
     }

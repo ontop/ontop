@@ -41,7 +41,7 @@ public class QueryRenamerImpl implements QueryRenamer {
             return originalQuery;
 
         HomogeneousIQTreeVisitingTransformer iqTransformer = getIQTransformer();
-        IQTree newIQTree = originalQuery.getTree().acceptTransformer(iqTransformer);
+        IQTree newIQTree = iqTransformer.transform(originalQuery.getTree());
 
         DistinctVariableOnlyDataAtom atom = originalQuery.getProjectionAtom();
         ImmutableList<Variable> newArguments = substitutionFactory.apply(renamingSubstitution, atom.getArguments());
@@ -56,7 +56,7 @@ public class QueryRenamerImpl implements QueryRenamer {
             return originalTree;
 
         HomogeneousIQTreeVisitingTransformer iqTransformer = getIQTransformer();
-        return originalTree.acceptTransformer(iqTransformer);
+        return iqTransformer.transform(originalTree);
     }
 
     private HomogeneousIQTreeVisitingTransformer getIQTransformer() {

@@ -14,11 +14,6 @@ public interface BinaryNonCommutativeIQTree extends CompositeIQTree<BinaryNonCom
     IQTree getRightChild();
 
     @Override
-    default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        return getRootNode().acceptTransformer(this, transformer, getLeftChild(), getRightChild());
-    }
-
-    @Override
     default  <T> T acceptVisitor(IQVisitor<T> visitor) {
         return getRootNode().acceptVisitor(this, visitor, getLeftChild(), getRightChild());
     }

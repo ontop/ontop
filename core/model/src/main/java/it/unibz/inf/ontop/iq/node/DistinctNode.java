@@ -17,7 +17,7 @@ public interface DistinctNode extends QueryModifierNode {
 
     @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
-        return visitor.visitDistinct(tree, this, child);
+        return visitor.transformDistinct(tree, this, child);
     }
 
 }

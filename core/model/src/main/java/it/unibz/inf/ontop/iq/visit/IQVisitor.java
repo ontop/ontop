@@ -7,23 +7,23 @@ import it.unibz.inf.ontop.iq.node.*;
 
 public interface IQVisitor<T> {
 
-    T visitIntensionalData(IntensionalDataNode dataNode);
-    T visitExtensionalData(ExtensionalDataNode dataNode);
-    T visitEmpty(EmptyNode node);
-    T visitTrue(TrueNode node);
-    T visitNative(NativeNode nativeNode);
-    T visitValues(ValuesNode valuesNode);
+    T transformIntensionalData(IntensionalDataNode dataNode);
+    T transformExtensionalData(ExtensionalDataNode dataNode);
+    T transformEmpty(EmptyNode node);
+    T transformTrue(TrueNode node);
+    T transformNative(NativeNode nativeNode);
+    T transformValues(ValuesNode valuesNode);
 
-    T visitConstruction(IQTree tree, ConstructionNode rootNode, IQTree child);
-    T visitAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child);
-    T visitFilter(IQTree tree, FilterNode rootNode, IQTree child);
-    T visitFlatten(IQTree tree, FlattenNode rootNode, IQTree child);
-    T visitDistinct(IQTree tree, DistinctNode rootNode, IQTree child);
-    T visitSlice(IQTree tree, SliceNode sliceNode, IQTree child);
-    T visitOrderBy(IQTree tree, OrderByNode rootNode, IQTree child);
+    T transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child);
+    T transformAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child);
+    T transformFilter(IQTree tree, FilterNode rootNode, IQTree child);
+    T transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child);
+    T transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child);
+    T transformSlice(IQTree tree, SliceNode sliceNode, IQTree child);
+    T transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child);
 
-    T visitLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild);
+    T transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild);
 
-    T visitInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children);
-    T visitUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children);
+    T transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children);
+    T transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children);
 }

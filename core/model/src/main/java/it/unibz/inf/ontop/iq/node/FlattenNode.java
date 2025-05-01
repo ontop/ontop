@@ -82,7 +82,7 @@ public interface FlattenNode extends UnaryOperatorNode {
 
     @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
-        return visitor.visitFlatten(tree, this, child);
+        return visitor.transformFlatten(tree, this, child);
     }
 
 }
