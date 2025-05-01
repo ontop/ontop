@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.QueryNodeRenamer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -40,8 +41,7 @@ public class QueryRenamerImpl implements QueryRenamer {
         if (renamingSubstitution.isEmpty())
             return originalQuery;
 
-        HomogeneousIQTreeVisitingTransformer iqTransformer = getIQTransformer();
-        IQTree newIQTree = iqTransformer.transform(originalQuery.getTree());
+        IQTree newIQTree = applyRenaming(originalQuery.getTree());
 
         DistinctVariableOnlyDataAtom atom = originalQuery.getProjectionAtom();
         ImmutableList<Variable> newArguments = substitutionFactory.apply(renamingSubstitution, atom.getArguments());
@@ -55,12 +55,12 @@ public class QueryRenamerImpl implements QueryRenamer {
         if (renamingSubstitution.isEmpty())
             return originalTree;
 
-        HomogeneousIQTreeVisitingTransformer iqTransformer = getIQTransformer();
-        return iqTransformer.transform(originalTree);
+        return applyRenaming(originalTree);
     }
 
-    private HomogeneousIQTreeVisitingTransformer getIQTransformer() {
+    private IQTree applyRenaming(IQTree tree) {
         QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(iqFactory, renamingSubstitution, atomFactory, substitutionFactory);
-        return new HomogeneousIQTreeVisitingTransformer(nodeTransformer, iqFactory);
+        IQTreeVisitingTransformer transformer = new HomogeneousIQTreeVisitingTransformer(nodeTransformer, iqFactory);
+        return transformer.transform(tree);
     }
 }
