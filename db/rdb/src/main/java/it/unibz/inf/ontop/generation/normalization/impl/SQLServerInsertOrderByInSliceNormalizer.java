@@ -112,11 +112,6 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
         }
 
         @Override
-        public Boolean visitNonStandardLeafNode(LeafIQTree leafNode) {
-            return false;
-        }
-
-        @Override
         public Boolean visitConstruction(ConstructionNode rootNode, IQTree child) {
             return false;
         }
@@ -152,17 +147,7 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
         }
 
         @Override
-        public Boolean visitNonStandardUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
-            return false;
-        }
-
-        @Override
         public Boolean visitLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitNonStandardBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
             return false;
         }
 
@@ -173,11 +158,6 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
 
         @Override
         public Boolean visitUnion(UnionNode rootNode, ImmutableList<IQTree> children) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitNonStandardNaryNode(NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
             return false;
         }
     }

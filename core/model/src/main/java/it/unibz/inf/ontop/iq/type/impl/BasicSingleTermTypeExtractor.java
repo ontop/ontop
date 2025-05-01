@@ -126,11 +126,6 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         }
 
         @Override
-        public Optional<TermType> visitNonStandardLeafNode(LeafIQTree leafNode) {
-            return Optional.empty();
-        }
-
-        @Override
         public Optional<TermType> visitConstruction(ConstructionNode rootNode, IQTree child) {
             return visitExtendedProjection(rootNode, child);
         }
@@ -178,11 +173,6 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
             return child.acceptVisitor(this);
         }
 
-        @Override
-        public Optional<TermType> visitNonStandardUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
-            return Optional.empty();
-        }
-
         /**
          * Only consider the right child for right-specific variables
          */
@@ -196,12 +186,6 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
             }
             else
                 return Optional.empty();
-        }
-
-        @Override
-        public Optional<TermType> visitNonStandardBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode,
-                                                                           IQTree leftChild, IQTree rightChild) {
-            return Optional.empty();
         }
 
         /**
@@ -228,11 +212,6 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
             // Picks arbitrarily one of them
             return termTypes.stream()
                     .findAny();
-        }
-
-        @Override
-        public Optional<TermType> visitNonStandardNaryNode(NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-            return Optional.empty();
         }
     }
 }

@@ -120,17 +120,9 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
     }
 
     /**
-     * Blocks by default
-     */
-    @Override
-    public Optional<IQTree> visitNonStandardUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
-        return Optional.empty();
-    }
-
-    /**
      * Only pushes on the left
      *
-     * TODO: consider pushing on the right safe expressions
+     * TODO: consider pushing on the right safe expressions
      */
     @Override
     public Optional<IQTree> visitLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
@@ -144,15 +136,6 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
         }
         else
             return Optional.empty();
-    }
-
-    /**
-     * Blocks by default
-     */
-    @Override
-    public Optional<IQTree> visitNonStandardBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode,
-                                                                     IQTree leftChild, IQTree rightChild) {
-        return Optional.empty();
     }
 
     @Override
@@ -190,16 +173,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
     }
 
     /**
-     * Blocks by default
-     */
-    @Override
-    public Optional<IQTree> visitNonStandardNaryNode(NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-        return Optional.empty();
-    }
-
-
-    /**
-     * Leafs nodes do not accept expressions
+     * Leaf nodes do not accept expressions
      */
     private Optional<IQTree> visitLeafNode() {
         return Optional.empty();
@@ -234,10 +208,4 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
     public Optional<IQTree> visitValues(ValuesNode valuesNode) {
         return visitLeafNode();
     }
-
-    @Override
-    public Optional<IQTree> visitNonStandardLeafNode(LeafIQTree leafNode) {
-        return visitLeafNode();
-    }
-
 }

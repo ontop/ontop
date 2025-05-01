@@ -34,11 +34,6 @@ public abstract class AbstractPredicateExtractor<T extends LeafIQTree> implement
     }
 
     @Override
-    public Stream<T> visitNonStandardLeafNode(LeafIQTree leafNode) {
-        return Stream.empty();
-    }
-
-    @Override
     public Stream<T> visitConstruction(ConstructionNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
@@ -74,18 +69,7 @@ public abstract class AbstractPredicateExtractor<T extends LeafIQTree> implement
     }
 
     @Override
-    public Stream<T> visitNonStandardUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
-        return child.acceptVisitor(this);
-    }
-
-    @Override
     public Stream<T> visitLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        return Stream.of(leftChild, rightChild)
-                .flatMap(c -> c.acceptVisitor(this));
-    }
-
-    @Override
-    public Stream<T> visitNonStandardBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
         return Stream.of(leftChild, rightChild)
                 .flatMap(c -> c.acceptVisitor(this));
     }
@@ -101,11 +85,4 @@ public abstract class AbstractPredicateExtractor<T extends LeafIQTree> implement
         return children.stream()
                 .flatMap(c -> c.acceptVisitor(this));
     }
-
-    @Override
-    public Stream<T> visitNonStandardNaryNode(NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-        return children.stream()
-                .flatMap(c -> c.acceptVisitor(this));
-    }
-
 }

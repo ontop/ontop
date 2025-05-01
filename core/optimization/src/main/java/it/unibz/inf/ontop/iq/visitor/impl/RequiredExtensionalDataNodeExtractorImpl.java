@@ -49,11 +49,6 @@ public class RequiredExtensionalDataNodeExtractorImpl implements RequiredExtensi
     }
 
     @Override
-    public Stream<ExtensionalDataNode> visitNonStandardLeafNode(LeafIQTree leafNode) {
-        return Stream.empty();
-    }
-
-    @Override
     public Stream<ExtensionalDataNode> visitConstruction(ConstructionNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
@@ -92,27 +87,11 @@ public class RequiredExtensionalDataNodeExtractorImpl implements RequiredExtensi
     }
 
     /**
-     * Blocks by default
-     */
-    @Override
-    public Stream<ExtensionalDataNode> visitNonStandardUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
-        return Stream.empty();
-    }
-
-    /**
      * Only considers the left child
      */
     @Override
     public Stream<ExtensionalDataNode> visitLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         return leftChild.acceptVisitor(this);
-    }
-
-    /**
-     * Blocks by default
-     */
-    @Override
-    public Stream<ExtensionalDataNode> visitNonStandardBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
-        return Stream.empty();
     }
 
     @Override
@@ -126,14 +105,6 @@ public class RequiredExtensionalDataNodeExtractorImpl implements RequiredExtensi
      */
     @Override
     public Stream<ExtensionalDataNode> visitUnion(UnionNode rootNode, ImmutableList<IQTree> children) {
-        return Stream.empty();
-    }
-
-    /**
-     * Blocks by default
-     */
-    @Override
-    public Stream<ExtensionalDataNode> visitNonStandardNaryNode(NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
         return Stream.empty();
     }
 }
