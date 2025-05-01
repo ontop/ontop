@@ -33,8 +33,8 @@ public interface UnionNode extends ExplicitVariableProjectionNode, NaryOperatorN
     }
 
     @Override
-    default <T> T acceptVisitor(IQVisitor<T> visitor, ImmutableList<IQTree> children) {
-        return visitor.visitUnion(this, children);
+    default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, ImmutableList<IQTree> children) {
+        return visitor.visitUnion(tree, this, children);
     }
 
     @Override

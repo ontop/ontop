@@ -34,54 +34,54 @@ public abstract class AbstractPredicateExtractor<T extends LeafIQTree> implement
     }
 
     @Override
-    public Stream<T> visitConstruction(ConstructionNode rootNode, IQTree child) {
+    public Stream<T> visitConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<T> visitAggregation(AggregationNode aggregationNode, IQTree child) {
+    public Stream<T> visitAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<T> visitFilter(FilterNode rootNode, IQTree child) {
+    public Stream<T> visitFilter(IQTree tree, FilterNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<T> visitDistinct(DistinctNode rootNode, IQTree child) {
+    public Stream<T> visitDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<T> visitSlice(SliceNode sliceNode, IQTree child) {
+    public Stream<T> visitSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<T> visitOrderBy(OrderByNode rootNode, IQTree child) {
+    public Stream<T> visitOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<T> visitFlatten(FlattenNode rootNode, IQTree child) {
+    public Stream<T> visitFlatten(IQTree tree, FlattenNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<T> visitLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+    public Stream<T> visitLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         return Stream.of(leftChild, rightChild)
                 .flatMap(c -> c.acceptVisitor(this));
     }
 
     @Override
-    public Stream<T> visitInnerJoin(InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+    public Stream<T> visitInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
         return children.stream()
                 .flatMap(c -> c.acceptVisitor(this));
     }
 
     @Override
-    public Stream<T> visitUnion(UnionNode rootNode, ImmutableList<IQTree> children) {
+    public Stream<T> visitUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         return children.stream()
                 .flatMap(c -> c.acceptVisitor(this));
     }

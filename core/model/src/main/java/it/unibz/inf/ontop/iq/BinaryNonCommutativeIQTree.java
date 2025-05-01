@@ -20,6 +20,6 @@ public interface BinaryNonCommutativeIQTree extends CompositeIQTree<BinaryNonCom
 
     @Override
     default  <T> T acceptVisitor(IQVisitor<T> visitor) {
-        return getRootNode().acceptVisitor(visitor, getLeftChild(), getRightChild());
+        return getRootNode().acceptVisitor(this, visitor, getLeftChild(), getRightChild());
     }
 }

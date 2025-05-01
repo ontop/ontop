@@ -7,7 +7,6 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -126,12 +125,12 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         }
 
         @Override
-        public Optional<TermType> visitConstruction(ConstructionNode rootNode, IQTree child) {
+        public Optional<TermType> visitConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
             return visitExtendedProjection(rootNode, child);
         }
 
         @Override
-        public Optional<TermType> visitAggregation(AggregationNode rootNode, IQTree child) {
+        public Optional<TermType> visitAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
             return visitExtendedProjection(rootNode, child);
         }
 
@@ -140,12 +139,12 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         }
 
         @Override
-        public Optional<TermType> visitFilter(FilterNode rootNode, IQTree child) {
+        public Optional<TermType> visitFilter(IQTree tree, FilterNode rootNode, IQTree child) {
             return child.acceptVisitor(this);
         }
 
         @Override
-        public Optional<TermType> visitFlatten(FlattenNode flattenNode, IQTree child) {
+        public Optional<TermType> visitFlatten(IQTree tree, FlattenNode flattenNode, IQTree child) {
             if (variable.equals(flattenNode.getOutputVariable())) {
                 /* We prefer to rely on the data type provided in the lens rather than the inferred one,
                    because it is more accurate than what we can obtain from the JDBC.
@@ -159,17 +158,17 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         }
 
         @Override
-        public Optional<TermType> visitDistinct(DistinctNode rootNode, IQTree child) {
+        public Optional<TermType> visitDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
             return child.acceptVisitor(this);
         }
 
         @Override
-        public Optional<TermType> visitSlice(SliceNode sliceNode, IQTree child) {
+        public Optional<TermType> visitSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
             return child.acceptVisitor(this);
         }
 
         @Override
-        public Optional<TermType> visitOrderBy(OrderByNode rootNode, IQTree child) {
+        public Optional<TermType> visitOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
             return child.acceptVisitor(this);
         }
 
@@ -177,7 +176,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
          * Only consider the right child for right-specific variables
          */
         @Override
-        public Optional<TermType> visitLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        public Optional<TermType> visitLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             if (leftChild.getVariables().contains(variable)) {
                 return leftChild.acceptVisitor(this);
             }
@@ -195,7 +194,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
          *
          */
         @Override
-        public Optional<TermType> visitInnerJoin(InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+        public Optional<TermType> visitInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             return children.stream()
                     .map(c -> c.acceptVisitor(this))
                     .flatMap(Optional::stream)
@@ -203,7 +202,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         }
 
         @Override
-        public Optional<TermType> visitUnion(UnionNode rootNode, ImmutableList<IQTree> children) {
+        public Optional<TermType> visitUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
             ImmutableSet<TermType> termTypes = children.stream()
                     .map(c -> c.acceptVisitor(this))
                     .flatMap(Optional::stream)

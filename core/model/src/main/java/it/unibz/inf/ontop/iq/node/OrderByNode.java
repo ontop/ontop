@@ -3,9 +3,7 @@ package it.unibz.inf.ontop.iq.node;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
@@ -39,8 +37,8 @@ public interface OrderByNode extends QueryModifierNode {
     }
 
     @Override
-    default <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
-        return visitor.visitOrderBy(this, child);
+    default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
+        return visitor.visitOrderBy(tree, this, child);
     }
 
 }

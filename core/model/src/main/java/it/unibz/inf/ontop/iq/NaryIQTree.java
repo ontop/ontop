@@ -17,7 +17,7 @@ public interface NaryIQTree extends CompositeIQTree<NaryOperatorNode> {
 
     @Override
     default <T> T acceptVisitor(IQVisitor<T> visitor) {
-        return getRootNode().acceptVisitor(visitor, getChildren());
+        return getRootNode().acceptVisitor(this, visitor, getChildren());
     }
 
 }

@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq.visit;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 
 
@@ -15,16 +14,16 @@ public interface IQVisitor<T> {
     T visitNative(NativeNode nativeNode);
     T visitValues(ValuesNode valuesNode);
 
-    T visitConstruction(ConstructionNode rootNode, IQTree child);
-    T visitAggregation(AggregationNode aggregationNode, IQTree child);
-    T visitFilter(FilterNode rootNode, IQTree child);
-    T visitFlatten(FlattenNode rootNode, IQTree child);
-    T visitDistinct(DistinctNode rootNode, IQTree child);
-    T visitSlice(SliceNode sliceNode, IQTree child);
-    T visitOrderBy(OrderByNode rootNode, IQTree child);
+    T visitConstruction(IQTree tree, ConstructionNode rootNode, IQTree child);
+    T visitAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child);
+    T visitFilter(IQTree tree, FilterNode rootNode, IQTree child);
+    T visitFlatten(IQTree tree, FlattenNode rootNode, IQTree child);
+    T visitDistinct(IQTree tree, DistinctNode rootNode, IQTree child);
+    T visitSlice(IQTree tree, SliceNode sliceNode, IQTree child);
+    T visitOrderBy(IQTree tree, OrderByNode rootNode, IQTree child);
 
-    T visitLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild);
+    T visitLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild);
 
-    T visitInnerJoin(InnerJoinNode rootNode, ImmutableList<IQTree> children);
-    T visitUnion(UnionNode rootNode, ImmutableList<IQTree> children);
+    T visitInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children);
+    T visitUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children);
 }

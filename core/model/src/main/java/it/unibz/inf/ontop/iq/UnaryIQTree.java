@@ -18,7 +18,7 @@ public interface UnaryIQTree extends CompositeIQTree<UnaryOperatorNode> {
 
     @Override
     default <T> T acceptVisitor(IQVisitor<T> visitor) {
-        return getRootNode().acceptVisitor(visitor, getChild());
+        return getRootNode().acceptVisitor(this, visitor, getChild());
     }
 
 }

@@ -2,9 +2,7 @@ package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -83,8 +81,8 @@ public interface FlattenNode extends UnaryOperatorNode {
     }
 
     @Override
-    default <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
-        return visitor.visitFlatten(this, child);
+    default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
+        return visitor.visitFlatten(tree, this, child);
     }
 
 }

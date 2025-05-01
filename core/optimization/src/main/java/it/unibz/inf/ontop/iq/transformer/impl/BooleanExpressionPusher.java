@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -41,7 +40,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
     }
 
     @Override
-    public Optional<IQTree> visitConstruction(ConstructionNode rootNode, IQTree child) {
+    public Optional<IQTree> visitConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
         Substitution<ImmutableTerm> substitution = rootNode.getSubstitution();
 
         ImmutableExpression newExpression = substitution.apply(expressionToPushDown);
@@ -55,7 +54,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
         return Optional.of(iqFactory.createUnaryIQTree(rootNode, newChild));
     }
     @Override
-    public Optional<IQTree> visitAggregation(AggregationNode aggregationNode, IQTree child) {
+    public Optional<IQTree> visitAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child) {
         ImmutableSet<Variable> expressionVariables = expressionToPushDown.getVariableStream()
                 .collect(ImmutableCollectors.toSet());
 
@@ -77,7 +76,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
      * NB: focuses on the expressionToPushDown, NOT on pushing down its own expression
      */
     @Override
-    public Optional<IQTree> visitFilter(FilterNode rootNode, IQTree child) {
+    public Optional<IQTree> visitFilter(IQTree tree, FilterNode rootNode, IQTree child) {
         Optional<IQTree> newChild = child.acceptVisitor(this);
 
         UnaryIQTree newTree = newChild
@@ -92,7 +91,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
     }
 
     @Override
-    public Optional<IQTree> visitFlatten(FlattenNode rootNode, IQTree child) {
+    public Optional<IQTree> visitFlatten(IQTree tree, FlattenNode rootNode, IQTree child) {
         Optional<Variable> indexVariable = rootNode.getIndexVariable();
         return expressionToPushDown.getVariableStream()
                     .anyMatch(v -> v.equals(rootNode.getOutputVariable()) ||
@@ -102,7 +101,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
     }
 
     @Override
-    public Optional<IQTree> visitDistinct(DistinctNode rootNode, IQTree child) {
+    public Optional<IQTree> visitDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
         return visitPassingUnaryNode(rootNode, child);
     }
 
@@ -110,12 +109,12 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
      * The slice blocks
      */
     @Override
-    public Optional<IQTree> visitSlice(SliceNode sliceNode, IQTree child) {
+    public Optional<IQTree> visitSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<IQTree> visitOrderBy(OrderByNode rootNode, IQTree child) {
+    public Optional<IQTree> visitOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
         return visitPassingUnaryNode(rootNode, child);
     }
 
@@ -125,7 +124,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
      * TODO: consider pushing on the right safe expressions
      */
     @Override
-    public Optional<IQTree> visitLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+    public Optional<IQTree> visitLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         ImmutableSet<Variable> expressionVariables = expressionToPushDown.getVariableStream()
                 .collect(ImmutableCollectors.toSet());
 
@@ -139,7 +138,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
     }
 
     @Override
-    public Optional<IQTree> visitInnerJoin(InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+    public Optional<IQTree> visitInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
         ImmutableSet<Variable> expressionVariables = expressionToPushDown.getVariableStream()
                 .collect(ImmutableCollectors.toSet());
 
@@ -161,7 +160,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
     }
 
     @Override
-    public Optional<IQTree> visitUnion(UnionNode rootNode, ImmutableList<IQTree> children) {
+    public Optional<IQTree> visitUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(c -> c.acceptVisitor(this)
                         .orElseGet(() -> iqFactory.createUnaryIQTree(

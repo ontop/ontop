@@ -51,7 +51,7 @@ public interface NaryOperatorNode extends QueryNode {
 
     IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, ImmutableList<IQTree> children);
 
-    <T> T acceptVisitor(IQVisitor<T> visitor, ImmutableList<IQTree> children);
+    <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, ImmutableList<IQTree> children);
 
     /**
      * Only validates the node, not its children

@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -112,52 +111,52 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
         }
 
         @Override
-        public Boolean visitConstruction(ConstructionNode rootNode, IQTree child) {
+        public Boolean visitConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
             return false;
         }
 
         @Override
-        public Boolean visitAggregation(AggregationNode aggregationNode, IQTree child) {
+        public Boolean visitAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child) {
             return false;
         }
 
         @Override
-        public Boolean visitFilter(FilterNode rootNode, IQTree child) {
+        public Boolean visitFilter(IQTree tree, FilterNode rootNode, IQTree child) {
             return child.acceptVisitor(this);
         }
 
         @Override
-        public Boolean visitFlatten(FlattenNode rootNode, IQTree child) {
+        public Boolean visitFlatten(IQTree tree, FlattenNode rootNode, IQTree child) {
             return false;
         }
 
         @Override
-        public Boolean visitDistinct(DistinctNode rootNode, IQTree child) {
+        public Boolean visitDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
             return child.acceptVisitor(this);
         }
 
         @Override
-        public Boolean visitSlice(SliceNode sliceNode, IQTree child) {
+        public Boolean visitSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
             return false;
         }
 
         @Override
-        public Boolean visitOrderBy(OrderByNode rootNode, IQTree child) {
+        public Boolean visitOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
             return true;
         }
 
         @Override
-        public Boolean visitLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        public Boolean visitLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             return false;
         }
 
         @Override
-        public Boolean visitInnerJoin(InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+        public Boolean visitInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             return false;
         }
 
         @Override
-        public Boolean visitUnion(UnionNode rootNode, ImmutableList<IQTree> children) {
+        public Boolean visitUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
             return false;
         }
     }
