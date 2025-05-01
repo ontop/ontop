@@ -49,8 +49,4 @@ public interface NativeNode extends LeafIQTree {
         return visitor.visitNative(this);
     }
 
-    @Override
-    default LeafIQTree acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
-    }
 }

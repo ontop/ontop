@@ -10,7 +10,4 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
  */
 public interface BinaryNonCommutativeOperatorNode extends BinaryOrderedOperatorNode {
 
-    @Override
-    BinaryNonCommutativeOperatorNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException;
 }

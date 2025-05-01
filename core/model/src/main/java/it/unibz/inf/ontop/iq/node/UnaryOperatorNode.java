@@ -51,10 +51,6 @@ public interface UnaryOperatorNode extends QueryNode {
 
     <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child);
 
-    @Override
-    UnaryOperatorNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException;
-
     /**
      * Only validates the node, not its child
      */

@@ -32,9 +32,4 @@ public interface ConstructionNode extends ExtendedProjectionNode {
         return visitor.visitConstruction(this, child);
     }
 
-    @Override
-    default ConstructionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
 }

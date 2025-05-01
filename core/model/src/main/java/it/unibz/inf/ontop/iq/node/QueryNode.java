@@ -13,18 +13,6 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 public interface QueryNode {
 
     /**
-     * "Accept" method for the "Visitor" pattern.
-     *
-     * To be implemented by leaf classes.
-     *
-     * If the transformation cannot be done,
-     * throw a QueryNodeTransformationException
-     *
-     */
-    QueryNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException;
-
-    /**
      * Set of variables MENTIONED in the node, INDEPENDENTLY of its sub-tree.
      *
      * See ImmutableQuery.getVariables(QueryNode node) for getting all the variables

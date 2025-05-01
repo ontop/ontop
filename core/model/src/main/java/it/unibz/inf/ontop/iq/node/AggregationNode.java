@@ -34,8 +34,4 @@ public interface AggregationNode extends ExtendedProjectionNode {
         return visitor.visitAggregation(this, child);
     }
 
-    @Override
-    default AggregationNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
 }

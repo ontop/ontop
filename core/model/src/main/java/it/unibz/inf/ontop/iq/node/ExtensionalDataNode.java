@@ -24,11 +24,6 @@ public interface ExtensionalDataNode extends LeafIQTree {
     ImmutableMap<Integer, ? extends VariableOrGroundTerm> getArgumentMap();
 
     @Override
-    default ExtensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
-
-    @Override
     default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         return transformer.transformExtensionalData(this);
     }

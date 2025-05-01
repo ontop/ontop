@@ -15,11 +15,6 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
  * See IntermediateQueryFactory for creating a new instance.
  */
 public interface EmptyNode extends LeafIQTree {
-    @Override
-    default EmptyNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
 
     @Override
     default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {

@@ -87,9 +87,4 @@ public interface FlattenNode extends UnaryOperatorNode {
         return visitor.visitFlatten(this, child);
     }
 
-    @Override
-    default FlattenNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
 }

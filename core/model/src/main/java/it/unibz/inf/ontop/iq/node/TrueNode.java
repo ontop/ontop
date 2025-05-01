@@ -14,12 +14,6 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 public interface TrueNode extends LeafIQTree {
 
     @Override
-    default TrueNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
-
-    @Override
     default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         return transformer.transformTrue(this);
     }

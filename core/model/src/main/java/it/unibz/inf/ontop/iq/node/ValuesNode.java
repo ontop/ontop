@@ -36,11 +36,6 @@ public interface ValuesNode extends LeafIQTree {
 
 
     @Override
-    default ValuesNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
-
-    @Override
     default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         return transformer.transformValues(this);
     }

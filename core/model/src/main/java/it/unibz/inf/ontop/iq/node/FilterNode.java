@@ -34,8 +34,4 @@ public interface FilterNode extends CommutativeJoinOrFilterNode, UnaryOperatorNo
         return visitor.visitFilter(this, child);
     }
 
-    @Override
-    default FilterNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
 }

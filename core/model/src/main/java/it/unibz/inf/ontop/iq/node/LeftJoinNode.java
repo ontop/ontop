@@ -27,8 +27,4 @@ public interface LeftJoinNode extends JoinLikeNode, BinaryNonCommutativeOperator
         return visitor.visitLeftJoin(this, leftChild, rightChild);
     }
 
-    @Override
-    default LeftJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
 }

@@ -9,7 +9,4 @@ public interface LeafIQTree extends IQTree, ExplicitVariableProjectionNode {
     @Override
     LeafIQTree getRootNode();
 
-    @Override
-    LeafIQTree acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException;
 }

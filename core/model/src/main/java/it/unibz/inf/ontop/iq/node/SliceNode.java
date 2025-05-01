@@ -34,9 +34,4 @@ public interface SliceNode extends QueryModifierNode {
         return visitor.visitSlice(this, child);
     }
 
-    @Override
-    default SliceNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
 }

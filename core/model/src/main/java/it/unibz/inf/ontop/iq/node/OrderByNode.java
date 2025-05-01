@@ -43,8 +43,4 @@ public interface OrderByNode extends QueryModifierNode {
         return visitor.visitOrderBy(this, child);
     }
 
-    @Override
-    default OrderByNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
 }

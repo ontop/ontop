@@ -22,8 +22,4 @@ public interface DistinctNode extends QueryModifierNode {
         return visitor.visitDistinct(this, child);
     }
 
-    @Override
-    default DistinctNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
 }

@@ -22,12 +22,6 @@ public interface IntensionalDataNode extends LeafIQTree {
     IntensionalDataNode newAtom(DataAtom<AtomPredicate> newAtom);
 
     @Override
-    default IntensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
-
-    @Override
     default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         return transformer.transformIntensionalData(this);
     }
