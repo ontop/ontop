@@ -18,7 +18,6 @@ public interface IQTreeVisitingTransformer extends IQTreeTransformer {
     IQTree transformEmpty(EmptyNode rootNode);
     IQTree transformTrue(TrueNode rootNode);
     IQTree transformValues(ValuesNode valuesNode);
-    IQTree transformNonStandardLeafNode(LeafIQTree rootNode);
 
     IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child);
     IQTree transformAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child);
@@ -27,15 +26,11 @@ public interface IQTreeVisitingTransformer extends IQTreeTransformer {
     IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child);
     IQTree transformSlice(IQTree tree, SliceNode rootNode, IQTree child);
     IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child);
-    IQTree transformNonStandardUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child);
 
     IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild);
-    IQTree transformNonStandardBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode,
-                                                        IQTree leftChild, IQTree rightChild);
 
     IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children);
     IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children);
-    IQTree transformNonStandardNaryNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children);
 
     default IQTree transform(IQTree tree) {
         return tree.acceptTransformer(this);

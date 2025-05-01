@@ -94,26 +94,4 @@ public class HomogeneousIQTreeVisitingTransformer extends DefaultRecursiveIQTree
     public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         return transformNaryCommutativeNode(tree, nodeTransformer.transform(rootNode), children);
     }
-
-
-    @Override
-    public IQTree transformNonStandardLeafNode(LeafIQTree leafNode) {
-        throw new RuntimeException("A non-standard leaf node was encountered: " + leafNode);
-    }
-
-    @Override
-    public IQTree transformNonStandardUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-        throw new RuntimeException("A non-standard unary node was encountered: " + rootNode);
-    }
-
-    @Override
-    public IQTree transformNonStandardBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode,
-                                                               IQTree leftChild, IQTree rightChild) {
-        throw new RuntimeException("A non-standard binary non-commutative node was encountered: " + rootNode);
-    }
-
-    @Override
-    public IQTree transformNonStandardNaryNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-        throw new RuntimeException("A non-standard n-ary node was encountered: " + rootNode);
-    }
 }
