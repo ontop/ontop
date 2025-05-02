@@ -165,7 +165,7 @@ public class BasicFlattenLifter implements FlattenLifter {
         FlattenSplit split(ImmutableSet<Variable> blockingVars) {
             return flattenNodes.stream()
                     .collect(simpleAccumulatorOf(
-                            new FlattenSplit(this, ImmutableList.of(), ImmutableList.of(), blockingVars),
+                            new FlattenSplit(child, ImmutableList.of(), ImmutableList.of(), blockingVars),
                             FlattenSplit::addFlattenNode));
         }
 
@@ -195,13 +195,13 @@ public class BasicFlattenLifter implements FlattenLifter {
 
 
     private class FlattenSplit {
-        private final FlattenSubtree subtree;
+        private final IQTree child;
         private final ImmutableList<FlattenNode> liftableFlatten;
         private final ImmutableList<FlattenNode> nonLiftableFlatten;
         private final ImmutableSet<Variable> blockingVars;
 
-        FlattenSplit(FlattenSubtree subtree, ImmutableList<FlattenNode> liftableFlatten, ImmutableList<FlattenNode> nonLiftableFlatten, ImmutableSet<Variable> blockingVars) {
-            this.subtree = subtree;
+        FlattenSplit(IQTree child, ImmutableList<FlattenNode> liftableFlatten, ImmutableList<FlattenNode> nonLiftableFlatten, ImmutableSet<Variable> blockingVars) {
+            this.child = child;
             this.liftableFlatten = liftableFlatten;
             this.nonLiftableFlatten = nonLiftableFlatten;
             this.blockingVars = blockingVars;
@@ -210,19 +210,19 @@ public class BasicFlattenLifter implements FlattenLifter {
         FlattenSplit addFlattenNode(FlattenNode fn) {
             return Sets.intersection(fn.getLocallyDefinedVariables(), blockingVars).isEmpty()
                     ? new FlattenSplit(
-                        subtree,
+                        child,
                         Stream.concat(liftableFlatten.stream(),Stream.of(fn)).collect(ImmutableCollectors.toList()),
                         nonLiftableFlatten,
                         blockingVars)
                     : new FlattenSplit(
-                        subtree,
+                        child,
                         liftableFlatten,
                         Stream.concat(nonLiftableFlatten.stream(), Stream.of(fn)).collect(ImmutableCollectors.toList()),
                         Stream.concat(blockingVars.stream(), Stream.of(fn.getFlattenedVariable())).collect(ImmutableCollectors.toSet()));
         }
 
         IQTree nonLiftableSubtree() {
-            return buildUnaryTree(nonLiftableFlatten, subtree.child);
+            return buildUnaryTree(nonLiftableFlatten, child);
         }
 
         FlattenSubtree insertAboveNonLiftable(UnaryOperatorNode node) {
