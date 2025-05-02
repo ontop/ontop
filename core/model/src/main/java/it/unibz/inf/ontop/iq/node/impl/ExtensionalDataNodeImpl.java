@@ -357,6 +357,4 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
                         substitutedDefinition)
                 .normalizeForOptimization(variableGenerator);
     }
-
-
 }
