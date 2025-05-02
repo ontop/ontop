@@ -28,18 +28,7 @@ public interface UnionNode extends ExplicitVariableProjectionNode, NaryOperatorN
     IQTree makeDistinct(ImmutableList<IQTree> children);
 
     @Override
-    default IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, ImmutableList<IQTree> children) {
-        return transformer.transformUnion(tree,this, children);
-    }
-
-    @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, ImmutableList<IQTree> children) {
         return visitor.transformUnion(tree, this, children);
-    }
-
-    @Override
-    default UnionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
     }
 }

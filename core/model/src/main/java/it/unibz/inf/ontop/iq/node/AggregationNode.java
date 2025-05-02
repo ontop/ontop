@@ -23,11 +23,6 @@ public interface AggregationNode extends ExtendedProjectionNode {
     ImmutableSet<Variable> getGroupingVariables();
 
     @Override
-    default IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
-        return transformer.transformAggregation(tree, this, child);
-    }
-
-    @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
         return visitor.transformAggregation(tree, this, child);
     }

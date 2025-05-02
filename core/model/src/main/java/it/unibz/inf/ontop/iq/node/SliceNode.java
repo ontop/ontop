@@ -23,13 +23,7 @@ public interface SliceNode extends QueryModifierNode {
     Optional<Long> getLimit();
 
     @Override
-    default IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
-        return transformer.transformSlice(tree, this, child);
-    }
-
-    @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
         return visitor.transformSlice(tree, this, child);
     }
-
 }

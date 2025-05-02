@@ -76,13 +76,7 @@ public interface FlattenNode extends UnaryOperatorNode {
     ImmutableSet<Variable> getVariables(ImmutableSet<Variable> childVariables);
 
     @Override
-    default IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
-        return transformer.transformFlatten(tree, this, child);
-    }
-
-    @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
         return visitor.transformFlatten(tree, this, child);
     }
-
 }

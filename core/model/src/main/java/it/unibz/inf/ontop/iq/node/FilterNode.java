@@ -23,13 +23,7 @@ public interface FilterNode extends CommutativeJoinOrFilterNode, UnaryOperatorNo
     FilterNode changeFilterCondition(ImmutableExpression newFilterCondition);
 
     @Override
-    default IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
-        return transformer.transformFilter(tree,this, child);
-    }
-
-    @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
         return visitor.transformFilter(tree, this, child);
     }
-
 }

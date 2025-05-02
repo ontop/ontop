@@ -16,11 +16,6 @@ public interface LeftJoinNode extends JoinLikeNode, BinaryNonCommutativeOperator
     LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
 
     @Override
-    default IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree leftChild, IQTree rightChild) {
-        return transformer.transformLeftJoin(tree,this, leftChild, rightChild);
-    }
-
-    @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree leftChild, IQTree rightChild) {
         return visitor.transformLeftJoin(tree, this, leftChild, rightChild);
     }

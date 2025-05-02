@@ -21,11 +21,6 @@ public interface ConstructionNode extends ExtendedProjectionNode {
     Substitution<ImmutableTerm> getSubstitution();
 
     @Override
-    default IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
-        return transformer.transformConstruction(tree,this, child);
-    }
-
-    @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
         return visitor.transformConstruction(tree, this, child);
     }

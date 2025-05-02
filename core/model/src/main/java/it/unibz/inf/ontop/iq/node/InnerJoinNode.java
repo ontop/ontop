@@ -19,18 +19,7 @@ public interface InnerJoinNode extends InnerJoinLikeNode {
     InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
 
     @Override
-    default IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, ImmutableList<IQTree> children) {
-        return transformer.transformInnerJoin(tree,this, children);
-    }
-
-    @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, ImmutableList<IQTree> children) {
         return visitor.transformInnerJoin(tree, this, children);
-    }
-
-    @Override
-    default InnerJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
     }
 }

@@ -11,13 +11,7 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 public interface DistinctNode extends QueryModifierNode {
 
     @Override
-    default IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
-        return transformer.transformDistinct(tree, this, child);
-    }
-
-    @Override
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
         return visitor.transformDistinct(tree, this, child);
     }
-
 }

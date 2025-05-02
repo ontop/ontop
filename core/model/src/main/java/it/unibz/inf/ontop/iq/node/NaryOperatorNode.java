@@ -49,17 +49,12 @@ public interface NaryOperatorNode extends QueryNode {
 
     IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children, VariableGenerator variableGenerator);
 
-    IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, ImmutableList<IQTree> children);
-
     <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, ImmutableList<IQTree> children);
 
     /**
      * Only validates the node, not its children
      */
     void validateNode(ImmutableList<IQTree> children) throws InvalidIntermediateQueryException;
-
-    NaryOperatorNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException;
 
     ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(ImmutableList<IQTree> children);
 
