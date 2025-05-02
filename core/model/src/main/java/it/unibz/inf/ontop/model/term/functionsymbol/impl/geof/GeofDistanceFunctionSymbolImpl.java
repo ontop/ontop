@@ -48,8 +48,8 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
         IRI srid1 = wktLiteralValues.get(1).getSRID();
 
         DBTermType geometryType = termFactory.getTypeFactory().getDBTypeFactory().getDBGeometryType();
-        ImmutableTerm geom0 = removeTextCast(wktLiteralValues.get(0).getGeometry(), geometryType, termFactory);
-        ImmutableTerm geom1 = removeTextCast(wktLiteralValues.get(1).getGeometry(), geometryType, termFactory);
+        ImmutableTerm geom0 = termFactory.getConversionFromRDFLexical2DB(geometryType, wktLiteralValues.get(0).getGeometry());
+        ImmutableTerm geom1 = termFactory.getConversionFromRDFLexical2DB(geometryType, wktLiteralValues.get(1).getGeometry());
 
         DistanceUnit inputUnit = GeoUtils.getUnitFromSRID(srid0.getIRIString());
         DistanceUnit outputUnit = DistanceUnit.findByIRI(((DBConstant) subLexicalTerms.get(2)).getValue());

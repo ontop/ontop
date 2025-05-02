@@ -26,8 +26,8 @@ public abstract class AbstractBinaryGeofWKTFunctionSymbolDirectImpl extends Abst
 
         DBTermType geometryType = termFactory.getTypeFactory().getDBTypeFactory().getDBGeometryType();
 
-        ImmutableTerm input0 = removeTextCast(v0.getGeometry(), geometryType, termFactory);
-        ImmutableTerm input1 = removeTextCast(v1.getGeometry(), geometryType, termFactory);
+        ImmutableTerm input0 = termFactory.getConversionFromRDFLexical2DB(geometryType, v0.getGeometry());
+        ImmutableTerm input1 = termFactory.getConversionFromRDFLexical2DB(geometryType, v1.getGeometry());
 
         return termFactory.getDBAsText(getDBFunction(termFactory).apply(input0, input1).simplify());
     }

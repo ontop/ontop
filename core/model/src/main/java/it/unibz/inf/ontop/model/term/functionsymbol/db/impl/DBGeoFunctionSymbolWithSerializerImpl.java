@@ -5,17 +5,24 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.impl.StringDBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
+/**
+ * DBFunctionSymbol for Custom GeoSPARQL Functions with targeted denormalization.
+ */
+public class DBGeoFunctionSymbolWithSerializerImpl extends DBFunctionSymbolWithSerializerImpl {
 
-public class GeoDBTypedFunctionSymbol extends DefaultSQLSimpleTypedDBFunctionSymbol{
-    public GeoDBTypedFunctionSymbol(String nameInDialect, int arity, DBTermType targetType, boolean isInjective,
-                                    DBTermType rootDBTermType) {
-        super(nameInDialect, arity, targetType, isInjective, rootDBTermType);
+    protected DBGeoFunctionSymbolWithSerializerImpl(String name, ImmutableList<TermType> inputDBTypes,
+                                                 DBTermType targetType,
+                                                 boolean isAlwaysInjective,
+                                                 DBFunctionSymbolSerializer serializer) {
+        super(name, inputDBTypes, targetType, isAlwaysInjective, serializer);
     }
 
     @Override
@@ -59,5 +66,5 @@ public class GeoDBTypedFunctionSymbol extends DefaultSQLSimpleTypedDBFunctionSym
 
         return isStringInput && isGeometryTarget;
     }
-}
 
+}

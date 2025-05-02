@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.NullRejectingDBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.SPARQLFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.vocabulary.GEO;
@@ -166,19 +165,6 @@ public abstract class AbstractGeofFunctionSymbolImpl extends SPARQLFunctionSymbo
             return Optional.of((!v0.getSRID().equals(v1.getSRID())));
         }
         return Optional.empty();
-    }
-
-    /**
-     * Remove RDF cast to TEXT for ST_SETSRID and ST_TRANSFORM which return a GEOMETRY
-     */
-    protected ImmutableTerm removeTextCast(ImmutableTerm geometry, DBTermType geometryType, TermFactory termFactory) {
-        if (geometry instanceof ImmutableFunctionalTerm) {
-            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) geometry;
-            if (functionalTerm.getFunctionSymbol().getName().equalsIgnoreCase("geometrytotext")) {
-                return termFactory.getDBCastFunctionalTerm(geometryType, geometry);
-            }
-        }
-        return geometry;
     }
 
 }

@@ -21,14 +21,14 @@ public abstract class AbstractGeofBooleanFunctionSymbolImplUsingRelate extends A
     protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
         WKTLiteralValue v0 = GeoUtils.extractWKTLiteralValue(termFactory, subLexicalTerms.get(0));
         WKTLiteralValue v1 = GeoUtils.extractWKTLiteralValue(termFactory, subLexicalTerms.get(1));
-        ImmutableTerm v2 = termFactory.getDBStringConstant(getMatrixPatternString());
+        ImmutableTerm matrixPattern = termFactory.getDBStringConstant(getMatrixPatternString());
 
         DBTermType geometryType = termFactory.getTypeFactory().getDBTypeFactory().getDBGeometryType();
 
-        ImmutableTerm input0 = removeTextCast(v0.getGeometry(), geometryType, termFactory);
-        ImmutableTerm input1 = removeTextCast(v1.getGeometry(), geometryType, termFactory);
+        ImmutableTerm input0 = termFactory.getConversionFromRDFLexical2DB(geometryType, v0.getGeometry());
+        ImmutableTerm input1 = termFactory.getConversionFromRDFLexical2DB(geometryType, v1.getGeometry());
 
-        return termFactory.getDBRelate(input0, input1, v2).simplify();
+        return termFactory.getDBRelate(input0, input1, matrixPattern).simplify();
 
     }
 
