@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.node;
 import java.util.Optional;
 
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 
@@ -19,5 +18,4 @@ public interface LeftJoinNode extends JoinLikeNode, BinaryNonCommutativeOperator
     default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree leftChild, IQTree rightChild) {
         return visitor.transformLeftJoin(tree, this, leftChild, rightChild);
     }
-
 }

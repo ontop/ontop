@@ -2,11 +2,8 @@ package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
 /**
  * All its children are expected to project its projected variables
