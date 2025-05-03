@@ -24,6 +24,9 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
+
 public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
 
     private final boolean onlyInPresenceOfDistinct;
@@ -272,44 +275,17 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
         }
 
         static Decomposition decomposeTree(IQTree tree) {
+            var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
+            var distinct = UnaryIQTreeDecomposition.of(slice.getChild(), DistinctNode.class);
+            var construction = UnaryIQTreeDecomposition.of(distinct.getChild(), ConstructionNode.class);
+            var orderBy = UnaryIQTreeDecomposition.of(construction.getChild(), OrderByNode.class);
 
-            QueryNode rootNode = tree.getRootNode();
-            Optional<SliceNode> sliceNode = Optional.of(rootNode)
-                    .filter(n -> n instanceof SliceNode)
-                    .map(n -> (SliceNode) n);
-
-            IQTree firstNonSliceTree = sliceNode
-                    .map(n -> ((UnaryIQTree) tree).getChild())
-                    .orElse(tree);
-
-            Optional<DistinctNode> distinctNode = Optional.of(firstNonSliceTree)
-                    .map(IQTree::getRootNode)
-                    .filter(n -> n instanceof DistinctNode)
-                    .map(n -> (DistinctNode) n);
-
-            IQTree firstNonSliceDistinctTree = distinctNode
-                    .map(n -> ((UnaryIQTree) firstNonSliceTree).getChild())
-                    .orElse(firstNonSliceTree);
-
-            Optional<ConstructionNode> constructionNode = Optional.of(firstNonSliceDistinctTree)
-                    .map(IQTree::getRootNode)
-                    .filter(n -> n instanceof ConstructionNode)
-                    .map(n -> (ConstructionNode) n);
-
-            IQTree firstNonSliceDistinctConstructionTree = constructionNode
-                    .map(n -> ((UnaryIQTree) firstNonSliceDistinctTree).getChild())
-                    .orElse(firstNonSliceDistinctTree);
-
-            Optional<OrderByNode> orderByNode = Optional.of(firstNonSliceDistinctConstructionTree)
-                    .map(IQTree::getRootNode)
-                    .filter(n -> n instanceof OrderByNode)
-                    .map(n -> (OrderByNode) n);
-
-            IQTree descendantTree = orderByNode
-                    .map(n -> ((UnaryIQTree) firstNonSliceDistinctConstructionTree).getChild())
-                    .orElse(firstNonSliceDistinctConstructionTree);
-
-            return new Decomposition(sliceNode, distinctNode, constructionNode, orderByNode, descendantTree);
+            return new Decomposition(
+                    slice.getOptionalNode(),
+                    distinct.getOptionalNode(),
+                    construction.getOptionalNode(),
+                    orderBy.getOptionalNode(),
+                    orderBy.getChild());
         }
     }
 }

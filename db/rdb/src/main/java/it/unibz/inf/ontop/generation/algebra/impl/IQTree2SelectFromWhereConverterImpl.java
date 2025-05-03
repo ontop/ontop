@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.generation.algebra.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -17,6 +16,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhereConverter {
 
@@ -36,59 +37,25 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
     @Override
     public SelectFromWhereWithModifiers convert(IQTree tree, ImmutableSortedSet<Variable> signature) {
 
-        QueryNode rootNode = tree.getRootNode();
-        Optional<SliceNode> sliceNode = Optional.of(rootNode)
-                .filter(n -> n instanceof SliceNode)
-                .map(n -> (SliceNode) n);
+        var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
+        Optional<SliceNode> sliceNode = slice.getOptionalNode();
 
-        IQTree firstNonSliceTree = sliceNode
-                .map(n -> ((UnaryIQTree) tree).getChild())
-                .orElse(tree);
+        var distinct = UnaryIQTreeDecomposition.of(slice.getChild(), DistinctNode.class);
+        Optional<DistinctNode> distinctNode = distinct.getOptionalNode();
 
-        Optional<DistinctNode> distinctNode = Optional.of(firstNonSliceTree)
-                .map(IQTree::getRootNode)
-                .filter(n -> n instanceof DistinctNode)
-                .map(n -> (DistinctNode) n);
+        var construction = UnaryIQTreeDecomposition.of(distinct.getChild(), ConstructionNode.class);
+        Optional<ConstructionNode> constructionNode = construction.getOptionalNode();
 
-        IQTree firstNonSliceDistinctTree = distinctNode
-                .map(n -> ((UnaryIQTree) firstNonSliceTree).getChild())
-                .orElse(firstNonSliceTree);
+        var orderBy = UnaryIQTreeDecomposition.of(construction.getChild(), OrderByNode.class);
+        Optional<OrderByNode> orderByNode = orderBy.getOptionalNode();
 
-        Optional<ConstructionNode> constructionNode = Optional.of(firstNonSliceDistinctTree)
-                .map(IQTree::getRootNode)
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode) n);
+        var aggregation = UnaryIQTreeDecomposition.of(orderBy.getChild(), AggregationNode.class);
+        Optional<AggregationNode> aggregationNode = aggregation.getOptionalNode();
 
-        IQTree firstNonSliceDistinctConstructionTree = constructionNode
-                .map(n -> ((UnaryIQTree) firstNonSliceDistinctTree).getChild())
-                .orElse(firstNonSliceDistinctTree);
+        var filter = UnaryIQTreeDecomposition.of(aggregation.getChild(), FilterNode.class);
+        Optional<FilterNode> filterNode = filter.getOptionalNode();
 
-        Optional<OrderByNode> orderByNode = Optional.of(firstNonSliceDistinctConstructionTree)
-                .map(IQTree::getRootNode)
-                .filter(n -> n instanceof OrderByNode)
-                .map(n -> (OrderByNode) n);
-
-        IQTree firstNonSliceDistinctConstructionOrderByTree = orderByNode
-                .map(n -> ((UnaryIQTree) firstNonSliceDistinctConstructionTree).getChild())
-                .orElse(firstNonSliceDistinctConstructionTree);
-
-        Optional<AggregationNode> aggregationNode = Optional.of(firstNonSliceDistinctConstructionOrderByTree)
-                .map(IQTree::getRootNode)
-                .filter(n -> n instanceof AggregationNode)
-                .map(n -> (AggregationNode) n);
-
-        IQTree firstNonSliceDistinctConstructionOrderByAggregationTree = aggregationNode
-                .map(n -> ((UnaryIQTree) firstNonSliceDistinctConstructionOrderByTree).getChild())
-                .orElse(firstNonSliceDistinctConstructionOrderByTree);
-
-        Optional<FilterNode> filterNode = Optional.of(firstNonSliceDistinctConstructionOrderByAggregationTree)
-                .map(IQTree::getRootNode)
-                .filter(n -> n instanceof FilterNode)
-                .map(n -> (FilterNode) n);
-
-        IQTree childTree = filterNode
-                .map(n -> ((UnaryIQTree) firstNonSliceDistinctConstructionOrderByAggregationTree).getChild())
-                .orElse(firstNonSliceDistinctConstructionOrderByAggregationTree);
+        IQTree childTree = filter.getChild();
 
         Substitution<ImmutableTerm> substitution = constructionNode
                 .map(c -> aggregationNode
@@ -241,7 +208,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
     }
 
     private SQLExpression getSubExpressionOfLeftJoinExpression(IQTree tree){
-        if (tree.getRootNode() instanceof InnerJoinNode){
+        if (tree.getRootNode() instanceof InnerJoinNode) {
             ImmutableList<IQTree> children = tree.getChildren();
             int arity = children.size();
 

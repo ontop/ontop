@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -156,6 +157,10 @@ public class IQTreeTools {
 
         public <U> Optional<U> map(Function<? super T, ? extends U> function) {
             return Optional.ofNullable(node).map(function);
+        }
+
+        public <U> Optional<U> map(BiFunction<? super T, IQTree, ? extends U> function) {
+            return Optional.ofNullable(node).map(n -> function.apply(n, child));
         }
 
         public static <T extends UnaryOperatorNode> UnaryIQTreeDecomposition<T> of(IQTree tree, Class<T> nodeClass) {
