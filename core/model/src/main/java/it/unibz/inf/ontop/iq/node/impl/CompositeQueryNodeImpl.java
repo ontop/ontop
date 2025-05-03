@@ -17,6 +17,4 @@ public abstract class CompositeQueryNodeImpl extends QueryNodeImpl {
         this.termFactory = termFactory;
         this.iqTreeTools = iqTreeTools;
     }
-
-
 }

@@ -8,16 +8,15 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInvalidKGQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.impl.QueryNodeRenamer;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transform.impl.HomogeneousIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -56,6 +55,7 @@ public class RDF4JTupleExprTranslator {
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final FunctionSymbolFactory functionSymbolFactory;
+    private final QueryTransformerFactory queryTransformerFactory;
     private final RDF rdfFactory;
     private final TypeFactory typeFactory;
 
@@ -65,26 +65,21 @@ public class RDF4JTupleExprTranslator {
     public RDF4JTupleExprTranslator(ImmutableMap<Variable, GroundTerm> externalBindings,
                                     @Nullable Dataset dataset,
                                     boolean treatBNodeAsVariable,
-                                    CoreUtilsFactory coreUtilsFactory,
-                                    SubstitutionFactory substitutionFactory,
-                                    IntermediateQueryFactory iqFactory,
-                                    AtomFactory atomFactory,
-                                    TermFactory termFactory,
-                                    FunctionSymbolFactory functionSymbolFactory,
+                                    CoreSingletons coreSingletons,
                                     RDF rdfFactory,
-                                    TypeFactory typeFactory,
                                     IQTreeTools iqTreeTools) {
         this.externalBindings = externalBindings;
         this.dataset = dataset;
         this.treatBNodeAsVariable = treatBNodeAsVariable;
-        this.coreUtilsFactory = coreUtilsFactory;
-        this.substitutionFactory = substitutionFactory;
-        this.iqFactory = iqFactory;
-        this.atomFactory = atomFactory;
-        this.termFactory = termFactory;
-        this.functionSymbolFactory = functionSymbolFactory;
+        this.coreUtilsFactory = coreSingletons.getCoreUtilsFactory();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.atomFactory = coreSingletons.getAtomFactory();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.functionSymbolFactory = coreSingletons.getFunctionSymbolFactory();
+        this.queryTransformerFactory = coreSingletons.getQueryTransformerFactory();
+        this.typeFactory = coreSingletons.getTypeFactory();
         this.rdfFactory = rdfFactory;
-        this.typeFactory = typeFactory;
         this.iqTreeTools = iqTreeTools;
         this.subClassOfConstant = termFactory.getConstantIRI(RDFS.SUBCLASSOF);
     }
@@ -172,12 +167,7 @@ public class RDF4JTupleExprTranslator {
     }
 
     private IQTree applyInDepthRenaming(IQTree tree, InjectiveSubstitution<Variable> renaming) {
-        if (renaming.isEmpty())
-            return tree;
-
-        QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(iqFactory, renaming, atomFactory, substitutionFactory);
-        HomogeneousIQTreeVisitingTransformer iqTransformer = new HomogeneousIQTreeVisitingTransformer(nodeTransformer, iqFactory);
-        return iqTransformer.transform(tree);
+        return queryTransformerFactory.createRenamer(renaming).transform(tree);
     }
 
     private ImmutableList<ImmutableExpression> getEqOrNullable(Variable sharedVar, Variable renamedVar, ImmutableSet<Variable> leftNullableVars,

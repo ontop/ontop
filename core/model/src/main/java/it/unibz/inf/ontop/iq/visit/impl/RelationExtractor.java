@@ -7,16 +7,13 @@ import java.util.stream.Stream;
 
 public class RelationExtractor extends AbstractPredicateExtractor<ExtensionalDataNode> {
 
-    public RelationExtractor() {
-    }
-
     @Override
-    public Stream<ExtensionalDataNode> visitIntensionalData(IntensionalDataNode dataNode) {
+    public Stream<ExtensionalDataNode> transformIntensionalData(IntensionalDataNode dataNode) {
         return Stream.empty();
     }
 
     @Override
-    public Stream<ExtensionalDataNode> visitExtensionalData(ExtensionalDataNode dataNode) {
+    public Stream<ExtensionalDataNode> transformExtensionalData(ExtensionalDataNode dataNode) {
         return Stream.of(dataNode);
     }
 }

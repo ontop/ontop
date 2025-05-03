@@ -46,12 +46,12 @@ public class ClassAndPropertyExtractor extends AbstractPredicateExtractor<Intens
     }
 
     @Override
-    public Stream<IntensionalDataNode> visitIntensionalData(IntensionalDataNode dataNode) {
+    public Stream<IntensionalDataNode> transformIntensionalData(IntensionalDataNode dataNode) {
         return Stream.of(dataNode);
     }
 
     @Override
-    public Stream<IntensionalDataNode> visitExtensionalData(ExtensionalDataNode dataNode) {
+    public Stream<IntensionalDataNode> transformExtensionalData(ExtensionalDataNode dataNode) {
         return Stream.empty();
     }
 
