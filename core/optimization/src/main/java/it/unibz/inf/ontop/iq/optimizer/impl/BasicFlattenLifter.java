@@ -7,13 +7,13 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.FlattenLifter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
@@ -21,11 +21,12 @@ import java.util.stream.Stream;
 public class BasicFlattenLifter implements FlattenLifter {
 
     private final IntermediateQueryFactory iqFactory;
-
+    private final IQTreeTools iqTreeTools;
 
     @Inject
-    private BasicFlattenLifter(IntermediateQueryFactory iqFactory) {
+    private BasicFlattenLifter(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -44,7 +45,7 @@ public class BasicFlattenLifter implements FlattenLifter {
 
         @Override
         public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
-            IQTree updatedChild = child.acceptTransformer(this);
+            IQTree updatedChild = transformChild(child);
             FlattenSubtree flattenSubtree = flattenSubtreeOf(updatedChild);
             if (flattenSubtree.flattenNodes.isEmpty()) {
                 return iqFactory.createUnaryIQTree(rootNode, updatedChild);
@@ -63,7 +64,7 @@ public class BasicFlattenLifter implements FlattenLifter {
 
         @Override
         public IQTree transformConstruction(IQTree tree, ConstructionNode cn, IQTree child) {
-            IQTree updatedChild = child.acceptTransformer(this);
+            IQTree updatedChild = transformChild(child);
             if (tree.getRootNode().equals(cn)) {
                 return iqFactory.createUnaryIQTree(cn, updatedChild);
             }
@@ -90,9 +91,7 @@ public class BasicFlattenLifter implements FlattenLifter {
          */
         @Override
         public IQTree transformInnerJoin(IQTree tree, InnerJoinNode join, ImmutableList<IQTree> initialChildren) {
-            ImmutableList<IQTree> children = initialChildren.stream()
-                    .map(c -> c.acceptTransformer(this))
-                    .collect(ImmutableCollectors.toList());
+            ImmutableList<IQTree> children = transformChildren(initialChildren);
 
             ImmutableSet<Variable> blockingVars = getImplicitJoinCondition(children);
 
@@ -118,8 +117,8 @@ public class BasicFlattenLifter implements FlattenLifter {
          */
         @Override
         public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree initialLeftChild, IQTree initialRightChild) {
-            IQTree leftChild = initialLeftChild.acceptTransformer(this);
-            IQTree rightChild = initialRightChild.acceptTransformer(this);
+            IQTree leftChild = transformChild(initialLeftChild);
+            IQTree rightChild = transformChild(initialRightChild);
 
             // all variables involved in the joining condition are blocking
             ImmutableSet<Variable> blockingVars = Sets.union(
@@ -170,7 +169,7 @@ public class BasicFlattenLifter implements FlattenLifter {
         }
 
         IQTree asIQTree() {
-            return buildUnaryTree(flattenNodes, child);
+            return iqTreeTools.createAncestorsUnaryIQTree(flattenNodes.reverse(), child);
         }
     }
 
@@ -222,7 +221,7 @@ public class BasicFlattenLifter implements FlattenLifter {
         }
 
         IQTree nonLiftableSubtree() {
-            return buildUnaryTree(nonLiftableFlatten, child);
+            return iqTreeTools.createAncestorsUnaryIQTree(nonLiftableFlatten.reverse(), child);
         }
 
         FlattenSubtree insertAboveNonLiftable(UnaryOperatorNode node) {
@@ -236,15 +235,6 @@ public class BasicFlattenLifter implements FlattenLifter {
         FlattenSubtree flattenSubtree = flattenSubtreeOf(tree);
         return flattenSubtree.split(blockingVars);
     }
-
-    private IQTree buildUnaryTree(List<FlattenNode> list, IQTree subtree) {
-        // TODO: use reversed() in Java 21
-        Deque<FlattenNode> deque = new ArrayDeque<>(list);
-        return Streams.stream(deque.descendingIterator())
-                .collect(simpleAccumulatorOf(subtree,
-                        (t, n) -> iqFactory.createUnaryIQTree(n, t)));
-    }
-
 
     private static <T,A> Collector<T,?,A> simpleAccumulatorOf(A initial, BiFunction<A,T,A> function) {
         class Store {

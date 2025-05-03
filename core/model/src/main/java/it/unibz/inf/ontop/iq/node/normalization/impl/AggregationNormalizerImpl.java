@@ -26,6 +26,8 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
 public class AggregationNormalizerImpl implements AggregationNormalizer {
 
     private final CoreSingletons coreSingletons;
@@ -76,14 +78,9 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             return normalizeEmptyChild(aggregationNode, normalizedTreeCache);
         }
 
-        QueryNode rootNode = shrunkChild.getRootNode();
-
         // State after lifting the bindings
-        AggregationNormalizationState stateAfterLiftingBindings = Optional.of(rootNode)
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode) n)
-                .map(n -> normalizeWithChildConstructionNode(aggregationNode, n,
-                        ((UnaryIQTree) shrunkChild).getChild(), variableGenerator))
+        AggregationNormalizationState stateAfterLiftingBindings = UnaryIQTreeDecomposition.of(shrunkChild, ConstructionNode.class)
+                .map((n, t) -> normalizeWithChildConstructionNode(aggregationNode, n, t, variableGenerator))
                 .orElseGet(() -> new AggregationNormalizationState(aggregationNode, null,
                         shrunkChild, variableGenerator, null));
 
