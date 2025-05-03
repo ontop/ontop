@@ -55,9 +55,7 @@ public abstract class AbstractBelowDistinctInnerJoinTransformer extends Abstract
         Optional<ImmutableExpression> expression = termFactory.getConjunction(optionalFilterCondition,
                 variablesToFilterNulls.stream().map(termFactory::getDBIsNotNull));
 
-        InnerJoinNode innerJoinNode = expression
-                .map(iqFactory::createInnerJoinNode)
-                .orElseGet(iqFactory::createInnerJoinNode);
+        InnerJoinNode innerJoinNode = iqFactory.createInnerJoinNode(expression);
 
         // NB: will be normalized later on
         return Optional.of(iqFactory.createNaryIQTree(innerJoinNode, ImmutableList.copyOf(currentChildren)));

@@ -8,9 +8,8 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -18,7 +17,9 @@ import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Singleton
@@ -127,9 +128,55 @@ public class IQTreeTools {
                 .collect(ImmutableCollectors.toList());
     }
 
-    public InnerJoinNode createInnerJoinNode(Optional<ImmutableExpression> optionalExpression) {
-        return optionalExpression.map(iqFactory::createInnerJoinNode).orElseGet(iqFactory::createInnerJoinNode);
+
+    public static class UnaryIQTreeDecomposition<T extends UnaryOperatorNode> {
+        private final T node; // nullable
+        private final IQTree child;
+
+        private UnaryIQTreeDecomposition(T node, IQTree child) {
+            this.node = node;
+            this.child = child;
+        }
+
+        public Optional<T> getOptionalNode() {
+            return Optional.ofNullable(node);
+        }
+
+        public IQTree getChild() {
+            return child;
+        }
+
+        public boolean isPresent() {
+            return node != null ;
+        }
+
+        public T get() {
+            return Objects.requireNonNull(node);
+        }
+
+        public <U> Optional<U> map(Function<? super T, ? extends U> function) {
+            return Optional.ofNullable(node).map(function);
+        }
+
+        public static <T extends UnaryOperatorNode> UnaryIQTreeDecomposition<T> of(IQTree tree, Class<T> nodeClass) {
+            return nodeClass.isInstance(tree.getRootNode())
+                    ? new UnaryIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((UnaryIQTree)tree).getChild())
+                    : new UnaryIQTreeDecomposition<>(null, tree);
+        }
+
+        public static <T extends UnaryOperatorNode> ImmutableList<UnaryIQTreeDecomposition<T>> of(ImmutableList<IQTree> list, Class<T> nodeClass) {
+            return list.stream()
+                    .map(c -> UnaryIQTreeDecomposition.of(c, nodeClass))
+                    .collect(ImmutableCollectors.toList());
+        }
+
+        public static <T extends UnaryOperatorNode> ImmutableList<IQTree> getChildren(ImmutableList<UnaryIQTreeDecomposition<T>> list) {
+            return list.stream()
+                    .map(UnaryIQTreeDecomposition::getChild)
+                    .collect(ImmutableCollectors.toList());
+        }
     }
+
 
     /**
      * If the substitution is a fresh renaming, returns it as an injective substitution

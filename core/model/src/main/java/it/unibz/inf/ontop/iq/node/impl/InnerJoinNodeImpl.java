@@ -176,7 +176,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
             VariableGenerator variableGenerator) {
 
-        InnerJoinNode newJoinNode = iqTreeTools.createInnerJoinNode(
+        InnerJoinNode newJoinNode = iqFactory.createInnerJoinNode(
                 getOptionalFilterCondition().map(descendingSubstitution::apply));
 
         ImmutableList<IQTree> newChildren = children.stream()
@@ -446,7 +446,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
             InnerJoinNode newJoin = conditionSimplificationResults.getOptionalExpression().equals(getOptionalFilterCondition())
                     ? this
-                    : iqTreeTools.createInnerJoinNode(conditionSimplificationResults.getOptionalExpression());
+                    : iqFactory.createInnerJoinNode(conditionSimplificationResults.getOptionalExpression());
 
             NaryIQTree joinTree = iqFactory.createNaryIQTree(newJoin, newChildren);
 

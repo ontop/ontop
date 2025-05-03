@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransf
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.inject.Inject;
@@ -67,11 +66,10 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
                 rootNode.getOptionalFilterCondition().get(),
                 this::pushExpressionDownIfContainsVariables);
 
-        LeftJoinNode newLeftJoinNode = result.nonPushedExpression
-                .map(iqFactory::createLeftJoinNode)
-                .orElseGet(iqFactory::createLeftJoinNode);
-
-        return iqFactory.createBinaryNonCommutativeIQTree(newLeftJoinNode, transformedLeftChild, result.result);
+        return iqFactory.createBinaryNonCommutativeIQTree(
+                iqFactory.createLeftJoinNode(result.nonPushedExpression),
+                transformedLeftChild,
+                result.result);
     }
 
     @Override
@@ -89,13 +87,11 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
         PushResult<ImmutableList<IQTree>> result = pushExpressionDown(
                 transformedChildren,
                 rootNode.getOptionalFilterCondition().get(),
-                this::pushExpressionDown);
+                this::pushExpressionDownIfContainsVariables);
 
-        InnerJoinNode newInnerJoinNode = result.nonPushedExpression
-                .map(iqFactory::createInnerJoinNode)
-                .orElseGet(iqFactory::createInnerJoinNode);
-
-        return iqFactory.createNaryIQTree(newInnerJoinNode, result.result);
+        return iqFactory.createNaryIQTree(
+                iqFactory.createInnerJoinNode(result.nonPushedExpression),
+                result.result);
     }
 
     private Optional<IQTree> pushExpressionDown(ImmutableExpression expression, IQTree child) {
@@ -104,18 +100,15 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
     }
 
     private Optional<IQTree> pushExpressionDownIfContainsVariables(ImmutableExpression expression, IQTree tree) {
-        ImmutableSet<Variable> expressionVariables = getVariables(expression);
-        if (tree.getVariables().containsAll(expressionVariables))
+        if (tree.getVariables().containsAll(expression.getVariables()))
             return pushExpressionDown(expression, tree);
         return Optional.empty();
     }
 
-    private Optional<ImmutableList<IQTree>> pushExpressionDown(ImmutableExpression expression, ImmutableList<IQTree> list) {
-        ImmutableSet<Variable> expressionVariables = getVariables(expression);
+    private Optional<ImmutableList<IQTree>> pushExpressionDownIfContainsVariables(ImmutableExpression expression, ImmutableList<IQTree> list) {
         return Optional.of(list.stream()
-                        .map(tree -> tree.getVariables().containsAll(expressionVariables)
-                                ? pushExpressionDown(expression, tree).orElse(tree)
-                                : tree)
+                        .map(tree -> pushExpressionDownIfContainsVariables(expression, tree)
+                                .orElse(tree))
                         .collect(ImmutableCollectors.toList()))
                 // If the expression could not be pushed down to any child, keep it in the inner join
                 .filter(rr -> !rr.equals(list));
@@ -125,7 +118,7 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
         final T result;
         final Optional<ImmutableExpression>  nonPushedExpression;
 
-        private PushResult(T result, Optional<ImmutableExpression> nonPushedExpression) {
+        PushResult(T result, Optional<ImmutableExpression> nonPushedExpression) {
             this.result = result;
             this.nonPushedExpression = nonPushedExpression;
         }
@@ -142,9 +135,5 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
                 nonPushedExpressionBuilder.add(exp);
         }
         return new PushResult<>(result, termFactory.getConjunction(nonPushedExpressionBuilder.build().stream()));
-    }
-
-    private static ImmutableSet<Variable> getVariables(ImmutableExpression expression) {
-        return expression.getVariableStream().collect(ImmutableCollectors.toSet());
     }
 }
