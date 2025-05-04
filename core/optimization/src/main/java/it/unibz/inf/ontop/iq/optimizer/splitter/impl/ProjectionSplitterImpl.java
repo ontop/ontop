@@ -16,7 +16,8 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Optional;
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
 
 public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
 
@@ -43,10 +44,8 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
 
     protected ProjectionSplit split(IQTree topTree, VariableGenerator variableGenerator, ProjectionDecomposer decomposer) {
 
-        return Optional.of(topTree)
-                .filter(t -> t.getRootNode() instanceof ConstructionNode)
-                .map(t -> (UnaryIQTree) t)
-                .map(t -> split(t, variableGenerator, decomposer))
+        return UnaryIQTreeDecomposition.of(topTree, ConstructionNode.class)
+                .map((cn, t) -> split(cn, t, variableGenerator, decomposer))
                 .orElseGet(() -> new ProjectionSplitImpl(
                         // "Useless" construction node --> no post-processing
                         iqFactory.createConstructionNode(topTree.getVariables(), substitutionFactory.getSubstitution()),
@@ -57,10 +56,7 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
     }
 
 
-    private ProjectionSplit split(UnaryIQTree initialTree, VariableGenerator variableGenerator, ProjectionDecomposer decomposer) {
-
-        ConstructionNode initialRootNode = (ConstructionNode) initialTree.getRootNode();
-        IQTree initialSubTree = initialTree.getChild();
+    private ProjectionSplit split(ConstructionNode initialRootNode, IQTree initialSubTree, VariableGenerator variableGenerator, ProjectionDecomposer decomposer) {
 
         ProjectionDecomposition decomposition = decomposer.decomposeSubstitution(initialRootNode.getSubstitution(), variableGenerator);
 
@@ -97,10 +93,8 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
      *
      */
     protected IQTree normalizeNewSubTree(IQTree newSubTree, VariableGenerator variableGenerator) {
-        return Optional.of(newSubTree.getRootNode())
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode) n)
-                .map(c -> insertConstructionNode(((UnaryIQTree) newSubTree).getChild(), c, variableGenerator))
+        return UnaryIQTreeDecomposition.of(newSubTree, ConstructionNode.class)
+                .map((cn, t) -> insertConstructionNode(t, cn, variableGenerator))
                 .orElse(newSubTree);
     }
 
@@ -108,12 +102,12 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
      * Recursive
      */
     protected IQTree insertConstructionNode(IQTree tree, ConstructionNode constructionNode, VariableGenerator variableGenerator) {
-        QueryNode rootNode = tree.getRootNode();
-        if (rootNode instanceof SliceNode)
+        var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
+        if (slice.isPresent())
             return iqFactory.createUnaryIQTree(
-                    (UnaryOperatorNode) rootNode,
+                    slice.get(),
                     // Recursive
-                    insertConstructionNode(((UnaryIQTree)tree).getChild(), constructionNode, variableGenerator));
+                    insertConstructionNode(slice.getChild(), constructionNode, variableGenerator));
         /*
          * Distinct:
          * If
@@ -126,29 +120,24 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
          * TODO: relax the condition 1?
          *
          */
-        else if (rootNode instanceof DistinctNode) {
-            IQTree childTree = ((UnaryIQTree) tree).getChild();
-
+        var distinct = UnaryIQTreeDecomposition.of(tree, DistinctNode.class);
+        if (distinct.isPresent()) {
             // Stops if the child tree is projecting more variables than what the construction node expects
-            if (!childTree.getVariables().equals(constructionNode.getChildVariables()))
+            if (!distinct.getChild().getVariables().equals(constructionNode.getChildVariables()))
                 return iqFactory.createUnaryIQTree(
                         constructionNode,
-                        tree
-                );
+                        tree);
 
-            UnaryIQTree possibleChildTree = iqFactory.createUnaryIQTree(constructionNode, childTree);
+            UnaryIQTree possibleChildTree = iqFactory.createUnaryIQTree(constructionNode, distinct.getChild());
 
-            DistinctNode distinctNode = (DistinctNode) rootNode;
-
-            IQTree liftedTree = distinctNormalizer.normalizeForOptimization(distinctNode, possibleChildTree, variableGenerator,
+            IQTree liftedTree = distinctNormalizer.normalizeForOptimization(distinct.get(), possibleChildTree, variableGenerator,
                     iqFactory.createIQTreeCache());
 
             return liftedTree.getRootNode().equals(constructionNode)
-                    ? iqFactory.createUnaryIQTree(distinctNode, possibleChildTree)
+                    ? iqFactory.createUnaryIQTree(distinct.get(), possibleChildTree)
                     : iqFactory.createUnaryIQTree(constructionNode, tree);
         }
-        else
-            return iqFactory.createUnaryIQTree(constructionNode, tree);
+        return iqFactory.createUnaryIQTree(constructionNode, tree);
     }
 
     static class ProjectionSplitImpl implements ProjectionSplit {

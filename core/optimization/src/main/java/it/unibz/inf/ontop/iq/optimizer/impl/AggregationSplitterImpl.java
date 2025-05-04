@@ -11,11 +11,10 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.AggregationSplitter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -26,19 +25,24 @@ import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
+
 public class AggregationSplitterImpl implements AggregationSplitter {
 
     private final CoreSingletons coreSingletons;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
-    protected AggregationSplitterImpl(CoreSingletons coreSingletons) {
+    protected AggregationSplitterImpl(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
         this.coreSingletons = coreSingletons;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
     public IQ optimize(IQ query) {
         IQ normalizedQuery = query.normalizeForOptimization();
-        AggregationUnionLifterTransformer transformer = new AggregationUnionLifterTransformer(coreSingletons, query.getVariableGenerator());
+        AggregationUnionLifterTransformer transformer = new AggregationUnionLifterTransformer(query.getVariableGenerator());
 
         IQTree tree = normalizedQuery.getTree();
         IQTree newTree = transformer.transform(tree);
@@ -52,26 +56,24 @@ public class AggregationSplitterImpl implements AggregationSplitter {
     /**
      * Assumes that the tree is normalized
      */
-    protected static class AggregationUnionLifterTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    protected class AggregationUnionLifterTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
         private final VariableGenerator variableGenerator;
         private final SubstitutionFactory substitutionFactory;
         private final TermFactory termFactory;
-        private final AtomFactory atomFactory;
         private final QueryTransformerFactory queryTransformerFactory;
 
-        protected AggregationUnionLifterTransformer(CoreSingletons coreSingletons, VariableGenerator variableGenerator) {
-            super(coreSingletons);
+        protected AggregationUnionLifterTransformer(VariableGenerator variableGenerator) {
+            super(coreSingletons.getIQFactory());
             this.variableGenerator = variableGenerator;
             this.substitutionFactory = coreSingletons.getSubstitutionFactory();
             this.termFactory = coreSingletons.getTermFactory();
-            this.atomFactory = coreSingletons.getAtomFactory();
             this.queryTransformerFactory = coreSingletons.getQueryTransformerFactory();
         }
 
         @Override
         public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
-            IQTree liftedChild = child.acceptTransformer(this);
+            IQTree liftedChild = transformChild(child);
 
             return tryToLift(rootNode, liftedChild)
                     .orElseGet(() -> liftedChild == child
@@ -83,31 +85,11 @@ public class AggregationSplitterImpl implements AggregationSplitter {
 
             ImmutableSet<Variable> groupingVariables = rootNode.getGroupingVariables();
 
-            Optional<ConstructionNode> topChildConstructionNode = Optional.of(child.getRootNode())
-                    .filter(n -> n instanceof ConstructionNode)
-                    .map(n -> (ConstructionNode) n);
+            var construction = UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
+            var distinct = UnaryIQTreeDecomposition.of(construction.getChild(), DistinctNode.class);
+            var subConstruction = UnaryIQTreeDecomposition.of(distinct.getChild(), ConstructionNode.class);
 
-            IQTree nonTopConstructionDescendant = topChildConstructionNode
-                    .map(cst -> ((UnaryIQTree) child).getChild())
-                    .orElse(child);
-
-            Optional<DistinctNode> distinctDescendantNode = Optional.of(nonTopConstructionDescendant)
-                    .map(IQTree::getRootNode)
-                    .filter(n -> n instanceof DistinctNode)
-                    .map(n -> (DistinctNode) n);
-
-            IQTree nonTopConstructionNonDistinctDescendant = distinctDescendantNode
-                    .map(cst -> ((UnaryIQTree) nonTopConstructionDescendant).getChild())
-                    .orElse(nonTopConstructionDescendant);
-
-            Optional<ConstructionNode> subConstructionDescendantNode = Optional.of(nonTopConstructionNonDistinctDescendant)
-                    .map(IQTree::getRootNode)
-                    .filter(n -> n instanceof ConstructionNode)
-                    .map(n -> (ConstructionNode) n);
-
-            IQTree nonConstructionNonDistinctDescendant = subConstructionDescendantNode
-                    .map(cst -> ((UnaryIQTree) nonTopConstructionNonDistinctDescendant).getChild())
-                    .orElse(nonTopConstructionNonDistinctDescendant);
+            IQTree nonConstructionNonDistinctDescendant = subConstruction.getChild();
 
             if (!(nonConstructionNonDistinctDescendant.getRootNode() instanceof UnionNode))
                 // TODO: log a message, as we are in an unexpected situation
@@ -121,12 +103,12 @@ public class AggregationSplitterImpl implements AggregationSplitter {
              */
             ImmutableSet<Variable> groupingVariablesWithDifferentDefinitions = groupingVariables.stream()
                     .filter(child::isConstructed)
-                    .filter(v -> !topChildConstructionNode
+                    .filter(v -> construction.getOptionalNode()
                             .filter(n -> n.getSubstitution().isDefining(v))
-                            .isPresent())
-                    .filter(v -> !subConstructionDescendantNode
+                            .isEmpty())
+                    .filter(v -> subConstruction.getOptionalNode()
                             .filter(n -> n.getSubstitution().isDefining(v))
-                            .isPresent())
+                            .isEmpty())
                     .collect(ImmutableCollectors.toSet());
 
             if (groupingVariablesWithDifferentDefinitions.isEmpty())
@@ -148,9 +130,14 @@ public class AggregationSplitterImpl implements AggregationSplitter {
             if (groups.size() <= 1)
                 return Optional.empty();
 
-            return Optional.of(liftUnion(groups, topChildConstructionNode, distinctDescendantNode, subConstructionDescendantNode,
-                    rootNode, unionChildren));
-
+            return Optional.of(
+                    liftUnion(
+                            groups,
+                            Stream.of(construction, distinct, subConstruction)
+                                    .map(UnaryIQTreeDecomposition::getOptionalNode)
+                                    .collect(ImmutableCollectors.toList()),
+                            rootNode,
+                            unionChildren));
         }
 
         private Stream<ImmutableSet<IQTree>> tryToSplit(ImmutableSet<IQTree> initialGroup, Variable groupingVariable,
@@ -222,10 +209,9 @@ public class AggregationSplitterImpl implements AggregationSplitter {
                     .map(ChildGroup::getTrees);
         }
 
-        protected IQTree liftUnion(ImmutableList<ImmutableSet<IQTree>> groups, Optional<ConstructionNode> childConstructionNode,
-                                   Optional<DistinctNode> distinctDescendantNode, Optional<ConstructionNode> subConstructionDescendantNode,
+        protected IQTree liftUnion(ImmutableList<ImmutableSet<IQTree>> groups, ImmutableList<Optional<? extends UnaryOperatorNode>> nodes,
                                    AggregationNode initialAggregationNode, ImmutableMultiset<IQTree> unionChildren) {
-            Sets.SetView<Variable> nonGroupingVariables = Sets.difference(initialAggregationNode.getChildVariables(), initialAggregationNode.getGroupingVariables());
+            Set<Variable> nonGroupingVariables = Sets.difference(initialAggregationNode.getChildVariables(), initialAggregationNode.getGroupingVariables());
 
             ImmutableList<ImmutableList<IQTree>> multiGroups = groups.stream()
                     .map(g -> unionChildren.entrySet().stream()
@@ -243,7 +229,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
                             case 1:
                                 return iqFactory.createUnaryIQTree(
                                         initialAggregationNode,
-                                        buildSubAggregateTree(g.get(0), childConstructionNode, distinctDescendantNode, subConstructionDescendantNode));
+                                        iqTreeTools.createOptionalAncestorsUnaryIQTree(nodes, g.get(0)));
                             default:
                                 IQTree lowUnion = iqFactory.createNaryIQTree(
                                         iqFactory.createUnionNode(initialAggregationNode.getChildVariables()),
@@ -251,7 +237,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
 
                                 return iqFactory.createUnaryIQTree(
                                         initialAggregationNode,
-                                        buildSubAggregateTree(lowUnion, childConstructionNode, distinctDescendantNode, subConstructionDescendantNode));
+                                        iqTreeTools.createOptionalAncestorsUnaryIQTree(nodes, lowUnion));
                         }
                     })
                     .map(t -> renameSomeUnprojectedVariables(t, nonGroupingVariables))
@@ -260,22 +246,6 @@ public class AggregationSplitterImpl implements AggregationSplitter {
             return iqFactory.createNaryIQTree(
                     iqFactory.createUnionNode(initialAggregationNode.getVariables()),
                     topUnionChildren);
-        }
-
-        private IQTree buildSubAggregateTree(IQTree bottomTree, Optional<ConstructionNode> childConstructionNode,
-                                             Optional<DistinctNode> distinctDescendantNode,
-                                             Optional<ConstructionNode> subConstructionDescendantNode) {
-            IQTree level3Tree = subConstructionDescendantNode
-                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, bottomTree))
-                    .orElse(bottomTree);
-
-            IQTree level2Tree = distinctDescendantNode
-                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, level3Tree))
-                    .orElse(level3Tree);
-
-            return childConstructionNode
-                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, level2Tree))
-                    .orElse(level2Tree);
         }
 
         private IQTree renameSomeUnprojectedVariables(IQTree tree, Set<Variable> nonGroupingVariables) {

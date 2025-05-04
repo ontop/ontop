@@ -24,6 +24,9 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
+
 @Singleton
 public class FilterNormalizerImpl implements FilterNormalizer {
 
@@ -107,23 +110,19 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
         private State updateParentChildAndCondition(UnaryOperatorNode newParent,
                                                                        ImmutableExpression newCondition, IQTree newChild) {
-            ImmutableList<UnaryOperatorNode> newAncestors = extendAncestors(newParent);
-            return new State(projectedVariables, newAncestors, Optional.of(newCondition), newChild);
+            return new State(projectedVariables, extendAncestors(newParent), Optional.of(newCondition), newChild);
         }
 
         private State addParentRemoveConditionAndUpdateChild(UnaryOperatorNode newParent, IQTree newChild) {
-            ImmutableList<UnaryOperatorNode> newAncestors = extendAncestors(newParent);
-            return new State(projectedVariables, newAncestors, Optional.empty(), newChild);
+            return new State(projectedVariables, extendAncestors(newParent), Optional.empty(), newChild);
         }
 
         private ImmutableList<UnaryOperatorNode> extendAncestors(UnaryOperatorNode newNode) {
             return Stream.concat(Stream.of(newNode), ancestors.stream()).collect(ImmutableCollectors.toList());
         }
 
-        private State liftChildAsParent(UnaryIQTree formerChildTree) {
-            ImmutableList<UnaryOperatorNode> newAncestors = extendAncestors(formerChildTree.getRootNode());
-            IQTree newChild = formerChildTree.getChild();
-            return new State(projectedVariables, newAncestors, condition, newChild);
+        private State liftChildAsParent(UnaryIQTreeDecomposition<?> decomposition) {
+            return new State(projectedVariables, extendAncestors(decomposition.get()), condition, decomposition.getChild());
         }
 
         private State updateConditionAndChild(ImmutableExpression newCondition, IQTree newChild) {
@@ -165,28 +164,27 @@ public class FilterNormalizerImpl implements FilterNormalizer {
         }
 
         public State liftBindingsAndDistinct() {
-            QueryNode childRoot = child.getRootNode();
 
-            if (childRoot instanceof ConstructionNode) {
-                ConstructionNode constructionNode = (ConstructionNode) childRoot;
-                UnaryIQTree childTree = (UnaryIQTree) child;
+            var construction = UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
+            if (construction.isPresent()) {
                 return condition
-                        .map(e -> constructionNode.getSubstitution().apply(e))
-                        .map(e -> updateParentChildAndCondition(constructionNode, e, childTree.getChild()))
-                        .orElseGet(() -> liftChildAsParent(childTree))
+                        .map(e -> construction.get().getSubstitution().apply(e))
+                        .map(e -> updateParentChildAndCondition(construction.get(), e, construction.getChild()))
+                        .orElseGet(() -> liftChildAsParent(construction))
                         // Recursive (maybe followed by a distinct)
                         .liftBindingsAndDistinct();
             }
-            else if (childRoot instanceof DistinctNode) {
-                UnaryIQTree childTree = (UnaryIQTree) child;
+
+            var distinct = UnaryIQTreeDecomposition.of(child, DistinctNode.class);
+            if (distinct.isPresent()) {
                 return condition
-                        .map(e -> updateParentChildAndCondition((DistinctNode) childRoot, e, childTree.getChild()))
-                        .orElseGet(() -> liftChildAsParent(childTree))
+                        .map(e -> updateParentChildAndCondition(distinct.get(), e, distinct.getChild()))
+                        .orElseGet(() -> liftChildAsParent(distinct))
                         // Recursive (may be followed by another construction node)
                         .liftBindingsAndDistinct();
             }
-            else
-                return this;
+
+            return this;
         }
 
 
@@ -252,7 +250,8 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                         .orElseGet(() -> parentConstructionNode
                                 .map(p -> addParentRemoveConditionAndUpdateChild(p, newChild))
                                 .orElseGet(() -> removeConditionAndUpdateChild(newChild)));
-            } catch (UnsatisfiableConditionException e) {
+            }
+            catch (UnsatisfiableConditionException e) {
                 return createEmptyState();
             }
         }

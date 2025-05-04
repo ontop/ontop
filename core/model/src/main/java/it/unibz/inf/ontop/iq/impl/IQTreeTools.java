@@ -123,6 +123,16 @@ public class IQTreeTools {
                         (t1, t2) -> { throw new MinorOntopInternalBugException("No merge was expected"); });
     }
 
+    public IQTree createOptionalAncestorsUnaryIQTree(ImmutableList<Optional<? extends UnaryOperatorNode>> ancestors, IQTree tree) {
+        return ancestors.stream()
+                .flatMap(Optional::stream)
+                .collect(ImmutableCollectors.toList())
+                .reverse().stream()
+                .reduce(tree,
+                        (t, a) -> iqFactory.createUnaryIQTree(a, t),
+                        (t1, t2) -> { throw new MinorOntopInternalBugException("No merge was expected"); });
+    }
+
     public ImmutableList<IQTree> createUnaryOperatorChildren(UnaryOperatorNode node, IQTree child) {
          return child.getChildren().stream()
                 .<IQTree>map(c -> iqFactory.createUnaryIQTree(node, c))

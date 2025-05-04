@@ -6,14 +6,13 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.FlattenNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.normalization.FlattenNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 
@@ -22,22 +21,20 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    private FlattenNormalizerImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
+    private FlattenNormalizerImpl(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
     }
 
     @Override
     public IQTree normalizeForOptimization(FlattenNode flattenNode, IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
         IQTree normalizedChild = child.normalizeForOptimization(variableGenerator);
-        QueryNode newChildNode = normalizedChild.getRootNode();
 
         // Among the trees that are created, the outermost (aka output) tree is declared as normalized.
         // The other ones (if any) are normalized immediately after they are created.
         IQTreeCache outputTreeCache = treeCache.declareAsNormalizedForOptimizationWithoutEffect();
 
-        if (newChildNode instanceof ConstructionNode) {
-            ConstructionNode cn = (ConstructionNode) newChildNode;
-
+        var construction = IQTreeTools.UnaryIQTreeDecomposition.of(normalizedChild, ConstructionNode.class);
+        if (construction.isPresent()) {
             /*
              * Let c be the root of the child tree before lift, of the form CONSTRUCT[V, S].
              * Let f be the flattened variable.
@@ -57,11 +54,13 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
              */
             Variable flattenedVar = flattenNode.getFlattenedVariable();
 
-            Substitution<ImmutableTerm> flattenedVarSubstitution = cn.getSubstitution().builder()
+            Substitution<ImmutableTerm> substitution = construction.get().getSubstitution();
+
+            Substitution<ImmutableTerm> flattenedVarSubstitution = substitution.builder()
                     .restrict((v, t) -> v.equals(flattenedVar) || t.getVariableStream().anyMatch(tv -> tv.equals(flattenedVar)))
                     .build();
 
-            Substitution<ImmutableTerm> primeSubstitution = cn.getSubstitution()
+            Substitution<ImmutableTerm> primeSubstitution = substitution
                     .removeFromDomain(flattenedVarSubstitution.getDomain());
 
             // Nothing can be lifted, declare the new tree normalized
@@ -72,19 +71,18 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
             ConstructionNode newParentCn = iqFactory.createConstructionNode(
                     Sets.union(
                             flattenNode.getLocallyDefinedVariables(),
-                            Sets.difference(cn.getVariables(), ImmutableSet.of(flattenedVar))).immutableCopy(),
+                            Sets.difference(construction.get().getVariables(), ImmutableSet.of(flattenedVar))).immutableCopy(),
                     primeSubstitution);
 
-            IQTree grandChild = normalizedChild.getChildren().get(0);
             IQTree updatedChild = flattenedVarSubstitution.isEmpty()
-                ? grandChild
+                ? construction.getChild()
                 : iqFactory.createUnaryIQTree(
                         iqFactory.createConstructionNode(
                                 Sets.union(
                                         ImmutableSet.of(flattenedVar),
                                         Sets.difference(newParentCn.getLocallyRequiredVariables(), flattenNode.getLocallyDefinedVariables())).immutableCopy(),
                                 flattenedVarSubstitution),
-                        grandChild
+                    construction.getChild()
                 ).normalizeForOptimization(variableGenerator);
 
             return iqFactory.createUnaryIQTree(
@@ -96,5 +94,4 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
         // Nothing can be lifted, declare the new tree normalized
         return iqFactory.createUnaryIQTree(flattenNode, normalizedChild, outputTreeCache);
     }
-
 }
