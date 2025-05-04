@@ -155,10 +155,6 @@ public class IQTreeTools {
             return Objects.requireNonNull(node);
         }
 
-        public <U> Optional<U> map(Function<? super T, ? extends U> function) {
-            return Optional.ofNullable(node).map(function);
-        }
-
         public <U> Optional<U> map(BiFunction<? super T, IQTree, ? extends U> function) {
             return Optional.ofNullable(node).map(n -> function.apply(n, child));
         }

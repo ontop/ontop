@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.iq.optimizer.FilterLifter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -56,17 +55,13 @@ public class FilterLifterImpl implements FilterLifter {
             }
 
             UnaryIQTreeDecomposition<FilterNode> decomposition = UnaryIQTreeDecomposition.of(child, FilterNode.class);
-
-            if (decomposition.isPresent()) {
-                FilterNode filter = decomposition.get();
-                ImmutableSet<Variable> projectedVars = Sets.union(filter.getFilterCondition().getVariables(), cn.getVariables()).immutableCopy();
-
-                ConstructionNode updatedCn = iqFactory.createConstructionNode(projectedVars, cn.getSubstitution());
-                return iqFactory.createUnaryIQTree(
-                        filter,
-                        iqFactory.createUnaryIQTree(updatedCn, decomposition.getChild()));
-            }
-            return iqFactory.createUnaryIQTree(cn, child);
+            return iqFactory.createUnaryIQTree(
+                    decomposition.map((f, t) ->
+                                    iqFactory.createConstructionNode(
+                                            Sets.union(f.getFilterCondition().getVariables(), cn.getVariables()).immutableCopy(),
+                                            cn.getSubstitution()))
+                            .orElse(cn),
+                    decomposition.getChild());
         }
 
         @Override
@@ -76,10 +71,9 @@ public class FilterLifterImpl implements FilterLifter {
             UnaryIQTreeDecomposition<FilterNode> decomposition = UnaryIQTreeDecomposition.of(child, FilterNode.class);
 
             return iqFactory.createUnaryIQTree(
-                    decomposition.map(f -> termFactory.getConjunction(
-                                            filter.getFilterCondition(),
-                                            f.getFilterCondition()))
-                            .map(iqFactory::createFilterNode)
+                    decomposition.map((f, t) ->
+                                    iqFactory.createFilterNode(
+                                            termFactory.getConjunction(filter.getFilterCondition(), f.getFilterCondition())))
                             .orElse(filter),
                     decomposition.getChild());
         }
@@ -146,7 +140,7 @@ public class FilterLifterImpl implements FilterLifter {
             UnaryIQTreeDecomposition<FilterNode> rightChildDecomposition = UnaryIQTreeDecomposition.of(rightChild, FilterNode.class);
 
             LeftJoinNode updatedLJ = rightChildDecomposition
-                    .map(f -> termFactory.getConjunction(rootNode.getOptionalFilterCondition(), Stream.of(f.getFilterCondition())))
+                    .map((f, t) -> termFactory.getConjunction(rootNode.getOptionalFilterCondition(), Stream.of(f.getFilterCondition())))
                     .map(iqFactory::createLeftJoinNode)
                     .orElse(rootNode);
 
