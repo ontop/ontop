@@ -25,6 +25,9 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
+
 /**
  * TODO: explain
  *
@@ -102,7 +105,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
             return iqFactory.createIQ(query.getProjectionAtom(),
                     iqFactory.createEmptyNode(query.getProjectionAtom().getVariables()));
 
-        NativeNode nativeNode = generateNativeNode(normalizedSubTree, tolerateUnknownTypes);
+        NativeNode nativeNode = defaultIQTree2NativeNodeGenerator.generate(normalizedSubTree, dbParameters, tolerateUnknownTypes);
 
         UnaryIQTree newTree = iqFactory.createUnaryIQTree(split.getConstructionNode(), nativeNode);
 
@@ -151,83 +154,65 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     }
 
     private IQTree liftSlice(IQTree subTree) {
-        if (subTree.getRootNode() instanceof ConstructionNode) {
-            ConstructionNode constructionNode = (ConstructionNode) subTree.getRootNode();
-            IQTree childTree = ((UnaryIQTree) subTree).getChild();
-            if (childTree.getRootNode() instanceof SliceNode) {
-                /*
-                 * Swap the top construction node and the slice
-                 */
-                SliceNode sliceNode = (SliceNode) childTree.getRootNode();
-                IQTree grandChildTree = ((UnaryIQTree) childTree).getChild();
-
-                return iqFactory.createUnaryIQTree(sliceNode,
-                        iqFactory.createUnaryIQTree(constructionNode, grandChildTree));
-            }
+        var construction = UnaryIQTreeDecomposition.of(subTree, ConstructionNode.class);
+        var slice = UnaryIQTreeDecomposition.of(construction.getChild(), SliceNode.class);
+        if (construction.isPresent() && slice.isPresent()) {
+            return iqFactory.createUnaryIQTree(slice.get(),
+                    iqFactory.createUnaryIQTree(construction.get(),
+                            slice.getChild()));
         }
         return subTree;
     }
 
     private IQTree dropTopConstruct(IQTree subTree) {
         // Check if it starts with [LIMIT]
-        if (subTree.getRootNode() instanceof SliceNode) {
-            SliceNode sliceNode = (SliceNode) subTree.getRootNode();
-            // Add slice node to trimmed childtree
-            return iqFactory.createUnaryIQTree(sliceNode,
-                    dropTopConstruct(((UnaryIQTree) subTree).getChild()));
-        } else {
-            // Check for pattern CONSTRUCT, DISTINCT, [CONSTRUCT], ORDER BY
-            if (subTree.getRootNode() instanceof ConstructionNode) {
-                ConstructionNode constructionNode = (ConstructionNode) subTree.getRootNode();
-                // If there is variable substitution in the top construction do not normalize
-                IQTree childTree = ((UnaryIQTree) subTree).getChild();
-                if (childTree.getRootNode() instanceof DistinctNode && constructionNode.getSubstitution().isEmpty()) {
-                    IQTree grandChildTree = ((UnaryIQTree) childTree).getChild();
-                    // CASE 1: CONSTRUCT, DISTINCT, CONSTRUCT, ORDER BY
-                    if (grandChildTree.getRootNode() instanceof ConstructionNode) {
-                        IQTree grandGrandChildTree = ((UnaryIQTree) grandChildTree).getChild();
-                        if (grandGrandChildTree.getRootNode() instanceof OrderByNode) {
-                            /*
-                             * Drop the top construction node
-                             */
-                            return childTree;
-                        }
-                    // CASE 2: CONSTRUCT, DISTINCT, ORDER BY
-                    } else if (grandChildTree.getRootNode() instanceof OrderByNode) {
-                        /*
-                         * Drop the top construction node
-                         */
-                        return childTree;
-                    }
-                }
-            }
-            return subTree;
-        }
+        return UnaryIQTreeDecomposition.of(subTree, SliceNode.class)
+                .<IQTree>map((s, t) ->
+                        iqFactory.createUnaryIQTree(s,
+                                dropTopConstructStep2(t)))
+                .orElse(subTree);
     }
 
-    private IQTree liftOrderByAboveDistinct(IQTree subTree) {
-        if (subTree.getRootNode() instanceof ConstructionNode) {
-            IQTree childTree = ((UnaryIQTree) subTree).getChild();
-            if (childTree.getRootNode() instanceof DistinctNode) {
-                IQTree grandChildTree = ((UnaryIQTree) childTree).getChild();
-                if (grandChildTree.getRootNode() instanceof OrderByNode) {
-                    IQTree newGrandChildTree = iqFactory.createUnaryIQTree(
-                            (UnaryOperatorNode) childTree.getRootNode(),
-                            grandChildTree.getChildren().get(0));
-                    IQTree newChildTree = iqFactory.createUnaryIQTree(
-                            (UnaryOperatorNode) grandChildTree.getRootNode(),
-                            newGrandChildTree);
-
-                    return iqFactory.createUnaryIQTree(
-                            (UnaryOperatorNode) subTree.getRootNode(),
-                            newChildTree);
+    private IQTree dropTopConstructStep2(IQTree subTree) {
+        // Check for pattern CONSTRUCT, DISTINCT, [CONSTRUCT], ORDER BY
+        var construction = UnaryIQTreeDecomposition.of(subTree, ConstructionNode.class);
+        if (construction.isPresent()) {
+            // If there is variable substitution in the top construction do not normalize
+            var distinct = UnaryIQTreeDecomposition.of(construction.getChild(), DistinctNode.class);
+            if (distinct.isPresent() && construction.get().getSubstitution().isEmpty()) {
+                // CASE 1: CONSTRUCT, DISTINCT, CONSTRUCT, ORDER BY
+                var construction2 = UnaryIQTreeDecomposition.of(distinct.getChild(), ConstructionNode.class);
+                if (construction2.isPresent()) {
+                    var orderBy = UnaryIQTreeDecomposition.of(construction2.getChild(), OrderByNode.class);
+                    if (orderBy.isPresent()) {
+                        // Drop the top construction node
+                        return construction.getChild();
+                    }
+                }
+                else {
+                    // CASE 2: CONSTRUCT, DISTINCT, ORDER BY
+                    var orderBy = UnaryIQTreeDecomposition.of(distinct.getChild(), OrderByNode.class);
+                    if (orderBy.isPresent()) {
+                        // Drop the top construction node
+                        return construction.getChild();
+                    }
                 }
             }
         }
         return subTree;
     }
 
-    private NativeNode generateNativeNode(IQTree normalizedSubTree, boolean tolerateUnknownTypes) {
-        return defaultIQTree2NativeNodeGenerator.generate(normalizedSubTree, dbParameters, tolerateUnknownTypes);
+    private IQTree liftOrderByAboveDistinct(IQTree subTree) {
+        var construction = UnaryIQTreeDecomposition.of(subTree, ConstructionNode.class);
+        var distinct = UnaryIQTreeDecomposition.of(construction.getChild(), DistinctNode.class);
+        var orderBy = UnaryIQTreeDecomposition.of(distinct.getChild(), OrderByNode.class);
+
+        if (construction.isPresent() && distinct.isPresent() && orderBy.isPresent()) {
+            return iqFactory.createUnaryIQTree(construction.get(),
+                    iqFactory.createUnaryIQTree(orderBy.get(),
+                            iqFactory.createUnaryIQTree(distinct.get(),
+                                    orderBy.getChild())));
+        }
+        return subTree;
     }
 }

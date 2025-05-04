@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -178,32 +177,29 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
          * Recursive
          */
         private IQTree updateTopConstructionNode(IQTree tree, ConstructionNode newConstructionNode) {
-            QueryNode rootNode = tree.getRootNode();
-            if (rootNode instanceof ConstructionNode)
-                return iqFactory.createUnaryIQTree(newConstructionNode,
-                        ((UnaryIQTree)tree).getChild());
-            else if (rootNode instanceof UnaryOperatorNode)
-                return iqFactory.createUnaryIQTree(
-                        (UnaryOperatorNode) rootNode,
-                        // Recursive
-                        updateTopConstructionNode(((UnaryIQTree)tree).getChild(), newConstructionNode));
-            else
-                throw new MinorOntopInternalBugException("Was expected to reach a ConstructionNode before a non-unary node");
+            return UnaryIQTreeDecomposition.of(tree, ConstructionNode.class)
+                    .map((cn, t) -> iqFactory.createUnaryIQTree(newConstructionNode, t))
+
+                    .or(() -> UnaryIQTreeDecomposition.of(tree, UnaryOperatorNode.class)
+                            // Recursive
+                            .map((u, t) -> iqFactory.createUnaryIQTree(u, updateTopConstructionNode(t, newConstructionNode))))
+
+                    .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to reach a ConstructionNode before a non-unary node"));
         }
 
         /**
          * Recursive
          */
         private IQTree insertConstructionNode(IQTree tree, ConstructionNode newConstructionNode) {
-            QueryNode rootNode = tree.getRootNode();
-            if ((rootNode instanceof DistinctNode)
-                    || (rootNode instanceof SliceNode))
-                return iqFactory.createUnaryIQTree(
-                        (UnaryOperatorNode) rootNode,
-                        // Recursive
-                        insertConstructionNode(((UnaryIQTree)tree).getChild(), newConstructionNode));
-            else
-                return iqFactory.createUnaryIQTree(newConstructionNode, tree);
+            return UnaryIQTreeDecomposition.of(tree, DistinctNode.class)
+                    // Recursive
+                    .map((n, t) -> iqFactory.createUnaryIQTree(n, insertConstructionNode(t, newConstructionNode)))
+
+                    .or(() -> UnaryIQTreeDecomposition.of(tree, SliceNode.class)
+                            // Recursive
+                            .map((n, t) -> iqFactory.createUnaryIQTree(n, insertConstructionNode(t, newConstructionNode))))
+
+                    .orElseGet(() -> iqFactory.createUnaryIQTree(newConstructionNode, tree));
         }
     }
 

@@ -13,11 +13,15 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
 
 public class TypingNullsInUnionDialectExtraNormalizer extends AbstractTypingNullsDialectExtraNormalizer {
 
@@ -32,14 +36,12 @@ public class TypingNullsInUnionDialectExtraNormalizer extends AbstractTypingNull
 
     @Override
     public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> updatedChildren = children.stream()
-                .map(this::transform)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> updatedChildren = transformChildren(children);
 
         ImmutableSet<Variable> nullVariables = updatedChildren.stream()
-                .map(IQTree::getRootNode)
-                .filter(c -> c instanceof ConstructionNode)
-                .map(c -> (ConstructionNode) c)
+                .map(c -> UnaryIQTreeDecomposition.of(c, ConstructionNode.class))
+                .map(UnaryIQTreeDecomposition::getOptionalNode)
+                .flatMap(Optional::stream)
                 .map(this::extractNullVariables)
                 .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toSet());
@@ -47,7 +49,7 @@ public class TypingNullsInUnionDialectExtraNormalizer extends AbstractTypingNull
         if (nullVariables.isEmpty())
             return updatedChildren.equals(children) ? tree : iqFactory.createNaryIQTree(rootNode, updatedChildren);
 
-        ImmutableMap<Variable, ImmutableFunctionalTerm> typedNullMap = extractTypedNullMap(tree, nullVariables);
+        Substitution<ImmutableFunctionalTerm> typedNullMap = extractTypedNullMap(tree, nullVariables);
 
         ImmutableList<IQTree> newChildren = updatedChildren.stream()
                 .map(c -> updateSubQuery(c, typedNullMap))
@@ -56,18 +58,16 @@ public class TypingNullsInUnionDialectExtraNormalizer extends AbstractTypingNull
         return iqFactory.createNaryIQTree(rootNode, newChildren);
     }
 
-    private ImmutableMap<Variable, ImmutableFunctionalTerm> extractTypedNullMap(IQTree tree, ImmutableSet<Variable> nullVariables) {
+    private Substitution<ImmutableFunctionalTerm> extractTypedNullMap(IQTree tree, ImmutableSet<Variable> nullVariables) {
         ImmutableMap<Variable, Optional<TermType>> typeMap = nullVariables.stream()
                 .collect(ImmutableCollectors.toMap(
                         v -> v,
                         v -> uniqueTermTypeExtractor.extractSingleTermType(v, tree)));
 
         return typeMap.entrySet().stream()
-                .filter(e -> e.getValue().isPresent())
-                .filter(e -> e.getValue()
-                        .filter(t -> t instanceof DBTermType)
-                        .isPresent())
-                .collect(ImmutableCollectors.toMap(
+                .filter(e -> e.getValue().stream()
+                        .anyMatch(t -> t instanceof DBTermType))
+                .collect(substitutionFactory.toSubstitution(
                         Map.Entry::getKey,
                         e -> termFactory.getTypedNull((DBTermType) e.getValue().get())));
     }

@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 /**
@@ -26,15 +27,17 @@ public class TypingNullsInConstructionNodeDialectExtraNormalizer extends Abstrac
 
     @Override
     public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
-        IQTree newChild = child.acceptTransformer(this);
+        IQTree newChild = transformChild(child);
 
         ImmutableSet<Variable> nullVariables = extractNullVariables(rootNode);
 
         if (nullVariables.isEmpty())
-            return newChild.equals(child) ? tree : iqFactory.createUnaryIQTree(rootNode, newChild);
+            return newChild.equals(child)
+                    ? tree
+                    : iqFactory.createUnaryIQTree(rootNode, newChild);
 
-        ImmutableMap<Variable, ImmutableFunctionalTerm> typedNullMap = nullVariables.stream()
-                .collect(ImmutableCollectors.toMap(
+        Substitution<ImmutableFunctionalTerm> typedNullMap = nullVariables.stream()
+                .collect(substitutionFactory.toSubstitution(
                         v -> v,
                         v -> termFactory.getTypedNull(defaultType)));
 

@@ -31,6 +31,9 @@ import org.apache.commons.rdf.api.RDF;
 
 import java.sql.*;
 
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
+
 /**
  * SQL-specific implementation of OBDAStatement.
  * Derived from QuestStatement.
@@ -279,9 +282,8 @@ public class SQLQuestStatement extends QuestStatement {
         if  (tree.isDeclaredAsEmpty())
             throw new EmptyQueryException();
 
-        return Optional.of(tree.getRootNode())
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode)n)
+        return UnaryIQTreeDecomposition.of(tree, ConstructionNode.class)
+                .getOptionalNode()
                 .orElseThrow(() -> new MinorOntopInternalBugException(
                         "The \"executable\" query is not starting with a construction node\n" + executableQuery));
     }

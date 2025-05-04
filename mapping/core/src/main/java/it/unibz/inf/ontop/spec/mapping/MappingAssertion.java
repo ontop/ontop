@@ -20,6 +20,8 @@ import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
 /**
  * Assumes that the top=level node is a ConstructionNode.
  * This ConstructionNode determines the index of the mapping assertion.
@@ -70,10 +72,8 @@ public class MappingAssertion {
     }
 
     public Substitution<ImmutableTerm> getTopSubstitution() {
-        return Optional.of(query.getTree())
-                .map(IQTree::getRootNode)
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode) n)
+        return UnaryIQTreeDecomposition.of(query.getTree(), ConstructionNode.class)
+                .getOptionalNode()
                 .map(ConstructionNode::getSubstitution)
                 .orElseThrow(() -> new MinorOntopInternalBugException(
                         "The mapping assertion was expecting to start with a construction node\n" + query));

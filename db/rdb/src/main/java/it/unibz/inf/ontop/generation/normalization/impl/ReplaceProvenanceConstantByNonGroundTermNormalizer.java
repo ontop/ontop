@@ -5,7 +5,6 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -16,6 +15,8 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 /**
  * Prevents a bug observed with MySQL 5.7.15, where the provenance special constant was misused
@@ -29,8 +30,7 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DefaultR
 
     @Inject
     protected ReplaceProvenanceConstantByNonGroundTermNormalizer(IntermediateQueryFactory iqFactory,
-                                                                 TermFactory termFactory,
-                                                                 SubstitutionFactory substitutionFactory) {
+                                                                 TermFactory termFactory) {
         super(iqFactory);
         this.termFactory = termFactory;
     }
@@ -42,8 +42,8 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DefaultR
 
     @Override
     public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        IQTree newLeftChild = leftChild.acceptTransformer(this);
-        IQTree newRightChild = rightChild.acceptTransformer(this);
+        IQTree newLeftChild = transformChild(leftChild);
+        IQTree newRightChild = transformChild(rightChild);
 
         return furtherTransformLJ(rootNode, leftChild, rightChild)
                 .orElseGet(() -> newLeftChild.equals(leftChild) && newRightChild.equals(rightChild)
@@ -52,14 +52,15 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DefaultR
     }
 
     private Optional<IQTree> furtherTransformLJ(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        if (rightChild.getRootNode() instanceof ConstructionNode) {
-         ConstructionNode rightConstructionNode = (ConstructionNode) rightChild.getRootNode();
-            IQTree rightGrandChild = ((UnaryIQTree) rightChild).getChild();
+        var construction = UnaryIQTreeDecomposition.of(rightChild, ConstructionNode.class);
+        if (construction.isPresent()) {
+            IQTree rightGrandChild = construction.getChild();
             Optional<Variable> grandChildVariable = rightGrandChild.getVariables().stream()
                     .findAny();
 
             DBConstant provenanceConstant = termFactory.getProvenanceSpecialConstant();
 
+            ConstructionNode rightConstructionNode = construction.get();
             return grandChildVariable
                     .map(v -> termFactory.getIfThenElse(termFactory.getDBIsNotNull(v),
                             termFactory.getDBStringConstant("placeholder1"),

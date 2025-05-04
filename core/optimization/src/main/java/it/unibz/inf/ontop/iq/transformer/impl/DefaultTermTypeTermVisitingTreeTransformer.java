@@ -20,11 +20,14 @@ import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
+import org.apache.commons.rdf.api.RDFTerm;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 
 /**
@@ -112,16 +115,22 @@ public class DefaultTermTypeTermVisitingTreeTransformer
     }
 
     private IQTree replaceTypeTermConstants(IQTree child) {
-        return Optional.of(child.getRootNode())
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode)n)
-                .map(ConstructionNode::getSubstitution)
-                .filter(s -> !s.isEmpty())
-                .map(s -> s.transform(this::replaceTypeTermConstants))
-                .map(s -> iqFactory.createConstructionNode(child.getVariables(), s))
-                .filter(n -> !n.equals(child.getRootNode()))
-                .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, ((UnaryIQTree)child).getChild()))
+        return UnaryIQTreeDecomposition.of(child, ConstructionNode.class)
+                .map((cn, t) -> replaceTypeTermConstants(cn, t, child))
                 .orElse(child);
+    }
+
+    private IQTree replaceTypeTermConstants(ConstructionNode constructionNode, IQTree child, IQTree tree) {
+        Substitution<?> substitution = constructionNode.getSubstitution();
+        Substitution<?> newSubstitution = substitution.transform(this::replaceTypeTermConstants);
+        if (!newSubstitution.equals(substitution)) {
+            return iqFactory.createUnaryIQTree(
+                    iqFactory.createConstructionNode(
+                            constructionNode.getVariables(),
+                            newSubstitution),
+                    child);
+        }
+        return tree;
     }
 
     /**
@@ -152,10 +161,9 @@ public class DefaultTermTypeTermVisitingTreeTransformer
     }
 
     private Optional<ImmutableTerm> extractDefinition(Variable variable, IQTree child) {
-        return Optional.of(child.getRootNode())
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode) n)
-                .flatMap(c -> Optional.ofNullable(c.getSubstitution().get(variable)));
+        return UnaryIQTreeDecomposition.of(child, ConstructionNode.class)
+                .map((cn, t) -> cn.getSubstitution())
+                .flatMap(s -> Optional.ofNullable(s.get(variable)));
     }
 
     private Stream<RDFTermTypeConstant> extractPossibleTermTypeConstants(Variable variable, IQTree child) {
@@ -186,19 +194,20 @@ public class DefaultTermTypeTermVisitingTreeTransformer
 
     private IQTree enforceUsageOfCommonTypeFunctionSymbol(IQTree tree,
                                                           ImmutableMap<Variable, RDFTermTypeFunctionSymbol> typeFunctionSymbolMap) {
-        ConstructionNode initialConstructionNode = Optional.of(tree.getRootNode())
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode) n)
+
+        var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+        ConstructionNode constructionNode = construction
+                .getOptionalNode()
                 .orElseThrow(() -> new UnexpectedlyFormattedIQTreeException(
                         "Was expecting the child to start with a ConstructionNode"));
 
-        Substitution<ImmutableTerm> newSubstitution = initialConstructionNode.getSubstitution().builder()
+        Substitution<ImmutableTerm> newSubstitution = constructionNode.getSubstitution().builder()
                 .transformOrRetain(typeFunctionSymbolMap::get, this::enforceUsageOfCommonTypeFunctionSymbol)
                 .build();
 
-        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(tree.getVariables(),newSubstitution);
-
-        return iqFactory.createUnaryIQTree(newConstructionNode, ((UnaryIQTree)tree).getChild());
+        return iqFactory.createUnaryIQTree(
+                iqFactory.createConstructionNode(tree.getVariables(), newSubstitution),
+                construction.getChild());
     }
 
     private ImmutableTerm enforceUsageOfCommonTypeFunctionSymbol(ImmutableTerm definition, RDFTermTypeFunctionSymbol functionSymbol) {

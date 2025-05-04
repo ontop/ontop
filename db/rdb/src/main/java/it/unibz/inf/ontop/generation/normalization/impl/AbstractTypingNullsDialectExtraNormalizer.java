@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -23,7 +24,7 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
     protected final SubstitutionFactory substitutionFactory;
 
     protected AbstractTypingNullsDialectExtraNormalizer(CoreSingletons coreSingletons) {
-        super(coreSingletons);
+        super(coreSingletons.getIQFactory());
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
 
@@ -41,20 +42,17 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
     /**
      * Replaces NULL bindings in top construction nodes if a type is defined
      */
-    protected IQTree updateSubQuery(IQTree child, ImmutableMap<Variable, ImmutableFunctionalTerm> typedNullMap) {
-        if (child.getRootNode() instanceof ConstructionNode) {
-            ConstructionNode constructionNode = (ConstructionNode) child.getRootNode();
+    protected IQTree updateSubQuery(IQTree child, Substitution<ImmutableFunctionalTerm> typedNullMap) {
+        return IQTreeTools.UnaryIQTreeDecomposition.of(child, ConstructionNode.class)
+                .<IQTree>map((cn, ct) -> {
+                    Substitution<ImmutableTerm> newSubstitution = cn.getSubstitution().builder()
+                            .transformOrRetain(typedNullMap::get, (t, n) -> t.isNull() ? n : t)
+                            .build();
 
-            Substitution<ImmutableTerm> newSubstitution = constructionNode.getSubstitution().builder()
-                    .transformOrRetain(typedNullMap::get, (t, n) -> t.isNull() ? n : t)
-                    .build();
-
-            ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
-                    constructionNode.getVariables(), newSubstitution);
-
-            return iqFactory.createUnaryIQTree(newConstructionNode, ((UnaryIQTree) child).getChild());
-        }
-        else
-            return child;
+                    return iqFactory.createUnaryIQTree(
+                            iqFactory.createConstructionNode(cn.getVariables(), newSubstitution),
+                            ct);
+                })
+                .orElse(child);
     }
 }
