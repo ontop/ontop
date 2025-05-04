@@ -108,7 +108,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
             return lift(new LiftState(children, rootNode.getVariables(), variableGenerator,
                         optimizationSingletons.getCoreSingletons(), iqTreeTools))
-                    .generateTree(iqFactory)
+                    .generateTree()
                     .normalizeForOptimization(variableGenerator);
         }
 
@@ -208,15 +208,11 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             this.iqTreeTools = iqTreeTools;
         }
 
-        public IQTree generateTree(IntermediateQueryFactory iqFactory) {
+        public IQTree generateTree() {
             IQTree unionTree = iqFactory.createNaryIQTree(
                     iqFactory.createUnionNode(unionVariables),
                     children);
-            return ancestors.reverse().stream()
-                    .reduce(unionTree,
-                            (t, n) -> iqFactory.createUnaryIQTree(n, t),
-                            (t1, t2) -> { throw new MinorOntopInternalBugException("this merging operation should never appear"); });
-
+            return iqTreeTools.createAncestorsUnaryIQTree(ancestors.reverse(), unionTree);
         }
 
         public ImmutableSet<Variable> getUnionVariables() {
