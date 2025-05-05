@@ -1,8 +1,13 @@
 package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
@@ -22,6 +27,7 @@ import java.sql.DriverManager;
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static junit.framework.TestCase.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class GeoSPARQLTest {
 
@@ -706,6 +712,8 @@ public class GeoSPARQLTest {
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
         assertTrue(val);
+        String ontopSQLtranslation = getReformulatedQuery(query);
+        assertFalse("SQL has an unexpected cast: " + ontopSQLtranslation, ontopSQLtranslation.toLowerCase().contains("cast"));
     }
 
     @Test // linestrings
@@ -1434,5 +1442,22 @@ public class GeoSPARQLTest {
             OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
             return ind1.getLiteral();
         }
+    }
+
+    private String getReformulatedQuery(String query) throws Exception {
+        try (OntopOWLConnection conn = reasoner.getConnection();
+             OntopOWLStatement st = conn.createStatement()) {
+            IQTree iqTree =  st.getExecutableQuery(query).getTree();
+
+            return extractNativeQueryString(iqTree);
+        }
+    }
+
+    private String extractNativeQueryString(IQTree iqTree) {
+        if (iqTree.getRootNode() instanceof NativeNode)
+            return ((NativeNode) iqTree).getNativeQueryString();
+        if (iqTree.getRootNode() instanceof ConstructionNode)
+            return extractNativeQueryString(iqTree.getChildren().get(0));
+        throw new RuntimeException("Unexpected executable IQTree: " + iqTree);
     }
 }
