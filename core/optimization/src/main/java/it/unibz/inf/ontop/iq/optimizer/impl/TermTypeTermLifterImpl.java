@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.optimizer.TermTypeTermLifter;
 import it.unibz.inf.ontop.iq.transformer.TermTypeTermLiftTransformer;
@@ -19,7 +18,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Optional;
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 @Singleton
 public class TermTypeTermLifterImpl implements TermTypeTermLifter {
@@ -29,8 +28,9 @@ public class TermTypeTermLifterImpl implements TermTypeTermLifter {
     private final TermFactory termFactory;
 
     @Inject
-    private TermTypeTermLifterImpl(OptimizerFactory transformerFactory, IntermediateQueryFactory iqFactory,
-                                   SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+    private TermTypeTermLifterImpl(OptimizerFactory transformerFactory,
+                                   IntermediateQueryFactory iqFactory,
+                                   TermFactory termFactory) {
         this.transformerFactory = transformerFactory;
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
@@ -57,13 +57,14 @@ public class TermTypeTermLifterImpl implements TermTypeTermLifter {
      *
      */
     private IQTree makeRDFTermTypeFunctionSymbolsSimplifiable(IQTree tree) {
-        return Optional.of(tree.getRootNode())
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode) n)
-                .map(ConstructionNode::getSubstitution)
-                .map(s -> s.transform(this::makeRDFTermTypeFunctionSymbolsSimplifiable))
-                .map(s -> iqFactory.createConstructionNode(tree.getVariables(), s))
-                .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, ((UnaryIQTree) tree).getChild()))
+        return UnaryIQTreeDecomposition.of(tree, ConstructionNode.class)
+                .<IQTree>map((cn, t) ->
+                        iqFactory.createUnaryIQTree(
+                                iqFactory.createConstructionNode(
+                                        cn.getVariables(),
+                                        cn.getSubstitution()
+                                                .transform(this::makeRDFTermTypeFunctionSymbolsSimplifiable)),
+                                t))
                 .orElse(tree);
     }
 

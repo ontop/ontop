@@ -28,6 +28,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
 /**
  * Is cardinality-insensitive.
  * For self-left-joins on nullable determinants of FDs.
@@ -127,18 +129,17 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
         }
 
         private Optional<DataNodeAndProvenanceVariables> extractDataNodeAndProvenance(IQTree rightChild) {
-            if (rightChild instanceof ExtensionalDataNode)
-                return Optional.of(new DataNodeAndProvenanceVariables((ExtensionalDataNode) rightChild, ImmutableSet.of()));
+            return DataNodeAndProvenanceVariables.of(rightChild, ImmutableSet.of())
 
-            if (rightChild.getRootNode() instanceof ConstructionNode) {
-                var substitution = ((ConstructionNode) rightChild.getRootNode()).getSubstitution();
-                var subChild = rightChild.getChildren().get(0);
+                    .or(() -> UnaryIQTreeDecomposition.of(rightChild, ConstructionNode.class)
+                            .map(this::extractDataNodeAndProvenance)
+                            .orElse(Optional.empty()));
+        }
 
-                if ((subChild instanceof ExtensionalDataNode)
-                        // Should be the case for a normalized IQ tree
-                        && substitution.rangeAllMatch(t -> t.equals(provenanceConstant))) {
-                    return Optional.of(new DataNodeAndProvenanceVariables((ExtensionalDataNode) subChild, substitution.getDomain()));
-                }
+        private Optional<DataNodeAndProvenanceVariables> extractDataNodeAndProvenance(ConstructionNode cn, IQTree subChild) {
+            if (cn.getSubstitution()
+                    .rangeAllMatch(t -> t.equals(provenanceConstant))) {
+                return DataNodeAndProvenanceVariables.of(subChild, cn.getSubstitution().getDomain());
             }
             return Optional.empty();
         }
@@ -326,7 +327,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
             var newArgumentMap = Sets.union(leftArgumentMap.keySet(), argumentsToTransfer.keySet()).stream()
                     .collect(ImmutableCollectors.toMap(
                             i -> i,
-                            i -> Optional.ofNullable((VariableOrGroundTerm) leftArgumentMap.get(i))
+                            i -> Optional.<VariableOrGroundTerm>ofNullable(leftArgumentMap.get(i))
                             .orElseGet(() -> Optional.ofNullable(argumentsToTransfer.get(i))
                                     .filter(t -> t instanceof Variable)
                                     .map(v -> variableGenerator.generateNewVariableFromVar((Variable) v))
@@ -401,6 +402,12 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
             this.dataNode = dataNode;
             this.provenanceVariables = provenanceVariables;
         }
-    }
 
+        static Optional<DataNodeAndProvenanceVariables> of(IQTree tree, ImmutableSet<Variable> provenanceVariables) {
+            return Optional.of(tree)
+                    .filter(t -> t instanceof ExtensionalDataNode)
+                    .map(t -> (ExtensionalDataNode)t)
+                    .map(t -> new DataNodeAndProvenanceVariables(t, provenanceVariables));
+        }
+    }
 }

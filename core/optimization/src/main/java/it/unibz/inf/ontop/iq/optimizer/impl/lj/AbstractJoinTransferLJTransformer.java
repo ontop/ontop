@@ -30,6 +30,8 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
 public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransformer {
 
     protected final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
@@ -205,21 +207,16 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
      *
      */
     private Optional<IQTree> moveTopConstructionNodeAside(IQTree rightTree) {
-        QueryNode rootNode = rightTree.getRootNode();
-        if (rootNode instanceof ConstructionNode) {
-            Substitution<ImmutableTerm> substitution = ((ConstructionNode) rootNode).getSubstitution();
-
+        var construction = UnaryIQTreeDecomposition.of(rightTree, ConstructionNode.class);
+        if (construction.isPresent()) {
+            Substitution<ImmutableTerm> substitution = construction.get().getSubstitution();
             if (substitution.rangeAllMatch(ImmutableTerm::isGround)) {
-                ConstructionNode newConstructionNode = iqFactory.createConstructionNode(substitution.getDomain(), substitution);
-
-                IQTree initialChild = ((UnaryIQTree) rightTree).getChild();
-
                 NaryIQTree newTree = iqFactory.createNaryIQTree(
                         iqFactory.createInnerJoinNode(),
                         ImmutableList.of(
-                                initialChild,
+                                construction.getChild(),
                                 iqFactory.createUnaryIQTree(
-                                        newConstructionNode,
+                                        iqFactory.createConstructionNode(substitution.getDomain(), substitution),
                                         iqFactory.createTrueNode())));
 
                 return Optional.of(newTree);
@@ -332,8 +329,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
         ReplaceNodeByTrueTransformer transformer = new ReplaceNodeByTrueTransformer(
                 selectedNodes.stream()
                         .map(n -> n.extensionalDataNode)
-                        .collect(ImmutableCollectors.toSet()),
-                iqFactory);
+                        .collect(ImmutableCollectors.toSet()));
 
         return rightChild.acceptTransformer(transformer)
                 .applyFreshRenaming(renamingSubstitution);
@@ -396,13 +392,12 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
     }
 
 
-    protected static class ReplaceNodeByTrueTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    protected class ReplaceNodeByTrueTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
         private final ImmutableSet<ExtensionalDataNode> dataNodesToReplace;
 
-        protected ReplaceNodeByTrueTransformer(ImmutableSet<ExtensionalDataNode> dataNodesToReplace,
-                                               IntermediateQueryFactory iqFactory) {
-            super(iqFactory);
+        protected ReplaceNodeByTrueTransformer(ImmutableSet<ExtensionalDataNode> dataNodesToReplace) {
+            super(AbstractJoinTransferLJTransformer.this.iqFactory);
             this.dataNodesToReplace = dataNodesToReplace;
         }
 

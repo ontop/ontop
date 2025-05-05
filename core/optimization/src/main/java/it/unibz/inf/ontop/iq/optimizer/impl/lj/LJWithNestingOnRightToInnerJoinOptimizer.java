@@ -28,6 +28,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
 /**
  * Restricted to LJs on the right to limit overlap with existing techniques.
  * Typical case optimized: self-left-join with LJ nesting on the right (and possibly on the left)
@@ -90,17 +92,11 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
 
         @Override
         protected Optional<IQTree> furtherTransformLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            Optional<ConstructionNode> rightConstructionNode = Optional.of(rightChild.getRootNode())
-                    .filter(n -> n instanceof ConstructionNode)
-                    .map(n -> (ConstructionNode) n);
+            var construction = UnaryIQTreeDecomposition.of(rightChild, ConstructionNode.class);
 
-            Optional<BinaryNonCommutativeIQTree> rightLJ = rightConstructionNode
-                    .map(c -> rightChild.getChildren().get(0))
-                    .or(() -> Optional.of(rightChild))
+            return Optional.of(construction.getChild())
                     .filter(t -> t.getRootNode() instanceof LeftJoinNode)
-                    .map(t -> (BinaryNonCommutativeIQTree) t);
-
-            return rightLJ
+                    .map(t -> (BinaryNonCommutativeIQTree) t)
                     .flatMap(rLJ -> tryToSimplify(leftChild, rightChild, rootNode.getOptionalFilterCondition(), rLJ));
         }
 

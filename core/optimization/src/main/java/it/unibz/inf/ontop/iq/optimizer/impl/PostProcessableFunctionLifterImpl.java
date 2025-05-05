@@ -32,6 +32,9 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
+
 @Singleton
 public class PostProcessableFunctionLifterImpl implements PostProcessableFunctionLifter {
 
@@ -140,9 +143,8 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
         protected boolean shouldBeLifted(Variable variable, ImmutableList<IQTree> children) {
             return children.stream()
-                    .map(IQTree::getRootNode)
-                    .filter(n -> n instanceof ConstructionNode)
-                    .map(n -> (ConstructionNode)n)
+                    .map(c -> UnaryIQTreeDecomposition.of(c, ConstructionNode.class))
+                    .flatMap(d -> d.getOptionalNode().stream())
                     .map(n -> n.getSubstitution().get(variable))
                     .filter(d -> d instanceof ImmutableFunctionalTerm)
                     .map(d -> (ImmutableFunctionalTerm) d)
@@ -267,9 +269,9 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
         protected ChildDefinitionLift liftDefinition(IQTree childTree, int position, Variable variable,
                                                      ImmutableSet<Variable> unionVariables, Variable idVariable) {
-            Optional<Substitution<ImmutableTerm>> originalSubstitution = Optional.of(childTree.getRootNode())
-                    .filter(n -> n instanceof ConstructionNode)
-                    .map(n -> (ConstructionNode) n)
+
+            var construction = UnaryIQTreeDecomposition.of(childTree, ConstructionNode.class);
+            Optional<Substitution<ImmutableTerm>> originalSubstitution = construction.getOptionalNode()
                     .map(ConstructionNode::getSubstitution);
 
             ImmutableTerm originalDefinition = originalSubstitution
@@ -299,14 +301,9 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .map(s -> s.restrictDomainTo(projectedVariablesBeforeRenaming))
                     .orElse(positionSubstitution);
 
-            IQTree childOfConstruction = Optional.of(childTree)
-                    .filter(t -> t.getRootNode() instanceof ConstructionNode)
-                    .map(t -> ((UnaryIQTree) t).getChild())
-                    .orElse(childTree);
-
             UnaryIQTree childBeforeRenaming = iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(projectedVariablesBeforeRenaming, substitutionBeforeRenaming),
-                    childOfConstruction);
+                    construction.getChild());
 
             IQTree partiallyPaddedChild = childBeforeRenaming.applyDescendingSubstitution(renamingSubstitution, Optional.empty(), variableGenerator);
             ImmutableTerm liftedDefinition = renamingSubstitution.applyToTerm(originalDefinition);
