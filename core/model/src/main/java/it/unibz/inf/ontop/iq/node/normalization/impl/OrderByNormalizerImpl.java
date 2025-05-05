@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.OrderByNormalizer;
@@ -16,6 +15,8 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 public class OrderByNormalizerImpl implements OrderByNormalizer {
 
@@ -117,35 +118,34 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
         public State liftChild() {
 
             // No orderByNode -> already converged (empty)
-            if (!orderByNode.isPresent())
+            if (orderByNode.isEmpty())
                 return this;
 
-            OrderByNode orderBy = orderByNode.get();
-
             IQTree newChild = child.normalizeForOptimization(variableGenerator);
-            QueryNode newChildRoot = newChild.getRootNode();
 
-            if (newChildRoot instanceof ConstructionNode)
-                return liftChildConstructionNode((ConstructionNode) newChildRoot, (UnaryIQTree) newChild, orderBy);
-            else if (newChildRoot instanceof EmptyNode)
+            var construction = UnaryIQTreeDecomposition.of(newChild, ConstructionNode.class);
+            if (construction.isPresent())
+                return liftChildConstructionNode(construction.get(), construction.getChild(), orderByNode.get());
+
+            var distinct = UnaryIQTreeDecomposition.of(newChild, DistinctNode.class);
+            if (distinct.isPresent())
+                return updateParentOrderByAndChild(distinct.get(), orderByNode, distinct.getChild());
+
+            if (newChild instanceof EmptyNode)
                 return declareAsEmpty(newChild);
-            else if (newChildRoot instanceof DistinctNode) {
-                return updateParentOrderByAndChild((DistinctNode) newChildRoot, Optional.of(orderBy),
-                        ((UnaryIQTree)newChild).getChild());
-            }
-            else
-                return updateChild(newChild);
+
+            return updateChild(newChild);
         }
 
 
         /**
          * Lifts the construction node above and updates the order comparators
          */
-        private State liftChildConstructionNode(ConstructionNode childRoot, UnaryIQTree child, OrderByNode orderBy) {
+        private State liftChildConstructionNode(ConstructionNode childRoot, IQTree grandChild, OrderByNode orderBy) {
             return updateParentOrderByAndChild(childRoot,
                     orderBy.applySubstitution(childRoot.getSubstitution())
-                            .flatMap(o -> simplifyOrderByNode(o, child.getChild().getVariableNullability())),
-                    child.getChild());
+                            .flatMap(o -> simplifyOrderByNode(o, grandChild.getVariableNullability())),
+                    grandChild);
         }
 
         public IQTree createNormalizedTree(VariableGenerator variableGenerator, IQTreeCache treeCache) {

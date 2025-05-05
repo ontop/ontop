@@ -24,6 +24,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
 
 /**
  * Tries to eliminate nodeInGraph atoms where:
@@ -34,19 +36,22 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
 
     private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
+    private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
-    protected NodeInGraphOptimizerImpl(CoreSingletons coreSingletons,
-                                       IntermediateQueryFactory iqFactory) {
+    protected NodeInGraphOptimizerImpl(CoreSingletons coreSingletons) {
         this.coreSingletons = coreSingletons;
-        this.iqFactory = iqFactory;
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
     }
 
 
     @Override
     public IQ optimize(IQ query) {
         var tree = query.getTree();
-        var transformer = new Transformer(coreSingletons);
+        var transformer = new Transformer();
         var newTree = tree.acceptTransformer(transformer)
                 .normalizeForOptimization(query.getVariableGenerator());
 
@@ -56,14 +61,10 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
 
     }
 
-    protected static class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-        private final SubstitutionFactory substitutionFactory;
-        private final TermFactory termFactory;
+    protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        protected Transformer(CoreSingletons coreSingletons) {
-            super(coreSingletons);
-            this.substitutionFactory = coreSingletons.getSubstitutionFactory();
-            this.termFactory = coreSingletons.getTermFactory();
+        protected Transformer() {
+            super(NodeInGraphOptimizerImpl.this.iqFactory);
         }
 
         /**
@@ -83,9 +84,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
         @Override
         public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             // Recursive
-            var updatedChildren = children.stream()
-                    .map(t -> t.acceptTransformer(this))
-                    .collect(ImmutableCollectors.toList());
+            var updatedChildren = transformChildren(children);
 
             var nodeInGraphContextMultimap = extractNodeInGraphContexts(updatedChildren);
             var removableNodeInGraphAtoms = selectRemovableNodeInGraphAtoms(nodeInGraphContextMultimap.keySet(), updatedChildren);
@@ -94,7 +93,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                     ? tree
                     : newChildren.size() == 1
                         ? rootNode.getOptionalFilterCondition()
-                            .map(f -> (IQTree) iqFactory.createUnaryIQTree(
+                            .<IQTree>map(f -> iqFactory.createUnaryIQTree(
                                     iqFactory.createFilterNode(f),
                                     newChildren.iterator().next()))
                             .orElseGet(() -> newChildren.iterator().next())
@@ -118,12 +117,10 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
         }
 
         private Optional<NodeInGraphContext> extractContext(IQTree childOfUnion) {
-            var rootNode = childOfUnion.getRootNode();
-            if (rootNode instanceof ConstructionNode) {
-                return childOfUnion.getChildren().stream()
-                        .findFirst()
-                        .flatMap(this::extractNodeInGraphAtomWithVariable)
-                        .map(a -> extractContext(a, (ConstructionNode) rootNode));
+            var construction = UnaryIQTreeDecomposition.of(childOfUnion, ConstructionNode.class);
+            if (construction.isPresent()) {
+                return extractNodeInGraphAtomWithVariable(construction.getChild())
+                        .map(a -> extractContext(a, construction.get()));
             }
             return extractNodeInGraphAtomWithVariable(childOfUnion)
                     .map(a -> new NodeInGraphContext(
@@ -253,17 +250,18 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                             .collect(ImmutableCollectors.toList()));
         }
 
-        private IQTree pushDataAtomIntoChildOfUnion(IQTree tree, IntensionalDataNode pushedIntensionalNode) {
-            var rootNode = tree.getRootNode();
-            if (rootNode instanceof ConstructionNode) {
-                var child = ((UnaryIQTree) tree).getChild();
-                if ((child instanceof IntensionalDataNode)
-                        && (((IntensionalDataNode) child).getProjectionAtom().getPredicate() instanceof NodeInGraphPredicate))
-                    return pushDataAtomIntoConstructionTreeWithNodeInGraph(tree, pushedIntensionalNode, (ConstructionNode) rootNode);
-            }
-            else if ((rootNode instanceof IntensionalDataNode)
-                    && (((IntensionalDataNode)rootNode).getProjectionAtom().getPredicate() instanceof NodeInGraphPredicate)) {
+        private boolean isNodeGraphPredicateNode(IQTree child) {
+            return (child instanceof IntensionalDataNode)
+                    && (((IntensionalDataNode) child).getProjectionAtom().getPredicate() instanceof NodeInGraphPredicate);
+        }
 
+        private IQTree pushDataAtomIntoChildOfUnion(IQTree tree, IntensionalDataNode pushedIntensionalNode) {
+            var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+            if (construction.isPresent()) {
+                if (isNodeGraphPredicateNode(construction.getChild()))
+                    return pushDataAtomIntoConstructionTreeWithNodeInGraph(tree, pushedIntensionalNode, construction.get());
+            }
+            else if (isNodeGraphPredicateNode(tree)) {
                 return pushedIntensionalNode;
             }
 
@@ -281,7 +279,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                         rootNode.getSubstitution().stream()
                                 .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())));
                 return filterCondition
-                        .map(c -> (IQTree) iqFactory.createUnaryIQTree(
+                        .<IQTree>map(c -> iqFactory.createUnaryIQTree(
                                 iqFactory.createFilterNode(c),
                                 pushedIntensionalNode))
                         .orElse(pushedIntensionalNode);
