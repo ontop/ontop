@@ -37,11 +37,6 @@ public class DefaultIdentityIQTreeVisitingTransformer implements IQTreeVisitingT
     }
 
     @Override
-    public IQTree transformNonStandardLeafNode(LeafIQTree leafNode) {
-        return leafNode;
-    }
-
-    @Override
     public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
         return tree;
     }
@@ -77,18 +72,7 @@ public class DefaultIdentityIQTreeVisitingTransformer implements IQTreeVisitingT
     }
 
     @Override
-    public IQTree transformNonStandardUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-        return tree;
-    }
-
-    @Override
     public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        return tree;
-    }
-
-    @Override
-    public IQTree transformNonStandardBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode,
-                                                               IQTree leftChild, IQTree rightChild) {
         return tree;
     }
 
@@ -99,11 +83,6 @@ public class DefaultIdentityIQTreeVisitingTransformer implements IQTreeVisitingT
 
     @Override
     public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        return tree;
-    }
-
-    @Override
-    public IQTree transformNonStandardNaryNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
         return tree;
     }
 }

@@ -7,27 +7,21 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.FilterNormalizer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -50,16 +44,6 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                 substitutionFactory, variableNullabilityTools, conditionSimplifier, iqTreeTools);
         this.coreUtilsFactory = coreUtilsFactory;
         this.normalizer = normalizer;
-    }
-
-    @Override
-    public void acceptVisitor(QueryNodeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public FilterNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        return transformer.transform(this);
     }
 
     @Override
@@ -128,21 +112,6 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             return iqFactory.createEmptyNode(child.getVariables());
         }
 
-    }
-
-    @Override
-    public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
-        return transformer.transformFilter(tree,this, child);
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
-        return transformer.transformFilter(tree,this, child, context);
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
-        return visitor.visitFilter(this, child);
     }
 
     @Override

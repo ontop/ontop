@@ -6,13 +6,12 @@ import it.unibz.inf.ontop.dbschema.Lens;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.impl.ExtensionalDataNodeImpl;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.substitution.*;
+import it.unibz.inf.ontop.iq.visit.impl.RelationExtractor;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 public class LensUnfolderImpl implements LensUnfolder {
@@ -32,51 +31,35 @@ public class LensUnfolderImpl implements LensUnfolder {
         int maxLevel = extractMaxLevel(initialTree);
         if (maxLevel < 1)
             return query;
-        IQTree newTree = transformTree(initialTree, query.getVariableGenerator(), maxLevel);
+
+        IQTree newTree = new MaxLevelLensUnfoldingTransformer(maxLevel, query.getVariableGenerator())
+                .transform(initialTree);
+
         return newTree.equals(initialTree)
                 ? query
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree)
                 .normalizeForOptimization();
     }
 
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator, int maxLevel) {
-        return new MaxLevelLensUnfoldingTransformer(maxLevel, variableGenerator, coreSingletons)
-                .transform(tree);
-    }
-
-    /**
-     * Recursive
-     */
     private int extractMaxLevel(IQTree tree) {
-        if (tree.getRootNode() instanceof ExtensionalDataNode) {
-            RelationDefinition relationDefinition = ((ExtensionalDataNode) tree.getRootNode()).getRelationDefinition();
-            return (relationDefinition instanceof Lens)
-                    ? ((Lens) relationDefinition).getLevel()
-                    : 0;
-        }
-        else {
-            return tree.getChildren().stream()
-                    .reduce(0,
-                            (l, c) -> Math.max(l, extractMaxLevel(c)),
-                            Math::max);
-        }
+        return tree.acceptVisitor(new RelationExtractor())
+                .map(ExtensionalDataNode::getRelationDefinition)
+                .filter(r -> r instanceof Lens)
+                .map(r -> (Lens) r)
+                .mapToInt(Lens::getLevel)
+                .max()
+                .orElse(0);
     }
 
-
-    protected static class MaxLevelLensUnfoldingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    protected class MaxLevelLensUnfoldingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
         protected final int maxLevel;
         protected final VariableGenerator variableGenerator;
-        protected final SubstitutionFactory substitutionFactory;
-        protected final QueryTransformerFactory transformerFactory;
 
-        protected MaxLevelLensUnfoldingTransformer(int maxLevel, VariableGenerator variableGenerator,
-                                                   CoreSingletons coreSingletons) {
+        protected MaxLevelLensUnfoldingTransformer(int maxLevel, VariableGenerator variableGenerator) {
             super(coreSingletons);
             this.maxLevel = maxLevel;
             this.variableGenerator = variableGenerator;
-            substitutionFactory = coreSingletons.getSubstitutionFactory();
-            transformerFactory = coreSingletons.getQueryTransformerFactory();
         }
 
         @Override
@@ -93,11 +76,10 @@ public class LensUnfolderImpl implements LensUnfolder {
         }
 
         protected IQTree merge(ExtensionalDataNode dataNode, IQ definition) {
-            return ExtensionalDataNodeImpl.merge(dataNode, definition, variableGenerator, substitutionFactory,
-                    transformerFactory, iqFactory);
+            return ExtensionalDataNodeImpl.merge(dataNode, definition, variableGenerator,
+                    coreSingletons.getSubstitutionFactory(),
+                    coreSingletons.getQueryTransformerFactory(),
+                    iqFactory);
         }
-
     }
-
-
 }

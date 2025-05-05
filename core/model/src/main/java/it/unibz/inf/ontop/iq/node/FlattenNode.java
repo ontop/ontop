@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -57,9 +57,6 @@ import java.util.Optional;
  */
 public interface FlattenNode extends UnaryOperatorNode {
 
-    @Override
-    FlattenNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
-
     Variable getFlattenedVariable();
 
     DBTermType getFlattenedType();
@@ -76,4 +73,9 @@ public interface FlattenNode extends UnaryOperatorNode {
      * Set of variables returned by a tree with this node as root, given the variables provided by the children
      */
     ImmutableSet<Variable> getVariables(ImmutableSet<Variable> childVariables);
+
+    @Override
+    default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
+        return visitor.transformFlatten(tree, this, child);
+    }
 }

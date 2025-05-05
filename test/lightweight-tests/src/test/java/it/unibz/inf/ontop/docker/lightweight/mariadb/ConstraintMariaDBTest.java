@@ -9,8 +9,8 @@ public class ConstraintMariaDBTest extends AbstractConstraintTest {
 
     private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-mariadb.properties";
 
-    public ConstraintMariaDBTest(String method) {
-        super(method, PROPERTIES_FILE);
+    public ConstraintMariaDBTest() {
+        super(PROPERTIES_FILE);
     }
 
 }

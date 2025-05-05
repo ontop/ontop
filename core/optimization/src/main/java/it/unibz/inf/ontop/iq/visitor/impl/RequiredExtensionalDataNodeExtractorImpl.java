@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq.visitor.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 
@@ -19,42 +18,37 @@ public class RequiredExtensionalDataNodeExtractorImpl implements RequiredExtensi
     }
 
     @Override
-    public Stream<ExtensionalDataNode> visitIntensionalData(IntensionalDataNode dataNode) {
+    public Stream<ExtensionalDataNode> transformIntensionalData(IntensionalDataNode dataNode) {
         return Stream.empty();
     }
 
     @Override
-    public Stream<ExtensionalDataNode> visitExtensionalData(ExtensionalDataNode dataNode) {
+    public Stream<ExtensionalDataNode> transformExtensionalData(ExtensionalDataNode dataNode) {
         return Stream.of(dataNode);
     }
 
     @Override
-    public Stream<ExtensionalDataNode> visitEmpty(EmptyNode node) {
+    public Stream<ExtensionalDataNode> transformEmpty(EmptyNode node) {
         return Stream.empty();
     }
 
     @Override
-    public Stream<ExtensionalDataNode> visitTrue(TrueNode node) {
+    public Stream<ExtensionalDataNode> transformTrue(TrueNode node) {
         return Stream.empty();
     }
 
     @Override
-    public Stream<ExtensionalDataNode> visitNative(NativeNode nativeNode) {
+    public Stream<ExtensionalDataNode> transformNative(NativeNode nativeNode) {
         return Stream.empty();
     }
 
     @Override
-    public Stream<ExtensionalDataNode> visitValues(ValuesNode valuesNode) {
+    public Stream<ExtensionalDataNode> transformValues(ValuesNode valuesNode) {
         return Stream.empty();
     }
 
     @Override
-    public Stream<ExtensionalDataNode> visitNonStandardLeafNode(LeafIQTree leafNode) {
-        return Stream.empty();
-    }
-
-    @Override
-    public Stream<ExtensionalDataNode> visitConstruction(ConstructionNode rootNode, IQTree child) {
+    public Stream<ExtensionalDataNode> transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
@@ -62,61 +56,45 @@ public class RequiredExtensionalDataNodeExtractorImpl implements RequiredExtensi
      * Blocks
      */
     @Override
-    public Stream<ExtensionalDataNode> visitAggregation(AggregationNode aggregationNode, IQTree child) {
+    public Stream<ExtensionalDataNode> transformAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child) {
         return Stream.empty();
     }
 
     @Override
-    public Stream<ExtensionalDataNode> visitFilter(FilterNode rootNode, IQTree child) {
+    public Stream<ExtensionalDataNode> transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<ExtensionalDataNode> visitFlatten(FlattenNode rootNode, IQTree child) {
+    public Stream<ExtensionalDataNode> transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<ExtensionalDataNode> visitDistinct(DistinctNode rootNode, IQTree child) {
+    public Stream<ExtensionalDataNode> transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<ExtensionalDataNode> visitSlice(SliceNode sliceNode, IQTree child) {
+    public Stream<ExtensionalDataNode> transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<ExtensionalDataNode> visitOrderBy(OrderByNode rootNode, IQTree child) {
+    public Stream<ExtensionalDataNode> transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
-    }
-
-    /**
-     * Blocks by default
-     */
-    @Override
-    public Stream<ExtensionalDataNode> visitNonStandardUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
-        return Stream.empty();
     }
 
     /**
      * Only considers the left child
      */
     @Override
-    public Stream<ExtensionalDataNode> visitLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+    public Stream<ExtensionalDataNode> transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         return leftChild.acceptVisitor(this);
     }
 
-    /**
-     * Blocks by default
-     */
     @Override
-    public Stream<ExtensionalDataNode> visitNonStandardBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
-        return Stream.empty();
-    }
-
-    @Override
-    public Stream<ExtensionalDataNode> visitInnerJoin(InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+    public Stream<ExtensionalDataNode> transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
         return children.stream()
                 .flatMap(c -> c.acceptVisitor(this));
     }
@@ -125,15 +103,7 @@ public class RequiredExtensionalDataNodeExtractorImpl implements RequiredExtensi
      * TODO: try to extract some common data nodes
      */
     @Override
-    public Stream<ExtensionalDataNode> visitUnion(UnionNode rootNode, ImmutableList<IQTree> children) {
-        return Stream.empty();
-    }
-
-    /**
-     * Blocks by default
-     */
-    @Override
-    public Stream<ExtensionalDataNode> visitNonStandardNaryNode(NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+    public Stream<ExtensionalDataNode> transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         return Stream.empty();
     }
 }

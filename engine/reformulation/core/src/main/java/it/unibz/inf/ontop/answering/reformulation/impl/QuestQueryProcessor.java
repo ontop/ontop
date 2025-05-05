@@ -73,8 +73,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		this.inputQueryTranslator = inputQueryTranslator;
 		this.queryCache = queryCache;
-
-		LOGGER.info("Ontop has completed the setup and it is ready for query answering!");
 	}
 
 	@Override

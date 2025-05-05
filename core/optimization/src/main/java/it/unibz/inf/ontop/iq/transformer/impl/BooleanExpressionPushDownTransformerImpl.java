@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.inject.Inject;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQTreeVisitingTransformer
         implements BooleanExpressionPushDownTransformer {
@@ -25,7 +26,7 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
 
     @Inject
     protected BooleanExpressionPushDownTransformerImpl(CoreSingletons coreSingletons) {
-        super(coreSingletons);
+        super(coreSingletons.getIQFactory());
         this.coreSingletons = coreSingletons;
         this.termFactory = coreSingletons.getTermFactory();
     }
@@ -33,29 +34,17 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
     @Override
     public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
 
-        ImmutableList<ImmutableExpression> subExpressions = rootNode.getFilterCondition().flattenAND()
-                .collect(ImmutableCollectors.toList());
+        IQTree transformedChild = child.acceptTransformer(this);
 
-        ImmutableList.Builder<ImmutableExpression> nonPushedExpressionBuilder = ImmutableList.builder();
+        PushResult<IQTree> result = pushExpressionDown(
+                transformedChild,
+                rootNode.getFilterCondition(),
+                this::pushExpressionDown);
 
-        // Recursive. Non-final variable
-        IQTree currentChild = child.acceptTransformer(this);
-
-        for (ImmutableExpression subExpression : subExpressions) {
-            BooleanExpressionPusher newPusher = new BooleanExpressionPusher(subExpression, coreSingletons);
-            Optional<IQTree> optionalChild = currentChild.acceptVisitor(newPusher);
-            if (optionalChild.isPresent()) {
-                currentChild = optionalChild.get();
-            }
-            else
-                nonPushedExpressionBuilder.add(subExpression);
-        }
-        IQTree newChild = currentChild;
-
-        return termFactory.getConjunction(nonPushedExpressionBuilder.build().stream())
+        return result.nonPushedExpression
                 .map(iqFactory::createFilterNode)
-                .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newChild))
-                .orElse(newChild);
+                .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, result.result))
+                .orElse(result.result);
     }
 
     /**
@@ -64,94 +53,98 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
     @Override
     public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
 
-        IQTree newLeftChild = leftChild.acceptTransformer(this);
-        IQTree selfTransformedRightChild = rightChild.acceptTransformer(this);
+        IQTree transformedLeftChild = leftChild.acceptTransformer(this);
+        IQTree transformedRightChild = rightChild.acceptTransformer(this);
 
-        if (!rootNode.getOptionalFilterCondition().isPresent())
-            return leftChild.equals(newLeftChild) && rightChild.equals(selfTransformedRightChild)
+        if (rootNode.getOptionalFilterCondition().isEmpty())
+            return leftChild.equals(transformedLeftChild) && rightChild.equals(transformedRightChild)
                     ? tree
-                    : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, selfTransformedRightChild);
+                    : iqFactory.createBinaryNonCommutativeIQTree(rootNode, transformedLeftChild, transformedRightChild);
 
-        ImmutableList<ImmutableExpression> subExpressions = rootNode.getOptionalFilterCondition().get().flattenAND()
-                .collect(ImmutableCollectors.toList());
+        // Expressions involving variables not on the right are not pushed
+        PushResult<IQTree> result = pushExpressionDown(
+                transformedRightChild,
+                rootNode.getOptionalFilterCondition().get(),
+                this::pushExpressionDownIfContainsVariables);
 
-        ImmutableList.Builder<ImmutableExpression> nonPushedExpressionBuilder = ImmutableList.builder();
-
-        // Recursive. Non-final variable
-        IQTree currentRightChild = selfTransformedRightChild;
-        ImmutableSet<Variable> rightChildVariables = rightChild.getVariables();
-
-        for (ImmutableExpression subExpression : subExpressions) {
-            ImmutableSet<Variable> subExpressionVariables = subExpression.getVariableStream()
-                    .collect(ImmutableCollectors.toSet());
-
-            if (rightChildVariables.containsAll(subExpressionVariables)) {
-
-                BooleanExpressionPusher newPusher = new BooleanExpressionPusher(subExpression, coreSingletons);
-                Optional<IQTree> optionalChild = currentRightChild.acceptVisitor(newPusher);
-                if (optionalChild.isPresent()) {
-                    currentRightChild = optionalChild.get();
-                } else
-                    nonPushedExpressionBuilder.add(subExpression);
-            }
-            // Expression involving variables not on the right
-            else
-                nonPushedExpressionBuilder.add(subExpression);
-        }
-
-        LeftJoinNode newLeftJoinNode = termFactory.getConjunction(nonPushedExpressionBuilder.build().stream())
+        LeftJoinNode newLeftJoinNode = result.nonPushedExpression
                 .map(iqFactory::createLeftJoinNode)
                 .orElseGet(iqFactory::createLeftJoinNode);
 
-        return iqFactory.createBinaryNonCommutativeIQTree(newLeftJoinNode, newLeftChild, currentRightChild);
+        return iqFactory.createBinaryNonCommutativeIQTree(newLeftJoinNode, transformedLeftChild, result.result);
     }
 
     @Override
     public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
 
-        ImmutableList<IQTree> selfTransformedChildren = children.stream()
-                .map(this::transform)
+        ImmutableList<IQTree> transformedChildren = children.stream()
+                .map(t -> t.acceptTransformer(this))
                 .collect(ImmutableCollectors.toList());
 
-        if (!rootNode.getOptionalFilterCondition().isPresent())
-            return selfTransformedChildren.equals(children)
+        if (rootNode.getOptionalFilterCondition().isEmpty())
+            return transformedChildren.equals(children)
                     ? tree
-                    : iqFactory.createNaryIQTree(rootNode, selfTransformedChildren);
+                    : iqFactory.createNaryIQTree(rootNode, transformedChildren);
 
-        ImmutableList<ImmutableExpression> subExpressions = rootNode.getOptionalFilterCondition().get().flattenAND()
-                .collect(ImmutableCollectors.toList());
+        PushResult<ImmutableList<IQTree>> result = pushExpressionDown(
+                transformedChildren,
+                rootNode.getOptionalFilterCondition().get(),
+                this::pushExpressionDown);
 
-        ImmutableSet.Builder<ImmutableExpression> nonPushedExpressionBuilder = ImmutableSet.builder();
-
-        // Recursive. Non-final variable
-        ImmutableList<IQTree> currentChildren = selfTransformedChildren;
-
-        for (ImmutableExpression subExpression : subExpressions) {
-            ImmutableSet<Variable> subExpressionVariables = subExpression.getVariableStream()
-                    .collect(ImmutableCollectors.toSet());
-
-            BooleanExpressionPusher newPusher = new BooleanExpressionPusher(subExpression, coreSingletons);
-
-            ImmutableList<IQTree> updatedChildren = currentChildren.stream()
-                    .map(c -> c.getVariables().containsAll(subExpressionVariables)
-                            ? c.acceptVisitor(newPusher).orElse(c)
-                            : c)
-                    .collect(ImmutableCollectors.toList());
-
-            /*
-             * If the expression could not be pushed down to any child, keep it in the inner join
-             */
-            if (currentChildren.equals(updatedChildren))
-                nonPushedExpressionBuilder.add(subExpression);
-
-            currentChildren = updatedChildren;
-        }
-
-        InnerJoinNode newInnerJoinNode = termFactory.getConjunction(nonPushedExpressionBuilder.build().stream())
+        InnerJoinNode newInnerJoinNode = result.nonPushedExpression
                 .map(iqFactory::createInnerJoinNode)
                 .orElseGet(iqFactory::createInnerJoinNode);
 
-        return iqFactory.createNaryIQTree(newInnerJoinNode, currentChildren);
+        return iqFactory.createNaryIQTree(newInnerJoinNode, result.result);
+    }
 
+    private Optional<IQTree> pushExpressionDown(ImmutableExpression expression, IQTree child) {
+        BooleanExpressionPusher newPusher = new BooleanExpressionPusher(expression, coreSingletons);
+        return child.acceptVisitor(newPusher);
+    }
+
+    private Optional<IQTree> pushExpressionDownIfContainsVariables(ImmutableExpression expression, IQTree tree) {
+        ImmutableSet<Variable> expressionVariables = getVariables(expression);
+        if (tree.getVariables().containsAll(expressionVariables))
+            return pushExpressionDown(expression, tree);
+        return Optional.empty();
+    }
+
+    private Optional<ImmutableList<IQTree>> pushExpressionDown(ImmutableExpression expression, ImmutableList<IQTree> list) {
+        ImmutableSet<Variable> expressionVariables = getVariables(expression);
+        return Optional.of(list.stream()
+                        .map(tree -> tree.getVariables().containsAll(expressionVariables)
+                                ? pushExpressionDown(expression, tree).orElse(tree)
+                                : tree)
+                        .collect(ImmutableCollectors.toList()))
+                // If the expression could not be pushed down to any child, keep it in the inner join
+                .filter(rr -> !rr.equals(list));
+    }
+
+    private static final class PushResult<T> {
+        final T result;
+        final Optional<ImmutableExpression>  nonPushedExpression;
+
+        private PushResult(T result, Optional<ImmutableExpression> nonPushedExpression) {
+            this.result = result;
+            this.nonPushedExpression = nonPushedExpression;
+        }
+    }
+
+    private <T> PushResult<T> pushExpressionDown(T initial, ImmutableExpression expression, BiFunction<ImmutableExpression, T, Optional<T>> function) {
+        ImmutableSet.Builder<ImmutableExpression> nonPushedExpressionBuilder = ImmutableSet.builder();
+        T result = initial; // non-final
+        for (ImmutableExpression exp : expression.flattenAND().collect(ImmutableCollectors.toList())) {
+            Optional<T> optionalResult = function.apply(exp, result);
+            if (optionalResult.isPresent())
+                result = optionalResult.get();
+            else
+                nonPushedExpressionBuilder.add(exp);
+        }
+        return new PushResult<>(result, termFactory.getConjunction(nonPushedExpressionBuilder.build().stream()));
+    }
+
+    private static ImmutableSet<Variable> getVariables(ImmutableExpression expression) {
+        return expression.getVariableStream().collect(ImmutableCollectors.toSet());
     }
 }

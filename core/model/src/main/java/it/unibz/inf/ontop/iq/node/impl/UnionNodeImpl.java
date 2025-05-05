@@ -7,20 +7,15 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -50,17 +45,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         this.iqTreeTools = iqTreeTools;
         this.coreUtilsFactory = coreUtilsFactory;
         this.notRequiredVariableRemover = notRequiredVariableRemover;
-    }
-
-    @Override
-    public void acceptVisitor(QueryNodeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public UnionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
     }
 
     @Override
@@ -274,22 +258,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 children.stream()
                         .map(c -> c.propagateDownConstraint(constraint, variableGenerator))
                         .collect(ImmutableCollectors.toList()));
-    }
-
-    @Override
-    public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, ImmutableList<IQTree> children) {
-        return transformer.transformUnion(tree,this, children);
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer,
-                                    ImmutableList<IQTree> children, T context) {
-        return transformer.transformUnion(tree,this, children, context);
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor, ImmutableList<IQTree> children) {
-        return visitor.visitUnion(this, children);
     }
 
     @Override

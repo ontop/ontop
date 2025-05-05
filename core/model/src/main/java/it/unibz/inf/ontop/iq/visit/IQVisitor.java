@@ -2,34 +2,28 @@ package it.unibz.inf.ontop.iq.visit;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 
 
 public interface IQVisitor<T> {
 
-    T visitIntensionalData(IntensionalDataNode dataNode);
-    T visitExtensionalData(ExtensionalDataNode dataNode);
-    T visitEmpty(EmptyNode node);
-    T visitTrue(TrueNode node);
-    T visitNative(NativeNode nativeNode);
-    T visitValues(ValuesNode valuesNode);
-    T visitNonStandardLeafNode(LeafIQTree leafNode);
+    T transformIntensionalData(IntensionalDataNode dataNode);
+    T transformExtensionalData(ExtensionalDataNode dataNode);
+    T transformEmpty(EmptyNode node);
+    T transformTrue(TrueNode node);
+    T transformNative(NativeNode nativeNode);
+    T transformValues(ValuesNode valuesNode);
 
-    T visitConstruction(ConstructionNode rootNode, IQTree child);
-    T visitAggregation(AggregationNode aggregationNode, IQTree child);
-    T visitFilter(FilterNode rootNode, IQTree child);
-    T visitFlatten(FlattenNode rootNode, IQTree child);
-    T visitDistinct(DistinctNode rootNode, IQTree child);
-    T visitSlice(SliceNode sliceNode, IQTree child);
-    T visitOrderBy(OrderByNode rootNode, IQTree child);
-    T visitNonStandardUnaryNode(UnaryOperatorNode rootNode, IQTree child);
+    T transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child);
+    T transformAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child);
+    T transformFilter(IQTree tree, FilterNode rootNode, IQTree child);
+    T transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child);
+    T transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child);
+    T transformSlice(IQTree tree, SliceNode sliceNode, IQTree child);
+    T transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child);
 
-    T visitLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild);
-    T visitNonStandardBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode,
-                                                        IQTree leftChild, IQTree rightChild);
+    T transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild);
 
-    T visitInnerJoin(InnerJoinNode rootNode, ImmutableList<IQTree> children);
-    T visitUnion(UnionNode rootNode, ImmutableList<IQTree> children);
-    T visitNonStandardNaryNode(NaryOperatorNode rootNode, ImmutableList<IQTree> children);
+    T transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children);
+    T transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children);
 }

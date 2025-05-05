@@ -4,15 +4,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.LeafIQTree;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -25,8 +20,9 @@ public interface ExtensionalDataNode extends LeafIQTree {
     ImmutableMap<Integer, ? extends VariableOrGroundTerm> getArgumentMap();
 
     @Override
-    ExtensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException;
+    default <T> T acceptVisitor(IQVisitor<T> visitor) {
+        return visitor.transformExtensionalData(this);
+    }
 
     static <T> ImmutableMap<Integer, ? extends T> union(ImmutableMap<Integer, ? extends T> argumentMap1, ImmutableMap<Integer, ? extends T> argumentMap2) {
         return Sets.union(argumentMap1.keySet(), argumentMap2.keySet()).stream()
