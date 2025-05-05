@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
@@ -22,7 +23,11 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
 
 public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
@@ -77,14 +82,18 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     protected IQTree normalizeForOptimization(IQTree newChild, VariableGenerator variableGenerator, IQTreeCache treeCache,
-                                              Supplier<Boolean> hasChildChanged) {
+                                              BooleanSupplier hasChildChanged) {
+
+        var construction = UnaryIQTreeDecomposition.of(newChild, ConstructionNode.class);
+        if (construction.isPresent())
+            return liftChildConstruction(construction.get(), construction.getChild(), variableGenerator);
+
+        var slice = UnaryIQTreeDecomposition.of(newChild, SliceNode.class);
+        if (slice.isPresent())
+            return mergeWithSliceChild(slice.get(), slice.getChild(), treeCache);
 
         QueryNode newChildRoot = newChild.getRootNode();
 
-        if (newChildRoot instanceof ConstructionNode)
-            return liftChildConstruction((ConstructionNode) newChildRoot, (UnaryIQTree)newChild, variableGenerator);
-        if (newChildRoot instanceof SliceNode)
-            return mergeWithSliceChild((SliceNode) newChildRoot, (UnaryIQTree) newChild, treeCache);
         if (newChildRoot instanceof EmptyNode)
             return newChild;
         if ((newChildRoot instanceof TrueNode)
@@ -115,20 +124,20 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
             return normalizeLimitNoOffset(limit.intValue(), newChild, variableGenerator, treeCache, hasChildChanged);
 
         return iqFactory.createUnaryIQTree(this, newChild,
-                hasChildChanged.get()
+                hasChildChanged.getAsBoolean()
                         ? treeCache.declareAsNormalizedForOptimizationWithEffect()
                         : treeCache.declareAsNormalizedForOptimizationWithoutEffect());
     }
 
-    private IQTree liftChildConstruction(ConstructionNode childConstructionNode, UnaryIQTree childTree,
+    private IQTree liftChildConstruction(ConstructionNode childConstructionNode, IQTree child,
                                          VariableGenerator variableGenerator) {
-        IQTree newSliceLevelTree = iqFactory.createUnaryIQTree(this, childTree.getChild())
+        IQTree newSliceLevelTree = iqFactory.createUnaryIQTree(this, child)
                 .normalizeForOptimization(variableGenerator);
         return iqFactory.createUnaryIQTree(childConstructionNode, newSliceLevelTree,
                 iqFactory.createIQTreeCache(true));
     }
 
-    private IQTree mergeWithSliceChild(SliceNode newChildRoot, UnaryIQTree newChild, IQTreeCache treeCache) {
+    private IQTree mergeWithSliceChild(SliceNode newChildRoot, IQTree child, IQTreeCache treeCache) {
         long newOffset = offset + newChildRoot.getOffset();
         Optional<Long> newLimit = newChildRoot.getLimit()
                 .map(cl -> Math.max(cl - offset, 0L))
@@ -141,7 +150,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 .map(l -> iqFactory.createSliceNode(newOffset, l))
                 .orElseGet(() -> iqFactory.createSliceNode(newOffset));
 
-        return iqFactory.createUnaryIQTree(newSliceNode, newChild.getChild(), treeCache.declareAsNormalizedForOptimizationWithEffect());
+        return iqFactory.createUnaryIQTree(newSliceNode, child, treeCache.declareAsNormalizedForOptimizationWithEffect());
     }
 
     /**
@@ -149,7 +158,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
      *
      */
     private IQTree normalizeLimitNoOffset(int limit, IQTree newChild, VariableGenerator variableGenerator,
-                                          IQTreeCache treeCache, Supplier<Boolean> hasChildChanged) {
+                                          IQTreeCache treeCache, BooleanSupplier hasChildChanged) {
         QueryNode newChildRoot = newChild.getRootNode();
             // Only triggered if a child with a known cardinality is present directly under the UNION
         if (newChildRoot instanceof UnionNode) {
@@ -174,7 +183,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                     && childOfDistinct.getChildren().stream().anyMatch(IQTree::isDistinct)) {
 
                 Optional<IQTree> newTree = simplifyDistinctUnionWithDistinctChildren(
-                        childOfDistinct, limit, variableGenerator);
+                        (NaryIQTree) childOfDistinct, limit, variableGenerator);
 
                 if (newTree.isPresent())
                     return newTree.get();
@@ -185,9 +194,8 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
             var joinChildren = newChild.getChildren();
             var newJoinChildren = joinChildren.stream()
                     // Distinct-s can be eliminated
-                    .map(c -> (c.getRootNode() instanceof DistinctNode)
-                            ? c.getChildren().get(0)
-                            : c)
+                    .map(c -> UnaryIQTreeDecomposition.of(c, DistinctNode.class))
+                    .map(UnaryIQTreeDecomposition::getChild)
                     .collect(ImmutableCollectors.toList());
 
             if (!newJoinChildren.equals(joinChildren)) {
@@ -198,7 +206,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         }
 
         return iqFactory.createUnaryIQTree(this, newChild,
-                hasChildChanged.get()
+                hasChildChanged.getAsBoolean()
                         ? treeCache.declareAsNormalizedForOptimizationWithEffect()
                         : treeCache.declareAsNormalizedForOptimizationWithoutEffect());
     }
@@ -209,9 +217,9 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         if (tree instanceof ValuesNode)
             return Optional.of(((ValuesNode) tree).getValues().size());
 
-        QueryNode rootNode = tree.getRootNode();
-        if (rootNode instanceof ConstructionNode)
-            return getKnownCardinality(tree.getChildren().get(0));
+        var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+        if (construction.isPresent())
+            return getKnownCardinality(construction.getChild());
         // TODO: shall we consider other nodes, like union nodes?
         return Optional.empty();
     }
@@ -302,7 +310,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                         iqFactory.createNaryIQTree(unionNode, newUnionChildren)));
     }
 
-    private Optional<IQTree> simplifyDistinctUnionWithDistinctChildren(IQTree unionTree, int limit, VariableGenerator variableGenerator) {
+    private Optional<IQTree> simplifyDistinctUnionWithDistinctChildren(NaryIQTree unionTree, int limit, VariableGenerator variableGenerator) {
         ImmutableList<IQTree> unionChildren = unionTree.getChildren();
 
         Optional<IQTree> sufficientChild = unionChildren.stream()
@@ -332,7 +340,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                                 iqFactory.createUnaryIQTree(
                                         iqFactory.createDistinctNode(),
                                         iqFactory.createNaryIQTree(
-                                                (UnionNode) unionTree.getRootNode(),
+                                                unionTree.getRootNode(),
                                                 newUnionChildren)))
                                 .normalizeForOptimization(variableGenerator));
     }

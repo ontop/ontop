@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
@@ -14,6 +15,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 /**
  * Lifts unions above projections, until a fixed point is reached.
@@ -25,9 +28,15 @@ public class UnionFlattenerImpl implements UnionFlattener {
 
     private final IntermediateQueryFactory iqFactory;
 
+    @Inject
+    private UnionFlattenerImpl(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
+    }
+
     private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
         private final VariableGenerator variableGenerator;
+
 
         private TreeTransformer(VariableGenerator variableGenerator) {
             super(UnionFlattenerImpl.this.iqFactory);
@@ -37,19 +46,19 @@ public class UnionFlattenerImpl implements UnionFlattener {
         @Override
         public IQTree transformConstruction(IQTree tree, ConstructionNode rootCn, IQTree child) {
 
-            IQTree transformedChild = child.acceptTransformer(this);
-            QueryNode transformedChildRoot = transformedChild.getRootNode();
+            IQTree transformedChild = transformChild(child);
 
             // if the child is a union, lift it
-            if (transformedChildRoot instanceof UnionNode) {
+            if (transformedChild.getRootNode() instanceof UnionNode) {
                 return iqFactory.createNaryIQTree(
                         iqFactory.createUnionNode(rootCn.getVariables()),
                         transformedChild.getChildren().stream()
                                 .map(t -> iqFactory.createUnaryIQTree(rootCn, t))
                                 .collect(ImmutableCollectors.toList()));
             }
+            var construction = UnaryIQTreeDecomposition.of(transformedChild, ConstructionNode.class);
             // if the child is a construction node, merge it
-            if (transformedChildRoot instanceof ConstructionNode) {
+            if (construction.isPresent()) {
                 return rootCn.normalizeForOptimization(transformedChild, variableGenerator, iqFactory.createIQTreeCache());
             }
             return iqFactory.createUnaryIQTree(rootCn, transformedChild);
@@ -59,9 +68,7 @@ public class UnionFlattenerImpl implements UnionFlattener {
         // merge consecutive unions
         public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
 
-            ImmutableList<IQTree> transformedChildren = children.stream()
-                    .map(t -> t.acceptTransformer(this))
-                    .collect(ImmutableCollectors.toList());
+            ImmutableList<IQTree> transformedChildren = transformChildren(children);
 
             ImmutableList<IQTree> unionGrandChildren = transformedChildren.stream()
                     .filter(t -> t.getRootNode() instanceof UnionNode)
@@ -77,11 +84,6 @@ public class UnionFlattenerImpl implements UnionFlattener {
                     ).collect(ImmutableCollectors.toList())
             );
         }
-    }
-
-    @Inject
-    private UnionFlattenerImpl(IntermediateQueryFactory iqFactory) {
-        this.iqFactory = iqFactory;
     }
 
     /**
