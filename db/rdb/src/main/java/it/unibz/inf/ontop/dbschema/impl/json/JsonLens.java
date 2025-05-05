@@ -18,8 +18,10 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
+import it.unibz.inf.ontop.iq.visit.impl.RelationExtractor;
 import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -466,5 +468,15 @@ public abstract class JsonLens extends JsonOpenObject {
         public IRISafeConstraints(@JsonProperty("added") List<String> added) {
             this.added = added;
         }
+    }
+
+    protected static int extractMaxParentLevel(IQ iq) {
+        return iq.getTree().acceptVisitor(new RelationExtractor())
+                .map(ExtensionalDataNode::getRelationDefinition)
+                .filter(r -> r instanceof Lens)
+                .map(r -> (Lens)r)
+                .mapToInt(Lens::getLevel)
+                .max()
+                .orElse(0);
     }
 }

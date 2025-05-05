@@ -9,9 +9,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.impl.QueryNodeRenamer;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transform.impl.HomogeneousIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -157,9 +155,7 @@ public class AggregationSplitterTest {
     }
 
     private IQTree applyInDepthRenaming(IQTree tree, InjectiveSubstitution<Variable> renaming) {
-        QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(IQ_FACTORY, renaming, ATOM_FACTORY, SUBSTITUTION_FACTORY);
-        HomogeneousIQTreeVisitingTransformer iqTransformer = new HomogeneousIQTreeVisitingTransformer(nodeTransformer, IQ_FACTORY);
-        return iqTransformer.transform(tree);
+        return CORE_SINGLETONS.getQueryTransformerFactory().createRenamer(renaming).transform(tree);
     }
 
     @Test

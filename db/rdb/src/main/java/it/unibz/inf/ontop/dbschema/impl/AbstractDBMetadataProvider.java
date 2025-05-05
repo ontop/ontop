@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.spec.sqlparser.DefaultSelectQueryAttributeExtractor;
 import it.unibz.inf.ontop.spec.sqlparser.JSqlParserTools;
 import it.unibz.inf.ontop.spec.sqlparser.ParserViewDefinition;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.TokenMgrException;
 import net.sf.jsqlparser.statement.select.Select;
@@ -27,12 +28,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
@@ -134,9 +135,15 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     protected abstract RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColum) throws SQLException;
 
     // can be overridden, 4 usages
-    protected void checkSameRelationID(RelationID extractedId, RelationID givenId, String method) throws MetadataExtractionException {
-        if (!extractedId.equals(givenId))
-            throw new MetadataExtractionException("Relation IDs mismatch: for relation " + givenId + ", the JDBC " + method + " returns " + extractedId);
+    protected boolean equalRelationIDs(RelationID extractedId, RelationID givenId)  {
+        return extractedId.equals(givenId);
+    }
+
+    protected RelationID extractRelationID(RelationID givenId, ResultSet rs, String[] columnNames, String method) throws SQLException, MetadataExtractionException {
+        RelationID extractedId = getRelationID(rs, columnNames[0], columnNames[1], columnNames[2]);
+        if (!equalRelationIDs(givenId, extractedId))
+              throw new MetadataExtractionException("Relation IDs mismatch: for relation " + givenId + ", the JDBC method "  + method + " returns " + extractedId);
+        return extractedId;
     }
 
     protected @Nullable String escapeRelationIdComponentPattern(@Nullable String s) {
@@ -145,6 +152,8 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                 : s.replace("_", escape + "_")
                     .replace("%", escape + "%");
     }
+
+    private static final String[] TABLE_NAME_COLUMNS = new String[] { "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME" };
 
     @Override
     public NamedRelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
@@ -156,8 +165,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
             while (rs.next()) {
                 logOperation.advanceCounter();
-                RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
-                checkSameRelationID(extractedId, id, "getColumns");
+                RelationID extractedId = extractRelationID(id, rs, TABLE_NAME_COLUMNS, "getColumns");
 
                 RelationDefinition.AttributeListBuilder builder = relations.computeIfAbsent(extractedId,
                         i -> DatabaseTableDefinition.attributeListBuilder());
@@ -175,7 +183,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             }
             LOGGER.debug("[DB-METADATA] Column info extracted in {} ms/column", logOperation.getAverageDuration());
 
-            if (relations.entrySet().size() == 1) {
+            if (relations.size() == 1) {
                 Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
                 return new DatabaseTableDefinition(getAllIDs(r.getKey()), r.getValue());
             }
@@ -258,38 +266,22 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         RelationID id = getCanonicalRelationId(relation.getID());
         // Retrieves a description of the given table's primary key columns. They are ordered by COLUMN_NAME (sic!)
         try (ResultSet rs = getPrimaryKeysResultSet(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
-            Map<Integer, QuotedID> primaryKeyAttributes = new HashMap<>();
-            String currentPkName = null;
+            Optional<PrimaryKeyBuilder> builder = Optional.empty();
             while (rs.next()) {
                 logOperation.advanceCounter();
-                RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
-                checkSameRelationID(extractedId, id, "getPrimaryKeys");
+                RelationID extractedId = extractRelationID(id, rs, TABLE_NAME_COLUMNS, "getPrimaryKeys");
 
                 String pkName = rs.getString("PK_NAME"); // may be null
-                if (currentPkName != null && pkName != null && !currentPkName.equals(pkName))
-                    throw new MetadataExtractionException("Two primary keys for the same table " + id + ": " + currentPkName + " and " + pkName);
-                currentPkName = pkName;
-                QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
+                if (builder.isEmpty()) {
+                    builder = Optional.of(new PrimaryKeyBuilder(extractedId, relation, pkName));
+                }
+                else if (!Objects.equals(pkName, builder.get().constraintName))
+                    throw new MetadataExtractionException("Two primary keys for the same table " + id + ": " + builder.get().constraintName + " and " + pkName);
+
                 int seq = rs.getShort("KEY_SEQ");
-                QuotedID previous = primaryKeyAttributes.put(seq, attrId);
-                if (previous != null)
-                    throw new MetadataExtractionException("Duplicate attribute " + previous + " in the primary key " + currentPkName + " for " + id);
+                builder.get().addColumn(seq, rs.getString("COLUMN_NAME"));
             }
-            if (!primaryKeyAttributes.isEmpty()) {
-                if (currentPkName != null && isPrimaryKeyDisabled(id, currentPkName))
-                    LOGGER.error("WARNING: primary key {} in table {} is disabled and will not be used in optimizations.", currentPkName, id);
-                else
-                    try {
-                        // use the KEY_SEQ values to restore the correct order of attributes in the PK
-                        UniqueConstraint.Builder builder = UniqueConstraint.primaryKeyBuilder(relation, currentPkName);
-                        for (int i = 1; i <= primaryKeyAttributes.size(); i++)
-                            builder.addDeterminant(primaryKeyAttributes.get(i));
-                        builder.build();
-                    }
-                    catch (AttributeNotFoundException e) {
-                        throw new MetadataExtractionException(e);
-                    }
-            }
+            builder.ifPresent(UniqueConstraintAbstractBuilder::build);
         }
         LOGGER.debug("[DB-METADATA] Primary key(s) extracted in {} ms/column", logOperation.getAverageDuration());
     }
@@ -322,73 +314,179 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         RelationID id = getCanonicalRelationId(relation.getID());
         // extracting unique
         try (ResultSet rs = getIndexInfoResultSet(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
-            UniqueConstraint.Builder builder = null;
-            List<String> columnsNotFound = new ArrayList<>();
-            String constraintId = null;
+            Optional<UniqueConstraintBuilder> builder = Optional.empty();
             while (rs.next()) {
                 logOperation.advanceCounter();
-                RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
-                checkSameRelationID(extractedId, id, "getIndexInfo");
+                RelationID extractedId = extractRelationID(id, rs, TABLE_NAME_COLUMNS, "getIndexInfo");
 
                 // TYPE: tableIndexStatistic - this identifies table statistics that are returned in conjunction with a table's index descriptions
                 //       tableIndexClustered - this is a clustered index
                 //       tableIndexHashed - this is a hashed index
                 //       tableIndexOther (all are static final int in DatabaseMetaData)
                 if (rs.getShort("TYPE") == DatabaseMetaData.tableIndexStatistic) {
-                    createUniqueConstraint(id, builder, constraintId, columnsNotFound);
-                    builder = null;
+                    builder.ifPresent(UniqueConstraintAbstractBuilder::build);
+                    builder = Optional.empty();
                     continue;
                 }
-                if (rs.getShort("ORDINAL_POSITION") == 1) {
-                    createUniqueConstraint(id, builder, constraintId, columnsNotFound);
-
-                    if (!rs.getBoolean("NON_UNIQUE")) {
-                        constraintId = rs.getString("INDEX_NAME");
-                        builder = UniqueConstraint.builder(relation, constraintId);
-                        columnsNotFound.clear();
-                    }
-                    else
-                        builder = null;
+                int pos = rs.getShort("ORDINAL_POSITION");
+                if (pos == 1) {
+                    builder.ifPresent(UniqueConstraintAbstractBuilder::build);
+                    builder = rs.getBoolean("NON_UNIQUE")
+                            ? Optional.empty()
+                            : Optional.of(new UniqueConstraintBuilder(extractedId, relation, rs.getString("INDEX_NAME")));
                 }
 
-                if (builder != null) {
-                    QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
-                    // ASC_OR_DESC String => column sort sequence, "A" => ascending, "D" => descending,
-                    //        may be null if sort sequence is not supported; null when TYPE is tableIndexStatistic
-                    // CARDINALITY int => When TYPE is tableIndexStatistic, then this is the number of rows in the table;
-                    //                      otherwise, it is the number of unique values in the index.
-                    // PAGES int => When TYPE is tableIndexStatisic then this is the number of pages used for the table,
-                    //                    otherwise it is the number of pages used for the current index.
-                    // FILTER_CONDITION String => Filter condition, if any. (may be null)
-                    try {
-                        builder.addDeterminant(attrId);
-                    }
-                    catch (AttributeNotFoundException e) {
-                        try {
-                            // bug in PostgreSQL JBDC driver: it strips off the quotation marks
-                            attrId = rawIdFactory.createAttributeID("\"" + rs.getString("COLUMN_NAME") + "\"");
-                            builder.addDeterminant(attrId);
-                        }
-                        catch (AttributeNotFoundException ex) {
-                            columnsNotFound.add(rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME")).getName());
-                        }
-                    }
-                }
+                // ASC_OR_DESC String => column sort sequence, "A" => ascending, "D" => descending,
+                //        may be null if sort sequence is not supported; null when TYPE is tableIndexStatistic
+                // CARDINALITY int => When TYPE is tableIndexStatistic, then this is the number of rows in the table;
+                //                      otherwise, it is the number of unique values in the index.
+                // PAGES int => When TYPE is tableIndexStatistic then this is the number of pages used for the table,
+                //                    otherwise it is the number of pages used for the current index.
+                // FILTER_CONDITION String => Filter condition, if any. (maybe null)
+                String column = rs.getString("COLUMN_NAME");
+                builder.ifPresent(b -> b.addColumn(pos, column));
             }
-            createUniqueConstraint(id, builder, constraintId, columnsNotFound);
+            builder.ifPresent(UniqueConstraintAbstractBuilder::build);
         }
         LOGGER.debug("[DB-METADATA] Unique constraints extracted in {} ms/column", logOperation.getAverageDuration());
     }
 
-    private void createUniqueConstraint(RelationID id, UniqueConstraint.Builder builder, String constraintId, List<String> columnsNotFound) {
-        if (builder != null) {
-            if (constraintId != null && isUniqueConstraintDisabled(id, constraintId))
-                LOGGER.error("WARNING: unique constraint {} in table {} is disabled and will not be used in optimizations.", constraintId, id);
-            else if (!columnsNotFound.isEmpty())
-                LOGGER.error("WARNING: column{} {} not found for the unique index {} (table {}): the constraint will not be used in optimizations.",
-                        columnsNotFound.size() == 1 ? "" : "s", String.join(", ", columnsNotFound), constraintId, id);
-            else
+    private class PrimaryKeyBuilder extends UniqueConstraintAbstractBuilder {
+
+        PrimaryKeyBuilder(RelationID canonicalId, NamedRelationDefinition relation, String constraintName) {
+            super("primary key", canonicalId, relation, constraintName,
+                    AbstractDBMetadataProvider.this::isPrimaryKeyDisabled);
+        }
+
+        @Override
+        protected BiFunction<NamedRelationDefinition, String, FunctionalDependency.Builder> getBuilderConstructor(ImmutableList<Attribute> attributes) {
+            if (attributes.stream().anyMatch(Attribute::isNullable)) {
+                LOGGER.error("WARNING: {} {} in table {} is downgraded to a unique constraint as it contains NULLable columns.",
+                        constraintType, constraintName, canonicalId);
+                return UniqueConstraint::builder;
+            }
+            return UniqueConstraint::primaryKeyBuilder;
+        }
+    }
+
+    private class UniqueConstraintBuilder extends UniqueConstraintAbstractBuilder {
+
+        UniqueConstraintBuilder(RelationID canonicalId, NamedRelationDefinition relation, String constraintName) {
+            super("unique index", canonicalId, relation, constraintName,
+                    AbstractDBMetadataProvider.this::isUniqueConstraintDisabled);
+        }
+
+        @Override
+        protected Optional<Attribute> getAttribute(String column) {
+            return super.getAttribute(column)
+                    // bug in PostgreSQL JDBC driver:
+                    // it strips off the quotation marks
+                    .or(() -> super.getAttribute("\"" + column + "\""));
+        }
+
+        @Override
+        protected BiFunction<NamedRelationDefinition, String, FunctionalDependency.Builder> getBuilderConstructor(ImmutableList<Attribute> attributes) {
+            return UniqueConstraint::builder;
+        }
+    }
+
+    private abstract class UniqueConstraintAbstractBuilder {
+        protected final NamedRelationDefinition relation;
+        protected final RelationID canonicalId;
+        protected final String constraintName;
+        protected final String constraintType;
+        protected final BiPredicate<RelationID, String> isDisabled;
+
+        private final Map<Integer, String> columns = new HashMap<>();
+        private boolean valid = true;
+
+        UniqueConstraintAbstractBuilder(String constraintType,
+                                        RelationID canonicalId, NamedRelationDefinition relation,
+                                        String constraintName,
+                                        BiPredicate<RelationID, String> isDisabled) {
+            this.constraintType = constraintType;
+            this.relation = relation;
+            this.canonicalId = canonicalId;
+            this.constraintName = constraintName;
+            this.isDisabled = isDisabled;
+        }
+
+        void addColumn(int pos, String column) {
+            String previous = columns.put(pos, column);
+            if (previous != null) {
+                valid = false;
+                LOGGER.error("WARNING: {} {} in table {} contains two columns, {} and {}, at the same position {}",
+                        constraintType, constraintName, canonicalId, previous, column, pos);
+            }
+        }
+
+        protected Optional<Attribute> getAttribute(String column) {
+            QuotedID id = rawIdFactory.createAttributeID(column);
+            try {
+                return Optional.of(relation.getAttribute(id));
+            }
+            catch (AttributeNotFoundException e) {
+                return Optional.empty();
+            }
+        }
+
+        protected abstract BiFunction<NamedRelationDefinition, String, FunctionalDependency.Builder> getBuilderConstructor(ImmutableList<Attribute> attributes);
+
+        protected ImmutableList<Attribute> getAttributes() {
+            if (!valid)
+                return ImmutableList.of();
+
+            if (columns.isEmpty()) {
+                LOGGER.error("WARNING: {} {} in table {} has no columns.",
+                        constraintType, constraintName, canonicalId);
+                return ImmutableList.of();
+            }
+
+            ImmutableList<Attribute> attributes = IntStream.rangeClosed(1, columns.size())
+                    .mapToObj(columns::get)
+                    .filter(Objects::nonNull)
+                    .map(this::getAttribute)
+                    .flatMap(Optional::stream)
+                    .collect(ImmutableCollectors.toList());
+
+            if (attributes.size() != columns.size()) {
+                ImmutableList<String> emptyPositions = IntStream.rangeClosed(1, columns.size())
+                        .filter(i -> columns.get(i) == null)
+                        .mapToObj(Integer::toString)
+                        .collect(ImmutableCollectors.toList());
+
+                if (!emptyPositions.isEmpty()) {
+                    LOGGER.error("WARNING: position{} {} not found for the {} {} (table {}): the constraint will not be used in optimizations.",
+                            emptyPositions.size() == 1 ? "" : "s", String.join(", ", emptyPositions), constraintType, constraintName, canonicalId);
+                    return ImmutableList.of();
+                }
+
+                ImmutableList<String> columnsNotFound = IntStream.rangeClosed(1, columns.size())
+                        .mapToObj(columns::get)
+                        .filter(c -> getAttribute(c).isEmpty())
+                        .collect(ImmutableCollectors.toList());
+
+                LOGGER.error("WARNING: column{} {} not found for the {} {} (table {}): the constraint will not be used in optimizations.",
+                        columnsNotFound.size() == 1 ? "" : "s", String.join(", ", columnsNotFound), constraintType, constraintName, canonicalId);
+                return ImmutableList.of();
+            }
+
+            return attributes;
+        }
+
+        void build() {
+            if (constraintName != null && isDisabled.test(canonicalId, constraintName)) {
+                LOGGER.error("WARNING: {} {} in table {} is disabled and will not be used in optimizations.",
+                        constraintType, constraintName, canonicalId);
+                return;
+            }
+            ImmutableList<Attribute> attributes = getAttributes();
+            if (!attributes.isEmpty()) {
+                FunctionalDependency.Builder builder = getBuilderConstructor(attributes).apply(relation, constraintName);
+                for (Attribute attribute : attributes)
+                    builder.addDeterminant(attribute.getIndex());
                 builder.build();
+            }
         }
     }
 
@@ -425,8 +523,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             String constraintId = null;
             while (rs.next()) {
                 logOperation.advanceCounter();
-                RelationID extractedId = getRelationID(rs, "FKTABLE_CAT", "FKTABLE_SCHEM","FKTABLE_NAME");
-                checkSameRelationID(extractedId, id, "getImportedKeys");
+                RelationID extractedId = extractRelationID(id, rs, new String[]{"FKTABLE_CAT", "FKTABLE_SCHEM","FKTABLE_NAME"}, "getImportedKeys");
                 RelationID pkId = getRelationID(rs, "PKTABLE_CAT", "PKTABLE_SCHEM","PKTABLE_NAME");
 
                 try {

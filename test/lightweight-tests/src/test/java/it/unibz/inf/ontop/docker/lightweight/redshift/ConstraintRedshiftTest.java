@@ -12,8 +12,8 @@ public class ConstraintRedshiftTest extends AbstractConstraintTest {
 
     private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-redshift.properties";
 
-    public ConstraintRedshiftTest(String method) {
-        super(method, PROPERTIES_FILE);
+    public ConstraintRedshiftTest() {
+        super(PROPERTIES_FILE);
     }
 
     @Override

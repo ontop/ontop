@@ -14,9 +14,6 @@ import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -51,6 +48,11 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
+    protected IQTree doNormalizeForOptimization(VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        return getRootNode().normalizeForOptimization(getChildren(), variableGenerator, treeCache);
+    }
+
+    @Override
     protected void validateNode() throws InvalidIntermediateQueryException {
         getRootNode().validateNode(getChildren());
     }
@@ -60,27 +62,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         return getRootNode().getVariableNullability(getChildren());
     }
 
-    @Override
-    public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        return getRootNode().acceptTransformer(this, transformer, getChildren());
-    }
 
-    @Override
-    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
-        return getRootNode().acceptTransformer(this, transformer, getChildren(), context);
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor) {
-        return getRootNode().acceptVisitor(visitor, getChildren());
-    }
-
-    @Override
-    public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
-        return getTreeCache().isNormalizedForOptimization()
-                ? this
-                : getRootNode().normalizeForOptimization(getChildren(), variableGenerator, getTreeCache());
-    }
 
     /**
      * TODO: use the properties for optimization purposes?
@@ -91,14 +73,8 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    protected IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, boolean alreadyNormalized) {
-        InjectiveSubstitution<Variable> selectedSubstitution = alreadyNormalized
-                ? renamingSubstitution
-                : renamingSubstitution.restrictDomainTo(getVariables());
-
-        return selectedSubstitution.isEmpty()
-                ? this
-                : getRootNode().applyFreshRenaming(renamingSubstitution, getChildren(), getTreeCache());
+    protected IQTree applyNonEmptyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return getRootNode().applyFreshRenaming(renamingSubstitution, getChildren(), getTreeCache());
     }
 
     @Override
@@ -109,17 +85,10 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+    protected IQTree doApplyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             VariableGenerator variableGenerator) {
-        try {
-            return normalizeDescendingSubstitution(descendingSubstitution)
-                    .map(s -> getRootNode().applyDescendingSubstitutionWithoutOptimizing(s, getChildren(), variableGenerator))
-                    .orElse(this);
-        }
-        catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
-            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
-        }
+            return getRootNode().applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, getChildren(), variableGenerator);
     }
 
     /**
@@ -136,25 +105,12 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    public boolean isDeclaredAsEmpty() {
-        return false;
+    protected IQTree doPropagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
+        return getRootNode().propagateDownConstraint(constraint, getChildren(), variableGenerator);
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
-        IQTree newTree = getRootNode().propagateDownConstraint(constraint, getChildren(), variableGenerator);
-        return newTree.equals(this) ? this : newTree;
-    }
-
-    @Override
-    public IQTree replaceSubTree(IQTree subTreeToReplace, IQTree newSubTree) {
-        if (equals(subTreeToReplace))
-            return newSubTree;
-
-        ImmutableList<IQTree> newChildren = getChildren().stream()
-                .map(c -> c.replaceSubTree(subTreeToReplace, newSubTree))
-                .collect(ImmutableCollectors.toList());
-
+    protected IQTree createIQTree(ImmutableList<IQTree> newChildren) {
         return iqFactory.createNaryIQTree(getRootNode(), newChildren);
     }
 
@@ -164,11 +120,8 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    public IQTree removeDistincts() {
-        IQTreeCache treeCache = getTreeCache();
-        return treeCache.areDistinctAlreadyRemoved()
-                ? this
-                : getRootNode().removeDistincts(getChildren(), treeCache);
+    protected IQTree doRemoveDistincts(IQTreeCache treeCache) {
+        return getRootNode().removeDistincts(getChildren(), treeCache);
     }
 
     @Override

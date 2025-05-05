@@ -8,8 +8,8 @@ public class ConstraintSnowflakeTest extends AbstractConstraintTest {
 
     private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-snowflake.properties";
 
-    public ConstraintSnowflakeTest(String method) {
-        super(method, PROPERTIES_FILE);
+    public ConstraintSnowflakeTest() {
+        super(PROPERTIES_FILE);
     }
 
 }

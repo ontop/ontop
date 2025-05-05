@@ -21,7 +21,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
     }
 
     protected DefaultRecursiveIQTreeVisitingTransformer(CoreSingletons coreSingletons) {
-        this.iqFactory = coreSingletons.getIQFactory();
+        this(coreSingletons.getIQFactory());
     }
 
     @Override
@@ -47,11 +47,6 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
     @Override
     public IQTree transformValues(ValuesNode node) {
         return transformLeaf(node);
-    }
-
-    @Override
-    public IQTree transformNonStandardLeafNode(LeafIQTree leafNode) {
-        return transformLeaf(leafNode);
     }
 
     @Override
@@ -90,17 +85,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
     }
 
     @Override
-    public IQTree transformNonStandardUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-        return transformUnaryNode(tree, rootNode, child);
-    }
-
-    @Override
     public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        return transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild);
-    }
-
-    @Override
-    public IQTree transformNonStandardBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
         return transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild);
     }
 
@@ -114,17 +99,12 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
         return transformNaryCommutativeNode(tree, rootNode, children);
     }
 
-    @Override
-    public IQTree transformNonStandardNaryNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-        return transformNaryCommutativeNode(tree, rootNode, children);
-    }
-
     protected IQTree transformLeaf(LeafIQTree leaf){
         return leaf;
     }
 
     protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-        IQTree newChild = child.acceptTransformer(this);
+        IQTree newChild = child.acceptVisitor(this);
         return newChild.equals(child) && rootNode.equals(tree.getRootNode())
                 ? tree
                 : iqFactory.createUnaryIQTree(rootNode, newChild);
@@ -132,7 +112,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
 
     protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
         ImmutableList<IQTree> newChildren = children.stream()
-                .map(t -> t.acceptTransformer(this))
+                .map(t -> t.acceptVisitor(this))
                 .collect(ImmutableCollectors.toList());
 
         return newChildren.equals(children) && rootNode.equals(tree.getRootNode())
@@ -141,8 +121,8 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
     }
 
     protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
-        IQTree newLeftChild = leftChild.acceptTransformer(this);
-        IQTree newRightChild = rightChild.acceptTransformer(this);
+        IQTree newLeftChild = leftChild.acceptVisitor(this);
+        IQTree newRightChild = rightChild.acceptVisitor(this);
         return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild) && rootNode.equals(tree.getRootNode())
                 ? tree
                 : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild);

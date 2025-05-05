@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSortedSet;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.LeafIQTree;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -21,7 +22,7 @@ public interface NativeNode extends LeafIQTree {
     ImmutableMap<Variable, DBTermType> getTypeMap();
 
     /**
-     * This set is sorted, useful for instance for using JDBC result sets
+     * This set is sorted, useful, for instance, for using JDBC result sets
      */
     @Override
     ImmutableSortedSet<Variable> getVariables();
@@ -33,4 +34,10 @@ public interface NativeNode extends LeafIQTree {
     ImmutableMap<Variable, QuotedID> getColumnNames();
 
     String getNativeQueryString();
+
+    @Override
+    default <T> T acceptVisitor(IQVisitor<T> visitor) {
+        return visitor.transformNative(this);
+    }
+
 }
