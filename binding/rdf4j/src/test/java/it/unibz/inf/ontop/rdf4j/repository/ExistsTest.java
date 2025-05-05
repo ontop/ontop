@@ -606,4 +606,30 @@ public class ExistsTest extends AbstractRDF4JTest {
                 "} ORDER BY DESC(?city) ?v";
         runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/2", "http://person.example.org/person/1", "http://person.example.org/person/5"));
     }
+
+    @Test
+    @Ignore
+    public void testAggregationByMultipleVariables() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?person ?fname (SUM(IF(EXISTS { ?person :firstName ?fname } , 1, 0)) AS ?hasFirstName) \n" +
+                "WHERE {\n" +
+                "   ?person a :Person; \n" +
+                "       :firstName ?fname ;\n" +
+                "} GROUP BY ?person ?fname  \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("false", "true", "true"));
+    }
+
+    // subqueries in EXISTS are not supported
+    @Test(expected = QueryEvaluationException.class)
+    public void testSubqueryInExists() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?v WHERE {\n" +
+                "   ?v a :Person .\n" +
+                "   FILTER EXISTS { SELECT ?v WHERE { ?v :firstName ?fname } }\n" +
+                "} ORDER BY ?v \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1", "http://person.example.org/person/2", "http://person.example.org/person/3",
+                "http://person.example.org/person/4", "http://person.example.org/person/5", "http://person.example.org/person/6"));
+    }
 }

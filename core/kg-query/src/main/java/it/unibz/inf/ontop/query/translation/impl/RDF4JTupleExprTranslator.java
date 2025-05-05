@@ -533,7 +533,7 @@ public class RDF4JTupleExprTranslator {
 
         return iqFactory.createBinaryNonCommutativeIQTree(
                 iqFactory.createLeftJoinNode(ljCond),
-                applyInDepthRenaming(leftTree, leftNonProjVarsRenaming),
+                leftTree,
                 applyInDepthRenaming(rightTree.applyDescendingSubstitutionWithoutOptimizing(sharedVarsRenaming, variableGenerator),
                         rightNonProjVarsRenaming));
     }
@@ -592,8 +592,12 @@ public class RDF4JTupleExprTranslator {
             throw new OntopUnsupportedKGQueryException("The EXISTS operator is not supported when there is no non-nullable common variable");
         }
 
-        ImmutableSet<Variable> allVars = new RDF4JVarsCollector(termFactory).collectVariables(existsSubquery);
-        if (!Sets.difference(allVars, rightTranslation.iqTree.getKnownVariables()).isEmpty()) {
+        ExistsSubtreeVisitor existsVisitor = new ExistsSubtreeVisitor(termFactory, existsSubquery);
+        if (!existsVisitor.isSubtreeValid()) {
+            throw new OntopUnsupportedKGQueryException("The EXISTS subquery is not valid: " + existsSubquery);
+        }
+
+        if (!Sets.difference(existsVisitor.getVariables(), rightTranslation.iqTree.getKnownVariables()).isEmpty()) {
             throw new OntopUnsupportedKGQueryException("Some of the variables in the EXISTS subquery are unbound");
         }
     }
@@ -1032,13 +1036,15 @@ public class RDF4JTupleExprTranslator {
         return new RDF4JValueExprTranslator(knownVariables, externalBindings, treatBNodeAsVariable, termFactory, rdfFactory, typeFactory, functionSymbolFactory, variableGenerator);
     }
 
-    private static class RDF4JVarsCollector extends AbstractQueryModelVisitor<RuntimeException> {
+    protected static final class ExistsSubtreeVisitor extends AbstractQueryModelVisitor<RuntimeException> {
         private final Set<Variable> variables = new HashSet<>();
         private final TermFactory termFactory;
+        private boolean isValid = true;
 
-        public RDF4JVarsCollector(TermFactory termFactory) {
+        public ExistsSubtreeVisitor(TermFactory termFactory, TupleExpr expr) {
             super();
             this.termFactory = termFactory;
+            expr.visit(this);
         }
 
         @Override
@@ -1049,9 +1055,48 @@ public class RDF4JTupleExprTranslator {
             super.meet(node); // Continue traversal
         }
 
-        public ImmutableSet<Variable> collectVariables(TupleExpr expr) {
-            expr.visit(this);
+        @Override
+        public void meet(Projection node) {
+            isValid = false;
+            super.meet(node);
+        }
+
+        @Override
+        public void meet(Union node) {
+            isValid = false;
+            super.meet(node);
+        }
+
+        @Override
+        public void meet(Slice node) {
+            isValid = false;
+            super.meet(node);
+        }
+
+        @Override
+        public void meet(Distinct node) {
+            isValid = false;
+            super.meet(node);
+        }
+
+        @Override
+        public void meet(Reduced node) {
+            isValid = false;
+            super.meet(node);
+        }
+
+        @Override
+        public void meet(Group node) {
+            isValid = false;
+            super.meet(node);
+        }
+
+        public ImmutableSet<Variable> getVariables() {
             return ImmutableSet.copyOf(variables);
+        }
+
+        public boolean isSubtreeValid() {
+            return isValid;
         }
     }
 
