@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
@@ -18,8 +17,10 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
 
 @Singleton
 public class DistinctNormalizerImpl implements DistinctNormalizer {
@@ -40,57 +41,49 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
     @Override
     public IQTree normalizeForOptimization(DistinctNode distinctNode, IQTree initialChild,
                                            VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        IQTree child = initialChild.normalizeForOptimization(variableGenerator);
 
+        IQTree child = initialChild.normalizeForOptimization(variableGenerator);
         if (child.isDistinct())
             return child;
 
         if (child.getVariables().isEmpty()) {
             // No child variable -> replace by a LIMIT 1
-            IQTree limitTree = iqFactory.createUnaryIQTree(iqFactory.createSliceNode(0, 1), child);
-
-            return limitTree.normalizeForOptimization(variableGenerator);
+            return iqFactory.createUnaryIQTree(iqFactory.createSliceNode(0, 1), child)
+                    .normalizeForOptimization(variableGenerator);
         }
 
-        QueryNode childRoot = child.getRootNode();
-
-        if (childRoot instanceof ConstructionNode) {
-            ConstructionNode constructionNode = (ConstructionNode) childRoot;
-            if (isConstructionNodeWithoutChildVariablesAndDeterministic(constructionNode))
+        var construction = UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
+        if (construction.isPresent()) {
+            if (isConstructionNodeWithoutChildVariablesAndDeterministic(construction.get()))
                 // Replaces the DISTINCT by a LIMIT 1
                 return iqFactory.createUnaryIQTree(iqFactory.createSliceNode(0, 1), child)
                         .normalizeForOptimization(variableGenerator);
 
-            return liftBindingConstructionChild(constructionNode, treeCache,
-                    (UnaryIQTree) child, variableGenerator);
+            return liftBindingConstructionChild(construction.get(), construction.getChild(), treeCache, variableGenerator);
         }
-        else if (childRoot instanceof ValuesNode) {
-            ValuesNode valuesNode = (ValuesNode) childRoot;
-            return iqFactory.createValuesNode(valuesNode.getOrderedVariables(),
-                    valuesNode.getValues().stream().distinct().collect(ImmutableCollectors.toList()));
-        }
-        else if (childRoot instanceof UnionNode) {
-            Optional<IQTree> newTree = simplifyUnion(child, distinctNode, null, null, variableGenerator);
-            if (newTree.isPresent())
-                return newTree.get();
-        }
-        else if ((childRoot instanceof OrderByNode) && (child.getChildren().get(0).getRootNode() instanceof UnionNode)) {
-            Optional<IQTree> newTree = simplifyUnion(child.getChildren().get(0), distinctNode, (OrderByNode) childRoot, null, variableGenerator);
-            if (newTree.isPresent())
-                return newTree.get();
-        }
-        else if ((childRoot instanceof OrderByNode)
-                && (child.getChildren().get(0).getRootNode() instanceof FilterNode)
-                && (child.getChildren().get(0).getChildren().get(0).getRootNode() instanceof UnionNode)) {
-            Optional<IQTree> newTree = simplifyUnion(child.getChildren().get(0).getChildren().get(0), distinctNode, (OrderByNode) childRoot,
-                    (FilterNode) child.getChildren().get(0).getRootNode(), variableGenerator);
-            if (newTree.isPresent())
-                return newTree.get();
-        }
-        else if ((childRoot instanceof FilterNode) && (child.getChildren().get(0).getRootNode() instanceof UnionNode)) {
-            Optional<IQTree> newTree = simplifyUnion(child.getChildren().get(0), distinctNode, null, (FilterNode) childRoot, variableGenerator);
-            if (newTree.isPresent())
-                return newTree.get();
+
+        if (child instanceof ValuesNode)
+            return simplifyValuesNode((ValuesNode) child);
+
+        // DISTINCT [ORDER BY] [FILTER] UNION
+        var orderBy = UnaryIQTreeDecomposition.of(child, OrderByNode.class);
+        var filter = UnaryIQTreeDecomposition.of(orderBy.getChild(), FilterNode.class);
+        var nestedChild = filter.getChild();
+
+        if (nestedChild.getRootNode() instanceof UnionNode) {
+            ImmutableList<IQTree> unionChildren = nestedChild.getChildren();
+            ImmutableList<IQTree> newUnionChildren = unionChildren.stream()
+                    .map(c -> simplifyUnionChild(c, variableGenerator))
+                    .collect(ImmutableCollectors.toList());
+
+            if (!unionChildren.equals(newUnionChildren))
+                return iqTreeTools.createOptionalAncestorsUnaryIQTree(
+                                ImmutableList.of(
+                                        Optional.of(distinctNode),
+                                        orderBy.getOptionalNode(),
+                                        filter.getOptionalNode()),
+                                iqFactory.createNaryIQTree((UnionNode) nestedChild.getRootNode(), newUnionChildren))
+                        .normalizeForOptimization(variableGenerator);
         }
 
         return child.equals(initialChild)
@@ -105,10 +98,10 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
     }
 
     private IQTree liftBindingConstructionChild(ConstructionNode constructionNode,
-                                                IQTreeCache treeCache, UnaryIQTree child,
+                                                IQTree grandChild,IQTreeCache treeCache,
                                                 VariableGenerator variableGenerator) {
         // Non-final
-        InjectiveBindingLiftState state = new InjectiveBindingLiftState(constructionNode, child.getChild(), variableGenerator,
+        InjectiveBindingLiftState state = new InjectiveBindingLiftState(constructionNode, grandChild, variableGenerator,
                 coreSingletons);
 
         for (int i = 0; i < MAX_ITERATIONS; i++) {
@@ -122,50 +115,24 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                 "did not converge after " + MAX_ITERATIONS);
     }
 
-    /**
-     * DISTINCT [ORDER BY] [FILTER] UNION
-     */
-    private Optional<IQTree> simplifyUnion(IQTree child, DistinctNode distinctNode, @Nullable OrderByNode orderByNode,
-                                           @Nullable FilterNode filterNode, VariableGenerator variableGenerator) {
-        ImmutableList<IQTree> unionChildren = child.getChildren();
-
-        ImmutableList<IQTree> newUnionChildren = unionChildren.stream()
-                .map(c -> simplifyUnionChild(c, variableGenerator))
-                .collect(ImmutableCollectors.toList());
-
-        if (unionChildren.equals(newUnionChildren))
-            return Optional.empty();
-
-        IQTree newUnionTree = iqFactory.createNaryIQTree((UnionNode) child.getRootNode(), newUnionChildren);
-
-        IQTree newFilterTree = iqTreeTools.createOptionalUnaryIQTree(Optional.ofNullable(filterNode), newUnionTree);
-
-        IQTree newOrderByTree = iqTreeTools.createOptionalUnaryIQTree(Optional.ofNullable(orderByNode), newFilterTree);
-
-        UnaryIQTree newTree = iqFactory.createUnaryIQTree(distinctNode, newOrderByTree);
-
-        return Optional.of(newTree.normalizeForOptimization(variableGenerator));
+    private IQTree simplifyValuesNode(ValuesNode valuesNode) {
+        return iqFactory.createValuesNode(valuesNode.getOrderedVariables(),
+                valuesNode.getValues().stream()
+                        .distinct()
+                        .collect(ImmutableCollectors.toList()));
     }
 
     private IQTree simplifyUnionChild(IQTree unionChild, VariableGenerator variableGenerator) {
         if (unionChild.isDistinct())
             return unionChild;
 
-        if (unionChild instanceof ValuesNode) {
-            ValuesNode valuesNode = (ValuesNode) unionChild;
-            return iqFactory.createValuesNode(valuesNode.getOrderedVariables(),
-                    valuesNode.getValues().stream()
-                            .distinct()
-                            .collect(ImmutableCollectors.toList()));
-        }
+        if (unionChild instanceof ValuesNode)
+            return simplifyValuesNode((ValuesNode) unionChild);
 
-        QueryNode unionChildRoot = unionChild.getRootNode();
-
-        if (unionChildRoot instanceof ConstructionNode) {
-            ConstructionNode constructionNode = (ConstructionNode) unionChildRoot;
-
+        var construction = UnaryIQTreeDecomposition.of(unionChild, ConstructionNode.class);
+        if (construction.isPresent()) {
             // No child variable and no non-deterministic function used -> inserts a LIMIT 1
-            if (isConstructionNodeWithoutChildVariablesAndDeterministic(constructionNode))
+            if (isConstructionNodeWithoutChildVariablesAndDeterministic(construction.get()))
                 return iqFactory.createUnaryIQTree(iqFactory.createSliceNode(0, 1),
                         unionChild)
                         .normalizeForOptimization(variableGenerator);
@@ -195,9 +162,8 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
 
         IQTree grandChildTree = state.getGrandChildTree();
         // No need to have a DISTINCT as a grand child
-        IQTree newGrandChildTree = (grandChildTree.getRootNode() instanceof DistinctNode)
-                ? ((UnaryIQTree)grandChildTree).getChild()
-                : grandChildTree;
+        IQTree newGrandChildTree = UnaryIQTreeDecomposition.of(grandChildTree, DistinctNode.class)
+                .getChild();
 
         IQTreeCache childTreeCache = iqFactory.createIQTreeCache(newGrandChildTree == grandChildTree);
 
@@ -215,5 +181,4 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                 // Recursive (for merging top construction nodes)
                 .normalizeForOptimization(variableGenerator);
     }
-
 }
