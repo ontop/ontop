@@ -26,7 +26,7 @@ public abstract class RDFTypeDependentSimplifyingTransformer extends DefaultRecu
     private final OptimizerFactory optimizerFactory;
 
     protected RDFTypeDependentSimplifyingTransformer(OptimizationSingletons optimizationSingletons) {
-        super(optimizationSingletons.getCoreSingletons());
+        super(optimizationSingletons.getCoreSingletons().getIQFactory());
         this.optimizerFactory = optimizationSingletons.getOptimizerFactory();
     }
 

@@ -32,20 +32,18 @@ import java.util.stream.Stream;
 public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimizer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final CoreSingletons coreSingletons;
     private final SelfJoinFDSimplifier simplifier;
 
     @Inject
     protected ArgumentTransferInnerJoinFDIQOptimizer(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
         simplifier = new SelfJoinFDSimplifier(coreSingletons, iqTreeTools);
         this.iqFactory = coreSingletons.getIQFactory();
-        this.coreSingletons = coreSingletons;
     }
 
     @Override
     public IQ optimize(IQ query) {
 
-        ArgumentTransferJoinTransformer transformer = new ArgumentTransferJoinTransformer(simplifier, coreSingletons, query.getVariableGenerator());
+        ArgumentTransferJoinTransformer transformer = new ArgumentTransferJoinTransformer(simplifier, iqFactory, query.getVariableGenerator());
         IQTree initialTree = query.getTree();
         IQTree newTree = transformer.transform(initialTree);
         return (newTree == initialTree)
@@ -58,9 +56,9 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
         private final SelfJoinFDSimplifier simplifier;
         private final VariableGenerator variableGenerator;
 
-        protected ArgumentTransferJoinTransformer(SelfJoinFDSimplifier simplifier, CoreSingletons coreSingletons,
+        protected ArgumentTransferJoinTransformer(SelfJoinFDSimplifier simplifier, IntermediateQueryFactory iqFactory,
                                                   VariableGenerator variableGenerator) {
-            super(coreSingletons);
+            super(iqFactory);
             this.simplifier = simplifier;
             this.variableGenerator = variableGenerator;
         }

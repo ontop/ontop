@@ -22,14 +22,14 @@ public class LookForDistinctOrLimit1TransformerImpl extends DefaultRecursiveIQTr
 
     public LookForDistinctOrLimit1TransformerImpl(CardinalityFreeTransformerConstructor1 transformerConstructor,
                                                   CoreSingletons coreSingletons) {
-        super(coreSingletons);
+        super(coreSingletons.getIQFactory());
         this.subTransformer = transformerConstructor.create(this);
         this.transformerConstructor3 = null;
     }
 
     public LookForDistinctOrLimit1TransformerImpl(CardinalityFreeTransformerConstructor2 transformerConstructor3,
                                                   CoreSingletons coreSingletons) {
-        super(coreSingletons);
+        super(coreSingletons.getIQFactory());
         this.transformerConstructor3 = transformerConstructor3;
         this.subTransformer = null;
     }

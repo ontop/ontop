@@ -63,7 +63,7 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
         protected SelfJoinUCTransformer(CoreSingletons coreSingletons,
                                         SelfJoinUCSimplifier simplifier,
                                         VariableGenerator variableGenerator) {
-            super(coreSingletons);
+            super(coreSingletons.getIQFactory());
             this.simplifier = simplifier;
             this.variableGenerator = variableGenerator;
         }

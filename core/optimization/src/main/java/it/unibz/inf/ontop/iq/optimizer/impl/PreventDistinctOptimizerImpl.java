@@ -48,7 +48,7 @@ public class PreventDistinctOptimizerImpl implements PreventDistinctOptimizer {
         private final VariableGenerator variableGenerator;
 
         public PreventDistinctTransformer(VariableGenerator variableGenerator) {
-            super(optimizationSingletons.getCoreSingletons());
+            super(PreventDistinctOptimizerImpl.this.iqFactory);
             this.variableGenerator = variableGenerator;
         }
 

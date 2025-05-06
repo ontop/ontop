@@ -27,7 +27,7 @@ public class SubQueryFromComplexJoinExtraNormalizer extends DefaultRecursiveIQTr
 
     @Inject
     protected SubQueryFromComplexJoinExtraNormalizer(CoreSingletons coreSingletons) {
-        super(coreSingletons);
+        super(coreSingletons.getIQFactory());
     }
 
     @Override

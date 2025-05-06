@@ -57,7 +57,7 @@ public class LensUnfolderImpl implements LensUnfolder {
         protected final VariableGenerator variableGenerator;
 
         protected MaxLevelLensUnfoldingTransformer(int maxLevel, VariableGenerator variableGenerator) {
-            super(coreSingletons);
+            super(LensUnfolderImpl.this.iqFactory);
             this.maxLevel = maxLevel;
             this.variableGenerator = variableGenerator;
         }

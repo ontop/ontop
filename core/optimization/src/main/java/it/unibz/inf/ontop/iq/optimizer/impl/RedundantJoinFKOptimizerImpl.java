@@ -49,7 +49,7 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
         protected final TermFactory termFactory;
 
         protected RedundantJoinFKTransformer(CoreSingletons coreSingletons) {
-            super(coreSingletons);
+            super(coreSingletons.getIQFactory());
             this.termFactory = coreSingletons.getTermFactory();
         }
 

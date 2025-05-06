@@ -87,7 +87,7 @@ public class QueryTemplateExtractor {
 
         protected QueryTemplateTransformer(CoreSingletons coreSingletons, ImmutableSet<Variable> knownVariables,
                                            OntopModelSettings settings) {
-            super(coreSingletons);
+            super(coreSingletons.getIQFactory());
             atomFactory = coreSingletons.getAtomFactory();
             this.settings = settings;
             this.variableGenerator = coreSingletons.getCoreUtilsFactory()

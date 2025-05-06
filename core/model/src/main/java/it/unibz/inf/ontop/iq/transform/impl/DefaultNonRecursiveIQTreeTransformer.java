@@ -7,6 +7,11 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 
 /**
+ * Delegates the call to transformLeaf, transformUnaryNode,
+ * transformNaryCommutativeNode or transformBinaryNonCommutativeNode
+ * depending on the type of the node.
+ * These four methods simply return the tree unchanged.
+ *
  * To be extended by overloading the methods of interest.
  */
 public abstract class DefaultNonRecursiveIQTreeTransformer implements IQTreeVisitingTransformer {

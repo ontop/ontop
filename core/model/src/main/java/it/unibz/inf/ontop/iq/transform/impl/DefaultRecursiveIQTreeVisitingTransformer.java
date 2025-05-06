@@ -10,6 +10,16 @@ import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 /**
+ * Delegates the call to transformLeaf, transformUnaryNode,
+ * transformNaryCommutativeNode or transformBinaryNonCommutativeNode
+ * depending on the type of the node.
+ *
+ * Method transformLeaf simply returns the tree unchanged.
+ * Method transformUnaryNode, transformNaryCommutativeNode
+ * or transformBinaryNonCommutativeNode apply the transformer to
+ * their children and if the result is different, creates a new subtree;
+ * otherwise, the input tree is reused.
+ *
  * To be extended by overloading the methods of interest.
  */
 public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTreeVisitingTransformer {
@@ -18,10 +28,6 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
 
     protected DefaultRecursiveIQTreeVisitingTransformer(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
-    }
-
-    protected DefaultRecursiveIQTreeVisitingTransformer(CoreSingletons coreSingletons) {
-        this(coreSingletons.getIQFactory());
     }
 
     @Override
@@ -99,13 +105,13 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
         return transformNaryCommutativeNode(tree, rootNode, children);
     }
 
-    protected ImmutableList<IQTree> transformChildren(ImmutableList<IQTree> children) {
+    protected final ImmutableList<IQTree> transformChildren(ImmutableList<IQTree> children) {
         return children.stream()
                 .map(this::transformChild)
                 .collect(ImmutableCollectors.toList());
     }
 
-    protected IQTree transformChild(IQTree child) {
+    protected final IQTree transformChild(IQTree child) {
         return child.acceptVisitor(this);
     }
 

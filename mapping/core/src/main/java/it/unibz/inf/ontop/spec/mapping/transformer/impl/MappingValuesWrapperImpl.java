@@ -55,7 +55,7 @@ public class MappingValuesWrapperImpl implements MappingValuesWrapper {
         private final AtomFactory atomFactory;
 
         protected Transformer(DBParameters dbParameters) {
-            super(dbParameters.getCoreSingletons());
+            super(dbParameters.getCoreSingletons().getIQFactory());
             this.dbParameters = dbParameters;
             this.rawQuotedIqFactory = new RawQuotedIDFactory(dbParameters.getQuotedIDFactory());
             this.atomFactory = dbParameters.getCoreSingletons().getAtomFactory();

@@ -95,7 +95,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
                               CardinalitySensitiveJoinTransferLJOptimizer joinTransferOptimizer,
                               LJWithNestingOnRightToInnerJoinOptimizer ljReductionOptimizer,
                               ComplexStrictEqualityLeftJoinExpliciter ljConditionExpliciter) {
-            super(coreSingletons);
+            super(coreSingletons.getIQFactory());
             this.variableGenerator = variableGenerator;
             this.rightProvenanceNormalizer = rightProvenanceNormalizer;
             this.termFactory = coreSingletons.getTermFactory();
