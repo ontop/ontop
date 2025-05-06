@@ -381,7 +381,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
         }
 
         public Substitution<VariableOrGroundTerm> getSubstitution(SubstitutionFactory substitutionFactory) {
-            return replacement.getSubstitution(substitutionFactory, extensionalDataNode.getArgumentMap());
+            return replacement.getSubstitution(substitutionFactory, extensionalDataNode.getArgumentMap()::get);
         }
 
         public ExtensionalDataNode getExtensionalDataNode(IntermediateQueryFactory iqFactory) {

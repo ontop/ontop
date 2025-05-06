@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.substitution;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class ArgumentSubstitution<T extends ImmutableTerm> {
 
@@ -34,33 +36,28 @@ public class ArgumentSubstitution<T extends ImmutableTerm> {
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> optionalProvider.apply(map.get(e.getKey())).orElseGet(e::getValue)));
     }
 
-    public Substitution<T> getSubstitution(SubstitutionFactory substitutionFactory, ImmutableList<? extends T> terms) {
+    public Substitution<T> getSubstitution(SubstitutionFactory substitutionFactory, Function<Integer, ? extends T> terms) {
         return map.entrySet().stream()
                 .collect(substitutionFactory.toSubstitution(
                         Map.Entry::getValue,
-                        e -> terms.get(e.getKey())));
-    }
-
-    public Substitution<T> getSubstitution(SubstitutionFactory substitutionFactory, ImmutableMap<Integer, ? extends T> terms) {
-        return map.entrySet().stream()
-                .collect(substitutionFactory.toSubstitution(
-                        Map.Entry::getValue,
-                        e -> terms.get(e.getKey())));
+                        e -> terms.apply(e.getKey())));
     }
 
     public boolean isEmpty() {
         return map.isEmpty();
     }
 
-    public ImmutableExpression getConjunction(TermFactory termFactory, ImmutableList<? extends T> terms) {
+    public ImmutableExpression getConjunction(TermFactory termFactory, Function<Integer, ? extends T> terms) {
         return termFactory.getConjunction(map.entrySet().stream()
-                .map(e -> termFactory.getStrictEquality(terms.get(e.getKey()), e.getValue()))
+                .map(e -> termFactory.getStrictEquality(terms.apply(e.getKey()), e.getValue()))
                 .collect(ImmutableCollectors.toList()));
     }
 
-    public ImmutableExpression getConjunction(TermFactory termFactory, ImmutableMap<Integer, ? extends T> terms) {
-        return termFactory.getConjunction(map.entrySet().stream()
-                .map(e -> termFactory.getStrictEquality(terms.get(e.getKey()), e.getValue()))
-                .collect(ImmutableCollectors.toList()));
+    public static <T> Stream<Map.Entry<Integer, T>> stream(ImmutableList<T> list) {
+        return IntStream.range(0, list.size()).mapToObj(i -> Maps.immutableEntry(i, list.get(i)));
+    }
+
+    public static <T> Stream<Map.Entry<Integer, T>> stream(ImmutableMap<Integer, T> map) {
+        return map.entrySet().stream();
     }
 }

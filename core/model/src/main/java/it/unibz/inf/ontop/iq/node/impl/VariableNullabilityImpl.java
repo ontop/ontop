@@ -275,7 +275,7 @@ public class VariableNullabilityImpl implements VariableNullability {
         }
 
         Substitution<ImmutableTerm> getSubstitution() {
-            return map.getSubstitution(substitutionFactory, term.getTerms());
+            return map.getSubstitution(substitutionFactory, term.getTerms()::get);
         }
 
         boolean isEmpty() {
