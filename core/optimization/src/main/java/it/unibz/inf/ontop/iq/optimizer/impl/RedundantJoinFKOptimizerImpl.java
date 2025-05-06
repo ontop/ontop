@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.optimizer.RedundantJoinFKOptimizer;
@@ -54,7 +55,7 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
         }
 
         @Override
-        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> initialChildren) {
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> initialChildren) {
             ImmutableList<IQTree> liftedChildren = initialChildren.stream()
                     .map(t -> t.acceptTransformer(this))
                     .collect(ImmutableCollectors.toList());

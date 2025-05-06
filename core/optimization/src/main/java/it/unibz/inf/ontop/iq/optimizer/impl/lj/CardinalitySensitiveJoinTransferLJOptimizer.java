@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -105,7 +106,7 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
          * Keeps passing the non-nullability constraints down below the construction node
          */
         @Override
-        public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
             var childVariableNullabilitySupplier = computeChildVariableNullabilityFromConstructionParent(tree, rootNode, child);
 
             return transformUnaryNode(tree, rootNode, child,

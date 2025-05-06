@@ -7,9 +7,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.LeafIQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -69,7 +67,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
 
 
     @Override
-    public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+    public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         // Recursive (children are normalized separately)
         ImmutableList<IQTree> normalizedChildren = children.stream()
                 .map(c -> c.acceptTransformer(this))
@@ -283,12 +281,12 @@ public class DefaultTermTypeTermVisitingTreeTransformer
 
 
     @Override
-    public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
+    public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
         return transformNodeBlockingNonInjectiveBindings(rootNode, child);
     }
 
     @Override
-    public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
+    public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
         return transformNodeBlockingNonInjectiveBindings(rootNode, child);
     }
 
@@ -310,17 +308,20 @@ public class DefaultTermTypeTermVisitingTreeTransformer
         return leaf.normalizeForOptimization(variableGenerator);
     }
 
-    protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+    @Override
+    protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
         return super.transformUnaryNode(tree, rootNode, child)
                 .normalizeForOptimization(variableGenerator);
     }
 
-    protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+    @Override
+    protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
         return super.transformNaryCommutativeNode(tree, rootNode, children)
                 .normalizeForOptimization(variableGenerator);
     }
 
-    protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
+    @Override
+    protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
         return super.transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild)
                 .normalizeForOptimization(variableGenerator);
     }

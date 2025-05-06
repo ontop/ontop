@@ -3,7 +3,10 @@ package it.unibz.inf.ontop.iq.transformer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
@@ -31,7 +34,7 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
     }
 
     @Override
-    public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+    public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
 
         IQTree transformedChild = child.acceptTransformer(this);
 
@@ -50,7 +53,7 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
      * Tries to push the left join condition on the right
      */
     @Override
-    public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+    public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
 
         IQTree transformedLeftChild = leftChild.acceptTransformer(this);
         IQTree transformedRightChild = rightChild.acceptTransformer(this);
@@ -73,7 +76,7 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
     }
 
     @Override
-    public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+    public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
 
         ImmutableList<IQTree> transformedChildren = children.stream()
                 .map(t -> t.acceptTransformer(this))

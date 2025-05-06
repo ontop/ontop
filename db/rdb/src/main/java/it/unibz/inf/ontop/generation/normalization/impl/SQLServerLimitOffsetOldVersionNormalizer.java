@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -58,7 +59,7 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
 
         // Transformation necessary for versions 8,9,10 of SQL Server when a Slice Node is present
         @Override
-        public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
+        public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
 
             // If no SliceNode present, 2) not an older version of SQL Server pre-2012 3) no db info; use default transformation
             if (!databaseInfoSupplier.getDatabaseVersion().isPresent() ||

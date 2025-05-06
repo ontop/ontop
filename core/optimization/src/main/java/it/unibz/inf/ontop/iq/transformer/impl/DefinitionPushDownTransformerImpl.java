@@ -8,8 +8,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.LeafIQTree;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
@@ -49,7 +48,7 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
     }
 
     @Override
-    public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+    public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
         Substitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
 
         ImmutableSet<Variable> newProjectedVariables = iqTreeTools.getChildrenVariables(tree,  request.getNewVariable());
@@ -91,7 +90,7 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
      * TODO: understand when the definition does not have to be blocked
      */
     @Override
-    public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
+    public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
         return blockDefinition(tree);
     }
 
@@ -99,12 +98,12 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
      * TODO: stop blocking systematically
      */
     @Override
-    public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
+    public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
         return blockDefinition(tree);
     }
 
     @Override
-    public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+    public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         ImmutableSet<Variable> requestVariables = request.getDefinitionAndConditionVariables();
         if (leftChild.getVariables().containsAll(requestVariables))
             return iqFactory.createBinaryNonCommutativeIQTree(
@@ -121,7 +120,7 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
     }
 
     @Override
-    public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+    public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
         ImmutableSet<Variable> requestVariables = request.getDefinitionAndConditionVariables();
 
         return IntStream.range(0, children.size())
@@ -141,7 +140,7 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
     }
 
     @Override
-    public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+    public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(c -> c.acceptTransformer(this))
                 .collect(ImmutableCollectors.toList());

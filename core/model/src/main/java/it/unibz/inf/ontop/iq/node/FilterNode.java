@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.node;
 
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 
@@ -22,7 +23,7 @@ public interface FilterNode extends CommutativeJoinOrFilterNode, UnaryOperatorNo
     FilterNode changeFilterCondition(ImmutableExpression newFilterCondition);
 
     @Override
-    default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
+    default <T> T acceptVisitor(UnaryIQTree tree, IQVisitor<T> visitor, IQTree child) {
         return visitor.transformFilter(tree, this, child);
     }
 }

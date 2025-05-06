@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
@@ -398,7 +399,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
         IQTree rewritingTree = canonicalTree.acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
             @Override
-            public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+            public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
                 // fix some order on variables
                 ImmutableSet<Variable> avs = rootNode.getVariables();
                 return iqFactory.createUnaryIQTree(rootNode, child.acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {

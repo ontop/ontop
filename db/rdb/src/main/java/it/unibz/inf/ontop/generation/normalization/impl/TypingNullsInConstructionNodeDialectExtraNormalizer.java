@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -26,7 +27,7 @@ public class TypingNullsInConstructionNodeDialectExtraNormalizer extends Abstrac
     }
 
     @Override
-    public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+    public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
         IQTree newChild = transformChild(child);
 
         ImmutableSet<Variable> nullVariables = extractNullVariables(rootNode);

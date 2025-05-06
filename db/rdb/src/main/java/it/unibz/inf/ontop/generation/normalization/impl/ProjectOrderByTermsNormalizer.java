@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -52,22 +53,22 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
         }
 
         @Override
-        public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
             return transformConstructionSliceDistinctOrOrderByTree(tree);
         }
 
         @Override
-        public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
+        public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
             return transformConstructionSliceDistinctOrOrderByTree(tree);
         }
 
         @Override
-        public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
+        public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
             return transformConstructionSliceDistinctOrOrderByTree(tree);
         }
 
         @Override
-        public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+        public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
             return transformConstructionSliceDistinctOrOrderByTree(tree);
         }
 

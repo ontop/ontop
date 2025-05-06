@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.FlattenNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -48,7 +49,7 @@ public class UnquoteFlattenResultsNormalizer extends DefaultRecursiveIQTreeVisit
      * This removes encasing quotation marks from flatten results.
      */
     @Override
-    public IQTree transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child) {
+    public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
         DBMathBinaryOperator minus = termFactory.getDBFunctionSymbolFactory().getDBMathBinaryOperator("-", termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType());
         ImmutableTerm resultSubstitution = termFactory.getDBCase(

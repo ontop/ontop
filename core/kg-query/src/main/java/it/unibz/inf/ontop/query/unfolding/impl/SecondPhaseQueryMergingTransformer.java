@@ -3,8 +3,7 @@ package it.unibz.inf.ontop.query.unfolding.impl;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -169,7 +168,7 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
     }
 
     @Override
-    public final IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+    public final IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(this::transformChildWithNewTransformer)
                 .collect(ImmutableCollectors.toList());
@@ -180,7 +179,7 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
     }
 
     @Override
-    public final IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+    public final IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         IQTree newLeftChild = leftChild.acceptTransformer(this);
         IQTree newRightChild = transformChildWithNewTransformer(rightChild);
         return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild) && rootNode.equals(tree.getRootNode())
@@ -189,11 +188,11 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
     }
 
     @Override
-    public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+    public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
         return transformUnaryTreeUsingLocalDefinitions(tree, rootNode, child);
     }
 
-    public IQTree transformUnaryTreeUsingLocalDefinitions(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+    public IQTree transformUnaryTreeUsingLocalDefinitions(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
         IQTree newChild = transformChildWithNewTransformer(child);
         return newChild.equals(child)
                 ? tree
@@ -207,7 +206,7 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
     }
 
     @Override
-    public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
+    public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
         return transformUnaryTreeUsingLocalDefinitions(tree, rootNode, child);
     }
 

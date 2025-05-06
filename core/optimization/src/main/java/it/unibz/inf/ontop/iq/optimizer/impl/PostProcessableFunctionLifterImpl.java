@@ -9,9 +9,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.PostProcessableFunctionLifter;
@@ -82,26 +80,26 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         }
 
         @Override
-        protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+        protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
             return super.transformUnaryNode(tree, rootNode, child)
                     .normalizeForOptimization(variableGenerator);
         }
 
         @Override
-        protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+        protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
             return super.transformNaryCommutativeNode(tree, rootNode, children)
                     .normalizeForOptimization(variableGenerator);
         }
 
         @Override
-        protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode,
+        protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode,
                                                            IQTree leftChild, IQTree rightChild) {
             return super.transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild)
                     .normalizeForOptimization(variableGenerator);
         }
 
         @Override
-        public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+        public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
             IQTree normalizedTree = transformNaryCommutativeNode(tree, rootNode, children);
 
             // Fix-point before pursing (recursive, potentially dangerous!)

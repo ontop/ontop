@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -40,7 +41,7 @@ public class WrapProjectedOrOrderByExpressionNormalizer extends DefaultRecursive
     }
 
     @Override
-    public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+    public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
 
         Substitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
@@ -59,7 +60,7 @@ public class WrapProjectedOrOrderByExpressionNormalizer extends DefaultRecursive
     }
 
     @Override
-    public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+    public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
 
         ImmutableList<OrderByNode.OrderComparator> initialComparators = rootNode.getComparators();

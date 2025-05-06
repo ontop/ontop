@@ -9,8 +9,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
@@ -146,7 +145,7 @@ public class QueryTemplateExtractor {
         }
 
         @Override
-        public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+        public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
             IQTree newChild = child.acceptTransformer(this);
             Optional<ImmutableExpression> newCondition = transformFilterCondition(rootNode.getFilterCondition());
 
@@ -159,7 +158,7 @@ public class QueryTemplateExtractor {
 
 
         @Override
-        public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             IQTree newLeft = leftChild.acceptTransformer(this);
             IQTree newRight = rightChild.acceptTransformer(this);
 
@@ -174,7 +173,7 @@ public class QueryTemplateExtractor {
         }
 
         @Override
-        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             ImmutableList<IQTree> newChildren = children.stream()
                     .map(c -> c.acceptTransformer(this))
                     .collect(ImmutableCollectors.toList());

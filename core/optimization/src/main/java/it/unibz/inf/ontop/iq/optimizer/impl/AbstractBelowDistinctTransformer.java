@@ -2,7 +2,10 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
@@ -27,7 +30,7 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
     }
 
     @Override
-    public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+    public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
         ImmutableList<IQTree> transformedChildren = children.stream()
                 .map(this::transform)
                 .collect(ImmutableCollectors.toList());
@@ -51,7 +54,7 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
             Optional<ImmutableExpression> optionalFilterCondition, ImmutableList<IQTree> children);
 
     @Override
-    public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+    public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
 
         return (newChild.equals(child))
@@ -61,7 +64,7 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
 
 
     @Override
-    public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
+    public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
         IQTree newChild = transform(child);
         return (newChild.equals(child))
                 ? tree
@@ -69,7 +72,7 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
     }
 
     @Override
-    public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+    public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
         return (newChild.equals(child))
                 ? tree
@@ -77,7 +80,7 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
     }
 
     @Override
-    public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+    public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
 
         return (newChild.equals(child))
@@ -86,7 +89,7 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
     }
 
     @Override
-    public IQTree transformFlatten(IQTree tree, FlattenNode node, IQTree child) {
+    public IQTree transformFlatten(UnaryIQTree tree, FlattenNode node, IQTree child) {
         IQTree newChild = transform(child);
 
         return (newChild.equals(child))
@@ -95,7 +98,7 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
     }
 
     @Override
-    public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+    public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(this::transform)
                 .collect(ImmutableCollectors.toList());
@@ -106,7 +109,7 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
     }
 
     @Override
-    public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+    public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         IQTree newLeftChild = transform(leftChild);
         IQTree newRightChild = transform(rightChild);
 
@@ -118,7 +121,8 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
     /**
      * By default, switch back to the "LookForDistinctTransformer"
      */
-    protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+    @Override
+    protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
         return lookForDistinctOrLimit1Transformer.transform(tree);
     }
 

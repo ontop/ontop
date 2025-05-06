@@ -2,7 +2,10 @@ package it.unibz.inf.ontop.iq.type.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
@@ -27,7 +30,7 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
     }
 
     @Override
-    public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+    public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
 
         Substitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
@@ -41,7 +44,7 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
     }
 
     @Override
-    public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
+    public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
 
         Substitution<ImmutableFunctionalTerm> initialSubstitution = rootNode.getSubstitution();
@@ -55,7 +58,7 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
     }
 
     @Override
-    public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+    public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
         ImmutableExpression initialExpression = rootNode.getFilterCondition();
         ImmutableExpression newExpression = transformExpression(initialExpression, tree);
@@ -70,7 +73,7 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
     }
 
     @Override
-    public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+    public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
 
         ImmutableList<OrderByNode.OrderComparator> initialComparators = rootNode.getComparators();
@@ -89,7 +92,7 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
     }
 
     @Override
-    public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+    public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         IQTree newLeftChild = transform(leftChild);
         IQTree newRightChild = transform(rightChild);
         Optional<ImmutableExpression> initialExpression = rootNode.getOptionalFilterCondition();
@@ -106,7 +109,7 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
     }
 
     @Override
-    public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+    public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(this::transform)
                 .collect(ImmutableCollectors.toList());

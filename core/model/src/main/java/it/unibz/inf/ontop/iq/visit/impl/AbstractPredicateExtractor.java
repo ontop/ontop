@@ -1,8 +1,7 @@
 package it.unibz.inf.ontop.iq.visit.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.LeafIQTree;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 
@@ -34,54 +33,54 @@ public abstract class AbstractPredicateExtractor<T extends LeafIQTree> implement
     }
 
     @Override
-    public Stream<T> transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+    public Stream<T> transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<T> transformAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child) {
+    public Stream<T> transformAggregation(UnaryIQTree tree, AggregationNode aggregationNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<T> transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+    public Stream<T> transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<T> transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
+    public Stream<T> transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<T> transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
+    public Stream<T> transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<T> transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+    public Stream<T> transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<T> transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child) {
+    public Stream<T> transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 
     @Override
-    public Stream<T> transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+    public Stream<T> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         return Stream.of(leftChild, rightChild)
                 .flatMap(c -> c.acceptVisitor(this));
     }
 
     @Override
-    public Stream<T> transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+    public Stream<T> transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
         return children.stream()
                 .flatMap(c -> c.acceptVisitor(this));
     }
 
     @Override
-    public Stream<T> transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+    public Stream<T> transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         return children.stream()
                 .flatMap(c -> c.acceptVisitor(this));
     }

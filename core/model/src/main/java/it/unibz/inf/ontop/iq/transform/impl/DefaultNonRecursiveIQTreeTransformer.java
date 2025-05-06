@@ -1,8 +1,7 @@
 package it.unibz.inf.ontop.iq.transform.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.LeafIQTree;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 
@@ -42,52 +41,52 @@ public abstract class DefaultNonRecursiveIQTreeTransformer implements IQTreeVisi
     }
 
     @Override
-    public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+    public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
         return transformUnaryNode(tree, rootNode, child);
     }
 
     @Override
-    public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
+    public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
         return transformUnaryNode(tree, rootNode, child);
     }
 
     @Override
-    public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+    public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
         return transformUnaryNode(tree, rootNode, child);
     }
 
     @Override
-    public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
+    public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
         return transformUnaryNode(tree, rootNode, child);
     }
 
     @Override
-    public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
+    public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
         return transformUnaryNode(tree, sliceNode, child);
     }
 
     @Override
-    public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+    public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
         return transformUnaryNode(tree, rootNode, child);
     }
 
     @Override
-    public IQTree transformFlatten(IQTree tree, FlattenNode node, IQTree child) {
+    public IQTree transformFlatten(UnaryIQTree tree, FlattenNode node, IQTree child) {
         return transformUnaryNode(tree, node, child);
     }
 
     @Override
-    public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+    public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         return transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild);
     }
 
     @Override
-    public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+    public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
         return transformNaryCommutativeNode(tree, rootNode, children);
     }
 
     @Override
-    public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+    public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         return transformNaryCommutativeNode(tree, rootNode, children);
     }
 
@@ -95,15 +94,15 @@ public abstract class DefaultNonRecursiveIQTreeTransformer implements IQTreeVisi
         return leaf;
     }
 
-    protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+    protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
         return tree;
     }
 
-    protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+    protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
         return tree;
     }
 
-    protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
+    protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
         return tree;
     }
 }

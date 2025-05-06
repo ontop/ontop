@@ -95,7 +95,7 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
         }
 
         @Override
-        public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
             Substitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
 
             ImmutableMap<Variable, FunctionalTermSimplification> updatedEntryMap = initialSubstitution.builder()
@@ -133,7 +133,7 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
          * Propagates
          */
         @Override
-        public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
+        public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
             IQTree newChild = this.transform(child);
             return newChild.equals(child)
                     ? tree

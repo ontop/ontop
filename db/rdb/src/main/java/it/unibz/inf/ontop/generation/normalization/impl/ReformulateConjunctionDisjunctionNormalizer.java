@@ -5,7 +5,10 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -40,7 +43,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
         }
 
         @Override
-        public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+        public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
             var expression = rootNode.getFilterCondition();
             var newExpression = transformTerm(expression);
             if (newExpression.equals(expression))
@@ -52,7 +55,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
         }
 
         @Override
-        public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             var expression = rootNode.getOptionalFilterCondition();
             var newExpression = expression.map(this::transformTerm);
             if (newExpression.isEmpty() || newExpression.equals(expression))
@@ -65,7 +68,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
         }
 
         @Override
-        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             var expression = rootNode.getOptionalFilterCondition();
             var newExpression = expression.map(this::transformTerm);
             if (newExpression.isEmpty() || newExpression.equals(expression))
@@ -79,7 +82,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
         }
 
         @Override
-        public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
             var newSubstitution = rootNode.getSubstitution().transform(this::transformTerm);
             var newConstruction = iqFactory.createConstructionNode(rootNode.getVariables(), newSubstitution);
             if (newConstruction.equals(rootNode))
@@ -91,7 +94,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
         }
 
         @Override
-        public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+        public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
             var expressions = rootNode.getComparators().stream()
                     .map(c -> iqFactory.createOrderComparator((NonGroundTerm) transformTerm(c.getTerm()), c.isAscending()))
                     .collect(ImmutableCollectors.toList());
@@ -105,7 +108,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
         }
 
         @Override
-        public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
+        public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
             var newSubstitution = rootNode.getSubstitution().transform(t -> (ImmutableFunctionalTerm) transformTerm(t));
             var newAggregation = iqFactory.createAggregationNode(rootNode.getGroupingVariables(), newSubstitution);
             if (newAggregation.equals(rootNode))

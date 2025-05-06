@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.node.SliceNode;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
@@ -41,7 +42,7 @@ public class LookForDistinctOrLimit1TransformerImpl extends DefaultRecursiveIQTr
     }
 
     @Override
-    public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
+    public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
         IQTree newChild = getSubTransformer(child).transform(child);
         return (newChild.equals(child))
                 ? tree
@@ -49,7 +50,7 @@ public class LookForDistinctOrLimit1TransformerImpl extends DefaultRecursiveIQTr
     }
 
     @Override
-    public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
+    public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
         // LIMIT 1
         if (sliceNode.getOffset() == 0 && sliceNode.getLimit().filter(l -> l <= 1).isPresent()) {
             IQTree newChild = getSubTransformer(child).transform(child);

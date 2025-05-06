@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.AggregationSplitter;
@@ -72,7 +73,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
         }
 
         @Override
-        public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
+        public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
             IQTree liftedChild = transformChild(child);
 
             return tryToLift(rootNode, liftedChild)

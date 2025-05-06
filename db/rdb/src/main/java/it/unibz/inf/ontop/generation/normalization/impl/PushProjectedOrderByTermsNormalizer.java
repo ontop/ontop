@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
@@ -39,7 +40,7 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
         }
 
         @Override
-        public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
+        public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
             var decomposition = ProjectOrderByTermsNormalizer.Decomposition.decomposeTree(tree);
             if (decomposition.constructionNode.isEmpty() || decomposition.distinctNode.isEmpty() || decomposition.orderByNode.isEmpty()) {
                 var newDescendantTree = transform(decomposition.descendantTree);
@@ -51,7 +52,7 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
         }
 
         @Override
-        public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
             if (onlyDistinct)
                 return super.transformConstruction(tree, rootNode, child);
 

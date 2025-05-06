@@ -4,9 +4,7 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.FlattenLifter;
@@ -44,7 +42,7 @@ public class BasicFlattenLifter implements FlattenLifter {
         }
 
         @Override
-        public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+        public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
             IQTree updatedChild = transformChild(child);
             FlattenSubtree flattenSubtree = flattenSubtreeOf(updatedChild);
             if (flattenSubtree.flattenNodes.isEmpty()) {
@@ -63,7 +61,7 @@ public class BasicFlattenLifter implements FlattenLifter {
         }
 
         @Override
-        public IQTree transformConstruction(IQTree tree, ConstructionNode cn, IQTree child) {
+        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode cn, IQTree child) {
             IQTree updatedChild = transformChild(child);
             if (tree.getRootNode().equals(cn)) {
                 return iqFactory.createUnaryIQTree(cn, updatedChild);
@@ -90,7 +88,7 @@ public class BasicFlattenLifter implements FlattenLifter {
          * Assumption: the join carries no (explicit) joining condition
          */
         @Override
-        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode join, ImmutableList<IQTree> initialChildren) {
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode join, ImmutableList<IQTree> initialChildren) {
             ImmutableList<IQTree> children = transformChildren(initialChildren);
 
             ImmutableSet<Variable> blockingVars = getImplicitJoinCondition(children);
@@ -116,7 +114,7 @@ public class BasicFlattenLifter implements FlattenLifter {
          * (note that this only possible if extra integrity constraints hold, or in the presence of a distinct)
          */
         @Override
-        public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree initialLeftChild, IQTree initialRightChild) {
+        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree initialLeftChild, IQTree initialRightChild) {
             IQTree leftChild = transformChild(initialLeftChild);
             IQTree rightChild = transformChild(initialRightChild);
 

@@ -7,7 +7,10 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -42,7 +45,7 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
         }
 
         @Override
-        public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
+        public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
             if (isOrderByPresent(child)) {
                 return iqFactory.createUnaryIQTree(
                         sliceNode,
@@ -111,52 +114,52 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
         }
 
         @Override
-        public Boolean transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+        public Boolean transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
             return false;
         }
 
         @Override
-        public Boolean transformAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child) {
+        public Boolean transformAggregation(UnaryIQTree tree, AggregationNode aggregationNode, IQTree child) {
             return false;
         }
 
         @Override
-        public Boolean transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+        public Boolean transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
             return child.acceptVisitor(this);
         }
 
         @Override
-        public Boolean transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child) {
+        public Boolean transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
             return false;
         }
 
         @Override
-        public Boolean transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
+        public Boolean transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
             return child.acceptVisitor(this);
         }
 
         @Override
-        public Boolean transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
+        public Boolean transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
             return false;
         }
 
         @Override
-        public Boolean transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+        public Boolean transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
             return true;
         }
 
         @Override
-        public Boolean transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        public Boolean transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             return false;
         }
 
         @Override
-        public Boolean transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+        public Boolean transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             return false;
         }
 
         @Override
-        public Boolean transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+        public Boolean transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
             return false;
         }
     }

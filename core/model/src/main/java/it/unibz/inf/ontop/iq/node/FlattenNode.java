@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -75,7 +76,7 @@ public interface FlattenNode extends UnaryOperatorNode {
     ImmutableSet<Variable> getVariables(ImmutableSet<Variable> childVariables);
 
     @Override
-    default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
+    default <T> T acceptVisitor(UnaryIQTree tree, IQVisitor<T> visitor, IQTree child) {
         return visitor.transformFlatten(tree, this, child);
     }
 }

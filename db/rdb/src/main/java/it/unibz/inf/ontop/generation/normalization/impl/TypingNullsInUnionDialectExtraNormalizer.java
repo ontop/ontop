@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
@@ -35,7 +36,7 @@ public class TypingNullsInUnionDialectExtraNormalizer extends AbstractTypingNull
     }
 
     @Override
-    public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+    public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         ImmutableList<IQTree> updatedChildren = transformChildren(children);
 
         ImmutableSet<Variable> nullVariables = updatedChildren.stream()

@@ -32,7 +32,7 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree leftChild, IQTree rightChild);
 
-    <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree leftChild, IQTree rightChild);
+    <T> T acceptVisitor(BinaryNonCommutativeIQTree tree, IQVisitor<T> visitor, IQTree leftChild, IQTree rightChild);
 
     IQTree normalizeForOptimization(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator,
                                     IQTreeCache treeCache);

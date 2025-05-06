@@ -6,7 +6,9 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
@@ -89,7 +91,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         @Override
-        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             ImmutableList<InjectiveSubstitution<Variable>> substitutions = computeSubstitutions(children);
             if (substitutions.stream().allMatch(Substitution::isEmpty))
                 return tree;
@@ -106,7 +108,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         @Override
-        public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             ImmutableList<IQTree> children = ImmutableList.of(leftChild, rightChild);
             ImmutableList<InjectiveSubstitution<Variable>> substitutions = computeSubstitutions(children);
             if (substitutions.stream().allMatch(Substitution::isEmpty))
@@ -256,7 +258,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         @Override
-        public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
 
             var leftFilter = UnaryIQTreeDecomposition.of(leftChild, FilterNode.class);
             var rightFilter = UnaryIQTreeDecomposition.of(rightChild, FilterNode.class);
@@ -282,7 +284,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         @Override
-        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             var childrenFilters = children.stream()
                     .map(c -> UnaryIQTreeDecomposition.of(c, FilterNode.class))
                     .collect(ImmutableCollectors.toList());
@@ -305,7 +307,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         @Override
-        public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+        public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
             return UnaryIQTreeDecomposition.of(child, FilterNode.class)
                     .<IQTree>map((f, t) -> iqFactory.createUnaryIQTree(
                             iqFactory.createFilterNode(termFactory.getConjunction(
@@ -339,15 +341,18 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 //        }
 //    }
 
-        protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+        @Override
+        protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
             return childTransformer.transform(tree);
         }
 
-        protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+        @Override
+        protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
             return childTransformer.transform(tree);
         }
 
-        protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
+        @Override
+        protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
             return childTransformer.transform(tree);
         }
     }
@@ -360,17 +365,17 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
     class CnLifter extends DefaultNonRecursiveIQTreeTransformer {
 
         @Override
-        public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
+        public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
             return tree;
         }
 
         @Override
-        public IQTree transformSlice(IQTree tree, SliceNode rootNode, IQTree child) {
+        public IQTree transformSlice(UnaryIQTree tree, SliceNode rootNode, IQTree child) {
             return tree;
         }
 
         @Override
-        public IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+        public IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
             ImmutableList<ConstructionNode> idleCns = getIdleCns(Stream.of(child));
             return idleCns.isEmpty()
                     ? tree
@@ -382,7 +387,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         @Override
-        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             ImmutableList<ConstructionNode> idleCns = getIdleCns(children.stream());
             return idleCns.isEmpty()
                     ? tree
@@ -396,7 +401,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         @Override
-        protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
+        protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
             ImmutableList<ConstructionNode> idleCns = getIdleCns(Stream.of(leftChild, rightChild));
             return idleCns.isEmpty()
                     ? tree

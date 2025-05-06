@@ -107,7 +107,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
         }
 
         @Override
-        public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             IQTree newLeftChild = transform(leftChild);
             IQTree newRightChild = transform(rightChild);
 

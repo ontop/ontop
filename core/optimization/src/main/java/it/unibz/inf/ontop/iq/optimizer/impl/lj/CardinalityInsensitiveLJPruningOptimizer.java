@@ -7,8 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerImpl;
@@ -69,7 +68,7 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
         }
 
         @Override
-        public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
             var newVariablesUsed = Sets.union(variablesUsedByAncestors, rootNode.getLocallyRequiredVariables());
 
             var newTransformer = newVariablesUsed.equals(variablesUsedByAncestors)
@@ -83,7 +82,7 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
         }
 
         @Override
-        public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+        public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
             var newTransformer = rootNode.getOptionalFilterCondition()
                     .map(ImmutableFunctionalTerm::getVariables)
                     .filter(vs -> !vs.isEmpty())
@@ -98,11 +97,11 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
         }
 
         @Override
-        public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+        public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
             return applyRecursivelyToUnaryNode(tree, rootNode, child);
         }
 
-        protected IQTree applyRecursivelyToUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+        protected IQTree applyRecursivelyToUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
             IQTree newChild = child.acceptTransformer(this);
             return newChild.equals(child) && rootNode.equals(tree.getRootNode())
                     ? tree
@@ -110,7 +109,7 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
         }
 
         @Override
-        public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             var treeVariables = tree.getVariables();
 
             var leftVariables = leftChild.getVariables();
@@ -140,12 +139,12 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
         }
 
         @Override
-        public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+        public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
             return applyRecursivelyToNaryNode(tree, rootNode, children);
         }
 
         @Override
-        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             var newTransformer = rootNode.getOptionalFilterCondition()
                     .map(ImmutableFunctionalTerm::getVariables)
                     .filter(vs -> !vs.isEmpty())
@@ -176,7 +175,7 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
          * Default behavior
          */
         @Override
-        protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+        protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
             return lookForDistinctTransformer.transform(tree);
         }
 
@@ -184,7 +183,7 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
          * Default behavior
          */
         @Override
-        protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+        protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
             return lookForDistinctTransformer.transform(tree);
         }
 
@@ -192,7 +191,7 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
          * Default behavior
          */
         @Override
-        protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
+        protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
             return lookForDistinctTransformer.transform(tree);
         }
 
@@ -200,6 +199,4 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
             return new CardinalityInsensitiveLJPruningTransformer(lookForDistinctTransformer, coreSingletons, newVariablesUsedByAncestors);
         }
     }
-
-
 }

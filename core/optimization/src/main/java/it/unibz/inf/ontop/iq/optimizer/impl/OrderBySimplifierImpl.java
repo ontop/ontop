@@ -68,7 +68,7 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
         }
 
         @Override
-        public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+        public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
 
             ImmutableList<ComparatorSimplification> simplifications = rootNode.getComparators().stream()
                     .flatMap(c -> simplifyComparator(c, child))

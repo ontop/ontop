@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.optimizer.splitter.PreventDistinctProjectionSplitter;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -53,7 +54,7 @@ public class PreventDistinctOptimizerImpl implements PreventDistinctOptimizer {
         }
 
         @Override
-        public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
             var decomposition = Decomposition.decomposeTree(child);
             if (decomposition.distinctNode.isPresent()) {
                 var split = preventDistinctProjectionSplitter.split(tree, variableGenerator);

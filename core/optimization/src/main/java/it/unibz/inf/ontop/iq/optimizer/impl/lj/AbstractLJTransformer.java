@@ -3,7 +3,10 @@ package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
@@ -48,7 +51,7 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
     }
 
     @Override
-    public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+    public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         IQTree transformedLeftChild = transform(leftChild);
         // Cannot reuse
         IQTree transformedRightChild = preTransformLJRightChild(rightChild, rootNode.getOptionalFilterCondition(), leftChild.getVariables());
@@ -90,37 +93,37 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
 
 
     @Override
-    public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+    public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
         // Recursive
         return transformUnaryNode(tree, rootNode, child, this::transform);
     }
 
     @Override
-    public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
+    public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
         // Recursive
         return transformUnaryNode(tree, rootNode, child, this::transform);
     }
 
     @Override
-    public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
+    public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
         // Recursive
         return transformUnaryNode(tree, sliceNode, child, this::transform);
     }
 
     @Override
-    public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+    public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
         // Recursive
         return transformUnaryNode(tree, rootNode, child, this::transform);
     }
 
     @Override
-    public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+    public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
         // Recursive
         return transformNaryCommutativeNode(tree, rootNode, children, this::transform);
     }
 
     @Override
-    protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+    protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
         return transformUnaryNode(tree, rootNode, child, this::transformBySearchingFromScratch);
     }
 
@@ -134,11 +137,11 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
     }
 
     @Override
-    protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+    protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
         return transformNaryCommutativeNode(tree, rootNode, children, this::transformBySearchingFromScratch);
     }
 
-    protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children,
+    protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children,
                                                   Function<IQTree, IQTree> childTransformation) {
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(childTransformation)
@@ -150,13 +153,13 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
     }
 
     @Override
-    protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode,
+    protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode,
                                                        IQTree leftChild, IQTree rightChild) {
         return transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild,
                 this::transformBySearchingFromScratch);
     }
 
-    protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode,
+    protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode,
                                                        IQTree leftChild, IQTree rightChild,
                                                        Function<IQTree, IQTree> childTransformation) {
         IQTree newLeftChild = childTransformation.apply(leftChild);

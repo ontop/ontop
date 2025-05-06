@@ -46,7 +46,7 @@ public class FilterLifterImpl implements FilterLifter {
         }
 
         @Override
-        public IQTree transformConstruction(IQTree tree, ConstructionNode cn, IQTree child) {
+        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode cn, IQTree child) {
 
             child = transformChild(child);
 
@@ -65,7 +65,7 @@ public class FilterLifterImpl implements FilterLifter {
         }
 
         @Override
-        public IQTree transformFilter(IQTree tree, FilterNode filter, IQTree child) {
+        public IQTree transformFilter(UnaryIQTree tree, FilterNode filter, IQTree child) {
 
             child = transformChild(child);
             UnaryIQTreeDecomposition<FilterNode> decomposition = UnaryIQTreeDecomposition.of(child, FilterNode.class);
@@ -79,7 +79,7 @@ public class FilterLifterImpl implements FilterLifter {
         }
 
         @Override
-        public IQTree transformFlatten(IQTree tree, FlattenNode fn, IQTree child) {
+        public IQTree transformFlatten(UnaryIQTree tree, FlattenNode fn, IQTree child) {
 
             child = transformChild(child);
             UnaryIQTreeDecomposition<FilterNode> decomposition = UnaryIQTreeDecomposition.of(child, FilterNode.class);
@@ -94,7 +94,7 @@ public class FilterLifterImpl implements FilterLifter {
         }
 
         @Override
-        public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+        public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
 
             children = transformChildren(children);
             var childrenDecomposition = UnaryIQTreeDecomposition.of(children, FilterNode.class);
@@ -112,7 +112,7 @@ public class FilterLifterImpl implements FilterLifter {
         }
 
         @Override
-        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode joinNode, ImmutableList<IQTree> children) {
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode joinNode, ImmutableList<IQTree> children) {
 
             children = transformChildren(children);
             var childrenDecomposition = UnaryIQTreeDecomposition.of(children, FilterNode.class);
@@ -132,7 +132,7 @@ public class FilterLifterImpl implements FilterLifter {
         }
 
         @Override
-        public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             leftChild = transformChild(leftChild);
             rightChild = transformChild(rightChild);
 

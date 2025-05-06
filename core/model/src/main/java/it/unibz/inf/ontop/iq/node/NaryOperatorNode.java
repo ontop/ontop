@@ -46,7 +46,7 @@ public interface NaryOperatorNode extends QueryNode {
 
     IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children, VariableGenerator variableGenerator);
 
-    <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, ImmutableList<IQTree> children);
+    <T> T acceptVisitor(NaryIQTree tree, IQVisitor<T> visitor, ImmutableList<IQTree> children);
 
     /**
      * Only validates the node, not its children

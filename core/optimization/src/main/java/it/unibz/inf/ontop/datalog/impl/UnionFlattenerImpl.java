@@ -6,9 +6,9 @@ import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -44,7 +44,7 @@ public class UnionFlattenerImpl implements UnionFlattener {
         }
 
         @Override
-        public IQTree transformConstruction(IQTree tree, ConstructionNode rootCn, IQTree child) {
+        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootCn, IQTree child) {
 
             IQTree transformedChild = transformChild(child);
 
@@ -66,7 +66,7 @@ public class UnionFlattenerImpl implements UnionFlattener {
 
         @Override
         // merge consecutive unions
-        public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+        public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
 
             ImmutableList<IQTree> transformedChildren = transformChildren(children);
 

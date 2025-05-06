@@ -110,7 +110,7 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
         }
 
         @Override
-        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> initialChildren) {
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> initialChildren) {
 
             //Non-final
             ImmutableList<IQTree> children = initialChildren;
