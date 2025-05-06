@@ -8,9 +8,9 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 
 /**
- *  For composite IQ trees, the tree itself is passed as a first argument,
- *  in case the transformer does not transform the tree,
- *  which can be used to avoid creating unnecessary new objects in transformers.
+ *  For composite IQ trees, the tree itself is passed as the first argument,
+ *  which can be used to avoid creating unnecessary new objects in transformers
+ *  (if the result is identical to the input).
  */
 
 public interface IQVisitor<T> {

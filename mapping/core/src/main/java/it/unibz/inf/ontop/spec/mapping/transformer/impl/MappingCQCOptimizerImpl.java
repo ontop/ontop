@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transform.impl.LazyRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -38,67 +38,91 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
         IQTree tree = query.getTree();
         ConstructionNode constructionNode = (ConstructionNode) tree.getRootNode();
 
-        return iqFactory.createIQ(query.getProjectionAtom(), tree.acceptTransformer(new LazyRecursiveIQTreeVisitingTransformer(iqFactory) {
-            @Override
-            public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children0) {
+        return iqFactory.createIQ(
+                query.getProjectionAtom(),
+                tree.acceptTransformer(new Transformer(constructionNode, cqContainmentCheck)));
+    }
 
-                Optional<ImmutableExpression> joiningConditions = rootNode.getOptionalFilterCondition();
+    protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
+        private final ConstructionNode constructionNode;
+        private final ExtensionalDataNodeListContainmentCheck cqContainmentCheck;
 
-                ImmutableList<ExtensionalDataNode> extensionalDataNodes = tree.getChildren().stream()
-                        .filter(n -> n instanceof ExtensionalDataNode)
-                        .map(n -> (ExtensionalDataNode)n)
+        protected Transformer(ConstructionNode constructionNode, ExtensionalDataNodeListContainmentCheck cqContainmentCheck) {
+            super(MappingCQCOptimizerImpl.this.iqFactory);
+            this.constructionNode = constructionNode;
+            this.cqContainmentCheck = cqContainmentCheck;
+        }
+
+        @Override
+        protected boolean nodesEqual(QueryNode node1, QueryNode node2) {
+            return true;
+        }
+
+        @Override
+        protected boolean treesEqual(IQTree tree1, IQTree tree2) {
+            return tree1 == tree2;
+        }
+
+        @Override
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode innerJoinNode, ImmutableList<IQTree> children0) {
+
+            Optional<ImmutableExpression> joiningConditions = innerJoinNode.getOptionalFilterCondition();
+
+            ImmutableList<ExtensionalDataNode> extensionalDataNodes = tree.getChildren().stream()
+                    .filter(n -> n instanceof ExtensionalDataNode)
+                    .map(n -> (ExtensionalDataNode)n)
+                    .collect(ImmutableCollectors.toList());
+
+            ImmutableList<Variable> answerVariables = Stream.concat(
+                            constructionNode.getSubstitution().getRangeVariables().stream(),
+                            joiningConditions.stream().flatMap(ImmutableTerm::getVariableStream))
+                    .distinct()
+                    .collect(ImmutableCollectors.toList());
+
+            int currentIndex = 0;
+            while (currentIndex < extensionalDataNodes.size()) {
+                ExtensionalDataNode current = extensionalDataNodes.get(currentIndex);
+                ImmutableList<ExtensionalDataNode> extensionalDataNodesExceptCurrent = extensionalDataNodes.stream()
+                        .filter(child -> child != current)
                         .collect(ImmutableCollectors.toList());
 
-                ImmutableList<Variable> answerVariables = Stream.concat(
-                                constructionNode.getSubstitution().getRangeVariables().stream(),
-                                joiningConditions.stream().flatMap(ImmutableTerm::getVariableStream))
-                        .distinct()
-                        .collect(ImmutableCollectors.toList());
+                if (extensionalDataNodesExceptCurrent.stream()
+                        .flatMap(a -> a.getVariables().stream())
+                        .collect(ImmutableCollectors.toSet())
+                        .containsAll(answerVariables)) {
 
-                int currentIndex = 0;
-                while (currentIndex < extensionalDataNodes.size()) {
-                    ExtensionalDataNode current = extensionalDataNodes.get(currentIndex);
-                    ImmutableList<ExtensionalDataNode> extensionalDataNodesExceptCurrent = extensionalDataNodes.stream()
-                            .filter(child -> child != current)
-                            .collect(ImmutableCollectors.toList());
-
-                    if (extensionalDataNodesExceptCurrent.stream()
-                            .flatMap(a -> a.getVariables().stream())
-                            .collect(ImmutableCollectors.toSet())
-                            .containsAll(answerVariables)) {
-
-                        if (cqContainmentCheck.isContainedIn(
-                                answerVariables, extensionalDataNodesExceptCurrent, answerVariables, extensionalDataNodes)) {
-                            //System.out.println("CQC-REMOVED: " + extensionalDataNodes.get(currentIndex) + " FROM " + extensionalDataNodes);
-                            log.debug("CQC-REMOVED: " + extensionalDataNodes.get(currentIndex) + " FROM " + extensionalDataNodes);
-                            extensionalDataNodes = extensionalDataNodesExceptCurrent;
-                            if (extensionalDataNodes.size() < 2)
-                                break;
-                            currentIndex = 0; // reset
-                        }
-                        else
-                            currentIndex++;
+                    if (cqContainmentCheck.isContainedIn(
+                            answerVariables, extensionalDataNodesExceptCurrent, answerVariables, extensionalDataNodes)) {
+                        //System.out.println("CQC-REMOVED: " + extensionalDataNodes.get(currentIndex) + " FROM " + extensionalDataNodes);
+                        log.debug("CQC-REMOVED: " + extensionalDataNodes.get(currentIndex) + " FROM " + extensionalDataNodes);
+                        extensionalDataNodes = extensionalDataNodesExceptCurrent;
+                        if (extensionalDataNodes.size() < 2)
+                            break;
+                        currentIndex = 0; // reset
                     }
                     else
                         currentIndex++;
                 }
-
-                ImmutableList<IQTree> children = Stream.concat(
-                                extensionalDataNodes.stream(),
-                                tree.getChildren().stream().filter(n -> !(n instanceof ExtensionalDataNode)))
-                        .collect(ImmutableCollectors.toList());
-
-                switch (children.size()) {
-                    case 0:
-                        return iqFactory.createTrueNode();
-                    case 1:
-                        return joiningConditions
-                                .<IQTree>map(c -> iqFactory.createUnaryIQTree(iqFactory.createFilterNode(c), children.get(0)))
-                                .orElseGet(() -> children.get(0));
-                    default:
-                        return iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(joiningConditions), children);
-                }
+                else
+                    currentIndex++;
             }
-        }));
+
+            ImmutableList<IQTree> children = Stream.concat(
+                            extensionalDataNodes.stream(),
+                            tree.getChildren().stream()
+                                    .filter(n -> !(n instanceof ExtensionalDataNode)))
+                    .collect(ImmutableCollectors.toList());
+
+            switch (children.size()) {
+                case 0:
+                    return iqFactory.createTrueNode();
+                case 1:
+                    return joiningConditions
+                            .<IQTree>map(c -> iqFactory.createUnaryIQTree(iqFactory.createFilterNode(c), children.get(0)))
+                            .orElseGet(() -> children.get(0));
+                default:
+                    return iqFactory.createNaryIQTree(innerJoinNode, children);
+            }
+        }
     }
 }

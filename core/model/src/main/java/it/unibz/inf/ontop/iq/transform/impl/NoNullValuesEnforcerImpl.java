@@ -8,44 +8,44 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.DistinctNode;
+import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.Set;
 
+/**
+ * Adds NOT NULL filters to IQs in MappingAssertion (which is essentially a CQ).
+ */
 
 public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
 
-    private final IntermediateQueryFactory iQFactory;
+    private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
     private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
-    private NoNullValuesEnforcerImpl(IntermediateQueryFactory iQFactory, TermFactory termFactory,
-                                     SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory) {
-        this.iQFactory = iQFactory;
+    private NoNullValuesEnforcerImpl(IntermediateQueryFactory iqFactory,
+                                     TermFactory termFactory,
+                                     CoreUtilsFactory coreUtilsFactory) {
+        this.iqFactory = iqFactory;
         this.termFactory = termFactory;
-        this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
     }
 
     @Override
     public IQTree transform(IQTree tree) {
-        return transform(tree, coreUtilsFactory.createVariableGenerator(tree.getKnownVariables()));
-    }
-
-    private IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
+        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(tree.getKnownVariables());
         Optional<ImmutableExpression> condition = termFactory.getDBIsNotNull(tree.getVariables().stream());
 
         return condition
-                .map(iQFactory::createFilterNode)
-                .map(n -> iQFactory.createUnaryIQTree(n, tree))
+                .map(iqFactory::createFilterNode)
+                .map(n -> iqFactory.createUnaryIQTree(n, tree))
                 .map(t -> t.normalizeForOptimization(variableGenerator))
                 .map(this::declareTopVariablesNotNull)
                 .orElse(tree);
@@ -72,25 +72,19 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
      *        T1(a,b)
      *
      * DESIGN NOTE:
-     * In a bottom-up manner, NULLIF(b,0) would instead require to known that "b" is non-null *and different from 0*
+     * In a bottom-up manner, NULLIF(b,0) would instead require to know that "b" is non-null *and different from 0*
      *  to simplify itself. Such information is only partially provided by the VariableNullability data structure.
      */
     protected IQTree declareTopVariablesNotNull(IQTree tree) {
-        NotNullTopVariablePropagator transformer = new NotNullTopVariablePropagator(iQFactory, substitutionFactory, tree.getVariables());
+        NotNullTopVariablePropagator transformer = new NotNullTopVariablePropagator(tree.getVariables());
         return transformer.transform(tree);
     }
 
-    protected static class NotNullTopVariablePropagator extends DefaultNonRecursiveIQTreeTransformer {
+    protected class NotNullTopVariablePropagator extends DefaultNonRecursiveIQTreeTransformer {
 
-        protected final IntermediateQueryFactory iqFactory;
         protected final ImmutableSet<Variable> nonNullVariables;
-        private final SubstitutionFactory substitutionFactory;
 
-        protected NotNullTopVariablePropagator(IntermediateQueryFactory iqFactory,
-                                               SubstitutionFactory substitutionFactory,
-                                               ImmutableSet<Variable> nonNullVariables) {
-            this.iqFactory = iqFactory;
-            this.substitutionFactory = substitutionFactory;
+        protected NotNullTopVariablePropagator(ImmutableSet<Variable> nonNullVariables) {
             this.nonNullVariables = nonNullVariables;
         }
 
@@ -111,35 +105,32 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
                     ? rootNode
                     : iqFactory.createConstructionNode(rootNode.getVariables(), newSubstitution);
 
-            ImmutableSet<Variable> simplifiableChildVariables = Sets.union(
+            Set<Variable> simplifiableChildVariables = Sets.union(
                     Sets.difference(rootNode.getVariables(), initialSubstitution.getDomain()),
                     updatedEntryMap.values().stream()
                             .flatMap(s -> s.getSimplifiableVariables().stream())
-                            .collect(ImmutableCollectors.toSet()))
-                    .immutableCopy();
+                            .collect(ImmutableCollectors.toSet()));
 
-            // "Recursive"
             IQTree newChild = simplifiableChildVariables.isEmpty()
                     ? child
-                    : (new NotNullTopVariablePropagator(iqFactory, substitutionFactory, simplifiableChildVariables)).transform(child);
+                    : declareTopVariablesNotNull(child);  // "Recursive"
 
-            if (newConstructionNode == rootNode && newChild == child)
-                return tree;
-
-            return iqFactory.createUnaryIQTree(newConstructionNode, newChild);
+            return lazyCreateUnaryIQTree(tree, newConstructionNode, newChild);
         }
 
         /**
          * Propagates
          */
         @Override
-        public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-            IQTree newChild = this.transform(child);
-            return newChild.equals(child)
+        public IQTree transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree child) {
+            IQTree newChild = transformChild(child);
+            return lazyCreateUnaryIQTree(tree, node, newChild);
+        }
+
+        private IQTree lazyCreateUnaryIQTree(UnaryIQTree tree, UnaryOperatorNode node, IQTree child) {
+            return (node == tree.getRootNode() && child == tree.getChild())
                     ? tree
-                    : iqFactory.createUnaryIQTree(rootNode, newChild);
+                    : iqFactory.createUnaryIQTree(node, child);
         }
     }
-
-
 }
