@@ -82,12 +82,37 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
         @Override
         public IQTree transformIntensionalData(IntensionalDataNode dn) {
-            return transformIntensionalDataNode(dn);
+            DataAtom<AtomPredicate> projectionAtom = dn.getProjectionAtom();
+            ArgumentSubstitution<VariableOrGroundTerm> replacementVars = getArgumentReplacement(projectionAtom.getArguments());
+            if (replacementVars.isEmpty())
+                return dn;
+
+            FilterNode filter = iqFactory.createFilterNode(replacementVars.getConjunction(termFactory, projectionAtom.getArguments()));
+
+            DataAtom<AtomPredicate> atom = atomFactory.getDataAtom(
+                    projectionAtom.getPredicate(),
+                    replacementVars.replaceTerms(projectionAtom.getArguments()));
+
+            return iqFactory.createUnaryIQTree(
+                    iqFactory.createConstructionNode(dn.getVariables()),
+                    iqFactory.createUnaryIQTree(filter, dn.newAtom(atom)));
         }
 
         @Override
         public IQTree transformExtensionalData(ExtensionalDataNode dn) {
-            return transformExtensionalDataNode(dn);
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> initialArgumentMap = dn.getArgumentMap();
+            ArgumentSubstitution<VariableOrGroundTerm> replacementVars = getArgumentReplacement(initialArgumentMap);
+            if (replacementVars.isEmpty())
+                return dn;
+
+            FilterNode filter = iqFactory.createFilterNode(replacementVars.getConjunction(termFactory, initialArgumentMap));
+
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap = replacementVars.replaceTerms(initialArgumentMap);
+            return iqFactory.createUnaryIQTree(
+                    iqFactory.createConstructionNode(dn.getVariables()),
+                    iqFactory.createUnaryIQTree(
+                            filter,
+                            iqFactory.createExtensionalDataNode(dn.getRelationDefinition(), newArgumentMap)));
         }
 
         @Override
@@ -166,39 +191,6 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                     .flatMap(b -> b.toStream(termFactory::getStrictEquality));
             
             return termFactory.getConjunction(optionalFilterCondition, varEqualities).get();
-        }
-
-        private IQTree transformIntensionalDataNode(IntensionalDataNode dn) {
-            DataAtom<AtomPredicate> projectionAtom = dn.getProjectionAtom();
-            ArgumentSubstitution<VariableOrGroundTerm> replacementVars = getArgumentReplacement(projectionAtom.getArguments());
-            if (replacementVars.isEmpty())
-                return dn;
-
-            FilterNode filter = iqFactory.createFilterNode(replacementVars.getConjunction(termFactory, projectionAtom.getArguments()));
-
-            DataAtom<AtomPredicate> atom = atomFactory.getDataAtom(
-                    projectionAtom.getPredicate(),
-                    replacementVars.replaceTerms(projectionAtom.getArguments()));
-
-            return iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(dn.getVariables()),
-                    iqFactory.createUnaryIQTree(filter, dn.newAtom(atom)));
-        }
-
-        private IQTree transformExtensionalDataNode(ExtensionalDataNode dn) {
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> initialArgumentMap = dn.getArgumentMap();
-            ArgumentSubstitution<VariableOrGroundTerm> replacementVars = getArgumentReplacement(initialArgumentMap);
-            if (replacementVars.isEmpty())
-                return dn;
-
-            FilterNode filter = iqFactory.createFilterNode(replacementVars.getConjunction(termFactory, initialArgumentMap));
-
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap = replacementVars.replaceTerms(initialArgumentMap);
-            return iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(dn.getVariables()),
-                    iqFactory.createUnaryIQTree(
-                            filter,
-                            iqFactory.createExtensionalDataNode(dn.getRelationDefinition(), newArgumentMap)));
         }
 
 
