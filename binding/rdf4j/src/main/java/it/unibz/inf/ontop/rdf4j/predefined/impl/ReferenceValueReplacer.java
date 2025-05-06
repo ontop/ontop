@@ -8,19 +8,17 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.iq.node.NativeNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 @Singleton
 public class ReferenceValueReplacer {
@@ -30,8 +28,7 @@ public class ReferenceValueReplacer {
     private final TermFactory termFactory;
 
     @Inject
-    protected ReferenceValueReplacer(IntermediateQueryFactory iqFactory, TermFactory termFactory,
-                                     SubstitutionFactory substitutionFactory) {
+    protected ReferenceValueReplacer(IntermediateQueryFactory iqFactory, TermFactory termFactory) {
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
     }
@@ -63,10 +60,10 @@ public class ReferenceValueReplacer {
      * Only applies transformations to construct nodes and native nodes
      */
     private IQTree transform(IQTree tree, ImmutableMap<String, String> referenceToInputMap) {
-        QueryNode rootNode = tree.getRootNode();
 
-        if (rootNode instanceof ConstructionNode) {
-            ConstructionNode constructionNode = (ConstructionNode)rootNode;
+        var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+        if (construction.isPresent()) {
+            ConstructionNode constructionNode = construction.get();
 
             ConstructionNode newConstructionNode = constructionNode.getSubstitution().isEmpty()
                 ? constructionNode
@@ -76,13 +73,13 @@ public class ReferenceValueReplacer {
 
             return iqFactory.createUnaryIQTree(
                     newConstructionNode,
-                    transform(((UnaryIQTree) tree).getChild(), referenceToInputMap));
+                    transform(construction.getChild(), referenceToInputMap));
 
         }
-        else if (rootNode instanceof NativeNode) {
-            return transformNativeNode((NativeNode) rootNode, referenceToInputMap);
+        else if (tree instanceof NativeNode) {
+            return transformNativeNode((NativeNode) tree, referenceToInputMap);
         }
-        else if (rootNode instanceof EmptyNode) {
+        else if (tree instanceof EmptyNode) {
             return tree;
         }
         else

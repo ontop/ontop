@@ -138,7 +138,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     }
 
     @Override
-    protected Optional<ExtendedProjectionNode> computeNewProjectionNode(ImmutableSet<Variable> newProjectedVariables,
+    protected Optional<AggregationNode> computeNewProjectionNode(ImmutableSet<Variable> newProjectedVariables,
                                                                         Substitution<ImmutableTerm> theta, IQTree newChild) {
         return Optional.of(iqFactory.createAggregationNode(
                 Sets.difference(newProjectedVariables, theta.getDomain()).immutableCopy(),

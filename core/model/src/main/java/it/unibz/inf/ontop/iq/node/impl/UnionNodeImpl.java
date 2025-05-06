@@ -24,6 +24,8 @@ import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
 public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     private static final String UNION_NODE_STR = "UNION";
@@ -59,8 +61,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     @Override
     public boolean hasAChildWithLiftableDefinition(Variable variable, ImmutableList<IQTree> children) {
         return children.stream()
-                .anyMatch(c -> (c.getRootNode() instanceof ConstructionNode)
-                        && ((ConstructionNode) c.getRootNode()).getSubstitution().isDefining(variable));
+                .anyMatch(c -> UnaryIQTreeDecomposition.of(c, ConstructionNode.class)
+                        .map((cn, t) -> cn.getSubstitution().isDefining(variable)).isPresent()
+);
     }
 
     @Override
@@ -135,7 +138,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         ImmutableSet<Substitution<NonVariableTerm>> possibleDefs2 = child2.getPossibleVariableDefinitions();
 
         return variables.stream()
-                // We don't consider variables nullable on both side
+                // We don't consider variables nullable on both sides
                 .filter(v -> !(variableNullability1.isPossiblyNullable(v) && variableNullability2.isPossiblyNullable(v)))
                 .anyMatch(v -> areDisjointWhenNonNull(extractDefs(possibleDefs1, v), extractDefs(possibleDefs2, v), variableNullability1));
     }
@@ -523,13 +526,17 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         /*
          * Cannot lift anything if some children do not have a construction node
          */
-        if (liftedChildren.stream()
-                .anyMatch(c -> !(c.getRootNode() instanceof ConstructionNode)))
+        ImmutableList<UnaryIQTreeDecomposition<ConstructionNode>> liftedChildrenDecompositions = liftedChildren.stream()
+                .map(c -> UnaryIQTreeDecomposition.of(c, ConstructionNode.class))
+                .collect(ImmutableCollectors.toList());
+
+        if (liftedChildrenDecompositions.stream()
+                .anyMatch(c -> !c.isPresent()))
             // Opportunistically flagged as normalized. May be discarded later on
             return iqFactory.createNaryIQTree(this, flattenChildren(liftedChildren), treeCache.declareAsNormalizedForOptimizationWithEffect());
 
-        ImmutableList<Substitution<ImmutableTerm>> tmpNormalizedChildSubstitutions = liftedChildren.stream()
-                .map(c -> (ConstructionNode) c.getRootNode())
+        ImmutableList<Substitution<ImmutableTerm>> tmpNormalizedChildSubstitutions = liftedChildrenDecompositions.stream()
+                .map(UnaryIQTreeDecomposition::get)
                 .map(ConstructionNode::getSubstitution)
                 .map(s -> s.transform(this::normalizeNullAndRDFConstants))
                 .collect(ImmutableCollectors.toList());
@@ -552,9 +559,14 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         UnionNode newUnionNode = iqFactory.createUnionNode(unionVariables);
 
         NaryIQTree unionIQ = iqFactory.createNaryIQTree(newUnionNode,
-                IntStream.range(0, liftedChildren.size())
-                        .mapToObj(i -> updateChild((UnaryIQTree) liftedChildren.get(i), mergedSubstitution,
-                                tmpNormalizedChildSubstitutions.get(i), unionVariables, variableGenerator))
+                IntStream.range(0, liftedChildrenDecompositions.size())
+                        .mapToObj(i -> updateChild(
+                                liftedChildrenDecompositions.get(i).get(),
+                                liftedChildrenDecompositions.get(i).getChild(),
+                                mergedSubstitution,
+                                tmpNormalizedChildSubstitutions.get(i),
+                                unionVariables,
+                                variableGenerator))
                         .flatMap(this::flattenChild)
                         .map(c -> iqTreeTools.createConstructionNodeTreeIfNontrivial(c, unionVariables))
                         .collect(ImmutableCollectors.toList()));
@@ -699,11 +711,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     /**
      * TODO: find a better name
      */
-    private IQTree updateChild(UnaryIQTree liftedChildTree, Substitution<ImmutableTerm> mergedSubstitution,
+    private IQTree updateChild(ConstructionNode constructionNode, IQTree liftedGrandChild, Substitution<ImmutableTerm> mergedSubstitution,
                                Substitution<ImmutableTerm> tmpNormalizedSubstitution,
                                ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator) {
-
-        ConstructionNode constructionNode = (ConstructionNode) liftedChildTree.getRootNode();
 
         ImmutableSet<Variable> formerV = constructionNode.getVariables();
 
@@ -737,21 +747,20 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .transform(t -> (VariableOrGroundTerm)t)
                 .build();
 
-        IQTree newChild = liftedChildTree.getChild()
+        IQTree newChild = liftedGrandChild
                 .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);
 
         return iqTreeTools.createConstructionNodeTreeIfNontrivial(newChild, newTheta, () -> projectedVariables);
     }
 
     private IQTree tryToMergeSomeChildrenInAValuesNode(IQTree tree, VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        QueryNode rootNode = tree.getRootNode();
+        var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
 
-        if (rootNode instanceof ConstructionNode) {
-            IQTree subTree = tree.getChildren().get(0);
-            IQTree newSubTree = tryToMergeSomeChildrenInAValuesNode(subTree, variableGenerator, treeCache, false);
-            return (subTree == newSubTree)
+        if (construction.isPresent()) {
+            IQTree newSubTree = tryToMergeSomeChildrenInAValuesNode(construction.getChild(), variableGenerator, treeCache, false);
+            return (construction.getChild() == newSubTree)
                     ? tree
-                    : iqFactory.createUnaryIQTree((ConstructionNode) rootNode, newSubTree,
+                    : iqFactory.createUnaryIQTree(construction.get(), newSubTree,
                     treeCache.declareAsNormalizedForOptimizationWithEffect());
         }
         else
@@ -779,9 +788,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         // Tries to reuse the ordered value list of a values node
         ImmutableList<Variable> valuesVariables = children.stream()
-                .map(IQTree::getRootNode)
                 .filter(n -> n instanceof ValuesNode)
-                .map(n -> ((ValuesNode) n).getOrderedVariables())
+                .map(n -> (ValuesNode) n)
+                .map(ValuesNode::getOrderedVariables)
                 .findAny()
                 // Otherwise creates an arbitrary order
                 .orElseGet(() -> ImmutableList.copyOf(unionNode.getVariables()));
@@ -815,22 +824,20 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
      * are lifted or transformed properly in the rest of the code
      */
     private boolean isMergeableInValuesNode(IQTree tree) {
-        QueryNode rootNode = tree.getRootNode();
-        if ((rootNode instanceof ValuesNode) || (rootNode instanceof TrueNode))
+        if ((tree instanceof ValuesNode) || (tree instanceof TrueNode))
             return true;
 
-        if (!(rootNode instanceof ConstructionNode))
+        var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+        if (!construction.isPresent())
             return false;
 
-        IQTree child = tree.getChildren().get(0);
-
+        IQTree child = construction.getChild();
         if (!((child instanceof TrueNode) || (child instanceof ValuesNode)))
             return false;
 
-        ConstructionNode constructionNode = (ConstructionNode) rootNode;
-
         //NB: RDF constants are already expected to be decomposed
-        return constructionNode.getSubstitution().rangeAllMatch(v -> (v instanceof DBConstant) || v.isNull());
+        return construction.get().getSubstitution()
+                .rangeAllMatch(v -> (v instanceof DBConstant) || v.isNull());
     }
 
     private Stream<ImmutableList<Constant>> extractValues(IQTree tree, ImmutableList<Variable> outputOrderedVariables) {
@@ -840,12 +847,15 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         if (tree instanceof TrueNode)
             return Stream.of(ImmutableList.of());
 
-        QueryNode rootNode = tree.getRootNode();
-        if (!(rootNode instanceof ConstructionNode))
+        var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+        if (!construction.isPresent())
             throw new MinorOntopInternalBugException("Was expecting either a ValuesNode, a TrueNode or a ConstructionNode");
 
-        Substitution<ImmutableTerm> substitution = ((ConstructionNode) rootNode).getSubstitution();
-        IQTree child = tree.getChildren().get(0);
+        Substitution<ImmutableTerm> substitution = construction.get().getSubstitution();
+        IQTree child = construction.getChild();
+
+        if (child instanceof ValuesNode)
+            return extractValuesFromValuesNode((ValuesNode) child, outputOrderedVariables, substitution);
 
         if (child instanceof TrueNode)
             return Stream.of(
@@ -853,9 +863,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         .map(substitution::get)
                         .map(t -> (Constant) t)
                         .collect(ImmutableCollectors.toList()));
-
-        if (child instanceof ValuesNode)
-            return extractValuesFromValuesNode((ValuesNode) child, outputOrderedVariables, substitution);
 
         throw new MinorOntopInternalBugException("Unexpected child: " + child);
     }

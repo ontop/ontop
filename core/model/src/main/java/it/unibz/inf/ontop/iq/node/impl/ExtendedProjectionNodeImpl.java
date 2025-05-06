@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -85,24 +86,24 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         try {
             PropagationResults tauPropagationResults = propagateTau(tau, child.getVariables());
 
+            IQTree newChild = updateChildFct.apply(child, tauPropagationResults);
+
             Optional<FilterNode> filterNode = tauPropagationResults.filter
                     .map(iqFactory::createFilterNode);
 
-            IQTree newChild = updateChildFct.apply(child, tauPropagationResults);
-
-            Optional<ExtendedProjectionNode> projectionNode = computeNewProjectionNode(newProjectedVariables,
+            Optional<? extends ExtendedProjectionNode> projectionNode = computeNewProjectionNode(newProjectedVariables,
                     tauPropagationResults.theta, newChild);
 
-            IQTree filterTree = iqTreeTools.createOptionalUnaryIQTree(filterNode, newChild);
-
-            return iqTreeTools.createOptionalUnaryIQTree(projectionNode, filterTree);
-
-        } catch (EmptyTreeException e) {
+            return iqTreeTools.createOptionalAncestorsUnaryIQTree(
+                    ImmutableList.of(projectionNode, filterNode),
+                    newChild);
+        }
+        catch (EmptyTreeException e) {
             return iqFactory.createEmptyNode(newProjectedVariables);
         }
     }
 
-    protected abstract Optional<ExtendedProjectionNode> computeNewProjectionNode(
+    protected abstract Optional<? extends ExtendedProjectionNode> computeNewProjectionNode(
             ImmutableSet<Variable> newProjectedVariables, Substitution<ImmutableTerm> theta, IQTree newChild);
 
 

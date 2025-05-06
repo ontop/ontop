@@ -485,9 +485,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
         IQTree liftedChild = child.normalizeForOptimization(variableGenerator);
         IQTree shrunkChild = notRequiredVariableRemover.optimize(liftedChild, childVariables, variableGenerator);
-        QueryNode shrunkChildRoot = shrunkChild.getRootNode();
-        if (shrunkChildRoot instanceof ConstructionNode)
-            return mergeWithChild((ConstructionNode) shrunkChildRoot, (UnaryIQTree) shrunkChild, treeCache, variableGenerator);
+        var shrunkChildConstruction = IQTreeTools.UnaryIQTreeDecomposition.of(shrunkChild, ConstructionNode.class);
+        if (shrunkChildConstruction.isPresent())
+            return mergeWithChild(shrunkChildConstruction.get(), shrunkChildConstruction.getChild(), treeCache, variableGenerator);
         else if (shrunkChild.isDeclaredAsEmpty()) {
             return iqFactory.createEmptyNode(projectedVariables);
         }
@@ -530,16 +530,14 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    protected Optional<ExtendedProjectionNode> computeNewProjectionNode(ImmutableSet<Variable> newProjectedVariables,
+    protected Optional<ConstructionNode> computeNewProjectionNode(ImmutableSet<Variable> newProjectedVariables,
                                                                         Substitution<ImmutableTerm> theta, IQTree newChild) {
         return Optional.of(theta)
                 .filter(t -> !(t.isEmpty() && newProjectedVariables.equals(newChild.getVariables())))
                 .map(t -> iqFactory.createConstructionNode(newProjectedVariables, t));
     }
 
-    private IQTree mergeWithChild(ConstructionNode childConstructionNode, UnaryIQTree childIQ, IQTreeCache treeCache, VariableGenerator variableGenerator) {
-
-        IQTree grandChild = childIQ.getChild();
+    private IQTree mergeWithChild(ConstructionNode childConstructionNode, IQTree grandChild, IQTreeCache treeCache, VariableGenerator variableGenerator) {
 
         ConstructionSubstitutionNormalization substitutionNormalization = substitutionNormalizer.normalizeSubstitution(
                 childConstructionNode.getSubstitution().compose(substitution)
