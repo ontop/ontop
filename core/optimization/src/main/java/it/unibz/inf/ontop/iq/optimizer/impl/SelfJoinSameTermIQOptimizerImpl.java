@@ -61,7 +61,7 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
                     .filter(c -> c instanceof ExtensionalDataNode)
                     .map(c -> (ExtensionalDataNode) c)
                     .filter(d1 -> otherChildren
-                            .flatMap(t -> t.acceptVisitor(requiredExtensionalDataNodeExtractor))
+                            .flatMap(requiredExtensionalDataNodeExtractor::transform)
                             .anyMatch(d2 -> isDetectedAsRedundant(d1, d2)))
                     .isPresent();
         }

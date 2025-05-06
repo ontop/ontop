@@ -5,9 +5,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.visit.impl.AbstractPredicateExtractor;
+import it.unibz.inf.ontop.iq.visit.impl.AbstractIQTreeToStreamVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
@@ -18,7 +17,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Singleton
-public class ClassAndPropertyExtractor extends AbstractPredicateExtractor<IntensionalDataNode> {
+public class ClassAndPropertyExtractor extends AbstractIQTreeToStreamVisitingTransformer<IntensionalDataNode> {
 
     @Inject
     protected ClassAndPropertyExtractor() {
@@ -48,11 +47,6 @@ public class ClassAndPropertyExtractor extends AbstractPredicateExtractor<Intens
     @Override
     public Stream<IntensionalDataNode> transformIntensionalData(IntensionalDataNode dataNode) {
         return Stream.of(dataNode);
-    }
-
-    @Override
-    public Stream<IntensionalDataNode> transformExtensionalData(ExtensionalDataNode dataNode) {
-        return Stream.empty();
     }
 
     public static class ClassesAndProperties {

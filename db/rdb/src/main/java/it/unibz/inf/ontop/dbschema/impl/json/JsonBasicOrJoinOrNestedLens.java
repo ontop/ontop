@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
-import it.unibz.inf.ontop.iq.visit.impl.RelationExtractor;
+import it.unibz.inf.ontop.iq.visit.impl.ExtensionalDataNodeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -342,7 +342,7 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
         }
 
         Optional<ExtensionalDataNode> optionalParentNode = viewIQ.getTree()
-                .acceptVisitor(new RelationExtractor())
+                .acceptVisitor(new ExtensionalDataNodeExtractor())
                 .filter(n -> n.getRelationDefinition().equals(parentRelation))
                 .findAny();
 

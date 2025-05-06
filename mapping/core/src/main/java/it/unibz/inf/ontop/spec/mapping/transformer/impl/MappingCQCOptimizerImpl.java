@@ -18,6 +18,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -36,21 +38,21 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
     public IQ optimize(ExtensionalDataNodeListContainmentCheck cqContainmentCheck, IQ query) {
 
         IQTree tree = query.getTree();
-        ConstructionNode constructionNode = (ConstructionNode) tree.getRootNode();
+        var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
 
         return iqFactory.createIQ(
                 query.getProjectionAtom(),
-                tree.acceptTransformer(new Transformer(constructionNode, cqContainmentCheck)));
+                tree.acceptTransformer(new Transformer(construction.get().getSubstitution().getRangeVariables(), cqContainmentCheck)));
     }
 
     protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-        private final ConstructionNode constructionNode;
+        private final ImmutableSet<Variable> constructionTreeVariables;
         private final ExtensionalDataNodeListContainmentCheck cqContainmentCheck;
 
-        protected Transformer(ConstructionNode constructionNode, ExtensionalDataNodeListContainmentCheck cqContainmentCheck) {
+        protected Transformer(ImmutableSet<Variable> constructionTreeVariables, ExtensionalDataNodeListContainmentCheck cqContainmentCheck) {
             super(MappingCQCOptimizerImpl.this.iqFactory);
-            this.constructionNode = constructionNode;
             this.cqContainmentCheck = cqContainmentCheck;
+            this.constructionTreeVariables = constructionTreeVariables;
         }
 
         @Override
@@ -74,7 +76,7 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                     .collect(ImmutableCollectors.toList());
 
             ImmutableList<Variable> answerVariables = Stream.concat(
-                            constructionNode.getSubstitution().getRangeVariables().stream(),
+                            constructionTreeVariables.stream(),
                             joiningConditions.stream().flatMap(ImmutableTerm::getVariableStream))
                     .distinct()
                     .collect(ImmutableCollectors.toList());

@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.visit.impl.AbstractIQTreeToStreamVisitingTransformer;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 
 import javax.inject.Inject;
@@ -13,16 +14,27 @@ import javax.inject.Singleton;
 import java.util.stream.Stream;
 
 
+/**
+ * Looks for extensional data nodes that are required to provide tuples.
+ *
+ * For instance, excludes data atoms only appearing on the right of a LJ.
+ *
+ * MAY BE INCOMPLETE
+ *
+ */
+
+
 @Singleton
-public class RequiredExtensionalDataNodeExtractorImpl implements RequiredExtensionalDataNodeExtractor {
+public class RequiredExtensionalDataNodeExtractorImpl extends AbstractIQTreeToStreamVisitingTransformer<ExtensionalDataNode>
+        implements RequiredExtensionalDataNodeExtractor {
 
     @Inject
     protected RequiredExtensionalDataNodeExtractorImpl() {
     }
 
     @Override
-    public Stream<ExtensionalDataNode> transformIntensionalData(IntensionalDataNode dataNode) {
-        return Stream.empty();
+    public Stream<ExtensionalDataNode> transform(IQTree tree) {
+        return tree.acceptVisitor(this);
     }
 
     @Override
@@ -31,75 +43,15 @@ public class RequiredExtensionalDataNodeExtractorImpl implements RequiredExtensi
     }
 
     @Override
-    public Stream<ExtensionalDataNode> transformEmpty(EmptyNode node) {
-        return Stream.empty();
-    }
-
-    @Override
-    public Stream<ExtensionalDataNode> transformTrue(TrueNode node) {
-        return Stream.empty();
-    }
-
-    @Override
-    public Stream<ExtensionalDataNode> transformNative(NativeNode nativeNode) {
-        return Stream.empty();
-    }
-
-    @Override
-    public Stream<ExtensionalDataNode> transformValues(ValuesNode valuesNode) {
-        return Stream.empty();
-    }
-
-    @Override
-    public Stream<ExtensionalDataNode> transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-        return child.acceptVisitor(this);
-    }
-
-    /**
-     * Blocks
-     */
-    @Override
     public Stream<ExtensionalDataNode> transformAggregation(UnaryIQTree tree, AggregationNode aggregationNode, IQTree child) {
+        // blocks
         return Stream.empty();
     }
 
-    @Override
-    public Stream<ExtensionalDataNode> transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-        return child.acceptVisitor(this);
-    }
-
-    @Override
-    public Stream<ExtensionalDataNode> transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
-        return child.acceptVisitor(this);
-    }
-
-    @Override
-    public Stream<ExtensionalDataNode> transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-        return child.acceptVisitor(this);
-    }
-
-    @Override
-    public Stream<ExtensionalDataNode> transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
-        return child.acceptVisitor(this);
-    }
-
-    @Override
-    public Stream<ExtensionalDataNode> transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-        return child.acceptVisitor(this);
-    }
-
-    /**
-     * Only considers the left child
-     */
     @Override
     public Stream<ExtensionalDataNode> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        // Only considers the left child
         return leftChild.acceptVisitor(this);
-    }
-
-    @Override
-    public Stream<ExtensionalDataNode> transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-        return children.stream()
-                .flatMap(c -> c.acceptVisitor(this));
     }
 
     /**

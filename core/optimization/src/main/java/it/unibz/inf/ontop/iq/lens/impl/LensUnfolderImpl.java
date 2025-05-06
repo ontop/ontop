@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.impl.ExtensionalDataNodeImpl;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.impl.RelationExtractor;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 public class LensUnfolderImpl implements LensUnfolder {
@@ -28,7 +27,7 @@ public class LensUnfolderImpl implements LensUnfolder {
     @Override
     public IQ optimize(IQ query) {
         IQTree initialTree = query.getTree();
-        int maxLevel = extractMaxLevel(initialTree);
+        int maxLevel = Lens.getMaxLevel(initialTree);
         if (maxLevel < 1)
             return query;
 
@@ -39,16 +38,6 @@ public class LensUnfolderImpl implements LensUnfolder {
                 ? query
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree)
                 .normalizeForOptimization();
-    }
-
-    private int extractMaxLevel(IQTree tree) {
-        return tree.acceptVisitor(new RelationExtractor())
-                .map(ExtensionalDataNode::getRelationDefinition)
-                .filter(r -> r instanceof Lens)
-                .map(r -> (Lens) r)
-                .mapToInt(Lens::getLevel)
-                .max()
-                .orElse(0);
     }
 
     protected class MaxLevelLensUnfoldingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {

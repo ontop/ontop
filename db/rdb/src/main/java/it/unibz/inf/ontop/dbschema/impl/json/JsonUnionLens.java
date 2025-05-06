@@ -79,7 +79,7 @@ public class JsonUnionLens extends JsonLens {
 
         IQ iq = createIQ(relationId, dbParameters, parentCacheMetadataLookup);
 
-        int maxParentLevel = extractMaxParentLevel(iq);
+        int maxParentLevel = Lens.getMaxLevel(iq.getTree());
 
         // For added columns the termtype, quoted ID and nullability all need to come from the IQ
         RelationDefinition.AttributeListBuilder attributeBuilder = createAttributeBuilder(iq, dbParameters);

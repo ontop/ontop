@@ -62,7 +62,7 @@ public class JsonSQLLens extends JsonLens {
 
         IQ iq = createIQ(relationId, dbParameters, parentCacheMetadataLookup);
 
-        int maxParentLevel = extractMaxParentLevel(iq);
+        int maxParentLevel = Lens.getMaxLevel(iq.getTree());
 
         if (maxParentLevel > 0)
             LOGGER.warn("It is dangerous to build SQLViewDefinitions above OntopViewDefinitions, " +

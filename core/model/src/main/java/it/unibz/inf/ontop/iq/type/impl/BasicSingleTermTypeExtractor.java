@@ -201,19 +201,15 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
             return children.stream()
                     .map(c -> c.acceptVisitor(this))
                     .flatMap(Optional::stream)
-                    .findAny();
+                    .findAny(); // pick any of them
         }
 
         @Override
         public Optional<TermType> transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            ImmutableSet<TermType> termTypes = children.stream()
+            return children.stream()
                     .map(c -> c.acceptVisitor(this))
                     .flatMap(Optional::stream)
-                    .collect(ImmutableCollectors.toSet());
-
-            // Picks arbitrarily one of them
-            return termTypes.stream()
-                    .findAny();
+                    .findAny(); // pick any of them
         }
     }
 }
