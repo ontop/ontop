@@ -8,6 +8,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -16,6 +17,7 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -154,27 +156,24 @@ public class IQTreeTools {
     }
 
     public ImmutableList<IQTree> createUnaryOperatorChildren(UnaryOperatorNode node, IQTree child) {
-         return child.getChildren().stream()
+         return createUnaryOperatorChildren(node, child.getChildren());
+    }
+
+    public ImmutableList<IQTree> createUnaryOperatorChildren(UnaryOperatorNode node, ImmutableList<IQTree> children) {
+        return children.stream()
                 .<IQTree>map(c -> iqFactory.createUnaryIQTree(node, c))
                 .collect(ImmutableCollectors.toList());
     }
 
+    public static class IQTreeDecomposition<T extends QueryNode> {
+        protected final T node; // nullable
 
-    public static class UnaryIQTreeDecomposition<T extends UnaryOperatorNode> {
-        private final T node; // nullable
-        private final IQTree child;
-
-        private UnaryIQTreeDecomposition(T node, IQTree child) {
+        private IQTreeDecomposition(T node) {
             this.node = node;
-            this.child = child;
         }
 
         public Optional<T> getOptionalNode() {
             return Optional.ofNullable(node);
-        }
-
-        public IQTree getChild() {
-            return child;
         }
 
         public boolean isPresent() {
@@ -183,6 +182,21 @@ public class IQTreeTools {
 
         public T get() {
             return Objects.requireNonNull(node);
+        }
+
+    }
+
+
+    public static class UnaryIQTreeDecomposition<T extends UnaryOperatorNode> extends IQTreeDecomposition<T> {
+        private final IQTree child;
+
+        private UnaryIQTreeDecomposition(T node, IQTree child) {
+            super(node);
+            this.child = child;
+        }
+
+        public IQTree getChild() {
+            return child;
         }
 
         public <U> Optional<U> map(BiFunction<? super T, IQTree, ? extends U> function) {
@@ -206,14 +220,50 @@ public class IQTreeTools {
                     .map(UnaryIQTreeDecomposition::getChild)
                     .collect(ImmutableCollectors.toList());
         }
-
     }
 
+    public static class NaryIQTreeDecomposition<T extends NaryOperatorNode> extends IQTreeDecomposition<T> {
+        private final ImmutableList<IQTree> children;
+
+        public NaryIQTreeDecomposition(T node, ImmutableList<IQTree> children) {
+            super(node);
+            this.children = children;
+        }
+
+        public ImmutableList<IQTree> getChildren() {
+            return children;
+        }
+        public <U> Optional<U> map(BiFunction<? super T, ImmutableList<IQTree>, ? extends U> function) {
+            return Optional.ofNullable(node).map(n -> function.apply(n, children));
+        }
+
+
+        public static <T extends NaryOperatorNode> NaryIQTreeDecomposition<T> of(IQTree tree, Class<T> nodeClass) {
+            return nodeClass.isInstance(tree.getRootNode())
+                    ? new NaryIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((NaryIQTree)tree).getChildren())
+                    : new NaryIQTreeDecomposition<>(null, ImmutableList.of(tree));
+        }
+    }
 
     public static <T extends QueryNode> boolean contains(IQTree tree, Class<T> nodeClass) {
         return nodeClass.isInstance(tree.getRootNode()) ||
                 tree.getChildren().stream().anyMatch(t -> contains(t, nodeClass));
     }
+
+    public IQTree liftIncompatibleDefinitions(UnaryOperatorNode node, Variable variable, IQTree child, VariableGenerator variableGenerator) {
+        IQTree newChild = child.liftIncompatibleDefinitions(variable, variableGenerator);
+
+        // Lift the union above the node
+        var union = NaryIQTreeDecomposition.of(newChild, UnionNode.class);
+        if (union.isPresent()) {
+            if (union.get().hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
+                ImmutableList<IQTree> newChildren = createUnaryOperatorChildren(node, newChild);
+                return iqFactory.createNaryIQTree(union.get(), newChildren);
+            }
+        }
+        return iqFactory.createUnaryIQTree(node, newChild);
+    }
+
 
     /**
      * If the substitution is a fresh renaming, returns it as an injective substitution

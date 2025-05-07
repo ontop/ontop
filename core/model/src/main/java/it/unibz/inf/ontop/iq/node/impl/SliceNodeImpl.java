@@ -24,9 +24,9 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 
 
 public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
@@ -164,18 +164,18 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                                           IQTreeCache treeCache, BooleanSupplier hasChildChanged) {
         QueryNode newChildRoot = newChild.getRootNode();
             // Only triggered if a child with a known cardinality is present directly under the UNION
-        if (newChildRoot instanceof UnionNode) {
-            UnionNode unionNode = (UnionNode) newChildRoot;
-
-            Optional<IQTree> newTree = newChild.getChildren().stream().anyMatch(c -> getKnownCardinality(c).isPresent())
-                    ? simplifyUnionWithChildrenOfKnownCardinality(unionNode, newChild, limit, variableGenerator)
-                    : pushLimitInUnionChildren(unionNode, newChild, variableGenerator);
+        var union = NaryIQTreeDecomposition.of(newChild, UnionNode.class);
+        if (union.isPresent()) {
+            Optional<IQTree> newTree = union.getChildren().stream().anyMatch(c -> getKnownCardinality(c).isPresent())
+                    ? simplifyUnionWithChildrenOfKnownCardinality(union.get(), newChild, limit, variableGenerator)
+                    : pushLimitInUnionChildren(union.get(), union.getChildren(), variableGenerator);
             if (newTree.isPresent())
                 return newTree.get();
         }
+        var innerJoin = NaryIQTreeDecomposition.of(newChild, InnerJoinNode.class);
         // TODO: consider a more general technique (distinct removal in sub-tree)
-        else if ((newChildRoot instanceof InnerJoinNode) && limit <= 1) {
-            var joinChildren = newChild.getChildren();
+        if (innerJoin.isPresent() && limit <= 1) {
+            var joinChildren = innerJoin.getChildren();
             var newJoinChildren = joinChildren.stream()
                     // Distinct-s can be eliminated
                     .map(c -> UnaryIQTreeDecomposition.of(c, DistinctNode.class))
@@ -183,7 +183,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                     .collect(ImmutableCollectors.toList());
 
             if (!newJoinChildren.equals(joinChildren)) {
-                var updatedChildTree = iqFactory.createNaryIQTree((InnerJoinNode) newChildRoot, newJoinChildren);
+                var updatedChildTree = iqFactory.createNaryIQTree(innerJoin.get(), newJoinChildren);
                 return normalizeForOptimization(updatedChildTree, variableGenerator, treeCache,
                         () -> true);
             }
@@ -195,14 +195,13 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 return normalizeForOptimization(distinct.getChild(), variableGenerator, treeCache,
                         () -> true);
 
-            IQTree childOfDistinct = distinct.getChild();
-
-            if ((childOfDistinct.getRootNode() instanceof UnionNode)
+            var innerUnion = NaryIQTreeDecomposition.of(distinct.getChild(), UnionNode.class);
+            if (innerUnion.isPresent()
                     // If any subtree Ti is distinct we proceed with the optimization
-                    && childOfDistinct.getChildren().stream().anyMatch(IQTree::isDistinct)) {
+                    && innerUnion.getChildren().stream().anyMatch(IQTree::isDistinct)) {
 
                 Optional<IQTree> newTree = simplifyDistinctUnionWithDistinctChildren(
-                        (NaryIQTree) childOfDistinct, limit, variableGenerator);
+                        innerUnion.get(), innerUnion.getChildren(), limit, variableGenerator);
 
                 if (newTree.isPresent())
                     return newTree.get();
@@ -301,25 +300,25 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                         .normalizeForOptimization(variableGenerator));
     }
 
-    private Optional<IQTree> pushLimitInUnionChildren(UnionNode unionNode, IQTree unionTree, VariableGenerator variableGenerator) {
-        ImmutableList<IQTree> newUnionChildren = unionTree.getChildren().stream()
+    private Optional<IQTree> pushLimitInUnionChildren(UnionNode unionNode, ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
+        ImmutableList<IQTree> newUnionChildren = children.stream()
                 .map(c -> iqFactory.createUnaryIQTree(this, c))
                 .map(c -> c.normalizeForOptimization(variableGenerator))
                 .collect(ImmutableCollectors.toList());
 
-        return unionTree.getChildren().equals(newUnionChildren)
+        return children.equals(newUnionChildren)
                 ? Optional.empty()
                 : Optional.of(iqFactory.createUnaryIQTree(
                         this,
                         iqFactory.createNaryIQTree(unionNode, newUnionChildren)));
     }
 
-    private Optional<IQTree> simplifyDistinctUnionWithDistinctChildren(NaryIQTree unionTree, int limit, VariableGenerator variableGenerator) {
-        ImmutableList<IQTree> unionChildren = unionTree.getChildren();
+    private Optional<IQTree> simplifyDistinctUnionWithDistinctChildren(UnionNode union, ImmutableList<IQTree> unionChildren, int limit, VariableGenerator variableGenerator) {
 
         Optional<IQTree> sufficientChild = unionChildren.stream()
                 .filter(IQTree::isDistinct)
-                .filter(c -> getKnownCardinality(c).filter(card -> card >= limit)
+                .filter(c -> getKnownCardinality(c)
+                        .filter(card -> card >= limit)
                         .isPresent())
                 .findAny();
 
@@ -344,7 +343,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                                 iqFactory.createUnaryIQTree(
                                         iqFactory.createDistinctNode(),
                                         iqFactory.createNaryIQTree(
-                                                unionTree.getRootNode(),
+                                                union,
                                                 newUnionChildren)))
                                 .normalizeForOptimization(variableGenerator));
     }

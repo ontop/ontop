@@ -770,13 +770,12 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     private IQTree tryToMergeSomeChildrenInAValuesNode(IQTree tree, VariableGenerator variableGenerator, IQTreeCache treeCache,
                                                        boolean isRoot) {
-        QueryNode rootNode = tree.getRootNode();
-        if (!(rootNode instanceof UnionNode))
+        var union = IQTreeTools.NaryIQTreeDecomposition.of(tree, UnionNode.class);
+        if (!union.isPresent())
             return tree;
 
-        UnionNode unionNode = (UnionNode) rootNode;
-
-        ImmutableList<IQTree> children = tree.getChildren();
+        UnionNode unionNode = union.get();
+        ImmutableList<IQTree> children = union.getChildren();
 
         ImmutableList<IQTree> nonMergedChildren = children.stream()
                 .filter(t -> !isMergeableInValuesNode(t))
@@ -828,16 +827,14 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             return true;
 
         var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
-        if (!construction.isPresent())
-            return false;
-
-        IQTree child = construction.getChild();
-        if (!((child instanceof TrueNode) || (child instanceof ValuesNode)))
-            return false;
-
-        //NB: RDF constants are already expected to be decomposed
-        return construction.get().getSubstitution()
-                .rangeAllMatch(v -> (v instanceof DBConstant) || v.isNull());
+        if (construction.isPresent()) {
+            IQTree child = construction.getChild();
+            return ((child instanceof ValuesNode) || (child instanceof TrueNode))
+                    //NB: RDF constants are already expected to be decomposed
+                    && construction.get().getSubstitution()
+                    .rangeAllMatch(v -> (v instanceof DBConstant) || v.isNull());
+        }
+        return false;
     }
 
     private Stream<ImmutableList<Constant>> extractValues(IQTree tree, ImmutableList<Variable> outputOrderedVariables) {
@@ -848,23 +845,21 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             return Stream.of(ImmutableList.of());
 
         var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
-        if (!construction.isPresent())
-            throw new MinorOntopInternalBugException("Was expecting either a ValuesNode, a TrueNode or a ConstructionNode");
+        if (construction.isPresent()) {
+            Substitution<ImmutableTerm> substitution = construction.get().getSubstitution();
+            IQTree child = construction.getChild();
 
-        Substitution<ImmutableTerm> substitution = construction.get().getSubstitution();
-        IQTree child = construction.getChild();
+            if (child instanceof ValuesNode)
+                return extractValuesFromValuesNode((ValuesNode) child, outputOrderedVariables, substitution);
 
-        if (child instanceof ValuesNode)
-            return extractValuesFromValuesNode((ValuesNode) child, outputOrderedVariables, substitution);
-
-        if (child instanceof TrueNode)
-            return Stream.of(
-                    outputOrderedVariables.stream()
-                        .map(substitution::get)
-                        .map(t -> (Constant) t)
-                        .collect(ImmutableCollectors.toList()));
-
-        throw new MinorOntopInternalBugException("Unexpected child: " + child);
+            if (child instanceof TrueNode)
+                return Stream.of(
+                        outputOrderedVariables.stream()
+                                .map(substitution::get)
+                                .map(t -> (Constant) t)
+                                .collect(ImmutableCollectors.toList()));
+        }
+        throw new MinorOntopInternalBugException("Unexpected tree: " + tree);
     }
 
     private Stream<ImmutableList<Constant>> extractValuesFromValuesNode(ValuesNode valuesNode, ImmutableList<Variable> outputOrderedVariables) {

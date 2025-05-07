@@ -227,12 +227,10 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .filter(e -> e.getValue().isConstructed(variable))
                 // index -> new child
                 .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().liftIncompatibleDefinitions(variable, variableGenerator)))
-                .filter(e -> {
-                            QueryNode newRootNode = e.getValue().getRootNode();
-                            return (newRootNode instanceof UnionNode)
-                                    && ((UnionNode) newRootNode).hasAChildWithLiftableDefinition(variable,
-                                    e.getValue().getChildren());
-                })
+                .filter(e -> IQTreeTools.NaryIQTreeDecomposition.of(e.getValue(), UnionNode.class)
+                        .map((u, c) -> u.hasAChildWithLiftableDefinition(variable, c))
+                        .filter(Boolean::booleanValue)
+                        .isPresent())
                 .findFirst()
                 .map(e -> liftUnionChild(e.getKey(), (NaryIQTree) e.getValue(), children, variableGenerator))
                 .orElseGet(() -> iqFactory.createNaryIQTree(this, children));

@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -17,6 +18,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 
 /**
  * Lifts unions above projections, until a fixed point is reached.
@@ -27,16 +29,17 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 public class UnionFlattenerImpl implements UnionFlattener {
 
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
-    private UnionFlattenerImpl(IntermediateQueryFactory iqFactory) {
+    private UnionFlattenerImpl(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
         private final VariableGenerator variableGenerator;
-
 
         private TreeTransformer(VariableGenerator variableGenerator) {
             super(UnionFlattenerImpl.this.iqFactory);
@@ -49,15 +52,14 @@ public class UnionFlattenerImpl implements UnionFlattener {
             IQTree transformedChild = transformChild(child);
 
             // if the child is a union, lift it
-            if (transformedChild.getRootNode() instanceof UnionNode) {
+            var union = NaryIQTreeDecomposition.of(transformedChild, UnionNode.class);
+            if (union.isPresent()) {
                 return iqFactory.createNaryIQTree(
                         iqFactory.createUnionNode(rootCn.getVariables()),
-                        transformedChild.getChildren().stream()
-                                .map(t -> iqFactory.createUnaryIQTree(rootCn, t))
-                                .collect(ImmutableCollectors.toList()));
+                            iqTreeTools.createUnaryOperatorChildren(rootCn, union.getChildren()));
             }
-            var construction = UnaryIQTreeDecomposition.of(transformedChild, ConstructionNode.class);
             // if the child is a construction node, merge it
+            var construction = UnaryIQTreeDecomposition.of(transformedChild, ConstructionNode.class);
             if (construction.isPresent()) {
                 return rootCn.normalizeForOptimization(transformedChild, variableGenerator, iqFactory.createIQTreeCache());
             }

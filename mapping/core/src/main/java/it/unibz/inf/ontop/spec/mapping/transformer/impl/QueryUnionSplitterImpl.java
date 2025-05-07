@@ -45,6 +45,7 @@ public class QueryUnionSplitterImpl implements QueryUnionSplitter {
     }
 
     private Optional<NaryIQTree> findFirstSplittableUnion(IQ query) {
+
         Queue<IQTree> nodesToVisit = new LinkedList<>();
         nodesToVisit.add(query.getTree());
 

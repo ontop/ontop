@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 
 
 @Singleton
@@ -68,10 +69,9 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
         // DISTINCT [ORDER BY] [FILTER] UNION
         var orderBy = UnaryIQTreeDecomposition.of(child, OrderByNode.class);
         var filter = UnaryIQTreeDecomposition.of(orderBy.getChild(), FilterNode.class);
-        var nestedChild = filter.getChild();
-
-        if (nestedChild.getRootNode() instanceof UnionNode) {
-            ImmutableList<IQTree> unionChildren = nestedChild.getChildren();
+        var union = NaryIQTreeDecomposition.of(filter.getChild(), UnionNode.class);
+        if (union.isPresent()) {
+            ImmutableList<IQTree> unionChildren = union.getChildren();
             ImmutableList<IQTree> newUnionChildren = unionChildren.stream()
                     .map(c -> simplifyUnionChild(c, variableGenerator))
                     .collect(ImmutableCollectors.toList());
@@ -82,7 +82,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                                         Optional.of(distinctNode),
                                         orderBy.getOptionalNode(),
                                         filter.getOptionalNode()),
-                                iqFactory.createNaryIQTree((UnionNode) nestedChild.getRootNode(), newUnionChildren))
+                                iqFactory.createNaryIQTree(union.get(), newUnionChildren))
                         .normalizeForOptimization(variableGenerator);
         }
 

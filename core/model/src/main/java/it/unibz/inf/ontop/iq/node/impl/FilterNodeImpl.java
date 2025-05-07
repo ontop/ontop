@@ -64,20 +64,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator) {
-        IQTree newChild = child.liftIncompatibleDefinitions(variable, variableGenerator);
-        QueryNode newChildRoot = newChild.getRootNode();
-
-        /*
-         * Lift the union above the filter
-         */
-        if (newChildRoot instanceof UnionNode) {
-            UnionNode unionNode = (UnionNode) newChildRoot;
-            if (unionNode.hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
-                ImmutableList<IQTree> newChildren = iqTreeTools.createUnaryOperatorChildren(this, newChild);
-                return iqFactory.createNaryIQTree(unionNode, newChildren);
-            }
-        }
-        return iqFactory.createUnaryIQTree(this, newChild);
+        return iqTreeTools.liftIncompatibleDefinitions(this, variable, child, variableGenerator);
     }
 
     @Override

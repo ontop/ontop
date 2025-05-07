@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
@@ -153,13 +154,11 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         }
 
         IQTree newChild = child.liftIncompatibleDefinitions(variable, variableGenerator);
-        QueryNode newChildRoot = newChild.getRootNode();
 
-        /*
-         * Lift the union above the construction node
-         */
-        if ((newChildRoot instanceof UnionNode)
-                && ((UnionNode) newChildRoot).hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
+        // Lift the union above the construction node (note the different union node compared to IQTreeTools)
+        var union = NaryIQTreeDecomposition.of(newChild, UnionNode.class);
+        if (union.isPresent()
+                && union.get().hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
             ImmutableList<IQTree> newChildren = iqTreeTools.createUnaryOperatorChildren(this, newChild);
             return iqFactory.createNaryIQTree(iqFactory.createUnionNode(getVariables()), newChildren);
         }
@@ -411,7 +410,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         if (!f.getFunctionSymbol().isDeterministic())
             return false;
         return f.getTerms().stream() // recursive
-                .allMatch(t -> isDeterministic(t));
+                .allMatch(ConstructionNodeImpl::isDeterministic);
     }
 
     /**

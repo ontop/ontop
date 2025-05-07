@@ -27,6 +27,9 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
+
 /**
  * When an UNION appears as a child of an inner join, looks for other siblings that could be "pushed under the union".
  * <p>
@@ -119,11 +122,8 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
                 ImmutableList<IQTree> currentChildren = children;
 
                 Optional<Map.Entry<NaryIQTree, ImmutableList<Integer>>> selectedEntry = children.stream()
-                        .filter(c -> c.getRootNode() instanceof UnionNode)
-                        .map(c -> (NaryIQTree) c)
                         .map(c -> extractPushableSiblings(c, currentChildren))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
+                        .flatMap(Optional::stream)
                         .findFirst();
 
                 if (selectedEntry.isPresent()) {
@@ -151,8 +151,12 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
         /**
          * Criteria for selecting siblings: must be leaf and must naturally join (i.e. share a variable) with the union
          */
-        protected Optional<Map.Entry<NaryIQTree, ImmutableList<Integer>>> extractPushableSiblings(NaryIQTree unionTree,
-                                                                                             ImmutableList<IQTree> children) {
+        protected Optional<Map.Entry<NaryIQTree, ImmutableList<Integer>>> extractPushableSiblings(IQTree unionTree,
+                                                                                                  ImmutableList<IQTree> children) {
+            var union = NaryIQTreeDecomposition.of(unionTree, UnionNode.class);
+            if (!union.isPresent())
+                return Optional.empty();
+
             ImmutableSet<Variable> unionVariables = unionTree.getVariables();
 
             ImmutableList<Integer> pushableSiblings = IntStream.range(0, children.size())
@@ -165,7 +169,7 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
 
             return pushableSiblings.isEmpty()
                     ? Optional.empty()
-                    : Optional.of(Maps.immutableEntry(unionTree, pushableSiblings));
+                    : Optional.of(Maps.immutableEntry((NaryIQTree) unionTree, pushableSiblings));
         }
 
         private ImmutableList<IQTree> updateChildren(NaryIQTree unionTree, ImmutableList<Integer> pushableSiblingIndexes,
