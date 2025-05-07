@@ -19,6 +19,8 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
 /**
  * SQL Server extra normalizer which can handle limit and offset for Microsoft SQL Server 2000 through 2008
  */
@@ -80,15 +82,13 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
             ImmutableExpression expression = getNewFilterExpression(sliceNode, freshVariable);
             FilterNode newFilter = iqFactory.createFilterNode(expression);
 
+            // Patterns: SLICE [CONSTRUCT] ORDER BY
+            var construction = UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
+            var orderBy = UnaryIQTreeDecomposition.of(construction.getChild(), OrderByNode.class);
             // Drop ORDER BY node since it will now be part of the orderBy subTerm
-            IQTree newChild;
-            if (child.getRootNode() instanceof OrderByNode) {
-                newChild = child.getChildren().get(0);
-            } else if (!child.getChildren().isEmpty() && child.getChildren().get(0).getRootNode() instanceof OrderByNode) {
-                newChild = iqFactory.createUnaryIQTree((ConstructionNode) child.getRootNode(), child.getChildren().get(0).getChildren().get(0));
-            } else {
-                newChild = child;
-            }
+            IQTree newChild = construction.isPresent() && orderBy.isPresent()
+                ? iqFactory.createUnaryIQTree(construction.get(), orderBy.getChild())
+                : orderBy.getChild();
             IQTree normalizedChild = this.transform(newChild);
 
             IQTree newTree = iqFactory.createUnaryIQTree(newFilter,
@@ -107,20 +107,12 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
         }
 
         private ImmutableFunctionalTerm getOrderBySubTerm(IQTree childTree) {
-            // Let SLICE be the rootNode
-            // Pattern 1: SLICE [ORDER BY]
-            if (childTree.getRootNode() instanceof OrderByNode) {
+            // Patterns: SLICE [CONSTRUCT] ORDER BY
+            var construction = UnaryIQTreeDecomposition.of(childTree, ConstructionNode.class);
+            var orderBy = UnaryIQTreeDecomposition.of(construction.getChild(), OrderByNode.class);
+            if (orderBy.isPresent()) {
                 return termFactory.getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRowNumberWithOrderBy(),
-                        ((OrderByNode) childTree.getRootNode())
-                                .getComparators().stream()
-                                .map(OrderByNode.OrderComparator::getTerm)
-                                .collect(ImmutableCollectors.toList()));
-            }
-            // Pattern 2: SLICE [CONSTRUCT] [ORDER BY]
-            if (!childTree.getChildren().isEmpty() &&
-                    childTree.getChildren().get(0).getRootNode() instanceof OrderByNode) {
-                return termFactory.getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRowNumberWithOrderBy(),
-                        ((OrderByNode) childTree.getChildren().get(0).getRootNode())
+                        orderBy.get()
                                 .getComparators().stream()
                                 .map(OrderByNode.OrderComparator::getTerm)
                                 .collect(ImmutableCollectors.toList()));

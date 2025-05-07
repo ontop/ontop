@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.BelowDistinctJoinWithClassUnionOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
@@ -69,29 +70,27 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
         }
 
         private Optional<ExtensionalDataNode> extractExtensionalNode(IQTree unionChild) {
-            QueryNode rootNode = unionChild.getRootNode();
-
             /*
              * Filters just make much the variables are non-null can be eliminating,
              * because we are interested in cases where we join over these variables
              */
-            if (rootNode instanceof FilterNode) {
+            var filter = IQTreeTools.UnaryIQTreeDecomposition.of(unionChild, FilterNode.class);
+            if (filter.isPresent()) {
                 VariableNullability variableNullability = coreSingletons.getCoreUtilsFactory()
                         .createEmptyVariableNullability(unionChild.getVariables());
 
-                ImmutableExpression filterCondition = ((FilterNode) rootNode).getFilterCondition();
-
+                ImmutableExpression filterCondition = filter.get().getFilterCondition();
 
                 return filterCondition.evaluate2VL(variableNullability)
                         .getValue()
                         .filter(b -> b.equals(ImmutableExpression.Evaluation.BooleanValue.TRUE))
                         // Continue to the child
-                        .flatMap(b -> extractExtensionalNode(unionChild.getChildren().get(0)));
+                        .flatMap(b -> extractExtensionalNode(filter.getChild()));
             }
-            else if (rootNode instanceof ExtensionalDataNode)
-                return Optional.of((ExtensionalDataNode) rootNode);
-            else
-                return Optional.empty();
+            if (unionChild instanceof ExtensionalDataNode)
+                return Optional.of((ExtensionalDataNode) unionChild);
+
+            return Optional.empty();
         }
     }
 }

@@ -194,17 +194,15 @@ public class FilterNormalizerImpl implements FilterNormalizer {
         public State mergeWithChild() {
             if (condition.isPresent()) {
 
-                QueryNode childRoot = child.getRootNode();
-
-                if (childRoot instanceof FilterNode) {
-                    FilterNode filterChild = (FilterNode) childRoot;
-
+                var filter = UnaryIQTreeDecomposition.of(child, FilterNode.class);
+                if (filter.isPresent()) {
                     ImmutableExpression newCondition = termFactory.getConjunction(condition.get(),
-                            filterChild.getFilterCondition());
+                            filter.get().getFilterCondition());
 
-                    return updateConditionAndChild(newCondition, ((UnaryIQTree)child).getChild());
+                    return updateConditionAndChild(newCondition, filter.getChild());
                 }
-                else if (childRoot instanceof InnerJoinNode) {
+                QueryNode childRoot = child.getRootNode();
+                if (childRoot instanceof InnerJoinNode) {
                     ImmutableExpression newJoiningCondition = ((InnerJoinNode) childRoot).getOptionalFilterCondition()
                             .map(c -> termFactory.getConjunction(condition.get(), c))
                             .orElse(condition.get());

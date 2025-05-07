@@ -523,24 +523,25 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .map(rvs -> Sets.union(leftChild.getVariables(), rvs).immutableCopy())
                     .map(iqFactory::createConstructionNode);
 
-            if (grandChildNode instanceof DistinctNode) {
+            var distinctRightGrandChild = UnaryIQTreeDecomposition.of(rightGrandChild, DistinctNode.class);
+            if (distinctRightGrandChild.isPresent()) {
                 if (leftChild.isDistinct()) {
                     IQTree newLeftChild = leftChild.removeDistincts();
                     IQTree newRightChild = createNewRightChildWithProvenance(provenanceVariable,
-                            ((UnaryIQTree)rightGrandChild).getChild(), rightGrandChild.getVariables());
+                            distinctRightGrandChild.getChild(), rightGrandChild.getVariables());
 
                     ImmutableList<UnaryOperatorNode> additionalAncestors = optionalProjectingAwayParent
-                            .map(p -> ImmutableList.of((DistinctNode) grandChildNode, p))
-                            .orElseGet(() -> ImmutableList.of((DistinctNode) grandChildNode));
+                            .map(p -> ImmutableList.of(distinctRightGrandChild.get(), p))
+                            .orElseGet(() -> ImmutableList.of(distinctRightGrandChild.get()));
 
                     return Optional.of(updateAncestorsConditionChildren(additionalAncestors, ljCondition, newLeftChild, newRightChild));
                 }
                 else
                     return Optional.empty();
             }
-            else if (grandChildNode instanceof FilterNode) {
-                FilterNode filterNode = (FilterNode) grandChildNode;
-                ImmutableExpression filterCondition = filterNode.getFilterCondition();
+            var filterRightGrandChild = UnaryIQTreeDecomposition.of(rightGrandChild, FilterNode.class);
+            if (filterRightGrandChild.isPresent()) {
+                ImmutableExpression filterCondition = filterRightGrandChild.get().getFilterCondition();
 
                 ImmutableExpression newLJCondition = getConjunction(ljCondition, filterCondition);
 
@@ -548,13 +549,13 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         .immutableCopy();
 
                 IQTree newRightChild = createNewRightChildWithProvenance(provenanceVariable,
-                        ((UnaryIQTree)rightGrandChild).getChild(), childVariablesToProject);
+                        filterRightGrandChild.getChild(), childVariablesToProject);
 
                 return Optional.of(optionalProjectingAwayParent
                         .map(p -> updateParentConditionRightChild(p, Optional.of(newLJCondition), newRightChild))
                         .orElseGet(() -> updateConditionAndRightChild(Optional.of(newLJCondition), newRightChild)));
             }
-            else if (grandChildNode instanceof CommutativeJoinNode) {
+            if (grandChildNode instanceof CommutativeJoinNode) {
                 CommutativeJoinNode joinNode = (CommutativeJoinNode) grandChildNode;
 
                 Optional<ImmutableExpression> filterCondition = joinNode.getOptionalFilterCondition();
@@ -579,8 +580,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 else
                     return Optional.empty();
             }
-            else
-                return Optional.empty();
+            return Optional.empty();
         }
 
         private IQTree createNewRightChildWithProvenance(Variable provenanceVariable, IQTree child,

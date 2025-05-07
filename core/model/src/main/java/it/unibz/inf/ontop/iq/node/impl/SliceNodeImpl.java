@@ -92,18 +92,21 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         if (slice.isPresent())
             return mergeWithSliceChild(slice.get(), slice.getChild(), treeCache);
 
-        QueryNode newChildRoot = newChild.getRootNode();
-
-        if (newChildRoot instanceof EmptyNode)
+        if (newChild instanceof EmptyNode)
             return newChild;
-        if ((newChildRoot instanceof TrueNode)
-                || ((newChildRoot instanceof AggregationNode)
-                    && ((AggregationNode) newChildRoot).getGroupingVariables().isEmpty()))
+
+        if ((newChild instanceof TrueNode)
+                || UnaryIQTreeDecomposition.of(newChild, AggregationNode.class)
+                        .getOptionalNode()
+                        .map(AggregationNode::getGroupingVariables)
+                        .filter(AbstractCollection::isEmpty)
+                        .isPresent())
             return offset > 0
                     ? iqFactory.createEmptyNode(newChild.getVariables())
                     : newChild;
-        if (newChildRoot instanceof ValuesNode) {
-            ValuesNode valuesNode = (ValuesNode) newChildRoot;
+
+        if (newChild instanceof ValuesNode) {
+            ValuesNode valuesNode = (ValuesNode) newChild;
             ImmutableList<ImmutableList<Constant>> values = valuesNode.getValues();
             if (values.size() <= offset)
                 return iqFactory.createEmptyNode(valuesNode.getVariables());
@@ -170,25 +173,6 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
             if (newTree.isPresent())
                 return newTree.get();
         }
-        else if (newChildRoot instanceof DistinctNode) {
-            if (limit <= 1)
-                // Distinct can be eliminated
-                return normalizeForOptimization(((UnaryIQTree) newChild).getChild(), variableGenerator, treeCache,
-                        () -> true);
-
-            IQTree childOfDistinct = newChild.getChildren().get(0);
-
-            if ((childOfDistinct.getRootNode() instanceof UnionNode)
-                    // If any subtree Ti is distinct we proceed with the optimization
-                    && childOfDistinct.getChildren().stream().anyMatch(IQTree::isDistinct)) {
-
-                Optional<IQTree> newTree = simplifyDistinctUnionWithDistinctChildren(
-                        (NaryIQTree) childOfDistinct, limit, variableGenerator);
-
-                if (newTree.isPresent())
-                    return newTree.get();
-            }
-        }
         // TODO: consider a more general technique (distinct removal in sub-tree)
         else if ((newChildRoot instanceof InnerJoinNode) && limit <= 1) {
             var joinChildren = newChild.getChildren();
@@ -202,6 +186,26 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 var updatedChildTree = iqFactory.createNaryIQTree((InnerJoinNode) newChildRoot, newJoinChildren);
                 return normalizeForOptimization(updatedChildTree, variableGenerator, treeCache,
                         () -> true);
+            }
+        }
+        var distinct = UnaryIQTreeDecomposition.of(newChild, DistinctNode.class);
+        if (distinct.isPresent()) {
+            if (limit <= 1)
+                // Distinct can be eliminated
+                return normalizeForOptimization(distinct.getChild(), variableGenerator, treeCache,
+                        () -> true);
+
+            IQTree childOfDistinct = distinct.getChild();
+
+            if ((childOfDistinct.getRootNode() instanceof UnionNode)
+                    // If any subtree Ti is distinct we proceed with the optimization
+                    && childOfDistinct.getChildren().stream().anyMatch(IQTree::isDistinct)) {
+
+                Optional<IQTree> newTree = simplifyDistinctUnionWithDistinctChildren(
+                        (NaryIQTree) childOfDistinct, limit, variableGenerator);
+
+                if (newTree.isPresent())
+                    return newTree.get();
             }
         }
 

@@ -27,6 +27,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
 public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements ConstructionNode {
@@ -137,9 +139,11 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         if (child instanceof TrueNode)
             return true;
 
-        QueryNode childRoot = child.getRootNode();
-        return (childRoot instanceof SliceNode)
-                && ((SliceNode) childRoot).getLimit().filter(l -> l == 1).isPresent();
+        return UnaryIQTreeDecomposition.of(child, SliceNode.class)
+                .getOptionalNode()
+                .flatMap(SliceNode::getLimit)
+                .filter(l -> l == 1)
+                .isPresent();
     }
 
     @Override
@@ -485,7 +489,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
         IQTree liftedChild = child.normalizeForOptimization(variableGenerator);
         IQTree shrunkChild = notRequiredVariableRemover.optimize(liftedChild, childVariables, variableGenerator);
-        var shrunkChildConstruction = IQTreeTools.UnaryIQTreeDecomposition.of(shrunkChild, ConstructionNode.class);
+        var shrunkChildConstruction = UnaryIQTreeDecomposition.of(shrunkChild, ConstructionNode.class);
         if (shrunkChildConstruction.isPresent())
             return mergeWithChild(shrunkChildConstruction.get(), shrunkChildConstruction.getChild(), treeCache, variableGenerator);
         else if (shrunkChild.isDeclaredAsEmpty()) {

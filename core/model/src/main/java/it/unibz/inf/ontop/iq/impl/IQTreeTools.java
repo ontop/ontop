@@ -124,6 +124,12 @@ public class IQTreeTools {
                 .orElse(leftJoinNode);
     }
 
+    public InnerJoinNode updateInnerJoinNodeWithConjunct(InnerJoinNode innerJoinNode, Optional<ImmutableExpression> conjunct) {
+        return conjunct
+                .map(c -> iqFactory.createInnerJoinNode(termFactory.getConjunction(innerJoinNode.getOptionalFilterCondition(), Stream.of(c))))
+                .orElse(innerJoinNode);
+    }
+
     public IQTree createOptionalUnaryIQTree(Optional<? extends UnaryOperatorNode> optionalNode, IQTree tree) {
         return optionalNode
                 .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, tree))

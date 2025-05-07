@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.iq.optimizer.splitter.impl;
 
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.optimizer.splitter.PreventDistinctProjectionSplitter;
@@ -18,6 +18,8 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.stream.IntStream;
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 public class PreventDistinctProjectionSplitterImpl extends ProjectionSplitterImpl implements PreventDistinctProjectionSplitter {
 
@@ -62,14 +64,14 @@ public class PreventDistinctProjectionSplitterImpl extends ProjectionSplitterImp
 
     @Override
     protected IQTree insertConstructionNode(IQTree tree, ConstructionNode constructionNode, VariableGenerator variableGenerator) {
-        var rootNode = tree.getRootNode();
-        if(!(rootNode instanceof DistinctNode))
-            return super.insertConstructionNode(tree, constructionNode, variableGenerator);
-
-        /* We can bypass the security check for pushing the CONSTRUCT into the DISTINCT used by the normal ProjectionSplitter,
-         * as the general circumstances of this use case already revolve around that scenario.
-         */
-        return iqFactory.createUnaryIQTree((DistinctNode) rootNode,
-                iqFactory.createUnaryIQTree(constructionNode, ((UnaryIQTree)tree).getChild()));
+        var distinct = IQTreeTools.UnaryIQTreeDecomposition.of(tree, DistinctNode.class);
+        if(distinct.isPresent()) {
+            /* We can bypass the security check for pushing the CONSTRUCT into the DISTINCT used by the normal ProjectionSplitter,
+             * as the general circumstances of this use case already revolve around that scenario.
+             */
+            return iqFactory.createUnaryIQTree(distinct.get(),
+                    iqFactory.createUnaryIQTree(constructionNode, distinct.getChild()));
+        }
+        return super.insertConstructionNode(tree, constructionNode, variableGenerator);
     }
 }
