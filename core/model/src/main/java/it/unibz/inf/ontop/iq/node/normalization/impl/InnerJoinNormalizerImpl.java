@@ -27,6 +27,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 
 
 public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
@@ -40,7 +41,6 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
     private final ConditionSimplifier conditionSimplifier;
     private final TermFactory termFactory;
     private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
-
     private final IQTreeTools iqTreeTools;
 
     @Inject
@@ -438,33 +438,39 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     .noneMatch(c -> c.getRootNode() instanceof CommutativeJoinOrFilterNode))
                 return this;
 
-            ImmutableList<ConditionAndTrees> conditionAndTrees = children.stream()
-                    .map(this::extractConditionAndSubtrees)
-                    .collect(ImmutableCollectors.toList());
+            Optional<ImmutableExpression> newJoiningCondition = termFactory.getConjunction(
+                    joiningCondition,
+                    children.stream().flatMap(this::extractConditions));
 
-            Stream<ImmutableExpression> conditions = conditionAndTrees.stream()
-                    .map(ct -> ct.condition)
-                    .flatMap(Optional::stream);
-
-            Optional<ImmutableExpression> newJoiningCondition = termFactory.getConjunction(joiningCondition, conditions);
-
-            ImmutableList<IQTree> newChildren = conditionAndTrees.stream()
-                    .flatMap(ct -> ct.trees)
+            ImmutableList<IQTree> newChildren = children.stream()
+                    .flatMap(this::extractSubtrees)
                     .collect(ImmutableCollectors.toList());
 
             return updateConditionAndChildren(newJoiningCondition, newChildren);
         }
 
-        private ConditionAndTrees extractConditionAndSubtrees(IQTree tree) {
+        private Stream<IQTree> extractSubtrees(IQTree tree) {
             var filter = UnaryIQTreeDecomposition.of(tree, FilterNode.class);
             if (filter.isPresent())
-                return new ConditionAndTrees(Optional.of(filter.get().getFilterCondition()), Stream.of(filter.getChild()));
-            
-            var join = IQTreeTools.NaryIQTreeDecomposition.of(tree, InnerJoinNode.class);
-            if (join.isPresent())
-                return new ConditionAndTrees(join.get().getOptionalFilterCondition(), join.getChildren().stream());
+                return Stream.of(filter.getChild());
 
-            return new ConditionAndTrees(Optional.empty(), Stream.of(tree));
+            var join = NaryIQTreeDecomposition.of(tree, InnerJoinNode.class);
+            if (join.isPresent())
+                return join.getChildren().stream();
+
+            return Stream.of(tree);
+        }
+
+        private Stream<ImmutableExpression> extractConditions(IQTree tree) {
+            var filter = UnaryIQTreeDecomposition.of(tree, FilterNode.class);
+            if (filter.isPresent())
+                return Stream.of(filter.get().getFilterCondition());
+
+            var join = NaryIQTreeDecomposition.of(tree, InnerJoinNode.class);
+            if (join.isPresent())
+                return join.get().getOptionalFilterCondition().stream();
+
+            return Stream.empty();
         }
 
         /**
@@ -487,16 +493,4 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             return updateParentConditionAndChildren(newParent, joiningCondition, newChildren);
         }
     }
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static class ConditionAndTrees {
-        final Optional<ImmutableExpression> condition;
-        final Stream<IQTree> trees;
-
-        ConditionAndTrees(Optional<ImmutableExpression> condition, Stream<IQTree> trees) {
-            this.condition = condition;
-            this.trees = trees;
-        }
-    }
-
 }
