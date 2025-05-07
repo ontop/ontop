@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 
@@ -12,6 +13,7 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.BinaryNonCommutativeIQTreeDecomposition;
 
 
 @Singleton
@@ -41,8 +43,9 @@ public class RequiredExtensionalDataNodeExtractor {
         /*
          * TODO: see how to safely extract data nodes in the fromRight case
          */
-        if (fromLeft && (tree.getRootNode() instanceof LeftJoinNode))
-            return extractSomeRequiredNodes(((BinaryNonCommutativeIQTree) tree).getLeftChild(), true);
+        var leftJoin = IQTreeTools.BinaryNonCommutativeIQTreeDecomposition.of(tree, LeftJoinNode.class);
+        if (fromLeft && leftJoin.isPresent())
+            return extractSomeRequiredNodes(leftJoin.getLeftChild(), true);
 
         // Usually at the top of the right child of a LJ, with a substitution with ground terms (normally provenance constants)
         if (!fromLeft) {

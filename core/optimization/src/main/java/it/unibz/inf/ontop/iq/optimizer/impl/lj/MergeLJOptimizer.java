@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
@@ -146,14 +147,14 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
 
         private Optional<IQTree> tryToSimplify(IQTree leftDescendent, IQTree topRightTree, Optional<ImmutableExpression> topLJCondition,
                                                ImmutableSet<Variable> topRightSpecificVariables, List<Ancestor> ancestors) {
-            QueryNode leftRootNode = leftDescendent.getRootNode();
-            if (!(leftRootNode instanceof LeftJoinNode))
+
+            var leftJoin = IQTreeTools.BinaryNonCommutativeIQTreeDecomposition.of(leftDescendent, LeftJoinNode.class);
+            if (!leftJoin.isPresent())
                 return Optional.empty();
 
-            LeftJoinNode leftJoinNode = (LeftJoinNode) leftRootNode;
-            BinaryNonCommutativeIQTree leftJoinTree = (BinaryNonCommutativeIQTree) leftDescendent;
-            IQTree leftSubTree = leftJoinTree.getLeftChild();
-            IQTree rightSubTree = leftJoinTree.getRightChild();
+            LeftJoinNode leftJoinNode = leftJoin.get();
+            IQTree leftSubTree = leftJoin.getLeftChild();
+            IQTree rightSubTree = leftJoin.getRightChild();
 
             ImmutableSet<Variable> leftVariables = leftSubTree.getVariables();
 
@@ -185,7 +186,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
             Optional<RightProvenance> localRightProvenance =  renamingAndUpdatedConditions.renaming.isEmpty()
                     ? Optional.empty()
                     : Optional.of(rightProvenanceNormalizer.normalizeRightProvenance(
-                            mergedLocalRightBeforeRenaming, leftJoinTree.getVariables(),
+                            mergedLocalRightBeforeRenaming, leftDescendent.getVariables(),
                     Optional.empty(), variableGenerator));
 
 

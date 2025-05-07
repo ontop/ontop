@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.BinaryNonCommutativeIQTreeDecomposition;
 
 
 public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
@@ -301,12 +302,11 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
          */
         private boolean isLeftJoinToLiftAboveJoin(int i) {
             IQTree currentChild = children.get(i);
-            if (currentChild.getRootNode() instanceof LeftJoinNode) {
-                BinaryNonCommutativeIQTree leftJoinTree = (BinaryNonCommutativeIQTree) currentChild;
-
+            var leftJoin = BinaryNonCommutativeIQTreeDecomposition.of(currentChild, LeftJoinNode.class);
+            if (leftJoin.isPresent()) {
                 Set<Variable> rightSpecificVariables = Sets.difference(
-                        leftJoinTree.getRightChild().getVariables(),
-                        leftJoinTree.getLeftChild().getVariables());
+                        leftJoin.getRightChild().getVariables(),
+                        leftJoin.getLeftChild().getVariables());
 
                 return IntStream.range(0, children.size())
                         .filter(j -> i != j)
@@ -343,7 +343,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 return Optional.empty();
 
             int index = ljChildToLiftIndex.getAsInt();
-            BinaryNonCommutativeIQTree ljChild = (BinaryNonCommutativeIQTree) children.get(index);
+            var ljChild = BinaryNonCommutativeIQTreeDecomposition.of(children.get(index), LeftJoinNode.class);
 
             NaryIQTree newJoinOnLeft = iqFactory.createNaryIQTree(
                     iqFactory.createInnerJoinNode(),
@@ -354,10 +354,12 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                                     .mapToObj(children::get))
                             .collect(ImmutableCollectors.toList()));
 
-            BinaryNonCommutativeIQTree newLeftJoinTree = iqFactory.createBinaryNonCommutativeIQTree(ljChild.getRootNode(), newJoinOnLeft,
-                    ljChild.getRightChild());
-
-            IQTree newTree = iqTreeTools.createOptionalUnaryIQTree(joiningCondition.map(iqFactory::createFilterNode), newLeftJoinTree);
+            IQTree newTree = iqTreeTools.createOptionalUnaryIQTree(
+                    joiningCondition.map(iqFactory::createFilterNode),
+                    iqFactory.createBinaryNonCommutativeIQTree(
+                            ljChild.get(),
+                            newJoinOnLeft,
+                            ljChild.getRightChild()));
 
             return Optional.of(newTree);
         }

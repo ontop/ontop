@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
@@ -29,6 +28,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.BinaryNonCommutativeIQTreeDecomposition;
 
 /**
  * Restricted to LJs on the right to limit overlap with existing techniques.
@@ -192,10 +192,10 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
             if (!leftChild.getVariables().containsAll(rightVariablesInteractingWithLeft))
                 return Optional.empty();
 
-            QueryNode rootNode = leftChild.getRootNode();
-            if (rootNode instanceof LeftJoinNode)
+            var leftJoin = BinaryNonCommutativeIQTreeDecomposition.of(leftChild, LeftJoinNode.class);
+            if (leftJoin.isPresent())
                 // Recursive
-                return extractSafeLeftOfRightDescendantTree(leftChild.getChildren().get(0), rightVariablesInteractingWithLeft);
+                return extractSafeLeftOfRightDescendantTree(leftJoin.getLeftChild(), rightVariablesInteractingWithLeft);
             else
                 return Optional.of(leftChild);
         }
