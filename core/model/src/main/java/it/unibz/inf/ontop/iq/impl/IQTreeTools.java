@@ -206,8 +206,14 @@ public class IQTreeTools {
                     .map(UnaryIQTreeDecomposition::getChild)
                     .collect(ImmutableCollectors.toList());
         }
+
     }
 
+
+    public static <T extends QueryNode> boolean contains(IQTree tree, Class<T> nodeClass) {
+        return nodeClass.isInstance(tree.getRootNode()) ||
+                tree.getChildren().stream().anyMatch(t -> contains(t, nodeClass));
+    }
 
     /**
      * If the substitution is a fresh renaming, returns it as an injective substitution

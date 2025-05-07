@@ -66,7 +66,7 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
             // If no SliceNode present, 2) not an older version of SQL Server pre-2012 3) no db info; use default transformation
             if (!databaseInfoSupplier.getDatabaseVersion().isPresent() ||
                     (Stream.of("8.", "9.", "10.").noneMatch(s -> databaseInfoSupplier.getDatabaseVersion().get().startsWith(s)))
-                    || !containsSliceNode(tree)) {
+                    || !IQTreeTools.contains(tree, SliceNode.class)) {
                 return super.transformSlice(tree, sliceNode, child);
             }
 
@@ -97,13 +97,6 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
             // Additional CONSTRUCTION necessary when subtree leaf in NaryIQTree (e.g. sub-query)
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(newTree.getVariables()), newTree);
-        }
-
-        private boolean containsSliceNode(IQTree tree) {
-            if (tree.getChildren().isEmpty()) { return false; }
-
-            return tree.getRootNode() instanceof SliceNode ||
-                    tree.getChildren().stream().anyMatch(this::containsSliceNode);
         }
 
         private ImmutableFunctionalTerm getOrderBySubTerm(IQTree childTree) {

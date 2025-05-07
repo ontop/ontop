@@ -7,13 +7,11 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -46,7 +44,7 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
 
         @Override
         public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
-            if (isOrderByPresent(child)) {
+            if (IQTreeTools.contains(child, OrderByNode.class)) {
                 return iqFactory.createUnaryIQTree(
                         sliceNode,
                         transform(child));
@@ -69,98 +67,6 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
                                     iqFactory.createUnaryIQTree(
                                             bottomConstruct,
                                             transform(child)))));
-        }
-
-        private boolean isOrderByPresent(IQTree child) {
-            return child.acceptVisitor(new OrderBySearcher());
-        }
-    }
-
-
-
-    /**
-     * Search for an ORDER BY clause in the child IQTree. Keep searching until a node is found that will cause a new sub-query.
-     */
-    static class OrderBySearcher implements IQVisitor<Boolean> {
-
-        @Override
-        public Boolean transformIntensionalData(IntensionalDataNode dataNode) {
-            return false;
-        }
-
-        @Override
-        public Boolean transformExtensionalData(ExtensionalDataNode dataNode) {
-            return false;
-        }
-
-        @Override
-        public Boolean transformEmpty(EmptyNode node) {
-            return false;
-        }
-
-        @Override
-        public Boolean transformTrue(TrueNode node) {
-            return false;
-        }
-
-        @Override
-        public Boolean transformNative(NativeNode nativeNode) {
-            return false;
-        }
-
-        @Override
-        public Boolean transformValues(ValuesNode valuesNode) {
-            return false;
-        }
-
-        @Override
-        public Boolean transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-            return false;
-        }
-
-        @Override
-        public Boolean transformAggregation(UnaryIQTree tree, AggregationNode aggregationNode, IQTree child) {
-            return false;
-        }
-
-        @Override
-        public Boolean transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-            return child.acceptVisitor(this);
-        }
-
-        @Override
-        public Boolean transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
-            return false;
-        }
-
-        @Override
-        public Boolean transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-            return child.acceptVisitor(this);
-        }
-
-        @Override
-        public Boolean transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
-            return false;
-        }
-
-        @Override
-        public Boolean transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-            return true;
-        }
-
-        @Override
-        public Boolean transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            return false;
-        }
-
-        @Override
-        public Boolean transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            return false;
-        }
-
-        @Override
-        public Boolean transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            return false;
         }
     }
 }
