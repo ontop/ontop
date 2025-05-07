@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
@@ -25,6 +24,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 
 
 @Singleton
@@ -193,7 +193,6 @@ public class FilterNormalizerImpl implements FilterNormalizer {
          */
         public State mergeWithChild() {
             if (condition.isPresent()) {
-
                 var filter = UnaryIQTreeDecomposition.of(child, FilterNode.class);
                 if (filter.isPresent()) {
                     ImmutableExpression newCondition = termFactory.getConjunction(condition.get(),
@@ -201,14 +200,15 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
                     return updateConditionAndChild(newCondition, filter.getChild());
                 }
-                QueryNode childRoot = child.getRootNode();
-                if (childRoot instanceof InnerJoinNode) {
-                    ImmutableExpression newJoiningCondition = ((InnerJoinNode) childRoot).getOptionalFilterCondition()
+                var join = NaryIQTreeDecomposition.of(child, InnerJoinNode.class);
+                if (join.isPresent()) {
+                    ImmutableExpression newJoiningCondition = join.get().getOptionalFilterCondition()
                             .map(c -> termFactory.getConjunction(condition.get(), c))
                             .orElse(condition.get());
 
-                    IQTree newChild = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(newJoiningCondition),
-                            child.getChildren());
+                    IQTree newChild = iqFactory.createNaryIQTree(
+                            iqFactory.createInnerJoinNode(newJoiningCondition),
+                            join.getChildren());
                     return removeConditionAndUpdateChild(newChild);
                 }
             }

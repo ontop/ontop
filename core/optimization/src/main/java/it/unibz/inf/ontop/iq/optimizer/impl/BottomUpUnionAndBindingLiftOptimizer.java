@@ -95,7 +95,7 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
 
         ImmutableList<IQTree> newChildren = queryTree.getChildren().stream()
                 // Recursive
-                .map(queryTree1 -> liftTree(queryTree1, variableGenerator))
+                .map(t -> liftTree(t, variableGenerator))
                 .collect(ImmutableCollectors.toList());
 
         if (root instanceof InnerJoinNode) {

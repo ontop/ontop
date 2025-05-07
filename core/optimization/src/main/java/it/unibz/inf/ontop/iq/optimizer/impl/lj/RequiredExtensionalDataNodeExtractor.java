@@ -11,6 +11,7 @@ import javax.inject.Singleton;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 
 
 @Singleton
@@ -32,9 +33,10 @@ public class RequiredExtensionalDataNodeExtractor {
         if (tree instanceof ExtensionalDataNode)
             return Stream.of((ExtensionalDataNode) tree);
 
-        if (tree.getRootNode() instanceof InnerJoinNode)
-            return tree.getChildren().stream()
-                    .flatMap(tree1 -> extractSomeRequiredNodes(tree1, fromLeft));
+        var join = NaryIQTreeDecomposition.of(tree, InnerJoinNode.class);
+        if (join.isPresent())
+            return join.getChildren().stream()
+                    .flatMap(t -> extractSomeRequiredNodes(t, fromLeft));
 
         /*
          * TODO: see how to safely extract data nodes in the fromRight case
