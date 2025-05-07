@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -183,7 +184,6 @@ public class IQTreeTools {
         public T get() {
             return Objects.requireNonNull(node);
         }
-
     }
 
 
@@ -242,6 +242,40 @@ public class IQTreeTools {
             return nodeClass.isInstance(tree.getRootNode())
                     ? new NaryIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((NaryIQTree)tree).getChildren())
                     : new NaryIQTreeDecomposition<>(null, ImmutableList.of(tree));
+        }
+    }
+
+    public static class BinaryNonCommutativeIQTreeDecomposition<T extends BinaryNonCommutativeOperatorNode> extends IQTreeDecomposition<T> {
+        private final IQTree leftChild;
+        private final IQTree rightChild;
+
+        public BinaryNonCommutativeIQTreeDecomposition(T node, IQTree leftChild, IQTree rightChild) {
+            super(node);
+            this.leftChild = leftChild;
+            this.rightChild = rightChild;
+        }
+
+        public IQTree getLeftChild() {
+            return leftChild;
+        }
+
+        public IQTree getRightChild() {
+            return rightChild;
+        }
+
+        public <U> Optional<U> map(TriFunction<? super T, IQTree, IQTree, ? extends U> function) {
+            return Optional.ofNullable(node).map(n -> function.apply(n, leftChild, rightChild));
+        }
+
+        @FunctionalInterface
+        public interface TriFunction<T1, T2, T3, R> {
+            R apply(T1 t1, T2 t2, T3 t3);
+        }
+
+        public static <T extends BinaryNonCommutativeOperatorNode> BinaryNonCommutativeIQTreeDecomposition<T> of(IQTree tree, Class<T> nodeClass) {
+            return nodeClass.isInstance(tree.getRootNode())
+                    ? new BinaryNonCommutativeIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((BinaryNonCommutativeIQTree)tree).getLeftChild(), ((BinaryNonCommutativeIQTree)tree).getRightChild())
+                    : new BinaryNonCommutativeIQTreeDecomposition<>(null, tree, null);
         }
     }
 

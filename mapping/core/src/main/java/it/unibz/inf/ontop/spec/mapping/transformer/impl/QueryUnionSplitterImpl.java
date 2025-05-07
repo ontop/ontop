@@ -5,7 +5,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.visit.impl.AbstractIQTreeToStreamVisitingTransformer;
 import it.unibz.inf.ontop.spec.mapping.transformer.QueryUnionSplitter;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -14,6 +16,8 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.BinaryNonCommutativeIQTreeDecomposition;
 
 /**
  * Only splits according to the first splittable union found (breadth-first search)
@@ -46,38 +50,15 @@ public class QueryUnionSplitterImpl implements QueryUnionSplitter {
 
     private Optional<NaryIQTree> findFirstSplittableUnion(IQ query) {
 
-        Queue<IQTree> nodesToVisit = new LinkedList<>();
-        nodesToVisit.add(query.getTree());
-
-        while(!nodesToVisit.isEmpty()) {
-            IQTree childTree = nodesToVisit.poll();
-            if (childTree.getRootNode() instanceof UnionNode) {
-                return Optional.of((NaryIQTree) childTree);
+        return query.getTree().acceptVisitor(new AbstractIQTreeToStreamVisitingTransformer<NaryIQTree>() {
+            @Override
+            public Stream<NaryIQTree> transformUnion(NaryIQTree tree, UnionNode node, ImmutableList<IQTree> children) {
+                return Stream.of(tree);
             }
-            else {
-                nodesToVisit.addAll(extractChildrenToVisit(childTree));
+            @Override
+            public Stream<NaryIQTree> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode node, IQTree leftChild, IQTree rightChild) {
+                return leftChild.acceptVisitor(this);
             }
-        }
-
-        return Optional.empty();
+        }).findAny();
     }
-
-    private ImmutableList<IQTree> extractChildrenToVisit(IQTree tree) {
-        QueryNode node = tree.getRootNode();
-        if (node instanceof BinaryNonCommutativeOperatorNode) {
-            if (node instanceof LeftJoinNode) {
-                return ImmutableList.of(((BinaryNonCommutativeIQTree)tree).getLeftChild());
-            }
-            /*
-             * Not supported BinaryNonCommutativeOperatorNode: we ignore them
-             */
-            else {
-                return ImmutableList.of();
-            }
-        }
-        else {
-            return tree.getChildren();
-        }
-    }
-
 }
