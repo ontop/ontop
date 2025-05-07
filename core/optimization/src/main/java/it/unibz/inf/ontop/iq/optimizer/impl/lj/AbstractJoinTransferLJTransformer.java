@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
@@ -209,7 +208,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
     private Optional<IQTree> moveTopConstructionNodeAside(IQTree rightTree) {
         var construction = UnaryIQTreeDecomposition.of(rightTree, ConstructionNode.class);
         if (construction.isPresent()) {
-            Substitution<ImmutableTerm> substitution = construction.get().getSubstitution();
+            Substitution<ImmutableTerm> substitution = construction.getNode().getSubstitution();
             if (substitution.rangeAllMatch(ImmutableTerm::isGround)) {
                 NaryIQTree newTree = iqFactory.createNaryIQTree(
                         iqFactory.createInnerJoinNode(),

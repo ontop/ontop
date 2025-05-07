@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransf
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -61,7 +60,7 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DefaultR
 
             DBConstant provenanceConstant = termFactory.getProvenanceSpecialConstant();
 
-            ConstructionNode rightConstructionNode = construction.get();
+            ConstructionNode rightConstructionNode = construction.getNode();
             return grandChildVariable
                     .map(v -> termFactory.getIfThenElse(termFactory.getDBIsNotNull(v),
                             termFactory.getDBStringConstant("placeholder1"),

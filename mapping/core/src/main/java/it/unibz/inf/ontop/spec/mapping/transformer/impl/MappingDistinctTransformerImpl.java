@@ -53,10 +53,10 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
         Optional<IQTree> distinctUnionTree = Optional.of(distinct.getChild())
                 .map(t -> NaryIQTreeDecomposition.of(t, UnionNode.class))
                 .filter(NaryIQTreeDecomposition::isPresent)
-                .map(t -> t.get().makeDistinct(t.getChildren()));
+                .map(t -> t.getNode().makeDistinct(t.getChildren()));
 
         IQTree newTree = distinctUnionTree
-                .map(t -> iqFactory.createUnaryIQTree(topConstruction.get(), t))
+                .map(t -> iqFactory.createUnaryIQTree(topConstruction.getNode(), t))
                 .map(t -> t.normalizeForOptimization(variableGenerator))
                 .orElse(distinctTree);
 

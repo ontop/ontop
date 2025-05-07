@@ -42,7 +42,7 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
 
         return iqFactory.createIQ(
                 query.getProjectionAtom(),
-                tree.acceptTransformer(new Transformer(construction.get().getSubstitution().getRangeVariables(), cqContainmentCheck)));
+                tree.acceptTransformer(new Transformer(construction.getNode().getSubstitution().getRangeVariables(), cqContainmentCheck)));
     }
 
     protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

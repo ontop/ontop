@@ -170,11 +170,11 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
                                     downSubstitution),
                             tree);
 
-        var leftJoinCondition = leftJoin.get().getOptionalFilterCondition();
+        var leftJoinCondition = leftJoin.getNode().getOptionalFilterCondition();
         if (leftJoinCondition.isEmpty()) {
             var newLeft = normalizeLeft(leftJoin.getLeftChild(), downSubstitution, variableGenerator);
             return iqFactory.createBinaryNonCommutativeIQTree(
-                    leftJoin.get(),
+                    leftJoin.getNode(),
                     newLeft,
                     leftJoin.getRightChild());
         }

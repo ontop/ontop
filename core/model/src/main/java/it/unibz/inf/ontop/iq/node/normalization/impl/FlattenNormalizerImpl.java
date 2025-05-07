@@ -54,7 +54,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
              */
             Variable flattenedVar = flattenNode.getFlattenedVariable();
 
-            Substitution<ImmutableTerm> substitution = construction.get().getSubstitution();
+            Substitution<ImmutableTerm> substitution = construction.getNode().getSubstitution();
 
             Substitution<ImmutableTerm> flattenedVarSubstitution = substitution.builder()
                     .restrict((v, t) -> v.equals(flattenedVar) || t.getVariableStream().anyMatch(tv -> tv.equals(flattenedVar)))
@@ -71,7 +71,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
             ConstructionNode newParentCn = iqFactory.createConstructionNode(
                     Sets.union(
                             flattenNode.getLocallyDefinedVariables(),
-                            Sets.difference(construction.get().getVariables(), ImmutableSet.of(flattenedVar))).immutableCopy(),
+                            Sets.difference(construction.getNode().getVariables(), ImmutableSet.of(flattenedVar))).immutableCopy(),
                     primeSubstitution);
 
             IQTree updatedChild = flattenedVarSubstitution.isEmpty()

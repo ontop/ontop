@@ -55,12 +55,12 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
 
         var construction = UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
         if (construction.isPresent()) {
-            if (isConstructionNodeWithoutChildVariablesAndDeterministic(construction.get()))
+            if (isConstructionNodeWithoutChildVariablesAndDeterministic(construction.getNode()))
                 // Replaces the DISTINCT by a LIMIT 1
                 return iqFactory.createUnaryIQTree(iqFactory.createSliceNode(0, 1), child)
                         .normalizeForOptimization(variableGenerator);
 
-            return liftBindingConstructionChild(construction.get(), construction.getChild(), treeCache, variableGenerator);
+            return liftBindingConstructionChild(construction.getNode(), construction.getChild(), treeCache, variableGenerator);
         }
 
         if (child instanceof ValuesNode)
@@ -82,7 +82,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                                         Optional.of(distinctNode),
                                         orderBy.getOptionalNode(),
                                         filter.getOptionalNode()),
-                                iqFactory.createNaryIQTree(union.get(), newUnionChildren))
+                                iqFactory.createNaryIQTree(union.getNode(), newUnionChildren))
                         .normalizeForOptimization(variableGenerator);
         }
 
@@ -132,7 +132,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
         var construction = UnaryIQTreeDecomposition.of(unionChild, ConstructionNode.class);
         if (construction.isPresent()) {
             // No child variable and no non-deterministic function used -> inserts a LIMIT 1
-            if (isConstructionNodeWithoutChildVariablesAndDeterministic(construction.get()))
+            if (isConstructionNodeWithoutChildVariablesAndDeterministic(construction.getNode()))
                 return iqFactory.createUnaryIQTree(iqFactory.createSliceNode(0, 1),
                         unionChild)
                         .normalizeForOptimization(variableGenerator);

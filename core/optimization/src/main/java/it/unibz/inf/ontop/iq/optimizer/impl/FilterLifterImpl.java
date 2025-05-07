@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -85,7 +84,7 @@ public class FilterLifterImpl implements FilterLifter {
             UnaryIQTreeDecomposition<FilterNode> decomposition = UnaryIQTreeDecomposition.of(child, FilterNode.class);
 
             if (decomposition.isPresent()) {
-                FilterNode filter = decomposition.get();
+                FilterNode filter = decomposition.getNode();
                 return iqFactory.createUnaryIQTree(
                         filter,
                         iqFactory.createUnaryIQTree(fn, decomposition.getChild()));
@@ -156,7 +155,7 @@ public class FilterLifterImpl implements FilterLifter {
     private Stream<ImmutableExpression> getChildrenExpression(ImmutableList<UnaryIQTreeDecomposition<FilterNode>> childrenDecomposition) {
         return childrenDecomposition.stream()
                 .filter(UnaryIQTreeDecomposition::isPresent)
-                .map(UnaryIQTreeDecomposition::get)
+                .map(UnaryIQTreeDecomposition::getNode)
                 .map(FilterNode::getFilterCondition);
     }
 }

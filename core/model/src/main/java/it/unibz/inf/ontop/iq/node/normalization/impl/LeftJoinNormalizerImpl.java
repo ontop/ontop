@@ -180,15 +180,15 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
             var construction = UnaryIQTreeDecomposition.of(liftedLeftChild, ConstructionNode.class);
             if (construction.isPresent())
-                return liftLeftConstruction(liftedLeftChild, construction.get(), construction.getChild());
+                return liftLeftConstruction(liftedLeftChild, construction.getNode(), construction.getChild());
 
             var distinct = UnaryIQTreeDecomposition.of(liftedLeftChild, DistinctNode.class);
             if (distinct.isPresent())
-                return liftLeftDistinct(liftedLeftChild, distinct.get(), distinct.getChild());
+                return liftLeftDistinct(liftedLeftChild, distinct.getNode(), distinct.getChild());
 
             var filter = UnaryIQTreeDecomposition.of(liftedLeftChild, FilterNode.class);
             if (filter.isPresent())
-                return liftLeftFilterNode(filter.get(), filter.getChild());
+                return liftLeftFilterNode(filter.getNode(), filter.getChild());
 
             QueryNode leftRootNode = liftedLeftChild.getRootNode();
             if (leftRootNode instanceof CommutativeJoinNode)
@@ -417,15 +417,15 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         private Optional<LJNormalizationState> tryToLiftRightChild(IQTree liftedRightChild) {
             var construction = UnaryIQTreeDecomposition.of(liftedRightChild, ConstructionNode.class);
             if (construction.isPresent())
-                return tryToLiftRightConstruction(construction.get(), construction.getChild());
+                return tryToLiftRightConstruction(construction.getNode(), construction.getChild());
 
             var distinct = UnaryIQTreeDecomposition.of(liftedRightChild, DistinctNode.class);
             if (distinct.isPresent())
-                return tryToLiftRightDistinct(distinct.get(), distinct.getChild());
+                return tryToLiftRightDistinct(distinct.getNode(), distinct.getChild());
 
             var filter = UnaryIQTreeDecomposition.of(liftedRightChild, FilterNode.class);
             if (filter.isPresent())
-                return Optional.of(liftRightFilter(filter.get(), filter.getChild()));
+                return Optional.of(liftRightFilter(filter.getNode(), filter.getChild()));
 
             if (liftedRightChild.getRootNode() instanceof CommutativeJoinNode)
                 return tryToLiftRightCommutativeJoin(liftedRightChild);
@@ -531,8 +531,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                             distinctRightGrandChild.getChild(), rightGrandChild.getVariables());
 
                     ImmutableList<UnaryOperatorNode> additionalAncestors = optionalProjectingAwayParent
-                            .map(p -> ImmutableList.of(distinctRightGrandChild.get(), p))
-                            .orElseGet(() -> ImmutableList.of(distinctRightGrandChild.get()));
+                            .map(p -> ImmutableList.of(distinctRightGrandChild.getNode(), p))
+                            .orElseGet(() -> ImmutableList.of(distinctRightGrandChild.getNode()));
 
                     return Optional.of(updateAncestorsConditionChildren(additionalAncestors, ljCondition, newLeftChild, newRightChild));
                 }
@@ -541,7 +541,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             }
             var filterRightGrandChild = UnaryIQTreeDecomposition.of(rightGrandChild, FilterNode.class);
             if (filterRightGrandChild.isPresent()) {
-                ImmutableExpression filterCondition = filterRightGrandChild.get().getFilterCondition();
+                ImmutableExpression filterCondition = filterRightGrandChild.getNode().getFilterCondition();
 
                 ImmutableExpression newLJCondition = getConjunction(ljCondition, filterCondition);
 

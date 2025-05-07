@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
@@ -86,11 +85,11 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
         var construction = UnaryIQTreeDecomposition.of(newChild, ConstructionNode.class);
         if (construction.isPresent())
-            return liftChildConstruction(construction.get(), construction.getChild(), variableGenerator);
+            return liftChildConstruction(construction.getNode(), construction.getChild(), variableGenerator);
 
         var slice = UnaryIQTreeDecomposition.of(newChild, SliceNode.class);
         if (slice.isPresent())
-            return mergeWithSliceChild(slice.get(), slice.getChild(), treeCache);
+            return mergeWithSliceChild(slice.getNode(), slice.getChild(), treeCache);
 
         if (newChild instanceof EmptyNode)
             return newChild;
@@ -167,8 +166,8 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         var union = NaryIQTreeDecomposition.of(newChild, UnionNode.class);
         if (union.isPresent()) {
             Optional<IQTree> newTree = union.getChildren().stream().anyMatch(c -> getKnownCardinality(c).isPresent())
-                    ? simplifyUnionWithChildrenOfKnownCardinality(union.get(), newChild, limit, variableGenerator)
-                    : pushLimitInUnionChildren(union.get(), union.getChildren(), variableGenerator);
+                    ? simplifyUnionWithChildrenOfKnownCardinality(union.getNode(), union.getTree(), limit, variableGenerator)
+                    : pushLimitInUnionChildren(union.getNode(), union.getChildren(), variableGenerator);
             if (newTree.isPresent())
                 return newTree.get();
         }
@@ -183,7 +182,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                     .collect(ImmutableCollectors.toList());
 
             if (!newJoinChildren.equals(joinChildren)) {
-                var updatedChildTree = iqFactory.createNaryIQTree(innerJoin.get(), newJoinChildren);
+                var updatedChildTree = iqFactory.createNaryIQTree(innerJoin.getNode(), newJoinChildren);
                 return normalizeForOptimization(updatedChildTree, variableGenerator, treeCache,
                         () -> true);
             }
@@ -201,7 +200,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                     && innerUnion.getChildren().stream().anyMatch(IQTree::isDistinct)) {
 
                 Optional<IQTree> newTree = simplifyDistinctUnionWithDistinctChildren(
-                        innerUnion.get(), innerUnion.getChildren(), limit, variableGenerator);
+                        innerUnion.getNode(), innerUnion.getChildren(), limit, variableGenerator);
 
                 if (newTree.isPresent())
                     return newTree.get();

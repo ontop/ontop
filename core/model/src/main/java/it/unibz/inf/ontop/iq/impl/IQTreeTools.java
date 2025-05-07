@@ -20,10 +20,11 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -166,35 +167,63 @@ public class IQTreeTools {
                 .collect(ImmutableCollectors.toList());
     }
 
-    public static class IQTreeDecomposition<T extends QueryNode> {
-        protected final T node; // nullable
+    public static class IQTreeDecomposition<N extends QueryNode, T extends IQTree> {
+        protected final N node; // nullable
+        protected final T tree;
+        protected final IQTree subTree;
 
-        private IQTreeDecomposition(T node) {
-            this.node = node;
+        protected IQTreeDecomposition(IQTree subTree) {
+            this.node = null;
+            this.tree = null;
+            this.subTree = Objects.requireNonNull(subTree);
         }
 
-        public Optional<T> getOptionalNode() {
+        protected IQTreeDecomposition(N node, T tree) {
+            this.node = Objects.requireNonNull(node);
+            this.tree = Objects.requireNonNull(tree);
+            this.subTree = tree;
+        }
+
+        @Nonnull
+        public Optional<N> getOptionalNode() {
             return Optional.ofNullable(node);
         }
 
         public boolean isPresent() {
-            return node != null ;
+            return node != null;
         }
 
-        public T get() {
+        @Nonnull
+        public N getNode() {
             return Objects.requireNonNull(node);
+        }
+
+        @Nonnull
+        public T getTree() {
+            return Objects.requireNonNull(tree);
+        }
+
+        @Nonnull
+        public IQTree getSubTree() {
+            return subTree;
         }
     }
 
 
-    public static class UnaryIQTreeDecomposition<T extends UnaryOperatorNode> extends IQTreeDecomposition<T> {
+    public static class UnaryIQTreeDecomposition<T extends UnaryOperatorNode> extends IQTreeDecomposition<T, UnaryIQTree> {
         private final IQTree child;
 
-        private UnaryIQTreeDecomposition(T node, IQTree child) {
-            super(node);
-            this.child = child;
+        private UnaryIQTreeDecomposition(T node, UnaryIQTree tree) {
+            super(node, tree);
+            this.child = tree.getChild();
         }
 
+        private UnaryIQTreeDecomposition(IQTree tree) {
+            super(tree);
+            this.child = Objects.requireNonNull(tree);
+        }
+
+        @Nonnull
         public IQTree getChild() {
             return child;
         }
@@ -205,8 +234,8 @@ public class IQTreeTools {
 
         public static <T extends UnaryOperatorNode> UnaryIQTreeDecomposition<T> of(IQTree tree, Class<T> nodeClass) {
             return nodeClass.isInstance(tree.getRootNode())
-                    ? new UnaryIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((UnaryIQTree)tree).getChild())
-                    : new UnaryIQTreeDecomposition<>(null, tree);
+                    ? new UnaryIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((UnaryIQTree)tree))
+                    : new UnaryIQTreeDecomposition<>(tree);
         }
 
         public static <T extends UnaryOperatorNode> ImmutableList<UnaryIQTreeDecomposition<T>> of(ImmutableList<IQTree> list, Class<T> nodeClass) {
@@ -222,45 +251,59 @@ public class IQTreeTools {
         }
     }
 
-    public static class NaryIQTreeDecomposition<T extends NaryOperatorNode> extends IQTreeDecomposition<T> {
+    public static class NaryIQTreeDecomposition<T extends NaryOperatorNode> extends IQTreeDecomposition<T, NaryIQTree> {
         private final ImmutableList<IQTree> children;
 
-        public NaryIQTreeDecomposition(T node, ImmutableList<IQTree> children) {
-            super(node);
-            this.children = children;
+        private NaryIQTreeDecomposition(T node, NaryIQTree tree) {
+            super(node, tree);
+            this.children = tree.getChildren();
         }
 
-        public ImmutableList<IQTree> getChildren() {
-            return children;
+        private NaryIQTreeDecomposition(IQTree tree) {
+            super(tree);
+            this.children = null;
         }
+
+        @Nonnull
+        public ImmutableList<IQTree> getChildren() {
+            return Objects.requireNonNull(children);
+        }
+
         public <U> Optional<U> map(BiFunction<? super T, ImmutableList<IQTree>, ? extends U> function) {
             return Optional.ofNullable(node).map(n -> function.apply(n, children));
         }
 
-
         public static <T extends NaryOperatorNode> NaryIQTreeDecomposition<T> of(IQTree tree, Class<T> nodeClass) {
             return nodeClass.isInstance(tree.getRootNode())
-                    ? new NaryIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((NaryIQTree)tree).getChildren())
-                    : new NaryIQTreeDecomposition<>(null, ImmutableList.of(tree));
+                    ? new NaryIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((NaryIQTree)tree))
+                    : new NaryIQTreeDecomposition<>(tree);
         }
     }
 
-    public static class BinaryNonCommutativeIQTreeDecomposition<T extends BinaryNonCommutativeOperatorNode> extends IQTreeDecomposition<T> {
+    public static class BinaryNonCommutativeIQTreeDecomposition<T extends BinaryNonCommutativeOperatorNode> extends IQTreeDecomposition<T, BinaryNonCommutativeIQTree> {
         private final IQTree leftChild;
         private final IQTree rightChild;
 
-        public BinaryNonCommutativeIQTreeDecomposition(T node, IQTree leftChild, IQTree rightChild) {
-            super(node);
-            this.leftChild = leftChild;
-            this.rightChild = rightChild;
+        private BinaryNonCommutativeIQTreeDecomposition(T node, BinaryNonCommutativeIQTree tree) {
+            super(node, tree);
+            this.leftChild = tree.getLeftChild();
+            this.rightChild = tree.getRightChild();
         }
 
+        private BinaryNonCommutativeIQTreeDecomposition(IQTree tree) {
+            super(tree);
+            this.leftChild = null;
+            this.rightChild = null;
+        }
+
+        @Nonnull
         public IQTree getLeftChild() {
-            return leftChild;
+            return Objects.requireNonNull(leftChild);
         }
 
+        @Nonnull
         public IQTree getRightChild() {
-            return rightChild;
+            return Objects.requireNonNull(rightChild);
         }
 
         public <U> Optional<U> map(TriFunction<? super T, IQTree, IQTree, ? extends U> function) {
@@ -274,8 +317,8 @@ public class IQTreeTools {
 
         public static <T extends BinaryNonCommutativeOperatorNode> BinaryNonCommutativeIQTreeDecomposition<T> of(IQTree tree, Class<T> nodeClass) {
             return nodeClass.isInstance(tree.getRootNode())
-                    ? new BinaryNonCommutativeIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((BinaryNonCommutativeIQTree)tree).getLeftChild(), ((BinaryNonCommutativeIQTree)tree).getRightChild())
-                    : new BinaryNonCommutativeIQTreeDecomposition<>(null, tree, null);
+                    ? new BinaryNonCommutativeIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((BinaryNonCommutativeIQTree)tree))
+                    : new BinaryNonCommutativeIQTreeDecomposition<>(tree);
         }
     }
 
@@ -290,9 +333,9 @@ public class IQTreeTools {
         // Lift the union above the node
         var union = NaryIQTreeDecomposition.of(newChild, UnionNode.class);
         if (union.isPresent()) {
-            if (union.get().hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
+            if (union.getNode().hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
                 ImmutableList<IQTree> newChildren = createUnaryOperatorChildren(node, newChild);
-                return iqFactory.createNaryIQTree(union.get(), newChildren);
+                return iqFactory.createNaryIQTree(union.getNode(), newChildren);
             }
         }
         return iqFactory.createUnaryIQTree(node, newChild);

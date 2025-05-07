@@ -87,7 +87,7 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
             var orderBy = UnaryIQTreeDecomposition.of(construction.getChild(), OrderByNode.class);
             // Drop ORDER BY node since it will now be part of the orderBy subTerm
             IQTree newChild = construction.isPresent() && orderBy.isPresent()
-                ? iqFactory.createUnaryIQTree(construction.get(), orderBy.getChild())
+                ? iqFactory.createUnaryIQTree(construction.getNode(), orderBy.getChild())
                 : orderBy.getChild();
             IQTree normalizedChild = this.transform(newChild);
 
@@ -105,7 +105,7 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
             var orderBy = UnaryIQTreeDecomposition.of(construction.getChild(), OrderByNode.class);
             if (orderBy.isPresent()) {
                 return termFactory.getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRowNumberWithOrderBy(),
-                        orderBy.get()
+                        orderBy.getNode()
                                 .getComparators().stream()
                                 .map(OrderByNode.OrderComparator::getTerm)
                                 .collect(ImmutableCollectors.toList()));

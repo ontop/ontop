@@ -122,7 +122,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
         }
 
         private State liftChildAsParent(UnaryIQTreeDecomposition<?> decomposition) {
-            return new State(projectedVariables, extendAncestors(decomposition.get()), condition, decomposition.getChild());
+            return new State(projectedVariables, extendAncestors(decomposition.getNode()), condition, decomposition.getChild());
         }
 
         private State updateConditionAndChild(ImmutableExpression newCondition, IQTree newChild) {
@@ -168,8 +168,8 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             var construction = UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
             if (construction.isPresent()) {
                 return condition
-                        .map(e -> construction.get().getSubstitution().apply(e))
-                        .map(e -> updateParentChildAndCondition(construction.get(), e, construction.getChild()))
+                        .map(e -> construction.getNode().getSubstitution().apply(e))
+                        .map(e -> updateParentChildAndCondition(construction.getNode(), e, construction.getChild()))
                         .orElseGet(() -> liftChildAsParent(construction))
                         // Recursive (maybe followed by a distinct)
                         .liftBindingsAndDistinct();
@@ -178,7 +178,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             var distinct = UnaryIQTreeDecomposition.of(child, DistinctNode.class);
             if (distinct.isPresent()) {
                 return condition
-                        .map(e -> updateParentChildAndCondition(distinct.get(), e, distinct.getChild()))
+                        .map(e -> updateParentChildAndCondition(distinct.getNode(), e, distinct.getChild()))
                         .orElseGet(() -> liftChildAsParent(distinct))
                         // Recursive (may be followed by another construction node)
                         .liftBindingsAndDistinct();
@@ -196,13 +196,13 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 var filter = UnaryIQTreeDecomposition.of(child, FilterNode.class);
                 if (filter.isPresent()) {
                     ImmutableExpression newCondition = termFactory.getConjunction(condition.get(),
-                            filter.get().getFilterCondition());
+                            filter.getNode().getFilterCondition());
 
                     return updateConditionAndChild(newCondition, filter.getChild());
                 }
                 var join = NaryIQTreeDecomposition.of(child, InnerJoinNode.class);
                 if (join.isPresent()) {
-                    ImmutableExpression newJoiningCondition = join.get().getOptionalFilterCondition()
+                    ImmutableExpression newJoiningCondition = join.getNode().getOptionalFilterCondition()
                             .map(c -> termFactory.getConjunction(condition.get(), c))
                             .orElse(condition.get());
 

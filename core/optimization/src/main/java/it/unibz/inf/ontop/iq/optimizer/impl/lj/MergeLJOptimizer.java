@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer.RightProvenance;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
@@ -152,7 +151,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
             if (!leftJoin.isPresent())
                 return Optional.empty();
 
-            LeftJoinNode leftJoinNode = leftJoin.get();
+            LeftJoinNode leftJoinNode = leftJoin.getNode();
             IQTree leftSubTree = leftJoin.getLeftChild();
             IQTree rightSubTree = leftJoin.getRightChild();
 

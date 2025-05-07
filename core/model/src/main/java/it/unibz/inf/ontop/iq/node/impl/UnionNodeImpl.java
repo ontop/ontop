@@ -536,7 +536,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             return iqFactory.createNaryIQTree(this, flattenChildren(liftedChildren), treeCache.declareAsNormalizedForOptimizationWithEffect());
 
         ImmutableList<Substitution<ImmutableTerm>> tmpNormalizedChildSubstitutions = liftedChildrenDecompositions.stream()
-                .map(UnaryIQTreeDecomposition::get)
+                .map(UnaryIQTreeDecomposition::getNode)
                 .map(ConstructionNode::getSubstitution)
                 .map(s -> s.transform(this::normalizeNullAndRDFConstants))
                 .collect(ImmutableCollectors.toList());
@@ -561,7 +561,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         NaryIQTree unionIQ = iqFactory.createNaryIQTree(newUnionNode,
                 IntStream.range(0, liftedChildrenDecompositions.size())
                         .mapToObj(i -> updateChild(
-                                liftedChildrenDecompositions.get(i).get(),
+                                liftedChildrenDecompositions.get(i).getNode(),
                                 liftedChildrenDecompositions.get(i).getChild(),
                                 mergedSubstitution,
                                 tmpNormalizedChildSubstitutions.get(i),
@@ -760,7 +760,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             IQTree newSubTree = tryToMergeSomeChildrenInAValuesNode(construction.getChild(), variableGenerator, treeCache, false);
             return (construction.getChild() == newSubTree)
                     ? tree
-                    : iqFactory.createUnaryIQTree(construction.get(), newSubTree,
+                    : iqFactory.createUnaryIQTree(construction.getNode(), newSubTree,
                     treeCache.declareAsNormalizedForOptimizationWithEffect());
         }
         else
@@ -774,7 +774,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         if (!union.isPresent())
             return tree;
 
-        UnionNode unionNode = union.get();
+        UnionNode unionNode = union.getNode();
         ImmutableList<IQTree> children = union.getChildren();
 
         ImmutableList<IQTree> nonMergedChildren = children.stream()
@@ -831,7 +831,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             IQTree child = construction.getChild();
             return ((child instanceof ValuesNode) || (child instanceof TrueNode))
                     //NB: RDF constants are already expected to be decomposed
-                    && construction.get().getSubstitution()
+                    && construction.getNode().getSubstitution()
                     .rangeAllMatch(v -> (v instanceof DBConstant) || v.isNull());
         }
         return false;
@@ -846,7 +846,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
         if (construction.isPresent()) {
-            Substitution<ImmutableTerm> substitution = construction.get().getSubstitution();
+            Substitution<ImmutableTerm> substitution = construction.getNode().getSubstitution();
             IQTree child = construction.getChild();
 
             if (child instanceof ValuesNode)

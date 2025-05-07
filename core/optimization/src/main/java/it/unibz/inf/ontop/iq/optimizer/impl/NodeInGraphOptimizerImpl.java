@@ -120,7 +120,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             var construction = UnaryIQTreeDecomposition.of(childOfUnion, ConstructionNode.class);
             return construction.isPresent()
                     ? extractNodeInGraphAtomWithVariable(construction.getChild())
-                        .map(a -> extractContext(a, construction.get()))
+                        .map(a -> extractContext(a, construction.getNode()))
                     : extractNodeInGraphAtomWithVariable(childOfUnion)
                         .map(a -> new NodeInGraphContext(
                             ImmutableSet.of((Variable) a.getPredicate().getNode(a.getArguments())), a));
@@ -259,7 +259,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
             if (construction.isPresent()) {
                 if (isNodeGraphPredicateNode(construction.getChild()))
-                    return pushDataAtomIntoConstructionTreeWithNodeInGraph(tree, pushedIntensionalNode, construction.get());
+                    return pushDataAtomIntoConstructionTreeWithNodeInGraph(tree, pushedIntensionalNode, construction.getNode());
             }
             else if (isNodeGraphPredicateNode(tree)) {
                 return pushedIntensionalNode;

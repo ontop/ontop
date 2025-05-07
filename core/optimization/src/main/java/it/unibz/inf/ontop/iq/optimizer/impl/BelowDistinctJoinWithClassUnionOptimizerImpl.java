@@ -77,7 +77,7 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
                 VariableNullability variableNullability = coreSingletons.getCoreUtilsFactory()
                         .createEmptyVariableNullability(unionChild.getVariables());
 
-                ImmutableExpression filterCondition = filter.get().getFilterCondition();
+                ImmutableExpression filterCondition = filter.getNode().getFilterCondition();
 
                 return filterCondition.evaluate2VL(variableNullability)
                         .getValue()

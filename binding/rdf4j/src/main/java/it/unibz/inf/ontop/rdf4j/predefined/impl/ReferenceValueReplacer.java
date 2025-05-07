@@ -63,7 +63,7 @@ public class ReferenceValueReplacer {
 
         var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
         if (construction.isPresent()) {
-            ConstructionNode constructionNode = construction.get();
+            ConstructionNode constructionNode = construction.getNode();
 
             ConstructionNode newConstructionNode = constructionNode.getSubstitution().isEmpty()
                 ? constructionNode

@@ -125,10 +125,8 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
     private SQLExpression convertIntoFromExpression(IQTree tree) {
         var join = NaryIQTreeDecomposition.of(tree, InnerJoinNode.class);
         if (join.isPresent()) {
-            InnerJoinNode innerJoinNode = join.get();
             // Removes the joining condition
-            InnerJoinNode newInnerJoinNode = innerJoinNode.changeOptionalFilterCondition(Optional.empty());
-
+            InnerJoinNode newInnerJoinNode = join.getNode().changeOptionalFilterCondition(Optional.empty());
             return convertIntoOrdinaryExpression(iqFactory.createNaryIQTree(newInnerJoinNode,
                     join.getChildren()));
         }
@@ -254,7 +252,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
             ImmutableList<IQTree> children =  join.getChildren();
             int arity = children.size();
 
-            Optional<ImmutableExpression> filterCondition = join.get().getOptionalFilterCondition();
+            Optional<ImmutableExpression> filterCondition = join.getNode().getOptionalFilterCondition();
 
             return IntStream.range(1, arity)
                     .boxed()

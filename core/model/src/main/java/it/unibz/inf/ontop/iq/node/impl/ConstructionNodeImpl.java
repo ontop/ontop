@@ -158,7 +158,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         // Lift the union above the construction node (note the different union node compared to IQTreeTools)
         var union = NaryIQTreeDecomposition.of(newChild, UnionNode.class);
         if (union.isPresent()
-                && union.get().hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
+                && union.getNode().hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
             ImmutableList<IQTree> newChildren = iqTreeTools.createUnaryOperatorChildren(this, newChild);
             return iqFactory.createNaryIQTree(iqFactory.createUnionNode(getVariables()), newChildren);
         }
@@ -490,7 +490,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         IQTree shrunkChild = notRequiredVariableRemover.optimize(liftedChild, childVariables, variableGenerator);
         var shrunkChildConstruction = UnaryIQTreeDecomposition.of(shrunkChild, ConstructionNode.class);
         if (shrunkChildConstruction.isPresent())
-            return mergeWithChild(shrunkChildConstruction.get(), shrunkChildConstruction.getChild(), treeCache, variableGenerator);
+            return mergeWithChild(shrunkChildConstruction.getNode(), shrunkChildConstruction.getChild(), treeCache, variableGenerator);
         else if (shrunkChild.isDeclaredAsEmpty()) {
             return iqFactory.createEmptyNode(projectedVariables);
         }

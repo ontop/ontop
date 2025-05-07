@@ -231,7 +231,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             int selectedChildPosition = optionalSelectedLiftedChildPosition.getAsInt();
             var selectedLiftedChild = UnaryIQTreeDecomposition.of(liftedChildren.get(selectedChildPosition), ConstructionNode.class);
 
-            ConstructionNode selectedChildConstructionNode = selectedLiftedChild.get();
+            ConstructionNode selectedChildConstructionNode = selectedLiftedChild.getNode();
             IQTree selectedGrandChild = selectedLiftedChild.getChild();
 
             ImmutableSet<Variable> requiredGrandChildVariables = selectedChildConstructionNode.getChildVariables();
@@ -357,7 +357,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             IQTree newTree = iqTreeTools.createOptionalUnaryIQTree(
                     joiningCondition.map(iqFactory::createFilterNode),
                     iqFactory.createBinaryNonCommutativeIQTree(
-                            ljChild.get(),
+                            ljChild.getNode(),
                             newJoinOnLeft,
                             ljChild.getRightChild()));
 
@@ -466,11 +466,11 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         private Stream<ImmutableExpression> extractConditions(IQTree tree) {
             var filter = UnaryIQTreeDecomposition.of(tree, FilterNode.class);
             if (filter.isPresent())
-                return Stream.of(filter.get().getFilterCondition());
+                return Stream.of(filter.getNode().getFilterCondition());
 
             var join = NaryIQTreeDecomposition.of(tree, InnerJoinNode.class);
             if (join.isPresent())
-                return join.get().getOptionalFilterCondition().stream();
+                return join.getNode().getOptionalFilterCondition().stream();
 
             return Stream.empty();
         }

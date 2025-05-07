@@ -183,7 +183,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             IQTree liftedLeftChild = leftChild.liftIncompatibleDefinitions(variable, variableGenerator);
             var union = IQTreeTools.NaryIQTreeDecomposition.of(liftedLeftChild, UnionNode.class);
             if (union.isPresent()
-                    && union.get().hasAChildWithLiftableDefinition(variable, union.getChildren())) {
+                    && union.getNode().hasAChildWithLiftableDefinition(variable, union.getChildren())) {
 
                 UnionNode newUnionNode = iqFactory.createUnionNode(iqTreeTools.getChildrenVariables(leftChild, rightChild));
 

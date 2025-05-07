@@ -105,7 +105,7 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
         var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
         if (slice.isPresent())
             return iqFactory.createUnaryIQTree(
-                    slice.get(),
+                    slice.getNode(),
                     // Recursive
                     insertConstructionNode(slice.getChild(), constructionNode, variableGenerator));
         /*
@@ -130,11 +130,11 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
 
             UnaryIQTree possibleChildTree = iqFactory.createUnaryIQTree(constructionNode, distinct.getChild());
 
-            IQTree liftedTree = distinctNormalizer.normalizeForOptimization(distinct.get(), possibleChildTree, variableGenerator,
+            IQTree liftedTree = distinctNormalizer.normalizeForOptimization(distinct.getNode(), possibleChildTree, variableGenerator,
                     iqFactory.createIQTreeCache());
 
             return liftedTree.getRootNode().equals(constructionNode)
-                    ? iqFactory.createUnaryIQTree(distinct.get(), possibleChildTree)
+                    ? iqFactory.createUnaryIQTree(distinct.getNode(), possibleChildTree)
                     : iqFactory.createUnaryIQTree(constructionNode, tree);
         }
         return iqFactory.createUnaryIQTree(constructionNode, tree);

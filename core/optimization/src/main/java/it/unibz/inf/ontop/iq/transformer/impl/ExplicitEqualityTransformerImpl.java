@@ -396,7 +396,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                 return decomposition.getChild();
 
             return decomposition
-                    .<IQTree>map(iqFactory::createUnaryIQTree) // not ideal as it creates a new tree
+                    .<IQTree>map((n, t) -> decomposition.getTree())
                     .orElseGet(decomposition::getChild);
         }
     }

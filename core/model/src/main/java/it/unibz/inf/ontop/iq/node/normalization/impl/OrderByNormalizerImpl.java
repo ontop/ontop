@@ -125,11 +125,11 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
 
             var construction = UnaryIQTreeDecomposition.of(newChild, ConstructionNode.class);
             if (construction.isPresent())
-                return liftChildConstructionNode(construction.get(), construction.getChild(), orderByNode.get());
+                return liftChildConstructionNode(construction.getNode(), construction.getChild(), orderByNode.get());
 
             var distinct = UnaryIQTreeDecomposition.of(newChild, DistinctNode.class);
             if (distinct.isPresent())
-                return updateParentOrderByAndChild(distinct.get(), orderByNode, distinct.getChild());
+                return updateParentOrderByAndChild(distinct.getNode(), orderByNode, distinct.getChild());
 
             if (newChild instanceof EmptyNode)
                 return declareAsEmpty(newChild);

@@ -19,8 +19,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-
 public class PreventDistinctProjectionSplitterImpl extends ProjectionSplitterImpl implements PreventDistinctProjectionSplitter {
 
     private final ProjectionDecomposer decomposer;
@@ -69,7 +67,7 @@ public class PreventDistinctProjectionSplitterImpl extends ProjectionSplitterImp
             /* We can bypass the security check for pushing the CONSTRUCT into the DISTINCT used by the normal ProjectionSplitter,
              * as the general circumstances of this use case already revolve around that scenario.
              */
-            return iqFactory.createUnaryIQTree(distinct.get(),
+            return iqFactory.createUnaryIQTree(distinct.getNode(),
                     iqFactory.createUnaryIQTree(constructionNode, distinct.getChild()));
         }
         return super.insertConstructionNode(tree, constructionNode, variableGenerator);
