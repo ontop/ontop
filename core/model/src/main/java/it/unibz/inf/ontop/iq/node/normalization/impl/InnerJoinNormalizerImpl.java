@@ -457,16 +457,14 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
         private ConditionAndTrees extractConditionAndSubtrees(IQTree tree) {
             var filter = UnaryIQTreeDecomposition.of(tree, FilterNode.class);
-            if (filter.isPresent()) {
+            if (filter.isPresent())
                 return new ConditionAndTrees(Optional.of(filter.get().getFilterCondition()), Stream.of(filter.getChild()));
-            }
-            QueryNode rootNode = tree.getRootNode();
-            if (rootNode instanceof CommutativeJoinNode) {
-                CommutativeJoinNode joinNode = (CommutativeJoinNode) rootNode;
-                return new ConditionAndTrees(joinNode.getOptionalFilterCondition(), tree.getChildren().stream());
-            }
-            else
-                return new ConditionAndTrees(Optional.empty(), Stream.of(tree));
+            
+            var join = IQTreeTools.NaryIQTreeDecomposition.of(tree, InnerJoinNode.class);
+            if (join.isPresent())
+                return new ConditionAndTrees(join.get().getOptionalFilterCondition(), join.getChildren().stream());
+
+            return new ConditionAndTrees(Optional.empty(), Stream.of(tree));
         }
 
         /**
