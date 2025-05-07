@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 /**
  * Applies the transformer to the children
  */
-public class ChildTransformer extends DefaultNonRecursiveIQTreeTransformer {
+public class ChildTransformer extends DefaultIQTreeVisitingTransformer {
 
     private final IntermediateQueryFactory iqFactory;
     private final IQTreeTransformer transformer;

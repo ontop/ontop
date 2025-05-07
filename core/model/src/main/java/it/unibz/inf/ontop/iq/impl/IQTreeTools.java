@@ -22,18 +22,20 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @Singleton
 public class IQTreeTools {
 
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final TermFactory termFactory;
 
     @Inject
-    private IQTreeTools(IntermediateQueryFactory iqFactory,
-                        SubstitutionFactory substitutionFactory) {
+    private IQTreeTools(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
+        this.termFactory = termFactory;
     }
 
     public static ImmutableSet<Variable> computeStrictDependentsFromFunctionalDependencies(IQTree tree) {
@@ -90,6 +92,13 @@ public class IQTreeTools {
                 : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(variables), child);
     }
 
+    // TODO: merge with above
+    public IQTree createIQTreeWithSignature(ImmutableSet<Variable> signature, IQTree child) {
+        return iqFactory.createUnaryIQTree(
+                iqFactory.createConstructionNode(signature),
+                child);
+    }
+
     public ImmutableSet<Variable> getChildrenVariables(ImmutableList<IQTree> children) {
          return children.stream()
                 .flatMap(c -> c.getVariables().stream())
@@ -109,6 +118,11 @@ public class IQTreeTools {
         return Sets.union(groupingVariables, substitution.getRangeVariables()).immutableCopy();
     }
 
+    public LeftJoinNode updateLeftJoinNodeWithConjunct(LeftJoinNode leftJoinNode, Optional<ImmutableExpression> conjunct) {
+        return conjunct
+                .map(c -> iqFactory.createLeftJoinNode(termFactory.getConjunction(leftJoinNode.getOptionalFilterCondition(), Stream.of(c))))
+                .orElse(leftJoinNode);
+    }
 
     public IQTree createOptionalUnaryIQTree(Optional<? extends UnaryOperatorNode> optionalNode, IQTree tree) {
         return optionalNode
