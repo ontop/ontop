@@ -1,20 +1,18 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
-import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.node.LeftJoinNode;
-import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.UnionAndBindingLiftOptimizer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -67,65 +65,51 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree);
     }
 
-
-    /**
-     * Recursive (to reach the descendency but does not loop over itself)
-     */
-    private IQTree liftTree(IQTree queryTree, VariableGenerator variableGenerator) {
-        if (queryTree instanceof UnaryIQTree)
-            return liftUnary((UnaryIQTree) queryTree, variableGenerator);
-        else if (queryTree instanceof NaryIQTree)
-            return liftNary((NaryIQTree) queryTree, variableGenerator);
-        else if (queryTree instanceof BinaryNonCommutativeIQTree)
-            return liftBinaryNonCommutative((BinaryNonCommutativeIQTree) queryTree, variableGenerator);
-        // Leaf node
-        else
-            return queryTree;
+    private IQTree liftTree(IQTree previousTree, VariableGenerator variableGenerator) {
+        Lifter lifter = new Lifter(variableGenerator);
+        return lifter.transform(previousTree);
     }
 
-    private UnaryIQTree liftUnary(UnaryIQTree queryTree, VariableGenerator variableGenerator) {
-        IQTree newChild = liftTree(queryTree.getChild(), variableGenerator);
-        return newChild.equals(queryTree.getChild())
-                ? queryTree
-                : iqFactory.createUnaryIQTree(queryTree.getRootNode(), newChild);
-    }
+    private class Lifter extends DefaultRecursiveIQTreeVisitingTransformer {
+        private final VariableGenerator variableGenerator;
 
-    private IQTree liftNary(NaryIQTree queryTree, VariableGenerator variableGenerator) {
-        NaryOperatorNode root = queryTree.getRootNode();
-
-        ImmutableList<IQTree> newChildren = queryTree.getChildren().stream()
-                // Recursive
-                .map(t -> liftTree(t, variableGenerator))
-                .collect(ImmutableCollectors.toList());
-
-        if (root instanceof InnerJoinNode) {
-            return liftInnerJoin(queryTree, newChildren, variableGenerator);
+        protected Lifter(VariableGenerator variableGenerator) {
+            super(BottomUpUnionAndBindingLiftOptimizer.this.iqFactory);
+            this.variableGenerator = variableGenerator;
         }
-        else
-            return newChildren.equals(queryTree.getChildren())
-                    ? queryTree
-                    : iqFactory.createNaryIQTree(root, newChildren);
 
+        @Override
+        protected boolean nodesEqual(QueryNode node1, QueryNode node2) {
+            return true;
+        }
+
+        @Override
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode node, ImmutableList<IQTree> children) {
+            NaryIQTree newTree = (NaryIQTree) super.transformInnerJoin(tree, node, children);
+
+            return extractCandidateVariables(tree, node.getOptionalFilterCondition(), newTree.getChildren())
+                    .map(variable -> newTree.liftIncompatibleDefinitions(variable, variableGenerator))
+                    .filter(t -> !t.equals(tree))
+                    .findFirst()
+                    .orElse(newTree)
+                    .normalizeForOptimization(variableGenerator);
+        }
+
+        @Override
+        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode node, IQTree leftChild, IQTree rightChild) {
+            BinaryNonCommutativeIQTree newTree = (BinaryNonCommutativeIQTree)super.transformLeftJoin(tree, node, leftChild, rightChild);
+
+            ImmutableSet<Variable> leftVariables = newTree.getLeftChild().getVariables();
+            return extractCandidateVariables(tree, node.getOptionalFilterCondition(), ImmutableList.of(newTree.getLeftChild(), newTree.getRightChild()))
+                    .filter(leftVariables::contains)
+                    .map(variable -> newTree.liftIncompatibleDefinitions(variable, variableGenerator))
+                    .filter(t -> !t.equals(tree))
+                    .findFirst()
+                    .orElse(newTree)
+                    .normalizeForOptimization(variableGenerator);
+        }
     }
 
-
-    /**
-     * TODO: refactor
-     */
-    private IQTree liftInnerJoin(NaryIQTree queryTree, ImmutableList<IQTree> newChildren, VariableGenerator variableGenerator) {
-        InnerJoinNode joinNode = (InnerJoinNode) queryTree.getRootNode();
-
-        NaryIQTree newQueryTree = newChildren.equals(queryTree.getChildren())
-                ? queryTree
-                : iqFactory.createNaryIQTree(joinNode, newChildren);
-
-        return extractCandidateVariables(queryTree, joinNode.getOptionalFilterCondition(), newChildren)
-                .map(variable -> newQueryTree.liftIncompatibleDefinitions(variable, variableGenerator))
-                .filter(t -> !t.equals(queryTree))
-                .findFirst()
-                .orElse(newQueryTree)
-                .normalizeForOptimization(variableGenerator);
-    }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private Stream<Variable> extractCandidateVariables(IQTree tree,
@@ -146,42 +130,4 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
                 .distinct()
                 .filter(tree::isConstructed);
     }
-
-    private IQTree liftBinaryNonCommutative(BinaryNonCommutativeIQTree queryTree, VariableGenerator variableGenerator) {
-        BinaryNonCommutativeOperatorNode root = queryTree.getRootNode();
-
-        IQTree newLeftChild = liftTree(queryTree.getLeftChild(), variableGenerator);
-        IQTree newRightChild = liftTree(queryTree.getRightChild(), variableGenerator);
-
-        if (root instanceof LeftJoinNode) {
-            return liftLJJoin(queryTree, newLeftChild, newRightChild, variableGenerator);
-        }
-        else
-            return newLeftChild.equals(queryTree.getLeftChild()) && newRightChild.equals(queryTree.getRightChild())
-                    ? queryTree
-                    : iqFactory.createBinaryNonCommutativeIQTree(root, newLeftChild, newRightChild);
-    }
-
-    /**
-     * TODO: refactor
-     */
-    private IQTree liftLJJoin(BinaryNonCommutativeIQTree queryTree, IQTree newLeftChild, IQTree newRightChild,
-                              VariableGenerator variableGenerator) {
-        LeftJoinNode leftJoinNode = (LeftJoinNode) queryTree.getRootNode();
-
-        BinaryNonCommutativeIQTree newQueryTree = newLeftChild.equals(queryTree.getLeftChild())
-                && newRightChild.equals(queryTree.getRightChild())
-                ? queryTree
-                : iqFactory.createBinaryNonCommutativeIQTree(leftJoinNode, newLeftChild, newRightChild);
-
-        return extractCandidateVariables(queryTree, leftJoinNode.getOptionalFilterCondition(),
-                    ImmutableList.of(newLeftChild, newRightChild))
-                .filter(v -> newLeftChild.getVariables().contains(v))
-                .map(variable -> newQueryTree.liftIncompatibleDefinitions(variable, variableGenerator))
-                .filter(t -> !t.equals(queryTree))
-                .findFirst()
-                .orElse(newQueryTree)
-                .normalizeForOptimization(variableGenerator);
-    }
-
 }
