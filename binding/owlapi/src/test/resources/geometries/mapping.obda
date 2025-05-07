@@ -1,0 +1,12 @@
+[PrefixDeclaration]
+:		http://example.org/
+xsd:    http://www.w3.org/2001/XMLSchema#
+geo:    http://www.opengis.net/ont/geosparql#
+rdfs:   http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	geoms
+target		:{"id"} a :Geom ; geo:asWKT {"geom"}^^geo:wktLiteral ; :label {"name"}^^xsd:string .
+source		SELECT "id", "name", "geom" FROM "geometry";
+
+]]

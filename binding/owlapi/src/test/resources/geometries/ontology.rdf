@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+
+<rdf:RDF xmlns="http://example.org/"
+        xmlns:ex="http://example.org/"
+     xml:base="http://example.org/"
+     xmlns:geo="http://www.opengis.net/ont/geosparql#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+
+    <owl:Ontology rdf:about="http://example.org/"/>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/label"/>
+
+    <owl:DatatypeProperty rdf:about="http://www.opengis.net/ont/geosparql#asWKT"/>
+
+    <owl:Class rdf:about="http://example.org/Geom"/>
+
+    <owl:NamedIndividual rdf:about="http://example.org/100">
+        <rdf:type rdf:resource="http://example.org/Geom"/>
+        <ex:label> First ontology point</ex:label>
+        <geo:asWKT rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral">POINT(11.76983571552283 46.94903981306967)</geo:asWKT>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="http://example.org/101">
+        <rdf:type rdf:resource="http://example.org/Geom"/>
+        <ex:label> Second ontology point</ex:label>
+        <geo:asWKT rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral">POINT(11.777499931163218 46.950015945557745)</geo:asWKT>
+    </owl:NamedIndividual>
+
+</rdf:RDF>

@@ -1,0 +1,11 @@
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:geo="http://www.opengis.net/ont/geosparql#"
+         xmlns:ex="http://example.org/">
+
+    <rdf:Description rdf:about="http://example.org/100">
+        <rdf:type rdf:resource="http://example.org/Geom"/>
+        <ex:label >First facts point</ex:label>
+        <geo:asWKT rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral">POINT(13.2003 42.7677)</geo:asWKT>
+    </rdf:Description>
+
+</rdf:RDF>
