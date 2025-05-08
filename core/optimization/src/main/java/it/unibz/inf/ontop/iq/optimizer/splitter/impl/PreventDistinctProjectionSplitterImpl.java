@@ -24,18 +24,20 @@ public class PreventDistinctProjectionSplitterImpl extends ProjectionSplitterImp
     private final ProjectionDecomposer decomposer;
 
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private PreventDistinctProjectionSplitterImpl(IntermediateQueryFactory iqFactory,
                                                   SubstitutionFactory substitutionFactory,
                                                   CoreUtilsFactory coreUtilsFactory,
-                                                  DistinctNormalizer distinctNormalizer) {
+                                                  DistinctNormalizer distinctNormalizer, IQTreeTools iqTreeTools) {
         super(iqFactory, substitutionFactory, distinctNormalizer);
         this.decomposer = coreUtilsFactory.createProjectionDecomposer(
             t -> !shouldSplit(t),
             n -> true
         );
         this.iqFactory = iqFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -67,8 +69,10 @@ public class PreventDistinctProjectionSplitterImpl extends ProjectionSplitterImp
             /* We can bypass the security check for pushing the CONSTRUCT into the DISTINCT used by the normal ProjectionSplitter,
              * as the general circumstances of this use case already revolve around that scenario.
              */
-            return iqFactory.createUnaryIQTree(distinct.getNode(),
-                    iqFactory.createUnaryIQTree(constructionNode, distinct.getChild()));
+            return iqTreeTools.createUnaryIQTree(
+                    distinct.getNode(),
+                    constructionNode,
+                    distinct.getChild());
         }
         return super.insertConstructionNode(tree, constructionNode, variableGenerator);
     }

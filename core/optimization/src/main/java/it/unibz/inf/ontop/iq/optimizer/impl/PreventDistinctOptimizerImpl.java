@@ -60,9 +60,9 @@ public class PreventDistinctOptimizerImpl implements PreventDistinctOptimizer {
                 var split = preventDistinctProjectionSplitter.split(tree, variableGenerator);
                 var newTree = iqFactory.createUnaryIQTree(split.getConstructionNode(),
                         split.getSubTree());
-                if(newTree.equals(tree))
+                if (newTree.equals(tree))
                     return tree;
-                if(!validatePushedVariables(
+                if (!validatePushedVariables(
                         split.getPushedVariables(),
                         Sets.difference(
                                 rootNode.getChildVariables(),

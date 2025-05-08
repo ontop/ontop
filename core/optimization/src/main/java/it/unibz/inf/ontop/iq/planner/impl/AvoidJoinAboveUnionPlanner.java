@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
@@ -73,7 +74,7 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
     @Inject
     protected AvoidJoinAboveUnionPlanner(GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
                                          AvoidJoinAboveUnionTransformer transformer,
-                                         IntermediateQueryFactory iqFactory) {
+                                         IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
         this.generalOptimizer = generalOptimizer;
         this.transformer = transformer;
         this.iqFactory = iqFactory;
@@ -106,10 +107,12 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
 
     @Singleton
     protected static class AvoidJoinAboveUnionTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+        private final IQTreeTools iqTreeTools;
 
         @Inject
-        protected AvoidJoinAboveUnionTransformer(IntermediateQueryFactory iqFactory) {
+        protected AvoidJoinAboveUnionTransformer(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
             super(iqFactory);
+            this.iqTreeTools = iqTreeTools;
         }
 
         @Override
@@ -137,10 +140,10 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
                         case 0:
                             throw new MinorOntopInternalBugException("At least one child should remain");
                         case 1:
-                            return rootNode.getOptionalFilterCondition()
-                                    .map(iqFactory::createFilterNode)
-                                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, currentChildren.get(0)))
-                                    .orElseGet(() -> currentChildren.get(0));
+                            return iqTreeTools.createOptionalUnaryIQTree(
+                                    rootNode.getOptionalFilterCondition()
+                                            .map(iqFactory::createFilterNode),
+                                    currentChildren.get(0));
                         default:
                             return iqFactory.createNaryIQTree(rootNode, children);
                     }

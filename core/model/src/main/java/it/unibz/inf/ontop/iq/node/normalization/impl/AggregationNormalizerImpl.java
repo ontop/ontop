@@ -63,10 +63,10 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             return iqFactory.createTrueNode();
         }
         else if (aggregationNode.getSubstitution().isEmpty()) {
-            IQTree newTree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
-                    iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
-                            aggregationNode.getGroupingVariables()),
-                            child));
+            IQTree newTree = iqTreeTools.createUnaryIQTree(
+                    iqFactory.createDistinctNode(),
+                    iqFactory.createConstructionNode(aggregationNode.getGroupingVariables()),
+                    child);
 
             return newTree.normalizeForOptimization(variableGenerator);
         }

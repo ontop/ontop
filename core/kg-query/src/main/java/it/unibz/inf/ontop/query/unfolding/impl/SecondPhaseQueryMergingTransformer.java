@@ -366,8 +366,9 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
                 )
         );
         ImmutableExpression filterCondition = termFactory.getRDF2DBBooleanFunctionalTerm(sparqlSTRSTARTSFunctionWithParameters);
-        FilterNode filterNode = iqFactory.createFilterNode(filterCondition);
-        return iqFactory.createUnaryIQTree(filterNode, currentIQTree);
+        return iqFactory.createUnaryIQTree(
+                iqFactory.createFilterNode(filterCondition),
+                currentIQTree);
     }
 
     private IQ filterDefinitionWithConstant(IQ definition, ObjectConstant objectConstant,

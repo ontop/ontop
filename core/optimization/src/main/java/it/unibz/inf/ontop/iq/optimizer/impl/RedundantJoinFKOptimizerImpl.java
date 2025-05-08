@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.optimizer.RedundantJoinFKOptimizer;
@@ -27,11 +28,13 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
 
     private final RedundantJoinFKTransformer transformer;
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
-    private RedundantJoinFKOptimizerImpl(CoreSingletons coreSingletons) {
-        this.transformer = new RedundantJoinFKTransformer(coreSingletons);
+    private RedundantJoinFKOptimizerImpl(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
+        this.transformer = new RedundantJoinFKTransformer(coreSingletons, iqTreeTools);
         this.iqFactory = coreSingletons.getIQFactory();
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -48,10 +51,12 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
     protected static class RedundantJoinFKTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
         protected final TermFactory termFactory;
+        private final IQTreeTools iqTreeTools;
 
-        protected RedundantJoinFKTransformer(CoreSingletons coreSingletons) {
+        protected RedundantJoinFKTransformer(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
             super(coreSingletons.getIQFactory());
             this.termFactory = coreSingletons.getTermFactory();
+            this.iqTreeTools = iqTreeTools;
         }
 
         @Override
@@ -103,12 +108,9 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
                 case 0:
                     throw new IllegalStateException("At least one child must remain");
                 case 1:
-                    return Optional.of(
-                            newConditions
-                                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(
-                                            iqFactory.createFilterNode(c),
-                                            remainingChildren.get(0)))
-                                    .orElseGet(() -> remainingChildren.get(0)));
+                    return Optional.of(iqTreeTools.createOptionalUnaryIQTree(
+                            newConditions.map(iqFactory::createFilterNode),
+                            remainingChildren.get(0)));
                 default:
                     return Optional.of(
                             iqFactory.createNaryIQTree(
@@ -182,11 +184,9 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
                 case 0:
                     throw new IllegalStateException("The optimization should not eliminate all the children");
                 case 1:
-                    return rootNode.getOptionalFilterCondition().isPresent()
-                            ? iqFactory.createUnaryIQTree(
-                                iqFactory.createFilterNode((rootNode.getOptionalFilterCondition().get())),
-                                newChildren.get(0))
-                            : newChildren.get(0);
+                    return iqTreeTools.createOptionalUnaryIQTree(
+                            rootNode.getOptionalFilterCondition().map(iqFactory::createFilterNode),
+                            newChildren.get(0));
                 default:
                     return iqFactory.createNaryIQTree(rootNode, newChildren);
             }

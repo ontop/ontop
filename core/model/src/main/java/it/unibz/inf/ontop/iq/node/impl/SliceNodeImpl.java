@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
@@ -38,11 +39,13 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     private final Long limit;
 
     private final OntopModelSettings settings;
+    private final IQTreeTools iqTreeTools;
 
     @AssistedInject
     private SliceNodeImpl(@Assisted("offset") long offset, @Assisted("limit") long limit,
-                          IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
+                          IntermediateQueryFactory iqFactory, OntopModelSettings settings, IQTreeTools iqTreeTools) {
         super(iqFactory);
+        this.iqTreeTools = iqTreeTools;
         if (offset < 0)
             throw new IllegalArgumentException("The offset must not be negative");
         if (limit < 0)
@@ -53,8 +56,9 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @AssistedInject
-    private SliceNodeImpl(@Assisted long offset, IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
+    private SliceNodeImpl(@Assisted long offset, IntermediateQueryFactory iqFactory, OntopModelSettings settings, IQTreeTools iqTreeTools) {
         super(iqFactory);
+        this.iqTreeTools = iqTreeTools;
         if (offset < 0)
             throw new IllegalArgumentException("The offset must not be negative");
         this.offset = offset;
@@ -337,13 +341,10 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         return newUnionChildren.equals(unionChildren)
                 ? Optional.empty()
                 : Optional.of(
-                        iqFactory.createUnaryIQTree(
+                iqTreeTools.createUnaryIQTree(
                                 this,
-                                iqFactory.createUnaryIQTree(
-                                        iqFactory.createDistinctNode(),
-                                        iqFactory.createNaryIQTree(
-                                                union,
-                                                newUnionChildren)))
+                                iqFactory.createDistinctNode(),
+                                iqFactory.createNaryIQTree(union, newUnionChildren))
                                 .normalizeForOptimization(variableGenerator));
     }
 

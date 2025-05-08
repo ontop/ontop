@@ -289,8 +289,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         if (constructionNode == null) {
             return valuesNode;
         }
-        return iqFactory.createUnaryIQTree(constructionNode,
-                iqFactory.createUnaryIQTree(filterNode, valuesNode));
+        return iqTreeTools.createUnaryIQTree(constructionNode, filterNode, valuesNode);
     }
 
     private ValuesNode substituteConstants(Substitution<Constant> substitution, ValuesNode valuesNode) {

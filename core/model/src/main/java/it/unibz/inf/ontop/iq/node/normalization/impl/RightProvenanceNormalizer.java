@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -40,12 +41,14 @@ public class RightProvenanceNormalizer {
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
-    protected RightProvenanceNormalizer(CoreSingletons coreSingletons) {
+    protected RightProvenanceNormalizer(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
         this.iqFactory = coreSingletons.getIQFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.termFactory = coreSingletons.getTermFactory();
+        this.iqTreeTools = iqTreeTools;
     }
 
     public RightProvenance normalizeRightProvenance(IQTree rightTree, ImmutableSet<Variable> leftVariables,
@@ -53,12 +56,13 @@ public class RightProvenanceNormalizer {
                                                     VariableGenerator variableGenerator) {
         ImmutableSet<Variable> rightVariables = rightTree.getVariables();
 
-        VariableNullability rightNullability = leftJoinExpression
-                .flatMap(e -> termFactory.getConjunction(
-                        e.flattenAND()
-                                .filter(e1 -> rightVariables.containsAll(e1.getVariables()))))
-                .<IQTree>map(e -> iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), rightTree))
-                .orElse(rightTree)
+        VariableNullability rightNullability = iqTreeTools.createOptionalUnaryIQTree(
+                        leftJoinExpression
+                                .flatMap(e -> termFactory.getConjunction(
+                                        e.flattenAND()
+                                                .filter(e1 -> rightVariables.containsAll(e1.getVariables()))))
+                                .map(iqFactory::createFilterNode),
+                        rightTree)
                 .getVariableNullability();
 
         return normalizeRightProvenance(rightTree, leftVariables, rightTree.getVariables(), variableGenerator,

@@ -139,6 +139,17 @@ public class IQTreeTools {
                 .orElse(tree);
     }
 
+    public IQTree createUnaryIQTree(UnaryOperatorNode node1, UnaryOperatorNode node2, IQTree tree) {
+        return iqFactory.createUnaryIQTree(node1,
+                iqFactory.createUnaryIQTree(node2, tree));
+    }
+
+    public IQTree createUnaryIQTree(UnaryOperatorNode node1, UnaryOperatorNode node2, UnaryOperatorNode node3, IQTree tree) {
+        return iqFactory.createUnaryIQTree(node1,
+                iqFactory.createUnaryIQTree(node2,
+                        iqFactory.createUnaryIQTree(node3, tree)));
+    }
+
     public IQTree createAncestorsUnaryIQTree(ImmutableList<? extends UnaryOperatorNode> ancestors, IQTree tree) {
         return ancestors.stream()
                 .reduce(tree,
@@ -170,7 +181,7 @@ public class IQTreeTools {
         protected final N node; // nullable
         protected final T tree;
 
-        protected IQTreeDecomposition(IQTree subTree) {
+        protected IQTreeDecomposition() {
             this.node = null;
             this.tree = null;
         }
@@ -222,7 +233,6 @@ public class IQTreeTools {
         }
 
         private UnaryIQTreeDecomposition(IQTree tree) {
-            super(tree);
             this.child = null;
             this.tail = Objects.requireNonNull(tree);
         }
@@ -269,7 +279,6 @@ public class IQTreeTools {
         }
 
         private NaryIQTreeDecomposition(IQTree tree) {
-            super(tree);
             this.children = null;
         }
 
@@ -300,7 +309,6 @@ public class IQTreeTools {
         }
 
         private BinaryNonCommutativeIQTreeDecomposition(IQTree tree) {
-            super(tree);
             this.leftChild = null;
             this.rightChild = null;
         }

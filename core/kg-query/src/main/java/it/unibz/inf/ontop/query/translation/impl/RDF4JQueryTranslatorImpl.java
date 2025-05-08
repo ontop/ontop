@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -41,6 +40,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.*;
+
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 @Singleton
 public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
@@ -190,9 +192,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
 
         InsertClauseNormalizer.Result normalization = insertClauseNormalizer.normalize(dataNodes, whereTree);
-        IQTree normalizedSubTree = normalization.getConstructionNode()
-                .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, whereTree))
-                .orElse(whereTree);
+        IQTree normalizedSubTree = iqTreeTools.createOptionalUnaryIQTree(normalization.getConstructionNode(), whereTree);
 
         // NB: when there is no default graph
         if (normalizedSubTree.isDeclaredAsEmpty())
@@ -256,10 +256,11 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private IQTree projectOutAllVars(IQTree tree) {
-        if (tree.getRootNode() instanceof QueryModifierNode) {
+        var modifier = IQTreeTools.UnaryIQTreeDecomposition.of(tree, QueryModifierNode.class);
+        if (modifier.isPresent()) {
             return iqFactory.createUnaryIQTree(
-                    (UnaryOperatorNode) tree.getRootNode(),
-                    projectOutAllVars(((UnaryIQTree) tree).getChild()));
+                    modifier.getNode(),
+                    projectOutAllVars(modifier.getChild()));
         }
 
         return iqFactory.createUnaryIQTree(

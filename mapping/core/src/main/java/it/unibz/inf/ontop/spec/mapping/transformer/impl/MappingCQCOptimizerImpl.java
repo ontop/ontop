@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -28,10 +29,12 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
     private static final Logger log = LoggerFactory.getLogger(MappingCQCOptimizerImpl.class);
     
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
-    public MappingCQCOptimizerImpl(CoreSingletons coreSingletons) {
+    public MappingCQCOptimizerImpl(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
         this.iqFactory = coreSingletons.getIQFactory();
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -119,9 +122,9 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                 case 0:
                     return iqFactory.createTrueNode();
                 case 1:
-                    return joiningConditions
-                            .<IQTree>map(c -> iqFactory.createUnaryIQTree(iqFactory.createFilterNode(c), children.get(0)))
-                            .orElseGet(() -> children.get(0));
+                    return iqTreeTools.createOptionalUnaryIQTree(
+                            joiningConditions.map(iqFactory::createFilterNode),
+                            children.get(0));
                 default:
                     return iqFactory.createNaryIQTree(innerJoinNode, children);
             }

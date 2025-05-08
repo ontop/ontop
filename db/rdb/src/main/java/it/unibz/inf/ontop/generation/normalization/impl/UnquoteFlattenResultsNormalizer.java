@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.FlattenNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -29,13 +30,15 @@ public class UnquoteFlattenResultsNormalizer extends DefaultRecursiveIQTreeVisit
 
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     protected UnquoteFlattenResultsNormalizer(IntermediateQueryFactory iqFactory,
-                                              SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+                                              SubstitutionFactory substitutionFactory, TermFactory termFactory, IQTreeTools iqTreeTools) {
         super(iqFactory);
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -55,14 +58,15 @@ public class UnquoteFlattenResultsNormalizer extends DefaultRecursiveIQTreeVisit
         ImmutableTerm resultSubstitution = termFactory.getDBCase(
                 Stream.of(Maps.immutableEntry(
                         termFactory.getDBStartsWith(ImmutableList.of(rootNode.getOutputVariable(), termFactory.getDBStringConstant("\""))),
-                        termFactory.getDBSubString3(rootNode.getOutputVariable(), termFactory.getDBIntegerConstant(2), termFactory.getImmutableFunctionalTerm(minus, termFactory.getDBCharLength(rootNode.getOutputVariable()), termFactory.getDBIntegerConstant(2)))
-                )),
+                        termFactory.getDBSubString3(rootNode.getOutputVariable(), termFactory.getDBIntegerConstant(2), termFactory.getImmutableFunctionalTerm(minus, termFactory.getDBCharLength(rootNode.getOutputVariable()), termFactory.getDBIntegerConstant(2))))),
                 rootNode.getOutputVariable(),
-                true
-        );
+                true);
         Substitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(rootNode.getOutputVariable(), resultSubstitution);
-        ConstructionNode newRootNode = iqFactory.createConstructionNode(rootNode.getVariables(child.getVariables()), newSubstitution);
-        return iqFactory.createUnaryIQTree(newRootNode, iqFactory.createUnaryIQTree(rootNode, newChild));
+
+        return iqTreeTools.createUnaryIQTree(
+                iqFactory.createConstructionNode(rootNode.getVariables(child.getVariables()), newSubstitution),
+                rootNode,
+                newChild);
     }
 
 }

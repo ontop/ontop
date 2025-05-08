@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
@@ -25,12 +26,14 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
 
     private final CoreSingletons coreSingletons;
     private final TermFactory termFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
-    protected BooleanExpressionPushDownTransformerImpl(CoreSingletons coreSingletons) {
+    protected BooleanExpressionPushDownTransformerImpl(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
         super(coreSingletons.getIQFactory());
         this.coreSingletons = coreSingletons;
         this.termFactory = coreSingletons.getTermFactory();
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -43,10 +46,10 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
                 rootNode.getFilterCondition(),
                 this::pushExpressionDown);
 
-        return result.nonPushedExpression
-                .map(iqFactory::createFilterNode)
-                .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, result.result))
-                .orElse(result.result);
+        return iqTreeTools.createOptionalUnaryIQTree(
+                result.nonPushedExpression
+                        .map(iqFactory::createFilterNode),
+                result.result);
     }
 
     /**

@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
 import it.unibz.inf.ontop.iq.type.NotYetTypedBinaryMathOperationTransformer;
@@ -35,6 +36,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
     private final NotYetTypedBinaryMathOperationTransformer mappingBinaryMathOperationTransformer;
     private final IQTree2NativeNodeGenerator nativeNodeGenerator;
     private final OntopSQLCredentialSettings settings;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private MetaMappingExpanderImpl(SubstitutionFactory substitutionFactory,
@@ -43,7 +45,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                                     NotYetTypedEqualityTransformer mappingEqualityTransformer,
                                     NotYetTypedBinaryMathOperationTransformer mappingBinaryMathOperationTransformer,
                                     IQTree2NativeNodeGenerator nativeNodeGenerator,
-                                    OntopSQLCredentialSettings settings) {
+                                    OntopSQLCredentialSettings settings, IQTreeTools iqTreeTools) {
         this.substitutionFactory = substitutionFactory;
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
@@ -51,6 +53,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
         this.mappingBinaryMathOperationTransformer = mappingBinaryMathOperationTransformer;
         this.nativeNodeGenerator = nativeNodeGenerator;
         this.settings = settings;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -106,10 +109,10 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
 
         NativeNode getDatabaseQuery(DBParameters dbParameters) {
 
-            IQTree topChildNotNull = termFactory.getDBIsNotNull(assertion.getTopChild().getVariables().stream())
-                    .map(iqFactory::createFilterNode)
-                    .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, assertion.getTopChild()))
-                    .orElse(assertion.getTopChild());
+            IQTree topChildNotNull = iqTreeTools.createOptionalUnaryIQTree(
+                    termFactory.getDBIsNotNull(assertion.getTopChild().getVariables().stream())
+                            .map(iqFactory::createFilterNode),
+                    assertion.getTopChild());
 
             IQTree constructionTree = iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
                     assertion.getTopSubstitution().get(topVariable).getVariableStream().collect(ImmutableCollectors.toSet()),

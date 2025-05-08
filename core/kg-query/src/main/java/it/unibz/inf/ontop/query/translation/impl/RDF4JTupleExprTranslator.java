@@ -307,8 +307,7 @@ public class RDF4JTupleExprTranslator {
                                 ImmutableList.of(
                                         pathZeroDepthChild,
                                         // Depth 1. Takes advantage that Ontop computes the transitive closure of rdfs:subClassOf
-                                        childTree)
-                        ));
+                                        childTree)));
                 return createTranslationResult(newTree, ImmutableSet.of());
             }
         }
@@ -443,13 +442,14 @@ public class RDF4JTupleExprTranslator {
         InjectiveSubstitution<Variable> rightNonProjVarsRenaming = getNonProjVarsRenaming(rightTranslation, leftTranslation, vGen);
 
         return createTranslationResult(
-                iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(leftTranslation.iqTree.getVariables()),
-                        iqFactory.createUnaryIQTree(iqFactory.createFilterNode(filter),
-                                iqFactory.createBinaryNonCommutativeIQTree(iqFactory.createLeftJoinNode(ljCond),
-                                        applyInDepthRenaming(leftTranslation.iqTree, leftNonProjVarsRenaming),
-                                        applyInDepthRenaming(
-                                                rightTranslation.iqTree.applyDescendingSubstitutionWithoutOptimizing(sharedVarsRenaming, vGen),
-                                                rightNonProjVarsRenaming)))),
+                iqTreeTools.createUnaryIQTree(
+                        iqFactory.createConstructionNode(leftTranslation.iqTree.getVariables()),
+                        iqFactory.createFilterNode(filter),
+                        iqFactory.createBinaryNonCommutativeIQTree(iqFactory.createLeftJoinNode(ljCond),
+                                applyInDepthRenaming(leftTranslation.iqTree, leftNonProjVarsRenaming),
+                                applyInDepthRenaming(
+                                        rightTranslation.iqTree.applyDescendingSubstitutionWithoutOptimizing(sharedVarsRenaming, vGen),
+                                        rightNonProjVarsRenaming))),
                 leftTranslation.nullableVariables);
     }
 
@@ -567,12 +567,13 @@ public class RDF4JTupleExprTranslator {
         Substitution<ImmutableTerm> newSubstitution = Sets.difference(projectedVars, subQuery.getVariables()).stream()
                 .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
 
-        ConstructionNode projectNode = iqFactory.createConstructionNode(projectedVars, newSubstitution);
-        UnaryIQTree constructTree = iqFactory.createUnaryIQTree(projectNode, subQuery);
+        UnaryIQTree constructTree = iqFactory.createUnaryIQTree(
+                iqFactory.createConstructionNode(projectedVars, newSubstitution),
+                subQuery);
 
         ImmutableSet<Variable> nullableVariables = substitutionFactory.apply(substitution, child.nullableVariables);
 
-        IQTree iqTree = applyExternalBindingFilter(constructTree, projectNode.getSubstitution().getDomain());
+        IQTree iqTree = applyExternalBindingFilter(constructTree, newSubstitution.getDomain());
         return createTranslationResult(iqTree, nullableVariables);
     }
 
@@ -667,10 +668,10 @@ public class RDF4JTupleExprTranslator {
                 ImmutableSet<Variable> projectedVariables = Sets.difference(quadNode.getVariables(), ImmutableSet.of(graph)).immutableCopy();
 
                 // Merges the default trees -> removes duplicates
-                return iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
-                        iqFactory.createUnaryIQTree(
-                                iqFactory.createConstructionNode(projectedVariables),
-                                iqFactory.createUnaryIQTree(filterNode, quadNode)));
+                return iqTreeTools.createUnaryIQTree(
+                        iqFactory.createDistinctNode(),
+                        iqFactory.createConstructionNode(projectedVariables),
+                        filterNode, quadNode);
             }
         }
     }
@@ -819,10 +820,9 @@ public class RDF4JTupleExprTranslator {
                         .map(v -> termFactory.getStrictEquality(v, externalBindings.get(v))));
 
         // Filter variables according to bindings
-        return conjunction
-                .map(iqFactory::createFilterNode)
-                .<IQTree>map(f -> iqFactory.createUnaryIQTree(f, tree))
-                .orElse(tree);
+        return iqTreeTools.createOptionalUnaryIQTree(
+                conjunction.map(iqFactory::createFilterNode),
+                tree);
     }
 
 

@@ -164,9 +164,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         ImmutableExpression condition = termFactory.getConjunction(
                 renamedBlockedSubstitution.builder().toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList()));
 
-        FilterNode filterNode = iqFactory.createFilterNode(condition);
-
-        IQTree filterTree = iqFactory.createUnaryIQTree(filterNode, flattenTree);
+        IQTree filterTree = iqFactory.createUnaryIQTree(iqFactory.createFilterNode(condition), flattenTree);
 
         return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(

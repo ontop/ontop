@@ -48,7 +48,9 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
                         ? tree
                         : decomposition.rebuildWithNewDescendantTree(newDescendantTree, iqFactory);
             }
-            return normalizeWithDistinct(decomposition);
+            var distinct = decomposition.distinctNode.get();
+
+            return iqFactory.createUnaryIQTree(distinct, normalize(decomposition));
         }
 
         @Override
@@ -64,12 +66,6 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
                         : decomposition.rebuildWithNewDescendantTree(newDescendantTree, iqFactory);
             }
             return normalize(decomposition);
-        }
-
-        IQTree normalizeWithDistinct(ProjectOrderByTermsNormalizer.Decomposition decomposition) {
-            var distinct = decomposition.distinctNode.get();
-
-            return iqFactory.createUnaryIQTree(distinct, normalize(decomposition));
         }
 
         IQTree normalize(ProjectOrderByTermsNormalizer.Decomposition decomposition) {

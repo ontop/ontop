@@ -137,10 +137,10 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
             case 0:
                 throw new MinorOntopInternalBugException("Should have been detected before");
             case 1:
-                IQTree child = newChildren.iterator().next();
-                newTree = newExpression
-                        .<IQTree>map(e ->iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), child))
-                        .orElse(child);
+                IQTree child = newChildren.get(0);
+                newTree = iqTreeTools.createOptionalUnaryIQTree(
+                        newExpression.map(iqFactory::createFilterNode),
+                        child);
                 break;
             default:
                 newTree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(newExpression), newChildren);

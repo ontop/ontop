@@ -278,11 +278,10 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                 var filterCondition = termFactory.getConjunction(
                         rootNode.getSubstitution().stream()
                                 .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())));
-                return filterCondition
-                        .<IQTree>map(c -> iqFactory.createUnaryIQTree(
-                                iqFactory.createFilterNode(c),
-                                pushedIntensionalNode))
-                        .orElse(pushedIntensionalNode);
+                return iqTreeTools.createOptionalUnaryIQTree(
+                        filterCondition
+                                .map(iqFactory::createFilterNode),
+                        pushedIntensionalNode);
             }
 
             var commonTerm = pushedIntensionalNode.getProjectionAtom().getArguments().stream()
