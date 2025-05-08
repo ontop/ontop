@@ -96,30 +96,25 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 this.child = child;
             }
 
-            private State update(Optional<? extends UnaryOperatorNode> newParent,
-                                 Optional<ImmutableExpression> newCondition, IQTree newChild) {
-                return new State(ancestors.append(newParent), newCondition, newChild);
-            }
-
             @Override
-            public State transformConstruction(UnaryIQTree tree, ConstructionNode node, IQTree child) {
+            public State transformConstruction(UnaryIQTree tree, ConstructionNode node, IQTree newChild) {
                 var optionalCondition = condition
                         .map(e -> node.getSubstitution().apply(e));
-                return update(Optional.of(node), optionalCondition, child)
+                return new State(ancestors.append(node), optionalCondition, newChild)
                         .next();
             }
 
             @Override
-            public State transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree child) {
-                return update(Optional.of(node), condition, child)
+            public State transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree newChild) {
+                return new State(ancestors.append(node), condition, newChild)
                         .next();
             }
 
             @Override
-            public State transformFilter(UnaryIQTree tree, FilterNode node, IQTree child) {
+            public State transformFilter(UnaryIQTree tree, FilterNode node, IQTree newChild) {
                 var optionalCondition = condition
                         .map(c -> termFactory.getConjunction(c, node.getFilterCondition()));
-                return update(Optional.empty(), optionalCondition, child)
+                return new State(ancestors, optionalCondition, newChild)
                         .next();
             }
 
@@ -133,7 +128,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                     IQTree newChild = iqFactory.createNaryIQTree(
                             iqFactory.createInnerJoinNode(newJoiningCondition),
                             children);
-                    return update(Optional.empty(), Optional.empty(), newChild)
+                    return new State(ancestors, Optional.empty(), newChild)
                             .stop();
                 }
                 return stop();
@@ -204,7 +199,8 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                             .filter(s -> !s.isEmpty())
                             .map(s -> iqFactory.createConstructionNode(child.getVariables(), s));
 
-                    return update(parentConstructionNode, conditionSimplificationResults.getOptionalExpression(), newChild);
+                    Optional<ImmutableExpression> newCondition = conditionSimplificationResults.getOptionalExpression();
+                    return new State(ancestors.append(parentConstructionNode), newCondition, newChild);
                 }
                 catch (UnsatisfiableConditionException e) {
                     return new State(UnaryOperatorSequence.of(), Optional.empty(),
