@@ -301,7 +301,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
             UnaryIQTree childBeforeRenaming = iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(projectedVariablesBeforeRenaming, substitutionBeforeRenaming),
-                    construction.getChild());
+                    construction.getTail());
 
             IQTree partiallyPaddedChild = childBeforeRenaming.applyDescendingSubstitution(renamingSubstitution, Optional.empty(), variableGenerator);
             ImmutableTerm liftedDefinition = renamingSubstitution.applyToTerm(originalDefinition);

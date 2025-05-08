@@ -87,10 +87,10 @@ public class AggregationSplitterImpl implements AggregationSplitter {
             ImmutableSet<Variable> groupingVariables = rootNode.getGroupingVariables();
 
             var construction = UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
-            var distinct = UnaryIQTreeDecomposition.of(construction.getChild(), DistinctNode.class);
-            var subConstruction = UnaryIQTreeDecomposition.of(distinct.getChild(), ConstructionNode.class);
+            var distinct = UnaryIQTreeDecomposition.of(construction.getTail(), DistinctNode.class);
+            var subConstruction = UnaryIQTreeDecomposition.of(distinct.getTail(), ConstructionNode.class);
 
-            var union = IQTreeTools.NaryIQTreeDecomposition.of(subConstruction.getChild(), UnionNode.class);
+            var union = IQTreeTools.NaryIQTreeDecomposition.of(subConstruction.getTail(), UnionNode.class);
             if (!union.isPresent())
                 // TODO: log a message, as we are in an unexpected situation
                 return Optional.empty();
@@ -115,7 +115,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
                 return Optional.empty();
 
             ImmutableMultiset<IQTree> unionChildren = ImmutableMultiset.copyOf(union.getChildren());
-            VariableNullability variableNullability = subConstruction.getChild().getVariableNullability();
+            VariableNullability variableNullability = subConstruction.getTail().getVariableNullability();
 
             ImmutableList<ImmutableSet<IQTree>> groups = groupingVariablesWithDifferentDefinitions.stream()
                     .reduce(ImmutableList.of(ImmutableSet.copyOf(unionChildren)),

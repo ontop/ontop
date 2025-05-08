@@ -82,13 +82,13 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
             ImmutableExpression expression = getNewFilterExpression(sliceNode, freshVariable);
             FilterNode newFilter = iqFactory.createFilterNode(expression);
 
-            // Patterns: SLICE [CONSTRUCT] ORDER BY
+            // Patterns: SLICE [CONSTRUCT] [ORDER BY] -> SLICE [CONSTRUCT]
             var construction = UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
-            var orderBy = UnaryIQTreeDecomposition.of(construction.getChild(), OrderByNode.class);
+            var orderBy = UnaryIQTreeDecomposition.of(construction.getTail(), OrderByNode.class);
             // Drop ORDER BY node since it will now be part of the orderBy subTerm
-            IQTree newChild = construction.isPresent() && orderBy.isPresent()
-                ? iqFactory.createUnaryIQTree(construction.getNode(), orderBy.getChild())
-                : orderBy.getChild();
+            IQTree newChild = construction.isPresent()
+                ? iqFactory.createUnaryIQTree(construction.getNode(), orderBy.getTail())
+                : orderBy.getTail();
             IQTree normalizedChild = this.transform(newChild);
 
             IQTree newTree = iqFactory.createUnaryIQTree(newFilter,
@@ -100,9 +100,9 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
         }
 
         private ImmutableFunctionalTerm getOrderBySubTerm(IQTree childTree) {
-            // Patterns: SLICE [CONSTRUCT] ORDER BY
+            // Patterns: SLICE [CONSTRUCT] [ORDER BY]
             var construction = UnaryIQTreeDecomposition.of(childTree, ConstructionNode.class);
-            var orderBy = UnaryIQTreeDecomposition.of(construction.getChild(), OrderByNode.class);
+            var orderBy = UnaryIQTreeDecomposition.of(construction.getTail(), OrderByNode.class);
             if (orderBy.isPresent()) {
                 return termFactory.getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRowNumberWithOrderBy(),
                         orderBy.getNode()

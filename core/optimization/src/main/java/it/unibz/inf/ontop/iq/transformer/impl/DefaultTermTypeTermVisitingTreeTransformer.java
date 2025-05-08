@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.apache.commons.rdf.api.RDFTerm;
 
 import java.util.Collection;
 import java.util.Map;
@@ -194,12 +193,10 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                                                           ImmutableMap<Variable, RDFTermTypeFunctionSymbol> typeFunctionSymbolMap) {
 
         var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
-        ConstructionNode constructionNode = construction
-                .getOptionalNode()
-                .orElseThrow(() -> new UnexpectedlyFormattedIQTreeException(
-                        "Was expecting the child to start with a ConstructionNode"));
+        if (!construction.isPresent())
+            throw new UnexpectedlyFormattedIQTreeException("Was expecting the child to start with a ConstructionNode");
 
-        Substitution<ImmutableTerm> newSubstitution = constructionNode.getSubstitution().builder()
+        Substitution<ImmutableTerm> newSubstitution = construction.getNode().getSubstitution().builder()
                 .transformOrRetain(typeFunctionSymbolMap::get, this::enforceUsageOfCommonTypeFunctionSymbol)
                 .build();
 

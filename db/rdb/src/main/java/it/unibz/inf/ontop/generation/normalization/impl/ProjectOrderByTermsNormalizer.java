@@ -273,16 +273,16 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
 
         static Decomposition decomposeTree(IQTree tree) {
             var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
-            var distinct = UnaryIQTreeDecomposition.of(slice.getChild(), DistinctNode.class);
-            var construction = UnaryIQTreeDecomposition.of(distinct.getChild(), ConstructionNode.class);
-            var orderBy = UnaryIQTreeDecomposition.of(construction.getChild(), OrderByNode.class);
+            var distinct = UnaryIQTreeDecomposition.of(slice.getTail(), DistinctNode.class);
+            var construction = UnaryIQTreeDecomposition.of(distinct.getTail(), ConstructionNode.class);
+            var orderBy = UnaryIQTreeDecomposition.of(construction.getTail(), OrderByNode.class);
 
             return new Decomposition(
                     slice.getOptionalNode(),
                     distinct.getOptionalNode(),
                     construction.getOptionalNode(),
                     orderBy.getOptionalNode(),
-                    orderBy.getChild());
+                    orderBy.getTail());
         }
     }
 }

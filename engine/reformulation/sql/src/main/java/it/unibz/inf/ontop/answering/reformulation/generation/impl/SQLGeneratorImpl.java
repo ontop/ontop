@@ -155,7 +155,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
     private IQTree liftSlice(IQTree subTree) {
         var construction = UnaryIQTreeDecomposition.of(subTree, ConstructionNode.class);
-        var slice = UnaryIQTreeDecomposition.of(construction.getChild(), SliceNode.class);
+        var slice = UnaryIQTreeDecomposition.of(construction.getTail(), SliceNode.class);
         if (construction.isPresent() && slice.isPresent()) {
             return iqFactory.createUnaryIQTree(slice.getNode(),
                     iqFactory.createUnaryIQTree(construction.getNode(),
@@ -178,7 +178,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         var construction = UnaryIQTreeDecomposition.of(subTree, ConstructionNode.class);
         if (construction.isPresent()) {
             // If there is variable substitution in the top construction do not normalize
-            var distinct = UnaryIQTreeDecomposition.of(construction.getChild(), DistinctNode.class);
+            var distinct = UnaryIQTreeDecomposition.of(construction.getTail(), DistinctNode.class);
             if (distinct.isPresent() && construction.getNode().getSubstitution().isEmpty()) {
                 // CASE 1: CONSTRUCT, DISTINCT, CONSTRUCT, ORDER BY
                 var construction2 = UnaryIQTreeDecomposition.of(distinct.getChild(), ConstructionNode.class);
@@ -204,8 +204,8 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
     private IQTree liftOrderByAboveDistinct(IQTree subTree) {
         var construction = UnaryIQTreeDecomposition.of(subTree, ConstructionNode.class);
-        var distinct = UnaryIQTreeDecomposition.of(construction.getChild(), DistinctNode.class);
-        var orderBy = UnaryIQTreeDecomposition.of(distinct.getChild(), OrderByNode.class);
+        var distinct = UnaryIQTreeDecomposition.of(construction.getTail(), DistinctNode.class);
+        var orderBy = UnaryIQTreeDecomposition.of(distinct.getTail(), OrderByNode.class);
 
         if (construction.isPresent() && distinct.isPresent() && orderBy.isPresent()) {
             return iqFactory.createUnaryIQTree(construction.getNode(),

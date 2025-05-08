@@ -178,7 +178,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
             var newJoinChildren = joinChildren.stream()
                     // Distinct-s can be eliminated
                     .map(c -> UnaryIQTreeDecomposition.of(c, DistinctNode.class))
-                    .map(UnaryIQTreeDecomposition::getChild)
+                    .map(UnaryIQTreeDecomposition::getTail)
                     .collect(ImmutableCollectors.toList());
 
             if (!newJoinChildren.equals(joinChildren)) {

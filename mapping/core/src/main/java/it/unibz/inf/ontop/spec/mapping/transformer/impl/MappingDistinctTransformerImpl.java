@@ -48,9 +48,9 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
                 .normalizeForOptimization(variableGenerator);
 
         var topConstruction = UnaryIQTreeDecomposition.of(distinctTree, ConstructionNode.class);
-        var distinct = UnaryIQTreeDecomposition.of(topConstruction.getChild(), DistinctNode.class);
+        var distinct = UnaryIQTreeDecomposition.of(topConstruction.getTail(), DistinctNode.class);
 
-        Optional<IQTree> distinctUnionTree = Optional.of(distinct.getChild())
+        Optional<IQTree> distinctUnionTree = Optional.of(distinct.getTail())
                 .map(t -> NaryIQTreeDecomposition.of(t, UnionNode.class))
                 .filter(NaryIQTreeDecomposition::isPresent)
                 .map(t -> t.getNode().makeDistinct(t.getChildren()));

@@ -68,8 +68,8 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
 
         // DISTINCT [ORDER BY] [FILTER] UNION
         var orderBy = UnaryIQTreeDecomposition.of(child, OrderByNode.class);
-        var filter = UnaryIQTreeDecomposition.of(orderBy.getChild(), FilterNode.class);
-        var union = NaryIQTreeDecomposition.of(filter.getChild(), UnionNode.class);
+        var filter = UnaryIQTreeDecomposition.of(orderBy.getTail(), FilterNode.class);
+        var union = NaryIQTreeDecomposition.of(filter.getTail(), UnionNode.class);
         if (union.isPresent()) {
             ImmutableList<IQTree> unionChildren = union.getChildren();
             ImmutableList<IQTree> newUnionChildren = unionChildren.stream()
@@ -163,7 +163,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
         IQTree grandChildTree = state.getGrandChildTree();
         // No need to have a DISTINCT as a grand child
         IQTree newGrandChildTree = UnaryIQTreeDecomposition.of(grandChildTree, DistinctNode.class)
-                .getChild();
+                .getTail();
 
         IQTreeCache childTreeCache = iqFactory.createIQTreeCache(newGrandChildTree == grandChildTree);
 

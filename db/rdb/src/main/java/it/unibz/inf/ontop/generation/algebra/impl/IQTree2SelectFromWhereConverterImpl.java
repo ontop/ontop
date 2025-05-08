@@ -45,22 +45,22 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
         Optional<SliceNode> sliceNode = slice.getOptionalNode();
 
-        var distinct = UnaryIQTreeDecomposition.of(slice.getChild(), DistinctNode.class);
+        var distinct = UnaryIQTreeDecomposition.of(slice.getTail(), DistinctNode.class);
         Optional<DistinctNode> distinctNode = distinct.getOptionalNode();
 
-        var construction = UnaryIQTreeDecomposition.of(distinct.getChild(), ConstructionNode.class);
+        var construction = UnaryIQTreeDecomposition.of(distinct.getTail(), ConstructionNode.class);
         Optional<ConstructionNode> constructionNode = construction.getOptionalNode();
 
-        var orderBy = UnaryIQTreeDecomposition.of(construction.getChild(), OrderByNode.class);
+        var orderBy = UnaryIQTreeDecomposition.of(construction.getTail(), OrderByNode.class);
         Optional<OrderByNode> orderByNode = orderBy.getOptionalNode();
 
-        var aggregation = UnaryIQTreeDecomposition.of(orderBy.getChild(), AggregationNode.class);
+        var aggregation = UnaryIQTreeDecomposition.of(orderBy.getTail(), AggregationNode.class);
         Optional<AggregationNode> aggregationNode = aggregation.getOptionalNode();
 
-        var filter = UnaryIQTreeDecomposition.of(aggregation.getChild(), FilterNode.class);
+        var filter = UnaryIQTreeDecomposition.of(aggregation.getTail(), FilterNode.class);
         Optional<FilterNode> filterNode = filter.getOptionalNode();
 
-        IQTree childTree = filter.getChild();
+        IQTree childTree = filter.getTail();
 
         Substitution<ImmutableTerm> substitution = constructionNode
                 .map(c -> aggregationNode

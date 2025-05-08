@@ -243,8 +243,8 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                                 rootNode,
                                 rightFilter.getOptionalNode()
                                         .map(FilterNode::getFilterCondition)),
-                        leftFilter.getChild(),
-                        rightFilter.getChild());
+                        leftFilter.getTail(),
+                        rightFilter.getTail());
 
                 return iqTreeTools.createOptionalUnaryIQTree(
                         leftFilter.getOptionalNode()
@@ -272,7 +272,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                     iqFactory.createInnerJoinNode(termFactory.getConjunction(
                             rootNode.getOptionalFilterCondition(),
                             filterChildExpressions.stream())),
-                    UnaryIQTreeDecomposition.getChildren(childrenFilters));
+                    UnaryIQTreeDecomposition.getTails(childrenFilters));
         }
 
         @Override
@@ -397,7 +397,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
             return decomposition
                     .<IQTree>map((n, t) -> decomposition.getTree())
-                    .orElseGet(decomposition::getChild);
+                    .orElseGet(decomposition::getTail);
         }
     }
 

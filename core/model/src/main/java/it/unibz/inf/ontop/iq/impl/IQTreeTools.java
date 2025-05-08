@@ -21,7 +21,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -170,18 +169,15 @@ public class IQTreeTools {
     public static class IQTreeDecomposition<N extends QueryNode, T extends IQTree> {
         protected final N node; // nullable
         protected final T tree;
-        protected final IQTree subTree;
 
         protected IQTreeDecomposition(IQTree subTree) {
             this.node = null;
             this.tree = null;
-            this.subTree = Objects.requireNonNull(subTree);
         }
 
         protected IQTreeDecomposition(N node, T tree) {
             this.node = Objects.requireNonNull(node);
             this.tree = Objects.requireNonNull(tree);
-            this.subTree = tree;
         }
 
         @Nonnull
@@ -202,30 +198,43 @@ public class IQTreeTools {
         public T getTree() {
             return Objects.requireNonNull(tree);
         }
-
-        @Nonnull
-        public IQTree getSubTree() {
-            return subTree;
-        }
     }
 
+    /**
+     * Decomposition of a UnaryIQTree into a possibly empty node, child, tree
+     * and non-empty tail: the tree is the node together with the child, while
+     * the tail is the remaining part of the UnaryIQTree.
+     * In other words, either the tail is the whole UnaryIQTree
+     * (and then isPresent returns false and getNode, getChild and getTree fail),
+     * or the tail is the child of the UnaryIQTree.
+     *
+     * @param <T>
+     */
 
     public static class UnaryIQTreeDecomposition<T extends UnaryOperatorNode> extends IQTreeDecomposition<T, UnaryIQTree> {
+        private final IQTree tail;
         private final IQTree child;
 
         private UnaryIQTreeDecomposition(T node, UnaryIQTree tree) {
             super(node, tree);
             this.child = tree.getChild();
+            this.tail = child;
         }
 
         private UnaryIQTreeDecomposition(IQTree tree) {
             super(tree);
-            this.child = Objects.requireNonNull(tree);
+            this.child = null;
+            this.tail = Objects.requireNonNull(tree);
         }
 
         @Nonnull
         public IQTree getChild() {
-            return child;
+            return Objects.requireNonNull(child);
+        }
+
+        @Nonnull
+        public IQTree getTail() {
+            return tail;
         }
 
         public <U> Optional<U> map(BiFunction<? super T, IQTree, ? extends U> function) {
@@ -244,9 +253,9 @@ public class IQTreeTools {
                     .collect(ImmutableCollectors.toList());
         }
 
-        public static <T extends UnaryOperatorNode> ImmutableList<IQTree> getChildren(ImmutableList<UnaryIQTreeDecomposition<T>> list) {
+        public static <T extends UnaryOperatorNode> ImmutableList<IQTree> getTails(ImmutableList<UnaryIQTreeDecomposition<T>> list) {
             return list.stream()
-                    .map(UnaryIQTreeDecomposition::getChild)
+                    .map(UnaryIQTreeDecomposition::getTail)
                     .collect(ImmutableCollectors.toList());
         }
     }

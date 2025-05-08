@@ -125,9 +125,9 @@ public class PreventDistinctOptimizerImpl implements PreventDistinctOptimizer {
 
         static Decomposition decomposeTree(IQTree tree) {
             var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
-            var distinct = UnaryIQTreeDecomposition.of(slice.getChild(), DistinctNode.class);
+            var distinct = UnaryIQTreeDecomposition.of(slice.getTail(), DistinctNode.class);
 
-            return new Decomposition(slice.getOptionalNode(), distinct.getOptionalNode(), distinct.getChild());
+            return new Decomposition(slice.getOptionalNode(), distinct.getOptionalNode(), distinct.getTail());
         }
     }
 }

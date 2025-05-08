@@ -94,7 +94,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
         protected Optional<IQTree> furtherTransformLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             var construction = UnaryIQTreeDecomposition.of(rightChild, ConstructionNode.class);
 
-            return Optional.of(construction.getChild())
+            return Optional.of(construction.getTail())
                     .filter(t -> t.getRootNode() instanceof LeftJoinNode)
                     .map(t -> (BinaryNonCommutativeIQTree) t)
                     .flatMap(rLJ -> tryToSimplify(leftChild, rightChild, rootNode.getOptionalFilterCondition(), rLJ));
