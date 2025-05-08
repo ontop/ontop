@@ -102,7 +102,7 @@ public class BasicFlattenLifter implements FlattenLifter {
 
             NestedUnaryIQTreeDecomposition<FlattenNode> subtree = NestedUnaryIQTreeDecomposition.of(
                     UnaryOperatorSequence.of(splits.stream()
-                            .map(fs -> fs.liftableFlatten)),
+                            .flatMap(fs -> fs.liftableFlatten.stream())),
                     iqFactory.createNaryIQTree(join, splits.stream()
                             .map(FlattenSplit::nonLiftableSubtree)
                             .collect(ImmutableCollectors.toList())));
@@ -130,9 +130,8 @@ public class BasicFlattenLifter implements FlattenLifter {
             FlattenSplit rightSplit = splitOf(rightChild, blockingVars);
 
             NestedUnaryIQTreeDecomposition<FlattenNode> subtree = NestedUnaryIQTreeDecomposition.of(
-                    UnaryOperatorSequence.of(Stream.of(
-                            leftSplit.liftableFlatten,
-                            rightSplit.liftableFlatten)),
+                    UnaryOperatorSequence.of(Stream.of(leftSplit, rightSplit)
+                                    .flatMap(c -> c.liftableFlatten.stream())),
                     iqFactory.createBinaryNonCommutativeIQTree(
                             rootNode,
                             leftSplit.nonLiftableSubtree(),

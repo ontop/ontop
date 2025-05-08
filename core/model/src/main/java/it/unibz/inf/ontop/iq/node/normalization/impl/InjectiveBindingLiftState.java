@@ -23,6 +23,9 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
+
 /**
  * Out of a child construction node and a grand child tree, tries to lift injective definitions above
  * (that is inside ancestor construction nodes).
@@ -34,7 +37,7 @@ import java.util.stream.Stream;
 public class InjectiveBindingLiftState {
 
     // The oldest ancestor is first
-    private final ImmutableList<ConstructionNode> ancestors;
+    private final UnaryOperatorSequence<ConstructionNode> ancestors;
     // First descendent tree not starting with a construction node
     private final IQTree grandChildTree;
     @Nullable
@@ -48,13 +51,13 @@ public class InjectiveBindingLiftState {
     protected InjectiveBindingLiftState(@Nonnull ConstructionNode childConstructionNode, IQTree grandChildTree,
                                      VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
         this.coreSingletons = coreSingletons;
-        this.ancestors = ImmutableList.of();
+        this.ancestors = UnaryOperatorSequence.of();
         this.grandChildTree = grandChildTree;
         this.childConstructionNode = childConstructionNode;
         this.variableGenerator = variableGenerator;
     }
 
-    private InjectiveBindingLiftState(ImmutableList<ConstructionNode> ancestors, IQTree grandChildTree,
+    private InjectiveBindingLiftState(UnaryOperatorSequence<ConstructionNode> ancestors, IQTree grandChildTree,
                                       VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
         this.ancestors = ancestors;
         this.grandChildTree = grandChildTree;
@@ -63,7 +66,7 @@ public class InjectiveBindingLiftState {
         this.variableGenerator = variableGenerator;
     }
 
-    private InjectiveBindingLiftState(ImmutableList<ConstructionNode> ancestors, IQTree grandChildTree,
+    private InjectiveBindingLiftState(UnaryOperatorSequence<ConstructionNode> ancestors, IQTree grandChildTree,
                                       VariableGenerator variableGenerator,
                                       @Nonnull ConstructionNode childConstructionNode, CoreSingletons coreSingletons) {
         this.ancestors = ancestors;
@@ -84,7 +87,7 @@ public class InjectiveBindingLiftState {
     /**
      * The oldest ancestor is first
      */
-    public ImmutableList<ConstructionNode> getAncestors() {
+    public UnaryOperatorSequence<ConstructionNode> getAncestors() {
         return ancestors;
     }
 
@@ -147,9 +150,8 @@ public class InjectiveBindingLiftState {
             return this;
         }
 
-        ImmutableList<ConstructionNode> newAncestors = liftedConstructionNode
-                .map(n -> Stream.concat(ancestors.stream(), Stream.of(n))
-                        .collect(ImmutableCollectors.toList()))
+        UnaryOperatorSequence<ConstructionNode> newAncestors = liftedConstructionNode
+                .map(ancestors::append)
                 .orElseThrow(() -> new MinorOntopInternalBugException("A lifted construction node was expected"));
 
         return newChildConstructionNode

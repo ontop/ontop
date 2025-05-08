@@ -176,7 +176,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
         IQTree distinctTree = createDistinctTree(iqFactory.createDistinctNode(), newChildTree,
                 treeCache.declareAsNormalizedForOptimizationWithEffect());
 
-        return iqTreeTools.createAncestorsUnaryIQTree(state.getAncestors().reverse(), distinctTree)
+        return iqTreeTools.createAncestorsUnaryIQTree(state.getAncestors(), distinctTree)
                 // Recursive (for merging top construction nodes)
                 .normalizeForOptimization(variableGenerator);
     }

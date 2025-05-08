@@ -173,13 +173,23 @@ public class IQTreeTools {
             return list.isEmpty();
         }
 
+        public T getLast() {
+            return list.get(list.size() - 1);
+        }
+
         public Stream<T> stream() {
             return list.stream();
         }
 
-        public UnaryOperatorSequence<T> append(Optional<T> optionalNode) {
+        public UnaryOperatorSequence<T> append(Optional<? extends T> optionalNode) {
             return optionalNode.map(this::append)
                     .orElse(this);
+        }
+
+        public UnaryOperatorSequence<T> append(Stream<? extends T> stream) {
+            return new UnaryOperatorSequence<>(
+                    Stream.concat(list.stream(), stream)
+                            .collect(ImmutableList.toImmutableList()));
         }
 
         public static <T extends UnaryOperatorNode> UnaryOperatorSequence<T> of() {
@@ -190,14 +200,8 @@ public class IQTreeTools {
             return new UnaryOperatorSequence<>(ImmutableList.of(node));
         }
 
-        public static <T extends UnaryOperatorNode> UnaryOperatorSequence<T> of(ImmutableList<T> list) {
-            return new UnaryOperatorSequence<>(list);
-        }
-
-        public static <T extends UnaryOperatorNode> UnaryOperatorSequence<T> of(Stream<UnaryOperatorSequence<T>> stream) {
-            return new UnaryOperatorSequence<>(stream
-                    .flatMap(s -> s.list.stream())
-                    .collect(ImmutableList.toImmutableList()));
+        public static <T extends UnaryOperatorNode> UnaryOperatorSequence<T> of(Stream<? extends T> stream) {
+            return new UnaryOperatorSequence<>(stream.collect(ImmutableList.toImmutableList()));
         }
     }
 
