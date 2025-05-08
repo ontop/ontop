@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewr
 import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.constraints.ImmutableCQ;
 import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -63,19 +64,11 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private ImmutableCQContainmentCheck<RDFAtomPredicate> containmentCheckUnderLIDs;
 
     private final SubstitutionFactory substitutionFactory;
-    private final IQTreeTools iqTreeTools;
 
     @Inject
-	private TreeWitnessRewriter(AtomFactory atomFactory,
-								TermFactory termFactory,
-                                IntermediateQueryFactory iqFactory,
-                                SubstitutionFactory substitutionFactory,
-                                HomomorphismFactory homomorphismFactory,
-                                IQTreeTools iqTreeTools) {
-        super(iqFactory, atomFactory, termFactory, homomorphismFactory);
-
-        this.substitutionFactory = substitutionFactory;
-        this.iqTreeTools = iqTreeTools;
+	private TreeWitnessRewriter(CoreSingletons coreSingletons) {
+        super(coreSingletons);
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
     }
 
 	@Override
@@ -402,7 +395,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
             public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
                 // fix some order on variables
                 ImmutableSet<Variable> avs = rootNode.getVariables();
-                return iqFactory.createUnaryIQTree(rootNode, child.acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
+                return iqFactory.createUnaryIQTree(rootNode, child.acceptTransformer(new BasicGraphPatternTransformer(iqFactory, iqTreeTools) {
                     @Override
                     protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
                         ImmutableList<DataAtom<RDFAtomPredicate>> bgp = triplePatterns.stream()

@@ -44,11 +44,11 @@ public class RightProvenanceNormalizer {
     private final IQTreeTools iqTreeTools;
 
     @Inject
-    protected RightProvenanceNormalizer(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
+    protected RightProvenanceNormalizer(CoreSingletons coreSingletons) {
         this.iqFactory = coreSingletons.getIQFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.termFactory = coreSingletons.getTermFactory();
-        this.iqTreeTools = iqTreeTools;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     public RightProvenance normalizeRightProvenance(IQTree rightTree, ImmutableSet<Variable> leftVariables,

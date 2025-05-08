@@ -38,14 +38,12 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
     protected final OptimizationSingletons optimizationSingletons;
     private final IntermediateQueryFactory iqFactory;
-    private final IQTreeTools iqTreeTools;
 
     @Inject
-    protected PostProcessableFunctionLifterImpl(OptimizationSingletons optimizationSingletons,
-                                                IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
+    protected PostProcessableFunctionLifterImpl(OptimizationSingletons optimizationSingletons) {
         this.optimizationSingletons = optimizationSingletons;
-        this.iqFactory = iqFactory;
-        this.iqTreeTools = iqTreeTools;
+        CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
+        this.iqFactory = coreSingletons.getIQFactory();
     }
 
     @Override
@@ -58,7 +56,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
      * TODO: refactor IQTreeVisitingTransformer so as avoid to create fresh transformers
      */
     protected IQTreeVisitingTransformer createTransformer(VariableGenerator variableGenerator) {
-        return new FunctionLifterTransformer(variableGenerator, optimizationSingletons, iqTreeTools);
+        return new FunctionLifterTransformer(variableGenerator, optimizationSingletons);
     }
 
 
@@ -70,13 +68,13 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         private final int maxNbChildrenForLiftingDBFunctionSymbol;
         private final IQTreeTools iqTreeTools;
 
-        protected FunctionLifterTransformer(VariableGenerator variableGenerator, OptimizationSingletons optimizationSingletons, IQTreeTools iqTreeTools) {
+        protected FunctionLifterTransformer(VariableGenerator variableGenerator, OptimizationSingletons optimizationSingletons) {
             super(optimizationSingletons.getCoreSingletons().getIQFactory());
             this.variableGenerator = variableGenerator;
             this.optimizationSingletons = optimizationSingletons;
             this.maxNbChildrenForLiftingDBFunctionSymbol = optimizationSingletons.getSettings()
                     .getMaxNbChildrenForLiftingDBFunctionSymbol();
-            this.iqTreeTools = iqTreeTools;
+            this.iqTreeTools = optimizationSingletons.getCoreSingletons().getIQTreeTools();
         }
 
         @Override
@@ -108,7 +106,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             }
 
             return lift(new LiftState(children, rootNode.getVariables(), variableGenerator,
-                        optimizationSingletons.getCoreSingletons(), iqTreeTools))
+                        optimizationSingletons.getCoreSingletons()))
                     .generateTree()
                     .normalizeForOptimization(variableGenerator);
         }
@@ -188,13 +186,13 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
          * Initial constructor
          */
         public LiftState(ImmutableList<IQTree> children, ImmutableSet<Variable> unionVariables,
-                         VariableGenerator variableGenerator, CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
-            this(children, unionVariables, ImmutableList.of(), null, variableGenerator, coreSingletons, iqTreeTools);
+                         VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
+            this(children, unionVariables, ImmutableList.of(), null, variableGenerator, coreSingletons);
         }
 
         protected LiftState(ImmutableList<IQTree> children, ImmutableSet<Variable> unionVariables,
                             ImmutableList<ConstructionNode> ancestors, @Nullable Variable childIdVariable,
-                            VariableGenerator variableGenerator, CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
+                            VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
             this.children = children;
             this.unionVariables = unionVariables;
             this.ancestors = ancestors;
@@ -205,7 +203,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             this.termFactory = coreSingletons.getTermFactory();
             this.typeExtractor = coreSingletons.getUniqueTermTypeExtractor();
             this.coreSingletons = coreSingletons;
-            this.iqTreeTools = iqTreeTools;
+            this.iqTreeTools = coreSingletons.getIQTreeTools();
         }
 
         public IQTree generateTree() {
@@ -262,7 +260,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .collect(ImmutableCollectors.toList());
 
             return new LiftState(newChildren, newUnionVariables, newAncestors, idVariable, variableGenerator,
-                    coreSingletons, iqTreeTools);
+                    coreSingletons);
         }
 
         protected ChildDefinitionLift liftDefinition(IQTree childTree, int position, Variable variable,

@@ -31,12 +31,12 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
     private final ConstructionSubstitutionNormalizer substitutionNormalizer;
     protected final IQTreeTools iqTreeTools;
 
-    public AbstractSelfJoinSimplifier(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
+    public AbstractSelfJoinSimplifier(CoreSingletons coreSingletons) {
         this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
-        this.iqTreeTools = iqTreeTools;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.noSolutionState = new OptimizationState(ImmutableSet.of(), ImmutableList.of(), substitutionFactory.getSubstitution());
     }
 

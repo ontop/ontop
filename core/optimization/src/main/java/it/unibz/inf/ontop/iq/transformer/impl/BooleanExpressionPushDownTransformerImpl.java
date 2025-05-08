@@ -29,11 +29,11 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
     private final IQTreeTools iqTreeTools;
 
     @Inject
-    protected BooleanExpressionPushDownTransformerImpl(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
+    protected BooleanExpressionPushDownTransformerImpl(CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory());
         this.coreSingletons = coreSingletons;
         this.termFactory = coreSingletons.getTermFactory();
-        this.iqTreeTools = iqTreeTools;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override

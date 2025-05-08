@@ -48,7 +48,7 @@ public class SubQueryFromComplexJoinExtraNormalizer extends DefaultRecursiveIQTr
     }
 
     private IQTree createSubQueryIfJoin(IQTree child) {
-        IQTree transformedChild = child.acceptTransformer(this);
+        IQTree transformedChild = transformChild(child);
 
         if (transformedChild.getRootNode() instanceof JoinLikeNode) {
             return iqFactory.createUnaryIQTree(

@@ -30,7 +30,8 @@ public class PreventDistinctProjectionSplitterImpl extends ProjectionSplitterImp
     private PreventDistinctProjectionSplitterImpl(IntermediateQueryFactory iqFactory,
                                                   SubstitutionFactory substitutionFactory,
                                                   CoreUtilsFactory coreUtilsFactory,
-                                                  DistinctNormalizer distinctNormalizer, IQTreeTools iqTreeTools) {
+                                                  DistinctNormalizer distinctNormalizer,
+                                                  IQTreeTools iqTreeTools) {
         super(iqFactory, substitutionFactory, distinctNormalizer);
         this.decomposer = coreUtilsFactory.createProjectionDecomposer(
             t -> !shouldSplit(t),

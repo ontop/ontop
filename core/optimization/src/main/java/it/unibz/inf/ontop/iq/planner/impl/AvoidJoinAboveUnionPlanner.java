@@ -74,7 +74,7 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
     @Inject
     protected AvoidJoinAboveUnionPlanner(GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
                                          AvoidJoinAboveUnionTransformer transformer,
-                                         IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
+                                         IntermediateQueryFactory iqFactory) {
         this.generalOptimizer = generalOptimizer;
         this.transformer = transformer;
         this.iqFactory = iqFactory;

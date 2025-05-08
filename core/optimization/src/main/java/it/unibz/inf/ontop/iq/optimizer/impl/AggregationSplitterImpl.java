@@ -35,9 +35,9 @@ public class AggregationSplitterImpl implements AggregationSplitter {
     private final IQTreeTools iqTreeTools;
 
     @Inject
-    protected AggregationSplitterImpl(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
+    protected AggregationSplitterImpl(CoreSingletons coreSingletons) {
         this.coreSingletons = coreSingletons;
-        this.iqTreeTools = iqTreeTools;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override

@@ -35,7 +35,7 @@ public class IQTreeTools {
     private final TermFactory termFactory;
 
     @Inject
-    private IQTreeTools(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+    public IQTreeTools(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
@@ -148,6 +148,13 @@ public class IQTreeTools {
         return iqFactory.createUnaryIQTree(node1,
                 iqFactory.createUnaryIQTree(node2,
                         iqFactory.createUnaryIQTree(node3, tree)));
+    }
+
+    public IQTree createUnaryIQTree(UnaryOperatorNode node1, UnaryOperatorNode node2, UnaryOperatorNode node3, UnaryOperatorNode node4, IQTree tree) {
+        return iqFactory.createUnaryIQTree(node1,
+                iqFactory.createUnaryIQTree(node2,
+                        iqFactory.createUnaryIQTree(node3,
+                                iqFactory.createUnaryIQTree(node4, tree))));
     }
 
     public IQTree createAncestorsUnaryIQTree(ImmutableList<? extends UnaryOperatorNode> ancestors, IQTree tree) {

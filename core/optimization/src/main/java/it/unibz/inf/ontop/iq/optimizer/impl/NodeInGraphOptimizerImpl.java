@@ -42,11 +42,11 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
     private final IQTreeTools iqTreeTools;
 
     @Inject
-    protected NodeInGraphOptimizerImpl(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
+    protected NodeInGraphOptimizerImpl(CoreSingletons coreSingletons) {
         this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
-        this.iqTreeTools = iqTreeTools;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
 

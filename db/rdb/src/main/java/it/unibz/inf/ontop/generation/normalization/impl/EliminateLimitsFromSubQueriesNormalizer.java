@@ -76,11 +76,11 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
         */
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            var leftSubTree = transform(tree.getChildren().get(0));
-            var rightSubTree = eliminateLimitsFromSubQueriesNormalizer.transform(tree.getChildren().get(1));
-            if (leftSubTree.equals(tree.getChildren().get(0)) && rightSubTree.equals(tree.getChildren().get(1)))
+            var leftSubTree = transform(tree.getLeftChild());
+            var rightSubTree = eliminateLimitsFromSubQueriesNormalizer.transform(tree.getRightChild());
+            if (leftSubTree.equals(tree.getLeftChild()) && rightSubTree.equals(tree.getRightChild()))
                 return tree;
-            return iqFactory.createBinaryNonCommutativeIQTree((LeftJoinNode)tree.getRootNode(), leftSubTree, rightSubTree);
+            return iqFactory.createBinaryNonCommutativeIQTree(tree.getRootNode(), leftSubTree, rightSubTree);
         }
 
         /**

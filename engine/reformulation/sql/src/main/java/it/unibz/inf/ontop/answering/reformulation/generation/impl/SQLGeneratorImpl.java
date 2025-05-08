@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.optimizer.splitter.ProjectionSplitter;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
@@ -49,6 +50,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     private final DialectExtraNormalizer extraNormalizer;
     private final BooleanExpressionPushDownTransformer pushDownTransformer;
     private final EmptyRowsValuesNodeTransformer valuesNodeTransformer;
+    private final IQTreeTools iqTreeTools;
 
     @AssistedInject
     private SQLGeneratorImpl(@Assisted DBParameters dbParameters,
@@ -60,7 +62,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
                              IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator,
                              DialectExtraNormalizer extraNormalizer, BooleanExpressionPushDownTransformer pushDownTransformer,
                              EmptyRowsValuesNodeTransformer valuesNodeTransformer,
-                             OntopReformulationSQLSettings settings)
+                             OntopReformulationSQLSettings settings, IQTreeTools iqTreeTools)
     {
         this.functionLifter = functionLifter;
         this.extraNormalizer = extraNormalizer;
@@ -74,6 +76,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         this.rdfTypeLifter = rdfTypeLifter;
         this.defaultIQTree2NativeNodeGenerator = defaultIQTree2NativeNodeGenerator;
         this.settings = settings;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -157,9 +160,10 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         var construction = UnaryIQTreeDecomposition.of(subTree, ConstructionNode.class);
         var slice = UnaryIQTreeDecomposition.of(construction.getTail(), SliceNode.class);
         if (construction.isPresent() && slice.isPresent()) {
-            return iqFactory.createUnaryIQTree(slice.getNode(),
-                    iqFactory.createUnaryIQTree(construction.getNode(),
-                            slice.getChild()));
+            return iqTreeTools.createUnaryIQTree(
+                    slice.getNode(),
+                    construction.getNode(),
+                    slice.getChild());
         }
         return subTree;
     }
@@ -208,10 +212,11 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         var orderBy = UnaryIQTreeDecomposition.of(distinct.getTail(), OrderByNode.class);
 
         if (construction.isPresent() && distinct.isPresent() && orderBy.isPresent()) {
-            return iqFactory.createUnaryIQTree(construction.getNode(),
-                    iqFactory.createUnaryIQTree(orderBy.getNode(),
-                            iqFactory.createUnaryIQTree(distinct.getNode(),
-                                    orderBy.getChild())));
+            return iqTreeTools.createUnaryIQTree(
+                    construction.getNode(),
+                    orderBy.getNode(),
+                    distinct.getNode(),
+                    orderBy.getChild());
         }
         return subTree;
     }

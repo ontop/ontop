@@ -66,8 +66,7 @@ public class RDF4JTupleExprTranslator {
                                     @Nullable Dataset dataset,
                                     boolean treatBNodeAsVariable,
                                     CoreSingletons coreSingletons,
-                                    RDF rdfFactory,
-                                    IQTreeTools iqTreeTools) {
+                                    RDF rdfFactory) {
         this.externalBindings = externalBindings;
         this.dataset = dataset;
         this.treatBNodeAsVariable = treatBNodeAsVariable;
@@ -80,7 +79,7 @@ public class RDF4JTupleExprTranslator {
         this.queryTransformerFactory = coreSingletons.getQueryTransformerFactory();
         this.typeFactory = coreSingletons.getTypeFactory();
         this.rdfFactory = rdfFactory;
-        this.iqTreeTools = iqTreeTools;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.subClassOfConstant = termFactory.getConstantIRI(RDFS.SUBCLASSOF);
     }
 

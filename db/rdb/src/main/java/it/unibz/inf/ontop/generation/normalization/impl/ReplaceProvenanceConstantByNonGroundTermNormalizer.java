@@ -61,14 +61,20 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DefaultR
             DBConstant provenanceConstant = termFactory.getProvenanceSpecialConstant();
 
             ConstructionNode rightConstructionNode = construction.getNode();
-            return grandChildVariable
-                    .map(v -> termFactory.getIfThenElse(termFactory.getDBIsNotNull(v),
-                            termFactory.getDBStringConstant("placeholder1"),
-                            termFactory.getDBStringConstant("placeholder2")))
-                    .map(ifthenelse -> rightConstructionNode.getSubstitution().transform(t -> t.equals(provenanceConstant) ? ifthenelse : t))
-                    .map(s -> iqFactory.createConstructionNode(rightConstructionNode.getVariables(), s))
-                    .map(c -> iqFactory.createUnaryIQTree(c, rightGrandChild))
-                    .map(r -> iqFactory.createBinaryNonCommutativeIQTree(rootNode, leftChild, r));
+            return grandChildVariable.isPresent()
+                    ? Optional.of(iqFactory.createBinaryNonCommutativeIQTree(rootNode, leftChild,
+                            iqFactory.createUnaryIQTree(
+                                    iqFactory.createConstructionNode(
+                                            rightConstructionNode.getVariables(),
+                                            rightConstructionNode.getSubstitution()
+                                                    .transform(t -> t.equals(provenanceConstant)
+                                                            ? termFactory.getIfThenElse(
+                                                                    termFactory.getDBIsNotNull(grandChildVariable.get()),
+                                                                    termFactory.getDBStringConstant("placeholder1"),
+                                                                    termFactory.getDBStringConstant("placeholder2"))
+                                                            : t)),
+                                    rightGrandChild)))
+                    : Optional.empty();
         }
         return Optional.empty();
     }

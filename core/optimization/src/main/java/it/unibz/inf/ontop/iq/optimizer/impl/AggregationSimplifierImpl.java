@@ -34,13 +34,10 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
     private final IntermediateQueryFactory iqFactory;
     private final OptimizationSingletons optimizationSingletons;
 
-    private final IQTreeTools iqTreeTools;
-
     @Inject
-    private AggregationSimplifierImpl(IntermediateQueryFactory iqFactory, OptimizationSingletons optimizationSingletons, IQTreeTools iqTreeTools) {
+    private AggregationSimplifierImpl(IntermediateQueryFactory iqFactory, OptimizationSingletons optimizationSingletons) {
         this.iqFactory = iqFactory;
         this.optimizationSingletons = optimizationSingletons;
-        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -53,7 +50,7 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
     }
 
     protected IQTreeTransformer createTransformer(VariableGenerator variableGenerator) {
-        return new AggregationSimplifyingTransformer(variableGenerator, optimizationSingletons, iqTreeTools);
+        return new AggregationSimplifyingTransformer(variableGenerator, optimizationSingletons);
     }
 
     /**
@@ -66,12 +63,12 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
         private final IQTreeTools iqTreeTools;
 
         protected AggregationSimplifyingTransformer(VariableGenerator variableGenerator,
-                                                    OptimizationSingletons optimizationSingletons, IQTreeTools iqTreeTools) {
+                                                    OptimizationSingletons optimizationSingletons) {
             super(optimizationSingletons);
             this.variableGenerator = variableGenerator;
             CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
             this.termFactory = coreSingletons.getTermFactory();
-            this.iqTreeTools = iqTreeTools;
+            this.iqTreeTools = coreSingletons.getIQTreeTools();
         }
 
         @Override

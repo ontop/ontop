@@ -32,9 +32,9 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
     private final IQTreeTools iqTreeTools;
 
     @Inject
-    public MappingCQCOptimizerImpl(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
+    public MappingCQCOptimizerImpl(CoreSingletons coreSingletons) {
         this.iqFactory = coreSingletons.getIQFactory();
-        this.iqTreeTools = iqTreeTools;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override

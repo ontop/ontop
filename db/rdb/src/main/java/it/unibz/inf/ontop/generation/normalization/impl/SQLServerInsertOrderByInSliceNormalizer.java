@@ -21,12 +21,14 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     protected SQLServerInsertOrderByInSliceNormalizer(CoreSingletons coreSingletons) {
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.iqFactory = coreSingletons.getIQFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -58,15 +60,12 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
                             termFactory.getDBConstant("", termFactory.getTypeFactory().getDBTypeFactory().getDBStringType())));
             var orderByNode = iqFactory.createOrderByNode(ImmutableList.of(iqFactory.createOrderComparator(sortVariable, true)));
 
-            return iqFactory.createUnaryIQTree(
+            return iqTreeTools.createUnaryIQTree(
                     sliceNode,
-                    iqFactory.createUnaryIQTree(
-                            topConstruct,
-                            iqFactory.createUnaryIQTree(
-                                    orderByNode,
-                                    iqFactory.createUnaryIQTree(
-                                            bottomConstruct,
-                                            transform(child)))));
+                    topConstruct,
+                    orderByNode,
+                    bottomConstruct,
+                    transform(child));
         }
     }
 }

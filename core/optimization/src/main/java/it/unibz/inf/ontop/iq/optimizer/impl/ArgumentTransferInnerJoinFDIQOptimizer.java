@@ -36,8 +36,8 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
     private final SelfJoinFDSimplifier simplifier;
 
     @Inject
-    protected ArgumentTransferInnerJoinFDIQOptimizer(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
-        simplifier = new SelfJoinFDSimplifier(coreSingletons, iqTreeTools);
+    protected ArgumentTransferInnerJoinFDIQOptimizer(CoreSingletons coreSingletons) {
+        simplifier = new SelfJoinFDSimplifier(coreSingletons);
         this.iqFactory = coreSingletons.getIQFactory();
     }
 
@@ -73,8 +73,8 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
 
     protected static class SelfJoinFDSimplifier extends AbstractSelfJoinSimplifier<FunctionalDependency> {
 
-        protected SelfJoinFDSimplifier(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
-            super(coreSingletons, iqTreeTools);
+        protected SelfJoinFDSimplifier(CoreSingletons coreSingletons) {
+            super(coreSingletons);
         }
 
         @Override

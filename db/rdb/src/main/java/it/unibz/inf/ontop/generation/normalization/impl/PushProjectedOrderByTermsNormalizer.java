@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
@@ -21,12 +22,14 @@ Generally, an `AlwaysProjectOrderByTerms` normalizer is expected to be run befor
 public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
     private final boolean onlyDistinct;
 
     protected PushProjectedOrderByTermsNormalizer(boolean onlyDistinct,
                                                   CoreSingletons coreSingletons) {
         this.iqFactory = coreSingletons.getIQFactory();
         this.onlyDistinct = onlyDistinct;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -97,8 +100,10 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
                     .collect(ImmutableCollectors.toList()));
 
             //Change order from DISTINCT -> CONSTRUCT -> ORDER BY to DISTINCT -> ORDER BY -> CONSTRUCT
-            var newOrderBySubtree = iqFactory.createUnaryIQTree(construct, remainingSubtree);
-            return iqFactory.createUnaryIQTree(newOrderBy, newOrderBySubtree);
+            return iqTreeTools.createUnaryIQTree(
+                    newOrderBy,
+                    construct,
+                    remainingSubtree);
         }
     }
 }

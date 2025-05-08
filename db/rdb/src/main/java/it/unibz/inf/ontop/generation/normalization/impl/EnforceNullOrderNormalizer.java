@@ -53,7 +53,7 @@ public class EnforceNullOrderNormalizer implements DialectExtraNormalizer {
 
             return iqFactory.createUnaryIQTree(
                     iqFactory.createOrderByNode(conditions),
-                    child.acceptTransformer(this));
+                    transformChild(child));
         }
 
         /**

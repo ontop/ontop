@@ -34,7 +34,9 @@ public class UnquoteFlattenResultsNormalizer extends DefaultRecursiveIQTreeVisit
 
     @Inject
     protected UnquoteFlattenResultsNormalizer(IntermediateQueryFactory iqFactory,
-                                              SubstitutionFactory substitutionFactory, TermFactory termFactory, IQTreeTools iqTreeTools) {
+                                              SubstitutionFactory substitutionFactory,
+                                              TermFactory termFactory,
+                                              IQTreeTools iqTreeTools) {
         super(iqFactory);
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;

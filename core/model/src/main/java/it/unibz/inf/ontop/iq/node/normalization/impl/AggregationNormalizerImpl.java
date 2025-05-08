@@ -38,13 +38,13 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
     private final IQTreeTools iqTreeTools;
 
     @Inject
-    protected AggregationNormalizerImpl(CoreSingletons coreSingletons,  IQTreeTools iqTreeTools,
+    protected AggregationNormalizerImpl(CoreSingletons coreSingletons,
                                         NotRequiredVariableRemover notRequiredVariableRemover) {
         this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
-        this.iqTreeTools = iqTreeTools;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.notRequiredVariableRemover = notRequiredVariableRemover;
     }
 

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.injection;
 
 import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.type.NotYetTypedBinaryMathOperationTransformer;
@@ -37,6 +38,7 @@ public interface CoreSingletons {
     HomomorphismFactory getHomomorphismFactory();
 
     IntermediateQueryFactory getIQFactory();
+    IQTreeTools getIQTreeTools();
 
     CoreUtilsFactory getCoreUtilsFactory();
 

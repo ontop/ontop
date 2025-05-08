@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -14,9 +15,12 @@ import java.util.Optional;
 
 public abstract class BasicGraphPatternTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
+    private final IQTreeTools iqTreeTools;
+
     @Inject
-    protected BasicGraphPatternTransformer(IntermediateQueryFactory iqFactory) {
+    protected BasicGraphPatternTransformer(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
         super(iqFactory);
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -48,11 +52,9 @@ public abstract class BasicGraphPatternTransformer extends DefaultRecursiveIQTre
             case 0:
                 throw new IllegalStateException("All triple patterns of BGP have been eliminated by the transformation");
             case 1:
-                if (filter.isPresent())
-                    return iqFactory.createUnaryIQTree(
-                            iqFactory.createFilterNode(filter.get()),
-                            list.get(0));
-                else return list.get(0);
+                return iqTreeTools.createOptionalUnaryIQTree(
+                        filter.map(iqFactory::createFilterNode),
+                        list.get(0));
             default:
                 return iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(filter), list);
         }

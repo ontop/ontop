@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -25,11 +26,13 @@ public class SQLQueryParser {
 
     private final CoreSingletons coreSingletons;
     private final TermFactory termFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     public SQLQueryParser(CoreSingletons coreSingletons) {
         this.coreSingletons = coreSingletons;
         this.termFactory = coreSingletons.getTermFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     public RAExpression getRAExpression(String sourceQuery, MetadataLookup metadataLookup) throws InvalidQueryException, MetadataExtractionException {
@@ -53,9 +56,9 @@ public class SQLQueryParser {
             case 0:
                 return iqFactory.createTrueNode();
             case 1:
-                return joiningConditions
-                        .<IQTree>map(c -> iqFactory.createUnaryIQTree(iqFactory.createFilterNode(c), children.get(0)))
-                        .orElseGet(() -> children.get(0));
+                return iqTreeTools.createOptionalUnaryIQTree(
+                        joiningConditions.map(iqFactory::createFilterNode),
+                        children.get(0));
             default:
                 return iqFactory.createNaryIQTree(
                         iqFactory.createInnerJoinNode(joiningConditions),

@@ -86,8 +86,8 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
     protected static class SelfJoinUCSimplifier extends AbstractSelfJoinSimplifier<UniqueConstraint> {
 
         @Inject
-        protected SelfJoinUCSimplifier(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
-            super(coreSingletons, iqTreeTools);
+        protected SelfJoinUCSimplifier(CoreSingletons coreSingletons) {
+            super(coreSingletons);
         }
 
         @Override

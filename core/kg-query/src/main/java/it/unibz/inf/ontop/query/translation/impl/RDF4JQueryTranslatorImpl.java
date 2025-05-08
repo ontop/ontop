@@ -66,7 +66,6 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     public RDF4JQueryTranslatorImpl(CoreSingletons coreSingletons,
                                     RDF rdfFactory,
                                     InsertClauseNormalizer insertClauseNormalizer,
-                                    IQTreeTools iqTreeTools,
                                     OntopKGQuerySettings settings) {
         this.coreSingletons = coreSingletons;
         this.coreUtilsFactory = coreSingletons.getCoreUtilsFactory();
@@ -77,7 +76,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         this.atomFactory = coreSingletons.getAtomFactory();
         this.rdfFactory = rdfFactory;
         this.insertClauseNormalizer = insertClauseNormalizer;
-        this.iqTreeTools = iqTreeTools;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
         if(settings.isCustomSPARQLFunctionRegistrationEnabled()) {
             CustomAggregateFunctionRegistry registry = CustomAggregateFunctionRegistry.getInstance();
             registry.add(new VarianceSampAggregateFactory());
@@ -256,7 +255,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private IQTree projectOutAllVars(IQTree tree) {
-        var modifier = IQTreeTools.UnaryIQTreeDecomposition.of(tree, QueryModifierNode.class);
+        var modifier = UnaryIQTreeDecomposition.of(tree, QueryModifierNode.class);
         if (modifier.isPresent()) {
             return iqFactory.createUnaryIQTree(
                     modifier.getNode(),
@@ -269,7 +268,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private RDF4JTupleExprTranslator getTranslator(ImmutableMap<Variable, GroundTerm> externalBindings, @Nullable Dataset dataset, boolean treatBNodeAsVariable) {
-        return new RDF4JTupleExprTranslator(externalBindings, dataset, treatBNodeAsVariable, coreSingletons, rdfFactory, iqTreeTools);
+        return new RDF4JTupleExprTranslator(externalBindings, dataset, treatBNodeAsVariable, coreSingletons, rdfFactory);
     }
 
     private RDF4JValueTranslator getValueTranslator() {

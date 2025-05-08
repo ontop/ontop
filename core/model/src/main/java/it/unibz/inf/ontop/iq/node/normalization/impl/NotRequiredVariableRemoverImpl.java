@@ -30,12 +30,10 @@ import java.util.stream.IntStream;
 public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemover {
 
     private final CoreSingletons coreSingletons;
-    private final IQTreeTools iqTreeTools;
 
     @Inject
-    protected NotRequiredVariableRemoverImpl(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
+    protected NotRequiredVariableRemoverImpl(CoreSingletons coreSingletons) {
         this.coreSingletons = coreSingletons;
-        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -66,6 +64,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         protected final IntermediateQueryFactory iqFactory;
         protected final SubstitutionFactory substitutionFactory;
         protected final VariableGenerator variableGenerator;
+        protected final IQTreeTools iqTreeTools;
         protected final ConstructionSubstitutionNormalizer substitutionNormalizer;
 
         public VariableRemoverTransformer(ImmutableSet<Variable> variablesToRemove,
@@ -73,6 +72,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
             this.variablesToRemove = variablesToRemove;
             this.variableGenerator = variableGenerator;
             this.iqFactory = coreSingletons.getIQFactory();
+            this.iqTreeTools = coreSingletons.getIQTreeTools();
             this.substitutionFactory = coreSingletons.getSubstitutionFactory();
             this.substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
         }

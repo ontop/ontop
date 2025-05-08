@@ -31,10 +31,10 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
     private final IQTreeTools iqTreeTools;
 
     @Inject
-    private RedundantJoinFKOptimizerImpl(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
-        this.transformer = new RedundantJoinFKTransformer(coreSingletons, iqTreeTools);
+    private RedundantJoinFKOptimizerImpl(CoreSingletons coreSingletons) {
+        this.transformer = new RedundantJoinFKTransformer(coreSingletons);
         this.iqFactory = coreSingletons.getIQFactory();
-        this.iqTreeTools = iqTreeTools;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -53,10 +53,10 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
         protected final TermFactory termFactory;
         private final IQTreeTools iqTreeTools;
 
-        protected RedundantJoinFKTransformer(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
+        protected RedundantJoinFKTransformer(CoreSingletons coreSingletons) {
             super(coreSingletons.getIQFactory());
             this.termFactory = coreSingletons.getTermFactory();
-            this.iqTreeTools = iqTreeTools;
+            this.iqTreeTools = coreSingletons.getIQTreeTools();
         }
 
         @Override

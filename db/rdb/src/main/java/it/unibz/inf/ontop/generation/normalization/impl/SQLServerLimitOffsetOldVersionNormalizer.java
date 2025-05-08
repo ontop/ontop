@@ -36,13 +36,12 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
     @Inject
     protected SQLServerLimitOffsetOldVersionNormalizer(DatabaseInfoSupplier databaseInfoSupplier,
                                                        DBFunctionSymbolFactory dbFunctionSymbolFactory,
-                                                       CoreSingletons coreSingletons,
-                                                       IQTreeTools iqTreeTools) {
+                                                       CoreSingletons coreSingletons) {
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.databaseInfoSupplier = databaseInfoSupplier;
         this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
-        this.iqTreeTools = iqTreeTools;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.iqFactory = coreSingletons.getIQFactory();
     }
 

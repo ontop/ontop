@@ -29,14 +29,13 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
     private static final int MAX_ITERATIONS = 10000;
     private final IntermediateQueryFactory iqFactory;
     private final CoreSingletons coreSingletons;
-
     private final IQTreeTools iqTreeTools;
 
     @Inject
-    private DistinctNormalizerImpl(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
+    private DistinctNormalizerImpl(CoreSingletons coreSingletons) {
         this.iqFactory = coreSingletons.getIQFactory();
         this.coreSingletons = coreSingletons;
-        this.iqTreeTools = iqTreeTools;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override

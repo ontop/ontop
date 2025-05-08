@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
@@ -41,11 +42,13 @@ public class QueryTemplateExtractor {
     private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
     private final OntopModelSettings settings;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     protected QueryTemplateExtractor(CoreSingletons coreSingletons, OntopModelSettings settings) {
         this.coreSingletons = coreSingletons;
-        iqFactory = coreSingletons.getIQFactory();
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.settings = settings;
     }
 
@@ -83,16 +86,18 @@ public class QueryTemplateExtractor {
         private final SPARQLFunctionSymbol sparqlEqFunctionSymbol;
         private final TermFactory termFactory;
         private final BooleanFunctionSymbol rdf2BoolFunctionsymbol;
+        private final IQTreeTools iqTreeTools;
 
         protected QueryTemplateTransformer(CoreSingletons coreSingletons, ImmutableSet<Variable> knownVariables,
                                            OntopModelSettings settings) {
             super(coreSingletons.getIQFactory());
-            atomFactory = coreSingletons.getAtomFactory();
-            this.settings = settings;
+            this.atomFactory = coreSingletons.getAtomFactory();
+            this.iqTreeTools = coreSingletons.getIQTreeTools();
             this.variableGenerator = coreSingletons.getCoreUtilsFactory()
                     .createVariableGenerator(knownVariables);
             this.parameterMap = Maps.newLinkedHashMap();
             this.termFactory = coreSingletons.getTermFactory();
+            this.settings = settings;
             FunctionSymbolFactory functionSymbolFactory = coreSingletons.getFunctionSymbolFactory();
             this.sparqlEqFunctionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.EQ, 2);
             rdf2BoolFunctionsymbol = functionSymbolFactory.getRDF2DBBooleanFunctionSymbol();
@@ -149,11 +154,9 @@ public class QueryTemplateExtractor {
             IQTree newChild = child.acceptTransformer(this);
             Optional<ImmutableExpression> newCondition = transformFilterCondition(rootNode.getFilterCondition());
 
-            FilterNode newRootNode = newCondition
-                    .map(rootNode::changeFilterCondition)
-                    .orElse(rootNode);
-
-            return iqFactory.createUnaryIQTree(newRootNode, newChild);
+            return iqTreeTools.createOptionalUnaryIQTree(
+                    newCondition.map(iqFactory::createFilterNode),
+                    newChild);
         }
 
 

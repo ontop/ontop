@@ -28,10 +28,12 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
 import it.unibz.inf.ontop.constraints.impl.FullLinearInclusionDependenciesImpl;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -59,13 +61,15 @@ public class DummyRewriter implements QueryRewriter {
     protected final AtomFactory atomFactory;
     protected final TermFactory termFactory;
     protected final HomomorphismFactory homomorphismFactory;
+    protected final IQTreeTools iqTreeTools;
 
     @Inject
-    protected DummyRewriter(IntermediateQueryFactory iqFactory, AtomFactory atomFactory, TermFactory termFactory, HomomorphismFactory homomorphismFactory) {
-        this.iqFactory = iqFactory;
-        this.atomFactory = atomFactory;
-        this.termFactory = termFactory;
-        this.homomorphismFactory = homomorphismFactory;
+    protected DummyRewriter(CoreSingletons coreSingletons) {
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.atomFactory = coreSingletons.getAtomFactory();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.homomorphismFactory = coreSingletons.getHomomorphismFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -96,7 +100,7 @@ public class DummyRewriter implements QueryRewriter {
     @Override
 	public IQ rewrite(IQ query) throws EmptyQueryException {
         return iqFactory.createIQ(query.getProjectionAtom(),
-                query.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
+                query.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory, iqTreeTools) {
             @Override
             protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> bgp) {
                 return removeRedundantAtoms(bgp);

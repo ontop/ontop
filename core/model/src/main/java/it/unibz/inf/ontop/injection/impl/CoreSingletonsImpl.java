@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.type.NotYetTypedBinaryMathOperationTransformer;
@@ -35,6 +36,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
     private final CoreUtilsFactory coreUtilsFactory;
     private final SingleTermTypeExtractor uniqueTermTypeExtractor;
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
     private final OntopModelSettings settings;
     private final ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer;
     private final QueryTransformerFactory queryTransformerFactory;
@@ -52,6 +54,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
                                CoreUtilsFactory coreUtilsFactory,
                                SingleTermTypeExtractor uniqueTermTypeExtractor,
                                IntermediateQueryFactory iqFactory,
+                               IQTreeTools iqTreeTools,
                                OntopModelSettings settings,
                                ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer,
                                QueryTransformerFactory queryTransformerFactory,
@@ -69,6 +72,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
         this.coreUtilsFactory = coreUtilsFactory;
         this.uniqueTermTypeExtractor = uniqueTermTypeExtractor;
         this.iqFactory = iqFactory;
+        this.iqTreeTools = iqTreeTools;
         this.settings = settings;
         this.constructionSubstitutionNormalizer = constructionSubstitutionNormalizer;
         this.queryTransformerFactory = queryTransformerFactory;
@@ -117,6 +121,10 @@ public class CoreSingletonsImpl implements CoreSingletons {
     @Override
     public IntermediateQueryFactory getIQFactory() {
         return iqFactory;
+    }
+
+    public IQTreeTools getIQTreeTools() {
+        return iqTreeTools;
     }
 
     @Override
