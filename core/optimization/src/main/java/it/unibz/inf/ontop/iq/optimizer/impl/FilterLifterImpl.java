@@ -65,10 +65,9 @@ public class FilterLifterImpl implements FilterLifter {
 
         @Override
         public IQTree transformFilter(UnaryIQTree tree, FilterNode filter, IQTree child) {
-
             child = transformChild(child);
-            UnaryIQTreeDecomposition<FilterNode> decomposition = UnaryIQTreeDecomposition.of(child, FilterNode.class);
 
+            UnaryIQTreeDecomposition<FilterNode> decomposition = UnaryIQTreeDecomposition.of(child, FilterNode.class);
             return iqFactory.createUnaryIQTree(
                     decomposition.map((f, t) ->
                                     iqFactory.createFilterNode(
@@ -79,16 +78,12 @@ public class FilterLifterImpl implements FilterLifter {
 
         @Override
         public IQTree transformFlatten(UnaryIQTree tree, FlattenNode fn, IQTree child) {
-
             child = transformChild(child);
-            UnaryIQTreeDecomposition<FilterNode> filter = UnaryIQTreeDecomposition.of(child, FilterNode.class);
 
-            if (filter.isPresent()) {
-                return iqFactory.createUnaryIQTree(
-                        filter.getNode(),
-                        iqFactory.createUnaryIQTree(fn, filter.getChild()));
-            }
-            return iqFactory.createUnaryIQTree(fn, child);
+            UnaryIQTreeDecomposition<FilterNode> filter = UnaryIQTreeDecomposition.of(child, FilterNode.class);
+            return filter.isPresent()
+                    ? iqTreeTools.createUnaryIQTree(filter.getNode(), fn, filter.getChild())
+                    : iqFactory.createUnaryIQTree(fn, child);
         }
 
         @Override

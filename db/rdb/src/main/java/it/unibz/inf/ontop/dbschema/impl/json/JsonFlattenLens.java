@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
@@ -117,6 +118,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
         final TermFactory termFactory;
         final DBTypeFactory dbTypeFactory;
         final CoreSingletons coreSingletons;
+        final IQTreeTools iqTreeTools;
 
         ViewDefinitionCreator(DBParameters dbParameters) {
             this.dbParameters = dbParameters;
@@ -128,6 +130,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
             atomFactory = coreSingletons.getAtomFactory();
             termFactory = coreSingletons.getTermFactory();
             dbTypeFactory = dbParameters.getDBTypeFactory();
+            iqTreeTools = coreSingletons.getIQTreeTools();
         }
 
         RelationID getRelationID(List<String> components) {
@@ -171,8 +174,10 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
 
             if (flattenedDBType.getCategory() == DBTermType.Category.ARRAY) {
                 //If we use an array type, we do not need to add a filter to check if it really is an array.
-                IQTree treeBeforeSafenessInfo = iqFactory.createUnaryIQTree(constructionNode,
-                                iqFactory.createUnaryIQTree(flattennode, dataNode));
+                IQTree treeBeforeSafenessInfo = iqTreeTools.createUnaryIQTree(
+                        constructionNode,
+                        flattennode,
+                        dataNode);
 
                 return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
             }
@@ -184,11 +189,12 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                                 flattenedIfArrayVariable,
                                 termFactory.getIfElseNull(termFactory.getDBIsArray(flattenedDBType, flattenedVariable), flattenedVariable)));
 
-
-                IQTree treeBeforeSafenessInfo = iqFactory.createUnaryIQTree(constructionNode,
-                        iqFactory.createUnaryIQTree(filterNode,
-                                iqFactory.createUnaryIQTree(flattennode,
-                                        iqFactory.createUnaryIQTree(checkArrayConstructionNode, dataNode))));
+                IQTree treeBeforeSafenessInfo = iqTreeTools.createUnaryIQTree(
+                        constructionNode,
+                        filterNode,
+                        flattennode,
+                        checkArrayConstructionNode,
+                        dataNode);
 
                 return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
             }
