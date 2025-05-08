@@ -157,6 +157,54 @@ public class IQTreeTools {
                                 iqFactory.createUnaryIQTree(node4, tree))));
     }
 
+    public static class UnaryOperatorSequence<T extends UnaryOperatorNode> {
+        private final ImmutableList<T> list;
+        private UnaryOperatorSequence(ImmutableList<T> list) {
+            this.list = list;
+        }
+
+        public UnaryOperatorSequence<T> append(T node) {
+            return new UnaryOperatorSequence<>(
+                    Stream.concat(list.stream(), Stream.of(node))
+                            .collect(ImmutableList.toImmutableList()));
+        }
+
+        public boolean isEmpty() {
+            return list.isEmpty();
+        }
+
+        public Stream<T> stream() {
+            return list.stream();
+        }
+
+        public UnaryOperatorSequence<T> append(Optional<T> optionalNode) {
+            return optionalNode.map(this::append)
+                    .orElse(this);
+        }
+
+        public static <T extends UnaryOperatorNode> UnaryOperatorSequence<T> of() {
+            return new UnaryOperatorSequence<>(ImmutableList.of());
+        }
+
+        public static <T extends UnaryOperatorNode> UnaryOperatorSequence<T> of(T node) {
+            return new UnaryOperatorSequence<>(ImmutableList.of(node));
+        }
+
+        public static <T extends UnaryOperatorNode> UnaryOperatorSequence<T> of(Stream<UnaryOperatorSequence<T>> stream) {
+            return new UnaryOperatorSequence<>(stream
+                    .flatMap(s -> s.list.stream())
+                    .collect(ImmutableList.toImmutableList()));
+        }
+    }
+
+
+    public IQTree createAncestorsUnaryIQTree(UnaryOperatorSequence<? extends UnaryOperatorNode> sequence, IQTree tree) {
+        return sequence.list.reverse().stream()
+                .reduce(tree,
+                        (t, a) -> iqFactory.createUnaryIQTree(a, t),
+                        (t1, t2) -> { throw new MinorOntopInternalBugException("No merge was expected"); });
+    }
+
     public IQTree createAncestorsUnaryIQTree(ImmutableList<? extends UnaryOperatorNode> ancestors, IQTree tree) {
         return ancestors.stream()
                 .reduce(tree,
@@ -275,6 +323,50 @@ public class IQTreeTools {
                     .map(UnaryIQTreeDecomposition::getTail)
                     .collect(ImmutableCollectors.toList());
         }
+
+    }
+
+    public static class NestedUnaryIQTreeDecomposition<T extends UnaryOperatorNode> {
+        private final UnaryOperatorSequence<T> sequence;
+        private final IQTree child;
+
+        private NestedUnaryIQTreeDecomposition(UnaryOperatorSequence<T> sequence, IQTree child) {
+            this.sequence = sequence;
+            this.child = child;
+        }
+
+        public static <T extends UnaryOperatorNode> NestedUnaryIQTreeDecomposition<T> of(UnaryOperatorSequence<T> sequence, IQTree child) {
+            return new NestedUnaryIQTreeDecomposition<>(sequence, child);
+        }
+
+        public static <T extends UnaryOperatorNode> NestedUnaryIQTreeDecomposition<T> of(IQTree tree, Class<T> nodeClass) {
+            var list = Stream.iterate(
+                            UnaryIQTreeDecomposition.of(tree, nodeClass),
+                            UnaryIQTreeDecomposition::isPresent,
+                            d -> UnaryIQTreeDecomposition.of(d.getChild(), nodeClass))
+                    .collect(ImmutableCollectors.toList());
+
+            return list.isEmpty()
+                    ? new NestedUnaryIQTreeDecomposition<T>(UnaryOperatorSequence.of(), tree)
+                    : new NestedUnaryIQTreeDecomposition<T>(
+                            new UnaryOperatorSequence<>(
+                                    list.stream()
+                                            .map(UnaryIQTreeDecomposition::getNode)
+                                            .collect(ImmutableCollectors.toList())),
+                    list.getLast().getChild());
+        }
+
+        public NestedUnaryIQTreeDecomposition<T> append(T node) {
+            return new NestedUnaryIQTreeDecomposition<>(sequence.append(node), child);
+        }
+
+        public UnaryOperatorSequence<T> getSequence() {
+            return sequence;
+        }
+
+        public IQTree getChild() {
+            return child;
+        }
     }
 
     public static class NaryIQTreeDecomposition<T extends NaryOperatorNode> extends IQTreeDecomposition<T, NaryIQTree> {
@@ -285,7 +377,7 @@ public class IQTreeTools {
             this.children = tree.getChildren();
         }
 
-        private NaryIQTreeDecomposition(IQTree tree) {
+        private NaryIQTreeDecomposition() {
             this.children = null;
         }
 
@@ -301,7 +393,7 @@ public class IQTreeTools {
         public static <T extends NaryOperatorNode> NaryIQTreeDecomposition<T> of(IQTree tree, Class<T> nodeClass) {
             return nodeClass.isInstance(tree.getRootNode())
                     ? new NaryIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((NaryIQTree)tree))
-                    : new NaryIQTreeDecomposition<>(tree);
+                    : new NaryIQTreeDecomposition<>();
         }
     }
 
@@ -315,7 +407,7 @@ public class IQTreeTools {
             this.rightChild = tree.getRightChild();
         }
 
-        private BinaryNonCommutativeIQTreeDecomposition(IQTree tree) {
+        private BinaryNonCommutativeIQTreeDecomposition() {
             this.leftChild = null;
             this.rightChild = null;
         }
@@ -342,7 +434,7 @@ public class IQTreeTools {
         public static <T extends BinaryNonCommutativeOperatorNode> BinaryNonCommutativeIQTreeDecomposition<T> of(IQTree tree, Class<T> nodeClass) {
             return nodeClass.isInstance(tree.getRootNode())
                     ? new BinaryNonCommutativeIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((BinaryNonCommutativeIQTree)tree))
-                    : new BinaryNonCommutativeIQTreeDecomposition<>(tree);
+                    : new BinaryNonCommutativeIQTreeDecomposition<>();
         }
     }
 
