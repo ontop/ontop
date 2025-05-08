@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -52,6 +51,9 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+
 
 @Singleton
 public class TMappingSaturatorImpl implements MappingSaturator  {
@@ -174,14 +176,16 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
 
         MappingAssertion updateConstructionNodeIri(MappingAssertion assertion) {
             IQ query = assertion.getQuery();
-            ConstructionNode constructionNode = (ConstructionNode) query.getTree().getRootNode();
-            DistinctVariableOnlyDataAtom projectionAtom = query.getProjectionAtom();
-            ImmutableList<Variable> variables = projectionAtom.getArguments();
+            var construction = UnaryIQTreeDecomposition.of(query.getTree(), ConstructionNode.class);
+            ConstructionNode constructionNode = construction.getNode();
+            ImmutableList<Variable> variables = query.getProjectionAtom().getArguments();
             ImmutableList<ImmutableTerm> args = constructionNode.getSubstitution().apply(variables);
             Substitution<ImmutableTerm> updatedSubstitution = substitutionFactory.getSubstitution(variables, termTransformer.apply(args));
-            ConstructionNode updatedConstructionNode = iqFactory.createConstructionNode(constructionNode.getVariables(), updatedSubstitution);
-            IQ updatedQuery = iqFactory.createIQ(projectionAtom,
-                    iqFactory.createUnaryIQTree(updatedConstructionNode, ((UnaryIQTree)query.getTree()).getChild()));
+            IQ updatedQuery = iqFactory.createIQ(
+                    query.getProjectionAtom(),
+                    iqFactory.createUnaryIQTree(
+                            iqFactory.createConstructionNode(constructionNode.getVariables(), updatedSubstitution),
+                            construction.getChild()));
             return assertion.copyOf(updatedQuery);
         }
 

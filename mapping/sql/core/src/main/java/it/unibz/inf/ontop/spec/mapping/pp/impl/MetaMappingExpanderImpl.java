@@ -108,18 +108,16 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
         }
 
         NativeNode getDatabaseQuery(DBParameters dbParameters) {
-
-            IQTree topChildNotNull = iqTreeTools.createOptionalUnaryIQTree(
-                    termFactory.getDBIsNotNull(assertion.getTopChild().getVariables().stream())
-                            .map(iqFactory::createFilterNode),
-                    assertion.getTopChild());
-
-            IQTree constructionTree = iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
-                    assertion.getTopSubstitution().get(topVariable).getVariableStream().collect(ImmutableCollectors.toSet()),
-                    substitutionFactory.getSubstitution()),
-                    topChildNotNull);
-
-            IQTree tree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(), constructionTree);
+            IQTree tree = iqTreeTools.createUnaryIQTree(
+                    iqFactory.createDistinctNode(),
+                    iqFactory.createConstructionNode(
+                            assertion.getTopSubstitution().get(topVariable)
+                                    .getVariableStream().collect(ImmutableCollectors.toSet()),
+                            substitutionFactory.getSubstitution()),
+                    iqTreeTools.createOptionalUnaryIQTree(
+                            termFactory.getDBIsNotNull(assertion.getTopChild().getVariables().stream())
+                                    .map(iqFactory::createFilterNode),
+                            assertion.getTopChild()));
 
             IQTree transformedTree = mappingEqualityTransformer.transform(tree);
             IQTree binaryMathOperationTransformedTree = mappingBinaryMathOperationTransformer.transform(transformedTree);
@@ -132,20 +130,18 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                     .transformOrRetain(ImmutableMap.of(topVariable, values)::get, (t, sub) -> sub.applyToTerm(t))
                     .build();
 
-            IQTree filterTree = iqFactory.createUnaryIQTree(
+            IQTree tree = iqTreeTools.createUnaryIQTree(
+                    iqFactory.createConstructionNode(
+                            instantiatedSub.getDomain(),
+                            instantiatedSub),
                     iqFactory.createFilterNode(
                             termFactory.getConjunction(values.builder()
                                     .toStream(termFactory::getNotYetTypedEquality)
                                     .collect(ImmutableCollectors.toList()))),
                     assertion.getTopChild());
 
-            IQTree tree = iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(instantiatedSub.getDomain(), instantiatedSub),
-                    filterTree);
-
             return assertion.copyOf(tree, iqFactory);
         }
-
     }
 
     private Optional<ExpansionPosition> getExpansionPosition(MappingAssertion assertion) {

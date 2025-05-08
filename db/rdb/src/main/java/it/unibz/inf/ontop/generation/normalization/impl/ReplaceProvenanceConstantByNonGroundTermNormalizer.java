@@ -62,7 +62,9 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DefaultR
 
             ConstructionNode rightConstructionNode = construction.getNode();
             return grandChildVariable.isPresent()
-                    ? Optional.of(iqFactory.createBinaryNonCommutativeIQTree(rootNode, leftChild,
+                    ? Optional.of(iqFactory.createBinaryNonCommutativeIQTree(
+                            rootNode,
+                            leftChild,
                             iqFactory.createUnaryIQTree(
                                     iqFactory.createConstructionNode(
                                             rightConstructionNode.getVariables(),

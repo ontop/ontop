@@ -35,7 +35,7 @@ public class IQTreeTools {
     private final TermFactory termFactory;
 
     @Inject
-    public IQTreeTools(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+    private IQTreeTools(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;

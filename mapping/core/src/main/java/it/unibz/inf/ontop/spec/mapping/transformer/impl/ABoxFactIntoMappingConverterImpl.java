@@ -204,9 +204,11 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
 
         Substitution<?> substitution = substitutionFactory.getSubstitution(type.atom.getArguments(), arguments);
 
-        return iqFactory.createIQ(type.atom,
+        return iqFactory.createIQ(
+                type.atom,
                 iqFactory.createUnaryIQTree(
-                        iqFactory.createConstructionNode(substitution.getDomain(), substitution), valuesNode));
+                        iqFactory.createConstructionNode(substitution.getDomain(), substitution),
+                        valuesNode));
 
     }
 

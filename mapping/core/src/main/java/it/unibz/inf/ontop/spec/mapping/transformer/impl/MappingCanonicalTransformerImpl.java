@@ -132,9 +132,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                 iqFactory.createConstructionNode(projAtom.getVariables()),
                 iqFactory.createNaryIQTree(
                         iqFactory.createInnerJoinNode(),
-                        ImmutableList.of(
-                                assertion.getTree(),
-                                intensionalDataNode)));
+                        ImmutableList.of(assertion.getTree(), intensionalDataNode)));
     }
 
     private class IntensionalQueryMerger extends AbstractIntensionalQueryMerger {

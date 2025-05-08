@@ -87,8 +87,8 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
         return (newComparators.equals(initialComparators) && newChild.equals(child))
                 ? tree
                 : iqFactory.createUnaryIQTree(
-                iqFactory.createOrderByNode(newComparators),
-                newChild);
+                        iqFactory.createOrderByNode(newComparators),
+                        newChild);
     }
 
     @Override

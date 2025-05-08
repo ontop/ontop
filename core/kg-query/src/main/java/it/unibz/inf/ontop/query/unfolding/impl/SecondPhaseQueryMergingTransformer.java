@@ -362,9 +362,8 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
                 termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getBNodeTolerantSPARQLStrFunctionSymbol(), var),
                 termFactory.getRDFLiteralConstant(
                         prefix,
-                        termFactory.getTypeFactory().getXsdStringDatatype()
-                )
-        );
+                        termFactory.getTypeFactory().getXsdStringDatatype()));
+
         ImmutableExpression filterCondition = termFactory.getRDF2DBBooleanFunctionalTerm(sparqlSTRSTARTSFunctionWithParameters);
         return iqFactory.createUnaryIQTree(
                 iqFactory.createFilterNode(filterCondition),

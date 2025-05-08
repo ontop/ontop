@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -46,6 +47,7 @@ public class MappingAssertionUnion {
     private final HomomorphismFactory homomorphismFactory;
     private final CoreSingletons coreSingletons;
     private final UnionBasedQueryMerger queryMerger;
+    private final IQTreeTools iqTreeTools;
 
     public MappingAssertionUnion(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger) {
         this.cqc = cqc;
@@ -54,6 +56,7 @@ public class MappingAssertionUnion {
         this.homomorphismFactory = coreSingletons.getHomomorphismFactory();
         this.coreSingletons = coreSingletons;
         this.queryMerger = queryMerger;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     public MappingAssertionUnion add(MappingAssertion assertion) {
@@ -160,9 +163,11 @@ public class MappingAssertionUnion {
 
 
         IQ asIQ() {
-            return iqFactory.createIQ(projectionAtom,
+            return iqFactory.createIQ(
+                    projectionAtom,
                     iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(projectionAtom.getVariables(), substitution), getTree()));
+                            iqFactory.createConstructionNode(projectionAtom.getVariables(), substitution),
+                            getTree()));
         }
 
         IQTree getTree() {
@@ -170,16 +175,17 @@ public class MappingAssertionUnion {
             Optional<ImmutableExpression> mergedConditions = translate(filter);
 
             if (extensionalDataNodes.isEmpty() && valuesNode.isEmpty())
-                    return iqFactory.createTrueNode();
+                return iqFactory.createTrueNode();
             else if (valuesNode.isEmpty() && extensionalDataNodes.size() == 1)
-                    return mergedConditions
-                            .<IQTree>map(c -> iqFactory.createUnaryIQTree(iqFactory.createFilterNode(c), extensionalDataNodes.get(0)))
-                            .orElseGet(() -> extensionalDataNodes.get(0));
+                return iqTreeTools.createOptionalUnaryIQTree(
+                        mergedConditions.map(iqFactory::createFilterNode),
+                        extensionalDataNodes.get(0));
             else if (valuesNode.isPresent() && extensionalDataNodes.isEmpty())
-                return mergedConditions
-                        .<IQTree>map(c -> iqFactory.createUnaryIQTree(iqFactory.createFilterNode(c), valuesNode.get()))
-                        .orElseGet(valuesNode::get);
-            else return iqFactory.createNaryIQTree(
+                return iqTreeTools.createOptionalUnaryIQTree(
+                        mergedConditions.map(iqFactory::createFilterNode),
+                        valuesNode.get());
+            else
+                return iqFactory.createNaryIQTree(
                             iqFactory.createInnerJoinNode(mergedConditions),
                             Stream.concat(extensionalDataNodes.stream(), valuesNode.stream()).collect(ImmutableCollectors.toList()));
         }

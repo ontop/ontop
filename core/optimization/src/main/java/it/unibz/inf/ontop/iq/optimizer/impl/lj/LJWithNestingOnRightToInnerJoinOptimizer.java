@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -79,6 +80,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
     protected static class Transformer extends AbstractLJTransformer {
         private final CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer;
         private final AtomFactory atomFactory;
+        private final IQTreeTools iqTreeTools;
 
         protected Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
                               VariableGenerator variableGenerator, RightProvenanceNormalizer rightProvenanceNormalizer,
@@ -88,6 +90,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
                     coreSingletons);
             this.otherLJOptimizer = otherLJOptimizer;
             this.atomFactory = coreSingletons.getAtomFactory();
+            this.iqTreeTools = coreSingletons.getIQTreeTools();
         }
 
         @Override
@@ -158,27 +161,27 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
                             .map(termFactory::getDBIsNotNull));
 
             ImmutableExpression isNullCondition = termFactory.getDBIsNull(rightProvenance.getProvenanceVariable());
-
             ImmutableExpression filterCondition = nonNullabilityCondition
                     .map(c -> termFactory.getConjunction(isNullCondition, c))
                     .orElse(isNullCondition);
 
-            IQTree minusTree = iqFactory.createUnaryIQTree(
+            ConstructionNode constructionNode = iqFactory.createConstructionNode(
+                    ImmutableSet.of(rightProvenance.getProvenanceVariable()));
+
+            IQTree minusTree = iqTreeTools.createUnaryIQTree(
+                    constructionNode,
                     iqFactory.createFilterNode(filterCondition),
                     iqFactory.createBinaryNonCommutativeIQTree(
                             iqFactory.createLeftJoinNode(),
-                            leftChild, rightProvenance.getRightTree()));
-
-            ConstructionNode constructionNode = iqFactory.createConstructionNode(
-                    ImmutableSet.of(rightProvenance.getProvenanceVariable()));
+                            leftChild,
+                            rightProvenance.getRightTree()));
 
             // Hack
             DistinctVariableOnlyDataAtom minusFakeProjectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(
                     atomFactory.getRDFAnswerPredicate(1),
                     ImmutableList.copyOf(constructionNode.getVariables()));
 
-            return otherLJOptimizer.optimize(iqFactory.createIQ(minusFakeProjectionAtom,
-                            iqFactory.createUnaryIQTree(constructionNode, minusTree)))
+            return otherLJOptimizer.optimize(iqFactory.createIQ(minusFakeProjectionAtom, minusTree))
                     .normalizeForOptimization().getTree()
                     .isDeclaredAsEmpty();
         }

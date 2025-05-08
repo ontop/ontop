@@ -35,8 +35,8 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
     private final OptimizationSingletons optimizationSingletons;
 
     @Inject
-    private AggregationSimplifierImpl(IntermediateQueryFactory iqFactory, OptimizationSingletons optimizationSingletons) {
-        this.iqFactory = iqFactory;
+    private AggregationSimplifierImpl(OptimizationSingletons optimizationSingletons) {
+        this.iqFactory = optimizationSingletons.getCoreSingletons().getIQFactory();
         this.optimizationSingletons = optimizationSingletons;
     }
 

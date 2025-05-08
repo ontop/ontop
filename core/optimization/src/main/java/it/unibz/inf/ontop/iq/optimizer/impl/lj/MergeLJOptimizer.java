@@ -87,6 +87,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
         private final CardinalitySensitiveJoinTransferLJOptimizer joinTransferOptimizer;
         private final AtomFactory atomFactory;
         private final SubstitutionFactory substitutionFactory;
+        private final IQTreeTools iqTreeTools;
         private final LJWithNestingOnRightToInnerJoinOptimizer ljReductionOptimizer;
         private final ComplexStrictEqualityLeftJoinExpliciter ljConditionExpliciter;
 
@@ -96,6 +97,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
                               LJWithNestingOnRightToInnerJoinOptimizer ljReductionOptimizer,
                               ComplexStrictEqualityLeftJoinExpliciter ljConditionExpliciter) {
             super(coreSingletons.getIQFactory());
+            this.iqTreeTools = coreSingletons.getIQTreeTools();
             this.variableGenerator = variableGenerator;
             this.rightProvenanceNormalizer = rightProvenanceNormalizer;
             this.termFactory = coreSingletons.getTermFactory();
@@ -296,14 +298,13 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
                     .map(c -> termFactory.getConjunction(isNullCondition, c))
                     .orElse(isNullCondition);
 
-
-            IQTree minusTree = iqFactory.createUnaryIQTree(
+            IQTree minusTree = iqTreeTools.createUnaryIQTree(
                     iqFactory.createConstructionNode(ImmutableSet.of(rightProvenance.getProvenanceVariable())),
-                    iqFactory.createUnaryIQTree(
-                            iqFactory.createFilterNode(filterCondition),
-                            iqFactory.createBinaryNonCommutativeIQTree(
-                                    iqFactory.createLeftJoinNode(),
-                                    tree, rightProvenance.getRightTree())));
+                    iqFactory.createFilterNode(filterCondition),
+                    iqFactory.createBinaryNonCommutativeIQTree(
+                            iqFactory.createLeftJoinNode(),
+                            tree,
+                            rightProvenance.getRightTree()));
 
             // Hack
             DistinctVariableOnlyDataAtom minusFakeProjectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(

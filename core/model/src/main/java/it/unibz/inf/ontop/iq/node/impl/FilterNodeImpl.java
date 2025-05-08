@@ -225,9 +225,9 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child,
             VariableGenerator variableGenerator) {
-        FilterNode newFilterNode = iqFactory.createFilterNode(descendingSubstitution.apply(getFilterCondition()));
 
-        return iqFactory.createUnaryIQTree(newFilterNode,
+        return iqFactory.createUnaryIQTree(
+                iqFactory.createFilterNode(descendingSubstitution.apply(getFilterCondition())),
                 child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
     }
 
