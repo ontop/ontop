@@ -190,6 +190,10 @@ public class IQTreeTools {
             return new UnaryOperatorSequence<>(ImmutableList.of(node));
         }
 
+        public static <T extends UnaryOperatorNode> UnaryOperatorSequence<T> of(ImmutableList<T> list) {
+            return new UnaryOperatorSequence<>(list);
+        }
+
         public static <T extends UnaryOperatorNode> UnaryOperatorSequence<T> of(Stream<UnaryOperatorSequence<T>> stream) {
             return new UnaryOperatorSequence<>(stream
                     .flatMap(s -> s.list.stream())
@@ -353,7 +357,7 @@ public class IQTreeTools {
                                     list.stream()
                                             .map(UnaryIQTreeDecomposition::getNode)
                                             .collect(ImmutableCollectors.toList())),
-                    list.getLast().getChild());
+                    list.get(list.size() - 1).getChild());
         }
 
         public NestedUnaryIQTreeDecomposition<T> append(T node) {
