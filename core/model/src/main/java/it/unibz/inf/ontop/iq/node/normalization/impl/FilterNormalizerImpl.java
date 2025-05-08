@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
 
 @Singleton
@@ -83,20 +84,20 @@ public class FilterNormalizerImpl implements FilterNormalizer {
     protected class State {
         private final ImmutableSet<Variable> projectedVariables;
         // Parent first (should be composed of construction and distinct nodes only)
-        private final ImmutableList<UnaryOperatorNode> ancestors;
+        private final UnaryOperatorSequence<UnaryOperatorNode> ancestors;
         private final Optional<ImmutableExpression> condition;
         private final IQTree child;
         /**
          * Initial constructor
          */
         protected State(FilterNode initialFilterNode, IQTree initialChild) {
-            projectedVariables = initialChild.getVariables();
-            ancestors = ImmutableList.of();
-            condition = Optional.of(initialFilterNode.getFilterCondition());
-            child = initialChild;
+            this(initialChild.getVariables(),
+                    UnaryOperatorSequence.of(),
+                    Optional.of(initialFilterNode.getFilterCondition()),
+                    initialChild);
         }
 
-        protected State(ImmutableSet<Variable> projectedVariables, ImmutableList<UnaryOperatorNode> ancestors,
+        protected State(ImmutableSet<Variable> projectedVariables, UnaryOperatorSequence<UnaryOperatorNode> ancestors,
                         Optional<ImmutableExpression> condition, IQTree child) {
             this.projectedVariables = projectedVariables;
             this.ancestors = ancestors;
@@ -109,32 +110,20 @@ public class FilterNormalizerImpl implements FilterNormalizer {
         }
 
         private State updateParentChildAndCondition(UnaryOperatorNode newParent,
-                                                                       ImmutableExpression newCondition, IQTree newChild) {
-            return new State(projectedVariables, extendAncestors(newParent), Optional.of(newCondition), newChild);
-        }
-
-        private State addParentRemoveConditionAndUpdateChild(UnaryOperatorNode newParent, IQTree newChild) {
-            return new State(projectedVariables, extendAncestors(newParent), Optional.empty(), newChild);
-        }
-
-        private ImmutableList<UnaryOperatorNode> extendAncestors(UnaryOperatorNode newNode) {
-            return Stream.concat(Stream.of(newNode), ancestors.stream()).collect(ImmutableCollectors.toList());
+                                                                       Optional<ImmutableExpression> newCondition, IQTree newChild) {
+            return new State(projectedVariables, ancestors.append(newParent), newCondition, newChild);
         }
 
         private State liftChildAsParent(UnaryIQTreeDecomposition<?> decomposition) {
-            return new State(projectedVariables, extendAncestors(decomposition.getNode()), condition, decomposition.getChild());
+            return new State(projectedVariables, ancestors.append(decomposition.getNode()), condition, decomposition.getChild());
         }
 
-        private State updateConditionAndChild(ImmutableExpression newCondition, IQTree newChild) {
-            return new State(projectedVariables, ancestors, Optional.of(newCondition), newChild);
-        }
-
-        private State removeConditionAndUpdateChild(IQTree newChild) {
-            return new State(projectedVariables, ancestors, Optional.empty(), newChild);
+        private State updateConditionAndChild(Optional<ImmutableExpression> newCondition, IQTree newChild) {
+            return new State(projectedVariables, ancestors, newCondition, newChild);
         }
 
         private State createEmptyState() {
-            return new State(projectedVariables, ImmutableList.of(), Optional.empty(),
+            return new State(projectedVariables, UnaryOperatorSequence.of(), Optional.empty(),
                     iqFactory.createEmptyNode(projectedVariables));
         }
 
@@ -169,7 +158,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             if (construction.isPresent()) {
                 return condition
                         .map(e -> construction.getNode().getSubstitution().apply(e))
-                        .map(e -> updateParentChildAndCondition(construction.getNode(), e, construction.getChild()))
+                        .map(e -> updateParentChildAndCondition(construction.getNode(), Optional.of(e), construction.getChild()))
                         .orElseGet(() -> liftChildAsParent(construction))
                         // Recursive (maybe followed by a distinct)
                         .liftBindingsAndDistinct();
@@ -178,7 +167,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             var distinct = UnaryIQTreeDecomposition.of(child, DistinctNode.class);
             if (distinct.isPresent()) {
                 return condition
-                        .map(e -> updateParentChildAndCondition(distinct.getNode(), e, distinct.getChild()))
+                        .map(e -> updateParentChildAndCondition(distinct.getNode(), Optional.of(e), distinct.getChild()))
                         .orElseGet(() -> liftChildAsParent(distinct))
                         // Recursive (may be followed by another construction node)
                         .liftBindingsAndDistinct();
@@ -198,7 +187,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                     ImmutableExpression newCondition = termFactory.getConjunction(condition.get(),
                             filter.getNode().getFilterCondition());
 
-                    return updateConditionAndChild(newCondition, filter.getChild());
+                    return updateConditionAndChild(Optional.of(newCondition), filter.getChild());
                 }
                 var join = NaryIQTreeDecomposition.of(child, InnerJoinNode.class);
                 if (join.isPresent()) {
@@ -209,14 +198,14 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                     IQTree newChild = iqFactory.createNaryIQTree(
                             iqFactory.createInnerJoinNode(newJoiningCondition),
                             join.getChildren());
-                    return removeConditionAndUpdateChild(newChild);
+                    return updateConditionAndChild(Optional.empty(), newChild);
                 }
             }
             return this;
         }
 
         public State simplifyAndPropagateDownConstraint(VariableGenerator variableGenerator) {
-            if (!condition.isPresent()) {
+            if (condition.isEmpty()) {
                 return this;
             }
 
@@ -241,13 +230,9 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                         .filter(s -> !s.isEmpty())
                         .map(s -> iqFactory.createConstructionNode(child.getVariables(), s));
 
-                return conditionSimplificationResults.getOptionalExpression()
-                        .map(e -> parentConstructionNode
-                                .map(p -> updateParentChildAndCondition(p, e, newChild))
-                                .orElseGet(() -> updateConditionAndChild(e, newChild)))
-                        .orElseGet(() -> parentConstructionNode
-                                .map(p -> addParentRemoveConditionAndUpdateChild(p, newChild))
-                                .orElseGet(() -> removeConditionAndUpdateChild(newChild)));
+                return parentConstructionNode
+                        .map(p -> updateParentChildAndCondition(p, conditionSimplificationResults.getOptionalExpression(), newChild))
+                        .orElseGet(() -> updateConditionAndChild(conditionSimplificationResults.getOptionalExpression(), newChild));
             }
             catch (UnsatisfiableConditionException e) {
                 return createEmptyState();
