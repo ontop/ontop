@@ -100,13 +100,13 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 var optionalCondition = condition
                         .map(e -> node.getSubstitution().apply(e));
                 return new State(ancestors.append(node), optionalCondition, newChild)
-                        .next(newChild);
+                        .continueTo(newChild);
             }
 
             @Override
             public State transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree newChild) {
                 return new State(ancestors.append(node), condition, newChild)
-                        .next(newChild);
+                        .continueTo(newChild);
             }
 
             @Override
@@ -114,7 +114,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 var optionalCondition = condition
                         .map(c -> termFactory.getConjunction(c, node.getFilterCondition()));
                 return new State(ancestors, optionalCondition, newChild)
-                        .next(newChild);
+                        .continueTo(newChild);
             }
 
             @Override
@@ -166,7 +166,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
             @Override
             public State reduce() {
-                return next(child)
+                return continueTo(child)
                         .normalizeChild()
                         .simplifyAndPropagateDownConstraint();
             }

@@ -25,4 +25,3 @@ public interface NormalizationProcedure<T extends StateIQVisitor<T>> {
 
     StateIQVisitor<T> getInitialState();
 }
-

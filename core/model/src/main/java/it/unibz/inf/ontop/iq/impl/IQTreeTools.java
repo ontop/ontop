@@ -205,6 +205,18 @@ public class IQTreeTools {
         }
     }
 
+    public ImmutableExpression getConjunction(Optional<ImmutableExpression> optionalExpression, ImmutableExpression expression) {
+        return optionalExpression
+                .map(c -> termFactory.getConjunction(c, expression))
+                .orElse(expression);
+    }
+
+    // TODO: to be eliminated later, but some tests depend on the order of conjuncts
+    public ImmutableExpression getConjunction(ImmutableExpression expression, Optional<ImmutableExpression> optionalExpression) {
+        return optionalExpression
+                .map(c -> termFactory.getConjunction(expression, c))
+                .orElse(expression);
+    }
 
     public IQTree createAncestorsUnaryIQTree(UnaryOperatorSequence<? extends UnaryOperatorNode> sequence, IQTree tree) {
         return sequence.list.reverse().stream()

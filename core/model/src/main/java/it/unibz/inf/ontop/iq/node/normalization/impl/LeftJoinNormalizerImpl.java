@@ -290,7 +290,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
 
         private LJNormalizationState liftRightFilter(FilterNode filterNode, IQTree grandChild) {
-            ImmutableExpression newLJCondition = getConjunction(ljCondition, filterNode.getFilterCondition());
+            ImmutableExpression newLJCondition = iqTreeTools.getConjunction(ljCondition, filterNode.getFilterCondition());
             return updateConditionAndRightChild(Optional.of(newLJCondition), grandChild);
         }
 
@@ -300,7 +300,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             Optional<ImmutableExpression> filterCondition = joinNode.getOptionalFilterCondition();
             if (filterCondition.isPresent()) {
                 ImmutableExpression condition = filterCondition.get();
-                ImmutableExpression newLJCondition = getConjunction(ljCondition, condition);
+                ImmutableExpression newLJCondition = iqTreeTools.getConjunction(ljCondition, condition);
 
                 NaryIQTree newRightChild = iqFactory.createNaryIQTree(
                         joinNode.changeOptionalFilterCondition(Optional.empty()),
@@ -543,7 +543,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             if (filterRightGrandChild.isPresent()) {
                 ImmutableExpression filterCondition = filterRightGrandChild.getNode().getFilterCondition();
 
-                ImmutableExpression newLJCondition = getConjunction(ljCondition, filterCondition);
+                ImmutableExpression newLJCondition = iqTreeTools.getConjunction(ljCondition, filterCondition);
 
                 ImmutableSet<Variable> childVariablesToProject = Sets.union(rightChildRequiredVariables, filterCondition.getVariables())
                         .immutableCopy();
@@ -561,7 +561,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 Optional<ImmutableExpression> filterCondition = joinNode.getOptionalFilterCondition();
                 if (filterCondition.isPresent()) {
                     ImmutableExpression condition = filterCondition.get();
-                    ImmutableExpression newLJCondition = getConjunction(ljCondition, condition);
+                    ImmutableExpression newLJCondition = iqTreeTools.getConjunction(ljCondition, condition);
 
                     NaryIQTree newRightGrandChild = iqFactory.createNaryIQTree(
                             joinNode.changeOptionalFilterCondition(Optional.empty()),
@@ -756,9 +756,4 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         }
     }
 
-    private ImmutableExpression getConjunction(Optional<ImmutableExpression> optionalExpression, ImmutableExpression expression) {
-        return optionalExpression
-                .map(e -> termFactory.getConjunction(e, expression))
-                .orElse(expression);
-    }
 }

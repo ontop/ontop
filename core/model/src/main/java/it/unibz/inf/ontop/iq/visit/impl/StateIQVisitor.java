@@ -7,10 +7,13 @@ import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.NormalizationState;
 
-public abstract class StateIQVisitor<T extends IQVisitor<T>> implements IQVisitor<T> {
+import java.util.Optional;
 
-    protected final T next(IQTree next) {
+public abstract class StateIQVisitor<T extends IQVisitor<T> & NormalizationState<T>> implements IQVisitor<T>, NormalizationState<T> {
+
+    protected final T continueTo(IQTree next) {
         return next.acceptVisitor(this);
     }
 
@@ -18,6 +21,14 @@ public abstract class StateIQVisitor<T extends IQVisitor<T>> implements IQVisito
 
     protected final T done() {
         return (T)this;
+    }
+
+    @Override
+    public Optional<T> next() {
+        T r = reduce();
+        return r.equals(this)
+                ? Optional.empty()
+                : Optional.of(r);
     }
 
     public abstract IQTree toIQTree();

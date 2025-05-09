@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
@@ -13,9 +12,9 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.PostProcessableFunctionLifter;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
+import it.unibz.inf.ontop.iq.visit.NormalizationState;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
@@ -31,50 +30,50 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
 
 @Singleton
 public class PostProcessableFunctionLifterImpl implements PostProcessableFunctionLifter {
 
-    protected final OptimizationSingletons optimizationSingletons;
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
+    private final SubstitutionFactory substitutionFactory;
+    private final TermFactory termFactory;
+    private final SingleTermTypeExtractor typeExtractor;
+
+    private final int maxNbChildrenForLiftingDBFunctionSymbol;
+
+    protected static final int LOOPING_BOUND = 1000000;
 
     @Inject
     protected PostProcessableFunctionLifterImpl(OptimizationSingletons optimizationSingletons) {
-        this.optimizationSingletons = optimizationSingletons;
         CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
         this.iqFactory = coreSingletons.getIQFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.typeExtractor = coreSingletons.getUniqueTermTypeExtractor();
+
+        this.maxNbChildrenForLiftingDBFunctionSymbol = optimizationSingletons.getSettings()
+                .getMaxNbChildrenForLiftingDBFunctionSymbol();
     }
 
     @Override
     public IQ optimize(IQ query) {
-        IQTree newTree = query.getTree().acceptTransformer(createTransformer(query.getVariableGenerator()));
+        IQTree newTree = query.getTree().acceptTransformer(
+                new FunctionLifterTransformer(query.getVariableGenerator()));
         return iqFactory.createIQ(query.getProjectionAtom(), newTree);
     }
 
-    /**
-     * TODO: refactor IQTreeVisitingTransformer so as avoid to create fresh transformers
-     */
-    protected IQTreeVisitingTransformer createTransformer(VariableGenerator variableGenerator) {
-        return new FunctionLifterTransformer(variableGenerator, optimizationSingletons);
-    }
 
+    private class FunctionLifterTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-    public static class FunctionLifterTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
-
-        protected static final int LOOPING_BOUND = 1000000;
         protected final VariableGenerator variableGenerator;
-        protected final OptimizationSingletons optimizationSingletons;
-        private final int maxNbChildrenForLiftingDBFunctionSymbol;
-        private final IQTreeTools iqTreeTools;
 
-        protected FunctionLifterTransformer(VariableGenerator variableGenerator, OptimizationSingletons optimizationSingletons) {
-            super(optimizationSingletons.getCoreSingletons().getIQFactory());
+        protected FunctionLifterTransformer(VariableGenerator variableGenerator) {
+            super(PostProcessableFunctionLifterImpl.this.iqFactory);
             this.variableGenerator = variableGenerator;
-            this.optimizationSingletons = optimizationSingletons;
-            this.maxNbChildrenForLiftingDBFunctionSymbol = optimizationSingletons.getSettings()
-                    .getMaxNbChildrenForLiftingDBFunctionSymbol();
-            this.iqTreeTools = optimizationSingletons.getCoreSingletons().getIQTreeTools();
         }
 
         @Override
@@ -84,284 +83,230 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         }
 
         @Override
-        protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-            return super.transformNaryCommutativeNode(tree, rootNode, children)
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+            return super.transformInnerJoin(tree, rootNode, children)
                     .normalizeForOptimization(variableGenerator);
         }
 
         @Override
-        protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode,
+        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode,
                                                            IQTree leftChild, IQTree rightChild) {
-            return super.transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild)
+            return super.transformLeftJoin(tree, rootNode, leftChild, rightChild)
                     .normalizeForOptimization(variableGenerator);
         }
 
         @Override
         public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            IQTree normalizedTree = transformNaryCommutativeNode(tree, rootNode, children);
+            IQTree normalizedTree = super.transformUnion(tree, rootNode, children)
+                    .normalizeForOptimization(variableGenerator);
 
             // Fix-point before pursing (recursive, potentially dangerous!)
             if (!normalizedTree.equals(tree)) {
-                return normalizedTree.acceptTransformer(this);
+                return transform(normalizedTree);
             }
 
-            return lift(new LiftState(children, rootNode.getVariables(), variableGenerator,
-                        optimizationSingletons.getCoreSingletons()))
-                    .generateTree()
+            return NormalizationState.reachFixedPoint(
+                            new LiftState(children, rootNode.getVariables(), UnaryOperatorSequence.of(), Optional.empty()),
+                            LOOPING_BOUND)
+                    .asIQTree()
                     .normalizeForOptimization(variableGenerator);
         }
 
-        protected LiftState lift(LiftState initialState) {
-            //Non-final
-            LiftState state = initialState;
 
-            for(int i =0; i < LOOPING_BOUND; i++) {
-                LiftState newState = step(state);
-                if (newState.equals(state))
-                    return state;
-                state = newState;
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        private class LiftState implements NormalizationState<LiftState> {
+            private final UnaryOperatorSequence<ConstructionNode> ancestors;
+            private final ImmutableSet<Variable> unionVariables;
+            private final ImmutableList<IQTree> children;
+
+            private final Optional<Variable> childIdVariable;
+
+            LiftState(ImmutableList<IQTree> children, ImmutableSet<Variable> unionVariables,
+                      UnaryOperatorSequence<ConstructionNode> ancestors, Optional<Variable> childIdVariable) {
+                this.children = children;
+                this.unionVariables = unionVariables;
+                this.ancestors = ancestors;
+                this.childIdVariable = childIdVariable;
             }
-            throw new MinorOntopInternalBugException(String.format("Has not converged in %d iterations", LOOPING_BOUND));
-        }
 
-        protected LiftState step(LiftState state) {
-            return selectVariableToLift(state.getUnionVariables(), state.getChildren())
-                    .map(state::liftVariable)
-                    .orElse(state);
-        }
+            public IQTree asIQTree() {
+                IQTree unionTree = iqFactory.createNaryIQTree(
+                        iqFactory.createUnionNode(unionVariables),
+                        children);
+                return iqTreeTools.createAncestorsUnaryIQTree(ancestors, unionTree);
+            }
 
-        protected Optional<Variable> selectVariableToLift(ImmutableSet<Variable> unionVariables,
-                                                          ImmutableList<IQTree> children) {
-            return unionVariables.stream()
-                    .filter(v -> shouldBeLifted(v, children))
-                    .findAny();
-        }
+            @Override
+            public Optional<LiftState> next() {
+                return unionVariables.stream()
+                        .filter(v -> shouldBeLifted(v, children))
+                        // select any variable to lift
+                        .findAny()
+                        .map(this::liftVariable);
+            }
 
-        protected boolean shouldBeLifted(Variable variable, ImmutableList<IQTree> children) {
-            return children.stream()
-                    .map(c -> UnaryIQTreeDecomposition.of(c, ConstructionNode.class))
-                    .flatMap(d -> d.getOptionalNode().stream())
-                    .map(n -> n.getSubstitution().get(variable))
-                    .filter(d -> d instanceof ImmutableFunctionalTerm)
-                    .map(d -> (ImmutableFunctionalTerm) d)
-                    .anyMatch(t -> shouldBeLifted(t, children.size()));
-        }
+            private boolean shouldBeLifted(Variable variable, ImmutableList<IQTree> children) {
+                return children.stream()
+                        .map(c -> UnaryIQTreeDecomposition.of(c, ConstructionNode.class))
+                        .flatMap(d -> d.getOptionalNode().stream())
+                        .map(n -> n.getSubstitution().get(variable))
+                        .filter(d -> d instanceof ImmutableFunctionalTerm)
+                        .map(d -> (ImmutableFunctionalTerm) d)
+                        .anyMatch(t -> shouldBeLifted(t, children.size()));
+            }
 
-        /**
-         * Recursive
-         */
-        protected boolean shouldBeLifted(ImmutableFunctionalTerm functionalTerm, int nbChildren) {
-            FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
-            if (!(functionSymbol instanceof DBFunctionSymbol)
-                || ((nbChildren < maxNbChildrenForLiftingDBFunctionSymbol)
-                    && ((DBFunctionSymbol) functionSymbol).isPreferringToBePostProcessedOverBeingBlocked()))
-                return true;
+            /**
+             * Recursive
+             */
+            private boolean shouldBeLifted(ImmutableFunctionalTerm functionalTerm, int nbChildren) {
+                FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
+                if (!(functionSymbol instanceof DBFunctionSymbol)
+                        || ((nbChildren < maxNbChildrenForLiftingDBFunctionSymbol)
+                        && ((DBFunctionSymbol) functionSymbol).isPreferringToBePostProcessedOverBeingBlocked()))
+                    return true;
 
-            return functionalTerm.getTerms().stream()
-                    .filter(t -> t instanceof ImmutableFunctionalTerm)
-                    .map(t -> (ImmutableFunctionalTerm) t)
-                    .anyMatch(t -> shouldBeLifted(t, nbChildren));
-        }
+                return functionalTerm.getTerms().stream()
+                        .filter(t -> t instanceof ImmutableFunctionalTerm)
+                        .map(t -> (ImmutableFunctionalTerm) t)
+                        .anyMatch(t -> shouldBeLifted(t, nbChildren));
+            }
 
-    }
 
-    public static class LiftState {
-        private final ImmutableList<IQTree> children;
-        private final ImmutableSet<Variable> unionVariables;
-        // Ancestor first
-        private final ImmutableList<ConstructionNode> ancestors;
+            private LiftState liftVariable(Variable variable) {
+                Variable idVariable = childIdVariable
+                        .orElseGet(variableGenerator::generateNewVariable);
 
-        @Nullable
-        private final Variable childIdVariable;
+                ImmutableList<ChildDefinitionLift> childDefinitionLifts = IntStream.range(0, children.size())
+                        .mapToObj(i -> liftDefinition(children.get(i), i, variable, unionVariables, idVariable))
+                        .collect(ImmutableCollectors.toList());
 
-        private final VariableGenerator variableGenerator;
-        private final IntermediateQueryFactory iqFactory;
-        private final SubstitutionFactory substitutionFactory;
-        private final TermFactory termFactory;
-        private final SingleTermTypeExtractor typeExtractor;
-        private final CoreSingletons coreSingletons;
-        private final IQTreeTools iqTreeTools;
+                ImmutableFunctionalTerm newDefinition = mergeDefinitions(idVariable, childDefinitionLifts);
 
-        /**
-         * Initial constructor
-         */
-        public LiftState(ImmutableList<IQTree> children, ImmutableSet<Variable> unionVariables,
-                         VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
-            this(children, unionVariables, ImmutableList.of(), null, variableGenerator, coreSingletons);
-        }
+                ImmutableSet<Variable> newUnionVariables = Stream.concat(
+                                Stream.concat(
+                                        unionVariables.stream(),
+                                        Stream.of(idVariable)),
+                                childDefinitionLifts.stream()
+                                        .flatMap(l -> l.getFreshlyCreatedVariables().stream()))
+                        .filter(v -> !v.equals(variable))
+                        .collect(ImmutableCollectors.toSet());
 
-        protected LiftState(ImmutableList<IQTree> children, ImmutableSet<Variable> unionVariables,
-                            ImmutableList<ConstructionNode> ancestors, @Nullable Variable childIdVariable,
-                            VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
-            this.children = children;
-            this.unionVariables = unionVariables;
-            this.ancestors = ancestors;
-            this.childIdVariable = childIdVariable;
-            this.variableGenerator = variableGenerator;
-            this.iqFactory = coreSingletons.getIQFactory();
-            this.substitutionFactory = coreSingletons.getSubstitutionFactory();
-            this.termFactory = coreSingletons.getTermFactory();
-            this.typeExtractor = coreSingletons.getUniqueTermTypeExtractor();
-            this.coreSingletons = coreSingletons;
-            this.iqTreeTools = coreSingletons.getIQTreeTools();
-        }
+                ImmutableMap<Variable, Optional<DBTermType>> newVarTypeMap = newUnionVariables.stream()
+                        .collect(ImmutableCollectors.toMap(
+                                v -> v,
+                                v -> extractType(v, childDefinitionLifts)));
 
-        public IQTree generateTree() {
-            IQTree unionTree = iqFactory.createNaryIQTree(
-                    iqFactory.createUnionNode(unionVariables),
-                    children);
-            return iqTreeTools.createAncestorsUnaryIQTree(ancestors.reverse(), unionTree);
-        }
+                ImmutableList<IQTree> newChildren = childDefinitionLifts.stream()
+                        .map(l -> padChild(l.getPartiallyPaddedChild(), newVarTypeMap))
+                        .map(t -> t.normalizeForOptimization(variableGenerator))
+                        .collect(ImmutableCollectors.toList());
 
-        public ImmutableSet<Variable> getUnionVariables() {
-            return unionVariables;
-        }
+                ConstructionNode newConstructionNode = iqFactory.createConstructionNode(unionVariables,
+                        substitutionFactory.getSubstitution(variable, newDefinition));
 
-        public ImmutableList<IQTree> getChildren() {
-            return children;
-        }
+                return new LiftState(newChildren, newUnionVariables, ancestors.append(newConstructionNode), Optional.of(idVariable));
+            }
 
-        public LiftState liftVariable(Variable variable) {
-            Variable idVariable = (childIdVariable == null)
-                    ? variableGenerator.generateNewVariable()
-                    : childIdVariable;
+            private ChildDefinitionLift liftDefinition(IQTree childTree, int position, Variable variable,
+                                                         ImmutableSet<Variable> unionVariables, Variable idVariable) {
 
-            ImmutableList<ChildDefinitionLift> childDefinitionLifts = IntStream.range(0, children.size())
-                    .mapToObj(i -> liftDefinition(children.get(i), i, variable, unionVariables, idVariable))
-                    .collect(ImmutableCollectors.toList());
+                var construction = UnaryIQTreeDecomposition.of(childTree, ConstructionNode.class);
+                Optional<Substitution<ImmutableTerm>> originalSubstitution = construction.getOptionalNode()
+                        .map(ConstructionNode::getSubstitution);
 
-            ImmutableFunctionalTerm newDefinition = mergeDefinitions(idVariable, childDefinitionLifts);
+                ImmutableTerm originalDefinition = originalSubstitution
+                        .map(s -> s.apply(variable))
+                        .orElse(variable);
 
-            ImmutableSet<Variable> newUnionVariables = Stream.concat(
-                    Stream.concat(
-                            unionVariables.stream(),
-                            Stream.of(idVariable)),
-                    childDefinitionLifts.stream()
-                            .flatMap(l -> l.getFreshlyCreatedVariables().stream()))
-                    .filter(v -> !v.equals(variable))
-                    .collect(ImmutableCollectors.toSet());
+                InjectiveSubstitution<Variable> renamingSubstitution = originalDefinition.getVariableStream()
+                        .filter(v -> v.equals(variable) || (!unionVariables.contains(v)))
+                        .distinct()
+                        .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
-            ImmutableMap<Variable, Optional<DBTermType>> newVarTypeMap = newUnionVariables.stream()
-                    .collect(ImmutableCollectors.toMap(
-                            v -> v,
-                            v -> extractType(v, childDefinitionLifts)));
+                boolean isVariableNotDefinedInSubstitution = originalDefinition.equals(variable);
 
-            ImmutableList<IQTree> newChildren = childDefinitionLifts.stream()
-                    .map(l -> padChild(l.getPartiallyPaddedChild(), newVarTypeMap))
-                    .map(t -> t.normalizeForOptimization(variableGenerator))
-                    .collect(ImmutableCollectors.toList());
+                ImmutableSet<Variable> projectedVariablesBeforeRenaming = Stream.concat(
+                                Stream.concat(
+                                        unionVariables.stream(),
+                                        Stream.of(idVariable)),
+                                originalDefinition.getVariableStream())
+                        .filter(v -> isVariableNotDefinedInSubstitution || !v.equals(variable))
+                        .collect(ImmutableCollectors.toSet());
 
-            ConstructionNode newConstructionNode = iqFactory.createConstructionNode(unionVariables,
-                    substitutionFactory.getSubstitution(variable, newDefinition));
+                Substitution<ImmutableTerm> positionSubstitution =
+                        substitutionFactory.getSubstitution(idVariable, termFactory.getDBIntegerConstant(position));
 
-            ImmutableList<ConstructionNode> newAncestors = Stream.concat(
-                    ancestors.stream(),
-                    Stream.of(newConstructionNode))
-                    .collect(ImmutableCollectors.toList());
+                Substitution<ImmutableTerm> substitutionBeforeRenaming = originalSubstitution
+                        .map(s -> substitutionFactory.union(s, positionSubstitution))
+                        .map(s -> s.restrictDomainTo(projectedVariablesBeforeRenaming))
+                        .orElse(positionSubstitution);
 
-            return new LiftState(newChildren, newUnionVariables, newAncestors, idVariable, variableGenerator,
-                    coreSingletons);
-        }
+                UnaryIQTree childBeforeRenaming = iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(projectedVariablesBeforeRenaming, substitutionBeforeRenaming),
+                        construction.getTail());
 
-        protected ChildDefinitionLift liftDefinition(IQTree childTree, int position, Variable variable,
-                                                     ImmutableSet<Variable> unionVariables, Variable idVariable) {
+                IQTree partiallyPaddedChild = childBeforeRenaming.applyDescendingSubstitution(renamingSubstitution, Optional.empty(), variableGenerator);
+                ImmutableTerm liftedDefinition = renamingSubstitution.applyToTerm(originalDefinition);
 
-            var construction = UnaryIQTreeDecomposition.of(childTree, ConstructionNode.class);
-            Optional<Substitution<ImmutableTerm>> originalSubstitution = construction.getOptionalNode()
-                    .map(ConstructionNode::getSubstitution);
+                return new ChildDefinitionLift(partiallyPaddedChild, renamingSubstitution.getRangeSet(), liftedDefinition);
+            }
 
-            ImmutableTerm originalDefinition = originalSubstitution
-                    .map(s -> s.apply(variable))
-                    .orElse(variable);
+            protected ImmutableFunctionalTerm mergeDefinitions(Variable idVariable,
+                                                               ImmutableList<ChildDefinitionLift> childDefinitionLifts) {
+                ImmutableList<ImmutableTerm> values = childDefinitionLifts.stream()
+                        .map(ChildDefinitionLift::getLiftedDefinition)
+                        .collect(ImmutableCollectors.toList());
 
-            InjectiveSubstitution<Variable> renamingSubstitution = originalDefinition.getVariableStream()
-                    .filter(v -> v.equals(variable) || (!unionVariables.contains(v)))
-                    .distinct()
-                    .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
+                return termFactory.getDBIntIndex(idVariable, values);
+            }
 
-            boolean isVariableNotDefinedInSubstitution = originalDefinition.equals(variable);
+            protected Optional<DBTermType> extractType(Variable variable, ImmutableList<ChildDefinitionLift> childDefinitionLifts) {
+                return childDefinitionLifts.stream()
+                        .map(ChildDefinitionLift::getPartiallyPaddedChild)
+                        .filter(c -> c.getVariables().contains(variable))
+                        .findAny()
+                        .flatMap(t -> typeExtractor.extractSingleTermType(variable, t))
+                        .filter(t -> t instanceof DBTermType)
+                        .map(t -> (DBTermType) t);
+            }
 
-            ImmutableSet<Variable> projectedVariablesBeforeRenaming = Stream.concat(
-                    Stream.concat(
-                            unionVariables.stream(),
-                            Stream.of(idVariable)),
-                    originalDefinition.getVariableStream())
-                    .filter(v -> isVariableNotDefinedInSubstitution || !v.equals(variable))
-                    .collect(ImmutableCollectors.toSet());
+            protected IQTree padChild(IQTree partiallyPaddedChild, ImmutableMap<Variable, Optional<DBTermType>> newVarTypeMap) {
+                ImmutableSet<Variable> childVariables = partiallyPaddedChild.getVariables();
 
-            Substitution<ImmutableTerm> positionSubstitution =
-                    substitutionFactory.getSubstitution(idVariable, termFactory.getDBIntegerConstant(position));
+                Substitution<ImmutableTerm> paddingSubstitution = newVarTypeMap.entrySet().stream()
+                        .filter(v -> !childVariables.contains(v.getKey()))
+                        .collect(substitutionFactory.toSubstitution(
+                                Map.Entry::getKey,
+                                e -> e.getValue()
+                                        .map(t -> termFactory.getTypedNull(t).simplify())
+                                        .orElseGet(termFactory::getNullConstant)));
 
-            Substitution<ImmutableTerm> substitutionBeforeRenaming = originalSubstitution
-                    .map(s -> substitutionFactory.union(s, positionSubstitution))
-                    .map(s -> s.restrictDomainTo(projectedVariablesBeforeRenaming))
-                    .orElse(positionSubstitution);
-
-            UnaryIQTree childBeforeRenaming = iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(projectedVariablesBeforeRenaming, substitutionBeforeRenaming),
-                    construction.getTail());
-
-            IQTree partiallyPaddedChild = childBeforeRenaming.applyDescendingSubstitution(renamingSubstitution, Optional.empty(), variableGenerator);
-            ImmutableTerm liftedDefinition = renamingSubstitution.applyToTerm(originalDefinition);
-
-            return new ChildDefinitionLift(partiallyPaddedChild, renamingSubstitution.getRangeSet(), liftedDefinition);
-        }
-
-        protected ImmutableFunctionalTerm mergeDefinitions(Variable idVariable,
-                                                           ImmutableList<ChildDefinitionLift> childDefinitionLifts) {
-            ImmutableList<ImmutableTerm> values = childDefinitionLifts.stream()
-                    .map(ChildDefinitionLift::getLiftedDefinition)
-                    .collect(ImmutableCollectors.toList());
-
-            return termFactory.getDBIntIndex(idVariable, values);
-        }
-
-        protected Optional<DBTermType> extractType(Variable variable, ImmutableList<ChildDefinitionLift> childDefinitionLifts) {
-            return childDefinitionLifts.stream()
-                    .map(ChildDefinitionLift::getPartiallyPaddedChild)
-                    .filter(c -> c.getVariables().contains(variable))
-                    .findAny()
-                    .flatMap(t -> typeExtractor.extractSingleTermType(variable, t))
-                    .filter(t -> t instanceof DBTermType)
-                    .map(t -> (DBTermType) t);
-        }
-
-        protected IQTree padChild(IQTree partiallyPaddedChild, ImmutableMap<Variable, Optional<DBTermType>> newVarTypeMap) {
-            ImmutableSet<Variable> childVariables = partiallyPaddedChild.getVariables();
-
-            Substitution<ImmutableTerm> paddingSubstitution = newVarTypeMap.entrySet().stream()
-                    .filter(v -> !childVariables.contains(v.getKey()))
-                    .collect(substitutionFactory.toSubstitution(
-                            Map.Entry::getKey,
-                            e -> e.getValue()
-                                    .map(t -> termFactory.getTypedNull(t).simplify())
-                                    .orElseGet(termFactory::getNullConstant)));
-
-            return iqTreeTools.createConstructionNodeTreeIfNontrivial(partiallyPaddedChild, paddingSubstitution, newVarTypeMap::keySet);
+                return iqTreeTools.createConstructionNodeTreeIfNontrivial(partiallyPaddedChild, paddingSubstitution, newVarTypeMap::keySet);
+            }
         }
     }
 
-    public static class ChildDefinitionLift {
+    private static class ChildDefinitionLift {
         private final IQTree partiallyPaddedChild;
         private final ImmutableSet<Variable> freshlyCreatedVariables;
         private final ImmutableTerm liftedDefinition;
 
-        public ChildDefinitionLift(IQTree partiallyPaddedChild, ImmutableSet<Variable> freshlyCreatedVariables,
+        ChildDefinitionLift(IQTree partiallyPaddedChild, ImmutableSet<Variable> freshlyCreatedVariables,
                                    ImmutableTerm liftedDefinition) {
             this.partiallyPaddedChild = partiallyPaddedChild;
             this.freshlyCreatedVariables = freshlyCreatedVariables;
             this.liftedDefinition = liftedDefinition;
         }
 
-        public ImmutableSet<Variable> getFreshlyCreatedVariables() {
+        ImmutableSet<Variable> getFreshlyCreatedVariables() {
             return freshlyCreatedVariables;
         }
 
-        public IQTree getPartiallyPaddedChild() {
+        IQTree getPartiallyPaddedChild() {
             return partiallyPaddedChild;
         }
 
-        public ImmutableTerm getLiftedDefinition() {
+        ImmutableTerm getLiftedDefinition() {
             return liftedDefinition;
         }
     }

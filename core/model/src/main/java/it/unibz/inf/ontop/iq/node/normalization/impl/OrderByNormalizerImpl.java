@@ -97,13 +97,13 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
 
                 return newOrderByNode.isEmpty()
                         ? newState.done()
-                        : newState.next(newChild);
+                        : newState.continueTo(newChild);
             }
 
             @Override
             public State transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree newChild) {
                 return new State(ancestors.append(node), orderByNode, newChild)
-                        .next(newChild);
+                        .continueTo(newChild);
             }
 
             @Override
@@ -114,7 +114,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
 
             @Override
             public State reduce() {
-                return next(child)
+                return continueTo(child)
                         .normalizeChild();
             }
 
