@@ -21,6 +21,7 @@ import java.util.stream.IntStream;
 public abstract class AbstractOrNullFunctionSymbol extends DBBooleanFunctionSymbolImpl {
 
     private final boolean possibleBoolean;
+    private final DBTermType dbBooleanType;
 
     protected AbstractOrNullFunctionSymbol(@Nonnull String name, int arity, DBTermType dbBooleanTermType,
                                            boolean possibleBoolean) {
@@ -28,6 +29,7 @@ public abstract class AbstractOrNullFunctionSymbol extends DBBooleanFunctionSymb
                 .mapToObj(i -> dbBooleanTermType)
                 .collect(ImmutableCollectors.toList()), dbBooleanTermType);
         this.possibleBoolean = possibleBoolean;
+        this.dbBooleanType = dbBooleanTermType;
         if (arity <= 0)
             throw new IllegalArgumentException("Arity must be >= 1");
     }
@@ -74,9 +76,13 @@ public abstract class AbstractOrNullFunctionSymbol extends DBBooleanFunctionSymb
                 .map(t -> (ImmutableExpression) t)
                 .collect(ImmutableCollectors.toList());
 
-        return remainingExpressions.isEmpty()
-                ? termFactory.getNullConstant()
-                : termFactory.getImmutableExpression(this, remainingExpressions);
+        if (remainingExpressions.isEmpty())
+            return termFactory.getNullConstant();
+
+        int newArity = remainingExpressions.size();
+        return possibleBoolean
+                ? termFactory.getImmutableExpression(new TrueOrNullFunctionSymbolImpl(newArity, dbBooleanType), remainingExpressions)
+                : termFactory.getImmutableExpression(new FalseOrNullFunctionSymbolImpl(newArity, dbBooleanType), remainingExpressions);
     }
 
     @Override
