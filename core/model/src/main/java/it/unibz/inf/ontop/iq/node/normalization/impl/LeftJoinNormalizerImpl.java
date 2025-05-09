@@ -442,9 +442,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     return Optional.empty();
                 }
             }
-
-
-
+            
             @Override
             public boolean equals(Object o) {
                 if (this == o) return true;
@@ -569,39 +567,6 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         }
 
 
-
-        private ImmutableTerm transformRightSubstitutionValue(ImmutableTerm value,
-                                                              ImmutableSet<Variable> leftVariables,
-                                                              Optional<Variable> defaultRightProvenanceVariable) {
-            if (isNullWhenRightIsRejected(value, leftVariables))
-                return value;
-
-            Variable provenanceVariable = Optional.of(value)
-                    .filter(t -> t instanceof ImmutableFunctionalTerm)
-                    .map(t -> (ImmutableFunctionalTerm) t)
-                    .flatMap(f -> f.proposeProvenanceVariables()
-                            .filter(v -> !leftVariables.contains(v))
-                            .findAny())
-                    .or(() -> defaultRightProvenanceVariable)
-                    .orElseThrow(() -> new MinorOntopInternalBugException("A default provenance variable was needed"));
-
-            return termFactory.getIfElseNull(termFactory.getDBIsNotNull(provenanceVariable), value);
-        }
-
-
-        private UnaryIQTree createSubTreeWithProvenance(Variable provenanceVariable, IQTree tree,
-                                                   Set<Variable> treeVariablesToProject) {
-
-            var projectedVariables = Sets.union(ImmutableSet.of(provenanceVariable), treeVariablesToProject).immutableCopy();
-
-            var constructionNode = iqFactory.createConstructionNode(
-                    projectedVariables,
-                    substitutionFactory.getSubstitution(provenanceVariable, specialProvenanceConstant));
-
-            return iqFactory.createUnaryIQTree(constructionNode, tree);
-        }
-
-
         private class OptionalRightProvenance {
             private final IQTree rightTree;
             private final Substitution<? extends ImmutableTerm> selectedSubstitution;
@@ -679,6 +644,36 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         .build();
             }
         }
+    }
+
+    private UnaryIQTree createSubTreeWithProvenance(Variable provenanceVariable, IQTree tree,
+                                                    Set<Variable> treeVariablesToProject) {
+
+        var projectedVariables = Sets.union(ImmutableSet.of(provenanceVariable), treeVariablesToProject).immutableCopy();
+
+        var constructionNode = iqFactory.createConstructionNode(
+                projectedVariables,
+                substitutionFactory.getSubstitution(provenanceVariable, specialProvenanceConstant));
+
+        return iqFactory.createUnaryIQTree(constructionNode, tree);
+    }
+
+    private ImmutableTerm transformRightSubstitutionValue(ImmutableTerm value,
+                                                          ImmutableSet<Variable> leftVariables,
+                                                          Optional<Variable> defaultRightProvenanceVariable) {
+        if (isNullWhenRightIsRejected(value, leftVariables))
+            return value;
+
+        Variable provenanceVariable = Optional.of(value)
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t)
+                .flatMap(f -> f.proposeProvenanceVariables()
+                        .filter(v -> !leftVariables.contains(v))
+                        .findAny())
+                .or(() -> defaultRightProvenanceVariable)
+                .orElseThrow(() -> new MinorOntopInternalBugException("A default provenance variable was needed"));
+
+        return termFactory.getIfElseNull(termFactory.getDBIsNotNull(provenanceVariable), value);
     }
 
 
