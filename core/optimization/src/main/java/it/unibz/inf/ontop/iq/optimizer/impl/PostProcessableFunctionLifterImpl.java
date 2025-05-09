@@ -106,12 +106,19 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             }
 
             return NormalizationState.reachFixedPoint(
-                            new LiftState(children, rootNode.getVariables(), UnaryOperatorSequence.of(), Optional.empty()),
+                            new LiftState(
+                                    UnaryOperatorSequence.of(),
+                                    rootNode.getVariables(),
+                                    children,
+                                     Optional.empty()),
                             LOOPING_BOUND)
                     .asIQTree()
                     .normalizeForOptimization(variableGenerator);
         }
 
+        /**
+         * A sequence of ConstructionNodes, followed by a UnionNode
+         */
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         private class LiftState implements NormalizationState<LiftState> {
@@ -121,11 +128,11 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
             private final Optional<Variable> childIdVariable;
 
-            LiftState(ImmutableList<IQTree> children, ImmutableSet<Variable> unionVariables,
-                      UnaryOperatorSequence<ConstructionNode> ancestors, Optional<Variable> childIdVariable) {
-                this.children = children;
-                this.unionVariables = unionVariables;
+            LiftState(UnaryOperatorSequence<ConstructionNode> ancestors, ImmutableSet<Variable> unionVariables, ImmutableList<IQTree> children,
+                      Optional<Variable> childIdVariable) {
                 this.ancestors = ancestors;
+                this.unionVariables = unionVariables;
+                this.children = children;
                 this.childIdVariable = childIdVariable;
             }
 
@@ -204,7 +211,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                 ConstructionNode newConstructionNode = iqFactory.createConstructionNode(unionVariables,
                         substitutionFactory.getSubstitution(variable, newDefinition));
 
-                return new LiftState(newChildren, newUnionVariables, ancestors.append(newConstructionNode), Optional.of(idVariable));
+                return new LiftState(ancestors.append(newConstructionNode), newUnionVariables, newChildren, Optional.of(idVariable));
             }
 
             private ChildDefinitionLift liftDefinition(IQTree childTree, int position, Variable variable,

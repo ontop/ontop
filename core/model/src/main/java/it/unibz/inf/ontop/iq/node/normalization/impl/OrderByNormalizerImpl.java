@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.OrderByNormalizer;
-import it.unibz.inf.ontop.iq.visit.NormalizationProcedure;
 import it.unibz.inf.ontop.iq.visit.impl.StateIQVisitor;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -25,6 +24,8 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
     private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
 
+    private static final int MAX_NORMALIZATION_ITERATIONS = 10000;
+
     @Inject
     private OrderByNormalizerImpl(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
@@ -38,11 +39,11 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
     public IQTree normalizeForOptimization(OrderByNode orderByNode, IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
 
         Optional<OrderByNode> simplifiedOrderByNode = simplifyOrderByNode(orderByNode, child.getVariableNullability());
-        if (!simplifiedOrderByNode.isPresent())
+        if (simplifiedOrderByNode.isEmpty())
             return child.normalizeForOptimization(variableGenerator);
 
-        OrderByNormalizationProcedure normalizationProcedure = new OrderByNormalizationProcedure(variableGenerator, simplifiedOrderByNode.get(), child, treeCache);
-        return normalizationProcedure.normalize();
+        Context context = new Context(simplifiedOrderByNode.get(), child, variableGenerator, treeCache);
+        return context.normalize();
     }
 
     private Optional<OrderByNode> simplifyOrderByNode(OrderByNode orderByNode, VariableNullability variableNullability) {
@@ -59,26 +60,35 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
                 .map(iqFactory::createOrderByNode);
     }
 
-    protected class OrderByNormalizationProcedure implements NormalizationProcedure<OrderByNormalizationProcedure.State> {
-        private final VariableGenerator variableGenerator;
+    protected class Context {
         private final OrderByNode orderByNode;
         private final IQTree child;
+        private final VariableGenerator variableGenerator;
         private final IQTreeCache treeCache;
 
-        protected OrderByNormalizationProcedure(VariableGenerator variableGenerator, OrderByNode orderByNode, IQTree child, IQTreeCache treeCache) {
-            this.variableGenerator = variableGenerator;
+        protected Context(OrderByNode orderByNode, IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
             this.orderByNode = orderByNode;
             this.child = child;
+            this.variableGenerator = variableGenerator;
             this.treeCache = treeCache;
         }
 
-        @Override
-        public State getInitialState() {
-            return new State(UnaryOperatorSequence.of(), Optional.of(orderByNode), child);
+        IQTree normalize() {
+            return StateIQVisitor.reachFixedPoint(
+                            new State(
+                                    UnaryOperatorSequence.of(),
+                                    Optional.of(orderByNode),
+                                    child),
+                            MAX_NORMALIZATION_ITERATIONS)
+                    .toIQTree();
         }
 
+        /**
+         * A sequence of ConstructionNode and DistinctNode,
+         * followed by an optional OrderByNode, followed by a child tree.
+         */
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         protected class State extends StateIQVisitor<State> {
-            // ConstructionNode and DistinctNode only
             private final UnaryOperatorSequence<UnaryOperatorNode> ancestors;
             private final Optional<OrderByNode> orderByNode;
             private final IQTree child;

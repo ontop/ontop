@@ -8,15 +8,15 @@ public interface NormalizationState<T extends NormalizationState<T>> {
 
     Optional<T> next();
 
-    static <T extends NormalizationState<T>> T reachFixedPoint(T initial, int numberOfIterations) {
+    static <T extends NormalizationState<T>> T reachFixedPoint(T initial, int maxNumberOfIterations) {
         //Non-final
         T state = initial;
-        for (int i = 0; i < numberOfIterations; i++) {
+        for (int i = 0; i < maxNumberOfIterations; i++) {
             Optional<T> newState = state.next();
-            if (newState.isEmpty() || newState.get().equals(state))
+            if (newState.isEmpty())
                 return state;
             state = newState.get();
         }
-        throw new MinorOntopInternalBugException(String.format("Has not converged in %d iterations", numberOfIterations));
+        throw new MinorOntopInternalBugException(String.format("Has not converged in %d iterations", maxNumberOfIterations));
     }
 }

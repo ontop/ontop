@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.FilterNormalizer;
-import it.unibz.inf.ontop.iq.visit.NormalizationProcedure;
 import it.unibz.inf.ontop.iq.visit.impl.StateIQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -35,6 +34,8 @@ public class FilterNormalizerImpl implements FilterNormalizer {
     private final ConditionSimplifier conditionSimplifier;
     private final IQTreeTools iqTreeTools;
 
+    private static final int MAX_NORMALIZATION_ITERATIONS = 10000;
+
     @Inject
     private FilterNormalizerImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory,
                                  ConditionSimplifier conditionSimplifier, IQTreeTools iqTreeTools) {
@@ -50,40 +51,46 @@ public class FilterNormalizerImpl implements FilterNormalizer {
      */
     @Override
     public IQTree normalizeForOptimization(FilterNode initialFilterNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        FilterNormalizationProcedure normalizationProcedure = new FilterNormalizationProcedure(initialFilterNode, initialChild, variableGenerator, treeCache);
-        return normalizationProcedure.normalize();
+        Context context = new Context(initialFilterNode, initialChild, variableGenerator, treeCache);
+        return context.normalize();
     }
 
-    protected class FilterNormalizationProcedure implements NormalizationProcedure<FilterNormalizationProcedure.State> {
+    protected class Context {
 
         private final FilterNode initialFilterNode;
         private final IQTree initialChild;
-        private final ImmutableSet<Variable> projectedVariables;
         private final VariableGenerator variableGenerator;
         private final IQTreeCache treeCache;
 
-        protected FilterNormalizationProcedure(FilterNode initialFilterNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        private final ImmutableSet<Variable> projectedVariables;
+
+        protected Context(FilterNode initialFilterNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
             this.initialFilterNode = initialFilterNode;
             this.initialChild = initialChild;
-            this.projectedVariables = initialChild.getVariables();
             this.variableGenerator = variableGenerator;
             this.treeCache = treeCache;
+            this.projectedVariables = initialChild.getVariables();
         }
 
-        public State getInitialState() {
-            return new State(
-                        UnaryOperatorSequence.of(),
-                        Optional.of(initialFilterNode.getFilterCondition()),
-                        initialChild)
-                    .normalizeChild();
+        IQTree normalize() {
+            return StateIQVisitor.reachFixedPoint(
+                            new State(
+                                    UnaryOperatorSequence.of(),
+                                    Optional.of(initialFilterNode.getFilterCondition()),
+                                    initialChild)
+                                    .normalizeChild(),
+                            MAX_NORMALIZATION_ITERATIONS)
+                    .toIQTree();
         }
 
+        /**
+         * A sequence of ConstructionNode and DistinctNode,
+         * followed by an optional FilterNode, followed by a child tree.
+         */
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         protected class State extends StateIQVisitor<State> {
-            // Composed of ConstructionNode and DistinctNode only
             private final UnaryOperatorSequence<UnaryOperatorNode> ancestors;
-            // FilterNode above the child
             private final Optional<ImmutableExpression> condition;
             private final IQTree child;
 

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.visit.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
@@ -16,6 +17,20 @@ public abstract class StateIQVisitor<T extends IQVisitor<T> & NormalizationState
     protected final T continueTo(IQTree next) {
         return next.acceptVisitor(this);
     }
+
+    public static <T extends StateIQVisitor<T>> T reachFixedPoint(T initialState, int maxNumberOfIterations) {
+        //Non-final
+        T state = initialState;
+        for (int i = 0; i < maxNumberOfIterations; i++) {
+            T newState = state.reduce();
+            if (newState.equals(state))
+                return newState;
+            state = newState;
+        }
+        throw new MinorOntopInternalBugException("Bug: NormalizationProcedure did not converge after "
+                + maxNumberOfIterations + " iterations");
+    }
+
 
     public abstract T reduce();
 
