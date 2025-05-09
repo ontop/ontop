@@ -76,7 +76,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             return StateIQVisitor.reachFixedPoint(
                             new State(
                                     UnaryOperatorSequence.of(),
-                                    Optional.of(initialFilterNode.getFilterCondition()),
+                                    Optional.of(initialFilterNode),
                                     initialChild)
                                     .normalizeChild(),
                             MAX_NORMALIZATION_ITERATIONS)
@@ -91,45 +91,49 @@ public class FilterNormalizerImpl implements FilterNormalizer {
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         protected class State extends StateIQVisitor<State> {
             private final UnaryOperatorSequence<UnaryOperatorNode> ancestors;
-            private final Optional<ImmutableExpression> condition;
+            private final Optional<FilterNode> optionalFilterNode;
             private final IQTree child;
 
             protected State(UnaryOperatorSequence<UnaryOperatorNode> ancestors,
-                            Optional<ImmutableExpression> condition,
+                            Optional<FilterNode> optionalFilterNode,
                             IQTree child) {
                 this.ancestors = ancestors;
-                this.condition = condition;
+                this.optionalFilterNode = optionalFilterNode;
                 this.child = child;
             }
 
             @Override
             public State transformConstruction(UnaryIQTree tree, ConstructionNode node, IQTree newChild) {
-                var optionalCondition = condition
-                        .map(e -> node.getSubstitution().apply(e));
-                return new State(ancestors.append(node), optionalCondition, newChild)
+                var newOptionalFilterNode = optionalFilterNode
+                        .map(FilterNode::getFilterCondition)
+                        .map(e -> node.getSubstitution().apply(e))
+                        .map(iqFactory::createFilterNode);
+                return new State(ancestors.append(node), newOptionalFilterNode, newChild)
                         .continueTo(newChild);
             }
 
             @Override
             public State transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree newChild) {
-                return new State(ancestors.append(node), condition, newChild)
+                return new State(ancestors.append(node), optionalFilterNode, newChild)
                         .continueTo(newChild);
             }
 
             @Override
             public State transformFilter(UnaryIQTree tree, FilterNode node, IQTree newChild) {
-                var optionalCondition = condition
-                        .map(c -> termFactory.getConjunction(c, node.getFilterCondition()));
-                return new State(ancestors, optionalCondition, newChild)
+                var newFilterNode = iqFactory.createFilterNode(
+                        iqTreeTools.getConjunction(
+                                optionalFilterNode.map(FilterNode::getFilterCondition),
+                                node.getFilterCondition()));
+                return new State(ancestors, Optional.of(newFilterNode), newChild)
                         .continueTo(newChild);
             }
 
             @Override
             public State transformInnerJoin(NaryIQTree tree, InnerJoinNode node, ImmutableList<IQTree> children) {
-                if (condition.isPresent()) {
-                    ImmutableExpression newJoiningCondition = node.getOptionalFilterCondition()
-                            .map(c -> termFactory.getConjunction(condition.get(), c))
-                            .orElse(condition.get());
+                if (optionalFilterNode.isPresent()) {
+                    var newJoiningCondition = iqTreeTools.getConjunction(
+                            optionalFilterNode.get().getFilterCondition(),
+                            node.getOptionalFilterCondition());
 
                     IQTree newChild = iqFactory.createNaryIQTree(
                             iqFactory.createInnerJoinNode(newJoiningCondition),
@@ -158,8 +162,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 if (child.isDeclaredAsEmpty())
                     return iqFactory.createEmptyNode(projectedVariables);
 
-                IQTree filterLevelTree = condition
-                        .map(iqFactory::createFilterNode)
+                IQTree filterLevelTree = optionalFilterNode
                         .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, child, treeCache.declareAsNormalizedForOptimizationWithEffect()))
                         .orElse(child);
 
@@ -179,11 +182,11 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             }
 
             private State normalizeChild() {
-                return new State(ancestors, condition, child.normalizeForOptimization(variableGenerator));
+                return new State(ancestors, optionalFilterNode, child.normalizeForOptimization(variableGenerator));
             }
 
             private State simplifyAndPropagateDownConstraint() {
-                if (condition.isEmpty())
+                if (optionalFilterNode.isEmpty())
                     return this;
 
                 try {
@@ -191,28 +194,30 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
                     // TODO: also consider the constraint for simplifying the condition
                     ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
-                            condition.get(), ImmutableList.of(child), childVariableNullability);
+                            optionalFilterNode.get().getFilterCondition(), ImmutableList.of(child), childVariableNullability);
 
                     Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.empty(),
                             conditionSimplificationResults, childVariableNullability);
 
-                    IQTree newChild = Optional.of(conditionSimplificationResults.getSubstitution())
-                            .filter(s -> !s.isEmpty())
-                            .map(s -> child.applyDescendingSubstitution(s, downConstraint, variableGenerator))
-                            .orElseGet(() -> downConstraint
-                                    .map(c -> child.propagateDownConstraint(c, variableGenerator))
-                                    .orElse(child));
+                    var optionalNonEmptySubstitution = Optional.of(conditionSimplificationResults.getSubstitution())
+                            .filter(s -> !s.isEmpty());
 
-                    Optional<ConstructionNode> parentConstructionNode = Optional.of(conditionSimplificationResults.getSubstitution())
-                            .filter(s -> !s.isEmpty())
+                    IQTree newChild = optionalNonEmptySubstitution
+                            .map(s -> child.applyDescendingSubstitution(s, downConstraint, variableGenerator))
+                            .or(() -> downConstraint
+                                    .map(c -> child.propagateDownConstraint(c, variableGenerator)))
+                            .orElse(child);
+
+                    var parentConstructionNode = optionalNonEmptySubstitution
                             .map(s -> iqFactory.createConstructionNode(child.getVariables(), s));
 
-                    Optional<ImmutableExpression> newCondition = conditionSimplificationResults.getOptionalExpression();
-                    return new State(ancestors.append(parentConstructionNode), newCondition, newChild);
+                    var newOptionalFilterNode = conditionSimplificationResults.getOptionalExpression()
+                            .map(iqFactory::createFilterNode);
+
+                    return new State(ancestors.append(parentConstructionNode), newOptionalFilterNode, newChild);
                 }
                 catch (UnsatisfiableConditionException e) {
-                    return new State(UnaryOperatorSequence.of(), Optional.empty(),
-                            iqFactory.createEmptyNode(projectedVariables));
+                    return new State(UnaryOperatorSequence.of(), Optional.empty(), iqFactory.createEmptyNode(projectedVariables));
                 }
             }
         }
