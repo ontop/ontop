@@ -90,7 +90,6 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             protected State(UnaryOperatorSequence<UnaryOperatorNode> ancestors,
                             Optional<ImmutableExpression> condition,
                             IQTree child) {
-                super(() -> child);
                 this.ancestors = ancestors;
                 this.condition = condition;
                 this.child = child;
@@ -101,13 +100,13 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 var optionalCondition = condition
                         .map(e -> node.getSubstitution().apply(e));
                 return new State(ancestors.append(node), optionalCondition, newChild)
-                        .next();
+                        .next(newChild);
             }
 
             @Override
             public State transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree newChild) {
                 return new State(ancestors.append(node), condition, newChild)
-                        .next();
+                        .next(newChild);
             }
 
             @Override
@@ -115,7 +114,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 var optionalCondition = condition
                         .map(c -> termFactory.getConjunction(c, node.getFilterCondition()));
                 return new State(ancestors, optionalCondition, newChild)
-                        .next();
+                        .next(newChild);
             }
 
             @Override
@@ -129,9 +128,9 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                             iqFactory.createInnerJoinNode(newJoiningCondition),
                             children);
                     return new State(ancestors, Optional.empty(), newChild)
-                            .stop();
+                            .done();
                 }
-                return stop();
+                return done();
             }
 
             @Override
@@ -166,8 +165,10 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             }
 
             @Override
-            public State simplify() {
-                return normalizeChild().simplifyAndPropagateDownConstraint();
+            public State reduce() {
+                return next(child)
+                        .normalizeChild()
+                        .simplifyAndPropagateDownConstraint();
             }
 
             private State normalizeChild() {

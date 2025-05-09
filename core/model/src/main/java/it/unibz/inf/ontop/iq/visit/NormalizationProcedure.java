@@ -11,9 +11,7 @@ public interface NormalizationProcedure<T extends StateIQVisitor<T>> {
         StateIQVisitor<T> state = getInitialState();
 
         for (int i = 0; i < MAX_NORMALIZATION_ITERATIONS; i++) {
-            StateIQVisitor<T> stateBeforeSimplification = state.next();
-
-            StateIQVisitor<T> newState = stateBeforeSimplification.simplify();
+            StateIQVisitor<T> newState = state.reduce();
 
             if (newState.equals(state))
                 return newState.toIQTree();

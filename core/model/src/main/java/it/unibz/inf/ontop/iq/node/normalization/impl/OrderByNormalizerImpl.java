@@ -84,7 +84,6 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
             private final IQTree child;
 
             private State(UnaryOperatorSequence<UnaryOperatorNode> ancestors, Optional<OrderByNode> orderByNode, IQTree child) {
-                super(() -> child);
                 this.ancestors = ancestors;
                 this.orderByNode = orderByNode;
                 this.child = child;
@@ -97,24 +96,29 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
                 State newState = new State(ancestors.append(node), newOrderByNode, newChild);
 
                 return newOrderByNode.isEmpty()
-                        ? newState.stop()
-                        : newState.next();
+                        ? newState.done()
+                        : newState.next(newChild);
             }
 
             @Override
             public State transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree newChild) {
                 return new State(ancestors.append(node), orderByNode, newChild)
-                        .next();
+                        .next(newChild);
             }
 
             @Override
             public State transformEmpty(EmptyNode tree) {
                 return new State(ancestors, Optional.empty(), child)
-                        .stop();
+                        .done();
             }
 
             @Override
-            public State simplify() {
+            public State reduce() {
+                return next(child)
+                        .normalizeChild();
+            }
+
+            private State normalizeChild() {
                 return new State(ancestors, orderByNode, child.normalizeForOptimization(variableGenerator));
             }
 
