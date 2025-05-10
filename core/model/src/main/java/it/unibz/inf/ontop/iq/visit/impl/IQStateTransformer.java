@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 
 import java.util.function.Supplier;
 
+
 public abstract class IQStateTransformer<T> implements IQVisitor<T> {
     private final Supplier<T> doneSupplier;
 
