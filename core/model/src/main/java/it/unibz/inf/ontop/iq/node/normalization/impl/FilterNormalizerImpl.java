@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
@@ -15,7 +16,7 @@ import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.FilterNormalizer;
-import it.unibz.inf.ontop.iq.visit.impl.StateIQVisitor;
+import it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -30,17 +31,15 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 public class FilterNormalizerImpl implements FilterNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final TermFactory termFactory;
     private final ConditionSimplifier conditionSimplifier;
     private final IQTreeTools iqTreeTools;
 
     private static final int MAX_NORMALIZATION_ITERATIONS = 10000;
 
     @Inject
-    private FilterNormalizerImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory,
+    private FilterNormalizerImpl(IntermediateQueryFactory iqFactory,
                                  ConditionSimplifier conditionSimplifier, IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
-        this.termFactory = termFactory;
         this.conditionSimplifier = conditionSimplifier;
         this.iqTreeTools = iqTreeTools;
     }
@@ -73,14 +72,20 @@ public class FilterNormalizerImpl implements FilterNormalizer {
         }
 
         IQTree normalize() {
-            return StateIQVisitor.reachFixedPoint(
-                            new State(
-                                    UnaryOperatorSequence.of(),
-                                    Optional.of(initialFilterNode),
-                                    initialChild)
-                                    .normalizeChild(),
-                            MAX_NORMALIZATION_ITERATIONS)
-                    .toIQTree();
+            State state = new State(
+                    UnaryOperatorSequence.of(),
+                    Optional.of(initialFilterNode),
+                    initialChild)
+                    .normalizeChild();
+            for(int i = 0; i < MAX_NORMALIZATION_ITERATIONS; i++) {
+                State next = IQStateOptionalTransformer.reachMonotoneFixedPoint(state)
+                        .simplifyAndPropagateDownConstraint()
+                        .normalizeChild();
+                if (next.equals(state))
+                    return next.toIQTree();
+                state = next;
+            }
+            throw new MinorOntopInternalBugException("No normalization possible");
         }
 
         /**
@@ -89,7 +94,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
          */
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        protected class State extends StateIQVisitor<State> {
+        protected class State extends IQStateOptionalTransformer<State> {
             private final UnaryOperatorSequence<UnaryOperatorNode> ancestors;
             private final Optional<FilterNode> optionalFilterNode;
             private final IQTree child;
@@ -101,35 +106,33 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 this.optionalFilterNode = optionalFilterNode;
                 this.child = child;
             }
+            
 
             @Override
-            public State transformConstruction(UnaryIQTree tree, ConstructionNode node, IQTree newChild) {
+            public Optional<State> transformConstruction(UnaryIQTree tree, ConstructionNode node, IQTree newChild) {
                 var newOptionalFilterNode = optionalFilterNode
                         .map(FilterNode::getFilterCondition)
                         .map(e -> node.getSubstitution().apply(e))
                         .map(iqFactory::createFilterNode);
-                return new State(ancestors.append(node), newOptionalFilterNode, newChild)
-                        .continueTo(newChild);
+                return Optional.of(new State(ancestors.append(node), newOptionalFilterNode, newChild));
             }
 
             @Override
-            public State transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree newChild) {
-                return new State(ancestors.append(node), optionalFilterNode, newChild)
-                        .continueTo(newChild);
+            public Optional<State> transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree newChild) {
+                return Optional.of(new State(ancestors.append(node), optionalFilterNode, newChild));
             }
 
             @Override
-            public State transformFilter(UnaryIQTree tree, FilterNode node, IQTree newChild) {
+            public Optional<State> transformFilter(UnaryIQTree tree, FilterNode node, IQTree newChild) {
                 var newFilterNode = iqFactory.createFilterNode(
                         iqTreeTools.getConjunction(
                                 optionalFilterNode.map(FilterNode::getFilterCondition),
                                 node.getFilterCondition()));
-                return new State(ancestors, Optional.of(newFilterNode), newChild)
-                        .continueTo(newChild);
+                return Optional.of(new State(ancestors, Optional.of(newFilterNode), newChild));
             }
 
             @Override
-            public State transformInnerJoin(NaryIQTree tree, InnerJoinNode node, ImmutableList<IQTree> children) {
+            public Optional<State> transformInnerJoin(NaryIQTree tree, InnerJoinNode node, ImmutableList<IQTree> children) {
                 if (optionalFilterNode.isPresent()) {
                     var newJoiningCondition = iqTreeTools.getConjunction(
                             optionalFilterNode.get().getFilterCondition(),
@@ -138,8 +141,8 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                     IQTree newChild = iqFactory.createNaryIQTree(
                             iqFactory.createInnerJoinNode(newJoiningCondition),
                             children);
-                    return new State(ancestors, Optional.empty(), newChild)
-                            .done();
+                    // will be final on the next call to reduce() as the filter will be empty then
+                    return Optional.of(new State(ancestors, Optional.empty(), newChild));
                 }
                 return done();
             }
@@ -156,7 +159,6 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             /**
              * Returns a tree in which the "filter-level" sub-tree is declared as normalized.
              */
-            @Override
             public IQTree toIQTree() {
 
                 if (child.isDeclaredAsEmpty())
@@ -175,10 +177,8 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             }
 
             @Override
-            public State reduce() {
-                return continueTo(child)
-                        .normalizeChild()
-                        .simplifyAndPropagateDownConstraint();
+            public Optional<State> next() {
+                return child.acceptVisitor(this);
             }
 
             private State normalizeChild() {
