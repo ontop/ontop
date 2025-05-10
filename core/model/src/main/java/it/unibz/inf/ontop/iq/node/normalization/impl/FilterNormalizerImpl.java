@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAn
 import it.unibz.inf.ontop.iq.node.normalization.FilterNormalizer;
 import it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -78,7 +77,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                     initialChild)
                     .normalizeChild();
             for(int i = 0; i < MAX_NORMALIZATION_ITERATIONS; i++) {
-                State next = IQStateOptionalTransformer.reachMonotoneFixedPoint(state)
+                State next = IQStateOptionalTransformer.reachMonotoneFixedPoint(state, State::liftThroughFilter)
                         .simplifyAndPropagateDownConstraint()
                         .normalizeChild();
                 if (next.equals(state))
@@ -94,7 +93,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
          */
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        protected class State extends IQStateOptionalTransformer<State> {
+        protected class State {
             private final UnaryOperatorSequence<UnaryOperatorNode> ancestors;
             private final Optional<FilterNode> optionalFilterNode;
             private final IQTree child;
@@ -106,46 +105,59 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 this.optionalFilterNode = optionalFilterNode;
                 this.child = child;
             }
-            
 
-            @Override
-            public Optional<State> transformConstruction(UnaryIQTree tree, ConstructionNode node, IQTree newChild) {
-                var newOptionalFilterNode = optionalFilterNode
-                        .map(FilterNode::getFilterCondition)
-                        .map(e -> node.getSubstitution().apply(e))
-                        .map(iqFactory::createFilterNode);
-                return Optional.of(new State(ancestors.append(node), newOptionalFilterNode, newChild));
+            private Optional<State> lift(UnaryOperatorNode patent, Optional<FilterNode> optionalFilterNode, IQTree child) {
+                return Optional.of(new State(ancestors.append(patent), optionalFilterNode, child));
             }
 
-            @Override
-            public Optional<State> transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree newChild) {
-                return Optional.of(new State(ancestors.append(node), optionalFilterNode, newChild));
+            private Optional<State> lift(Optional<FilterNode> optionalFilterNode, IQTree child) {
+                return Optional.of(new State(ancestors, optionalFilterNode, child));
             }
 
-            @Override
-            public Optional<State> transformFilter(UnaryIQTree tree, FilterNode node, IQTree newChild) {
-                var newFilterNode = iqFactory.createFilterNode(
-                        iqTreeTools.getConjunction(
-                                optionalFilterNode.map(FilterNode::getFilterCondition),
-                                node.getFilterCondition()));
-                return Optional.of(new State(ancestors, Optional.of(newFilterNode), newChild));
+            protected Optional<State> liftThroughFilter() {
+                return child.acceptVisitor(new IQStateOptionalTransformer<>() {
+
+                    @Override
+                    public Optional<State> transformConstruction(UnaryIQTree tree, ConstructionNode node, IQTree  newChild) {
+                        var newOptionalFilterNode = optionalFilterNode
+                                .map(FilterNode::getFilterCondition)
+                                .map(e -> node.getSubstitution().apply(e))
+                                .map(iqFactory::createFilterNode);
+                        return lift(node, newOptionalFilterNode, newChild);
+                    }
+
+                    @Override
+                    public Optional<State> transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree newChild) {
+                        return lift(node, optionalFilterNode, newChild);
+                    }
+
+                    @Override
+                    public Optional<State> transformFilter(UnaryIQTree tree, FilterNode node, IQTree newChild) {
+                        var newFilterNode = iqFactory.createFilterNode(
+                                iqTreeTools.getConjunction(
+                                        optionalFilterNode.map(FilterNode::getFilterCondition),
+                                        node.getFilterCondition()));
+                        return lift(Optional.of(newFilterNode), newChild);
+                    }
+
+                    @Override
+                    public Optional<State> transformInnerJoin(NaryIQTree tree, InnerJoinNode node, ImmutableList <IQTree> children) {
+                        if (optionalFilterNode.isPresent()) {
+                            var newJoiningCondition = iqTreeTools.getConjunction(
+                                    optionalFilterNode.get().getFilterCondition(),
+                                    node.getOptionalFilterCondition());
+
+                            IQTree newChild = iqFactory.createNaryIQTree(
+                                    iqFactory.createInnerJoinNode(newJoiningCondition),
+                                    children);
+                            // will be final on the next call to reduce() as the filter will be empty then
+                            return lift(Optional.empty(), newChild);
+                        }
+                        return done();
+                    }
+                });
             }
 
-            @Override
-            public Optional<State> transformInnerJoin(NaryIQTree tree, InnerJoinNode node, ImmutableList<IQTree> children) {
-                if (optionalFilterNode.isPresent()) {
-                    var newJoiningCondition = iqTreeTools.getConjunction(
-                            optionalFilterNode.get().getFilterCondition(),
-                            node.getOptionalFilterCondition());
-
-                    IQTree newChild = iqFactory.createNaryIQTree(
-                            iqFactory.createInnerJoinNode(newJoiningCondition),
-                            children);
-                    // will be final on the next call to reduce() as the filter will be empty then
-                    return Optional.of(new State(ancestors, Optional.empty(), newChild));
-                }
-                return done();
-            }
 
             @Override
             public boolean equals(Object o) {
@@ -174,11 +186,6 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 return iqTreeTools.createAncestorsUnaryIQTree(ancestors, filterLevelTree)
                         // Normalizes the ancestors (recursive)
                         .normalizeForOptimization(variableGenerator);
-            }
-
-            @Override
-            public Optional<State> next() {
-                return child.acceptVisitor(this);
             }
 
             private State normalizeChild() {

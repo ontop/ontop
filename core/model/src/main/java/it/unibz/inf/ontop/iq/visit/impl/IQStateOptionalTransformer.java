@@ -1,18 +1,18 @@
 package it.unibz.inf.ontop.iq.visit.impl;
 
 import java.util.Optional;
+import java.util.function.Function;
 
-public abstract class IQStateOptionalTransformer<T extends IQStateOptionalTransformer<T>> extends IQStateTransformer<Optional<T>> {
+public abstract class IQStateOptionalTransformer<T> extends IQStateTransformer<Optional<T>> {
+
     protected IQStateOptionalTransformer() {
         super(Optional::empty);
     }
 
-    protected abstract Optional<T> next();
-
-    public static <T extends IQStateOptionalTransformer<T>> T reachMonotoneFixedPoint(T initial) {
+    public static <T> T reachMonotoneFixedPoint(T initial, Function<T, ? extends Optional<T>> transformer) {
         T state = initial;
         while (true) {
-            Optional<T> next = state.next();
+            Optional<T> next = transformer.apply(state);
             if (next.isEmpty())
                 return state;
             state = next.get();
