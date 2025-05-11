@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
@@ -24,6 +23,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
+import static it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer.*;
 
 
 @Singleton
@@ -71,20 +71,14 @@ public class FilterNormalizerImpl implements FilterNormalizer {
         }
 
         IQTree normalize() {
-            State state = new State(
-                    UnaryOperatorSequence.of(),
-                    Optional.of(initialFilterNode),
-                    initialChild)
-                    .normalizeChild();
-            for(int i = 0; i < MAX_NORMALIZATION_ITERATIONS; i++) {
-                State next = IQStateOptionalTransformer.reachMonotoneFixedPoint(state, State::liftThroughFilter)
-                        .simplifyAndPropagateDownConstraint()
-                        .normalizeChild();
-                if (next.equals(state))
-                    return next.toIQTree();
-                state = next;
-            }
-            throw new MinorOntopInternalBugException("No normalization possible");
+            State state = reachFixedPoint(
+                    new State(UnaryOperatorSequence.of(), Optional.of(initialFilterNode), initialChild)
+                            .normalizeChild(),
+                    s -> reachMonotoneFixedPoint(s, State::liftThroughFilter)
+                            .simplifyAndPropagateDownConstraint()
+                            .normalizeChild(),
+                    MAX_NORMALIZATION_ITERATIONS);
+            return state.toIQTree();
         }
 
         /**
@@ -106,8 +100,8 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 this.child = child;
             }
 
-            private Optional<State> lift(UnaryOperatorNode patent, Optional<FilterNode> optionalFilterNode, IQTree child) {
-                return Optional.of(new State(ancestors.append(patent), optionalFilterNode, child));
+            private Optional<State> lift(UnaryOperatorNode parent, Optional<FilterNode> optionalFilterNode, IQTree child) {
+                return Optional.of(new State(ancestors.append(parent), optionalFilterNode, child));
             }
 
             private Optional<State> lift(Optional<FilterNode> optionalFilterNode, IQTree child) {
@@ -150,7 +144,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                             IQTree newChild = iqFactory.createNaryIQTree(
                                     iqFactory.createInnerJoinNode(newJoiningCondition),
                                     children);
-                            // will be final on the next call to reduce() as the filter will be empty then
+                            // will be final on the next call as the filter will be empty then
                             return lift(Optional.empty(), newChild);
                         }
                         return done();
@@ -158,12 +152,13 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 });
             }
 
-
             @Override
             public boolean equals(Object o) {
                 if (o instanceof State) {
                     State other = (State) o;
-                    return child.equals(other.child);
+                    return ancestors.equals(other.ancestors)
+                            && optionalFilterNode.equals(other.optionalFilterNode)
+                            && child.equals(other.child);
                 }
                 return false;
             }
@@ -215,13 +210,13 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                                     .map(c -> child.propagateDownConstraint(c, variableGenerator)))
                             .orElse(child);
 
-                    var parentConstructionNode = optionalNonEmptySubstitution
+                    var newOptionalParent = optionalNonEmptySubstitution
                             .map(s -> iqFactory.createConstructionNode(child.getVariables(), s));
 
                     var newOptionalFilterNode = conditionSimplificationResults.getOptionalExpression()
                             .map(iqFactory::createFilterNode);
 
-                    return new State(ancestors.append(parentConstructionNode), newOptionalFilterNode, newChild);
+                    return new State(ancestors.append(newOptionalParent), newOptionalFilterNode, newChild);
                 }
                 catch (UnsatisfiableConditionException e) {
                     return new State(UnaryOperatorSequence.of(), Optional.empty(), iqFactory.createEmptyNode(projectedVariables));
