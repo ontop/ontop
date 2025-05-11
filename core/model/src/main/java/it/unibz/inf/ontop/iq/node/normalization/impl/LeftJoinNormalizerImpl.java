@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer.RightProvenance;
 import it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer;
-import it.unibz.inf.ontop.iq.visit.impl.IQStateTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -103,7 +102,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     initialRightChild);
 
             // The left child cannot be made empty because of the LJ. Therefore this step is enough to detect emptiness.
-            state = state.normalizeLeftChild().liftLeftChild();
+            state = state.liftLeftChild();
             if (state.isEmpty())
                 return state.asIQTree();
 
@@ -119,7 +118,6 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         .normalizeRightChild()
                         .liftRightChild()
                         // A DISTINCT on the left might have been waiting because of a not-yet distinct right child
-                        .normalizeLeftChild()
                         .liftLeftChild();
 
                 if (state.equals(newState))
@@ -142,7 +140,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             private final IQTree leftChild;
             private final IQTree rightChild;
 
-            private LJNormalizationState(UnaryOperatorSequence<UnaryOperatorNode> ancestors,
+            LJNormalizationState(UnaryOperatorSequence<UnaryOperatorNode> ancestors,
                                          Optional<ImmutableExpression> ljCondition,
                                          IQTree leftChild, IQTree rightChild) {
                 this.ancestors = ancestors;
@@ -151,69 +149,69 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 this.rightChild = rightChild;
             }
 
+            boolean isToBeReplacedByLeftChild() {
+                return rightChild.isDeclaredAsEmpty();
+            }
+
             ConstructionNode createConstructionNode(Substitution<? extends ImmutableTerm> substitution) {
                 ImmutableSet<Variable> childrenVariables = iqTreeTools.getChildrenVariables(leftChild, rightChild);
                 return iqFactory.createConstructionNode(childrenVariables, substitution);
             }
 
-            private LJNormalizationState update(UnaryOperatorNode node, Optional<ImmutableExpression> newLJCondition, IQTree newLeftChild, IQTree newRightChild) {
+            LJNormalizationState update(UnaryOperatorNode node, Optional<ImmutableExpression> newLJCondition, IQTree newLeftChild, IQTree newRightChild) {
                 return new LJNormalizationState(ancestors.append(node), newLJCondition, newLeftChild, newRightChild);
             }
 
-            private LJNormalizationState update(Optional<ImmutableExpression> newLJCondition, IQTree newLeftChild, IQTree newRightChild) {
+            LJNormalizationState update(Optional<ImmutableExpression> newLJCondition, IQTree newLeftChild, IQTree newRightChild) {
                 return new LJNormalizationState(ancestors, newLJCondition, newLeftChild, newRightChild);
             }
 
-            public LJNormalizationState normalizeLeftChild() {
+            LJNormalizationState normalizeLeftChild() {
                 return update(ljCondition, leftChild.normalizeForOptimization(variableGenerator), rightChild);
             }
 
-            /*
-                recursive
-             */
-            public LJNormalizationState liftLeftChild() {
-                if (leftChild.isDeclaredAsEmpty())
-                    return update(Optional.empty(), leftChild,
-                            iqFactory.createEmptyNode(rightChild.getVariables()));
-
-                return leftChild.acceptVisitor(new LiftLeftChild());
+            LJNormalizationState liftLeftChild() {
+                return IQStateOptionalTransformer.reachMonotoneFixedPoint(
+                        normalizeLeftChild(),
+                        LJNormalizationState::liftLeftChildStep);
             }
 
-            private class LiftLeftChild extends IQStateTransformer<LJNormalizationState> {
+            Optional<LJNormalizationState> liftLeftChildStep() {
+                if (isToBeReplacedByLeftChild())
+                    return Optional.empty();
 
-                protected LiftLeftChild() {
-                    super(() ->  LJNormalizationState.this);
-                }
+                return leftChild.acceptVisitor(new LiftLeftChildStep())
+                        .map(LJNormalizationState::normalizeLeftChild);
+            }
 
-                LJNormalizationState leftLift(UnaryOperatorNode parent, Optional<ImmutableExpression> newLJCondition, IQTree newLeftChild) {
-                    return update(parent, newLJCondition, newLeftChild, rightChild);
+            private class LiftLeftChildStep extends IQStateOptionalTransformer<LJNormalizationState> {
+
+                Optional<LJNormalizationState> leftLift(UnaryOperatorNode parent, Optional<ImmutableExpression> newLJCondition, IQTree newLeftChild, IQTree newRightChild) {
+                    return Optional.of(update(parent, newLJCondition, newLeftChild, newRightChild));
                 }
 
                 @Override
-                public LJNormalizationState transformConstruction(UnaryIQTree liftedLeftChild, ConstructionNode leftConstructionNode, IQTree leftGrandChild) {
+                public Optional<LJNormalizationState> transformConstruction(UnaryIQTree liftedLeftChild, ConstructionNode leftConstructionNode, IQTree leftGrandChild) {
                     try {
                         VariableNullability childVariableNullability = variableNullabilityTools.getChildrenVariableNullability(
                                 ImmutableList.of(leftGrandChild, rightChild));
 
-                        return bindingLifter.liftRegularChildBinding(leftConstructionNode, 0, leftGrandChild,
-                                        ImmutableList.of(liftedLeftChild, rightChild),
+                        return Optional.of(bindingLifter.liftRegularChildBinding(leftConstructionNode, 0, leftGrandChild,
+                                        ImmutableList.of(leftChild, rightChild),
                                         leftGrandChild.getVariables(), ljCondition, variableGenerator,
-                                        childVariableNullability, this::applyLeftChildBindingLift)
-                                .normalizeLeftChild()
-                                // Recursive (for optimization purposes)
-                                .liftLeftChild();
+                                        childVariableNullability, this::applyLeftChildBindingLift));
                     }
                     catch (UnsatisfiableConditionException e) {
-                        // Replaces the LJ by the left child
-                        ConstructionNode newParent = iqFactory.createConstructionNode(
-                                iqTreeTools.getChildrenVariables(liftedLeftChild, rightChild),
-                                leftConstructionNode.getSubstitution());
-
-                        return update(newParent, Optional.empty(), leftGrandChild, iqFactory.createEmptyNode(rightChild.getVariables()));
+                        // Replaces the LJ by the left child and stops recursion!
+                        return leftLift(
+                                createConstructionNode(leftConstructionNode.getSubstitution()),
+                                Optional.empty(),
+                                leftGrandChild,
+                                iqFactory.createEmptyNode(rightChild.getVariables()));
                     }
                 }
 
-                private LJNormalizationState applyLeftChildBindingLift(
+                LJNormalizationState applyLeftChildBindingLift(
                         ImmutableList<IQTree> children, IQTree leftGrandChild, int leftChildPosition,
                         Optional<ImmutableExpression> ljCondition, Substitution<ImmutableTerm> naiveAscendingSubstitution,
                         Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
@@ -234,55 +232,50 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                             (t, v) -> transformRightSubstitutionValue(t, leftVariables, defaultProvenanceVariable))
                                     .build();
 
-                    return update(createConstructionNode(ascendingSubstitution), ljCondition, leftGrandChild, rightProvenance.getRightTree());
+                    return leftLift(createConstructionNode(ascendingSubstitution), ljCondition, leftGrandChild, rightProvenance.getRightTree()).get();
                 }
 
                 @Override
-                public LJNormalizationState transformDistinct(UnaryIQTree liftedLeftChild, DistinctNode distinctNode, IQTree leftGrandChild) {
-                    if (isLJDistinctWhileLeftIsDistinct(liftedLeftChild)) {
-                        return update(distinctNode, ljCondition, leftGrandChild, rightChild.removeDistincts())
-                                .normalizeLeftChild()
-                                // Recursive (for optimization purposes)
-                                .liftLeftChild();
-                    }
+                public Optional<LJNormalizationState> transformDistinct(UnaryIQTree liftedLeftChild, DistinctNode distinctNode, IQTree leftGrandChild) {
+                    if (isLJDistinctGivenThatLeftChildIsDistinct())
+                        return leftLift(distinctNode, ljCondition, leftGrandChild, rightChild.removeDistincts());
+
                     return done();
                 }
 
                 /**
                  * When the left is distinct, isDistinct() behaves like for inner joins
                  */
-                private boolean isLJDistinctWhileLeftIsDistinct(IQTree distinctLeftChild) {
+                boolean isLJDistinctGivenThatLeftChildIsDistinct() {
                     if (rightChild.isDistinct())
                         return true;
 
                     IQTree innerJoinTree = iqFactory.createNaryIQTree(
                             iqFactory.createInnerJoinNode(ljCondition),
-                            ImmutableList.of(distinctLeftChild, rightChild));
+                            ImmutableList.of(leftChild, rightChild));
 
                     return innerJoinTree.isDistinct();
                 }
 
                 @Override
-                public LJNormalizationState transformFilter(UnaryIQTree liftedLeftChild, FilterNode filterNode, IQTree leftGrandChild) {
-                    return leftLift(filterNode, ljCondition, leftGrandChild)
-                            .normalizeLeftChild()
-                            .liftLeftChild();
+                public Optional<LJNormalizationState> transformFilter(UnaryIQTree liftedLeftChild, FilterNode filterNode, IQTree leftGrandChild) {
+                    return leftLift(filterNode, ljCondition, leftGrandChild, rightChild);
                 }
 
                 @Override
-                public LJNormalizationState transformInnerJoin(NaryIQTree liftedLeftChild, InnerJoinNode joinNode, ImmutableList<IQTree> leftGrandChildren) {
+                public Optional<LJNormalizationState> transformInnerJoin(NaryIQTree liftedLeftChild, InnerJoinNode joinNode, ImmutableList<IQTree> leftGrandChildren) {
                     Optional<ImmutableExpression> joinCondition = joinNode.getOptionalFilterCondition();
                     if (joinCondition.isPresent()) {
                         NaryIQTree newLeftChild = iqFactory.createNaryIQTree(
                                 iqFactory.createInnerJoinNode(), leftGrandChildren);
-
-                        return leftLift(iqFactory.createFilterNode(joinCondition.get()), ljCondition, newLeftChild);
+                        // lifts the filter from the join, but stops recursion on the next iteration
+                        return leftLift(iqFactory.createFilterNode(joinCondition.get()), ljCondition, newLeftChild, rightChild);
                     }
                     return done();
                 }
             }
 
-            private class LiftRightChild extends IQStateOptionalTransformer<LJNormalizationState> {
+            private class LiftRightChildStep extends IQStateOptionalTransformer<LJNormalizationState> {
 
                 Optional<LJNormalizationState> rightLift(Optional<? extends UnaryOperatorNode> parent, Optional<ImmutableExpression> newLJCondition, IQTree newRightChild) {
                     return Optional.of(new LJNormalizationState(ancestors.append(parent), newLJCondition, leftChild, newRightChild));
@@ -304,7 +297,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                 .map(c -> rightSubstitution.<ImmutableTerm>transform(t -> termFactory.getIfElseNull(c, t)))
                                 .orElse(rightSubstitution);
 
-                        return rightLift(createConstructionNode(liftableSubstitution), ljCondition, iqFactory.createTrueNode());
+                        return rightLift(createConstructionNode(liftableSubstitution), ljCondition, rightGrandChild);
                     }
 
                     if (rightSubstitution.isEmpty()) {
@@ -326,7 +319,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                      */
                     if (selectedSubstitution.isEmpty())
                         return liftRightGrandChildWithProvenance(
-                                provenanceVariable.orElseThrow(() -> new MinorOntopInternalBugException("An entry was expected")),
+                                provenanceVariable
+                                        .orElseThrow(() -> new MinorOntopInternalBugException("An entry was expected")),
                                 rightChildRequiredVariables,
                                 rightGrandChild);
 
@@ -348,17 +342,17 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 }
 
                 @Override
-                public Optional<LJNormalizationState> transformDistinct(UnaryIQTree tree, DistinctNode distinctNode, IQTree grandChild) {
+                public Optional<LJNormalizationState> transformDistinct(UnaryIQTree tree, DistinctNode distinctNode, IQTree rightGrandChild) {
                     if (leftChild.isDistinct())
-                        return Optional.of(update(distinctNode, ljCondition, leftChild.removeDistincts(), grandChild));
+                        return Optional.of(update(distinctNode, ljCondition, leftChild.removeDistincts(), rightGrandChild));
 
                     return done();
                 }
 
                 @Override
-                public Optional<LJNormalizationState> transformFilter(UnaryIQTree tree, FilterNode filterNode, IQTree grandChild) {
+                public Optional<LJNormalizationState> transformFilter(UnaryIQTree tree, FilterNode filterNode, IQTree rightGrandChild) {
                     ImmutableExpression newLJCondition = iqTreeTools.getConjunction(ljCondition, filterNode.getFilterCondition());
-                    return rightLift(Optional.of(newLJCondition), grandChild);
+                    return rightLift(Optional.of(newLJCondition), rightGrandChild);
                 }
 
                 @Override
@@ -380,9 +374,9 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                  * <p>
                  * When the right child is composed of a construction node with only a provenance entry
                  */
-                private Optional<LJNormalizationState> liftRightGrandChildWithProvenance(Variable provenanceVariable,
-                                                                                         ImmutableSet<Variable> rightChildRequiredVariables,
-                                                                                         IQTree rightGrandChild) {
+                Optional<LJNormalizationState> liftRightGrandChildWithProvenance(Variable provenanceVariable,
+                                                                                 ImmutableSet<Variable> rightChildRequiredVariables,
+                                                                                 IQTree rightGrandChild) {
 
                     // Parent construction node: in case some variables where projected out by the right construction node
                     Optional<ConstructionNode> optionalProjectingAwayParent = Optional.of(rightChild.getVariables())
@@ -390,54 +384,47 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                             .map(rvs -> Sets.union(leftChild.getVariables(), rvs).immutableCopy())
                             .map(iqFactory::createConstructionNode);
 
-                    var distinctRightGrandChild = UnaryIQTreeDecomposition.of(rightGrandChild, DistinctNode.class);
-                    if (distinctRightGrandChild.isPresent()) {
-                        if (leftChild.isDistinct()) {
-                            IQTree newRightChild = createSubTreeWithProvenance(provenanceVariable,
-                                    distinctRightGrandChild.getChild(), rightGrandChild.getVariables());
+                    return rightGrandChild.acceptVisitor(new IQStateOptionalTransformer<>() {
+                        @Override
+                        public Optional<LJNormalizationState> transformDistinct(UnaryIQTree tree, DistinctNode distinctNode, IQTree rightGrandGrandChild) {
+                            if (leftChild.isDistinct()) {
+                                IQTree newRightChild = createSubTreeWithProvenance(provenanceVariable,
+                                        rightGrandGrandChild, rightGrandChild.getVariables());
 
-                            return Optional.of(new LJNormalizationState(
-                                    ancestors
-                                            .append(optionalProjectingAwayParent)
-                                            .append(distinctRightGrandChild.getNode()),
-                                    ljCondition,
-                                    leftChild.removeDistincts(),
-                                    newRightChild));
+                                return rightLift(optionalProjectingAwayParent, ljCondition, newRightChild)
+                                        .map(s -> s.update(
+                                                distinctNode, s.ljCondition, s.leftChild.removeDistincts(), s.rightChild));
+                            }
+                            return Optional.empty();
                         }
-                        return Optional.empty();
-                    }
-                    var filterRightGrandChild = UnaryIQTreeDecomposition.of(rightGrandChild, FilterNode.class);
-                    if (filterRightGrandChild.isPresent()) {
-                        ImmutableExpression filterCondition = filterRightGrandChild.getNode().getFilterCondition();
+                        @Override
+                        public Optional<LJNormalizationState> transformFilter(UnaryIQTree tree, FilterNode filterNode, IQTree rightGrandGrandChild) {
+                            ImmutableExpression filterCondition = filterNode.getFilterCondition();
 
-                        IQTree newRightChild = createSubTreeWithProvenance(
-                                provenanceVariable,
-                                filterRightGrandChild.getChild(),
-                                Sets.union(rightChildRequiredVariables, filterCondition.getVariables()));
-
-                        return rightLift(optionalProjectingAwayParent,
-                                Optional.of(iqTreeTools.getConjunction(ljCondition, filterCondition)),
-                                newRightChild);
-                    }
-                    var joinRightGrandChild = IQTreeTools.NaryIQTreeDecomposition.of(rightGrandChild, InnerJoinNode.class);
-                    if (joinRightGrandChild.isPresent()) {
-                        Optional<ImmutableExpression> joinCondition = joinRightGrandChild.getNode().getOptionalFilterCondition();
-                        if (joinCondition.isPresent()) {
-                            NaryIQTree newRightGrandChild = iqFactory.createNaryIQTree(
-                                    iqFactory.createInnerJoinNode(), joinRightGrandChild.getChildren());
-
-                            IQTree newRightChild = createSubTreeWithProvenance(
-                                    provenanceVariable,
-                                    newRightGrandChild,
-                                    Sets.union(rightChildRequiredVariables, joinCondition.get().getVariables()));
+                            IQTree newRightChild = createSubTreeWithProvenance(provenanceVariable,
+                                    rightGrandGrandChild, Sets.union(rightChildRequiredVariables, filterCondition.getVariables()));
 
                             return rightLift(optionalProjectingAwayParent,
-                                    Optional.of(iqTreeTools.getConjunction(ljCondition, joinCondition.get())),
+                                    Optional.of(iqTreeTools.getConjunction(ljCondition, filterCondition)),
                                     newRightChild);
                         }
-                        return Optional.empty();
-                    }
-                    return Optional.empty();
+                        @Override
+                        public Optional<LJNormalizationState> transformInnerJoin(NaryIQTree tree, InnerJoinNode joinNode, ImmutableList<IQTree> grandGrandChildren) {
+                            Optional<ImmutableExpression> joinCondition = joinNode.getOptionalFilterCondition();
+                            if (joinCondition.isPresent()) {
+                                NaryIQTree newRightGrandChild = iqFactory.createNaryIQTree(
+                                        iqFactory.createInnerJoinNode(), grandGrandChildren);
+
+                                IQTree newRightChild = createSubTreeWithProvenance(provenanceVariable,
+                                        newRightGrandChild, Sets.union(rightChildRequiredVariables, joinCondition.get().getVariables()));
+
+                                return rightLift(optionalProjectingAwayParent,
+                                        Optional.of(iqTreeTools.getConjunction(ljCondition, joinCondition.get())),
+                                        newRightChild);
+                            }
+                            return Optional.empty();
+                        }
+                    });
                 }
             }
 
@@ -496,7 +483,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             }
 
             private LJNormalizationState liftRightChild() {
-                return rightChild.acceptVisitor(new LiftRightChild())
+                return rightChild.acceptVisitor(new LiftRightChildStep())
                         // If nothing can be lifted above, makes at least sure the right child is normalized
                         .orElseGet(() -> {
                             if (rightChild.isDeclaredAsEmpty())
@@ -517,14 +504,14 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 IQTreeCache normalizedProperties = treeCache.declareAsNormalizedForOptimizationWithEffect();
 
                 IQTree ljLevelTree;
-                if (rightChild.isDeclaredAsEmpty()) {
+                if (isToBeReplacedByLeftChild()) {
                     Set<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables());
 
-                    ConstructionNode newParentConstructionNode = createConstructionNode(
+                    var newParent = createConstructionNode(
                             rightSpecificVariables.stream()
                                     .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant())));
 
-                    ljLevelTree = iqFactory.createUnaryIQTree(newParentConstructionNode, leftChild, normalizedProperties);
+                    ljLevelTree = iqFactory.createUnaryIQTree(newParent, leftChild, normalizedProperties);
                 }
                 else if (rightChild instanceof TrueNode) {
                     ljLevelTree = leftChild;
