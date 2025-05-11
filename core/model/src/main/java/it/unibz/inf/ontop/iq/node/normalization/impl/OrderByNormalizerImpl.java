@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -14,7 +13,6 @@ import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -62,7 +60,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
             // NB: the loop is due to the lifting of both distinct and construction nodes
             State state = reachFixedPoint(
                     simplified,
-                    s -> reachMonotoneFixedPoint(s, State::liftThroughOrderBy)
+                    s -> IQStateOptionalTransformer.reachFinalState(s, State::liftThroughOrderBy)
                             .normalizeChild(),
                     MAX_NORMALIZATION_ITERATIONS);
             return state.toIQTree();

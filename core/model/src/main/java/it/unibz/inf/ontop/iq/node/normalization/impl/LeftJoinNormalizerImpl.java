@@ -25,7 +25,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
 
@@ -171,7 +170,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             }
 
             LJNormalizationState liftLeftChild() {
-                return IQStateOptionalTransformer.reachMonotoneFixedPoint(
+                return IQStateOptionalTransformer.reachFinalState(
                         normalizeLeftChild(),
                         LJNormalizationState::liftLeftChildStep);
             }

@@ -74,7 +74,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             State state = reachFixedPoint(
                     new State(UnaryOperatorSequence.of(), Optional.of(initialFilterNode), initialChild)
                             .normalizeChild(),
-                    s -> reachMonotoneFixedPoint(s, State::liftThroughFilter)
+                    s -> IQStateOptionalTransformer.reachFinalState(s, State::liftThroughFilter)
                             .simplifyAndPropagateDownConstraint()
                             .normalizeChild(),
                     MAX_NORMALIZATION_ITERATIONS);
