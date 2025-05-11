@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer.RightProvenance;
+import it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.IQStateTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -281,10 +282,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 }
             }
 
-            private class LiftRightChild extends IQStateTransformer<Optional<LJNormalizationState>> {
-                protected LiftRightChild() {
-                    super(Optional::empty);
-                }
+            private class LiftRightChild extends IQStateOptionalTransformer<LJNormalizationState> {
 
                 Optional<LJNormalizationState> rightLift(Optional<? extends UnaryOperatorNode> parent, Optional<ImmutableExpression> newLJCondition, IQTree newRightChild) {
                     return Optional.of(new LJNormalizationState(ancestors.append(parent), newLJCondition, leftChild, newRightChild));
