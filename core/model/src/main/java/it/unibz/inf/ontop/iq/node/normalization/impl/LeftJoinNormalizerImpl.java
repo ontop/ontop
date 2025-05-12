@@ -110,21 +110,21 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             // TODO: see if it deserves to be in the loop.
             state = state.propagateDownLJCondition();
 
-            for (int i = 0; i < MAX_ITERATIONS; i++) {
-                LJNormalizationState newState = state
-                        .checkRightChildContribution()
-                        .optimizeLeftJoinCondition()
-                        .normalizeRightChild()
-                        .liftRightChild()
-                        // A DISTINCT on the left might have been waiting because of a not-yet distinct right child
-                        .liftLeftChild();
+            return IQStateOptionalTransformer.reachFixedPoint(
+                            state,
+                            this::next,
+                            MAX_ITERATIONS)
+                    .asIQTree();
+        }
 
-                if (state.equals(newState))
-                    return state.asIQTree();
-
-                state = newState;
-            }
-            throw new MinorOntopInternalBugException("LJ.normalizeForOptimization() did not converge after " + MAX_ITERATIONS);
+        LJNormalizationState next(LJNormalizationState state) {
+            return state
+                    .checkRightChildContribution()
+                    .optimizeLeftJoinCondition()
+                    .normalizeRightChild()
+                    .liftRightChild()
+                    // A DISTINCT on the left might have been waiting because of a not-yet distinct right child
+                    .liftLeftChild();
         }
 
         /**
@@ -454,7 +454,6 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                     .restrictDomainTo(rightChild.getVariables());
 
                     var optionalCondition = simplificationResults.getOptionalExpression();
-
                     if (downSubstitution.isEmpty()) {
                         if (ljCondition.equals(optionalCondition))
                             return this;
@@ -483,12 +482,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
             private LJNormalizationState liftRightChild() {
                 return rightChild.acceptVisitor(new LiftRightChildStep())
-                        // If nothing can be lifted above, makes at least sure the right child is normalized
-                        .orElseGet(() -> {
-                            if (rightChild.isDeclaredAsEmpty())
-                                return update(Optional.empty(), leftChild, rightChild);
-                            return this;
-                        });
+                        .orElse(this);
             }
 
 
