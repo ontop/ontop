@@ -181,6 +181,15 @@ public class IQTreeTools {
             return list.stream();
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof UnaryOperatorSequence) {
+                UnaryOperatorSequence<?> other = (UnaryOperatorSequence<?>) o;
+                return list.equals(other.list);
+            }
+            return false;
+        }
+
         public UnaryOperatorSequence<T> append(Optional<? extends T> optionalNode) {
             return optionalNode.map(this::append)
                     .orElse(this);
@@ -220,13 +229,6 @@ public class IQTreeTools {
 
     public IQTree createAncestorsUnaryIQTree(UnaryOperatorSequence<? extends UnaryOperatorNode> sequence, IQTree tree) {
         return sequence.list.reverse().stream()
-                .reduce(tree,
-                        (t, a) -> iqFactory.createUnaryIQTree(a, t),
-                        (t1, t2) -> { throw new MinorOntopInternalBugException("No merge was expected"); });
-    }
-
-    public IQTree createAncestorsUnaryIQTree(ImmutableList<? extends UnaryOperatorNode> ancestors, IQTree tree) {
-        return ancestors.stream()
                 .reduce(tree,
                         (t, a) -> iqFactory.createUnaryIQTree(a, t),
                         (t1, t2) -> { throw new MinorOntopInternalBugException("No merge was expected"); });
