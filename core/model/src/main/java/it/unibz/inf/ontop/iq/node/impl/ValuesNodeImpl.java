@@ -31,6 +31,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
+
 public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
 
@@ -256,8 +259,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         if (descendingSubstitution.isEmpty())
             return this;
 
-        final ConstructionNode constructionNode;
-        final FilterNode filterNode;
+        final UnaryOperatorSequence<UnaryOperatorNode> prefix;
         ValuesNode valuesNode = this;
 
         Substitution<GroundFunctionalTerm> functionalSubstitutionFragment = descendingSubstitution.restrictRangeTo(GroundFunctionalTerm.class);
@@ -271,13 +273,16 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                             .toStream(termFactory::getStrictEquality))
                     .orElseThrow(() -> new MinorOntopInternalBugException("There must be an exception"));
 
-                constructionNode = iqFactory.createConstructionNode(Sets.difference(valuesNode.getVariables(), descendingSubstitution.getDomain()).immutableCopy());
-                filterNode = iqFactory.createFilterNode(filterCondition);
+                prefix = UnaryOperatorSequence.of()
+                        .append(iqFactory.createConstructionNode(
+                                Sets.difference(valuesNode.getVariables(),
+                                        descendingSubstitution.getDomain()).immutableCopy()))
+                        .append(iqFactory.createFilterNode(filterCondition));
+
                 valuesNode = valuesNode.applyFreshRenaming(renaming);
         }
         else {
-            constructionNode = null;
-            filterNode = null;
+            prefix = UnaryOperatorSequence.of();
         }
 
         Substitution<Constant> constantSubstitutionFragment = descendingSubstitution.restrictRangeTo(Constant.class);
@@ -286,10 +291,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         Substitution<Variable> variableSubstitutionFragment = descendingSubstitution.restrictRangeTo(Variable.class);
         valuesNode = substituteVariables(variableSubstitutionFragment, valuesNode);
 
-        if (constructionNode == null) {
-            return valuesNode;
-        }
-        return iqTreeTools.createUnaryIQTree(constructionNode, filterNode, valuesNode);
+        return iqTreeTools.createAncestorsUnaryIQTree(prefix, valuesNode);
     }
 
     private ValuesNode substituteConstants(Substitution<Constant> substitution, ValuesNode valuesNode) {

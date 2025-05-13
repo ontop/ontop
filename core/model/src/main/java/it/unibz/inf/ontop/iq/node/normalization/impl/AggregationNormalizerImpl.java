@@ -309,7 +309,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                             n.getSubstitution()));
 
             // Creates a filter over the sample variable so that only rows that have a non-null value in it are kept.
-            Optional<FilterNode> newFilter = sampleVariable.map(s -> iqFactory.createFilterNode(termFactory.getDBIsNotNull(s)));
+            Optional<FilterNode> newFilter = iqTreeTools.createOptionalFilterNode(sampleVariable.map(termFactory::getDBIsNotNull));
 
             return update(newAncestors, newGroupingVariables, finalAggregationSubstitution,
                     newChildConstructionNode,

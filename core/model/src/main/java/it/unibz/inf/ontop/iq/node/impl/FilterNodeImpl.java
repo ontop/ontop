@@ -83,7 +83,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             IQTree newChild = iqTreeTools.applyDescendingSubstitution(child, conditionSimplificationResults.getSubstitution(), downConstraint, variableGenerator);
 
             var optionalFilterNode = conditionSimplificationResults.getOptionalExpression()
-                    .map(e -> e.equals(getFilterCondition()) ? this : iqFactory.createFilterNode(e));
+                    .map(this::createFilterNode);
 
             IQTree filterLevelTree = iqTreeTools.createOptionalUnaryIQTree(optionalFilterNode, newChild);
 
@@ -203,8 +203,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                     substitutionFactory.onVariableOrGroundTerms().compose(descendingSubstitution, expressionAndSubstitution.getSubstitution());
 
             IQTree newChild = child.applyDescendingSubstitution(downSubstitution, downConstraint, variableGenerator);
-            var optionalFilterNode = iqTreeTools.createOptionalFilterNode(expressionAndSubstitution.getOptionalExpression());
-            IQTree filterLevelTree = iqTreeTools.createOptionalUnaryIQTree(optionalFilterNode, newChild);
+            IQTree filterLevelTree = iqTreeTools.createFilterTree(expressionAndSubstitution.getOptionalExpression(), newChild);
 
             var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(expressionAndSubstitution.getSubstitution(), newlyProjectedVariables);
             return iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, filterLevelTree);
@@ -230,11 +229,15 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
         ImmutableExpression newCondition = renamingSubstitution.apply(getFilterCondition());
 
-        FilterNode newFilterNode = newCondition.equals(getFilterCondition())
-                ? this
-                : iqFactory.createFilterNode(newCondition);
+        FilterNode newFilterNode = createFilterNode(newCondition);
 
         IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
         return iqFactory.createUnaryIQTree(newFilterNode, newChild, newTreeCache);
+    }
+
+    private FilterNode createFilterNode(ImmutableExpression expression) {
+        return expression.equals(getFilterCondition())
+                ? this
+                : iqFactory.createFilterNode(expression);
     }
 }

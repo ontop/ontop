@@ -99,9 +99,7 @@ public class FilterLifterImpl implements FilterLifter {
             Optional<ImmutableExpression> childrenExpression = termFactory.getConjunction(
                     getChildrenExpression(childrenDecomposition));
 
-            return iqTreeTools.createOptionalUnaryIQTree(
-                    childrenExpression.map(iqFactory::createFilterNode),
-                    unionSubtree);
+            return iqTreeTools.createFilterTree(childrenExpression, unionSubtree);
         }
 
         @Override
@@ -118,10 +116,7 @@ public class FilterLifterImpl implements FilterLifter {
                             getChildrenExpression(childrenDecomposition),
                             joinNode.getOptionalFilterCondition().stream());
 
-            return iqTreeTools.createOptionalUnaryIQTree(
-                    termFactory.getConjunction(conjuncts)
-                            .map(iqFactory::createFilterNode),
-                    joinSubtree);
+            return iqTreeTools.createFilterTree(termFactory.getConjunction(conjuncts), joinSubtree);
         }
 
         @Override

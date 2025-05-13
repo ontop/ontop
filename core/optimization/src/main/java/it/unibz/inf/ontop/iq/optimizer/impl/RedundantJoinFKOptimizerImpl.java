@@ -68,21 +68,24 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
             ImmutableMap<Boolean, ImmutableList<IQTree>> childPartitions = liftedChildren.stream()
                     .collect(ImmutableCollectors.partitioningBy(n -> (n instanceof ExtensionalDataNode)));
 
-            Optional<ImmutableList<IQTree>> optionalExtensionalChildren = Optional.ofNullable(childPartitions.get(true));
+            ImmutableList<ExtensionalDataNode> extensionalChildren = (ImmutableList)childPartitions.get(true);
+            assert extensionalChildren != null;
+            var otherChildren = childPartitions.get(false);
+            assert otherChildren != null;
 
-            if (!optionalExtensionalChildren.isPresent())
+            var optimisedExtensionalChildren = optimizeExtensionalChildren(extensionalChildren);
+            if (optimisedExtensionalChildren.isEmpty()) {
                 return liftedChildren.equals(initialChildren)
                         ? tree
                         : iqFactory.createNaryIQTree(rootNode, liftedChildren);
+            }
 
-
-            return optimizeExtensionalChildren(
-                    (ImmutableList<ExtensionalDataNode>)(ImmutableList<?>)optionalExtensionalChildren.get())
-                    .map(extensionalChildren -> buildNewTree(rootNode, extensionalChildren,
-                            Optional.ofNullable(childPartitions.get(false)).orElseGet(ImmutableList::of)))
-                    .orElseGet(() -> liftedChildren.equals(initialChildren)
-                            ? tree
-                            : iqFactory.createNaryIQTree(rootNode, liftedChildren));
+            // The returned tree may not be normalized (to be done at the IQOptimizer level)
+            return iqTreeTools.createJoinTree(
+                            rootNode.getOptionalFilterCondition(),
+                            Stream.concat(Stream.of(optimisedExtensionalChildren.get()), otherChildren.stream())
+                                    .collect(ImmutableCollectors.toList()))
+                    .orElseThrow(() -> new IllegalStateException("The optimization should not eliminate all the children"));
         }
 
         protected Optional<IQTree> optimizeExtensionalChildren(ImmutableList<ExtensionalDataNode> extensionalChildren) {
@@ -96,27 +99,17 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
             if (redundantNodes.isEmpty())
                 return Optional.empty();
 
-            Optional<ImmutableExpression> newConditions = termFactory.getDBIsNotNull(redundantNodes.stream()
-                    .flatMap(n -> n.getVariables().stream())
-                    .distinct());
+            Optional<ImmutableExpression> newConditions = termFactory.getDBIsNotNull(
+                    redundantNodes.stream()
+                            .flatMap(n -> n.getVariables().stream())
+                            .distinct());
 
-            ImmutableList<IQTree> remainingChildren = extensionalChildren.stream()
+            ImmutableList<ExtensionalDataNode> remainingChildren = extensionalChildren.stream()
                     .filter(n -> !redundantNodes.contains(n))
                     .collect(ImmutableCollectors.toList());
 
-            switch (remainingChildren.size()) {
-                case 0:
-                    throw new IllegalStateException("At least one child must remain");
-                case 1:
-                    return Optional.of(iqTreeTools.createOptionalUnaryIQTree(
-                            newConditions.map(iqFactory::createFilterNode),
-                            remainingChildren.get(0)));
-                default:
-                    return Optional.of(
-                            iqFactory.createNaryIQTree(
-                                    iqFactory.createInnerJoinNode(newConditions),
-                                    remainingChildren));
-            }
+            return Optional.of(iqTreeTools.createJoinTree(newConditions, remainingChildren)
+                    .orElseThrow(() -> new IllegalStateException("At least one child must remain")));
         }
 
         /**
@@ -170,26 +163,6 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
             return foreignKeyConstraint.getComponents().stream()
                     .allMatch(c -> sourceArgumentMap.get(c.getAttribute().getIndex() -1).equals(
                             targetArgumentMap.get(c.getReferencedAttribute().getIndex() -1)));
-        }
-
-        /**
-         * The returned tree may not be normalized (to be done at the IQOptimizer level)
-         */
-        private IQTree buildNewTree(InnerJoinNode rootNode, IQTree optimizedChildTree,
-                                    ImmutableList<IQTree> otherChildren) {
-            ImmutableList<IQTree> newChildren = Stream.concat(Stream.of(optimizedChildTree), otherChildren.stream())
-                    .collect(ImmutableCollectors.toList());
-
-            switch(newChildren.size()) {
-                case 0:
-                    throw new IllegalStateException("The optimization should not eliminate all the children");
-                case 1:
-                    return iqTreeTools.createOptionalUnaryIQTree(
-                            rootNode.getOptionalFilterCondition().map(iqFactory::createFilterNode),
-                            newChildren.get(0));
-                default:
-                    return iqFactory.createNaryIQTree(rootNode, newChildren);
-            }
         }
 
 

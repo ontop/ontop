@@ -94,9 +94,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             return newChildren.equals(children)
                     ? tree
                     : newChildren.size() == 1
-                        ? iqTreeTools.createOptionalUnaryIQTree(
-                                rootNode.getOptionalFilterCondition()
-                                        .map(iqFactory::createFilterNode),newChildren.get(0))
+                        ? iqTreeTools.createFilterTree(rootNode.getOptionalFilterCondition(), newChildren.get(0))
                         : iqFactory.createNaryIQTree(rootNode, newChildren);
         }
 
@@ -278,10 +276,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                 var filterCondition = termFactory.getConjunction(
                         rootNode.getSubstitution().stream()
                                 .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())));
-                return iqTreeTools.createOptionalUnaryIQTree(
-                        filterCondition
-                                .map(iqFactory::createFilterNode),
-                        pushedIntensionalNode);
+                return iqTreeTools.createFilterTree(filterCondition, pushedIntensionalNode);
             }
 
             var commonTerm = pushedIntensionalNode.getProjectionAtom().getArguments().stream()

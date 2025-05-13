@@ -174,20 +174,12 @@ public class MappingAssertionUnion {
             // assumes that filter is a possibly empty list of non-empty lists
             Optional<ImmutableExpression> mergedConditions = translate(filter);
 
-            if (extensionalDataNodes.isEmpty() && valuesNode.isEmpty())
-                return iqFactory.createTrueNode();
-            else if (valuesNode.isEmpty() && extensionalDataNodes.size() == 1)
-                return iqTreeTools.createOptionalUnaryIQTree(
-                        mergedConditions.map(iqFactory::createFilterNode),
-                        extensionalDataNodes.get(0));
-            else if (valuesNode.isPresent() && extensionalDataNodes.isEmpty())
-                return iqTreeTools.createOptionalUnaryIQTree(
-                        mergedConditions.map(iqFactory::createFilterNode),
-                        valuesNode.get());
-            else
-                return iqFactory.createNaryIQTree(
-                            iqFactory.createInnerJoinNode(mergedConditions),
-                            Stream.concat(extensionalDataNodes.stream(), valuesNode.stream()).collect(ImmutableCollectors.toList()));
+            ImmutableList<IQTree> children = Stream.concat(
+                            extensionalDataNodes.stream(), valuesNode.stream())
+                    .collect(ImmutableCollectors.toList());
+
+            return iqTreeTools.createJoinTree(mergedConditions, children)
+                    .orElseGet(iqFactory::createTrueNode);
         }
 
         Optional<ImmutableExpression> translate(DisjunctionOfConjunctions filter) {

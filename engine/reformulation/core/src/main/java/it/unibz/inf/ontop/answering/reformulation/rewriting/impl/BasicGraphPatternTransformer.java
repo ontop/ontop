@@ -48,16 +48,8 @@ public abstract class BasicGraphPatternTransformer extends DefaultRecursiveIQTre
     }
 
     private IQTree formInnerJoin(ImmutableList<IQTree> list, Optional<ImmutableExpression> filter) {
-        switch (list.size()) {
-            case 0:
-                throw new IllegalStateException("All triple patterns of BGP have been eliminated by the transformation");
-            case 1:
-                return iqTreeTools.createOptionalUnaryIQTree(
-                        filter.map(iqFactory::createFilterNode),
-                        list.get(0));
-            default:
-                return iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(filter), list);
-        }
+        return iqTreeTools.createJoinTree(filter, list)
+                .orElseThrow(() -> new IllegalStateException("All triple patterns of BGP have been eliminated by the transformation"));
     }
 
     private void addTransformedBGP(ImmutableList.Builder<IQTree> builderChildren, ImmutableList<IntensionalDataNode> currentBGP) {

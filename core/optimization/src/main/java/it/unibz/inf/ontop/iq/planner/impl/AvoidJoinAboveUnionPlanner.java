@@ -124,29 +124,20 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
                 // NB: for compilation purposes
                 ImmutableList<IQTree> currentChildren = children;
 
-                Optional<Map.Entry<NaryIQTree, ImmutableList<Integer>>> selectedEntry = children.stream()
+                Optional<Map.Entry<NaryIQTree, ImmutableList<Integer>>> selectedEntry = currentChildren.stream()
                         .map(c -> extractPushableSiblings(c, currentChildren))
                         .flatMap(Optional::stream)
                         .findFirst();
 
                 if (selectedEntry.isPresent()) {
-                    children = updateChildren(selectedEntry.get().getKey(), selectedEntry.get().getValue(), children);
+                    children = updateChildren(selectedEntry.get().getKey(), selectedEntry.get().getValue(), currentChildren);
                 }
                 else {
-                    if(children.equals(initialChildren))
+                    if (currentChildren.equals(initialChildren))
                         return tree;
 
-                    switch(children.size()) {
-                        case 0:
-                            throw new MinorOntopInternalBugException("At least one child should remain");
-                        case 1:
-                            return iqTreeTools.createOptionalUnaryIQTree(
-                                    rootNode.getOptionalFilterCondition()
-                                            .map(iqFactory::createFilterNode),
-                                    currentChildren.get(0));
-                        default:
-                            return iqFactory.createNaryIQTree(rootNode, children);
-                    }
+                    return iqTreeTools.createJoinTree(rootNode.getOptionalFilterCondition(), currentChildren)
+                            .orElseThrow(() -> new MinorOntopInternalBugException("At least one child should remain"));
                 }
             }
         }
@@ -160,7 +151,7 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
             if (!union.isPresent())
                 return Optional.empty();
 
-            ImmutableSet<Variable> unionVariables = unionTree.getVariables();
+            ImmutableSet<Variable> unionVariables = union.getTree().getVariables();
 
             ImmutableList<Integer> pushableSiblings = IntStream.range(0, children.size())
                     // Leaf siblings ...
@@ -172,7 +163,7 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
 
             return pushableSiblings.isEmpty()
                     ? Optional.empty()
-                    : Optional.of(Maps.immutableEntry((NaryIQTree) unionTree, pushableSiblings));
+                    : Optional.of(Maps.immutableEntry(union.getTree(), pushableSiblings));
         }
 
         private ImmutableList<IQTree> updateChildren(NaryIQTree unionTree, ImmutableList<Integer> pushableSiblingIndexes,

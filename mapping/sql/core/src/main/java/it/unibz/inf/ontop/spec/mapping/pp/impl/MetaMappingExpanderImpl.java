@@ -114,9 +114,8 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                             assertion.getTopSubstitution().get(topVariable)
                                     .getVariableStream().collect(ImmutableCollectors.toSet()),
                             substitutionFactory.getSubstitution()),
-                    iqTreeTools.createOptionalUnaryIQTree(
-                            termFactory.getDBIsNotNull(assertion.getTopChild().getVariables().stream())
-                                    .map(iqFactory::createFilterNode),
+                    iqTreeTools.createFilterTree(
+                            termFactory.getDBIsNotNull(assertion.getTopChild().getVariables().stream()),
                             assertion.getTopChild()));
 
             IQTree transformedTree = mappingEqualityTransformer.transform(tree);

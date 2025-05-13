@@ -364,9 +364,8 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
                         prefix,
                         termFactory.getTypeFactory().getXsdStringDatatype()));
 
-        ImmutableExpression filterCondition = termFactory.getRDF2DBBooleanFunctionalTerm(sparqlSTRSTARTSFunctionWithParameters);
         return iqFactory.createUnaryIQTree(
-                iqFactory.createFilterNode(filterCondition),
+                iqFactory.createFilterNode(termFactory.getRDF2DBBooleanFunctionalTerm(sparqlSTRSTARTSFunctionWithParameters)),
                 currentIQTree);
     }
 
@@ -375,9 +374,8 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
         DistinctVariableOnlyDataAtom projectionAtom = definition.getProjectionAtom();
         Variable indexVariable = projectionAtom.getArguments().get(indexPattern.getPosition());
 
-        ImmutableExpression filterCondition = termFactory.getStrictEquality(indexVariable, objectConstant);
         IQTree filteredTree = iqFactory.createUnaryIQTree(
-                iqFactory.createFilterNode(filterCondition),
+                iqFactory.createFilterNode(termFactory.getStrictEquality(indexVariable, objectConstant)),
                 definition.getTree());
         return iqFactory.createIQ(projectionAtom, filteredTree.normalizeForOptimization(variableGenerator));
     }

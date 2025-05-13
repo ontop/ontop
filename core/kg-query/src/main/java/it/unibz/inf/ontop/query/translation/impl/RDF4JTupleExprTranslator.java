@@ -143,7 +143,7 @@ public class RDF4JTupleExprTranslator {
         throw new OntopUnsupportedKGQueryException("Unsupported SPARQL operator: " + node.toString());
     }
 
-    private static Sets.SetView<Variable> getSharedVariables(TranslationResult left, TranslationResult right) {
+    private static Set<Variable> getSharedVariables(TranslationResult left, TranslationResult right) {
         return Sets.intersection(left.iqTree.getVariables(), right.iqTree.getVariables());
     }
 
@@ -156,7 +156,7 @@ public class RDF4JTupleExprTranslator {
         TranslationResult leftTranslation = translate(diff.getLeftArg());
         TranslationResult rightTranslation = translate(diff.getRightArg());
 
-        Sets.SetView<Variable> sharedVariables = getSharedVariables(rightTranslation, leftTranslation);
+        Set<Variable> sharedVariables = getSharedVariables(rightTranslation, leftTranslation);
 
         if (sharedVariables.isEmpty()) {
             return leftTranslation;
@@ -290,7 +290,7 @@ public class RDF4JTupleExprTranslator {
                             .orElseGet(() -> atomFactory.getDefaultGraphNodeAtom(object));
 
                     var parentNode = graphTerm.filter(g -> g.equals(subject))
-                            .map(g -> (UnaryOperatorNode) iqFactory.createFilterNode(
+                            .<UnaryOperatorNode>map(g -> iqFactory.createFilterNode(
                                     termFactory.getStrictEquality(g, object)))
                             .orElseGet(() -> iqFactory.createConstructionNode(childTree.getVariables(),
                                     substitutionFactory.getSubstitution((Variable) subject, object)));
@@ -400,7 +400,7 @@ public class RDF4JTupleExprTranslator {
     private TranslationResult translateNotExists(Exists exists, TranslationResult leftTranslation) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         TranslationResult rightTranslation = translate(exists.getSubQuery());
 
-        Sets.SetView<Variable> sharedVariables = getSharedVariables(rightTranslation, leftTranslation);
+        Set<Variable> sharedVariables = getSharedVariables(rightTranslation, leftTranslation);
 
         if (sharedVariables.isEmpty()) {
             throw new OntopUnsupportedKGQueryException("The NOT EXISTS operator is not supported with no common variables");
@@ -419,7 +419,7 @@ public class RDF4JTupleExprTranslator {
         return translateMinusOperation(leftTranslation, rightTranslation, sharedVariables);
     }
 
-    private TranslationResult translateMinusOperation(TranslationResult leftTranslation, TranslationResult rightTranslation, Sets.SetView<Variable> sharedVariables) {
+    private TranslationResult translateMinusOperation(TranslationResult leftTranslation, TranslationResult rightTranslation, Set<Variable> sharedVariables) {
         VariableGenerator vGen = getVariableGenerator(leftTranslation, rightTranslation);
 
         InjectiveSubstitution<Variable> sharedVarsRenaming = sharedVariables.stream()
@@ -457,11 +457,11 @@ public class RDF4JTupleExprTranslator {
         TranslationResult leftTranslation = translate(join.getLeftArg());
         TranslationResult rightTranslation = translate(join.getRightArg());
 
-        Sets.SetView<Variable> nullableVariablesLeftOrRight = Sets.union(leftTranslation.nullableVariables, rightTranslation.nullableVariables);
+        Set<Variable> nullableVariablesLeftOrRight = Sets.union(leftTranslation.nullableVariables, rightTranslation.nullableVariables);
 
-        Sets.SetView<Variable> sharedVariables = getSharedVariables(leftTranslation, rightTranslation);
+        Set<Variable> sharedVariables = getSharedVariables(leftTranslation, rightTranslation);
 
-        Sets.SetView<Variable> toCoalesce = Sets.intersection(sharedVariables, nullableVariablesLeftOrRight);
+        Set<Variable> toCoalesce = Sets.intersection(sharedVariables, nullableVariablesLeftOrRight);
 
         VariableGenerator variableGenerator = getVariableGenerator(leftTranslation, rightTranslation);
 
@@ -498,24 +498,24 @@ public class RDF4JTupleExprTranslator {
         Stream<ImmutableExpression> coalescingStream = toCoalesce.stream()
                 .map(v -> generateCompatibleExpression(v, leftRenamingSubstitution, rightRenamingSubstitution));
 
-        Sets.SetView<Variable> nullableVariables;
+        ImmutableSet<Variable> nullableVariables;
         IQTree joinTree;
         if (join instanceof LeftJoin) {
-            Sets.SetView<Variable> variables = Sets.union(leftTranslation.iqTree.getVariables(), rightTranslation.iqTree.getVariables());
+            Set<Variable> variables = Sets.union(leftTranslation.iqTree.getVariables(), rightTranslation.iqTree.getVariables());
             Optional<ImmutableExpression> filterExpression = Optional.ofNullable(((LeftJoin) join).getCondition())
                     .map(c -> topSubstitution.apply(getFilterExpression(c, variables)));
             Optional<ImmutableExpression> joinCondition = termFactory.getConjunction(filterExpression, coalescingStream);
 
             joinTree = iqFactory.createBinaryNonCommutativeIQTree(iqFactory.createLeftJoinNode(joinCondition), leftTree, rightTree);
 
-            nullableVariables = Sets.union(nullableVariablesLeftOrRight, Sets.difference(rightTranslation.iqTree.getVariables(), sharedVariables));
+            nullableVariables = Sets.union(nullableVariablesLeftOrRight, Sets.difference(rightTranslation.iqTree.getVariables(), sharedVariables)).immutableCopy();
         }
         else if (join instanceof Join) {
             Optional<ImmutableExpression> joinCondition = termFactory.getConjunction(Optional.empty(), coalescingStream);
 
             joinTree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(joinCondition), ImmutableList.of(leftTree, rightTree));
 
-            nullableVariables = Sets.difference(nullableVariablesLeftOrRight, sharedVariables);
+            nullableVariables = Sets.difference(nullableVariablesLeftOrRight, sharedVariables).immutableCopy();
         }
         else {
             throw new Sparql2IqConversionException("A left or inner join is expected");
@@ -524,7 +524,7 @@ public class RDF4JTupleExprTranslator {
         var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(topSubstitution, projectedVariables);
         IQTree joinQuery = iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, joinTree);
 
-        return createTranslationResult(joinQuery, nullableVariables.immutableCopy());
+        return createTranslationResult(joinQuery, nullableVariables);
     }
 
     private ImmutableExpression generateCompatibleExpression(Variable outputVariable,
@@ -586,8 +586,8 @@ public class RDF4JTupleExprTranslator {
         ImmutableSet<Variable> leftVariables = leftTranslation.iqTree.getVariables();
         ImmutableSet<Variable> rightVariables = rightTranslation.iqTree.getVariables();
 
-        Sets.SetView<Variable> nullOnLeft = Sets.difference(rightVariables, leftVariables);
-        Sets.SetView<Variable> nullOnRight = Sets.difference(leftVariables, rightVariables);
+        Set<Variable> nullOnLeft = Sets.difference(rightVariables, leftVariables);
+        Set<Variable> nullOnRight = Sets.difference(leftVariables, rightVariables);
 
         ImmutableSet<Variable> nullableVariables = Sets.union(
                 Sets.union(leftTranslation.nullableVariables, rightTranslation.nullableVariables),
@@ -813,16 +813,13 @@ public class RDF4JTupleExprTranslator {
         if (externalBindings.isEmpty())
             return tree;
 
-        Sets.SetView<Variable> externallyBoundedVariables = Sets.intersection(variables, externalBindings.keySet());
+        Set<Variable> externallyBoundedVariables = Sets.intersection(variables, externalBindings.keySet());
 
         Optional<ImmutableExpression> conjunction = termFactory.getConjunction(
                 externallyBoundedVariables.stream()
                         .map(v -> termFactory.getStrictEquality(v, externalBindings.get(v))));
 
-        // Filter variables according to bindings
-        return iqTreeTools.createOptionalUnaryIQTree(
-                conjunction.map(iqFactory::createFilterNode),
-                tree);
+        return iqTreeTools.createFilterTree(conjunction, tree);
     }
 
 

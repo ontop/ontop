@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
@@ -28,14 +29,17 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private NoNullValuesEnforcerImpl(IntermediateQueryFactory iqFactory,
                                      TermFactory termFactory,
-                                     CoreUtilsFactory coreUtilsFactory) {
+                                     CoreUtilsFactory coreUtilsFactory,
+                                     IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.coreUtilsFactory = coreUtilsFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -43,8 +47,7 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(tree.getKnownVariables());
         Optional<ImmutableExpression> condition = termFactory.getDBIsNotNull(tree.getVariables().stream());
 
-        return condition
-                .map(iqFactory::createFilterNode)
+        return iqTreeTools.createOptionalFilterNode(condition)
                 .map(n -> iqFactory.createUnaryIQTree(n, tree))
                 .map(t -> t.normalizeForOptimization(variableGenerator))
                 .map(this::declareTopVariablesNotNull)

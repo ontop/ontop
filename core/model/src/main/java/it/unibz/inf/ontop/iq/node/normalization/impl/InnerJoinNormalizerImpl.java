@@ -242,8 +242,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     case 0:
                         return iqFactory.createTrueNode();
                     case 1:
-                        IQTree uniqueChild = children.get(0);
-                        return iqTreeTools.createOptionalUnaryIQTree(joiningCondition.map(iqFactory::createFilterNode), uniqueChild);
+                        return iqTreeTools.createFilterTree(joiningCondition, children.get(0));
                     default:
                         return liftOneLeftJoin()
                                 .orElseGet(() -> iqFactory.createNaryIQTree(
@@ -287,8 +286,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                                                 .mapToObj(children::get))
                                 .collect(ImmutableCollectors.toList()));
 
-                return Optional.of(iqTreeTools.createOptionalUnaryIQTree(
-                        joiningCondition.map(iqFactory::createFilterNode),
+                return Optional.of(iqTreeTools.createFilterTree(
+                        joiningCondition,
                         iqFactory.createBinaryNonCommutativeIQTree(node, newJoinOnLeft, rightChild)));
             }
 

@@ -27,6 +27,7 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @Singleton
 public class IQTreeTools {
 
@@ -97,6 +98,13 @@ public class IQTreeTools {
 
     public Optional<FilterNode> createOptionalFilterNode(Optional<ImmutableExpression> expression) {
         return expression.map(iqFactory::createFilterNode);
+    }
+
+    public IQTree createFilterTree(Optional<ImmutableExpression> expression, IQTree child) {
+        return expression
+                .map(iqFactory::createFilterNode)
+                .<IQTree>map(f -> iqFactory.createUnaryIQTree(f, child))
+                .orElse(child);
     }
 
     public IQTree createConstructionNodeTreeIfNontrivial(IQTree child, ImmutableSet<Variable> variables) {
@@ -188,6 +196,18 @@ public class IQTreeTools {
                         iqFactory.createUnaryIQTree(node3,
                                 iqFactory.createUnaryIQTree(node4, tree))));
     }
+
+    public Optional<IQTree> createJoinTree(Optional<ImmutableExpression> filter, ImmutableList<? extends IQTree> list) {
+        switch (list.size()) {
+            case 0:
+                return Optional.empty();
+            case 1:
+                return Optional.of(createFilterTree(filter, list.get(0)));
+            default:
+                return Optional.of(iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(filter), (ImmutableList)list));
+        }
+    }
+
 
     public static class UnaryOperatorSequence<T extends UnaryOperatorNode> {
         private final ImmutableList<T> list;

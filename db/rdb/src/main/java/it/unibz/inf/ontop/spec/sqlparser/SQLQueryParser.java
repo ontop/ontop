@@ -27,12 +27,14 @@ public class SQLQueryParser {
     private final CoreSingletons coreSingletons;
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
+    private final IntermediateQueryFactory iqFactory;
 
     @Inject
     public SQLQueryParser(CoreSingletons coreSingletons) {
         this.coreSingletons = coreSingletons;
         this.termFactory = coreSingletons.getTermFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.iqFactory = coreSingletons.getIQFactory();
     }
 
     public RAExpression getRAExpression(String sourceQuery, MetadataLookup metadataLookup) throws InvalidQueryException, MetadataExtractionException {
@@ -47,23 +49,8 @@ public class SQLQueryParser {
     }
 
     public IQTree convert(RAExpression re) {
-        ImmutableList<ExtensionalDataNode> children = re.getDataAtoms();
         Optional<ImmutableExpression> joiningConditions = termFactory.getConjunction(re.getFilterAtoms().stream());
-
-        IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
-
-        switch (children.size()) {
-            case 0:
-                return iqFactory.createTrueNode();
-            case 1:
-                return iqTreeTools.createOptionalUnaryIQTree(
-                        joiningConditions.map(iqFactory::createFilterNode),
-                        children.get(0));
-            default:
-                return iqFactory.createNaryIQTree(
-                        iqFactory.createInnerJoinNode(joiningConditions),
-                        children.stream().collect(ImmutableCollectors.toList()));
-        }
+        return iqTreeTools.createJoinTree(joiningConditions, re.getDataAtoms())
+                .orElseGet(iqFactory::createTrueNode);
     }
-
 }

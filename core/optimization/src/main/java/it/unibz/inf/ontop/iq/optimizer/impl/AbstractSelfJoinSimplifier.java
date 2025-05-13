@@ -124,19 +124,8 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
 
         Optional<ImmutableExpression> newExpression = expression.map(unifier::apply);
 
-        IQTree newTree;
-        switch (newChildren.size()) {
-            case 0:
-                throw new MinorOntopInternalBugException("Should have been detected before");
-            case 1:
-                IQTree child = newChildren.get(0);
-                newTree = iqTreeTools.createOptionalUnaryIQTree(
-                        newExpression.map(iqFactory::createFilterNode),
-                        child);
-                break;
-            default:
-                newTree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(newExpression), newChildren);
-        }
+        IQTree newTree = iqTreeTools.createJoinTree(newExpression, newChildren)
+                .orElseThrow(() -> new MinorOntopInternalBugException("Should have been detected before"));
 
         ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
                 substitutionNormalizer.normalizeSubstitution(unifier, projectedVariables);

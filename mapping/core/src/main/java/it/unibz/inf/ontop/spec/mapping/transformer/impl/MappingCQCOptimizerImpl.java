@@ -118,16 +118,8 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                                     .filter(n -> !(n instanceof ExtensionalDataNode)))
                     .collect(ImmutableCollectors.toList());
 
-            switch (children.size()) {
-                case 0:
-                    return iqFactory.createTrueNode();
-                case 1:
-                    return iqTreeTools.createOptionalUnaryIQTree(
-                            joiningConditions.map(iqFactory::createFilterNode),
-                            children.get(0));
-                default:
-                    return iqFactory.createNaryIQTree(innerJoinNode, children);
-            }
+            return iqTreeTools.createJoinTree(joiningConditions, children)
+                    .orElseGet(iqFactory::createTrueNode);
         }
     }
 }
