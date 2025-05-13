@@ -365,11 +365,11 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                                 .map(t -> (Variable) t)
                                 .anyMatch(projectedVariables::contains)));
 
-        ImmutableList<ImmutableExpression> strictEqualities = Optional.ofNullable(constraintClassification.get(true))
-                .orElseGet(ImmutableList::of);
+        ImmutableList<ImmutableExpression> strictEqualities = constraintClassification.get(true);
+        assert strictEqualities != null;
 
-        ImmutableList<ImmutableExpression> otherConditions = Optional.ofNullable(constraintClassification.get(false))
-                .orElseGet(ImmutableList::of);
+        ImmutableList<ImmutableExpression> otherConditions = constraintClassification.get(false);
+        assert otherConditions != null;
 
         if (strictEqualities.isEmpty()) {
             return filterValuesNodeEntries(constraint);

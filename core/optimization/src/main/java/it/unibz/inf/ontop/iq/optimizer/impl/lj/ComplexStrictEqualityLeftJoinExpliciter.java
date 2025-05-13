@@ -67,10 +67,13 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
         var conditionMap = ljCondition.flattenAND()
                 .collect(ImmutableCollectors.partitioningBy(e -> isDecomposibleStrictEquality(e, leftVariables, rightSpecificVariables)));
         var strictEqualities = conditionMap.get(true);
-        if (strictEqualities == null || strictEqualities.isEmpty())
+        assert strictEqualities != null;
+        if (strictEqualities.isEmpty())
             return new LeftJoinNormalization(leftChild, rightChild, Optional.of(ljCondition), false);
 
-        var newLJCondition = Optional.ofNullable(conditionMap.get(false))
+        var otherConditions = conditionMap.get(false);
+        assert otherConditions != null;
+        var newLJCondition = Optional.of(otherConditions)
                 .filter(cs -> !cs.isEmpty())
                 .map(termFactory::getConjunction);
 

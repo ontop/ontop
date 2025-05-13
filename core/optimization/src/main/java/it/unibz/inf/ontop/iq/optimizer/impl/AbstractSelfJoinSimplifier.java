@@ -49,27 +49,23 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 .collect(ImmutableCollectors.partitioningBy(n -> (n instanceof ExtensionalDataNode)
                         && hasConstraint((ExtensionalDataNode) n)));
 
-        Optional<ImmutableList<IQTree>> extensionalChildrenWithConstraint = Optional.ofNullable(childPartitions.get(true));
+        var extensionalChildrenWithConstraint = childPartitions.get(true);
+        assert extensionalChildrenWithConstraint != null;
 
-        Optional<ImmutableMap<RelationDefinition, Collection<ExtensionalDataNode>>> optionalDataNodeMap = extensionalChildrenWithConstraint
-                .map(ns -> ns.stream()
+        ImmutableMap<RelationDefinition, Collection<ExtensionalDataNode>> dataNodeMap = extensionalChildrenWithConstraint.stream()
                         .map(n -> (ExtensionalDataNode) n)
                         .collect(ImmutableCollectors.toMultimap(
                                 ExtensionalDataNode::getRelationDefinition,
-                                n -> n)).asMap());
+                                n -> n)).asMap();
 
         // No room for optimization (no self-join involving a constraint of the desired type) -> returns fast
-        if (!optionalDataNodeMap
-                .filter(m -> m.values().stream()
-                        .anyMatch(c -> c.size() > 1))
-                .isPresent())
+        if (dataNodeMap.values().stream()
+                        .noneMatch(c -> c.size() > 1))
             return Optional.empty();
 
-        ImmutableList<OptimizationState> optimizationStates = optionalDataNodeMap
-                .map(m -> m.entrySet().stream()
+        ImmutableList<OptimizationState> optimizationStates = dataNodeMap.entrySet().stream()
                         .map(e -> optimizeExtensionalDataNodes(e.getKey(), e.getValue()))
-                        .collect(ImmutableCollectors.toList()))
-                .orElseGet(ImmutableList::of);
+                        .collect(ImmutableCollectors.toList());
 
         /*
          * First empty case: no solution for one relation
@@ -95,17 +91,17 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 .flatMap(s -> s.extensionalDataNodes.stream())
                 .collect(ImmutableCollectors.toList());
 
-        if (canEliminateNodes() && optimizedExtensionalDataNodes.size() == extensionalChildrenWithConstraint.map(AbstractCollection::size)
-                .orElse(0)) {
+        if (canEliminateNodes() && optimizedExtensionalDataNodes.size() == extensionalChildrenWithConstraint.size()) {
             return Optional.empty();
         }
 
-        Optional<ImmutableList<IQTree>> nonExtensionalChildrenWithConstraint = Optional.ofNullable(childPartitions.get(false));
+        ImmutableList<IQTree> nonExtensionalChildrenWithConstraint = childPartitions.get(false);
+        assert nonExtensionalChildrenWithConstraint != null;
 
-        ImmutableList<IQTree> newChildren = nonExtensionalChildrenWithConstraint
-                .map(nes -> Stream.concat(optimizedExtensionalDataNodes.stream(), nes.stream())
-                        .collect(ImmutableCollectors.toList()))
-                .orElse(optimizedExtensionalDataNodes);
+        ImmutableList<IQTree> newChildren = Stream.concat(
+                        optimizedExtensionalDataNodes.stream(),
+                        nonExtensionalChildrenWithConstraint.stream())
+                .collect(ImmutableCollectors.toList());
 
         Optional<ImmutableExpression> newExpression = termFactory.getConjunction(
                 rootNode.getOptionalFilterCondition(),

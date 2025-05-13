@@ -310,10 +310,10 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         .allMatch(c -> c.inferUniqueConstraints().contains(uc)))
                 .collect(ImmutableCollectors.partitioningBy(uc -> areDisjoint(children, uc)));
 
-        var nonDisjointUcs = Optional.ofNullable(ucsPartitionedByDisjointness.get(false))
-                .orElseGet(ImmutableList::of);
-        var disjointUcs = Optional.ofNullable(ucsPartitionedByDisjointness.get(true))
-                .orElseGet(ImmutableList::of);
+        var nonDisjointUcs = ucsPartitionedByDisjointness.get(false);
+        assert nonDisjointUcs != null;
+        var disjointUcs = ucsPartitionedByDisjointness.get(true);
+        assert disjointUcs != null;
 
         if (nonDisjointUcs.isEmpty())
             return ImmutableSet.copyOf(disjointUcs);
