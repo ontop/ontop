@@ -42,13 +42,11 @@ public class QueryTemplateExtractor {
     private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
     private final OntopModelSettings settings;
-    private final IQTreeTools iqTreeTools;
 
     @Inject
     protected QueryTemplateExtractor(CoreSingletons coreSingletons, OntopModelSettings settings) {
         this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
-        this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.settings = settings;
     }
 
@@ -167,7 +165,7 @@ public class QueryTemplateExtractor {
                     .flatMap(this::transformFilterCondition);
 
             LeftJoinNode newRootNode = newCondition
-                    .map(c -> rootNode.changeOptionalFilterCondition(newCondition))
+                    .map(c -> iqFactory.createLeftJoinNode(newCondition))
                     .orElse(rootNode);
 
             return iqFactory.createBinaryNonCommutativeIQTree(newRootNode, newLeft, newRight);
@@ -183,7 +181,7 @@ public class QueryTemplateExtractor {
                     .flatMap(this::transformFilterCondition);
 
             InnerJoinNode newRootNode = newCondition
-                    .map(c -> rootNode.changeOptionalFilterCondition(newCondition))
+                    .map(c -> iqFactory.createInnerJoinNode(newCondition))
                     .orElse(rootNode);
 
             return iqFactory.createNaryIQTree(newRootNode, newChildren);

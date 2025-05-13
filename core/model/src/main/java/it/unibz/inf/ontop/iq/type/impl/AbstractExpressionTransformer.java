@@ -65,9 +65,9 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
 
         FilterNode newFilterNode = newExpression.equals(initialExpression)
                 ? rootNode
-                : rootNode.changeFilterCondition(newExpression);
+                : iqFactory.createFilterNode(newExpression);
 
-        return (newFilterNode.equals(rootNode) && newChild.equals(child))
+        return newFilterNode.equals(rootNode) && newChild.equals(child)
                 ? tree
                 : iqFactory.createUnaryIQTree(newFilterNode, newChild);
     }
@@ -101,7 +101,7 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
 
         LeftJoinNode newLeftJoinNode = newExpression.equals(initialExpression)
                 ? rootNode
-                : rootNode.changeOptionalFilterCondition(newExpression);
+                : iqFactory.createLeftJoinNode(newExpression);
 
         return (newLeftJoinNode.equals(rootNode) && newLeftChild.equals(leftChild) && newRightChild.equals(rightChild))
                 ? tree
@@ -120,7 +120,7 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
 
         InnerJoinNode newJoinNode = newExpression.equals(initialExpression)
                 ? rootNode
-                : rootNode.changeOptionalFilterCondition(newExpression);
+                : iqFactory.createInnerJoinNode(newExpression);
 
         return (newJoinNode.equals(rootNode) && newChildren.equals(children))
                 ? tree

@@ -239,10 +239,10 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
             if (leftFilter.isPresent() || rightFilter.isPresent()) {
                 IQTree leftJoinTree = iqFactory.createBinaryNonCommutativeIQTree(
-                        iqTreeTools.updateLeftJoinNodeWithConjunct(
-                                rootNode,
-                                rightFilter.getOptionalNode()
-                                        .map(FilterNode::getFilterCondition)),
+                        iqFactory.createLeftJoinNode(
+                                iqTreeTools.getConjunction(
+                                        rootNode.getOptionalFilterCondition(),
+                                        rightFilter.getOptionalNode().map(FilterNode::getFilterCondition))),
                         leftFilter.getTail(),
                         rightFilter.getTail());
 

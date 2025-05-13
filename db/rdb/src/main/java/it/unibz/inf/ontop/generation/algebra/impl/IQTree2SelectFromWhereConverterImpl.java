@@ -126,9 +126,8 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         var join = NaryIQTreeDecomposition.of(tree, InnerJoinNode.class);
         if (join.isPresent()) {
             // Removes the joining condition
-            InnerJoinNode newInnerJoinNode = join.getNode().changeOptionalFilterCondition(Optional.empty());
-            return convertIntoOrdinaryExpression(iqFactory.createNaryIQTree(newInnerJoinNode,
-                    join.getChildren()));
+            return convertIntoOrdinaryExpression(
+                    iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(), join.getChildren()));
         }
         else
             return convertIntoOrdinaryExpression(tree);

@@ -72,13 +72,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
-        return new LeftJoinNodeImpl(newOptionalFilterCondition, nullabilityEvaluator, substitutionFactory,
-                termFactory, typeFactory, iqFactory,
-                conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory, iqTreeTools);
-    }
-
-    @Override
     public int hashCode() {
         return getOptionalFilterCondition().hashCode();
     }

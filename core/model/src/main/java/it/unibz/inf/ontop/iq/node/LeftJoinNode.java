@@ -13,9 +13,6 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 public interface LeftJoinNode extends JoinLikeNode, BinaryNonCommutativeOperatorNode {
 
     @Override
-    LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
-
-    @Override
     default <T> T acceptVisitor(BinaryNonCommutativeIQTree tree, IQVisitor<T> visitor, IQTree leftChild, IQTree rightChild) {
         return visitor.transformLeftJoin(tree, this, leftChild, rightChild);
     }

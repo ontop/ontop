@@ -17,10 +17,6 @@ public interface FilterNode extends CommutativeJoinOrFilterNode, UnaryOperatorNo
      */
     ImmutableExpression getFilterCondition();
 
-    /**
-     * Returns a new FilterNode (immutable).
-     */
-    FilterNode changeFilterCondition(ImmutableExpression newFilterCondition);
 
     @Override
     default <T> T acceptVisitor(UnaryIQTree tree, IQVisitor<T> visitor, IQTree child) {

@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -32,6 +33,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
     private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
+    private final IQTreeTools iqTreeTools;
 
     protected BooleanExpressionPusher(ImmutableExpression expressionToPushDown,
                                       CoreSingletons coreSingletons) {
@@ -39,6 +41,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
         this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -49,12 +52,15 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
 
         BooleanExpressionPusher newPusher = new BooleanExpressionPusher(newExpression, coreSingletons);
         IQTree newChild = child.acceptVisitor(newPusher)
-                .orElseGet(() ->  iqFactory.createUnaryIQTree(
-                        iqFactory.createFilterNode(newExpression),
-                        child));
+                .orElseGet(() ->  wrapInFilter(newExpression, child));
 
         return Optional.of(iqFactory.createUnaryIQTree(rootNode, newChild));
     }
+
+    private UnaryIQTree wrapInFilter(ImmutableExpression expression, IQTree child) {
+        return iqFactory.createUnaryIQTree(iqFactory.createFilterNode(expression), child);
+    }
+
     @Override
     public Optional<IQTree> transformAggregation(UnaryIQTree tree, AggregationNode aggregationNode, IQTree child) {
         ImmutableSet<Variable> expressionVariables = expressionToPushDown.getVariableStream()
@@ -67,9 +73,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
 
     protected Optional<IQTree> visitPassingUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
         IQTree newChild = child.acceptVisitor(this)
-                .orElseGet(() ->  iqFactory.createUnaryIQTree(
-                        iqFactory.createFilterNode(expressionToPushDown),
-                        child));
+                .orElseGet(() ->  wrapInFilter(expressionToPushDown, child));
 
         return Optional.of(iqFactory.createUnaryIQTree(rootNode, newChild));
     }
@@ -83,11 +87,9 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
 
         UnaryIQTree newTree = newChild
                 .map(c -> iqFactory.createUnaryIQTree(rootNode, c))
-                .orElseGet(() ->
-                        iqFactory.createUnaryIQTree(
-                                iqFactory.createFilterNode(
-                                        termFactory.getConjunction(rootNode.getFilterCondition(), expressionToPushDown)),
-                                child));
+                .orElseGet(() -> wrapInFilter(
+                        termFactory.getConjunction(
+                                rootNode.getFilterCondition(), expressionToPushDown), child));
 
         return Optional.of(newTree);
     }
@@ -152,10 +154,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
 
         InnerJoinNode newJoinNode = newChildren.equals(children)
                 // Refused by the children
-                ? iqFactory.createInnerJoinNode(
-                rootNode.getOptionalFilterCondition()
-                        .map(c -> termFactory.getConjunction(c, expressionToPushDown))
-                        .orElse(expressionToPushDown))
+                ? iqFactory.createInnerJoinNode(iqTreeTools.getConjunction(rootNode.getOptionalFilterCondition(), expressionToPushDown))
                 : rootNode;
 
         return Optional.of(iqFactory.createNaryIQTree(newJoinNode, newChildren));
@@ -165,9 +164,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
     public Optional<IQTree> transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(c -> c.acceptVisitor(this)
-                        .orElseGet(() -> iqFactory.createUnaryIQTree(
-                                iqFactory.createFilterNode(expressionToPushDown),
-                                c)))
+                        .orElseGet(() -> wrapInFilter(expressionToPushDown, c)))
                 .collect(ImmutableCollectors.toList());
 
         return Optional.of(iqFactory.createNaryIQTree(rootNode, newChildren));

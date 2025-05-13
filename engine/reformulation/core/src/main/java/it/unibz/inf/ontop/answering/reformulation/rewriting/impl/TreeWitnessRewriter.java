@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewr
 import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.constraints.ImmutableCQ;
 import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -378,9 +379,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
     }
 
     private IQTree join(ImmutableList<IQTree> atoms) {
-        return (atoms.size() == 1)
-                ? atoms.get(0)
-                : iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(), atoms);
+        return iqTreeTools.createJoinTree(Optional.empty(), atoms)
+                .orElseThrow(() -> new MinorOntopInternalBugException("Joining tree failed"));
     }
 
     @Override

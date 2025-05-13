@@ -18,9 +18,6 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 public interface InnerJoinNode extends InnerJoinLikeNode {
 
     @Override
-    InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
-
-    @Override
     default <T> T acceptVisitor(NaryIQTree tree, IQVisitor<T> visitor, ImmutableList<IQTree> children) {
         return visitor.transformInnerJoin(tree, this, children);
     }

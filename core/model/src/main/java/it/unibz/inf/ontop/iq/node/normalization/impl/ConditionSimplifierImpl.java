@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 @Singleton
@@ -107,7 +108,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                         .allMatch(c -> c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(v, true)))
                 .collect(ImmutableCollectors.toSet());
 
-        Sets.SetView<Variable> variablesToRemainInEqualities = Sets.union(nonLiftableVariables, rejectedByChildrenVariablesEqToConstant);
+        Set<Variable> variablesToRemainInEqualities = Sets.union(nonLiftableVariables, rejectedByChildrenVariablesEqToConstant);
 
         Optional<ImmutableExpression> partiallySimplifiedExpression = termFactory.getConjunction(
                 Stream.concat(

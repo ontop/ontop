@@ -52,11 +52,6 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public FilterNode changeFilterCondition(ImmutableExpression newFilterCondition) {
-        return iqFactory.createFilterNode(newFilterCondition);
-    }
-
-    @Override
     public VariableNullability getVariableNullability(IQTree child) {
         return variableNullabilityTools.updateWithFilter(getFilterCondition(),
                 child.getVariableNullability().getNullableGroups(), child.getVariables());
@@ -74,21 +69,15 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                     .extendToExternalVariables(constraint.getVariableStream());
 
             // TODO: also consider the constraint for simplifying the condition
-            ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier
+            ExpressionAndSubstitution simplification = conditionSimplifier
                     .simplifyCondition(getFilterCondition(), ImmutableList.of(child), extendedChildVariableNullability);
 
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.of(constraint),
-                    conditionSimplificationResults, extendedChildVariableNullability);
+                    simplification, extendedChildVariableNullability);
 
-            IQTree newChild = iqTreeTools.applyDescendingSubstitution(child, conditionSimplificationResults.getSubstitution(), downConstraint, variableGenerator);
+            IQTree newChild = iqTreeTools.applyDescendingSubstitution(child, simplification.getSubstitution(), downConstraint, variableGenerator);
 
-            var optionalFilterNode = conditionSimplificationResults.getOptionalExpression()
-                    .map(this::createFilterNode);
-
-            IQTree filterLevelTree = iqTreeTools.createOptionalUnaryIQTree(optionalFilterNode, newChild);
-
-            var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(conditionSimplificationResults.getSubstitution(), child.getVariables());
-            return iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, filterLevelTree);
+            return createFilterTree(simplification, child.getVariables(), newChild);
         }
         catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(child.getVariables());
@@ -192,6 +181,9 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(
                     unoptimizedExpression, ImmutableList.of(child), simplifiedFutureChildVariableNullability);
 
+            Substitution<? extends VariableOrGroundTerm> downSubstitution =
+                    substitutionFactory.onVariableOrGroundTerms().compose(descendingSubstitution, expressionAndSubstitution.getSubstitution());
+
             VariableNullability extendedVariableNullability = constraint
                     .map(c -> simplifiedFutureChildVariableNullability.extendToExternalVariables(c.getVariableStream()))
                     .orElse(simplifiedFutureChildVariableNullability);
@@ -199,18 +191,22 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(constraint,
                     expressionAndSubstitution, extendedVariableNullability);
 
-            Substitution<? extends VariableOrGroundTerm> downSubstitution =
-                    substitutionFactory.onVariableOrGroundTerms().compose(descendingSubstitution, expressionAndSubstitution.getSubstitution());
-
             IQTree newChild = child.applyDescendingSubstitution(downSubstitution, downConstraint, variableGenerator);
-            IQTree filterLevelTree = iqTreeTools.createFilterTree(expressionAndSubstitution.getOptionalExpression(), newChild);
 
-            var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(expressionAndSubstitution.getSubstitution(), newlyProjectedVariables);
-            return iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, filterLevelTree);
+            return createFilterTree(expressionAndSubstitution, newlyProjectedVariables, newChild);
         }
         catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(newlyProjectedVariables);
         }
+    }
+
+    private IQTree createFilterTree(ExpressionAndSubstitution expressionAndSubstitution, ImmutableSet<Variable> projectedVariables, IQTree child) {
+
+        var optionalFilterNode = iqTreeTools.createOptionalFilterNode(expressionAndSubstitution.getOptionalExpression());
+
+        var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(expressionAndSubstitution.getSubstitution(), projectedVariables);
+
+        return iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, optionalFilterNode, child);
     }
 
     @Override

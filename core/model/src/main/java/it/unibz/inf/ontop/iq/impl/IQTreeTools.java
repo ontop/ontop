@@ -139,12 +139,6 @@ public class IQTreeTools {
         return Sets.union(groupingVariables, substitution.getRangeVariables()).immutableCopy();
     }
 
-    public LeftJoinNode updateLeftJoinNodeWithConjunct(LeftJoinNode leftJoinNode, Optional<ImmutableExpression> conjunct) {
-        return conjunct
-                .map(c -> iqFactory.createLeftJoinNode(termFactory.getConjunction(leftJoinNode.getOptionalFilterCondition(), Stream.of(c))))
-                .orElse(leftJoinNode);
-    }
-
     public IQTree propagateDownOptionalConstraint(IQTree child, Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
         return constraint.map(c -> child.propagateDownConstraint(c, variableGenerator)).orElse(child);
     }
@@ -270,6 +264,10 @@ public class IQTreeTools {
         return optionalExpression
                 .map(c -> termFactory.getConjunction(c, expression))
                 .orElse(expression);
+    }
+
+    public Optional<ImmutableExpression> getConjunction(Optional<ImmutableExpression> optionalExpression1, Optional<ImmutableExpression> optionalExpression2) {
+        return termFactory.getConjunction(Stream.concat(optionalExpression1.stream(), optionalExpression2.stream()));
     }
 
     // TODO: to be eliminated later, but some tests depend on the order of conjuncts

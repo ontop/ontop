@@ -9,7 +9,4 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
  */
 public interface CommutativeJoinNode extends JoinLikeNode, CommutativeJoinOrFilterNode, NaryOperatorNode {
 
-    @Override
-    CommutativeJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
-
 }

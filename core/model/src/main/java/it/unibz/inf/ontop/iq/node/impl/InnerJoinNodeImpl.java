@@ -97,11 +97,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
 
     @Override
-    public InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
-        return iqFactory.createInnerJoinNode(newOptionalFilterCondition);
-    }
-
-    @Override
     public int hashCode() {
         return getOptionalFilterCondition().hashCode();
     }
@@ -196,9 +191,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         Optional<ImmutableExpression> newCondition = getOptionalFilterCondition()
                 .map(renamingSubstitution::apply);
 
-        InnerJoinNode newJoinNode = newCondition.equals(getOptionalFilterCondition())
-                ? this
-                : iqFactory.createInnerJoinNode(newCondition);
+        InnerJoinNode newJoinNode = createInnerJoinNode(newCondition);
 
         IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
         return iqFactory.createNaryIQTree(newJoinNode, newChildren, newTreeCache);
@@ -433,9 +426,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             ImmutableList<IQTree> newChildren = iqTreeTools.applyDescendingSubstitution(children,
                     conditionSimplificationResults.getSubstitution(), downConstraint, variableGenerator);
 
-            InnerJoinNode newJoin = conditionSimplificationResults.getOptionalExpression().equals(getOptionalFilterCondition())
-                    ? this
-                    : iqFactory.createInnerJoinNode(conditionSimplificationResults.getOptionalExpression());
+            InnerJoinNode newJoin = createInnerJoinNode(conditionSimplificationResults.getOptionalExpression());
 
             NaryIQTree joinTree = iqFactory.createNaryIQTree(newJoin, newChildren);
 
@@ -446,6 +437,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             return iqFactory.createEmptyNode(iqTreeTools.getChildrenVariables(children));
         }
     }
+
+    private InnerJoinNode createInnerJoinNode(Optional<ImmutableExpression> optionalExpression) {
+         return optionalExpression.equals(getOptionalFilterCondition())
+                ? this
+                : iqFactory.createInnerJoinNode(optionalExpression);
+    }
+
 
     private IQTree liftUnionChild(int childIndex, NaryIQTree newUnionChild, ImmutableList<IQTree> initialChildren,
                                   VariableGenerator variableGenerator) {
