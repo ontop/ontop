@@ -83,22 +83,13 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         }
 
         IQTree normalize() {
-            // Non-final
-            State state = new State(UnaryOperatorSequence.of(), innerJoinNode.getOptionalFilterCondition(), initialChildren);
-
-            for (int i = 0; i < MAX_ITERATIONS; i++) {
-                State newState = state
-                        .liftBindingsAndDistincts()
-                        .liftFilterInnerJoinProjectingConstruction();
-
-                if (newState.equals(state))
-                    return newState.asIQTree();
-                state = newState;
-            }
-
-            throw new MinorOntopInternalBugException("InnerJoin.liftBinding() did not converge after " + MAX_ITERATIONS);
+            return IQStateOptionalTransformer.reachFixedPoint(
+                            new State(UnaryOperatorSequence.of(), innerJoinNode.getOptionalFilterCondition(), initialChildren),
+                            s -> s.liftBindingsAndDistincts()
+                                    .liftFilterInnerJoinProjectingConstruction(),
+                            MAX_ITERATIONS)
+                    .asIQTree();
         }
-
 
         /**
          * A sequence of ConstructionNode and DistinctNode, followed by an InnerJoinNode,
@@ -111,8 +102,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             private final Optional<ImmutableExpression> joiningCondition;
             private final ImmutableList<IQTree> children;
 
-            private State(
-                    UnaryOperatorSequence<UnaryOperatorNode> ancestors, Optional<ImmutableExpression> joiningCondition, ImmutableList<IQTree> children) {
+            private State(UnaryOperatorSequence<UnaryOperatorNode> ancestors, Optional<ImmutableExpression> joiningCondition, ImmutableList<IQTree> children) {
                 this.ancestors = ancestors;
                 this.joiningCondition = joiningCondition;
                 this.children = children;
@@ -154,21 +144,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
              * NB: Note that this number is not guaranteed to be minimal. However, it is guaranteed to be sound.
              */
             State liftBindingsAndDistincts() {
-                // Non-final
-                State state = this;
-
-                for (int i = 0; i < MAX_ITERATIONS; i++) {
-                    State newState = state
-                            .propagateDownCondition()
-                            .liftBindings()
-                            .liftDistincts();
-
-                    if (newState.equals(state))
-                        return newState;
-                    state = newState;
-                }
-
-                throw new MinorOntopInternalBugException("InnerJoin.liftBinding() did not converge after " + MAX_ITERATIONS);
+                return IQStateOptionalTransformer.reachFinalState(
+                        this, s -> s.propagateDownCondition().liftBindings(), State::liftDistinct);
             }
 
             State liftBindings() {
@@ -245,9 +222,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
 
             IQTree asIQTree() {
-                IQTreeCache normalizedTreeCache = treeCache.declareAsNormalizedForOptimizationWithEffect();
 
-                IQTree joinLevelTree = createJoinOrFilterOrEmptyOrLiftLeft(normalizedTreeCache);
+                IQTree joinLevelTree = createJoinOrFilterOrEmptyOrLiftLeft(treeCache.declareAsNormalizedForOptimizationWithEffect());
 
                 if (joinLevelTree.isDeclaredAsEmpty())
                     return joinLevelTree;
@@ -357,21 +333,23 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 }
             }
 
-            State liftDistincts() {
-                Optional<DistinctNode> distinctNode = children.stream()
-                        .map(c -> UnaryIQTreeDecomposition.of(c, DistinctNode.class))
-                        .map(UnaryIQTreeDecomposition::getOptionalNode)
+            Optional<State> liftDistinct() {
+                return children.stream()
+                        .map(c -> c.acceptVisitor(new IQStateOptionalTransformer<State>() {
+                            @Override
+                            public Optional<State> transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree distinctChild) {
+                                if (isDistinct()) {
+                                    ImmutableList<IQTree> newChildren = children.stream()
+                                            .map(IQTree::removeDistincts)
+                                            .collect(ImmutableCollectors.toList());
+
+                                    return Optional.of(update(Optional.of(node), joiningCondition, newChildren));
+                                }
+                                return Optional.empty();
+                            }
+                        }))
                         .flatMap(Optional::stream)
                         .findFirst();
-
-                if (distinctNode.isPresent() && isDistinct()) {
-                    ImmutableList<IQTree> newChildren = children.stream()
-                            .map(IQTree::removeDistincts)
-                            .collect(ImmutableCollectors.toList());
-
-                    return update(distinctNode, joiningCondition, newChildren);
-                }
-                return this;
             }
 
             boolean isDistinct() {

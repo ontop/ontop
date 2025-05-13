@@ -160,11 +160,11 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
                             .map(c -> t.propagateDownConstraint(c, variableGenerator))
                             .orElse(t))
                     // Regular substitution
-                    .orElseGet(() -> normalizedSubstitution
-                            .map(s -> applyRegularDescendingSubstitution(s, newConstraint, variableGenerator))
-                            .orElseGet(() -> newConstraint
-                                    .map(c -> propagateDownConstraint(c, variableGenerator))
-                                    .orElse(this)));
+                    .or(() -> normalizedSubstitution
+                            .map(s -> applyRegularDescendingSubstitution(s, newConstraint, variableGenerator)))
+                    .or(() -> newConstraint
+                            .map(c -> propagateDownConstraint(c, variableGenerator)))
+                    .orElse(this);
         }
         catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
             return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, variables));
