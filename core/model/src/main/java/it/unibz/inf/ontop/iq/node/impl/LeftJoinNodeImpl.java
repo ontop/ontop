@@ -247,7 +247,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 Substitution<?> substitution = Sets.difference(projectedVariables, leftVariables).stream()
                         .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
 
-                return iqTreeTools.createConstructionNodeTreeIfNontrivial(updatedLeftChild, substitution, () -> projectedVariables);
+                var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(substitution, projectedVariables);
+                return iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, updatedLeftChild);
             }
             return iqFactory.createBinaryNonCommutativeIQTree(this, updatedLeftChild, updatedRightChild);
         }

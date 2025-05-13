@@ -27,6 +27,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
 
 public class AggregationSplitterImpl implements AggregationSplitter {
@@ -132,9 +133,11 @@ public class AggregationSplitterImpl implements AggregationSplitter {
             return Optional.of(
                     liftUnion(
                             groups,
-                            Stream.of(construction, distinct, subConstruction)
-                                    .map(UnaryIQTreeDecomposition::getOptionalNode)
-                                    .collect(ImmutableCollectors.toList()),
+                            UnaryOperatorSequence.of()
+                                    .append(rootNode)
+                                    .append(construction.getOptionalNode())
+                                    .append(distinct.getOptionalNode())
+                                    .append(subConstruction.getOptionalNode()),
                             rootNode,
                             unionChildren));
         }
@@ -208,7 +211,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
                     .map(ChildGroup::getTrees);
         }
 
-        protected IQTree liftUnion(ImmutableList<ImmutableSet<IQTree>> groups, ImmutableList<Optional<? extends UnaryOperatorNode>> nodes,
+        protected IQTree liftUnion(ImmutableList<ImmutableSet<IQTree>> groups, UnaryOperatorSequence<? extends UnaryOperatorNode> nodes,
                                    AggregationNode initialAggregationNode, ImmutableMultiset<IQTree> unionChildren) {
             Set<Variable> nonGroupingVariables = Sets.difference(initialAggregationNode.getChildVariables(), initialAggregationNode.getGroupingVariables());
 
@@ -226,17 +229,13 @@ public class AggregationSplitterImpl implements AggregationSplitter {
                             case 0:
                                 throw new MinorOntopInternalBugException("Should not be empty");
                             case 1:
-                                return iqFactory.createUnaryIQTree(
-                                        initialAggregationNode,
-                                        iqTreeTools.createOptionalAncestorsUnaryIQTree(nodes, g.get(0)));
+                                return iqTreeTools.createAncestorsUnaryIQTree(nodes, g.get(0));
                             default:
                                 IQTree lowUnion = iqFactory.createNaryIQTree(
                                         iqFactory.createUnionNode(initialAggregationNode.getChildVariables()),
                                         g);
 
-                                return iqFactory.createUnaryIQTree(
-                                        initialAggregationNode,
-                                        iqTreeTools.createOptionalAncestorsUnaryIQTree(nodes, lowUnion));
+                                return iqTreeTools.createAncestorsUnaryIQTree(nodes, lowUnion);
                         }
                     })
                     .map(t -> renameSomeUnprojectedVariables(t, nonGroupingVariables))

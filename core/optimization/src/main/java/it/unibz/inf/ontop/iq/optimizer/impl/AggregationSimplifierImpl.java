@@ -109,7 +109,8 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
                     .transformOrRemove(simplificationMap::get, d -> d.getDecomposition().getLiftableTerm())
                     .build();
 
-            return iqTreeTools.createConstructionNodeTreeIfNontrivial(newAggregationTree, parentSubstitution, rootNode::getVariables);
+            var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(parentSubstitution, rootNode.getVariables());
+            return iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, newAggregationTree);
         }
 
         protected Optional<AggregationSimplification> simplifyAggregationFunctionalTerm(ImmutableFunctionalTerm aggregationFunctionalTerm,

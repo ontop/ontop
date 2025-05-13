@@ -521,7 +521,8 @@ public class RDF4JTupleExprTranslator {
             throw new Sparql2IqConversionException("A left or inner join is expected");
         }
 
-        IQTree joinQuery = iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, topSubstitution, () -> projectedVariables);
+        var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(topSubstitution, projectedVariables);
+        IQTree joinQuery = iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, joinTree);
 
         return createTranslationResult(joinQuery, nullableVariables.immutableCopy());
     }

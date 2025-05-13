@@ -76,11 +76,11 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                     .collect(ImmutableCollectors.toList());
 
             if (!unionChildren.equals(newUnionChildren))
-                return iqTreeTools.createOptionalAncestorsUnaryIQTree(
-                                ImmutableList.of(
-                                        Optional.of(distinctNode),
-                                        orderBy.getOptionalNode(),
-                                        filter.getOptionalNode()),
+                return iqTreeTools.createAncestorsUnaryIQTree(
+                                IQTreeTools.UnaryOperatorSequence.of()
+                                        .append(distinctNode)
+                                        .append(orderBy.getOptionalNode())
+                                        .append(filter.getOptionalNode()),
                                 iqFactory.createNaryIQTree(union.getNode(), newUnionChildren))
                         .normalizeForOptimization(variableGenerator);
         }

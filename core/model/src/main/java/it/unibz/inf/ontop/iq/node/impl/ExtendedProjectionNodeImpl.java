@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -19,6 +18,8 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
 public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl implements ExtendedProjectionNode {
 
@@ -88,15 +89,12 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
             IQTree newChild = updateChildFct.apply(child, tauPropagationResults);
 
-            Optional<FilterNode> filterNode = tauPropagationResults.filter
-                    .map(iqFactory::createFilterNode);
+            Optional<FilterNode> filterNode = iqTreeTools.createOptionalFilterNode(tauPropagationResults.filter);
 
             Optional<? extends ExtendedProjectionNode> projectionNode = computeNewProjectionNode(newProjectedVariables,
                     tauPropagationResults.theta, newChild);
 
-            return iqTreeTools.createOptionalAncestorsUnaryIQTree(
-                    ImmutableList.of(projectionNode, filterNode),
-                    newChild);
+            return iqTreeTools.createOptionalUnaryIQTree(projectionNode, filterNode, newChild);
         }
         catch (EmptyTreeException e) {
             return iqFactory.createEmptyNode(newProjectedVariables);

@@ -82,13 +82,13 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
             IQTree newChild = iqTreeTools.applyDescendingSubstitution(child, conditionSimplificationResults.getSubstitution(), downConstraint, variableGenerator);
 
-            Optional<FilterNode> filterNode = conditionSimplificationResults.getOptionalExpression()
+            var optionalFilterNode = conditionSimplificationResults.getOptionalExpression()
                     .map(e -> e.equals(getFilterCondition()) ? this : iqFactory.createFilterNode(e));
 
-            IQTree filterLevelTree = iqTreeTools.createOptionalUnaryIQTree(filterNode, newChild);
+            IQTree filterLevelTree = iqTreeTools.createOptionalUnaryIQTree(optionalFilterNode, newChild);
 
-            return iqTreeTools.createConstructionNodeTreeIfNontrivial(
-                    filterLevelTree, conditionSimplificationResults.getSubstitution(), child::getVariables);
+            var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(conditionSimplificationResults.getSubstitution(), child.getVariables());
+            return iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, filterLevelTree);
         }
         catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(child.getVariables());
@@ -203,13 +203,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                     substitutionFactory.onVariableOrGroundTerms().compose(descendingSubstitution, expressionAndSubstitution.getSubstitution());
 
             IQTree newChild = child.applyDescendingSubstitution(downSubstitution, downConstraint, variableGenerator);
-            Optional<FilterNode> filterNode = expressionAndSubstitution.getOptionalExpression()
-                    .map(iqFactory::createFilterNode);
+            var optionalFilterNode = iqTreeTools.createOptionalFilterNode(expressionAndSubstitution.getOptionalExpression());
+            IQTree filterLevelTree = iqTreeTools.createOptionalUnaryIQTree(optionalFilterNode, newChild);
 
-            IQTree filterLevelTree = iqTreeTools.createOptionalUnaryIQTree(filterNode, newChild);
-
-            return iqTreeTools.createConstructionNodeTreeIfNontrivial(
-                    filterLevelTree, expressionAndSubstitution.getSubstitution(), () -> newlyProjectedVariables);
+            var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(expressionAndSubstitution.getSubstitution(), newlyProjectedVariables);
+            return iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, filterLevelTree);
         }
         catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(newlyProjectedVariables);
