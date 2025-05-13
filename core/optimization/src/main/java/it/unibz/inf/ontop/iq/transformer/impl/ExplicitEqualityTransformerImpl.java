@@ -246,10 +246,8 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                         leftFilter.getTail(),
                         rightFilter.getTail());
 
-                return iqTreeTools.createOptionalUnaryIQTree(
-                        leftFilter.getOptionalNode()
-                                .map(FilterNode::getFilterCondition)
-                                .map(iqFactory::createFilterNode),
+                return iqTreeTools.createFilterTree(
+                        leftFilter.getOptionalNode().map(FilterNode::getFilterCondition),
                         leftJoinTree);
             }
             return tree;

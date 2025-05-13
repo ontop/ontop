@@ -293,10 +293,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
                             .map(termFactory::getDBIsNotNull));
 
             ImmutableExpression isNullCondition = termFactory.getDBIsNull(rightProvenance.getProvenanceVariable());
-
-            ImmutableExpression filterCondition = nonNullabilityCondition
-                    .map(c -> termFactory.getConjunction(isNullCondition, c))
-                    .orElse(isNullCondition);
+            ImmutableExpression filterCondition = iqTreeTools.getConjunction(nonNullabilityCondition, isNullCondition);
 
             IQTree minusTree = iqTreeTools.createUnaryIQTree(
                     iqFactory.createConstructionNode(ImmutableSet.of(rightProvenance.getProvenanceVariable())),

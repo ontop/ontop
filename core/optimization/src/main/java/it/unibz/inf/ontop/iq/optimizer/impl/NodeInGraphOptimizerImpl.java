@@ -93,9 +93,8 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             var newChildren = simplifyChildren(removableNodeInGraphAtoms, nodeInGraphContextMultimap, updatedChildren);
             return newChildren.equals(children)
                     ? tree
-                    : newChildren.size() == 1
-                        ? iqTreeTools.createFilterTree(rootNode.getOptionalFilterCondition(), newChildren.get(0))
-                        : iqFactory.createNaryIQTree(rootNode, newChildren);
+                    : iqTreeTools.createJoinTree(rootNode.getOptionalFilterCondition(), newChildren)
+                    .orElseThrow(() -> new MinorOntopInternalBugException("should not happen"));
         }
 
         private ImmutableMultimap<NodeInGraphContext, IQTree> extractNodeInGraphContexts(ImmutableList<IQTree> children) {

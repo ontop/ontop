@@ -161,15 +161,11 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
                             .map(termFactory::getDBIsNotNull));
 
             ImmutableExpression isNullCondition = termFactory.getDBIsNull(rightProvenance.getProvenanceVariable());
-            ImmutableExpression filterCondition = nonNullabilityCondition
-                    .map(c -> termFactory.getConjunction(isNullCondition, c))
-                    .orElse(isNullCondition);
-
-            ConstructionNode constructionNode = iqFactory.createConstructionNode(
-                    ImmutableSet.of(rightProvenance.getProvenanceVariable()));
+            ImmutableExpression filterCondition = iqTreeTools.getConjunction(isNullCondition, nonNullabilityCondition);
 
             IQTree minusTree = iqTreeTools.createUnaryIQTree(
-                    constructionNode,
+                    iqFactory.createConstructionNode(
+                            ImmutableSet.of(rightProvenance.getProvenanceVariable())),
                     iqFactory.createFilterNode(filterCondition),
                     iqFactory.createBinaryNonCommutativeIQTree(
                             iqFactory.createLeftJoinNode(),
@@ -179,7 +175,8 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
             // Hack
             DistinctVariableOnlyDataAtom minusFakeProjectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(
                     atomFactory.getRDFAnswerPredicate(1),
-                    ImmutableList.copyOf(constructionNode.getVariables()));
+                    ImmutableList.copyOf(iqFactory.createConstructionNode(
+                            ImmutableSet.of(rightProvenance.getProvenanceVariable())).getVariables()));
 
             return otherLJOptimizer.optimize(iqFactory.createIQ(minusFakeProjectionAtom, minusTree))
                     .normalizeForOptimization().getTree()

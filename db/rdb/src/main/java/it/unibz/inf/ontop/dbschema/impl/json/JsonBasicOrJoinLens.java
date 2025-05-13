@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -128,6 +129,7 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         AtomFactory atomFactory = coreSingletons.getAtomFactory();
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
+        IQTreeTools iqTreeTools = coreSingletons.getIQTreeTools();
 
         // cannot use the keySet of substitutionMap because need to createAttributeVariableMap first
         ImmutableSet<Variable> addedVariables = columns.added.stream()
@@ -157,7 +159,12 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
                 substitutionNormalizer.normalizeSubstitution(substitution,
                         ImmutableSet.copyOf(projectedVariables));
 
-        IQTree parentTree = createParentTree(parentDefinitions, iqFactory);
+        ImmutableList<IQTree> parents = parentDefinitions.stream()
+                .map(p -> iqFactory.createExtensionalDataNode(p.relation, p.getArgumentMap()))
+                .collect(ImmutableCollectors.toList());
+
+        IQTree parentTree = iqTreeTools.createJoinTree(Optional.empty(), parents)
+                .orElseThrow(() -> new MetadataExtractionException("At least one base relation was expected"));
 
         ConstructionNode constructionNode = normalization.generateTopConstructionNode()
                 // In case, we reintroduce a ConstructionNode to get rid of unnecessary variables from the parent relation
@@ -166,11 +173,10 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         ImmutableList<ImmutableExpression> filterConditions = extractFilter(parentAttributeMap, idFactory, coreSingletons);
 
-        IQTree updatedParentDataNode = filterConditions.stream()
-                .reduce(termFactory::getConjunction)
-                .map(iqFactory::createFilterNode)
-                .map(f -> normalization.updateChild(iqFactory.createUnaryIQTree(f, parentTree), variableGenerator))
-                .orElse(normalization.updateChild(parentTree, variableGenerator));
+        IQTree filterTree = iqTreeTools.createFilterTree(
+                filterConditions.stream().reduce(termFactory::getConjunction), parentTree);
+
+        IQTree updatedParentDataNode = normalization.updateChild(filterTree, variableGenerator);
 
         IQTree iqTreeBeforeIRISafeConstraints = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
 
@@ -215,24 +221,6 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
     abstract protected ImmutableList<ParentDefinition> extractParentDefinitions(DBParameters dbParameters,
                                                                                               MetadataLookup parentCacheMetadataLookup)
             throws MetadataExtractionException;
-
-    private IQTree createParentTree(Collection<ParentDefinition> parentArgumentTable,
-                                    IntermediateQueryFactory iqFactory) throws MetadataExtractionException {
-        ImmutableList<IQTree> parents = parentArgumentTable.stream()
-                .map(p -> iqFactory.createExtensionalDataNode(p.relation, p.getArgumentMap()))
-                .collect(ImmutableCollectors.toList());
-
-        switch (parents.size()) {
-            case 0:
-                throw new MetadataExtractionException("At least one base relation was expected");
-            case 1:
-                return parents.get(0);
-            default:
-                return iqFactory.createNaryIQTree(
-                        iqFactory.createInnerJoinNode(),
-                        parents);
-        }
-    }
 
     private ImmutableList<Variable> extractRelationVariables(ImmutableSet<Variable> addedVariables, ImmutableSet<Variable> hiddenVariables,
                                                              ImmutableList<ParentDefinition> parentDefinitions, TermFactory termFactory) {
