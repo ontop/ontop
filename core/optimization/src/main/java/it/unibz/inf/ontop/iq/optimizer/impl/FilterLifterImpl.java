@@ -92,9 +92,9 @@ public class FilterLifterImpl implements FilterLifter {
             children = transformChildren(children);
             var childrenDecomposition = UnaryIQTreeDecomposition.of(children, FilterNode.class);
 
-            NaryIQTree unionSubtree = iqFactory.createNaryIQTree(
-                    iqFactory.createUnionNode(childrenDecomposition.get(0).getTail().getVariables()),
-                    UnaryIQTreeDecomposition.getTails(childrenDecomposition));
+            IQTree unionSubtree = iqTreeTools.createUnionTree(
+                            childrenDecomposition.get(0).getTail().getVariables(),
+                            UnaryIQTreeDecomposition.getTails(childrenDecomposition));
 
             Optional<ImmutableExpression> childrenExpression = termFactory.getConjunction(
                     getChildrenExpression(childrenDecomposition));
@@ -108,8 +108,7 @@ public class FilterLifterImpl implements FilterLifter {
             children = transformChildren(children);
             var childrenDecomposition = UnaryIQTreeDecomposition.of(children, FilterNode.class);
 
-            NaryIQTree joinSubtree = iqFactory.createNaryIQTree(
-                    iqFactory.createInnerJoinNode(),
+            NaryIQTree joinSubtree = iqTreeTools.createInnerJoinTree(
                     UnaryIQTreeDecomposition.getTails(childrenDecomposition));
 
             Stream<ImmutableExpression> conjuncts = Stream.concat(

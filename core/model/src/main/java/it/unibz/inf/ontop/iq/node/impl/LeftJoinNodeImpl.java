@@ -178,9 +178,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             if (union.isPresent()
                     && union.getNode().hasAChildWithLiftableDefinition(variable, union.getChildren())) {
 
-                UnionNode newUnionNode = iqFactory.createUnionNode(iqTreeTools.getChildrenVariables(leftChild, rightChild));
-
-                return iqFactory.createNaryIQTree(newUnionNode,
+                return iqTreeTools.createUnionTree(
+                        iqTreeTools.getChildrenVariables(leftChild, rightChild),
                         union.getChildren().stream()
                                 .<IQTree>map(c -> iqFactory.createBinaryNonCommutativeIQTree(this, c, rightChild))
                                 .collect(ImmutableCollectors.toList()));
@@ -526,8 +525,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     private IQTree transformIntoInnerJoinTree(IQTree leftChild, IQTree rightChild) {
-        return iqFactory.createNaryIQTree(
-                iqFactory.createInnerJoinNode(getOptionalFilterCondition()),
+        return iqTreeTools.createInnerJoinTree(
+                getOptionalFilterCondition(),
                 ImmutableList.of(leftChild, rightChild));
     }
 

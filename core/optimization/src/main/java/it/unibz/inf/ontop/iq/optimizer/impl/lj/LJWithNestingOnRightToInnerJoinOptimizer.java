@@ -201,8 +201,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
         }
 
         private IQTree buildInnerJoin(IQTree leftChild, IQTree rightChild, Optional<ImmutableExpression> leftJoinCondition) {
-            IQTree joinTree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(),
-                    ImmutableList.of(leftChild, rightChild));
+            IQTree joinTree = iqTreeTools.createInnerJoinTree(ImmutableList.of(leftChild, rightChild));
 
             if (leftJoinCondition.isEmpty())
                 return joinTree;

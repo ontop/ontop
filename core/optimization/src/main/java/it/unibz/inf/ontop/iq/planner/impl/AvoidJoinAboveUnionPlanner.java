@@ -174,11 +174,9 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
                     .collect(ImmutableCollectors.toList());
 
             ImmutableList<IQTree> newUnionChildren = unionTree.getChildren().stream()
-                    .map(c -> Stream.concat(Stream.of(c),
-                            pushedSiblings.stream()).collect(ImmutableCollectors.toList()))
-                    .map(cs -> iqFactory.createNaryIQTree(
-                            iqFactory.createInnerJoinNode(),
-                            cs))
+                    .map(c -> Stream.concat(Stream.of(c), pushedSiblings.stream())
+                            .collect(ImmutableCollectors.toList()))
+                    .map(iqTreeTools::createInnerJoinTree)
                     .collect(ImmutableCollectors.toList());
 
             ImmutableSet<Variable> newUnionVariables = Sets.union(
@@ -188,9 +186,7 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
                             .collect(ImmutableCollectors.toSet()))
                     .immutableCopy();
 
-            NaryIQTree newUnionTree = iqFactory.createNaryIQTree(
-                    iqFactory.createUnionNode(newUnionVariables),
-                    newUnionChildren);
+            IQTree newUnionTree = iqTreeTools.createUnionTree(newUnionVariables, newUnionChildren);
 
             return IntStream.range(0, children.size())
                     .filter(i -> !pushableSiblingIndexes.contains(i))

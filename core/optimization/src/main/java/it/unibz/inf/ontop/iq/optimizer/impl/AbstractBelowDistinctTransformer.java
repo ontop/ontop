@@ -35,7 +35,6 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
                 .map(this::transform)
                 .collect(ImmutableCollectors.toList());
 
-
         return furtherSimplifyInnerJoinChildren(
                     rootNode.getOptionalFilterCondition(),
                     transformedChildren)

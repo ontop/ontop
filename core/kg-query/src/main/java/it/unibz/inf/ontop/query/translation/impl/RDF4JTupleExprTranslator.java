@@ -301,8 +301,7 @@ public class RDF4JTupleExprTranslator {
 
                 var newTree = iqFactory.createUnaryIQTree(
                         iqFactory.createDistinctNode(),
-                        iqFactory.createNaryIQTree(
-                                iqFactory.createUnionNode(childTree.getVariables()),
+                        iqTreeTools.createUnionTree(childTree.getVariables(),
                                 ImmutableList.of(
                                         pathZeroDepthChild,
                                         // Depth 1. Takes advantage that Ontop computes the transitive closure of rdfs:subClassOf
@@ -344,7 +343,7 @@ public class RDF4JTupleExprTranslator {
 
         IQTree tree = subtrees.size() == 1
                 ? subtrees.get(0)
-                : iqFactory.createNaryIQTree(iqFactory.createUnionNode(allVars), subtrees);
+                : iqTreeTools.createUnionTree(allVars, subtrees);
 
         IQTree iqTree = applyExternalBindingFilter(tree, allVars);
         return createTranslationResult(iqTree, nullableVars);
@@ -513,7 +512,7 @@ public class RDF4JTupleExprTranslator {
         else if (join instanceof Join) {
             Optional<ImmutableExpression> joinCondition = termFactory.getConjunction(Optional.empty(), coalescingStream);
 
-            joinTree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(joinCondition), ImmutableList.of(leftTree, rightTree));
+            joinTree = iqTreeTools.createInnerJoinTree(joinCondition, ImmutableList.of(leftTree, rightTree));
 
             nullableVariables = Sets.difference(nullableVariablesLeftOrRight, sharedVariables).immutableCopy();
         }
@@ -605,7 +604,7 @@ public class RDF4JTupleExprTranslator {
 
         return createTranslationResult(
                 iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(rootVariables),
-                        iqFactory.createNaryIQTree(iqFactory.createUnionNode(rootVariables),
+                        iqTreeTools.createUnionTree(rootVariables,
                                 ImmutableList.of(
                                         iqFactory.createUnaryIQTree(leftCn, applyInDepthRenaming(leftTranslation.iqTree, leftNonProjVarsRenaming)),
                                         iqFactory.createUnaryIQTree(rightCn, applyInDepthRenaming(rightTranslation.iqTree, rightNonProjVarsRenaming))))),

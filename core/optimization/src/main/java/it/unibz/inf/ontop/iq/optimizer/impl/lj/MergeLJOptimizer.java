@@ -180,9 +180,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
             var renamingAndUpdatedConditions = computeRenaming(localLJCondition, leftSubTree.getVariables(),
                     rightSubTree.getVariables(), topRightTree.getVariables(), topLJCondition, topRightSpecificVariables);
 
-            IQTree mergedLocalRightBeforeRenaming = iqFactory.createNaryIQTree(
-                    iqFactory.createInnerJoinNode(),
-                    ImmutableList.of(rightSubTree, topRightTree));
+            IQTree mergedLocalRightBeforeRenaming = iqTreeTools.createInnerJoinTree(ImmutableList.of(rightSubTree, topRightTree));
 
             Optional<RightProvenance> localRightProvenance =  renamingAndUpdatedConditions.renaming.isEmpty()
                     ? Optional.empty()

@@ -232,9 +232,8 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
             ImmutableSet<Variable> newVariables = Sets.difference(rootNode.getVariables(), variablesToRemove)
                     .immutableCopy();
-            UnionNode newUnionNode = iqFactory.createUnionNode(newVariables);
 
-            if (rootNode.equals(newUnionNode))
+            if (newVariables.equals(rootNode.getVariables()))
                 return tree.normalizeForOptimization(variableGenerator);
 
             ImmutableList<IQTree> newChildren = children.stream()
@@ -242,7 +241,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
                     .collect(ImmutableCollectors.toList());
 
             // New removal opportunities may appear in the subtree ("RECURSIVE")
-            return iqFactory.createNaryIQTree(newUnionNode, newChildren)
+            return iqTreeTools.createUnionTree(newVariables, newChildren)
                     .normalizeForOptimization(variableGenerator);
         }
     }

@@ -148,9 +148,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                                     optionalFilterNode.get().getFilterCondition(),
                                     node.getOptionalFilterCondition());
 
-                            IQTree newChild = iqFactory.createNaryIQTree(
-                                    iqFactory.createInnerJoinNode(newJoiningCondition),
-                                    children);
+                            IQTree newChild = iqTreeTools.createInnerJoinTree(Optional.of(newJoiningCondition), children);
                             // will be final on the next call as the filter will be empty then
                             return lift(Optional.empty(), newChild);
                         }

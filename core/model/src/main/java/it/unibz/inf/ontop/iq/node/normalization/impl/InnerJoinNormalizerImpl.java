@@ -278,8 +278,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                         .allMatch(v -> Sets.intersection(v, rightSpecificVariables).isEmpty()))
                     return Optional.empty();
 
-                NaryIQTree newJoinOnLeft = iqFactory.createNaryIQTree(
-                        iqFactory.createInnerJoinNode(),
+                NaryIQTree newJoinOnLeft = iqTreeTools.createInnerJoinTree(
                         Stream.concat(Stream.of(leftChild),
                                         IntStream.range(0, children.size())
                                                 .filter(i -> i != index)
@@ -347,9 +346,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 if (children.stream().allMatch(IQTree::isDistinct))
                     return true;
 
-                IQTree tree = iqFactory.createNaryIQTree(
-                        iqFactory.createInnerJoinNode(joiningCondition),
-                        children);
+                IQTree tree = iqTreeTools.createInnerJoinTree(joiningCondition, children);
                 return tree.isDistinct();
             }
 

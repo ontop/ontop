@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -29,14 +30,17 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
     private final SQLAlgebraFactory sqlAlgebraFactory;
     private final SubstitutionFactory substitutionFactory;
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private IQTree2SelectFromWhereConverterImpl(SQLAlgebraFactory sqlAlgebraFactory,
                                                 SubstitutionFactory substitutionFactory,
-                                                IntermediateQueryFactory iqFactory) {
+                                                IntermediateQueryFactory iqFactory,
+                                                IQTreeTools iqTreeTools) {
         this.sqlAlgebraFactory = sqlAlgebraFactory;
         this.substitutionFactory = substitutionFactory;
         this.iqFactory = iqFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -127,7 +131,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         if (join.isPresent()) {
             // Removes the joining condition
             return convertIntoOrdinaryExpression(
-                    iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(), join.getChildren()));
+                    iqTreeTools.createInnerJoinTree(join.getChildren()));
         }
         else
             return convertIntoOrdinaryExpression(tree);
@@ -248,7 +252,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
     private SQLExpression getSubExpressionOfLeftJoinExpression(IQTree tree) {
         var join = NaryIQTreeDecomposition.of(tree, InnerJoinNode.class);
         if (join.isPresent()) {
-            ImmutableList<IQTree> children =  join.getChildren();
+            ImmutableList<IQTree> children = join.getChildren();
             int arity = children.size();
 
             Optional<ImmutableExpression> filterCondition = join.getNode().getOptionalFilterCondition();

@@ -202,6 +202,17 @@ public class IQTreeTools {
         }
     }
 
+    public IQTree createUnionTree(ImmutableSet<Variable> variables, ImmutableList<IQTree> children) {
+        return iqFactory.createNaryIQTree(iqFactory.createUnionNode(variables), children);
+    }
+
+    public NaryIQTree createInnerJoinTree(Optional<ImmutableExpression> filter, ImmutableList<IQTree> children) {
+        return iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(filter), children);
+    }
+
+    public NaryIQTree createInnerJoinTree(ImmutableList<IQTree> children) {
+        return iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(), children);
+    }
 
     public static class UnaryOperatorSequence<T extends UnaryOperatorNode> {
         private final ImmutableList<T> list;

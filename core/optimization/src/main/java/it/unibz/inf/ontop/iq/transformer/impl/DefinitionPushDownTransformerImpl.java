@@ -128,12 +128,12 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
                 .boxed()
                 .findAny()
                 .map(i -> IntStream.range(0, children.size())
-                        .mapToObj(j -> i.equals(j)
+                        .mapToObj(j -> i == j
                                 // Pushes down the definition to selected child
                                 ? children.get(j).acceptTransformer(this)
                                 : children.get(j))
                         .collect(ImmutableCollectors.toList()))
-                .map(newChildren -> (IQTree) iqFactory.createNaryIQTree(rootNode, newChildren))
+                .<IQTree>map(newChildren -> iqFactory.createNaryIQTree(rootNode, newChildren))
 
                 // Otherwise, blocks the definition
                 .orElseGet(() -> blockDefinition(tree));
@@ -145,13 +145,12 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
                 .map(c -> c.acceptTransformer(this))
                 .collect(ImmutableCollectors.toList());
 
-        UnionNode newRootNode = newChildren.stream()
+        ImmutableSet<Variable> newRootNodeVariables = newChildren.stream()
                 .findAny()
                 .map(IQTree::getVariables)
-                .map(iqFactory::createUnionNode)
                 .orElseThrow(() -> new MinorOntopInternalBugException("An union always have multiple children"));
 
-        return iqFactory.createNaryIQTree(newRootNode, newChildren);
+        return iqTreeTools.createUnionTree(newRootNodeVariables, newChildren);
     }
 
     @Override

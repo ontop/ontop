@@ -153,8 +153,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     .map(c -> c.applyDescendingSubstitution(downSubstitution, downConstraint, variableGenerator))
                     .collect(ImmutableCollectors.toList());
 
-            IQTree joinTree = iqFactory.createNaryIQTree(
-                    iqFactory.createInnerJoinNode(expressionAndSubstitution.getOptionalExpression()),
+            IQTree joinTree = iqTreeTools.createInnerJoinTree(
+                    expressionAndSubstitution.getOptionalExpression(),
                     newChildren);
 
             return iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, expressionAndSubstitution.getSubstitution(),
@@ -171,14 +171,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
             VariableGenerator variableGenerator) {
 
-        InnerJoinNode newJoinNode = iqFactory.createInnerJoinNode(
-                getOptionalFilterCondition().map(descendingSubstitution::apply));
-
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator))
                 .collect(ImmutableCollectors.toList());
 
-        return iqFactory.createNaryIQTree(newJoinNode, newChildren);
+        return iqTreeTools.createInnerJoinTree(
+                getOptionalFilterCondition().map(descendingSubstitution::apply),
+                newChildren);
     }
 
     @Override
@@ -448,9 +447,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     private IQTree liftUnionChild(int childIndex, NaryIQTree newUnionChild, ImmutableList<IQTree> initialChildren,
                                   VariableGenerator variableGenerator) {
 
-        UnionNode newUnionNode = iqFactory.createUnionNode(iqTreeTools.getChildrenVariables(initialChildren));
-
-        return iqFactory.createNaryIQTree(newUnionNode,
+        return iqTreeTools.createUnionTree(
+                iqTreeTools.getChildrenVariables(initialChildren),
                 newUnionChild.getChildren().stream()
                         .map(unionGrandChild -> createJoinSubtree(childIndex, unionGrandChild, initialChildren))
                         .collect(ImmutableCollectors.toList()))

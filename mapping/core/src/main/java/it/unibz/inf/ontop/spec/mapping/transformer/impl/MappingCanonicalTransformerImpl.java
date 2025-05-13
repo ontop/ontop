@@ -8,11 +8,13 @@ import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.*;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.Ontop;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
@@ -33,6 +35,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     private final UnionBasedQueryMerger queryMerger;
     private final CoreUtilsFactory coreUtilsFactory;
     private final OntopMappingSettings settings;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private MappingCanonicalTransformerImpl(CoreSingletons coreSingletons,
@@ -46,6 +49,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.atomFactory = coreSingletons.getAtomFactory();
         this.queryMerger = queryMerger;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -130,8 +134,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     private IQTree getIntensionalCanonizedTree(IQ assertion, DistinctVariableOnlyDataAtom projAtom, IntensionalDataNode intensionalDataNode) {
         return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(projAtom.getVariables()),
-                iqFactory.createNaryIQTree(
-                        iqFactory.createInnerJoinNode(),
+                iqTreeTools.createInnerJoinTree(
                         ImmutableList.of(assertion.getTree(), intensionalDataNode)));
     }
 

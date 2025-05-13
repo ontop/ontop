@@ -447,6 +447,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 .map(c -> iqTreeTools.createConstructionNodeTreeIfNontrivial(c, vars))
                 .collect(ImmutableCollectors.toList());
 
-        return ImmutableList.of(iqFactory.createNaryIQTree(iqFactory.createUnionNode(vars), unionChildren));
+        return ImmutableList.of(iqTreeTools.createUnionTree(vars, unionChildren));
     }
 }

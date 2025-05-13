@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
@@ -33,6 +34,7 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
     protected final TermFactory termFactory;
     protected final SubstitutionFactory substitutionFactory;
     protected final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
+    protected final IQTreeTools iqTreeTools;
 
     protected AbstractLJTransformer(Supplier<VariableNullability> variableNullabilitySupplier,
                                     VariableGenerator variableGenerator,
@@ -48,6 +50,7 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
         this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override

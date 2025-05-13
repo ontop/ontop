@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -16,6 +17,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBAndFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBOrFunctionSymbol;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
+
+import java.util.Optional;
 
 /**
  * The CDataDynamoDB driver seems to be struggling with the boolean operators AND and OR.
@@ -25,11 +28,13 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
 
     private final TermFactory termFactory;
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     protected ReformulateConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {
         this.termFactory = coreSingletons.getTermFactory();
         this.iqFactory = coreSingletons.getIQFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -74,8 +79,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
             if (newExpression.isEmpty() || newExpression.equals(expression))
                 return super.transformInnerJoin(tree, rootNode, children);
 
-            return iqFactory.createNaryIQTree(
-                    iqFactory.createInnerJoinNode((ImmutableExpression) newExpression.get()),
+            return iqTreeTools.createInnerJoinTree(Optional.of((ImmutableExpression) newExpression.get()),
                     children.stream()
                             .map(child -> child.acceptTransformer(this))
                             .collect(ImmutableCollectors.toList()));

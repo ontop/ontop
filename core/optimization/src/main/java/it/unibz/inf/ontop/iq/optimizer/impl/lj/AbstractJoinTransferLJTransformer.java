@@ -238,8 +238,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
                 .map(n -> n.transformForTransfer(variableGenerator))
                 .collect(ImmutableCollectors.toList());
 
-        IQTree newLeftChild = iqFactory.createNaryIQTree(
-                iqFactory.createInnerJoinNode(),
+        IQTree newLeftChild = iqTreeTools.createInnerJoinTree(
                 Stream.concat(
                         Stream.of(leftChild),
                         nodesToTransferAndReplacements.stream()

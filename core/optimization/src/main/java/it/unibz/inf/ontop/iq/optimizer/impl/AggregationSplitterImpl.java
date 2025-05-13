@@ -229,15 +229,12 @@ public class AggregationSplitterImpl implements AggregationSplitter {
                             case 0:
                                 throw new MinorOntopInternalBugException("Should not be empty");
                             case 1:
-                                return iqTreeTools.createAncestorsUnaryIQTree(nodes, g.get(0));
+                                return g.get(0);
                             default:
-                                IQTree lowUnion = iqFactory.createNaryIQTree(
-                                        iqFactory.createUnionNode(initialAggregationNode.getChildVariables()),
-                                        g);
-
-                                return iqTreeTools.createAncestorsUnaryIQTree(nodes, lowUnion);
+                                return iqTreeTools.createUnionTree(initialAggregationNode.getChildVariables(), g);
                         }
                     })
+                    .map(t -> iqTreeTools.createAncestorsUnaryIQTree(nodes, t))
                     .map(t -> renameSomeUnprojectedVariables(t, nonGroupingVariables))
                     .collect(ImmutableCollectors.toList());
 

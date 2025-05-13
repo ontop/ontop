@@ -92,8 +92,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                 .map(c -> iqTreeTools.createConstructionNodeTreeIfNontrivial(c, unionVariables))
                 .collect(ImmutableCollectors.toList());
 
-        IQTree unionTree = iqFactory.createNaryIQTree(iqFactory.createUnionNode(unionVariables),
-                unionChildren);
+        IQTree unionTree = iqTreeTools.createUnionTree(unionVariables, unionChildren);
 
         return Optional.of(iqFactory.createIQ(projectionAtom, unionTree));
     }

@@ -240,8 +240,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             var pushedIntensionalNode = iqFactory.createIntensionalDataNode(
                     (DataAtom<AtomPredicate>)(DataAtom<?>)pushedDataAtom);
 
-            return iqFactory.createNaryIQTree(
-                    iqFactory.createUnionNode(newProjectedVariables),
+            return iqTreeTools.createUnionTree(newProjectedVariables,
                     child.getChildren().stream()
                             .map(c -> pushDataAtomIntoChildOfUnion(c, pushedIntensionalNode))
                             .collect(ImmutableCollectors.toList()));
@@ -263,8 +262,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             }
 
             // Other children: join with the pushed down intentional node
-            return iqFactory.createNaryIQTree(
-                    iqFactory.createInnerJoinNode(),
+            return iqTreeTools.createInnerJoinTree(
                     ImmutableList.of(tree, pushedIntensionalNode));
         }
 

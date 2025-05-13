@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
@@ -171,6 +172,7 @@ public class JsonUnionLens extends JsonLens {
         TermFactory termFactory = coreSingletons.getTermFactory();
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         AtomFactory atomFactory = coreSingletons.getAtomFactory();
+        IQTreeTools iqTreeTools = coreSingletons.getIQTreeTools();
 
         //Get list of all projected variables (including provenance column, if applicable)
         ImmutableMap<String, Variable> projectedVariablesMap = this.extractProjectedVariables(dbParameters, parentCacheMetadataLookup);
@@ -213,8 +215,7 @@ public class JsonUnionLens extends JsonLens {
 
 
         //Create union of children
-        UnionNode union = iqFactory.createUnionNode(allProjectedVariables);
-        IQTree iqTree = iqFactory.createNaryIQTree(union, extendedChildren);
+        IQTree iqTree = iqTreeTools.createUnionTree(allProjectedVariables, extendedChildren);
 
         if (this.makeDistinct)
             iqTree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(), iqTree);

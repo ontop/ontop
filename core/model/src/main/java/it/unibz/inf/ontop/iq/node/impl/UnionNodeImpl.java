@@ -476,14 +476,14 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .filter(c -> !c.isDeclaredAsEmpty())
                 .collect(ImmutableCollectors.toList());
 
+        ImmutableSet<Variable> variables = iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables);
         switch (updatedChildren.size()) {
             case 0:
-                return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables));
+                return iqFactory.createEmptyNode(variables);
             case 1:
                 return updatedChildren.get(0);
             default:
-                UnionNode newRootNode = iqFactory.createUnionNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables));
-                return iqFactory.createNaryIQTree(newRootNode, updatedChildren);
+                return iqTreeTools.createUnionTree(variables, updatedChildren);
         }
     }
 
@@ -497,8 +497,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator))
                 .collect(ImmutableCollectors.toList());
 
-        UnionNode newRootNode = iqFactory.createUnionNode(updatedProjectedVariables);
-        return iqFactory.createNaryIQTree(newRootNode, updatedChildren);
+        return iqTreeTools.createUnionTree(updatedProjectedVariables, updatedChildren);
     }
 
     @Override
@@ -556,9 +555,8 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 mergedSubstitution.transform(ImmutableTerm::simplify));
 
         ImmutableSet<Variable> unionVariables = newRootNode.getChildVariables();
-        UnionNode newUnionNode = iqFactory.createUnionNode(unionVariables);
 
-        NaryIQTree unionIQ = iqFactory.createNaryIQTree(newUnionNode,
+        IQTree unionIQ = iqTreeTools.createUnionTree(unionVariables,
                 IntStream.range(0, liftedChildrenDecompositions.size())
                         .mapToObj(i -> updateChild(
                                 liftedChildrenDecompositions.get(i).getNode(),

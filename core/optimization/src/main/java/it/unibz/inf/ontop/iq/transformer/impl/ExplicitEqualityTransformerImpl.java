@@ -129,9 +129,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             ImmutableList<IQTree> updatedChildren = updateJoinChildren(substitutions, children);
 
             return iqTreeTools.createIQTreeWithSignature(tree.getVariables(),
-                    iqFactory.createNaryIQTree(
-                            iqFactory.createInnerJoinNode(updatedJoinCondition),
-                            updatedChildren));
+                    iqTreeTools.createInnerJoinTree(updatedJoinCondition, updatedChildren));
         }
 
         @Override
@@ -266,10 +264,10 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             if (filterChildExpressions.isEmpty())
                 return tree;
 
-            return iqFactory.createNaryIQTree(
-                    iqFactory.createInnerJoinNode(termFactory.getConjunction(
+            return iqTreeTools.createInnerJoinTree(
+                    termFactory.getConjunction(
                             rootNode.getOptionalFilterCondition(),
-                            filterChildExpressions.stream())),
+                            filterChildExpressions.stream()),
                     UnaryIQTreeDecomposition.getTails(childrenFilters));
         }
 

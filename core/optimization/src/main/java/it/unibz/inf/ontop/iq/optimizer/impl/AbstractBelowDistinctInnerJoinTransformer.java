@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.TrueNode;
@@ -24,11 +25,13 @@ public abstract class AbstractBelowDistinctInnerJoinTransformer extends Abstract
 
     protected final IntermediateQueryFactory iqFactory;
     protected final TermFactory termFactory;
+    protected final IQTreeTools iqTreeTools;
 
     protected AbstractBelowDistinctInnerJoinTransformer(IQTreeTransformer lookForDistinctTransformer, CoreSingletons coreSingletons) {
         super(lookForDistinctTransformer, coreSingletons);
         iqFactory = coreSingletons.getIQFactory();
         termFactory = coreSingletons.getTermFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -55,10 +58,8 @@ public abstract class AbstractBelowDistinctInnerJoinTransformer extends Abstract
         Optional<ImmutableExpression> expression = termFactory.getConjunction(optionalFilterCondition,
                 variablesToFilterNulls.stream().map(termFactory::getDBIsNotNull));
 
-        InnerJoinNode innerJoinNode = iqFactory.createInnerJoinNode(expression);
-
         // NB: will be normalized later on
-        return Optional.of(iqFactory.createNaryIQTree(innerJoinNode, ImmutableList.copyOf(currentChildren)));
+        return Optional.of(iqTreeTools.createInnerJoinTree(expression, ImmutableList.copyOf(currentChildren)));
     }
 
     /**

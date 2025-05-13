@@ -244,8 +244,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     if (rightChild.isDistinct())
                         return true;
 
-                    IQTree innerJoinTree = iqFactory.createNaryIQTree(
-                            iqFactory.createInnerJoinNode(ljCondition),
+                    IQTree innerJoinTree = iqTreeTools.createInnerJoinTree(
+                            ljCondition,
                             ImmutableList.of(leftChild, rightChild));
 
                     return innerJoinTree.isDistinct();
@@ -260,8 +260,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 public Optional<LJNormalizationState> transformInnerJoin(NaryIQTree liftedLeftChild, InnerJoinNode joinNode, ImmutableList<IQTree> leftGrandChildren) {
                     Optional<ImmutableExpression> joinCondition = joinNode.getOptionalFilterCondition();
                     if (joinCondition.isPresent()) {
-                        NaryIQTree newLeftChild = iqFactory.createNaryIQTree(
-                                iqFactory.createInnerJoinNode(), leftGrandChildren);
+                        NaryIQTree newLeftChild = iqTreeTools.createInnerJoinTree(leftGrandChildren);
                         // lifts the filter from the join, but stops recursion on the next iteration
                         return leftLift(iqFactory.createFilterNode(joinCondition.get()), ljCondition, newLeftChild, rightChild);
                     }
@@ -355,8 +354,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     if (joinCondition.isPresent()) {
                         ImmutableExpression newLJCondition = iqTreeTools.getConjunction(ljCondition, joinCondition.get());
 
-                        NaryIQTree newRightChild = iqFactory.createNaryIQTree(
-                                iqFactory.createInnerJoinNode(), grandChildren);
+                        NaryIQTree newRightChild = iqTreeTools.createInnerJoinTree(grandChildren);
 
                         return rightLift(Optional.of(newLJCondition), newRightChild);
                     }
@@ -406,8 +404,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         public Optional<LJNormalizationState> transformInnerJoin(NaryIQTree tree, InnerJoinNode joinNode, ImmutableList<IQTree> grandGrandChildren) {
                             Optional<ImmutableExpression> joinCondition = joinNode.getOptionalFilterCondition();
                             if (joinCondition.isPresent()) {
-                                NaryIQTree newRightGrandChild = iqFactory.createNaryIQTree(
-                                        iqFactory.createInnerJoinNode(), grandGrandChildren);
+                                NaryIQTree newRightGrandChild = iqTreeTools.createInnerJoinTree(grandGrandChildren);
 
                                 IQTree newRightChild = createSubTreeWithProvenance(provenanceVariable,
                                         newRightGrandChild, Sets.union(rightChildRequiredVariables, joinCondition.get().getVariables()));

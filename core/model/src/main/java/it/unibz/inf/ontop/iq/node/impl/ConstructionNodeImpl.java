@@ -160,7 +160,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         if (union.isPresent()
                 && union.getNode().hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
             ImmutableList<IQTree> newChildren = iqTreeTools.createUnaryOperatorChildren(this, newChild);
-            return iqFactory.createNaryIQTree(iqFactory.createUnionNode(getVariables()), newChildren);
+            return iqTreeTools.createUnionTree(getVariables(), newChildren);
         }
         return iqFactory.createUnaryIQTree(this, newChild);
     }
