@@ -23,13 +23,11 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.BinaryNonCommutativeIQTreeDecomposition;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
 
@@ -64,7 +62,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
     public IQTree normalizeForOptimization(InnerJoinNode innerJoinNode, ImmutableList<IQTree> children,
                                            VariableGenerator variableGenerator, IQTreeCache treeCache) {
         Context context = new Context(innerJoinNode, children, variableGenerator, treeCache);
-        return context.optimize();
+        return context.normalize();
     }
 
     private class Context {
@@ -84,12 +82,13 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             this.projectedVariables = iqTreeTools.getChildrenVariables(initialChildren);
         }
 
-        IQTree optimize() {
+        IQTree normalize() {
             // Non-final
             State state = new State(UnaryOperatorSequence.of(), innerJoinNode.getOptionalFilterCondition(), initialChildren);
 
             for (int i = 0; i < MAX_ITERATIONS; i++) {
-                State newState = liftBindingsAndDistincts(state)
+                State newState = state
+                        .liftBindingsAndDistincts()
                         .liftFilterInnerJoinProjectingConstruction();
 
                 if (newState.equals(state))
@@ -100,30 +99,6 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             throw new MinorOntopInternalBugException("InnerJoin.liftBinding() did not converge after " + MAX_ITERATIONS);
         }
 
-        /**
-         * Lifts bindings but children still project away irrelevant variables
-         * (needed for limiting as much as possible the number of variables on which DISTINCT is applied)
-         * <p>
-         * NB: Note that this number is not guaranteed to be minimal. However, it is guaranteed to be sound.
-         */
-        private State liftBindingsAndDistincts(State initialState) {
-
-            // Non-final
-            State state = initialState;
-
-            for (int i = 0; i < MAX_ITERATIONS; i++) {
-                State newState = state
-                        .propagateDownCondition()
-                        .liftBindings()
-                        .liftDistincts();
-
-                if (newState.equals(state))
-                    return newState;
-                state = newState;
-            }
-
-            throw new MinorOntopInternalBugException("InnerJoin.liftBinding() did not converge after " + MAX_ITERATIONS);
-        }
 
         /**
          * A sequence of ConstructionNode and DistinctNode, followed by an InnerJoinNode,
@@ -143,21 +118,18 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 this.children = children;
             }
 
-            private State update(Optional<ImmutableExpression> newCondition,
-                                 ImmutableList<IQTree> newChildren) {
+            State update(Optional<ImmutableExpression> newCondition, ImmutableList<IQTree> newChildren) {
                 return new State(ancestors, newCondition, newChildren);
             }
 
-            private State update(Optional<? extends UnaryOperatorNode> newParent, Optional<ImmutableExpression> newCondition,
-                                 ImmutableList<IQTree> newChildren) {
-
+            State update(Optional<? extends UnaryOperatorNode> newParent, Optional<ImmutableExpression> newCondition, ImmutableList<IQTree> newChildren) {
                 return new State(ancestors.append(newParent), newCondition, newChildren);
             }
 
             /**
              * No child is interpreted as EMPTY
              */
-            private State declareAsEmpty() {
+            State declareAsEmpty() {
                 EmptyNode emptyChild = iqFactory.createEmptyNode(projectedVariables);
                 return new State(UnaryOperatorSequence.of(), Optional.empty(), ImmutableList.of(emptyChild));
             }
@@ -175,18 +147,33 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             }
 
 
-            public State liftBindings() {
+            /**
+             * Lifts bindings but children still project away irrelevant variables
+             * (needed for limiting as much as possible the number of variables on which DISTINCT is applied)
+             * <p>
+             * NB: Note that this number is not guaranteed to be minimal. However, it is guaranteed to be sound.
+             */
+            State liftBindingsAndDistincts() {
                 // Non-final
                 State state = this;
 
-                for (int i = 0; i < BINDING_LIFT_ITERATIONS; i++) {
-                    State newState = state.normalizeChildren().liftOneChildBinding();
+                for (int i = 0; i < MAX_ITERATIONS; i++) {
+                    State newState = state
+                            .propagateDownCondition()
+                            .liftBindings()
+                            .liftDistincts();
 
                     if (newState.equals(state))
                         return newState;
                     state = newState;
                 }
-                return state;
+
+                throw new MinorOntopInternalBugException("InnerJoin.liftBinding() did not converge after " + MAX_ITERATIONS);
+            }
+
+            State liftBindings() {
+                return IQStateOptionalTransformer.reachFinalState(
+                        this, State::normalizeChildren, State::liftOneChildBinding);
             }
 
             State normalizeChildren() {
@@ -202,17 +189,16 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 return update(joiningCondition, liftedChildren);
             }
 
-            State liftOneChildBinding() {
+            Optional<State> liftOneChildBinding() {
                 return IntStream.range(0, children.size())
                         .mapToObj(i -> children.get(i).acceptVisitor(new IQStateOptionalTransformer<State>() {
                             @Override
-                            public Optional<State> transformConstruction(UnaryIQTree tree, ConstructionNode constructionNode, IQTree child) {
-                                return liftBinding(i, constructionNode, child);
+                            public Optional<State> transformConstruction(UnaryIQTree tree, ConstructionNode constructionNode, IQTree grandChild) {
+                                return liftBinding(i, constructionNode, grandChild);
                             }
                         }))
                         .flatMap(Optional::stream)
-                        .findFirst()
-                        .orElse(this);
+                        .findFirst();
             }
 
             Optional<State> liftBinding(int position, ConstructionNode constructionNode, IQTree grandChild) {
@@ -240,7 +226,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             }
 
 
-            private State convertIntoState(
+            State convertIntoState(
                     ImmutableList<IQTree> liftedChildren, IQTree selectedGrandChildWithLimitedProjection, int selectedChildPosition,
                     Optional<ImmutableExpression> notNormalizedCondition, Substitution<ImmutableTerm> ascendingSubstitution,
                     Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
@@ -265,7 +251,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 return update(newParent, newCondition, newChildren);
             }
 
-            public IQTree asIQTree() {
+            IQTree asIQTree() {
                 IQTreeCache normalizedTreeCache = treeCache.declareAsNormalizedForOptimizationWithEffect();
 
                 IQTree joinLevelTree = createJoinOrFilterOrEmptyOrLiftLeft(normalizedTreeCache);
@@ -281,26 +267,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 return nonNormalizedTree.normalizeForOptimization(variableGenerator);
             }
 
-            /**
-             * For safety (although conflicts are unlikely to appear)
-             */
-            private boolean isLeftJoinToLiftAboveJoin(int i) {
-                IQTree currentChild = children.get(i);
-                var leftJoin = BinaryNonCommutativeIQTreeDecomposition.of(currentChild, LeftJoinNode.class);
-                if (leftJoin.isPresent()) {
-                    Set<Variable> rightSpecificVariables = Sets.difference(
-                            leftJoin.getRightChild().getVariables(),
-                            leftJoin.getLeftChild().getVariables());
 
-                    return IntStream.range(0, children.size())
-                            .filter(j -> i != j)
-                            .allMatch(j -> Sets.intersection(children.get(j).getVariables(), rightSpecificVariables).isEmpty());
-                }
-                return false;
-            }
-
-
-            private IQTree createJoinOrFilterOrEmptyOrLiftLeft(IQTreeCache normalizedTreeCache) {
+            IQTree createJoinOrFilterOrEmptyOrLiftLeft(IQTreeCache normalizedTreeCache) {
                 switch (children.size()) {
                     case 0:
                         return iqFactory.createTrueNode();
@@ -308,7 +276,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                         IQTree uniqueChild = children.get(0);
                         return iqTreeTools.createOptionalUnaryIQTree(joiningCondition.map(iqFactory::createFilterNode), uniqueChild);
                     default:
-                        return liftLeftJoin()
+                        return liftOneLeftJoin()
                                 .orElseGet(() -> iqFactory.createNaryIQTree(
                                         iqFactory.createInnerJoinNode(joiningCondition),
                                         children, normalizedTreeCache));
@@ -318,40 +286,47 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             /**
              * Puts the LJ above the inner join if possible
              */
-            protected Optional<IQTree> liftLeftJoin() {
-                OptionalInt ljChildToLiftIndex = IntStream.range(0, children.size())
-                        .filter(this::isLeftJoinToLiftAboveJoin)
+            Optional<IQTree> liftOneLeftJoin() {
+                return IntStream.range(0, children.size())
+                        .mapToObj(i -> children.get(i).acceptVisitor(new IQStateOptionalTransformer<IQTree>() {
+                            @Override
+                            public Optional<IQTree> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode node, IQTree leftChild, IQTree rightChild) {
+                                return liftLeftJoin(i, node, leftChild, rightChild);
+                            }
+                        }))
+                        .flatMap(Optional::stream)
                         .findFirst();
+            }
 
-                if (ljChildToLiftIndex.isEmpty())
+            Optional<IQTree> liftLeftJoin(int index, LeftJoinNode node, IQTree leftChild, IQTree rightChild) {
+
+                // For safety (although conflicts are unlikely to appear)
+                Set<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables());
+
+                if (!IntStream.range(0, children.size())
+                        .filter(i -> i != index)
+                        .mapToObj(children::get)
+                        .map(IQTree::getVariables)
+                        .allMatch(v -> Sets.intersection(v, rightSpecificVariables).isEmpty()))
                     return Optional.empty();
-
-                int index = ljChildToLiftIndex.getAsInt();
-                var ljChild = BinaryNonCommutativeIQTreeDecomposition.of(children.get(index), LeftJoinNode.class);
 
                 NaryIQTree newJoinOnLeft = iqFactory.createNaryIQTree(
                         iqFactory.createInnerJoinNode(),
-                        Stream.concat(
-                                        Stream.of(ljChild.getLeftChild()),
+                        Stream.concat(Stream.of(leftChild),
                                         IntStream.range(0, children.size())
                                                 .filter(i -> i != index)
                                                 .mapToObj(children::get))
                                 .collect(ImmutableCollectors.toList()));
 
-                IQTree newTree = iqTreeTools.createOptionalUnaryIQTree(
+                return Optional.of(iqTreeTools.createOptionalUnaryIQTree(
                         joiningCondition.map(iqFactory::createFilterNode),
-                        iqFactory.createBinaryNonCommutativeIQTree(
-                                ljChild.getNode(),
-                                newJoinOnLeft,
-                                ljChild.getRightChild()));
-
-                return Optional.of(newTree);
+                        iqFactory.createBinaryNonCommutativeIQTree(node, newJoinOnLeft, rightChild)));
             }
 
             /**
              * TODO: collect the constraint
              */
-            public State propagateDownCondition() {
+            State propagateDownCondition() {
                 // TODO: consider that case as well
                 if (joiningCondition.isEmpty())
                     return this;
@@ -389,7 +364,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 }
             }
 
-            public State liftDistincts() {
+            State liftDistincts() {
                 Optional<DistinctNode> distinctNode = children.stream()
                         .map(c -> UnaryIQTreeDecomposition.of(c, DistinctNode.class))
                         .map(UnaryIQTreeDecomposition::getOptionalNode)
@@ -406,7 +381,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 return this;
             }
 
-            private boolean isDistinct() {
+            boolean isDistinct() {
                 if (children.stream().allMatch(IQTree::isDistinct))
                     return true;
 
