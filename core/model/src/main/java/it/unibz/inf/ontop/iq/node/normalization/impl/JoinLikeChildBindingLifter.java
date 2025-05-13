@@ -37,21 +37,19 @@ public class JoinLikeChildBindingLifter {
     /**
      * For children of a commutative join or for the left child of a LJ
      */
-    public <R> R liftRegularChildBinding(ConstructionNode selectedChildConstructionNode,
+    public BindingLift liftRegularChildBinding(ConstructionNode selectedChildConstructionNode,
                                          int selectedChildPosition,
-                                         IQTree selectedGrandChild,
                                          ImmutableList<IQTree> children,
                                          ImmutableSet<Variable> nonLiftableVariables,
                                          Optional<ImmutableExpression> initialJoiningCondition,
                                          VariableGenerator variableGenerator,
-                                         VariableNullability variableNullability,
-                                         BindingLiftConverter<R> bindingLiftConverter) throws UnsatisfiableConditionException {
+                                         VariableNullability variableNullability) throws UnsatisfiableConditionException {
 
-        Substitution<ImmutableTerm> selectedChildSubstitution = selectedChildConstructionNode.getSubstitution();
+        Substitution<ImmutableTerm> substitution = selectedChildConstructionNode.getSubstitution();
 
-        Substitution<VariableOrGroundTerm> downPropagableFragment = selectedChildSubstitution.restrictRangeTo(VariableOrGroundTerm.class);
+        Substitution<VariableOrGroundTerm> downPropagableFragment = substitution.restrictRangeTo(VariableOrGroundTerm.class);
 
-        Substitution<ImmutableFunctionalTerm> nonDownPropagableFragment = selectedChildSubstitution.restrictRangeTo(ImmutableFunctionalTerm.class);
+        Substitution<ImmutableFunctionalTerm> nonDownPropagableFragment = substitution.restrictRangeTo(ImmutableFunctionalTerm.class);
 
         ImmutableSet<Variable> otherChildrenVariables = IntStream.range(0, children.size())
                 .filter(i -> i != selectedChildPosition)
@@ -63,10 +61,10 @@ public class JoinLikeChildBindingLifter {
                 .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
         Stream<ImmutableExpression> equalities = freshRenaming.builder()
-                .toStream((v, t) -> termFactory.getStrictEquality(selectedChildSubstitution.apply(v), t));
+                .toStream((v, t) -> termFactory.getStrictEquality(substitution.apply(v), t));
 
         ConditionSimplifier.ExpressionAndSubstitution expressionResults = conditionSimplifier.simplifyCondition(
-                termFactory.getConjunction(initialJoiningCondition.map(selectedChildSubstitution::apply), equalities),
+                termFactory.getConjunction(initialJoiningCondition.map(substitution::apply), equalities),
                 nonLiftableVariables, children, variableNullability);
 
         Optional<ImmutableExpression> newCondition = expressionResults.getOptionalExpression();
@@ -74,23 +72,38 @@ public class JoinLikeChildBindingLifter {
         // NB: this substitution is said to be "naive" as further restrictions may be applied
         // to the effective ascending substitution (e.g., for the LJ, in the case of the renaming of right-specific vars)
         Substitution<ImmutableTerm> naiveAscendingSubstitution =
-                expressionResults.getSubstitution().compose(selectedChildSubstitution);
+                expressionResults.getSubstitution().compose(substitution);
 
         Substitution<VariableOrGroundTerm> descendingSubstitution =
                 substitutionFactory.onVariableOrGroundTerms().compose(
                         expressionResults.getSubstitution(),
                         substitutionFactory.union(freshRenaming, downPropagableFragment.removeFromDomain(freshRenaming.getDomain())));
 
-        return bindingLiftConverter.convert(children, selectedGrandChild, selectedChildPosition, newCondition,
-                naiveAscendingSubstitution, descendingSubstitution);
+        return new BindingLift(newCondition, naiveAscendingSubstitution, descendingSubstitution);
     }
 
-    @FunctionalInterface
-    public interface BindingLiftConverter<R> {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    public static class BindingLift {
+        private final Optional<ImmutableExpression> newCondition;
+        private final Substitution<ImmutableTerm> ascendingSubstitution;
+        private final Substitution<? extends VariableOrGroundTerm> descendingSubstitution;
 
-        R convert(ImmutableList<IQTree> liftedChildren, IQTree selectedGrandChild, int selectedChildPosition,
-                  Optional<ImmutableExpression> newCondition,
-                  Substitution<ImmutableTerm> ascendingSubstitution,
-                  Substitution<? extends VariableOrGroundTerm> descendingSubstitution);
+        private BindingLift(Optional<ImmutableExpression> newCondition, Substitution<ImmutableTerm> ascendingSubstitution, Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+            this.newCondition = newCondition;
+            this.ascendingSubstitution = ascendingSubstitution;
+            this.descendingSubstitution = descendingSubstitution;
+        }
+
+        public Optional<ImmutableExpression> getCondition() {
+            return newCondition;
+        }
+
+        public Substitution<ImmutableTerm> getAscendingSubstitution() {
+            return ascendingSubstitution;
+        }
+
+        public Substitution<? extends VariableOrGroundTerm> getDescendingSubstitution() {
+            return descendingSubstitution;
+        }
     }
 }

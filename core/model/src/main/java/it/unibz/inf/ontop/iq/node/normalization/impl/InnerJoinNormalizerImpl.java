@@ -36,7 +36,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
     private static final int MAX_ITERATIONS = 10000;
     private static final int BINDING_LIFT_ITERATIONS = 1000;
 
-    private final JoinLikeChildBindingLifter bindingLift;
+    private final JoinLikeChildBindingLifter bindingLifter;
     private final IntermediateQueryFactory iqFactory;
     private final ConstructionSubstitutionNormalizer substitutionNormalizer;
     private final ConditionSimplifier conditionSimplifier;
@@ -45,12 +45,12 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
     private final IQTreeTools iqTreeTools;
 
     @Inject
-    private InnerJoinNormalizerImpl(JoinLikeChildBindingLifter bindingLift, IntermediateQueryFactory iqFactory,
+    private InnerJoinNormalizerImpl(JoinLikeChildBindingLifter bindingLifter, IntermediateQueryFactory iqFactory,
                                     ConstructionSubstitutionNormalizer substitutionNormalizer,
                                     ConditionSimplifier conditionSimplifier, TermFactory termFactory,
                                     JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                     IQTreeTools iqTreeTools) {
-        this.bindingLift = bindingLift;
+        this.bindingLifter = bindingLifter;
         this.iqFactory = iqFactory;
         this.substitutionNormalizer = substitutionNormalizer;
         this.conditionSimplifier = conditionSimplifier;
@@ -205,51 +205,44 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 if (constructionNode.getSubstitution().isEmpty())
                     return Optional.empty();
 
-                IQTree selectedGrandChildWithLimitedProjection =
-                        iqTreeTools.createConstructionNodeTreeIfNontrivial(grandChild, constructionNode.getChildVariables());
-
-                VariableNullability newChildrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(
-                        IntStream.range(0, children.size())
-                                .mapToObj(i -> i == position ? selectedGrandChildWithLimitedProjection : children.get(i))
-                                .collect(ImmutableCollectors.toList()));
-
                 try {
-                    return Optional.of(bindingLift.liftRegularChildBinding(constructionNode,
+                    IQTree selectedGrandChildWithLimitedProjection =
+                            iqTreeTools.createConstructionNodeTreeIfNontrivial(grandChild, constructionNode.getChildVariables());
+
+                    var provisionalNewChildren = IntStream.range(0, children.size())
+                            .mapToObj(i -> i == position ? selectedGrandChildWithLimitedProjection : children.get(i))
+                            .collect(ImmutableCollectors.toList());
+
+                    var bindingLift = bindingLifter.liftRegularChildBinding(
+                            constructionNode,
                             position,
-                            selectedGrandChildWithLimitedProjection,
-                            children, ImmutableSet.of(), joiningCondition, variableGenerator,
-                            newChildrenVariableNullability, this::convertIntoState));
+                            children,
+                            ImmutableSet.of(),
+                            joiningCondition,
+                            variableGenerator,
+                            variableNullabilityTools.getChildrenVariableNullability(provisionalNewChildren));
+
+                    ConstructionSubstitutionNormalization normalization = substitutionNormalizer
+                            .normalizeSubstitution(bindingLift.getAscendingSubstitution(), iqTreeTools.getChildrenVariables(children));
+
+                    Optional<ImmutableExpression> newCondition = bindingLift.getCondition()
+                            .map(normalization::updateExpression);
+
+                    Substitution<? extends VariableOrGroundTerm> descendingSubstitution = bindingLift.getDescendingSubstitution();
+                    ImmutableList<IQTree> newChildren = provisionalNewChildren.stream()
+                            .map(c -> c.applyDescendingSubstitution(descendingSubstitution, newCondition, variableGenerator))
+                            .map(c -> normalization.updateChild(c, variableGenerator))
+                            .collect(ImmutableCollectors.toList());
+
+                    Optional<ConstructionNode> newParent = normalization.generateTopConstructionNode();
+
+                    return Optional.of(update(newParent, newCondition, newChildren));
                 }
                 catch (UnsatisfiableConditionException e) {
                     return Optional.of(declareAsEmpty());
                 }
             }
 
-
-            State convertIntoState(
-                    ImmutableList<IQTree> liftedChildren, IQTree selectedGrandChildWithLimitedProjection, int selectedChildPosition,
-                    Optional<ImmutableExpression> notNormalizedCondition, Substitution<ImmutableTerm> ascendingSubstitution,
-                    Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-
-                if (liftedChildren != children)
-                    throw new MinorOntopInternalBugException("unexpected lifted children");
-
-                ConstructionSubstitutionNormalization normalization = substitutionNormalizer
-                        .normalizeSubstitution(ascendingSubstitution, iqTreeTools.getChildrenVariables(children));
-
-                Optional<ImmutableExpression> newCondition = notNormalizedCondition
-                        .map(normalization::updateExpression);
-
-                Optional<ConstructionNode> newParent = normalization.generateTopConstructionNode();
-
-                ImmutableList<IQTree> newChildren = IntStream.range(0, children.size())
-                        .mapToObj(i -> i == selectedChildPosition ? selectedGrandChildWithLimitedProjection : children.get(i))
-                        .map(c -> c.applyDescendingSubstitution(descendingSubstitution, newCondition, variableGenerator))
-                        .map(c -> normalization.updateChild(c, variableGenerator))
-                        .collect(ImmutableCollectors.toList());
-
-                return update(newParent, newCondition, newChildren);
-            }
 
             IQTree asIQTree() {
                 IQTreeCache normalizedTreeCache = treeCache.declareAsNormalizedForOptimizationWithEffect();

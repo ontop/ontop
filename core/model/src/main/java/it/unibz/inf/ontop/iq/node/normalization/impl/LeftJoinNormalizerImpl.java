@@ -192,13 +192,32 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 @Override
                 public Optional<LJNormalizationState> transformConstruction(UnaryIQTree liftedLeftChild, ConstructionNode leftConstructionNode, IQTree leftGrandChild) {
                     try {
-                        VariableNullability childVariableNullability = variableNullabilityTools.getChildrenVariableNullability(
-                                ImmutableList.of(leftGrandChild, rightChild));
 
-                        return Optional.of(bindingLifter.liftRegularChildBinding(leftConstructionNode, 0, leftGrandChild,
-                                        ImmutableList.of(leftChild, rightChild),
-                                        leftGrandChild.getVariables(), ljCondition, variableGenerator,
-                                        childVariableNullability, this::applyLeftChildBindingLift));
+                        var bindingLift = bindingLifter.liftRegularChildBinding(
+                                leftConstructionNode,
+                                0,
+                                ImmutableList.of(leftChild, rightChild),
+                                leftGrandChild.getVariables(),
+                                ljCondition,
+                                variableGenerator,
+                                variableNullabilityTools.getChildrenVariableNullability(
+                                        ImmutableList.of(leftGrandChild, rightChild)));
+
+                        IQTree rightSubTree = rightChild.applyDescendingSubstitution(bindingLift.getDescendingSubstitution(), bindingLift.getCondition(), variableGenerator);
+
+                        ImmutableSet<Variable> leftVariables = iqTreeTools.getChildrenVariables(leftChild, leftGrandChild);
+
+                        Substitution<ImmutableTerm> naiveAscendingSubstitution = bindingLift.getAscendingSubstitution();
+                        OptionalRightProvenance rightProvenance = new OptionalRightProvenance(rightSubTree, naiveAscendingSubstitution, leftVariables);
+
+                        Optional<Variable> defaultProvenanceVariable = rightProvenance.getProvenanceVariable();
+                        Substitution<ImmutableTerm> ascendingSubstitution =
+                                naiveAscendingSubstitution.builder()
+                                        .transformOrRetain(v -> !leftVariables.contains(v) ? v : null,
+                                                (t, v) -> transformRightSubstitutionValue(t, leftVariables, defaultProvenanceVariable))
+                                        .build();
+
+                        return Optional.of(leftLift(createConstructionNode(ascendingSubstitution), bindingLift.getCondition(), leftGrandChild, rightProvenance.getRightTree()).get());
                     }
                     catch (UnsatisfiableConditionException e) {
                         // Replaces the LJ by the left child and stops recursion!
@@ -208,30 +227,6 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                 leftGrandChild,
                                 iqFactory.createEmptyNode(rightChild.getVariables()));
                     }
-                }
-
-                LJNormalizationState applyLeftChildBindingLift(
-                        ImmutableList<IQTree> children, IQTree leftGrandChild, int leftChildPosition,
-                        Optional<ImmutableExpression> ljCondition, Substitution<ImmutableTerm> naiveAscendingSubstitution,
-                        Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-
-                    if (children.size() != 2 || children.get(0) != leftChild || children.get(1) != rightChild)
-                        throw new MinorOntopInternalBugException("Two children were expected, not " + children);
-
-                    IQTree rightSubTree = rightChild.applyDescendingSubstitution(descendingSubstitution, ljCondition, variableGenerator);
-
-                    ImmutableSet<Variable> leftVariables = iqTreeTools.getChildrenVariables(leftChild, leftGrandChild);
-
-                    OptionalRightProvenance rightProvenance = new OptionalRightProvenance(rightSubTree, naiveAscendingSubstitution, leftVariables);
-
-                    Optional<Variable> defaultProvenanceVariable = rightProvenance.getProvenanceVariable();
-                    Substitution<ImmutableTerm> ascendingSubstitution =
-                            naiveAscendingSubstitution.builder()
-                                    .transformOrRetain(v -> !leftVariables.contains(v) ? v : null,
-                                            (t, v) -> transformRightSubstitutionValue(t, leftVariables, defaultProvenanceVariable))
-                                    .build();
-
-                    return leftLift(createConstructionNode(ascendingSubstitution), ljCondition, leftGrandChild, rightProvenance.getRightTree()).get();
                 }
 
                 @Override
