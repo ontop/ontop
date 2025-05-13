@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -17,6 +16,7 @@ import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormaliz
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
 import it.unibz.inf.ontop.iq.visit.impl.IQStateDefaultTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -180,7 +180,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 State state = this;
 
                 for (int i = 0; i < BINDING_LIFT_ITERATIONS; i++) {
-                    State newState = state.normalizeChildren().liftChildBinding();
+                    State newState = state.normalizeChildren().liftOneChildBinding();
 
                     if (newState.equals(state))
                         return newState;
@@ -202,48 +202,40 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 return update(joiningCondition, liftedChildren);
             }
 
-            /**
-             * Lifts the binding OF AT MOST ONE child
-             */
-            State liftChildBinding() {
+            State liftOneChildBinding() {
+                return IntStream.range(0, children.size())
+                        .mapToObj(i -> children.get(i).acceptVisitor(new IQStateOptionalTransformer<State>() {
+                            @Override
+                            public Optional<State> transformConstruction(UnaryIQTree tree, ConstructionNode constructionNode, IQTree child) {
+                                return liftBinding(i, constructionNode, child);
+                            }
+                        }))
+                        .flatMap(Optional::stream)
+                        .findFirst()
+                        .orElse(this);
+            }
 
-                var optionalSelectedLiftedChild = IntStream.range(0, children.size())
-                        .mapToObj(i -> Maps.immutableEntry(i, UnaryIQTreeDecomposition.of(children.get(i), ConstructionNode.class)))
-                        .filter(e -> e.getValue().isPresent())
-                        .filter(e -> !e.getValue().getNode().getSubstitution().isEmpty())
-                        .findFirst();
-
-                /*
-                 * No substitution to lift
-                 */
-                if (optionalSelectedLiftedChild.isEmpty())
-                    return this;
-
-                int selectedChildPosition = optionalSelectedLiftedChild.get().getKey();
-                var selectedLiftedChild = optionalSelectedLiftedChild.get().getValue();
-
-                ConstructionNode selectedChildConstructionNode = selectedLiftedChild.getNode();
-                IQTree selectedGrandChild = selectedLiftedChild.getChild();
-
-                ImmutableSet<Variable> requiredGrandChildVariables = selectedChildConstructionNode.getChildVariables();
+            Optional<State> liftBinding(int position, ConstructionNode constructionNode, IQTree grandChild) {
+                if (constructionNode.getSubstitution().isEmpty())
+                    return Optional.empty();
 
                 IQTree selectedGrandChildWithLimitedProjection =
-                        iqTreeTools.createConstructionNodeTreeIfNontrivial(selectedGrandChild, requiredGrandChildVariables);
+                        iqTreeTools.createConstructionNodeTreeIfNontrivial(grandChild, constructionNode.getChildVariables());
 
                 VariableNullability newChildrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(
                         IntStream.range(0, children.size())
-                                .mapToObj(i -> i == selectedChildPosition ? selectedGrandChildWithLimitedProjection : children.get(i))
+                                .mapToObj(i -> i == position ? selectedGrandChildWithLimitedProjection : children.get(i))
                                 .collect(ImmutableCollectors.toList()));
 
                 try {
-                    return bindingLift.liftRegularChildBinding(selectedChildConstructionNode,
-                            selectedChildPosition,
+                    return Optional.of(bindingLift.liftRegularChildBinding(constructionNode,
+                            position,
                             selectedGrandChildWithLimitedProjection,
                             children, ImmutableSet.of(), joiningCondition, variableGenerator,
-                            newChildrenVariableNullability, this::convertIntoState);
+                            newChildrenVariableNullability, this::convertIntoState));
                 }
                 catch (UnsatisfiableConditionException e) {
-                    return declareAsEmpty();
+                    return Optional.of(declareAsEmpty());
                 }
             }
 
@@ -254,7 +246,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
 
                 if (liftedChildren != children)
-                    throw new MinorOntopInternalBugException("unexpected liftted children");
+                    throw new MinorOntopInternalBugException("unexpected lifted children");
 
                 ConstructionSubstitutionNormalization normalization = substitutionNormalizer
                         .normalizeSubstitution(ascendingSubstitution, iqTreeTools.getChildrenVariables(children));
