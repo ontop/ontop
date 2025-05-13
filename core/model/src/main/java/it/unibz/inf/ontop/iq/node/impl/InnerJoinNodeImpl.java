@@ -430,17 +430,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     conditionSimplificationResults, extendedChildrenVariableNullability);
 
             //TODO: propagate different constraints to different children
-
-            ImmutableList<IQTree> newChildren = Optional.of(conditionSimplificationResults.getSubstitution())
-                    .filter(s -> !s.isEmpty())
-                    .map(s -> children.stream()
-                            .map(child -> child.applyDescendingSubstitution(s, downConstraint, variableGenerator))
-                            .collect(ImmutableCollectors.toList()))
-                    .orElseGet(() -> downConstraint
-                            .map(s -> children.stream()
-                                    .map(child -> child.propagateDownConstraint(s, variableGenerator))
-                                    .collect(ImmutableCollectors.toList()))
-                            .orElse(children));
+            ImmutableList<IQTree> newChildren = iqTreeTools.applyDescendingSubstitution(children,
+                    conditionSimplificationResults.getSubstitution(), downConstraint, variableGenerator);
 
             InnerJoinNode newJoin = conditionSimplificationResults.getOptionalExpression().equals(getOptionalFilterCondition())
                     ? this

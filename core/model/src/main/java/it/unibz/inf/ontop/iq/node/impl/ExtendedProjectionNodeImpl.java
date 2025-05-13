@@ -206,9 +206,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         try {
             Optional<ImmutableExpression> childConstraint = computeChildConstraint(getSubstitution(), constraint,
                     child.getVariableNullability().extendToExternalVariables(constraint.getVariableStream()));
-            IQTree newChild = childConstraint
-                    .map(c -> child.propagateDownConstraint(c, variableGenerator))
-                    .orElse(child);
+
+            IQTree newChild = iqTreeTools.propagateDownOptionalConstraint(child, childConstraint, variableGenerator);
             return iqFactory.createUnaryIQTree(this, newChild);
 
         } catch (EmptyTreeException e) {

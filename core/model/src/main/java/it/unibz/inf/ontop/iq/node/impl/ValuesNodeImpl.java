@@ -379,12 +379,12 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
         Optional<IQTree> optionalReshapedTree = tryToReshapeValuesNodeToConstructFunctionalTerm(firstStrictEquality, variableGenerator);
         if (optionalReshapedTree.isPresent()) {
-            IQTree reshapedTree = optionalReshapedTree.get();
             // Propagates down other constraints
-            return termFactory.getConjunction(constraint.flattenAND()
-                            .filter(c -> !c.equals(firstStrictEquality)))
-                    .map(c -> reshapedTree.propagateDownConstraint(c, variableGenerator))
-                    .orElse(reshapedTree);
+            return iqTreeTools.propagateDownOptionalConstraint(
+                    optionalReshapedTree.get(),
+                    termFactory.getConjunction(constraint.flattenAND()
+                            .filter(c -> !c.equals(firstStrictEquality))),
+                    variableGenerator);
         }
 
         IQTree filteredValuesNode = filterValuesNodeEntries(termFactory.getConjunction(

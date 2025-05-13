@@ -89,6 +89,16 @@ public class IQTreeTools {
                 : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(projectedVariables.get(), substitution), child);
     }
 
+    public Optional<ConstructionNode> createOptionalConstructionNode(Substitution<?> substitution, ImmutableSet<Variable> projectedVariables) {
+        return substitution.isEmpty()
+                ? Optional.empty()
+                : Optional.of(iqFactory.createConstructionNode(projectedVariables, substitution));
+    }
+
+    public Optional<FilterNode> createOptionalFilterNode(Optional<ImmutableExpression> expression) {
+        return expression.map(iqFactory::createFilterNode);
+    }
+
     public IQTree createConstructionNodeTreeIfNontrivial(IQTree child, ImmutableSet<Variable> variables) {
         return child.getVariables().equals(variables)
                 ? child
@@ -127,10 +137,28 @@ public class IQTreeTools {
                 .orElse(leftJoinNode);
     }
 
-    public InnerJoinNode updateInnerJoinNodeWithConjunct(InnerJoinNode innerJoinNode, Optional<ImmutableExpression> conjunct) {
-        return conjunct
-                .map(c -> iqFactory.createInnerJoinNode(termFactory.getConjunction(innerJoinNode.getOptionalFilterCondition(), Stream.of(c))))
-                .orElse(innerJoinNode);
+    public IQTree propagateDownOptionalConstraint(IQTree child, Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
+        return constraint.map(c -> child.propagateDownConstraint(c, variableGenerator)).orElse(child);
+    }
+
+    public IQTree applyDescendingSubstitution(IQTree child, Substitution<? extends VariableOrGroundTerm> substitution, Optional<ImmutableExpression> downConstraint, VariableGenerator variableGenerator) {
+        return Optional.of(substitution)
+                .filter(s -> !s.isEmpty())
+                .map(s -> child.applyDescendingSubstitution(s, downConstraint, variableGenerator))
+                .orElseGet(() -> propagateDownOptionalConstraint(child, downConstraint, variableGenerator));
+    }
+
+    public ImmutableList<IQTree> applyDescendingSubstitution(ImmutableList<IQTree> children, Substitution<? extends VariableOrGroundTerm> substitution, Optional<ImmutableExpression> downConstraint, VariableGenerator variableGenerator) {
+        return Optional.of(substitution)
+                .filter(s -> !s.isEmpty())
+                .map(s -> children.stream()
+                        .map(c -> c.applyDescendingSubstitution(s, downConstraint, variableGenerator))
+                        .collect(ImmutableCollectors.toList()))
+                .or(() -> downConstraint
+                        .map(cs -> children.stream()
+                                .map(c -> c.propagateDownConstraint(cs, variableGenerator))
+                                .collect(ImmutableCollectors.toList())))
+                .orElse(children);
     }
 
     public IQTree createOptionalUnaryIQTree(Optional<? extends UnaryOperatorNode> optionalNode, IQTree tree) {

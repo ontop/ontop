@@ -80,12 +80,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.of(constraint),
                     conditionSimplificationResults, extendedChildVariableNullability);
 
-            IQTree newChild = Optional.of(conditionSimplificationResults.getSubstitution())
-                    .filter(s -> !s.isEmpty())
-                    .map(s -> child.applyDescendingSubstitution(s, downConstraint, variableGenerator))
-                    .orElseGet(() -> downConstraint
-                            .map(c -> child.propagateDownConstraint(c, variableGenerator))
-                            .orElse(child));
+            IQTree newChild = iqTreeTools.applyDescendingSubstitution(child, conditionSimplificationResults.getSubstitution(), downConstraint, variableGenerator);
 
             Optional<FilterNode> filterNode = conditionSimplificationResults.getOptionalExpression()
                     .map(e -> e.equals(getFilterCondition()) ? this : iqFactory.createFilterNode(e));

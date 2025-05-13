@@ -120,11 +120,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                                 ImmutableSet<Variable> projectedVariables,
                                 VariableGenerator variableGenerator) {
 
-        ImmutableList<IQTree> newChildren = unifier.isEmpty()
-                ? children
-                : children.stream()
-                    .map(t -> t.applyDescendingSubstitution(unifier, Optional.empty(), variableGenerator))
-                    .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newChildren = iqTreeTools.applyDescendingSubstitution(children, unifier,Optional.empty(), variableGenerator);
 
         Optional<ImmutableExpression> newExpression = expression.map(unifier::apply);
 

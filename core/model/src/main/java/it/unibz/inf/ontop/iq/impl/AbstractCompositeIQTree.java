@@ -156,15 +156,11 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
                     .flatMap(s -> iqTreeTools.extractFreshRenaming(s, variables))
                     // Fresh renaming
                     .map(this::applyRestrictedFreshRenaming)
-                    .map(t -> newConstraint
-                            .map(c -> t.propagateDownConstraint(c, variableGenerator))
-                            .orElse(t))
+                    .map(t -> iqTreeTools.propagateDownOptionalConstraint(t, newConstraint, variableGenerator))
                     // Regular substitution
                     .or(() -> normalizedSubstitution
                             .map(s -> applyRegularDescendingSubstitution(s, newConstraint, variableGenerator)))
-                    .or(() -> newConstraint
-                            .map(c -> propagateDownConstraint(c, variableGenerator)))
-                    .orElse(this);
+                    .orElseGet(() -> iqTreeTools.propagateDownOptionalConstraint(this, newConstraint, variableGenerator));
         }
         catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
             return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, variables));

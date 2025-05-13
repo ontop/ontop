@@ -519,11 +519,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
 
             public LJNormalizationState propagateDownLJCondition() {
-                if (ljCondition.isPresent()) {
-                    IQTree newRightChild = rightChild.propagateDownConstraint(ljCondition.get(), variableGenerator);
-                    return update(ljCondition, leftChild, newRightChild);
-                }
-                return this;
+                return update(ljCondition, leftChild, iqTreeTools.propagateDownOptionalConstraint(rightChild, ljCondition, variableGenerator));
             }
 
             /**

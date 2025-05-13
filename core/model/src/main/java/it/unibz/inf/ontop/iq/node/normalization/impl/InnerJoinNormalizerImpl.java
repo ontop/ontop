@@ -310,16 +310,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     Optional<ImmutableExpression> newJoiningCondition = conditionSimplificationResults.getOptionalExpression();
                     // TODO: build a proper constraint (more than just the joining condition)
 
-                    ImmutableList<IQTree> newChildren = Optional.of(conditionSimplificationResults.getSubstitution())
-                            .filter(s -> !s.isEmpty())
-                            .map(s -> children.stream()
-                                    .map(child -> child.applyDescendingSubstitution(s, newJoiningCondition, variableGenerator))
-                                    .collect(ImmutableCollectors.toList()))
-                            .orElseGet(() -> newJoiningCondition
-                                    .map(s -> children.stream()
-                                            .map(child -> child.propagateDownConstraint(s, variableGenerator))
-                                            .collect(ImmutableCollectors.toList()))
-                                    .orElse(children));
+                    ImmutableList<IQTree> newChildren = iqTreeTools.applyDescendingSubstitution(
+                            children, conditionSimplificationResults.getSubstitution(), newJoiningCondition, variableGenerator);
 
                     Optional<ConstructionNode> newParent = Optional.of(conditionSimplificationResults.getSubstitution())
                             .filter(s -> !s.isEmpty())

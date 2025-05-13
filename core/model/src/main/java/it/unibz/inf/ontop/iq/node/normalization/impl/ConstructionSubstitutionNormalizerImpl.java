@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -23,12 +24,15 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private ConstructionSubstitutionNormalizerImpl(IntermediateQueryFactory iqFactory,
-                                                   SubstitutionFactory substitutionFactory) {
+                                                   SubstitutionFactory substitutionFactory,
+                                                   IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     /**
@@ -78,9 +82,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
         @Override
         public IQTree updateChild(IQTree child, VariableGenerator variableGenerator) {
-            return downRenamingSubstitution.isEmpty()
-                    ? child
-                    : child.applyDescendingSubstitution(downRenamingSubstitution, Optional.empty(), variableGenerator);
+            return iqTreeTools.applyDescendingSubstitution(child, downRenamingSubstitution,Optional.empty(), variableGenerator);
         }
 
         @Override
