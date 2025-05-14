@@ -683,8 +683,8 @@ public class ExistsTest extends AbstractRDF4JTest {
                 "http://person.example.org/person/4", "http://person.example.org/person/5", "http://person.example.org/person/6"));
     }
 
-    @Test
-    @Ignore
+    // all shared variables should be non-nullable
+    @Test(expected = QueryEvaluationException.class)
     public void testOptionalInFilterExists() {
         String sparql = "PREFIX  : <http://person.example.org/> \n" +
                 "SELECT DISTINCT ?v WHERE {\n" +
