@@ -39,14 +39,8 @@ public class JoinOrFilterVariableNullabilityTools {
 
     public VariableNullability getVariableNullability(ImmutableList<IQTree> children,
                                                       Optional<ImmutableExpression> joiningCondition) {
-        Map<Variable, Long> variableOccurrencesCount = children.stream()
-                .map(IQTree::getVariables)
-                .flatMap(Collection::stream)
-                .collect(Collectors.groupingBy(v -> v, Collectors.counting()));
 
-        ImmutableSet<Variable> coOccurringVariables = variableOccurrencesCount.entrySet().stream()
-                .filter(e -> e.getValue() > 1)
-                .map(Map.Entry::getKey)
+        ImmutableSet<Variable> coOccurringVariables = IQTreeTools.getCoOccurringVariables(children)
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableSet<ImmutableSet<Variable>> nullableGroups = children.stream()

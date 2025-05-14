@@ -164,8 +164,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
             ImmutableExpression filterCondition = iqTreeTools.getConjunction(isNullCondition, nonNullabilityCondition);
 
             IQTree minusTree = iqTreeTools.createUnaryIQTree(
-                    iqFactory.createConstructionNode(
-                            ImmutableSet.of(rightProvenance.getProvenanceVariable())),
+                    iqFactory.createConstructionNode(ImmutableSet.of(rightProvenance.getProvenanceVariable())),
                     iqFactory.createFilterNode(filterCondition),
                     iqFactory.createBinaryNonCommutativeIQTree(
                             iqFactory.createLeftJoinNode(),

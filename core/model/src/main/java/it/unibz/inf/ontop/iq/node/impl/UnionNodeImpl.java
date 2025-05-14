@@ -748,7 +748,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         IQTree newChild = liftedGrandChild
                 .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);
 
-        var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(newTheta, projectedVariables);
+        var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, newTheta);
         return iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, newChild);
     }
 

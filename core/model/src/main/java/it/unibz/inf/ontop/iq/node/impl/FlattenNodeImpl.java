@@ -167,9 +167,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         IQTree filterTree = iqFactory.createUnaryIQTree(iqFactory.createFilterNode(condition), flattenTree);
 
         return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(
-                        Sets.difference(filterTree.getVariables(), renamedBlockedSubstitution.getDomain())
-                                .immutableCopy()),
+                iqTreeTools.createProjectingConstructionNode(filterTree.getVariables(), renamedBlockedSubstitution.getDomain()),
                 filterTree);
     }
 

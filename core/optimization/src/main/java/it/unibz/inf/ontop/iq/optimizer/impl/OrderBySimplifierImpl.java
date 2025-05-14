@@ -86,11 +86,11 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
             if (newConditions.isEmpty())
                 return child;
 
-            OrderByNode newNode = iqFactory.createOrderByNode(newConditions);
-
             IQTree pushDownChildTree = pushDownDefinitions(child, definitionsToPushDown);
 
-            UnaryIQTree orderByTree = iqFactory.createUnaryIQTree(newNode, pushDownChildTree.acceptTransformer(this));
+            UnaryIQTree orderByTree = iqFactory.createUnaryIQTree(
+                    iqFactory.createOrderByNode(newConditions),
+                    pushDownChildTree.acceptTransformer(this));
 
             // Makes sure no new variable is projected by the returned tree
             ImmutableSet<Variable> childVariables = child.getVariables();

@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ValuesNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -44,6 +45,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
     private final SubstitutionFactory substitutionFactory;
     private final VariableGenerator projectedVariableGenerator;
     private final DBTypeFactory dbTypeFactory;
+    private final IQTreeTools iqTreeTools;
 
     private final FactType CLASS_IN_DEFAULT_GRAPH, PROPERTY_IN_DEFAULT_GRAPH, CLASS_IN_NON_DEFAULT_GRAPH, PROPERTY_IN_NON_DEFAULT_GRAPH;
 
@@ -52,11 +54,12 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
     protected ABoxFactIntoMappingConverterImpl(TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                                SubstitutionFactory substitutionFactory, AtomFactory atomFactory,
                                                CoreUtilsFactory coreUtilsFactory,
-                                               TypeFactory typeFactory) {
+                                               TypeFactory typeFactory, IQTreeTools iqTreeTools) {
         this.termFactory = termFactory;
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
+        this.iqTreeTools = iqTreeTools;
 
         projectedVariableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
 
@@ -204,12 +207,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
 
         Substitution<?> substitution = substitutionFactory.getSubstitution(type.atom.getArguments(), arguments);
 
-        return iqFactory.createIQ(
-                type.atom,
-                iqFactory.createUnaryIQTree(
-                        iqFactory.createConstructionNode(substitution.getDomain(), substitution),
-                        valuesNode));
-
+        return iqTreeTools.createMappingIQ(type.atom, substitution, valuesNode);
     }
 
 

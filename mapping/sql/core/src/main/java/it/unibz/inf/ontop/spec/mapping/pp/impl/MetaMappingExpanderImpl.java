@@ -129,15 +129,13 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                     .transformOrRetain(ImmutableMap.of(topVariable, values)::get, (t, sub) -> sub.applyToTerm(t))
                     .build();
 
-            IQTree tree = iqTreeTools.createUnaryIQTree(
-                    iqFactory.createConstructionNode(
-                            instantiatedSub.getDomain(),
-                            instantiatedSub),
-                    iqFactory.createFilterNode(
+            IQTree tree = iqTreeTools.createMappingIQTree(assertion.getProjectionAtom(),
+                    instantiatedSub,
+                    iqFactory.createUnaryIQTree(iqFactory.createFilterNode(
                             termFactory.getConjunction(values.builder()
                                     .toStream(termFactory::getNotYetTypedEquality)
                                     .collect(ImmutableCollectors.toList()))),
-                    assertion.getTopChild());
+                    assertion.getTopChild()));
 
             return assertion.copyOf(tree, iqFactory);
         }

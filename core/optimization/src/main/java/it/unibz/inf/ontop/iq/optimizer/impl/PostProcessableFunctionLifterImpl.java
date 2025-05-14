@@ -288,7 +288,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                                         .map(t -> termFactory.getTypedNull(t).simplify())
                                         .orElseGet(termFactory::getNullConstant)));
 
-                var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(paddingSubstitution, newVarTypeMap.keySet());
+                var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(newVarTypeMap::keySet, paddingSubstitution);
                 return iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, partiallyPaddedChild);
             }
         }

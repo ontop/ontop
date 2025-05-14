@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
@@ -34,6 +35,7 @@ public class TermTypeMappingCaster implements MappingCaster {
     private final SingleTermTypeExtractor typeExtractor;
     private final TermFactory termFactory;
     private final DBTermType dBStringType;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private TermTypeMappingCaster(FunctionSymbolFactory functionSymbolFactory,
@@ -44,6 +46,7 @@ public class TermTypeMappingCaster implements MappingCaster {
         this.typeExtractor = typeExtractor;
         this.termFactory = coreSingletons.getTermFactory();
         this.dBStringType = coreSingletons.getTypeFactory().getDBTypeFactory().getDBStringType();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -63,9 +66,7 @@ public class TermTypeMappingCaster implements MappingCaster {
         Substitution<ImmutableTerm> newSubstitution = assertion.getTopSubstitution()
                             .transform(t -> transformDefinition(t, childTree));
 
-        ConstructionNode newRootNode = iqFactory.createConstructionNode(assertion.getProjectedVariables(), newSubstitution);
-
-        return assertion.copyOf(iqFactory.createUnaryIQTree(newRootNode, childTree), iqFactory);
+        return assertion.copyOf(iqTreeTools.createMappingIQTree(assertion.getProjectionAtom(), newSubstitution, childTree), iqFactory);
     }
 
     private ImmutableTerm transformDefinition(ImmutableTerm rdfTerm, IQTree childTree) {

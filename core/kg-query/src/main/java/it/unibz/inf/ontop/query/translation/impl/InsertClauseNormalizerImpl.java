@@ -92,9 +92,7 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
                 .immutableCopy();
 
         return new ResultImpl(bNodeMap,
-                iqFactory.createConstructionNode(
-                        newProjectedVariables,
-                        substitution));
+                iqFactory.createConstructionNode(newProjectedVariables, substitution));
     }
 
     private ImmutableTerm createBNodeDefinitionsFromNonNullableUniqueConstraint(ImmutableSet<Variable> uniqueConstraint) {

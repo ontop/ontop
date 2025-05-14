@@ -159,45 +159,45 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
             Variable flattenOutputVariable = variableGenerator.generateNewVariable(normalizeAttributeName(columns.newColumn, quotedIDFactory));
 
             ImmutableSet<Variable> projectedVariables = computeRetainedVariables(parentVariableMap, indexVariable, flattenOutputVariable);
-
-            AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
-
-            DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, ImmutableList.copyOf(projectedVariables));
-
             ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables);
 
-            FilterNode filterNode = iqFactory.createFilterNode(termFactory.getDBIsNotNull(flattenOutputVariable));
-
-            FlattenNode flattennode = iqFactory.createFlattenNode(flattenOutputVariable, flattenedDBType.getCategory() == DBTermType.Category.ARRAY ? flattenedVariable : flattenedIfArrayVariable, indexVariable, flattenedDBType);
+            FlattenNode flattennode = iqFactory.createFlattenNode(flattenOutputVariable,
+                    flattenedDBType.getCategory() == DBTermType.Category.ARRAY
+                            ? flattenedVariable
+                            : flattenedIfArrayVariable, indexVariable, flattenedDBType);
 
             ExtensionalDataNode dataNode = iqFactory.createExtensionalDataNode(parentDefinition, compose(parentAttributeMap, parentVariableMap));
 
+            IQTree treeBeforeSafenessInfo;
             if (flattenedDBType.getCategory() == DBTermType.Category.ARRAY) {
                 //If we use an array type, we do not need to add a filter to check if it really is an array.
-                IQTree treeBeforeSafenessInfo = iqTreeTools.createUnaryIQTree(
+                treeBeforeSafenessInfo = iqTreeTools.createUnaryIQTree(
                         constructionNode,
                         flattennode,
                         dataNode);
-
-                return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
             }
             else {
+                FilterNode filterNode = iqFactory.createFilterNode(termFactory.getDBIsNotNull(flattenOutputVariable));
+
                 //If we use a json type or similar, we first need to check if the item is a valid array.
                 ConstructionNode checkArrayConstructionNode = iqFactory.createConstructionNode(
                         Sets.union(dataNode.getVariables(), ImmutableSet.of(flattenedIfArrayVariable)).immutableCopy(),
-                        substitutionFactory.<ImmutableTerm>getSubstitution(
+                        substitutionFactory.getSubstitution(
                                 flattenedIfArrayVariable,
                                 termFactory.getIfElseNull(termFactory.getDBIsArray(flattenedDBType, flattenedVariable), flattenedVariable)));
 
-                IQTree treeBeforeSafenessInfo = iqTreeTools.createUnaryIQTree(
+                treeBeforeSafenessInfo = iqTreeTools.createUnaryIQTree(
                         constructionNode,
                         filterNode,
                         flattennode,
                         checkArrayConstructionNode,
                         dataNode);
-
-                return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
             }
+
+            AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
+            DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, ImmutableList.copyOf(projectedVariables));
+
+            return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
         }
 
         private ImmutableSet<Variable> computeRetainedVariables(ImmutableMap<String, Variable> parentVariableMap, Optional<Variable> positionVariable, Variable outputVariable) throws MetadataExtractionException {

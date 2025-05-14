@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.UnionAndBindingLiftOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -115,17 +116,12 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
     private Stream<Variable> extractCandidateVariables(IQTree tree,
                                                        Optional<ImmutableExpression> optionalFilterCondition,
                                                        ImmutableList<IQTree> newChildren) {
-        Stream<Variable> coOccurringVariables = IntStream.range(0, newChildren.size() - 1)
-                .boxed()
-                .flatMap(i -> newChildren.get(i).getVariables().stream()
-                        .filter(v1 -> IntStream.range(i + 1, newChildren.size())
-                                .anyMatch(j -> newChildren.get(j).getVariables().stream().
-                                        anyMatch(v1::equals))));
+
+        Stream<Variable> coOccurringVariables = IQTreeTools.getCoOccurringVariables(newChildren);
 
         return Stream.concat(
-                    optionalFilterCondition
-                        .map(ImmutableTerm::getVariableStream)
-                        .orElseGet(Stream::empty),
+                    optionalFilterCondition.stream()
+                        .flatMap(ImmutableTerm::getVariableStream),
                     coOccurringVariables)
                 .distinct()
                 .filter(tree::isConstructed);

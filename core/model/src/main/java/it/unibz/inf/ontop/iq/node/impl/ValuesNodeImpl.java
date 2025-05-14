@@ -274,9 +274,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                     .orElseThrow(() -> new MinorOntopInternalBugException("There must be an exception"));
 
                 prefix = UnaryOperatorSequence.of()
-                        .append(iqFactory.createConstructionNode(
-                                Sets.difference(valuesNode.getVariables(),
-                                        descendingSubstitution.getDomain()).immutableCopy()))
+                        .append(iqTreeTools.createProjectingConstructionNode(valuesNode.getVariables(), descendingSubstitution.getDomain()))
                         .append(iqFactory.createFilterNode(filterCondition));
 
                 valuesNode = valuesNode.applyFreshRenaming(renaming);

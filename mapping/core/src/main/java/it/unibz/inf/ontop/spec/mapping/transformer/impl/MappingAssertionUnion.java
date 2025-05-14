@@ -163,11 +163,7 @@ public class MappingAssertionUnion {
 
 
         IQ asIQ() {
-            return iqFactory.createIQ(
-                    projectionAtom,
-                    iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(projectionAtom.getVariables(), substitution),
-                            getTree()));
+            return iqTreeTools.createMappingIQ(projectionAtom, substitution, getTree());
         }
 
         IQTree getTree() {

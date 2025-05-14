@@ -311,9 +311,9 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     ImmutableList<IQTree> newChildren = iqTreeTools.applyDescendingSubstitution(
                             children, conditionSimplificationResults.getSubstitution(), newJoiningCondition, variableGenerator);
 
-                    Optional<ConstructionNode> newParent = Optional.of(conditionSimplificationResults.getSubstitution())
-                            .filter(s -> !s.isEmpty())
-                            .map(s -> iqFactory.createConstructionNode(iqTreeTools.getChildrenVariables(children), s));
+                    Optional<ConstructionNode> newParent = iqTreeTools.createOptionalConstructionNode(
+                            () -> iqTreeTools.getChildrenVariables(children),
+                            conditionSimplificationResults.getSubstitution());
 
                     return update(newParent, newJoiningCondition, newChildren);
 

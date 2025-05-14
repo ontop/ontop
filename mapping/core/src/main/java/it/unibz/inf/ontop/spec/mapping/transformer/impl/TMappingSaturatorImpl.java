@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -67,6 +68,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
     private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
 	private TMappingSaturatorImpl(TMappingExclusionConfig tMappingExclusionConfig,
@@ -80,6 +82,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
         this.coreSingletons = coreSingletons;
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.iqFactory = coreSingletons.getIQFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -181,11 +184,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
             ImmutableList<Variable> variables = query.getProjectionAtom().getArguments();
             ImmutableList<ImmutableTerm> args = constructionNode.getSubstitution().apply(variables);
             Substitution<ImmutableTerm> updatedSubstitution = substitutionFactory.getSubstitution(variables, termTransformer.apply(args));
-            IQ updatedQuery = iqFactory.createIQ(
-                    query.getProjectionAtom(),
-                    iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(constructionNode.getVariables(), updatedSubstitution),
-                            construction.getChild()));
+            IQ updatedQuery = iqTreeTools.createMappingIQ(query.getProjectionAtom(),updatedSubstitution, construction.getChild());
             return assertion.copyOf(updatedQuery);
         }
 

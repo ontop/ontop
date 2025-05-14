@@ -337,7 +337,7 @@ public class RDF4JTupleExprTranslator {
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableList<IQTree> subtrees = substitutions.stream()
-                .map(sub -> iqFactory.createConstructionNode(sub.getDomain(), sub))
+                .map(iqTreeTools::createConstructionNode)
                 .map(cn -> iqFactory.createUnaryIQTree(cn, iqFactory.createTrueNode()))
                 .collect(ImmutableCollectors.toList());
 
@@ -520,7 +520,7 @@ public class RDF4JTupleExprTranslator {
             throw new Sparql2IqConversionException("A left or inner join is expected");
         }
 
-        var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(topSubstitution, projectedVariables);
+        var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, topSubstitution);
         IQTree joinQuery = iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, joinTree);
 
         return createTranslationResult(joinQuery, nullableVariables);
@@ -603,7 +603,8 @@ public class RDF4JTupleExprTranslator {
         InjectiveSubstitution<Variable> rightNonProjVarsRenaming = getNonProjVarsRenaming(rightTranslation, leftTranslation, variableGenerator);
 
         return createTranslationResult(
-                iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(rootVariables),
+                iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(rootVariables),
                         iqTreeTools.createUnionTree(rootVariables,
                                 ImmutableList.of(
                                         iqFactory.createUnaryIQTree(leftCn, applyInDepthRenaming(leftTranslation.iqTree, leftNonProjVarsRenaming)),
@@ -664,13 +665,12 @@ public class RDF4JTupleExprTranslator {
 
                 FilterNode filterNode = getGraphFilter(graph, defaultGraphs);
 
-                ImmutableSet<Variable> projectedVariables = Sets.difference(quadNode.getVariables(), ImmutableSet.of(graph)).immutableCopy();
-
                 // Merges the default trees -> removes duplicates
                 return iqTreeTools.createUnaryIQTree(
                         iqFactory.createDistinctNode(),
-                        iqFactory.createConstructionNode(projectedVariables),
-                        filterNode, quadNode);
+                        iqTreeTools.createProjectingConstructionNode(quadNode.getVariables(), ImmutableSet.of(graph)),
+                        filterNode,
+                        quadNode);
             }
         }
     }

@@ -104,7 +104,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         Substitution<ImmutableTerm> newSubstitution = aggregationNode.getSubstitution()
                 .transform(this::simplifyEmptyAggregate);
 
-        return iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(projectedVariables, newSubstitution),
+        return iqFactory.createUnaryIQTree(
+                iqFactory.createConstructionNode(projectedVariables, newSubstitution),
                 iqFactory.createTrueNode(), normalizedTreeCache);
     }
 
@@ -303,9 +304,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             // Is created if, either, the node includes a substitution, or a sample variable is required.
             Optional<ConstructionNode> newChildConstructionNode = subState.getChildConstructionNode()
                     // Only keeps the child construction node if it has a substitution
-                    .filter(n -> !n.getSubstitution().isEmpty())
-                    .map(n -> iqFactory.createConstructionNode(
-                            iqTreeTools.extractChildVariables(newGroupingVariables, finalAggregationSubstitution),
+                    .flatMap(n -> iqTreeTools.createOptionalConstructionNode(
+                            () -> iqTreeTools.extractChildVariables(newGroupingVariables, finalAggregationSubstitution),
                             n.getSubstitution()));
 
             // Creates a filter over the sample variable so that only rows that have a non-null value in it are kept.

@@ -7,12 +7,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.NaryIQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -21,10 +19,13 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -84,16 +85,29 @@ public class IQTreeTools {
         return Sets.union(newVariables, Sets.difference(projectedVariables, descendingSubstitution.getDomain())).immutableCopy();
     }
 
-    public IQTree createConstructionNodeTreeIfNontrivial(IQTree child, Substitution<?> substitution, Supplier<ImmutableSet<Variable>> projectedVariables) {
-        return substitution.isEmpty()
-                ? child
-                : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(projectedVariables.get(), substitution), child);
+    public IQ createMappingIQ(DistinctVariableOnlyDataAtom atom, Substitution<?> substitution, IQTree child) {
+        return iqFactory.createIQ(atom, createMappingIQTree(atom, substitution, child));
     }
 
-    public Optional<ConstructionNode> createOptionalConstructionNode(Substitution<?> substitution, ImmutableSet<Variable> projectedVariables) {
-        return substitution.isEmpty()
-                ? Optional.empty()
-                : Optional.of(iqFactory.createConstructionNode(projectedVariables, substitution));
+    public IQTree createMappingIQTree(DistinctVariableOnlyDataAtom atom, Substitution<?> substitution, IQTree child) {
+        return iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(atom.getVariables(), substitution),
+                        child);
+    }
+
+    public ConstructionNode createProjectingConstructionNode(ImmutableSet<Variable> allVariables, ImmutableSet<Variable> projectedAwayVariables) {
+        return iqFactory.createConstructionNode(
+                Sets.difference(allVariables, projectedAwayVariables).immutableCopy());
+    }
+
+    public ConstructionNode createConstructionNode(Substitution<?> substitution) {
+        return iqFactory.createConstructionNode(substitution.getDomain(), substitution);
+    }
+
+    public Optional<ConstructionNode> createOptionalConstructionNode(Supplier<ImmutableSet<Variable>> projectedVariables, Substitution<?> substitution) {
+        if (substitution.isEmpty())
+            return Optional.empty();
+        return Optional.of(iqFactory.createConstructionNode(projectedVariables.get(), substitution));
     }
 
     public Optional<FilterNode> createOptionalFilterNode(Optional<ImmutableExpression> expression) {
@@ -557,6 +571,27 @@ public class IQTreeTools {
      *
      */
     public static class UnsatisfiableDescendingSubstitutionException extends Exception {
+    }
+
+    public static Stream<Variable> getCoOccurringVariables(ImmutableList<IQTree> children) {
+        /* quadratic time,
+         return IntStream.range(0, children.size() - 1)
+                .boxed()
+                .flatMap(i -> children.get(i).getVariables().stream()
+                        .filter(v1 -> IntStream.range(i + 1, children.size())
+                                .anyMatch(j -> children.get(j).getVariables().stream().
+                                        anyMatch(v1::equals))));
+         */
+
+        // grouping should be more efficient - n log n
+        Map<Variable, Long> variableOccurrencesCount = children.stream()
+                .map(IQTree::getVariables)
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(v -> v, Collectors.counting()));
+
+        return variableOccurrencesCount.entrySet().stream()
+                .filter(e -> e.getValue() > 1)
+                .map(Map.Entry::getKey);
     }
 
 

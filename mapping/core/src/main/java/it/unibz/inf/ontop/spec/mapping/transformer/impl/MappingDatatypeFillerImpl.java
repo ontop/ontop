@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
@@ -28,6 +29,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
     private final TypeFactory typeFactory;
     private final IntermediateQueryFactory iqFactory;
     private final SingleTermTypeExtractor typeExtractor;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private MappingDatatypeFillerImpl(OntopMappingSettings settings,
@@ -37,6 +39,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
         this.termFactory = coreSingletons.getTermFactory();
         this.typeFactory = coreSingletons.getTypeFactory();
         this.iqFactory = coreSingletons.getIQFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.typeExtractor = typeExtractor;
     }
 
@@ -107,9 +110,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
                         .transformOrRetain(ImmutableMap.of(objectVariable, objectTermDefinition)::get, (t, u) -> u)
                         .build();
 
-        return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(assertion.getProjectedVariables(), newSubstitution),
-                assertion.getTopChild());
+        return iqTreeTools.createMappingIQTree(assertion.getProjectionAtom(), newSubstitution, assertion.getTopChild());
     }
 
     private ImmutableTerm getObjectLexicalTerm(Variable objectVariable, MappingAssertion assertion) {

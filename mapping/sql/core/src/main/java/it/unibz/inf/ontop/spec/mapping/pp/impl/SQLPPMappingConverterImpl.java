@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.model.term.*;
@@ -144,16 +145,16 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
         Substitution<? extends ImmutableTerm> selectSubstitution = substitution.restrictRangeTo(NonVariableTerm.class);
 
-        IQTree mappingTree = iqTreeTools.createUnaryIQTree(
-                iqFactory.createConstructionNode(
-                        target.getProjectionAtom().getVariables(),
-                        spoSubstitution),
-                iqFactory.createConstructionNode(
-                        spoSubstitution.getRangeVariables(),
-                        selectSubstitution),
-                tree);
+        IQ mapping = iqTreeTools.createMappingIQ(
+                target.getProjectionAtom(),
+                spoSubstitution,
+                iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(
+                                spoSubstitution.getRangeVariables(),
+                                selectSubstitution),
+                        tree));
 
-        return new MappingAssertion(iqFactory.createIQ(target.getProjectionAtom(), mappingTree), provenance);
+        return new MappingAssertion(mapping, provenance);
     }
 
     public RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException, MetadataExtractionException {

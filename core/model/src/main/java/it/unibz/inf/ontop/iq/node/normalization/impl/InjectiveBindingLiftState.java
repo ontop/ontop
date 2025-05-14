@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -36,44 +37,44 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
  */
 public class InjectiveBindingLiftState {
 
-    // The oldest ancestor is first
     private final UnaryOperatorSequence<ConstructionNode> ancestors;
-    // First descendent tree not starting with a construction node
-    private final IQTree grandChildTree;
     @Nullable
     private final ConstructionNode childConstructionNode;
+    // First descendent tree not starting with a construction node
+    private final IQTree grandChildTree;
+
     private final VariableGenerator variableGenerator;
+
     private final CoreSingletons coreSingletons;
+    private final IQTreeTools iqTreeTools;
+    private final IntermediateQueryFactory iqFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     /**
      * Initial state
      */
     protected InjectiveBindingLiftState(@Nonnull ConstructionNode childConstructionNode, IQTree grandChildTree,
                                      VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
-        this.coreSingletons = coreSingletons;
-        this.ancestors = UnaryOperatorSequence.of();
-        this.grandChildTree = grandChildTree;
-        this.childConstructionNode = childConstructionNode;
-        this.variableGenerator = variableGenerator;
+        this(UnaryOperatorSequence.of(), grandChildTree, variableGenerator, childConstructionNode, coreSingletons);
     }
 
     private InjectiveBindingLiftState(UnaryOperatorSequence<ConstructionNode> ancestors, IQTree grandChildTree,
                                       VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
-        this.ancestors = ancestors;
-        this.grandChildTree = grandChildTree;
-        this.coreSingletons = coreSingletons;
-        this.childConstructionNode = null;
-        this.variableGenerator = variableGenerator;
+        this(ancestors, grandChildTree, variableGenerator, null, coreSingletons);
     }
 
     private InjectiveBindingLiftState(UnaryOperatorSequence<ConstructionNode> ancestors, IQTree grandChildTree,
                                       VariableGenerator variableGenerator,
-                                      @Nonnull ConstructionNode childConstructionNode, CoreSingletons coreSingletons) {
+                                      ConstructionNode childConstructionNode, CoreSingletons coreSingletons) {
         this.ancestors = ancestors;
         this.grandChildTree = grandChildTree;
         this.childConstructionNode = childConstructionNode;
         this.variableGenerator = variableGenerator;
+
         this.coreSingletons = coreSingletons;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
     }
 
     public IQTree getGrandChildTree() {
@@ -84,9 +85,6 @@ public class InjectiveBindingLiftState {
         return Optional.ofNullable(childConstructionNode);
     }
 
-    /**
-     * The oldest ancestor is first
-     */
     public UnaryOperatorSequence<ConstructionNode> getAncestors() {
         return ancestors;
     }
@@ -108,8 +106,6 @@ public class InjectiveBindingLiftState {
                         .restrictRangeTo(ImmutableFunctionalTerm.class)
                         .toMapIgnoreOptional((v, t) -> t.analyzeInjectivity(nonFreeVariables, grandChildVariableNullability, variableGenerator));
 
-        SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
-
         Substitution<ImmutableTerm> liftedSubstitution = substitutionFactory.union(
                 // All variables and constants
                 childSubstitution.restrictRangeTo(NonFunctionalTerm.class),
@@ -119,11 +115,8 @@ public class InjectiveBindingLiftState {
                         .transformOrRemove(injectivityDecompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getLiftableTerm)
                         .build());
 
-        IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
-
-        Optional<ConstructionNode> liftedConstructionNode = Optional.of(liftedSubstitution)
-                .filter(s -> !s.isEmpty())
-                .map(s -> iqFactory.createConstructionNode(childConstructionNode.getVariables(), s));
+        Optional<ConstructionNode> liftedConstructionNode = iqTreeTools.createOptionalConstructionNode(
+                childConstructionNode::getVariables, liftedSubstitution);
 
         ImmutableSet<Variable> newChildVariables = liftedConstructionNode
                 .map(ConstructionNode::getChildVariables)
@@ -134,9 +127,8 @@ public class InjectiveBindingLiftState {
                 .flatTransform(injectivityDecompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubstitution)
                 .build();
 
-        Optional<ConstructionNode> newChildConstructionNode = Optional.of(newChildSubstitution)
-                .filter(s -> !s.isEmpty())
-                .map(s -> iqFactory.createConstructionNode(newChildVariables, s))
+        Optional<ConstructionNode> newChildConstructionNode =
+                iqTreeTools.createOptionalConstructionNode(() -> newChildVariables, newChildSubstitution)
                 .or(() -> newChildVariables.equals(grandChildTree.getVariables())
                         ? Optional.empty()
                         : Optional.of(iqFactory.createConstructionNode(newChildVariables)));

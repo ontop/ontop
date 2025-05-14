@@ -157,8 +157,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     expressionAndSubstitution.getOptionalExpression(),
                     newChildren);
 
-            return iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, expressionAndSubstitution.getSubstitution(),
-                    () -> iqTreeTools.computeNewProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)));
+            return iqTreeTools.createOptionalUnaryIQTree(
+                    iqTreeTools.createOptionalConstructionNode(
+                            () -> iqTreeTools.computeNewProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)),
+                            expressionAndSubstitution.getSubstitution()),
+                    joinTree);
         }
         catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(
@@ -429,8 +432,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
             NaryIQTree joinTree = iqFactory.createNaryIQTree(newJoin, newChildren);
 
-            return iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, conditionSimplificationResults.getSubstitution(),
-                    () -> iqTreeTools.getChildrenVariables(children));
+            return iqTreeTools.createOptionalUnaryIQTree(
+                    iqTreeTools.createOptionalConstructionNode(
+                            () -> iqTreeTools.getChildrenVariables(children),
+                            conditionSimplificationResults.getSubstitution()),
+                    joinTree);
         }
         catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(iqTreeTools.getChildrenVariables(children));

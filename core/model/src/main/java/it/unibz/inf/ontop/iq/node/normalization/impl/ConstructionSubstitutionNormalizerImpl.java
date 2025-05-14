@@ -74,10 +74,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
         @Override
         public Optional<ConstructionNode> generateTopConstructionNode() {
-            return Optional.of(normalizedSubstitution)
-                    .filter(s -> !s.isEmpty())
-                    .map(s -> iqFactory.createConstructionNode(projectedVariables, s));
-
+            return iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, normalizedSubstitution);
         }
 
         @Override

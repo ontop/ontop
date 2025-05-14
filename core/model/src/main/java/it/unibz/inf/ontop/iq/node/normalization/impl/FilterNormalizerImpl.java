@@ -13,11 +13,10 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
-import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.FilterNormalizer;
 import it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -208,7 +207,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
                     var newChild = iqTreeTools.applyDescendingSubstitution(child, simplification.getSubstitution(), downConstraint, variableGenerator);
 
-                    var newOptionalParent = iqTreeTools.createOptionalConstructionNode(simplification.getSubstitution(), child.getVariables());
+                    var newOptionalParent = iqTreeTools.createOptionalConstructionNode(child::getVariables, simplification.getSubstitution());
 
                     var newOptionalFilterNode = iqTreeTools.createOptionalFilterNode(simplification.getOptionalExpression());
 
