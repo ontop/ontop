@@ -215,13 +215,11 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
                                     renamingAndUpdatedConditions.topCondition))
                     .build();
 
-            ImmutableSet<Variable> projectedVariables = Sets.union(
-                    Sets.difference(newLJTree.getVariables(), renamingAndUpdatedConditions.renaming.getRangeSet()),
-                            newSubstitution.getDomain())
-                    .immutableCopy();
+            Set<Variable> newVariables =
+                    Sets.difference(newLJTree.getVariables(), renamingAndUpdatedConditions.renaming.getRangeSet());
 
             IQTree newTree = iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(projectedVariables, newSubstitution),
+                    iqTreeTools.extendSubTreeWithSubstitution(newVariables, newSubstitution),
                     newLJTree);
 
             return Optional.of(newTree);

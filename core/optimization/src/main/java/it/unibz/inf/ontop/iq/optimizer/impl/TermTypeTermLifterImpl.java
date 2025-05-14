@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.optimizer.TermTypeTermLifter;
 import it.unibz.inf.ontop.iq.transformer.TermTypeTermLiftTransformer;
@@ -26,14 +27,16 @@ public class TermTypeTermLifterImpl implements TermTypeTermLifter {
     private final OptimizerFactory transformerFactory;
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private TermTypeTermLifterImpl(OptimizerFactory transformerFactory,
                                    IntermediateQueryFactory iqFactory,
-                                   TermFactory termFactory) {
+                                   TermFactory termFactory, IQTreeTools iqTreeTools) {
         this.transformerFactory = transformerFactory;
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -60,8 +63,7 @@ public class TermTypeTermLifterImpl implements TermTypeTermLifter {
         return UnaryIQTreeDecomposition.of(tree, ConstructionNode.class)
                 .<IQTree>map((cn, t) ->
                         iqFactory.createUnaryIQTree(
-                                iqFactory.createConstructionNode(
-                                        cn.getVariables(),
+                                iqTreeTools.replaceSubstitution(cn,
                                         cn.getSubstitution()
                                                 .transform(this::makeRDFTermTypeFunctionSymbolsSimplifiable)),
                                 t))

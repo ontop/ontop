@@ -19,10 +19,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -104,7 +101,7 @@ public class IQTreeTools {
         return iqFactory.createConstructionNode(cn.getVariables(), substitution);
     }
 
-    public ConstructionNode extendSubTreeWithSubstitution(ImmutableSet<Variable> subTreeVariables, Substitution<?> substitution) {
+    public ConstructionNode extendSubTreeWithSubstitution(Set<Variable> subTreeVariables, Substitution<?> substitution) {
         return iqFactory.createConstructionNode(
                 Sets.union(subTreeVariables, substitution.getDomain()).immutableCopy(),
                 substitution);

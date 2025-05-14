@@ -49,7 +49,7 @@ public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
 
         protected QueryContextFunctionTransformer(QueryContext queryContext, CoreSingletons coreSingletons,
                                                   Predicate<FunctionSymbol> functionSymbolPredicate) {
-            super(coreSingletons.getIQFactory(), coreSingletons.getUniqueTermTypeExtractor(), coreSingletons.getTermFactory());
+            super(coreSingletons);
             this.queryContext = queryContext;
             this.functionSymbolPredicate = functionSymbolPredicate;
         }

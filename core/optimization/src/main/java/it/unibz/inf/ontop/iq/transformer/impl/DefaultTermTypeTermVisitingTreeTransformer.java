@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -41,20 +42,22 @@ public class DefaultTermTypeTermVisitingTreeTransformer
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
     private final FunctionSymbolFactory functionSymbolFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     protected DefaultTermTypeTermVisitingTreeTransformer(@Assisted VariableGenerator variableGenerator,
-                                                       TermFactory termFactory,
-                                                       IntermediateQueryFactory iqFactory,
-                                                       TypeConstantDictionary typeConstantDictionary,
-                                                       SubstitutionFactory substitutionFactory,
-                                                       FunctionSymbolFactory functionSymbolFactory) {
+                                                         TermFactory termFactory,
+                                                         IntermediateQueryFactory iqFactory,
+                                                         TypeConstantDictionary typeConstantDictionary,
+                                                         SubstitutionFactory substitutionFactory,
+                                                         FunctionSymbolFactory functionSymbolFactory, IQTreeTools iqTreeTools) {
         super(iqFactory);
         this.variableGenerator = variableGenerator;
         this.dictionary = typeConstantDictionary;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         this.functionSymbolFactory = functionSymbolFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -122,9 +125,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
         Substitution<?> newSubstitution = substitution.transform(this::replaceTypeTermConstants);
         if (!newSubstitution.equals(substitution)) {
             return iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(
-                            constructionNode.getVariables(),
-                            newSubstitution),
+                    iqTreeTools.replaceSubstitution(constructionNode, newSubstitution),
                     child);
         }
         return tree;

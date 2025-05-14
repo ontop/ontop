@@ -112,8 +112,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                     iqFactory.createDistinctNode(),
                     iqFactory.createConstructionNode(
                             assertion.getTopSubstitution().get(topVariable)
-                                    .getVariableStream().collect(ImmutableCollectors.toSet()),
-                            substitutionFactory.getSubstitution()),
+                                    .getVariableStream().collect(ImmutableCollectors.toSet())),
                     iqTreeTools.createFilterTree(
                             termFactory.getDBIsNotNull(assertion.getTopChild().getVariables().stream()),
                             assertion.getTopChild()));

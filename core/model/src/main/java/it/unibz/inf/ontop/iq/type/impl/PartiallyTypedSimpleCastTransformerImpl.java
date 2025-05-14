@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.type.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.type.PartiallyTypedSimpleCastTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
@@ -21,10 +22,11 @@ public class PartiallyTypedSimpleCastTransformerImpl implements PartiallyTypedSi
     @Inject
     protected PartiallyTypedSimpleCastTransformerImpl(IntermediateQueryFactory iqFactory,
                                                       SingleTermTypeExtractor typeExtractor,
-                                                      TermFactory termFactory) {
+                                                      TermFactory termFactory,
+                                                      IQTreeTools iqTreeTools) {
         this.expressionTransformer = new ExpressionTransformer(iqFactory,
                                                                 typeExtractor,
-                                                                termFactory);
+                                                                termFactory, iqTreeTools);
     }
 
     @Override
@@ -37,8 +39,9 @@ public class PartiallyTypedSimpleCastTransformerImpl implements PartiallyTypedSi
 
         protected ExpressionTransformer(IntermediateQueryFactory iqFactory,
                                         SingleTermTypeExtractor typeExtractor,
-                                        TermFactory termFactory) {
-            super(iqFactory, typeExtractor, termFactory);
+                                        TermFactory termFactory,
+                                        IQTreeTools iqTreeTools) {
+            super(iqFactory, typeExtractor, termFactory, iqTreeTools);
         }
 
         @Override

@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.optimizer.DisjunctionOfEqualitiesMergingSimplifier;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.iq.type.impl.AbstractExpressionTransformer;
@@ -37,11 +38,11 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
         IQTree tree = query.getTree();
 
         //Create IN terms where we have disjunctions of equalities.
-        InCreatingTransformer transformer1 = new InCreatingTransformer(coreSingletons.getIQFactory(), coreSingletons.getUniqueTermTypeExtractor(), coreSingletons.getTermFactory());
+        InCreatingTransformer transformer1 = new InCreatingTransformer(coreSingletons);
         IQTree newTree = transformer1.transform(tree);
 
         //Merge IN terms together.
-        InMergingTransformer transformer2 = new InMergingTransformer(coreSingletons.getIQFactory(), coreSingletons.getUniqueTermTypeExtractor(), coreSingletons.getTermFactory());
+        InMergingTransformer transformer2 = new InMergingTransformer(coreSingletons);
         IQTree finalTree = transformer2.transform(newTree);
 
         return finalTree == tree
@@ -84,8 +85,8 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
 
     protected static class InCreatingTransformer extends AbstractExpressionTransformer {
 
-        protected InCreatingTransformer(IntermediateQueryFactory iqFactory, SingleTermTypeExtractor typeExtractor, TermFactory termFactory) {
-            super(iqFactory, typeExtractor, termFactory);
+        protected InCreatingTransformer(CoreSingletons coreSingletons) {
+            super(coreSingletons);
         }
 
         @Override
@@ -125,8 +126,8 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
 
     protected static class InMergingTransformer extends AbstractExpressionTransformer {
 
-        protected InMergingTransformer(IntermediateQueryFactory iqFactory, SingleTermTypeExtractor typeExtractor, TermFactory termFactory) {
-            super(iqFactory, typeExtractor, termFactory);
+        protected InMergingTransformer(CoreSingletons coreSingletons) {
+            super(coreSingletons);
         }
 
         @Override

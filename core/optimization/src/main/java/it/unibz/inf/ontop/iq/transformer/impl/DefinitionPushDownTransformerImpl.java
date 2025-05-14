@@ -161,8 +161,8 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
     protected IQTree blockDefinition(IQTree tree) {
         Variable newVariable = request.getNewVariable();
 
-        ConstructionNode constructionNode = iqFactory.createConstructionNode(
-                iqTreeTools.getChildrenVariables(tree, newVariable),
+        ConstructionNode constructionNode = iqTreeTools.extendSubTreeWithSubstitution(
+                tree.getVariables(),
                 substitutionFactory.getSubstitution(newVariable,
                         termFactory.getIfElseNull(
                                 request.getCondition(),

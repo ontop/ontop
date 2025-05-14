@@ -6,7 +6,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -35,13 +37,15 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     protected ComplexStrictEqualityLeftJoinExpliciter(TermFactory termFactory, SubstitutionFactory substitutionFactory,
-                                                      IntermediateQueryFactory iqFactory) {
+                                                      IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         this.iqFactory = iqFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     public LeftJoinNormalization makeComplexEqualitiesImplicit(IQTree leftChild, IQTree rightChild,
@@ -81,9 +85,7 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
                 rightSpecificVariables, downSubstitution, variableGenerator);
 
         var newRight = iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(
-                        Sets.union(substitutionPair.rightSubstitution.getDomain(), rightChild.getVariables()).immutableCopy(),
-                        substitutionPair.rightSubstitution),
+                iqTreeTools.extendSubTreeWithSubstitution(rightChild.getVariables(), substitutionPair.rightSubstitution),
                 rightChild);
 
         IQTree newLeft = normalizeLeft(leftChild, substitutionPair.leftSubstitution, variableGenerator);
@@ -168,9 +170,7 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
             return downSubstitution.isEmpty()
                     ? tree
                     : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(
-                                    Sets.union(downSubstitution.getDomain(), tree.getVariables()).immutableCopy(),
-                                    downSubstitution),
+                            iqTreeTools.extendSubTreeWithSubstitution(tree.getVariables(), downSubstitution),
                             tree);
 
         var leftJoinCondition = leftJoin.getNode().getOptionalFilterCondition();

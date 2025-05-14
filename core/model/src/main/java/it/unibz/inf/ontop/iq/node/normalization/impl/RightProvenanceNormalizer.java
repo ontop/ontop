@@ -98,11 +98,8 @@ public class RightProvenanceNormalizer {
          */
         Variable provenanceVariable = variableGenerator.generateNewVariable(PROV);
 
-        ImmutableSet<Variable> newRightProjectedVariables = Sets.union(ImmutableSet.of(provenanceVariable), rightRequiredVariables)
-                .immutableCopy();
-
-        ConstructionNode newRightConstructionNode = iqFactory.createConstructionNode(
-                newRightProjectedVariables,
+        ConstructionNode newRightConstructionNode = iqTreeTools.extendSubTreeWithSubstitution(
+                rightRequiredVariables,
                 substitutionFactory.getSubstitution(provenanceVariable,
                         termFactory.getProvenanceSpecialConstant()));
 

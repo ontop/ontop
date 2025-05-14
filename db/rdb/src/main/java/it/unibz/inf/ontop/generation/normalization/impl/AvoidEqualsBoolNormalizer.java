@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.iq.type.impl.AbstractExpressionTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -25,19 +26,20 @@ public class AvoidEqualsBoolNormalizer implements DialectExtraNormalizer {
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final SingleTermTypeExtractor typeExtractor;
+    private final CoreSingletons coreSingletons;
 
     @Inject
-    protected AvoidEqualsBoolNormalizer(IntermediateQueryFactory iqFactory, SingleTermTypeExtractor typeExtractor,
-                                        TermFactory termFactory) {
-        this.iqFactory = iqFactory;
-        this.termFactory = termFactory;
-        this.typeExtractor = typeExtractor;
+    protected AvoidEqualsBoolNormalizer(CoreSingletons coreSingletons) {
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.typeExtractor = coreSingletons.getUniqueTermTypeExtractor();
+        this.coreSingletons = coreSingletons;
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
 
-        return tree.acceptTransformer(new AbstractExpressionTransformer(iqFactory, typeExtractor, termFactory) {
+        return tree.acceptTransformer(new AbstractExpressionTransformer(coreSingletons) {
             @Override
             protected boolean isFunctionSymbolToReplace(FunctionSymbol functionSymbol) {
                 return (functionSymbol instanceof AbstractDBNonStrictEqOperator) || (functionSymbol instanceof DefaultDBStrictEqFunctionSymbol);

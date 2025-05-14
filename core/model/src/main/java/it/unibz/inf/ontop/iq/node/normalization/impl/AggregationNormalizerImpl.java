@@ -207,8 +207,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             Optional<ConstructionNode> newChildConstructionNode = childConstructionNode
                     .map(ConstructionNode::getSubstitution)
                     .map(s -> s.restrictDomainTo(groupingVariables))
-                    .filter(s -> !s.isEmpty())
-                    .map(s -> iqFactory.createConstructionNode(newAggregationNode.getChildVariables(), s));
+                    .flatMap(s -> iqTreeTools.createOptionalConstructionNode(newAggregationNode::getChildVariables, s));
 
             return update(ancestors, groupingVariables, newAggregationSubstitution,
                     newChildConstructionNode, grandChild, sampleFilter);

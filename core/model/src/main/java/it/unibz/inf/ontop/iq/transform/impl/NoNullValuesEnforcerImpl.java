@@ -106,7 +106,7 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
 
             ConstructionNode newConstructionNode = initialSubstitution.equals(newSubstitution)
                     ? rootNode
-                    : iqFactory.createConstructionNode(rootNode.getVariables(), newSubstitution);
+                    : iqTreeTools.replaceSubstitution(rootNode, newSubstitution);
 
             Set<Variable> simplifiableChildVariables = Sets.union(
                     Sets.difference(rootNode.getVariables(), initialSubstitution.getDomain()),

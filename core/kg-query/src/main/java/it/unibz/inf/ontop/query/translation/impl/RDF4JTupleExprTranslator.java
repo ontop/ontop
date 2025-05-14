@@ -566,7 +566,9 @@ public class RDF4JTupleExprTranslator {
                 .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
 
         UnaryIQTree constructTree = iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(projectedVars, newSubstitution),
+                iqTreeTools.extendSubTreeWithSubstitution(
+                        Sets.intersection(projectedVars, subQuery.getVariables()),
+                        newSubstitution),
                 subQuery);
 
         ImmutableSet<Variable> nullableVariables = substitutionFactory.apply(substitution, child.nullableVariables);
@@ -593,9 +595,9 @@ public class RDF4JTupleExprTranslator {
 
         ImmutableSet<Variable> rootVariables = Sets.union(leftVariables, rightVariables).immutableCopy();
 
-        ConstructionNode leftCn = iqFactory.createConstructionNode(rootVariables, nullOnLeft.stream()
+        ConstructionNode leftCn = iqTreeTools.extendSubTreeWithSubstitution(leftVariables, nullOnLeft.stream()
                 .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant())));
-        ConstructionNode rightCn = iqFactory.createConstructionNode(rootVariables, nullOnRight.stream()
+        ConstructionNode rightCn = iqTreeTools.extendSubTreeWithSubstitution(rightVariables, nullOnRight.stream()
                 .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant())));
 
         InjectiveSubstitution<Variable> leftNonProjVarsRenaming = getNonProjVarsRenaming(leftTranslation, rightTranslation, variableGenerator);
@@ -716,9 +718,7 @@ public class RDF4JTupleExprTranslator {
             ImmutableSet<Variable> newNullableVariables = substitution
                     .getPreImage(t -> t.getVariableStream().anyMatch(nullableVariables::contains));
 
-            ConstructionNode constructionNode = iqFactory.createConstructionNode(
-                    Sets.union(result.iqTree.getVariables(), substitution.getDomain()).immutableCopy(),
-                    substitution);
+            ConstructionNode constructionNode = iqTreeTools.extendSubTreeWithSubstitution(result.iqTree.getVariables(), substitution);
 
             UnaryIQTree tree = iqFactory.createUnaryIQTree(constructionNode, result.iqTree);
 

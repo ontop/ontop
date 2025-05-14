@@ -3,8 +3,10 @@ package it.unibz.inf.ontop.generation.normalization.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
@@ -31,13 +33,9 @@ public class SplitIsNullOverConjunctionDisjunctionNormalizer extends DefaultRecu
     private final IQTreeTransformer expressionTransformer;
 
     @Inject
-    protected SplitIsNullOverConjunctionDisjunctionNormalizer(IntermediateQueryFactory iqFactory,
-                                                              SingleTermTypeExtractor typeExtractor,
-                                                              TermFactory termFactory) {
-        super(iqFactory);
-        this.expressionTransformer = new ExpressionTransformer(iqFactory,
-                typeExtractor,
-                termFactory);
+    protected SplitIsNullOverConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {
+        super(coreSingletons.getIQFactory());
+        this.expressionTransformer = new ExpressionTransformer(coreSingletons);
     }
 
     @Override
@@ -47,10 +45,8 @@ public class SplitIsNullOverConjunctionDisjunctionNormalizer extends DefaultRecu
 
     protected static class ExpressionTransformer extends AbstractExpressionTransformer {
 
-        protected ExpressionTransformer(IntermediateQueryFactory iqFactory,
-                                        SingleTermTypeExtractor typeExtractor,
-                                        TermFactory termFactory) {
-            super(iqFactory, typeExtractor, termFactory);
+        protected ExpressionTransformer(CoreSingletons coreSingletons) {
+            super(coreSingletons);
         }
 
         @Override
