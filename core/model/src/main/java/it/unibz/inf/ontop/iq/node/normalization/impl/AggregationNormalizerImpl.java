@@ -194,8 +194,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     iqTreeTools.extractChildVariables(groupingVariables, aggregationSubstitution),
                     groupingVariables);
 
-            Substitution<ImmutableTerm> nonGroupingSubstitution = childConstructionNode.get().getSubstitution()
-                    .restrictDomainTo(nonGroupingVariables);
+            Substitution<ImmutableTerm> substitution = childConstructionNode.get().getSubstitution();
+            Substitution<ImmutableTerm> nonGroupingSubstitution = substitution.restrictDomainTo(nonGroupingVariables);
 
             Substitution<ImmutableFunctionalTerm> newAggregationSubstitution =
                             nonGroupingSubstitution.compose(aggregationSubstitution).builder()
@@ -207,10 +207,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     groupingVariables,
                     newAggregationSubstitution);
 
-            Optional<ConstructionNode> newChildConstructionNode = childConstructionNode
-                    .map(ConstructionNode::getSubstitution)
-                    .map(s -> s.restrictDomainTo(groupingVariables))
-                    .flatMap(s -> iqTreeTools.createOptionalConstructionNode(newAggregationNode::getChildVariables, s));
+            Optional<ConstructionNode> newChildConstructionNode = iqTreeTools.createOptionalConstructionNode(
+                    newAggregationNode::getChildVariables, substitution.restrictDomainTo(groupingVariables));
 
             return update(ancestors, groupingVariables, newAggregationSubstitution,
                     newChildConstructionNode, grandChild, sampleFilter);

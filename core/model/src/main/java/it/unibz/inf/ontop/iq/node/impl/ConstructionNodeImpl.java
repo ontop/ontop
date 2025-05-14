@@ -508,20 +508,27 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                     iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, normalization.getNormalizedSubstitution());
 
             IQTree updatedChild = normalization.updateChild(shrunkChild, variableGenerator);
-            IQTree newChild = newTopConstructionNode
-                    .map(c -> notRequiredVariableRemover.optimize(updatedChild, c.getChildVariables(), variableGenerator))
-                    .orElse(updatedChild)
-                    .normalizeForOptimization(variableGenerator);
+            if (newTopConstructionNode.isPresent()) {
+                IQTree newChild = notRequiredVariableRemover.optimize(
+                                updatedChild,
+                                newTopConstructionNode.get().getChildVariables(),
+                                variableGenerator)
+                        .normalizeForOptimization(variableGenerator);
 
-            return newTopConstructionNode
-                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(
-                            c,
-                            newChild,
-                            treeCache.declareAsNormalizedForOptimizationWithEffect()))
-                    .orElseGet(() ->
-                            iqTreeTools.createOptionalUnaryIQTree(
-                                    iqTreeTools.createOptionalConstructionNode(projectedVariables, newChild),
-                                    newChild));
+                return iqFactory.createUnaryIQTree(
+                        newTopConstructionNode.get(),
+                        newChild,
+                        treeCache.declareAsNormalizedForOptimizationWithEffect());
+
+            }
+            else {
+                IQTree newChild = updatedChild
+                        .normalizeForOptimization(variableGenerator);
+
+                return iqTreeTools.createOptionalUnaryIQTree(
+                        iqTreeTools.createOptionalConstructionNode(projectedVariables, newChild),
+                        newChild);
+            }
         }
     }
 

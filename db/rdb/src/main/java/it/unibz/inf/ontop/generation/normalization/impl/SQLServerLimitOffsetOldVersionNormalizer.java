@@ -58,7 +58,7 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
             this.variableGenerator = variableGenerator;
         }
 
-        // Transformation necessary for versions 8,9,10 of SQL Server when a Slice Node is present
+        // Transformation necessary for versions 8,9,10 of SQL Server when a SliceNode is present
         @Override
         public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
 
@@ -74,8 +74,8 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
 
             // CASE 1: No OrderBy, ORDER BY (SELECT NULL)
             // CASE 2: OrderBy present, ORDER BY (comparators)
-            ConstructionNode newConstruction = iqFactory.createConstructionNode(
-                    iqTreeTools.getChildrenVariables(child, freshVariable),
+            ConstructionNode newConstruction = iqTreeTools.extendSubTreeWithSubstitution(
+                    child.getVariables(),
                     substitutionFactory.getSubstitution(freshVariable, getOrderBySubTerm(child)));
 
             ImmutableExpression expression = getNewFilterExpression(sliceNode, freshVariable);
@@ -85,9 +85,9 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
             var construction = UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
             var orderBy = UnaryIQTreeDecomposition.of(construction.getTail(), OrderByNode.class);
             // Drop ORDER BY node since it will now be part of the orderBy subTerm
-            IQTree newChild = construction.isPresent()
-                ? iqFactory.createUnaryIQTree(construction.getNode(), orderBy.getTail())
-                : orderBy.getTail();
+            IQTree newChild = iqTreeTools.createOptionalUnaryIQTree(
+                    construction.getOptionalNode(), orderBy.getTail());
+
             IQTree normalizedChild = this.transform(newChild);
 
             IQTree newTree = iqTreeTools.createUnaryIQTree(
