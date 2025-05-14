@@ -203,7 +203,7 @@ public class ExistsTest extends AbstractRDF4JTest {
                 "                FILTER(?fname = ?nick)\n" +
                 "        }\n" +
                 "}";
-        runQueryAndCompare(sparql, ImmutableSet.of("http://person.example.org/person/1"));
+        runQueryAndCompare(sparql, ImmutableSet.of("http://person.example.org/person/1", "http://person.example.org/person/5"));
     }
 
     @Test
@@ -371,16 +371,15 @@ public class ExistsTest extends AbstractRDF4JTest {
                 "http://person.example.org/person/5", "http://person.example.org/person/2", "http://person.example.org/person/1"));
     }
 
-    // multiple exists are not supported
-    @Test(expected = QueryEvaluationException.class)
+    @Test
     public void testOrderByMultipleExists() {
         String sparql = "PREFIX  : <http://person.example.org/> \n" +
                 "SELECT ?v WHERE {\n" +
                 "   ?v a :Person .\n" +
-                "} ORDER BY DESC(EXISTS { ?s :firstName ?fname }) ASC(EXISTS { ?s :lastName ?lname }) \n";
+                "} ORDER BY DESC(EXISTS { ?v :firstName ?fname }) ASC(EXISTS { ?v :lastName ?lname }) \n";
 
-        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1", "http://person.example.org/person/2", "http://person.example.org/person/3",
-                "http://person.example.org/person/4", "http://person.example.org/person/5", "http://person.example.org/person/6"));
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/2", "http://person.example.org/person/5", "http://person.example.org/person/1",
+                "http://person.example.org/person/4", "http://person.example.org/person/6", "http://person.example.org/person/3"));
     }
 
     // Not yet supported
@@ -608,20 +607,6 @@ public class ExistsTest extends AbstractRDF4JTest {
     }
 
     @Test
-    @Ignore
-    public void testAggregationByMultipleVariables() {
-        String sparql = "PREFIX : <http://person.example.org/>\n" +
-                "SELECT ?person ?fname (SUM(IF(EXISTS { ?person :firstName ?fname } , 1, 0)) AS ?hasFirstName) \n" +
-                "WHERE {\n" +
-                "   ?person a :Person; \n" +
-                "       :firstName ?fname ;\n" +
-                "} GROUP BY ?person ?fname  \n";
-
-        runQueryAndCompare(sparql, ImmutableList.of("false", "true", "true"));
-    }
-
-    // subqueries in EXISTS are not supported
-    @Test(expected = QueryEvaluationException.class)
     public void testSubqueryInExists() {
         String sparql = "PREFIX : <http://person.example.org/>\n" +
                 "SELECT ?v WHERE {\n" +
@@ -629,7 +614,105 @@ public class ExistsTest extends AbstractRDF4JTest {
                 "   FILTER EXISTS { SELECT ?v WHERE { ?v :firstName ?fname } }\n" +
                 "} ORDER BY ?v \n";
 
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1", "http://person.example.org/person/2", "http://person.example.org/person/5"));
+    }
+
+    @Test(expected = QueryEvaluationException.class)
+    public void testSliceInExists() {
+        String sparql = "PREFIX  : <http://example.org/> \n" +
+                "SELECT ?v WHERE {\n" +
+                "  ?v a :Person .\n" +
+                "  FILTER EXISTS { SELECT ?v WHERE { ?v :nickname ?nick } LIMIT 2 OFFSET 1 }\n" +
+                "} ORDER BY ?v";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/6"));
+    }
+
+    @Test
+    public void testMinusSharedVariable() {
+        String sparql = "PREFIX  : <http://person.example.org/> \n" +
+                "SELECT DISTINCT ?v WHERE {\n" +
+                "   ?v a :Person .\n" +
+                "   FILTER EXISTS {\n" +
+                "       VALUES ?blacklist { \"Smith\" }\n" +
+                "       ?v a :Person .\n" +
+                "       MINUS {\n" +
+                "           ?v :lastName ?blacklist . \n" +
+                "       }\n" +
+                "  }\n" +
+                "} ORDER BY ?v";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/2", "http://person.example.org/person/3",
+                "http://person.example.org/person/4", "http://person.example.org/person/5", "http://person.example.org/person/6"));
+    }
+
+    // variable blacklist outside the exists is not recognized as the same variable as the one inside the minus
+    @Test(expected = QueryEvaluationException.class)
+    public void testMinusNonInjectedVariable() {
+        String sparql = "PREFIX  : <http://person.example.org/> \n" +
+                "SELECT DISTINCT ?v WHERE {\n" +
+                "   ?v a :Person .\n" +
+                "   VALUES ?blacklist { \"Smith\" }\n" +
+                "   FILTER EXISTS {\n" +
+                "       ?v a :Person .\n" +
+                "       MINUS {\n" +
+                "           ?v :lastName ?blacklist . \n" +
+                "       }\n" +
+                "  }\n" +
+                "} ORDER BY ?v";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/2", "http://person.example.org/person/3",
+                "http://person.example.org/person/4", "http://person.example.org/person/5", "http://person.example.org/person/6"));
+    }
+
+    @Test
+    public void testOptionalSharedVariable() {
+        String sparql = "PREFIX  : <http://person.example.org/> \n" +
+                "SELECT DISTINCT ?v WHERE {\n" +
+                "   ?v a :Person .\n" +
+                "   FILTER EXISTS {\n" +
+                "       VALUES ?blacklist { \"Smith\" }\n" +
+                "       ?v a :Person .\n" +
+                "       OPTIONAL {\n" +
+                "           ?v :lastName ?blacklist . \n" +
+                "       }\n" +
+                "  }\n" +
+                "} ORDER BY ?v";
+
         runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1", "http://person.example.org/person/2", "http://person.example.org/person/3",
                 "http://person.example.org/person/4", "http://person.example.org/person/5", "http://person.example.org/person/6"));
     }
+
+    @Test
+    @Ignore
+    public void testOptionalInFilterExists() {
+        String sparql = "PREFIX  : <http://person.example.org/> \n" +
+                "SELECT DISTINCT ?v WHERE {\n" +
+                "   ?v a :Person .\n" +
+                "   VALUES ?blacklist { \"Smith\" }\n" +
+                "   FILTER EXISTS {\n" +
+                "       ?v a :Person .\n" +
+                "       OPTIONAL {\n" +
+                "           ?v :lastName ?blacklist . \n" +
+                "       }\n" +
+                "  }\n" +
+                "} ORDER BY ?v";
+
+        runQueryAndCompare(sparql, ImmutableList.of("http://person.example.org/person/1", "http://person.example.org/person/2", "http://person.example.org/person/3",
+                "http://person.example.org/person/4", "http://person.example.org/person/5", "http://person.example.org/person/6"));
+    }
+
+    @Test
+    @Ignore
+    public void testAggregationByMultipleVariables() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?person ?fname (SUM(IF(EXISTS { ?person :firstName ?fname } , 1, 0)) AS ?v) \n" +
+                "WHERE {\n" +
+                "   ?person a :Person; \n" +
+                "       :firstName ?fname ;\n" +
+                "} GROUP BY ?person ?fname  \n";
+
+        runQueryAndCompare(sparql, ImmutableList.of("1", "1", "1"));
+    }
+
 }

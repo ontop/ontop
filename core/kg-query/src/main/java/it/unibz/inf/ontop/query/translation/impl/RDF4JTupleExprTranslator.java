@@ -511,7 +511,6 @@ public class RDF4JTupleExprTranslator {
     }
 
     private IQTree createNonConflictingRenamingLeftJoin(IQTree leftTree, IQTree rightTree) {
-        var leftNonProjVarsRenaming = getNonProjVarsRenaming(leftTree, rightTree);
         var rightNonProjVarsRenaming = getNonProjVarsRenaming(rightTree, leftTree);
 
         var sharedVariables = Sets.intersection(leftTree.getVariables(), rightTree.getVariables());
@@ -577,18 +576,24 @@ public class RDF4JTupleExprTranslator {
             throw new OntopUnsupportedKGQueryException("The EXISTS operator is not supported with no common variables");
         }
 
-        if (sharedVariables.stream().allMatch(v -> v.isNullable(leftTranslation.nullableVariables)
+        if (sharedVariables.stream().anyMatch(v -> v.isNullable(leftTranslation.nullableVariables)
                 || v.isNullable(rightTranslation.nullableVariables))) {
-            throw new OntopUnsupportedKGQueryException("The EXISTS operator is not supported when there is no non-nullable common variable");
+            throw new OntopUnsupportedKGQueryException("The EXISTS operator is not supported when there are non-nullable common variables");
         }
 
         ExistsSubtreeVisitor existsVisitor = new ExistsSubtreeVisitor(termFactory, existsSubquery);
-        if (!existsVisitor.isSubtreeValid()) {
-            throw new OntopUnsupportedKGQueryException("The EXISTS subquery is not valid: " + existsSubquery);
+        if (!existsVisitor.isExistsSubtreeSupported()) {
+            throw new OntopUnsupportedKGQueryException("The EXISTS subquery is not supported: " + existsSubquery);
         }
 
-        if (!Sets.difference(existsVisitor.getVariables(), rightTranslation.iqTree.getKnownVariables()).isEmpty()) {
-            throw new OntopUnsupportedKGQueryException("Some of the variables in the EXISTS subquery are unbound");
+        Sets.SetView<Variable> unboundVariables = Sets.difference(existsVisitor.getVariables(), rightTranslation.iqTree.getKnownVariables());
+        if (!unboundVariables.isEmpty()) {
+            throw new OntopUnsupportedKGQueryException("Some of the variables in the EXISTS subquery are unbound" + unboundVariables);
+        }
+
+        Sets.SetView<Variable> existsSubtreeAndLeft = Sets.intersection(leftTranslation.iqTree.getVariables(), existsVisitor.getVariables());
+        if (!Sets.difference(existsSubtreeAndLeft, sharedVariables).isEmpty()) {
+            throw new OntopUnsupportedKGQueryException("Some of the variables in the EXISTS subquery are shared with the left subtree but are not projected: " + existsSubtreeAndLeft);
         }
     }
 
@@ -1029,7 +1034,7 @@ public class RDF4JTupleExprTranslator {
     protected static final class ExistsSubtreeVisitor extends AbstractQueryModelVisitor<RuntimeException> {
         private final Set<Variable> variables = new HashSet<>();
         private final TermFactory termFactory;
-        private boolean isValid = true;
+        private boolean isSupported = true;
 
         public ExistsSubtreeVisitor(TermFactory termFactory, TupleExpr expr) {
             super();
@@ -1046,38 +1051,14 @@ public class RDF4JTupleExprTranslator {
         }
 
         @Override
-        public void meet(Projection node) {
-            isValid = false;
-            super.meet(node);
-        }
-
-        @Override
-        public void meet(Union node) {
-            isValid = false;
-            super.meet(node);
-        }
-
-        @Override
         public void meet(Slice node) {
-            isValid = false;
-            super.meet(node);
-        }
-
-        @Override
-        public void meet(Distinct node) {
-            isValid = false;
-            super.meet(node);
-        }
-
-        @Override
-        public void meet(Reduced node) {
-            isValid = false;
+            isSupported = false;
             super.meet(node);
         }
 
         @Override
         public void meet(Group node) {
-            isValid = false;
+            isSupported = false;
             super.meet(node);
         }
 
@@ -1085,8 +1066,8 @@ public class RDF4JTupleExprTranslator {
             return ImmutableSet.copyOf(variables);
         }
 
-        public boolean isSubtreeValid() {
-            return isValid;
+        public boolean isExistsSubtreeSupported() {
+            return isSupported;
         }
     }
 
