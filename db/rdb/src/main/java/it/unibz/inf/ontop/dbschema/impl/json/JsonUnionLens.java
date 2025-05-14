@@ -199,7 +199,7 @@ public class JsonUnionLens extends JsonLens {
 
         //Add provenance column to each child
         ImmutableList<IQTree> extendedChildren;
-        if(includesProvenanceColumn()) {
+        if (includesProvenanceColumn()) {
             extendedChildren = children.stream().map(
                     child -> addConstantColumn(
                             termFactory.getVariable(getProvenanceColumn(quotedIDFactory)),
@@ -209,7 +209,8 @@ public class JsonUnionLens extends JsonLens {
                             coreSingletons
                     )
             ).collect(ImmutableCollectors.toList());
-        } else {
+        }
+        else {
             extendedChildren = children;
         }
 
@@ -237,6 +238,7 @@ public class JsonUnionLens extends JsonLens {
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         ConstructionSubstitutionNormalizer substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
         TermFactory termFactory = coreSingletons.getTermFactory();
+        IQTreeTools iqTreeTools = coreSingletons.getIQTreeTools();
 
         DBConstant provenanceValue = termFactory.getDBStringConstant(value);
         Substitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(variable, provenanceValue);
@@ -244,7 +246,8 @@ public class JsonUnionLens extends JsonLens {
         ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
                 substitutionNormalizer.normalizeSubstitution(substitution,
                         allProjectedVariables);
-        ConstructionNode constructionNode = normalization.generateTopConstructionNode().get();
+        ConstructionNode constructionNode =
+                iqTreeTools.createOptionalConstructionNode(() -> allProjectedVariables, normalization.getNormalizedSubstitution()).get();
         return iqFactory.createUnaryIQTree(constructionNode, child);
     }
 

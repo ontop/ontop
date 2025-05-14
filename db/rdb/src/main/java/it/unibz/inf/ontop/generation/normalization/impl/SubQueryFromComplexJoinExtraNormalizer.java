@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.JoinLikeNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
@@ -27,9 +28,12 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 public class SubQueryFromComplexJoinExtraNormalizer extends DefaultRecursiveIQTreeVisitingTransformer
         implements DialectExtraNormalizer {
 
+    private final IQTreeTools iqTreeTools;
+
     @Inject
     protected SubQueryFromComplexJoinExtraNormalizer(CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory());
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -51,9 +55,7 @@ public class SubQueryFromComplexJoinExtraNormalizer extends DefaultRecursiveIQTr
         IQTree transformedChild = transformChild(child);
 
         if (transformedChild.getRootNode() instanceof JoinLikeNode) {
-            return iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(transformedChild.getVariables()),
-                    transformedChild);
+            return iqTreeTools.createDummyConstructionIQTree(transformedChild);
         }
         return transformedChild;
     }

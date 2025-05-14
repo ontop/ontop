@@ -53,8 +53,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
                 .transform(ImmutableTerm::simplify)
                 .build();
 
-        return new ConstructionSubstitutionNormalizationImpl(newAscendingSubstitution, downRenamingSubstitution,
-                projectedVariables);
+        return new ConstructionSubstitutionNormalizationImpl(newAscendingSubstitution, downRenamingSubstitution);
     }
 
 
@@ -62,19 +61,11 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
         private final Substitution<ImmutableTerm> normalizedSubstitution;
         private final InjectiveSubstitution<Variable> downRenamingSubstitution;
-        private final ImmutableSet<Variable> projectedVariables;
 
         private ConstructionSubstitutionNormalizationImpl(Substitution<ImmutableTerm> normalizedSubstitution,
-                                                          InjectiveSubstitution<Variable> downRenamingSubstitution,
-                                                          ImmutableSet<Variable> projectedVariables) {
+                                                          InjectiveSubstitution<Variable> downRenamingSubstitution) {
             this.normalizedSubstitution = normalizedSubstitution;
             this.downRenamingSubstitution = downRenamingSubstitution;
-            this.projectedVariables = projectedVariables;
-        }
-
-        @Override
-        public Optional<ConstructionNode> generateTopConstructionNode() {
-            return iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, normalizedSubstitution);
         }
 
         @Override

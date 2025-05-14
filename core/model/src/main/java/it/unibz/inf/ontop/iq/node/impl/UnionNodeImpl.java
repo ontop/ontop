@@ -556,18 +556,17 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         ImmutableSet<Variable> unionVariables = newRootNode.getChildVariables();
 
-        IQTree unionIQ = iqTreeTools.createUnionTree(unionVariables,
-                IntStream.range(0, liftedChildrenDecompositions.size())
-                        .mapToObj(i -> updateChild(
-                                liftedChildrenDecompositions.get(i).getNode(),
-                                liftedChildrenDecompositions.get(i).getChild(),
-                                mergedSubstitution,
-                                tmpNormalizedChildSubstitutions.get(i),
-                                unionVariables,
-                                variableGenerator))
-                        .flatMap(this::flattenChild)
-                        .map(c -> iqTreeTools.createConstructionNodeTreeIfNontrivial(c, unionVariables))
-                        .collect(ImmutableCollectors.toList()));
+        Stream<IQTree> newChildrenStream = IntStream.range(0, liftedChildrenDecompositions.size())
+                .mapToObj(i -> updateChild(
+                        liftedChildrenDecompositions.get(i).getNode(),
+                        liftedChildrenDecompositions.get(i).getChild(),
+                        mergedSubstitution,
+                        tmpNormalizedChildSubstitutions.get(i),
+                        unionVariables,
+                        variableGenerator))
+                .flatMap(this::flattenChild);
+
+        IQTree unionIQ = iqTreeTools.createUnionTreeWithOptionalConstructionNodes(unionVariables, newChildrenStream);
 
         return iqFactory.createUnaryIQTree(newRootNode, unionIQ)
                 // TODO: see if needed or if we could opportunistically mark the tree as normalized

@@ -58,19 +58,22 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
     @Override
     public IQTree normalizeForOptimization(AggregationNode aggregationNode, IQTree child,
                                            VariableGenerator variableGenerator, IQTreeCache treeCache) {
+
+        if (aggregationNode.getSubstitution().isEmpty()) {
+            if (aggregationNode.getGroupingVariables().isEmpty()) {
+                return iqFactory.createTrueNode();
+            }
+            else {
+                IQTree newTree = iqTreeTools.createUnaryIQTree(
+                        iqFactory.createDistinctNode(),
+                        iqFactory.createConstructionNode(aggregationNode.getGroupingVariables()),
+                        child);
+
+                return newTree.normalizeForOptimization(variableGenerator);
+            }
+        }
+
         IQTreeCache normalizedTreeCache = treeCache.declareAsNormalizedForOptimizationWithEffect();
-
-        if (aggregationNode.getGroupingVariables().isEmpty() && aggregationNode.getSubstitution().isEmpty()) {
-            return iqFactory.createTrueNode();
-        }
-        else if (aggregationNode.getSubstitution().isEmpty()) {
-            IQTree newTree = iqTreeTools.createUnaryIQTree(
-                    iqFactory.createDistinctNode(),
-                    iqFactory.createConstructionNode(aggregationNode.getGroupingVariables()),
-                    child);
-
-            return newTree.normalizeForOptimization(variableGenerator);
-        }
 
         IQTree shrunkChild = notRequiredVariableRemover.optimize(child.normalizeForOptimization(variableGenerator),
                 aggregationNode.getLocallyRequiredVariables(), variableGenerator);

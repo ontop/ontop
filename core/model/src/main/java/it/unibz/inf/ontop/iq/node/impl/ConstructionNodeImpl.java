@@ -504,7 +504,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                     substitution.transform(t -> t.simplify(shrunkChild.getVariableNullability())),
                     projectedVariables);
 
-            Optional<ConstructionNode> newTopConstructionNode = normalization.generateTopConstructionNode();
+            Optional<ConstructionNode> newTopConstructionNode =
+                    iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, normalization.getNormalizedSubstitution());
 
             IQTree updatedChild = normalization.updateChild(shrunkChild, variableGenerator);
             IQTree newChild = newTopConstructionNode
@@ -513,10 +514,14 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                     .normalizeForOptimization(variableGenerator);
 
             return newTopConstructionNode
-                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(c, newChild,
+                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(
+                            c,
+                            newChild,
                             treeCache.declareAsNormalizedForOptimizationWithEffect()))
                     .orElseGet(() ->
-                            iqTreeTools.createConstructionNodeTreeIfNontrivial(newChild, projectedVariables));
+                            iqTreeTools.createOptionalUnaryIQTree(
+                                    iqTreeTools.createOptionalConstructionNode(projectedVariables, newChild),
+                                    newChild));
         }
     }
 

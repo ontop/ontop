@@ -135,7 +135,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
 
         return iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, normalizedTopSubstitution)
                 .<IQTree>map(cn -> iqFactory.createUnaryIQTree(cn, normalizedNewTree))
-                .orElseGet(() -> iqTreeTools.createConstructionNodeTreeIfNontrivial(normalizedNewTree, projectedVariables));
+                .orElseGet(() -> iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalConstructionNode(projectedVariables, normalizedNewTree), normalizedNewTree));
     }
 
 

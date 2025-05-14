@@ -153,11 +153,11 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
                 .map(a -> getVariable(a, idFactory, termFactory))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableList<Variable> projectedVariables = extractRelationVariables(addedVariables, hiddenVariables, parentDefinitions, termFactory);
+        ImmutableList<Variable> projectedVariablesList = extractRelationVariables(addedVariables, hiddenVariables, parentDefinitions, termFactory);
+        ImmutableSet<Variable> projectedVariables = ImmutableSet.copyOf(projectedVariablesList);
 
         ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
-                substitutionNormalizer.normalizeSubstitution(substitution,
-                        ImmutableSet.copyOf(projectedVariables));
+                substitutionNormalizer.normalizeSubstitution(substitution, projectedVariables);
 
         ImmutableList<IQTree> parents = parentDefinitions.stream()
                 .map(p -> iqFactory.createExtensionalDataNode(p.relation, p.getArgumentMap()))
@@ -166,10 +166,11 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
         IQTree parentTree = iqTreeTools.createJoinTree(Optional.empty(), parents)
                 .orElseThrow(() -> new MetadataExtractionException("At least one base relation was expected"));
 
-        ConstructionNode constructionNode = normalization.generateTopConstructionNode()
-                // In case, we reintroduce a ConstructionNode to get rid of unnecessary variables from the parent relation
+        ConstructionNode constructionNode =
+                iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, normalization.getNormalizedSubstitution())
+        // In case, we reintroduce a ConstructionNode to get rid of unnecessary variables from the parent relation
                 // It may be eliminated by the IQ normalization
-                .orElseGet(() -> iqFactory.createConstructionNode(ImmutableSet.copyOf(projectedVariables)));
+                .orElseGet(() -> iqFactory.createConstructionNode(projectedVariables));
 
         ImmutableList<ImmutableExpression> filterConditions = extractFilter(parentAttributeMap, idFactory, coreSingletons);
 
@@ -182,8 +183,8 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         IQTree iqTree = addIRISafeConstraints(iqTreeBeforeIRISafeConstraints, dbParameters);
 
-        AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
-        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);
+        AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariablesList.size(), coreSingletons);
+        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariablesList);
 
         return iqFactory.createIQ(projectionAtom, iqTree)
                 .normalizeForOptimization();

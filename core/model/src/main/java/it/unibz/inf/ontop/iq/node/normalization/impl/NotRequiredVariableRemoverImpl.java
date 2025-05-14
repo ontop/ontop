@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
-import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.Constant;
@@ -23,7 +22,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Set;
 import java.util.stream.IntStream;
 
 @Singleton
@@ -236,13 +234,10 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
             if (newVariables.equals(rootNode.getVariables()))
                 return tree.normalizeForOptimization(variableGenerator);
 
-            ImmutableList<IQTree> newChildren = children.stream()
-                    .map(c -> iqTreeTools.createConstructionNodeTreeIfNontrivial(c, newVariables))
-                    .collect(ImmutableCollectors.toList());
+            IQTree unionTree = iqTreeTools.createUnionTreeWithOptionalConstructionNodes(newVariables, children.stream());
 
             // New removal opportunities may appear in the subtree ("RECURSIVE")
-            return iqTreeTools.createUnionTree(newVariables, newChildren)
-                    .normalizeForOptimization(variableGenerator);
+            return unionTree.normalizeForOptimization(variableGenerator);
         }
     }
 }

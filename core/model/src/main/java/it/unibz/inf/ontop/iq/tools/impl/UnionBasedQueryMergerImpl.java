@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
@@ -88,11 +87,8 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
         ImmutableSet<Variable> unionVariables = projectionAtom.getVariables();
 
-        ImmutableList<IQTree> unionChildren = Stream.concat(Stream.of(firstDefinition.getTree()), renamedDefinitions)
-                .map(c -> iqTreeTools.createConstructionNodeTreeIfNontrivial(c, unionVariables))
-                .collect(ImmutableCollectors.toList());
-
-        IQTree unionTree = iqTreeTools.createUnionTree(unionVariables, unionChildren);
+        IQTree unionTree = iqTreeTools.createUnionTreeWithOptionalConstructionNodes(unionVariables,
+                Stream.concat(Stream.of(firstDefinition.getTree()), renamedDefinitions));
 
         return Optional.of(iqFactory.createIQ(projectionAtom, unionTree));
     }

@@ -23,17 +23,14 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
-import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.constraints.ImmutableCQ;
 import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.*;
@@ -443,10 +440,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 .filter(v -> joined.stream().allMatch(j -> j.getVariables().contains(v)))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableList<IQTree> unionChildren = joined.stream()
-                .map(c -> iqTreeTools.createConstructionNodeTreeIfNontrivial(c, vars))
-                .collect(ImmutableCollectors.toList());
+        IQTree unionTree = iqTreeTools.createUnionTreeWithOptionalConstructionNodes(vars, joined.stream());
 
-        return ImmutableList.of(iqTreeTools.createUnionTree(vars, unionChildren));
+        return ImmutableList.of(unionTree);
     }
 }

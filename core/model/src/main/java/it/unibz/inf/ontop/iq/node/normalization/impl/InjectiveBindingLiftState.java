@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -16,13 +15,11 @@ import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
@@ -56,11 +53,6 @@ public class InjectiveBindingLiftState {
     protected InjectiveBindingLiftState(@Nonnull ConstructionNode childConstructionNode, IQTree grandChildTree,
                                      VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
         this(UnaryOperatorSequence.of(), grandChildTree, variableGenerator, childConstructionNode, coreSingletons);
-    }
-
-    private InjectiveBindingLiftState(UnaryOperatorSequence<ConstructionNode> ancestors, IQTree grandChildTree,
-                                      VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
-        this(ancestors, grandChildTree, variableGenerator, null, coreSingletons);
     }
 
     private InjectiveBindingLiftState(UnaryOperatorSequence<ConstructionNode> ancestors, IQTree grandChildTree,
@@ -129,9 +121,7 @@ public class InjectiveBindingLiftState {
 
         Optional<ConstructionNode> newChildConstructionNode =
                 iqTreeTools.createOptionalConstructionNode(() -> newChildVariables, newChildSubstitution)
-                .or(() -> newChildVariables.equals(grandChildTree.getVariables())
-                        ? Optional.empty()
-                        : Optional.of(iqFactory.createConstructionNode(newChildVariables)));
+                .or(() -> iqTreeTools.createOptionalConstructionNode(newChildVariables, grandChildTree));
 
         // Nothing lifted
         if (newChildConstructionNode
@@ -142,12 +132,12 @@ public class InjectiveBindingLiftState {
             return this;
         }
 
-        UnaryOperatorSequence<ConstructionNode> newAncestors = liftedConstructionNode
-                .map(ancestors::append)
-                .orElseThrow(() -> new MinorOntopInternalBugException("A lifted construction node was expected"));
-
-        return newChildConstructionNode
-                .map(c -> new InjectiveBindingLiftState(newAncestors, grandChildTree, variableGenerator, c, coreSingletons))
-                .orElseGet(() -> new InjectiveBindingLiftState(newAncestors, grandChildTree, variableGenerator, coreSingletons));
+        return new InjectiveBindingLiftState(
+                ancestors.append(liftedConstructionNode
+                        .orElseThrow(() -> new MinorOntopInternalBugException("A lifted construction node was expected"))),
+                grandChildTree,
+                variableGenerator,
+                newChildConstructionNode.orElse(null),
+                coreSingletons);
     }
 }

@@ -20,8 +20,6 @@ public interface ConstructionSubstitutionNormalizer {
 
     interface ConstructionSubstitutionNormalization {
 
-        Optional<ConstructionNode> generateTopConstructionNode();
-
         IQTree updateChild(IQTree child, VariableGenerator variableGenerator);
 
         ImmutableExpression updateExpression(ImmutableExpression expression);

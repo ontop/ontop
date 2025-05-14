@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.optimizer.OrderBySimplifier;
 import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
@@ -31,9 +32,9 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    protected OrderBySimplifierImpl(OptimizationSingletons optimizationSingletons, IntermediateQueryFactory iqFactory) {
+    protected OrderBySimplifierImpl(OptimizationSingletons optimizationSingletons) {
         this.optimizationSingletons = optimizationSingletons;
-        this.iqFactory = iqFactory;
+        this.iqFactory = optimizationSingletons.getCoreSingletons().getIQFactory();
     }
 
     @Override
@@ -54,6 +55,7 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
         protected final TermFactory termFactory;
         protected final TypeFactory typeFactory;
         protected final ImmutableSet<RDFDatatype> nonLexicallyOrderedDatatypes;
+        protected final IQTreeTools iqTreeTools;
 
         protected OrderBySimplifyingTransformer(VariableGenerator variableGenerator,
                                                 OptimizationSingletons optimizationSingletons) {
@@ -62,9 +64,9 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
             CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
             this.termFactory = coreSingletons.getTermFactory();
             this.typeFactory = coreSingletons.getTypeFactory();
+            this.iqTreeTools = coreSingletons.getIQTreeTools();
             this.nonLexicallyOrderedDatatypes = ImmutableSet.of(typeFactory.getAbstractOntopNumericDatatype(),
                     typeFactory.getXsdBooleanDatatype(), typeFactory.getXsdDatetimeDatatype());
-
         }
 
         @Override
@@ -74,31 +76,27 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
                     .flatMap(c -> simplifyComparator(c, child))
                     .collect(ImmutableCollectors.toList());
 
-            ImmutableList<OrderByNode.OrderComparator> newConditions = simplifications.stream()
+            ImmutableList<OrderByNode.OrderComparator> newComparators = simplifications.stream()
                     .map(s -> s.newComparator)
                     .collect(ImmutableCollectors.toList());
 
+            if (newComparators.isEmpty())
+                return child;
+
             Stream<DefinitionPushDownRequest> definitionsToPushDown = simplifications.stream()
                     .map(s -> s.request)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get);
-
-            if (newConditions.isEmpty())
-                return child;
+                    .flatMap(Optional::stream);
 
             IQTree pushDownChildTree = pushDownDefinitions(child, definitionsToPushDown);
 
             UnaryIQTree orderByTree = iqFactory.createUnaryIQTree(
-                    iqFactory.createOrderByNode(newConditions),
+                    iqFactory.createOrderByNode(newComparators),
                     pushDownChildTree.acceptTransformer(this));
 
-            // Makes sure no new variable is projected by the returned tree
-            ImmutableSet<Variable> childVariables = child.getVariables();
-            return pushDownChildTree.getVariables().equals(childVariables)
-                    ? orderByTree
-                    : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(childVariables),
-                            orderByTree);
+            return iqTreeTools.createOptionalUnaryIQTree(
+                    // Makes sure no new variable is projected by the returned tree
+                    iqTreeTools.createOptionalConstructionNode(child.getVariables(), pushDownChildTree),
+                    orderByTree);
         }
 
         protected Stream<ComparatorSimplification> simplifyComparator(OrderByNode.OrderComparator comparator,
@@ -143,8 +141,7 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
 
                 return lexicalTerm.isGround()
                         ? Stream.empty()
-                        : Stream.of(computeDBTerm(lexicalTerm, possibleType, childTree))
-                            .flatMap(Optional::stream)
+                        : computeDBTerm(lexicalTerm, possibleType, childTree).stream()
                             .map(t -> iqFactory.createOrderComparator(t, isAscending))
                             .map(ComparatorSimplification::new);
             }

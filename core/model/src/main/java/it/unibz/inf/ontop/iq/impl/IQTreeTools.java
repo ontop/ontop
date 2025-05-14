@@ -130,11 +130,28 @@ public class IQTreeTools {
                 .orElse(child);
     }
 
-    public IQTree createConstructionNodeTreeIfNontrivial(IQTree child, ImmutableSet<Variable> variables) {
-        return child.getVariables().equals(variables)
-                ? child
-                : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(variables), child);
+    public Optional<ConstructionNode> createOptionalConstructionNode(ImmutableSet<Variable> originalSignature, IQTree newTree) {
+        // Makes sure no new variable is projected by the returned tree
+        return originalSignature.equals(newTree.getVariables())
+                ? Optional.empty()
+                : Optional.of(iqFactory.createConstructionNode(originalSignature));
     }
+
+    public IQTree createUnionTreeWithOptionalConstructionNodes(ImmutableSet<Variable> signature, Stream<IQTree> childrenStream) {
+        return createUnionTree(
+                signature,
+                childrenStream
+                        .map(c -> createOptionalUnaryIQTree(
+                                createOptionalConstructionNode(signature, c), c))
+                        .collect(ImmutableCollectors.toList()));
+    }
+
+    public IQTree createDummyConstructionIQTree(IQTree tree) {
+        return iqFactory.createUnaryIQTree(
+                iqFactory.createConstructionNode(tree.getVariables()),
+                tree);
+    }
+
 
     // TODO: merge with above
     public IQTree createIQTreeWithSignature(ImmutableSet<Variable> signature, IQTree child) {
