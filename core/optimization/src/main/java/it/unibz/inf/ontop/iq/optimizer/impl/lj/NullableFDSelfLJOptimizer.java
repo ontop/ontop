@@ -206,7 +206,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
             var newLeftTree = replaceNodeOnLeft(leftChild, transfer.leftNode, newLeftNode);
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(
-                            Sets.union(leftVariables, substitution.getDomain()).immutableCopy(),
+                            Sets.union(substitution.getDomain(), leftVariables).immutableCopy(),
                             substitution),
                     newLeftTree);
         }

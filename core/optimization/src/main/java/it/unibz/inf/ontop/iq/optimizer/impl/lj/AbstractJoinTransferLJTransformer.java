@@ -214,9 +214,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
                         iqFactory.createInnerJoinNode(),
                         ImmutableList.of(
                                 construction.getChild(),
-                                iqFactory.createUnaryIQTree(
-                                        iqFactory.createConstructionNode(substitution.getDomain(), substitution),
-                                        iqFactory.createTrueNode())));
+                                iqTreeTools.createTrueTree(substitution)));
 
                 return Optional.of(newTree);
             }

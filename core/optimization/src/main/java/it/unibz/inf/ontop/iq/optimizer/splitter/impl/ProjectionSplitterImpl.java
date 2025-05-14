@@ -48,7 +48,7 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
                 .map((cn, t) -> split(cn, t, variableGenerator, decomposer))
                 .orElseGet(() -> new ProjectionSplitImpl(
                         // "Useless" construction node --> no post-processing
-                        iqFactory.createConstructionNode(topTree.getVariables(), substitutionFactory.getSubstitution()),
+                        iqFactory.createConstructionNode(topTree.getVariables()),
                         topTree,
                         variableGenerator,
                         ImmutableSet.of(),

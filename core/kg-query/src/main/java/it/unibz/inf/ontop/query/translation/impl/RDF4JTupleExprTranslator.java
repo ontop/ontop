@@ -337,8 +337,7 @@ public class RDF4JTupleExprTranslator {
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableList<IQTree> subtrees = substitutions.stream()
-                .map(iqTreeTools::createConstructionNode)
-                .map(cn -> iqFactory.createUnaryIQTree(cn, iqFactory.createTrueNode()))
+                .map(iqTreeTools::createTrueTree)
                 .collect(ImmutableCollectors.toList());
 
         IQTree tree = subtrees.size() == 1

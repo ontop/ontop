@@ -51,7 +51,7 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
                         sliceNode,
                         transform(child));
             }
-            var topConstruct = iqFactory.createConstructionNode(tree.getVariables(), substitutionFactory.getSubstitution());
+            var topConstruct = iqFactory.createConstructionNode(tree.getVariables());
             var sortVariable = variableGenerator.generateNewVariable("slice_sort_column");
             var bottomConstruct = iqFactory.createConstructionNode(
                     Sets.union(tree.getVariables(), ImmutableSet.of(sortVariable)).immutableCopy(),

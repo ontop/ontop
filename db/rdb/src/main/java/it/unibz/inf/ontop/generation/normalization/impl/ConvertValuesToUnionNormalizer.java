@@ -54,9 +54,7 @@ public class ConvertValuesToUnionNormalizer extends DefaultRecursiveIQTreeVisiti
         return iqTreeTools.createUnionTree(
                 valuesNode.getVariables(),
                 substitutionList.stream()
-                        .map(s -> iqFactory.createUnaryIQTree(
-                                iqFactory.createConstructionNode(s.getDomain(), s),
-                                iqFactory.createTrueNode()))
+                        .map(iqTreeTools::createTrueTree)
                         .collect(ImmutableCollectors.toList()));
     }
 
