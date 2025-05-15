@@ -269,15 +269,11 @@ public class RDF4JTupleExprTranslator {
         if (existsMaps.isEmpty()) {
             childTree = child.iqTree;
         } else {
-            ImmutableList<IQTree> orderElementsExistsSubtrees = existsMaps.stream()
-                    .map(e -> {
-                        try {
-                            return translateExists(e, child);
-                        } catch (OntopUnsupportedKGQueryException | OntopInvalidKGQueryException ex) {
-                            throw new RuntimeException(ex);
-                        }
-                    })
-                    .collect(ImmutableCollectors.toList());
+            ImmutableList.Builder<IQTree> builder = ImmutableList.builder();
+            for (ImmutableMap<Variable, Exists> entry : existsMaps) {
+                builder.add(translateExists(entry, child));
+            }
+            ImmutableList<IQTree> orderElementsExistsSubtrees = builder.build();
 
             childTree = orderElementsExistsSubtrees.get(0);
             childTree = orderElementsExistsSubtrees.stream()
@@ -493,21 +489,17 @@ public class RDF4JTupleExprTranslator {
     }
 
     private IQTree translateExists(ImmutableMap<Variable, Exists> existsMap, TranslationResult leftTranslation) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
-        return existsMap.entrySet().stream()
-                .reduce(
-                        null,
-                        (subtree, entry) -> {
-                            try {
-                                IQTree newTree = createExistsSubtree(entry.getValue(), entry.getKey(), leftTranslation);
-                                return subtree == null ? newTree : createNonConflictingRenamingLeftJoin(newTree, subtree);
-                            } catch (OntopUnsupportedKGQueryException | OntopInvalidKGQueryException e) {
-                                throw new RuntimeException(e);
-                            }
-                        },
-                        (t1, t2) -> {
-                            throw new UnsupportedOperationException("Parallel stream not supported here");
-                        }
-                );
+        IQTree subtree = null;
+        for (Map.Entry<Variable, Exists> entry : existsMap.entrySet()) {
+            IQTree newTree = createExistsSubtree(entry.getValue(), entry.getKey(), leftTranslation);
+            if (subtree == null) {
+                subtree = newTree;
+            } else {
+                subtree = createNonConflictingRenamingLeftJoin(newTree, subtree);
+            }
+        }
+
+        return subtree;
     }
 
     private IQTree createNonConflictingRenamingLeftJoin(IQTree leftTree, IQTree rightTree) {
