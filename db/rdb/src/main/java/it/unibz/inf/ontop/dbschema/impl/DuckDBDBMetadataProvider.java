@@ -7,13 +7,13 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 
 import java.sql.*;
 
-public class DuckDBDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
+public class DuckDBDBMetadataProvider extends DefaultSchemaCatalogDBMetadataProvider {
 
     @AssistedInject
     DuckDBDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
-        super(connection, metadata -> new DuckDBQuotedIDFactory(), coreSingletons);
+        super(connection, metadata -> new DuckDBQuotedIDFactory(), coreSingletons,
+        "SELECT CURRENT_CATALOG AS TABLE_CAT, CURRENT_SCHEMA AS TABLE_SCHEM");
     }
-
 
     @Override
     protected ResultSet getPrimaryKeysResultSet(String catalog, String schema, String name) throws SQLException {
@@ -26,12 +26,14 @@ public class DuckDBDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 "generate_subscripts(constraint_column_names, 1) AS KEY_SEQ " +
                 "FROM duckdb_constraints " +
                 "WHERE " +
+                "database_name = ? AND " +
                 "schema_name = ? AND " +
                 "table_name = ? AND " +
                 "constraint_type = 'PRIMARY KEY'");
 
-        st.setString(1, schema);
-        st.setString(2, name);
+        st.setString(1, catalog);
+        st.setString(2, schema);
+        st.setString(3, name);
         return st.executeQuery();
     }
 
@@ -48,12 +50,14 @@ public class DuckDBDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "FALSE AS NON_UNIQUE " +
                         "FROM duckdb_constraints " +
                         "WHERE " +
+                        "database_name = ? AND " +
                         "schema_name = ? AND " +
                         "table_name = ? AND " +
                         "constraint_type = 'UNIQUE'");
 
-        st.setString(1, schema);
-        st.setString(2, name);
+        st.setString(1, catalog);
+        st.setString(2, schema);
+        st.setString(3, name);
         return st.executeQuery();
     }
 
@@ -73,12 +77,15 @@ public class DuckDBDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "FROM duckdb_constraints f INNER JOIN duckdb_constraints p " +
                         "ON f.constraint_index = p.constraint_index " +
                         "WHERE " +
+                        "f.database_name = ? AND " +
                         "f.schema_name = ? AND " +
                         "f.table_name = ? AND " +
                         "p.constraint_type = 'PRIMARY KEY' AND " +
                         "f.constraint_type = 'FOREIGN KEY'");
-        st.setString(1, schema);
-        st.setString(2, name);
+
+        st.setString(1, catalog);
+        st.setString(2, schema);
+        st.setString(3, name);
         return st.executeQuery();
     }
 
