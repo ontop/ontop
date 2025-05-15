@@ -10,11 +10,9 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.function.Function;
 
 public class TrueOrNullFunctionSymbolImpl extends AbstractOrNullFunctionSymbol implements TrueOrNullFunctionSymbol {
-    private final DBTermType dbBooleanType;
 
     protected TrueOrNullFunctionSymbolImpl(int arity, DBTermType dbBooleanTermType) {
         super("TRUE_OR_NULL" + arity, arity, dbBooleanTermType, true);
-        this.dbBooleanType = dbBooleanTermType;
     }
 
     @Override
@@ -27,26 +25,7 @@ public class TrueOrNullFunctionSymbolImpl extends AbstractOrNullFunctionSymbol i
     }
 
     @Override
-    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     TermFactory termFactory, VariableNullability variableNullability) {
-        DBConstant trueConstant = termFactory.getDBBooleanConstant(true);
-        if (newTerms.stream()
-                .anyMatch(trueConstant::equals))
-            return trueConstant;
-
-        /*
-         * We don't care about other constants
-         */
-        ImmutableList<ImmutableExpression> remainingExpressions = newTerms.stream()
-                .filter(t -> (t instanceof ImmutableExpression))
-                .map(t -> (ImmutableExpression) t)
-                .collect(ImmutableCollectors.toList());
-
-        int newArity = remainingExpressions.size();
-        return remainingExpressions.isEmpty()
-                ? termFactory.getNullConstant()
-                : termFactory.getImmutableExpression(
-                        new TrueOrNullFunctionSymbolImpl(newArity, dbBooleanType),
-                remainingExpressions);
+    protected AbstractOrNullFunctionSymbol createFunctionSymbol(int arity, DBTermType dbBooleanTermType) {
+        return new TrueOrNullFunctionSymbolImpl(arity, dbBooleanTermType);
     }
 }

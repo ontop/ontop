@@ -11,11 +11,8 @@ import java.util.function.Function;
 
 public class FalseOrNullFunctionSymbolImpl extends AbstractOrNullFunctionSymbol implements FalseOrNullFunctionSymbol {
 
-    private final DBTermType dbBooleanType;
-
     protected FalseOrNullFunctionSymbolImpl(int arity, DBTermType dbBooleanTermType) {
         super("FALSE_OR_NULL" + arity, arity, dbBooleanTermType, false);
-        this.dbBooleanType = dbBooleanTermType;
     }
 
     @Override
@@ -30,26 +27,7 @@ public class FalseOrNullFunctionSymbolImpl extends AbstractOrNullFunctionSymbol 
     }
 
     @Override
-    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     TermFactory termFactory, VariableNullability variableNullability) {
-        DBConstant falseConstant = termFactory.getDBBooleanConstant(false);
-        if (newTerms.stream()
-                .anyMatch(falseConstant::equals))
-            return falseConstant;
-
-        /*
-         * We don't care about other constants
-         */
-        ImmutableList<ImmutableExpression> remainingExpressions = newTerms.stream()
-                .filter(t -> (t instanceof ImmutableExpression))
-                .map(t -> (ImmutableExpression) t)
-                .collect(ImmutableCollectors.toList());
-
-        int newArity = remainingExpressions.size();
-        return remainingExpressions.isEmpty()
-                ? termFactory.getNullConstant()
-                : termFactory.getImmutableExpression(
-                        new FalseOrNullFunctionSymbolImpl(newArity, dbBooleanType),
-                remainingExpressions);
+    protected AbstractOrNullFunctionSymbol createFunctionSymbol(int arity, DBTermType dbBooleanTermType) {
+        return new FalseOrNullFunctionSymbolImpl(arity, dbBooleanTermType);
     }
 }
