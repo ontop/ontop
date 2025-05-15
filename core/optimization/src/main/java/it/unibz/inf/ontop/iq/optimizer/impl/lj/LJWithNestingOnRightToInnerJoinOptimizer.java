@@ -20,8 +20,10 @@ import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -44,17 +46,19 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
     private final IntermediateQueryFactory iqFactory;
     private final CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer;
     private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
+    private final LeftJoinTools leftJoinTools;
 
     @Inject
     protected LJWithNestingOnRightToInnerJoinOptimizer(RightProvenanceNormalizer rightProvenanceNormalizer,
                                                        CoreSingletons coreSingletons,
                                                        CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer,
-                                                       JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
+                                                       JoinOrFilterVariableNullabilityTools variableNullabilityTools, LeftJoinTools leftJoinTools) {
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
         this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
         this.otherLJOptimizer = otherLJOptimizer;
         this.variableNullabilityTools = variableNullabilityTools;
+        this.leftJoinTools = leftJoinTools;
     }
 
     @Override
@@ -67,7 +71,8 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
                 rightProvenanceNormalizer,
                 coreSingletons,
                 otherLJOptimizer,
-                variableNullabilityTools);
+                variableNullabilityTools,
+                leftJoinTools);
 
         IQTree newTree = initialTree.acceptTransformer(transformer);
 
@@ -81,16 +86,18 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
         private final CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer;
         private final AtomFactory atomFactory;
         private final IQTreeTools iqTreeTools;
+        private final LeftJoinTools leftJoinTools;
 
         protected Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
                               VariableGenerator variableGenerator, RightProvenanceNormalizer rightProvenanceNormalizer,
                               CoreSingletons coreSingletons, CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer,
-                              JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
+                              JoinOrFilterVariableNullabilityTools variableNullabilityTools, LeftJoinTools leftJoinTools) {
             super(variableNullabilitySupplier, variableGenerator, rightProvenanceNormalizer, variableNullabilityTools,
                     coreSingletons);
             this.otherLJOptimizer = otherLJOptimizer;
             this.atomFactory = coreSingletons.getAtomFactory();
             this.iqTreeTools = coreSingletons.getIQTreeTools();
+            this.leftJoinTools = leftJoinTools;
         }
 
         @Override
@@ -100,13 +107,13 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
             return Optional.of(construction.getTail())
                     .filter(t -> t.getRootNode() instanceof LeftJoinNode)
                     .map(t -> (BinaryNonCommutativeIQTree) t)
-                    .flatMap(rLJ -> tryToSimplify(leftChild, rightChild, rootNode.getOptionalFilterCondition(), rLJ));
+                    .flatMap(rLJ -> tryToSimplify(LeftJoinAnalysis.of(rootNode, leftChild, rightChild), rLJ));
         }
 
         @Override
         protected IQTree transformBySearchingFromScratch(IQTree tree) {
             Transformer newTransformer = new Transformer(tree::getVariableNullability, variableGenerator,
-                    rightProvenanceNormalizer, coreSingletons, otherLJOptimizer, variableNullabilityTools);
+                    rightProvenanceNormalizer, coreSingletons, otherLJOptimizer, variableNullabilityTools, leftJoinTools);
             return tree.acceptTransformer(newTransformer);
         }
 
@@ -116,14 +123,14 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
                     () -> computeRightChildVariableNullability(rightChild, ljCondition);
 
             Transformer newTransformer = new Transformer(variableNullabilitySupplier, variableGenerator,
-                    rightProvenanceNormalizer, coreSingletons, otherLJOptimizer, variableNullabilityTools);
+                    rightProvenanceNormalizer, coreSingletons, otherLJOptimizer, variableNullabilityTools, leftJoinTools);
             return rightChild.acceptTransformer(newTransformer);
         }
 
-        private Optional<IQTree> tryToSimplify(IQTree leftChild, IQTree rightChild,
-                                               Optional<ImmutableExpression> leftJoinCondition,
+        private Optional<IQTree> tryToSimplify(LeftJoinAnalysis leftJoin,
                                                BinaryNonCommutativeIQTree rightLJ) {
-            Set<Variable> commonVariables = Sets.intersection(leftChild.getVariables(), rightChild.getVariables());
+
+            Set<Variable> commonVariables = Sets.intersection(leftJoin.leftVariables(), leftJoin.rightVariables());
 
             // If some variables defined by the construction node are common with the left --> no optimization
             if (!rightLJ.getVariables().containsAll(commonVariables))
@@ -131,8 +138,8 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
 
             // In the presence of a LJ condition, a unique constraint must be present on the right child
             // and be joined over
-            if (leftJoinCondition.isPresent()
-                    && rightChild.inferUniqueConstraints().stream()
+            if (leftJoin.joinCondition().isPresent()
+                    && leftJoin.rightChild().inferUniqueConstraints().stream()
                     .noneMatch(commonVariables::containsAll))
                 return Optional.empty();
 
@@ -140,44 +147,18 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
                     rightLJ.getLeftChild(), commonVariables);
 
             return safeLeftOfRightDescendant
-                    .filter(r -> canLJBeReduced(leftChild, r))
+                    .filter(r -> canLJBeReduced(leftJoin.leftChild(), r))
                     // Reduces the LJ to an inner join
-                    .map(r -> buildInnerJoin(leftChild, rightChild, leftJoinCondition))
+                    .map(r -> buildInnerJoin(leftJoin))
                     .map(t -> t.normalizeForOptimization(variableGenerator));
         }
 
         private boolean canLJBeReduced(IQTree leftChild, IQTree safeLeftOfRightDescendant) {
-
-            ImmutableSet<Variable> leftChildVariables = leftChild.getVariables();
-
-            RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(
-                    safeLeftOfRightDescendant, leftChildVariables, Optional.empty(), variableGenerator);
-
             VariableNullability inheritedVariableNullability = getInheritedVariableNullability();
 
-            Optional<ImmutableExpression> nonNullabilityCondition = termFactory.getConjunction(
-                    leftChildVariables.stream()
-                            .filter(v -> !inheritedVariableNullability.isPossiblyNullable(v))
-                            .map(termFactory::getDBIsNotNull));
+            IQ minusIQ = leftJoinTools.constructMinusIQ(leftChild, safeLeftOfRightDescendant, inheritedVariableNullability::isPossiblyNullable, variableGenerator);
 
-            ImmutableExpression isNullCondition = termFactory.getDBIsNull(rightProvenance.getProvenanceVariable());
-            ImmutableExpression filterCondition = iqTreeTools.getConjunction(isNullCondition, nonNullabilityCondition);
-
-            IQTree minusTree = iqTreeTools.createUnaryIQTree(
-                    iqFactory.createConstructionNode(ImmutableSet.of(rightProvenance.getProvenanceVariable())),
-                    iqFactory.createFilterNode(filterCondition),
-                    iqFactory.createBinaryNonCommutativeIQTree(
-                            iqFactory.createLeftJoinNode(),
-                            leftChild,
-                            rightProvenance.getRightTree()));
-
-            // Hack
-            DistinctVariableOnlyDataAtom minusFakeProjectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(
-                    atomFactory.getRDFAnswerPredicate(1),
-                    ImmutableList.copyOf(iqFactory.createConstructionNode(
-                            ImmutableSet.of(rightProvenance.getProvenanceVariable())).getVariables()));
-
-            return otherLJOptimizer.optimize(iqFactory.createIQ(minusFakeProjectionAtom, minusTree))
+            return otherLJOptimizer.optimize(minusIQ)
                     .normalizeForOptimization().getTree()
                     .isDeclaredAsEmpty();
         }
@@ -199,22 +180,24 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
                 return Optional.of(leftChild);
         }
 
-        private IQTree buildInnerJoin(IQTree leftChild, IQTree rightChild, Optional<ImmutableExpression> leftJoinCondition) {
-            IQTree joinTree = iqTreeTools.createInnerJoinTree(ImmutableList.of(leftChild, rightChild));
+        private IQTree buildInnerJoin(LeftJoinAnalysis leftJoin) {
+            IQTree joinTree = iqTreeTools.createInnerJoinTree(ImmutableList.of(leftJoin.leftChild(), leftJoin.rightChild()));
 
-            if (leftJoinCondition.isEmpty())
+            if (leftJoin.joinCondition().isEmpty())
                 return joinTree;
 
-            InjectiveSubstitution<Variable> renaming = Sets.difference(rightChild.getVariables(), leftChild.getVariables()).stream()
+            InjectiveSubstitution<Variable> renaming = leftJoin.rightSpecificVariables().stream()
                     .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
-            ImmutableExpression renamedCondition = renaming.apply(leftJoinCondition.get());
+            ImmutableExpression renamedCondition = renaming.apply(leftJoin.joinCondition().get());
+
+            Substitution<ImmutableFunctionalTerm> newSubstitution = renaming.builder()
+                    .transform(t -> termFactory.getIfElseNull(renamedCondition, t))
+                    .build();
 
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(joinTree.getVariables(),
-                            renaming.builder()
-                                    .transform(t -> termFactory.getIfElseNull(renamedCondition, t))
-                                    .build()),
+                            newSubstitution),
                     joinTree.applyFreshRenaming(renaming));
         }
     }

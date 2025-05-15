@@ -123,6 +123,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
         return iqFactory;
     }
 
+    @Override
     public IQTreeTools getIQTreeTools() {
         return iqTreeTools;
     }

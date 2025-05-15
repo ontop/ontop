@@ -166,18 +166,18 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
         IQTree parentTree = iqTreeTools.createJoinTree(Optional.empty(), parents)
                 .orElseThrow(() -> new MetadataExtractionException("At least one base relation was expected"));
 
-        ConstructionNode constructionNode =
-                iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, normalization.getNormalizedSubstitution())
-        // In case, we reintroduce a ConstructionNode to get rid of unnecessary variables from the parent relation
-                // It may be eliminated by the IQ normalization
-                .orElseGet(() -> iqFactory.createConstructionNode(projectedVariables));
-
         ImmutableList<ImmutableExpression> filterConditions = extractFilter(parentAttributeMap, idFactory, coreSingletons);
 
         IQTree filterTree = iqTreeTools.createFilterTree(
                 filterConditions.stream().reduce(termFactory::getConjunction), parentTree);
 
         IQTree updatedParentDataNode = normalization.updateChild(filterTree, variableGenerator);
+
+        ConstructionNode constructionNode =
+                iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, normalization.getNormalizedSubstitution())
+                        // In case, we reintroduce a ConstructionNode to get rid of unnecessary variables from the parent relation
+                        // It may be eliminated by the IQ normalization
+                        .orElseGet(() -> iqFactory.createConstructionNode(projectedVariables));
 
         IQTree iqTreeBeforeIRISafeConstraints = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
 
