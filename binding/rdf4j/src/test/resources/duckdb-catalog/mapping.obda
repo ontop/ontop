@@ -1,0 +1,16 @@
+[PrefixDeclaration]
+ex:   http://example.org/
+cat:  http://example.catalog.org/
+
+
+[MappingDeclaration] @collection [[
+mappingId	books
+target	ex:book/{id} a ex:Book ; ex:title {title} ; ex:price {price} ; ex:discount {discount} ; ex:pubYear {publication_date} ; ex:description {description} .
+source	SELECT id, title, price, discount, publication_date, description, lang FROM books.books
+
+mappingId	booksCatalog
+target	cat:book/{id} a cat:Book ; cat:title {title} ; cat:price {price} ; cat:discount {discount} ; cat:pubYear {publication_date} ; cat:description {description} .
+source	SELECT id, title, price, discount, publication_date, description, lang FROM first_catalog.books.books
+
+]]
+

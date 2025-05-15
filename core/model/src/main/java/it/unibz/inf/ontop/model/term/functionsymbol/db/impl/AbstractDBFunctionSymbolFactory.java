@@ -1368,7 +1368,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBTypeConversionFunctionSymbol createHexBinaryNormFunctionSymbol(DBTermType binaryType);
     protected abstract DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol();
-    protected abstract DBTypeConversionFunctionSymbol createGeometryNormFunctionSymbol(DBTermType geoType);
     protected abstract DBTypeConversionFunctionSymbol createHexBinaryDenormFunctionSymbol(DBTermType binaryType);
 
     protected DBBooleanFunctionSymbol createLikeFunctionSymbol() {

@@ -28,8 +28,8 @@ public class ConstraintPostgreSQLTest extends AbstractConstraintTest {
 
     private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-postgresql.properties";
 
-    public ConstraintPostgreSQLTest(String method) {
-        super(method, PROPERTIES_FILE);
+    public ConstraintPostgreSQLTest() {
+        super(PROPERTIES_FILE);
     }
 
 }

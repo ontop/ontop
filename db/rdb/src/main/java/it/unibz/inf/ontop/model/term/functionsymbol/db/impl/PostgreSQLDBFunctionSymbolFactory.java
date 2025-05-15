@@ -108,24 +108,6 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-        builder.putAll(super.createNormalizationTable());
-
-        //GEOMETRY
-        DBTermType defaultDBGeometryType = dbTypeFactory.getDBGeometryType();
-        DBTypeConversionFunctionSymbol geometryNormFunctionSymbol = createGeometryNormFunctionSymbol(defaultDBGeometryType);
-        builder.put(defaultDBGeometryType,typeFactory.getWktLiteralDatatype(), geometryNormFunctionSymbol);
-
-        //GEOGRAPHY - Data type exclusive to PostGIS
-        DBTermType defaultDBGeographyType = dbTypeFactory.getDBGeographyType();
-        DBTypeConversionFunctionSymbol geographyNormFunctionSymbol = createGeometryNormFunctionSymbol(defaultDBGeographyType);
-        builder.put(defaultDBGeographyType,typeFactory.getWktLiteralDatatype(), geographyNormFunctionSymbol);
-
-        return builder.build();
-    }
-
-    @Override
     public DBFunctionSymbol getDBJsonEltAsText(ImmutableList<String> path) {
         return new DBFunctionSymbolWithSerializerImpl(
                 "JSON_GET_ELT_AS_TEXT:"+printPath(path),

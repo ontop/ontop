@@ -83,12 +83,10 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     }
 
     @Override
-    protected void checkSameRelationID(RelationID extractedId, RelationID givenId, String method) throws MetadataExtractionException {
+    protected boolean equalRelationIDs(RelationID extractedId, RelationID givenId) {
         // DUAL is retrieved as SYS.DUAL, but its canonical name is DUAL
-        if (isDual(extractedId) && isDual(givenId))
-            return;
-
-        super.checkSameRelationID(extractedId, givenId, method);
+        return (isDual(extractedId) && isDual(givenId))
+                || super.equalRelationIDs(extractedId, givenId);
     }
 
     private static final int PREFETCH_SIZE = 4048;
@@ -316,7 +314,6 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             "APPQOSSYS",
             "LBACSYS",
             "DVSYS",
-            "APPQOSSYS",
             "WMSYS",
             "ORDDATA",
             "AUDSYS");
@@ -349,9 +346,10 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
             "HELP",
             "ROLLING$STATUS");
 
-    private static final ImmutableSet<String> IGNORED_VIEW_PREFIXES = ImmutableSet.of("MVIEW_",
-            "LOGMNR_" +
-                    "AQ$_");
+    private static final ImmutableSet<String> IGNORED_VIEW_PREFIXES = ImmutableSet.of(
+            "MVIEW_",
+            "LOGMNR_",
+            "AQ$_");
 
     private static final ImmutableSet<String> IGNORED_VIEW_SCHEMAS = ImmutableSet.of("SYS",
             "GSMADMIN_INTERNAL",
@@ -398,7 +396,8 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         Statement stmt = connection.createStatement();
         stmt.closeOnCompletion();
         // Obtain the relational objects (i.e., tables and views)
-        return stmt.executeQuery("SELECT NULL AS TABLE_CAT, OWNER as TABLE_SCHEM, table_name as TABLE_NAME " +
+        return stmt.executeQuery(
+                "SELECT NULL AS TABLE_CAT, OWNER as TABLE_SCHEM, table_name as TABLE_NAME " +
                 "FROM all_tables " +
                 "UNION ALL " +
                 "SELECT NULL AS TABLE_CAT, owner as TABLE_SCHEM, view_name as TABLE_NAME " +

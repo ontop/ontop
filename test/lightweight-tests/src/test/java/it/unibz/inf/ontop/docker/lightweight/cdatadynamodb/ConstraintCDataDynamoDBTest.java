@@ -1,14 +1,9 @@
 package it.unibz.inf.ontop.docker.lightweight.cdatadynamodb;
 
-import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.docker.lightweight.AbstractConstraintTest;
 import it.unibz.inf.ontop.docker.lightweight.CDataDynamoDBLightweightTest;
-import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.sql.SQLException;
 
 /**
  * We only run the constraints test on the BOOK table. DynamoDB currently only supports primary keys as the column
@@ -23,55 +18,55 @@ public class ConstraintCDataDynamoDBTest extends AbstractConstraintTest {
     private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-cdatadynamodb.properties";
 
     public ConstraintCDataDynamoDBTest(String method) {
-        super(method, PROPERTIES_FILE);
+        super(PROPERTIES_FILE);
     }
 
     @Test
     @Disabled("We only support non-composite PRIMARY KEYS for DynamoDB at this moment.")
     @Override
-    public void testPrimaryKey2() {
-        super.testPrimaryKey2();
+    public void testPrimaryKeyBookWriter() {
+        super.testPrimaryKeyBookWriter();
     }
 
     @Test
     @Disabled("We only support non-composite PRIMARY KEYS for DynamoDB at this moment.")
     @Override
-    public void testPrimaryKey3() {
-        super.testPrimaryKey3();
+    public void testPrimaryKeyEdition() {
+        super.testPrimaryKeyEdition();
     }
 
     @Test
     @Disabled("We only support non-composite PRIMARY KEYS for DynamoDB at this moment.")
     @Override
-    public void testPrimaryKey4() {
-        super.testPrimaryKey4();
+    public void testPrimaryKeyWriter() {
+        super.testPrimaryKeyWriter();
     }
 
     @Test
     @Disabled("We only support non-composite PRIMARY KEYS for DynamoDB at this moment.")
     @Override
-    public void testForeignKey1() {
-        super.testForeignKey1();
+    public void testForeignKeyBook() {
+        super.testForeignKeyBook();
     }
 
     @Test
     @Disabled("We only support non-composite PRIMARY KEYS for DynamoDB at this moment.")
     @Override
-    public void testForeignKey2() {
-        super.testForeignKey2();
+    public void testForeignKeyBookWriter() {
+        super.testForeignKeyBookWriter();
     }
 
     @Test
     @Disabled("We only support non-composite PRIMARY KEYS for DynamoDB at this moment.")
     @Override
-    public void testForeignKey3() {
-        super.testForeignKey3();
+    public void testForeignKeyEdition() {
+        super.testForeignKeyEdition();
     }
 
     @Test
     @Disabled("We only support non-composite PRIMARY KEYS for DynamoDB at this moment.")
     @Override
-    public void testForeignKey4() {
-        super.testForeignKey4();
+    public void testForeignKeyWriter() {
+        super.testForeignKeyWriter();
     }
 }

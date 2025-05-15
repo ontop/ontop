@@ -10,8 +10,8 @@ public class ConstraintTrinoTest extends AbstractConstraintTest {
 
     private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-trino.properties";
 
-    public ConstraintTrinoTest(String method) {
-        super(method, PROPERTIES_FILE);
+    public ConstraintTrinoTest() {
+        super(PROPERTIES_FILE);
     }
 
 }

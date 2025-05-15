@@ -103,14 +103,6 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
         return blockDefinition(tree);
     }
 
-    /**
-     * Blocks by default
-     */
-    @Override
-    public IQTree transformNonStandardUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-        return blockDefinition(tree);
-    }
-
     @Override
     public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         ImmutableSet<Variable> requestVariables = request.getDefinitionAndConditionVariables();
@@ -126,12 +118,6 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
                     rightChild.acceptTransformer(this));
         else
             return blockDefinition(tree);
-    }
-
-    @Override
-    public IQTree transformNonStandardBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode,
-                                                               IQTree leftChild, IQTree rightChild) {
-        return blockDefinition(tree);
     }
 
     @Override
@@ -167,11 +153,6 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
                 .orElseThrow(() -> new MinorOntopInternalBugException("An union always have multiple children"));
 
         return iqFactory.createNaryIQTree(newRootNode, newChildren);
-    }
-
-    @Override
-    public IQTree transformNonStandardNaryNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-        return blockDefinition(tree);
     }
 
     @Override

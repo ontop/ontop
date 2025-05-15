@@ -17,8 +17,10 @@ import static it.unibz.inf.ontop.model.type.impl.SnowflakeDBTypeFactory.TIMESTAM
 
 public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
+    private static final String JSON_EXTRACT = "JSON_EXTRACT";
     private static final String RANDOM_STR = "RANDOM";
     private static final String UUID_STRING_STR = "UUID";
+    private static final String TO_SPHERICAL_GEOGRAPHY = "TO_SPHERICAL_GEOGRAPHY";
     private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for Trino";
 
     private DBFunctionSymbol dbRight;
@@ -35,6 +37,10 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
             TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
+        DBTermType dbGeometryType;
+        DBTermType dbStringType;
+        dbGeometryType = dbTypeFactory.getDBGeometryType();
+        dbStringType = dbTypeFactory.getDBStringType();
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
@@ -43,6 +49,16 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
                 CURRENT_TIMESTAMP_STR,
                 dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
         table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
+
+        // DBFunctionSymbol toSphericalGeographySymbol = new GeoDBTypedFunctionSymbol(TO_SPHERICAL_GEOGRAPHY, 1, dbGeometryType, false, 
+        //         abstractRootDBType); // QUESTION: why isn't this the way to declare TO_SPHERICAL_GEOGRAPHY? it is a function that accepts a Geometry type as its argument.
+        DBFunctionSymbol toSphericalGeographySymbol = new GeoDBTypedFunctionSymbol(TO_SPHERICAL_GEOGRAPHY, 1, dbStringType, false,
+                abstractRootDBType);
+        table.put(TO_SPHERICAL_GEOGRAPHY, 1, toSphericalGeographySymbol);
+
+        DBFunctionSymbol jsonExtractFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(JSON_EXTRACT, 2, dbStringType,
+                false, abstractRootDBType);
+        table.put(JSON_EXTRACT, 2, jsonExtractFunctionSymbol);
 
         return ImmutableTable.copyOf(table);
     }
@@ -351,15 +367,14 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     @Override
     public DBFunctionSymbol getDBSTDistanceSphere() {
-        return new DBFunctionSymbolWithSerializerImpl(
+        return new DBGeoFunctionSymbolWithSerializerImpl(
                 ST_DISTANCE,
                 ImmutableList.of(dbTypeFactory.getDBGeometryType(), dbTypeFactory.getDBGeometryType()),
                 dbDoubleType,
                 false,
                 (terms, converter, factory) ->
                     String.format(
-                            // TODO: Remove conversion from text to Geometry, type should already be a Geometry
-                            "ST_DISTANCE(TO_SPHERICAL_GEOGRAPHY(ST_GeometryFromText(%s)), TO_SPHERICAL_GEOGRAPHY(ST_GeometryFromText(%s)))",
+                            "ST_DISTANCE(TO_SPHERICAL_GEOGRAPHY(%s), TO_SPHERICAL_GEOGRAPHY(%s))",
                             converter.apply(terms.get(0)), converter.apply(terms.get(1))
                     ));
     }

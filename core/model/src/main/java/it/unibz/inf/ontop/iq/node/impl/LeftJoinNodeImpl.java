@@ -5,7 +5,6 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
@@ -13,12 +12,8 @@ import it.unibz.inf.ontop.iq.node.normalization.impl.ExpressionAndSubstitutionIm
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -74,16 +69,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                              JoinOrFilterVariableNullabilityTools variableNullabilityTools, CoreUtilsFactory coreUtilsFactory, IQTreeTools iqTreeTools) {
         this(Optional.empty(), nullabilityEvaluator, substitutionFactory,
                 termFactory, typeFactory, iqFactory, conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory, iqTreeTools);
-    }
-
-    @Override
-    public void acceptVisitor(QueryNodeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public LeftJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        return transformer.transform(this);
     }
 
     @Override
@@ -185,22 +170,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
 
     @Override
-    public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree leftChild, IQTree rightChild) {
-        return transformer.transformLeftJoin(tree,this, leftChild, rightChild);
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree leftChild,
-                                    IQTree rightChild, T context) {
-        return transformer.transformLeftJoin(tree,this, leftChild, rightChild, context);
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree leftChild, IQTree rightChild) {
-        return visitor.visitLeftJoin(this, leftChild, rightChild);
-    }
-
-    @Override
     public IQTree normalizeForOptimization(IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator,
                               IQTreeCache treeCache) {
         return ljNormalizer.normalizeForOptimization(this, initialLeftChild, initialRightChild,
@@ -231,7 +200,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     /**
-     * NB: the constraint is only propagate to the left child
+     * NB: the constraint is only propagated to the left child
      */
     @Override
     public IQTree applyDescendingSubstitution(
