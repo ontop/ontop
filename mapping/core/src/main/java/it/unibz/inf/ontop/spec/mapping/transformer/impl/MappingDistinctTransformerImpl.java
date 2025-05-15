@@ -60,6 +60,6 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
                 .map(t -> t.normalizeForOptimization(variableGenerator))
                 .orElse(distinctTree);
 
-        return assertion.copyOf(newTree, iqFactory);
+        return assertion.copyOf(iqFactory.createIQ(assertion.getProjectionAtom(), newTree));
     }
 }

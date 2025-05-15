@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.NativeNode;
@@ -128,7 +129,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                     .transformOrRetain(ImmutableMap.of(topVariable, values)::get, (t, sub) -> sub.applyToTerm(t))
                     .build();
 
-            IQTree tree = iqTreeTools.createMappingIQTree(assertion.getProjectionAtom(),
+            IQ iq = iqTreeTools.createMappingIQ(assertion.getProjectionAtom(),
                     instantiatedSub,
                     iqFactory.createUnaryIQTree(iqFactory.createFilterNode(
                             termFactory.getConjunction(values.builder()
@@ -136,7 +137,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                                     .collect(ImmutableCollectors.toList()))),
                     assertion.getTopChild()));
 
-            return assertion.copyOf(tree, iqFactory);
+            return assertion.copyOf(iq);
         }
     }
 

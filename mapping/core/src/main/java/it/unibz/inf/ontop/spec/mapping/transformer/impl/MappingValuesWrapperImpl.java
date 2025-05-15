@@ -139,16 +139,13 @@ public class MappingValuesWrapperImpl implements MappingValuesWrapper {
         }
 
         public MappingAssertion transformMappingAssertion(MappingAssertion mappingAssertion) {
-            var initialIQ = mappingAssertion.getQuery();
-            var initialTree = initialIQ.getTree();
+            var initialTree = mappingAssertion.getQuery().getTree();
 
             var newTree = transform(initialTree);
 
             return newTree.equals(initialTree)
                     ? mappingAssertion
-                    : new MappingAssertion(
-                            iqFactory.createIQ(initialIQ.getProjectionAtom(), newTree),
-                            mappingAssertion.getProvenance());
+                    : mappingAssertion.copyOf(iqFactory.createIQ(mappingAssertion.getProjectionAtom(), newTree));
         }
     }
 

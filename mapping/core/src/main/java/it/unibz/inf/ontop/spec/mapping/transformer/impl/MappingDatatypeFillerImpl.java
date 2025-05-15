@@ -79,7 +79,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
                 .isPresent())
             return assertion;
         else
-            return assertion.copyOf(fillMissingDatatype(objectVariable, assertion), iqFactory);
+            return assertion.copyOf(fillMissingDatatype(objectVariable, assertion));
     }
 
     private ImmutableSet<ImmutableTerm> extractDefinitions(Variable objectVariable, IQ iq) {
@@ -97,7 +97,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
         return objectDefinitions;
     }
 
-    private IQTree fillMissingDatatype(Variable objectVariable, MappingAssertion assertion) throws UnknownDatatypeException {
+    private IQ fillMissingDatatype(Variable objectVariable, MappingAssertion assertion) throws UnknownDatatypeException {
 
         ImmutableTerm objectLexicalTerm = getObjectLexicalTerm(objectVariable, assertion);
 
@@ -110,7 +110,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
                         .transformOrRetain(ImmutableMap.of(objectVariable, objectTermDefinition)::get, (t, u) -> u)
                         .build();
 
-        return iqTreeTools.createMappingIQTree(assertion.getProjectionAtom(), newSubstitution, assertion.getTopChild());
+        return iqTreeTools.createMappingIQ(assertion.getProjectionAtom(), newSubstitution, assertion.getTopChild());
     }
 
     private ImmutableTerm getObjectLexicalTerm(Variable objectVariable, MappingAssertion assertion) {

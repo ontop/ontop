@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -23,7 +22,7 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 /**
- * Assumes that the top=level node is a ConstructionNode.
+ * Assumes that the top-level node is a ConstructionNode.
  * This ConstructionNode determines the index of the mapping assertion.
  */
 public class MappingAssertion {
@@ -53,10 +52,6 @@ public class MappingAssertion {
 
     public MappingAssertion copyOf(IQ query) {
         return new MappingAssertion(query, provenance);
-    }
-
-    public MappingAssertion copyOf(IQTree tree, IntermediateQueryFactory iqFactory) {
-        return new MappingAssertion(iqFactory.createIQ(query.getProjectionAtom(), tree), provenance);
     }
 
     public ImmutableSet<Variable> getProjectedVariables() {

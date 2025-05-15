@@ -66,7 +66,7 @@ public class TermTypeMappingCaster implements MappingCaster {
         Substitution<ImmutableTerm> newSubstitution = assertion.getTopSubstitution()
                             .transform(t -> transformDefinition(t, childTree));
 
-        return assertion.copyOf(iqTreeTools.createMappingIQTree(assertion.getProjectionAtom(), newSubstitution, childTree), iqFactory);
+        return assertion.copyOf(iqTreeTools.createMappingIQ(assertion.getProjectionAtom(), newSubstitution, childTree));
     }
 
     private ImmutableTerm transformDefinition(ImmutableTerm rdfTerm, IQTree childTree) {
