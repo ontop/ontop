@@ -113,7 +113,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(
-                        AbstractIQTree.computeProjectedVariables(descendingSubstitution, getVariables())),
+                        iqTreeTools.computeProjectedVariables(descendingSubstitution, getVariables())),
                 filterTree);
     }
 

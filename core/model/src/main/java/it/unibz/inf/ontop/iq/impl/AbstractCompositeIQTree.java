@@ -160,7 +160,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
                     .orElseGet(() -> iqTreeTools.propagateDownOptionalConstraint(this, newConstraint, variableGenerator));
         }
         catch (UnsatisfiableDescendingSubstitutionException e) {
-            return createEmptyNode(descendingSubstitution);
+            return iqTreeTools.createEmptyNode(descendingSubstitution, getVariables());
         }
     }
 
@@ -311,7 +311,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
                     .orElse(this);
         }
         catch (UnsatisfiableDescendingSubstitutionException e) {
-            return createEmptyNode(descendingSubstitution);
+            return iqTreeTools.createEmptyNode(descendingSubstitution, getVariables());
         }
     }
 

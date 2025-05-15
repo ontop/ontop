@@ -67,7 +67,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
-        return createEmptyNode(descendingSubstitution);
+        return iqTreeTools.createEmptyNode(descendingSubstitution, getVariables());
     }
 
     @Override

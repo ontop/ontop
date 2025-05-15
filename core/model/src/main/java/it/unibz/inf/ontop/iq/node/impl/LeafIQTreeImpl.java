@@ -2,15 +2,14 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.impl.AbstractIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.NonVariableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.iq.node.EmptyNode;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -61,7 +60,7 @@ public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTre
                     .orElse(this);
         }
         catch (UnsatisfiableDescendingSubstitutionException e) {
-            return createEmptyNode(descendingSubstitution);
+            return iqTreeTools.createEmptyNode(descendingSubstitution, getVariables());
         }
     }
 

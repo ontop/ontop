@@ -134,7 +134,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .map(descendingSubstitution::apply);
 
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
-                AbstractIQTree.computeProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)));
+                iqTreeTools.computeProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)));
 
         VariableNullability extendedVariableNullability = constraint
                 .map(c -> simplifiedChildFutureVariableNullability.extendToExternalVariables(c.getVariableStream()))
@@ -160,13 +160,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
             return iqTreeTools.createOptionalUnaryIQTree(
                     iqTreeTools.createOptionalConstructionNode(
-                            () -> AbstractIQTree.computeProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)),
+                            () -> iqTreeTools.computeProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)),
                             expressionAndSubstitution.getSubstitution()),
                     joinTree);
         }
         catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(
-                    AbstractIQTree.computeProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)));
+                    iqTreeTools.computeProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)));
         }
     }
 

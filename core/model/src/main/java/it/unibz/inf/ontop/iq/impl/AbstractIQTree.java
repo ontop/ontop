@@ -23,16 +23,6 @@ public abstract class AbstractIQTree implements IQTree {
     }
 
 
-    public static ImmutableSet<Variable> computeProjectedVariables(
-            Substitution<? extends ImmutableTerm> descendingSubstitution,
-            ImmutableSet<Variable> projectedVariables) {
-
-        ImmutableSet<Variable> newVariables = descendingSubstitution.restrictDomainTo(projectedVariables).getRangeVariables();
-
-        return Sets.union(newVariables, Sets.difference(projectedVariables, descendingSubstitution.getDomain())).immutableCopy();
-    }
-
-
     /**
      * Excludes the variables that are not projected by the IQTree
      *
@@ -59,9 +49,4 @@ public abstract class AbstractIQTree implements IQTree {
      */
     public static class UnsatisfiableDescendingSubstitutionException extends Exception {
     }
-
-    protected final EmptyNode createEmptyNode(Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-        return iqFactory.createEmptyNode(computeProjectedVariables(descendingSubstitution, getVariables()));
-    }
-
 }

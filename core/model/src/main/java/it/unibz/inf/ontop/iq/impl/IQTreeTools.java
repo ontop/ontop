@@ -52,6 +52,20 @@ public class IQTreeTools {
     }
 
 
+    public ImmutableSet<Variable> computeProjectedVariables(
+            Substitution<? extends ImmutableTerm> descendingSubstitution,
+            ImmutableSet<Variable> projectedVariables) {
+
+        ImmutableSet<Variable> newVariables = descendingSubstitution.restrictDomainTo(projectedVariables).getRangeVariables();
+
+        return Sets.union(newVariables, Sets.difference(projectedVariables, descendingSubstitution.getDomain())).immutableCopy();
+    }
+
+    public EmptyNode createEmptyNode(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
+        return iqFactory.createEmptyNode(computeProjectedVariables(descendingSubstitution, projectedVariables));
+    }
+
+
 
     public IQ createMappingIQ(DistinctVariableOnlyDataAtom atom, Substitution<?> substitution, IQTree child) {
         return iqFactory.createIQ(atom, createMappingIQTree(atom, substitution, child));

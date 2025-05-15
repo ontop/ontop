@@ -173,7 +173,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         ImmutableExpression unoptimizedExpression = descendingSubstitution.apply(getFilterCondition());
 
         ImmutableSet<Variable> newlyProjectedVariables =
-                AbstractIQTree.computeProjectedVariables(descendingSubstitution, child.getVariables());
+                iqTreeTools.computeProjectedVariables(descendingSubstitution, child.getVariables());
 
         VariableNullability simplifiedFutureChildVariableNullability = coreUtilsFactory.createSimplifiedVariableNullability(
                 newlyProjectedVariables.stream());

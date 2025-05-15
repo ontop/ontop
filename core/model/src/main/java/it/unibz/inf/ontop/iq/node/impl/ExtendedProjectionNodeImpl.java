@@ -81,7 +81,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     private IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> tau, IQTree child,
                                                DescendingSubstitutionChildUpdateFunction updateChildFct) {
 
-        ImmutableSet<Variable> newProjectedVariables = AbstractIQTree.computeProjectedVariables(tau, getVariables());
+        ImmutableSet<Variable> newProjectedVariables = iqTreeTools.computeProjectedVariables(tau, getVariables());
 
         try {
             PropagationResults tauPropagationResults = propagateTau(tau, child.getVariables());
@@ -114,7 +114,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         Substitution<NonFunctionalTerm> tauC = tau.restrictRangeTo(NonFunctionalTerm.class);
         Substitution<NonFunctionalTerm> thetaC = substitution.restrictRangeTo(NonFunctionalTerm.class);
 
-        ImmutableSet<Variable> projectedVariablesAfterTauC = AbstractIQTree.computeProjectedVariables(tauC, getVariables());
+        ImmutableSet<Variable> projectedVariablesAfterTauC = iqTreeTools.computeProjectedVariables(tauC, getVariables());
 
         Substitution<NonFunctionalTerm> newEta = substitutionFactory.onNonFunctionalTerms().unifierBuilder(thetaC)
                 .unify(tauC.stream(), Map.Entry::getKey, Map.Entry::getValue)

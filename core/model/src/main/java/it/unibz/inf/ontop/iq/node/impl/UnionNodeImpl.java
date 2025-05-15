@@ -477,7 +477,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .filter(c -> !c.isDeclaredAsEmpty())
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableSet<Variable> variables = AbstractIQTree.computeProjectedVariables(descendingSubstitution, getVariables());
+        ImmutableSet<Variable> variables = iqTreeTools.computeProjectedVariables(descendingSubstitution, getVariables());
         switch (updatedChildren.size()) {
             case 0:
                 return iqFactory.createEmptyNode(variables);
@@ -492,7 +492,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
             VariableGenerator variableGenerator) {
-        ImmutableSet<Variable> updatedProjectedVariables = AbstractIQTree.computeProjectedVariables(descendingSubstitution, getVariables());
+        ImmutableSet<Variable> updatedProjectedVariables = iqTreeTools.computeProjectedVariables(descendingSubstitution, getVariables());
 
         ImmutableList<IQTree> updatedChildren = children.stream()
                 .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator))
