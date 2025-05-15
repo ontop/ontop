@@ -14,11 +14,9 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
-import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer.RightProvenance;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -218,7 +216,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
                         Sets.difference(newLJTree.getVariables(), renaming.getRangeSet());
 
                 IQTree newTree = iqFactory.createUnaryIQTree(
-                        iqTreeTools.extendSubTreeWithSubstitution(newVariables, newSubstitution),
+                        iqTreeTools.createExtendingConstructionNode(newVariables, newSubstitution),
                         newLJTree);
 
                 return Optional.of(newTree);

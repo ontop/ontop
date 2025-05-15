@@ -101,10 +101,10 @@ public class IQTreeTools {
         return iqFactory.createConstructionNode(cn.getVariables(), substitution);
     }
 
-    public ConstructionNode extendSubTreeWithSubstitution(Set<Variable> subTreeVariables, Substitution<?> substitution) {
+    public ConstructionNode createExtendingConstructionNode(Set<Variable> subTreeVariables, Substitution<?> extendingSubstitution) {
         return iqFactory.createConstructionNode(
-                Sets.union(subTreeVariables, substitution.getDomain()).immutableCopy(),
-                substitution);
+                Sets.union(subTreeVariables, extendingSubstitution.getDomain()).immutableCopy(),
+                extendingSubstitution);
     }
 
     public IQTree createTrueTree(Substitution<?> substitution) {

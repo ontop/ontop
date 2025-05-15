@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.iq.node.NativeNode;
@@ -26,11 +27,13 @@ public class ReferenceValueReplacer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceValueReplacer.class);
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
-    protected ReferenceValueReplacer(IntermediateQueryFactory iqFactory, TermFactory termFactory) {
+    protected ReferenceValueReplacer(IntermediateQueryFactory iqFactory, TermFactory termFactory, IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     /**
@@ -67,8 +70,8 @@ public class ReferenceValueReplacer {
 
             ConstructionNode newConstructionNode = constructionNode.getSubstitution().isEmpty()
                 ? constructionNode
-                : iqFactory.createConstructionNode(
-                        constructionNode.getVariables(),
+                : iqTreeTools.replaceSubstitution(
+                        constructionNode,
                         constructionNode.getSubstitution().transform(t -> transformTerm(t, referenceToInputMap)));
 
             return iqFactory.createUnaryIQTree(

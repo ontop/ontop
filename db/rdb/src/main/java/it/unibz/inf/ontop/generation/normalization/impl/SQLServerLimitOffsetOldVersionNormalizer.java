@@ -74,7 +74,7 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
 
             // CASE 1: No OrderBy, ORDER BY (SELECT NULL)
             // CASE 2: OrderBy present, ORDER BY (comparators)
-            ConstructionNode newConstruction = iqTreeTools.extendSubTreeWithSubstitution(
+            ConstructionNode newConstruction = iqTreeTools.createExtendingConstructionNode(
                     child.getVariables(),
                     substitutionFactory.getSubstitution(freshVariable, getOrderBySubTerm(child)));
 

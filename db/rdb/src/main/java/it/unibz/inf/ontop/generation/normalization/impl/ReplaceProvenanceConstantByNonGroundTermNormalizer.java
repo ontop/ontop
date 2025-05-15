@@ -3,9 +3,11 @@ package it.unibz.inf.ontop.generation.normalization.impl;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -27,12 +29,13 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DefaultR
         implements DialectExtraNormalizer {
 
     private final TermFactory termFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
-    protected ReplaceProvenanceConstantByNonGroundTermNormalizer(IntermediateQueryFactory iqFactory,
-                                                                 TermFactory termFactory) {
-        super(iqFactory);
-        this.termFactory = termFactory;
+    protected ReplaceProvenanceConstantByNonGroundTermNormalizer(CoreSingletons coreSingletons) {
+        super(coreSingletons.getIQFactory());
+        this.termFactory = coreSingletons.getTermFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -66,8 +69,8 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DefaultR
                             rootNode,
                             leftChild,
                             iqFactory.createUnaryIQTree(
-                                    iqFactory.createConstructionNode(
-                                            rightConstructionNode.getVariables(),
+                                    iqTreeTools.replaceSubstitution(
+                                            rightConstructionNode,
                                             rightConstructionNode.getSubstitution()
                                                     .transform(t -> t.equals(provenanceConstant)
                                                             ? termFactory.getIfThenElse(

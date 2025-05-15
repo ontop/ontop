@@ -1,12 +1,10 @@
 package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
@@ -83,7 +81,7 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
         IQTree newLeftChild = normalizeLeft(leftJoin.leftChild(), substitutionPair.leftSubstitution, variableGenerator);
 
         var newRightChild = iqFactory.createUnaryIQTree(
-                iqTreeTools.extendSubTreeWithSubstitution(leftJoin.rightChild().getVariables(), substitutionPair.rightSubstitution),
+                iqTreeTools.createExtendingConstructionNode(leftJoin.rightChild().getVariables(), substitutionPair.rightSubstitution),
                 leftJoin.rightChild());
 
         return LeftJoinAnalysis.of(newLeftJoin, newLeftChild, newRightChild);
@@ -164,7 +162,7 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
             return downSubstitution.isEmpty()
                     ? tree
                     : iqFactory.createUnaryIQTree(
-                            iqTreeTools.extendSubTreeWithSubstitution(tree.getVariables(), downSubstitution),
+                            iqTreeTools.createExtendingConstructionNode(tree.getVariables(), downSubstitution),
                             tree);
 
         if (leftJoin.getNode().getOptionalFilterCondition().isEmpty()) {

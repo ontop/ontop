@@ -363,18 +363,20 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
                 var newJoiningCondition = termFactory.getConjunction(
                         joiningCondition,
-                        childLifts.stream().flatMap(ChildLift::getExpressionStream));
+                        childLifts.stream().flatMap(ChildLift::expressionStream));
 
                 var newChildren = childLifts.stream()
-                        .flatMap(ChildLift::getChildrenStream)
+                        .flatMap(ChildLift::childrenStream)
                         .collect(ImmutableCollectors.toList());
 
-                var optionalNewParent = Optional.of(children)
-                        .filter(c -> !newChildren.equals(c))
-                        .map(iqTreeTools::getChildrenVariables)
-                        .map(iqFactory::createConstructionNode);
+                if (children.equals(newChildren))
+                    return this;
 
-                return update(optionalNewParent, newJoiningCondition, newChildren);
+                return update(
+                        Optional.of(iqFactory.createConstructionNode(
+                            iqTreeTools.getChildrenVariables(children))),
+                        newJoiningCondition,
+                        newChildren);
             }
 
             ChildLift getChildLift(IQTree tree) {
@@ -392,6 +394,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     @Override
                     public ChildLift transformConstruction(UnaryIQTree tree, ConstructionNode constructionNode, IQTree child) {
                         if (constructionNode.getSubstitution().isEmpty())
+                            // TODO: check whether projected away variables need to be renamed
+                            //  (in case they occur in other children)
                             return new ChildLift(Stream.of(), Stream.of(child));
 
                         return done();
@@ -406,20 +410,20 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         }
     }
 
-    private static class ChildLift {
+    private static final class ChildLift {
         private final Stream<ImmutableExpression> expressionStream;
         private final Stream<IQTree> childrenStream;
 
-        private ChildLift(Stream<ImmutableExpression> expressionStream, Stream<IQTree> childrenStream) {
+        ChildLift(Stream<ImmutableExpression> expressionStream, Stream<IQTree> childrenStream) {
             this.expressionStream = expressionStream;
             this.childrenStream = childrenStream;
         }
 
-        public Stream<ImmutableExpression> getExpressionStream() {
+        Stream<ImmutableExpression> expressionStream() {
             return expressionStream;
         }
 
-        public Stream<IQTree> getChildrenStream() {
+        Stream<IQTree> childrenStream() {
             return childrenStream;
         }
     }

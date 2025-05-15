@@ -63,7 +63,8 @@ public class TermTypeTermLifterImpl implements TermTypeTermLifter {
         return UnaryIQTreeDecomposition.of(tree, ConstructionNode.class)
                 .<IQTree>map((cn, t) ->
                         iqFactory.createUnaryIQTree(
-                                iqTreeTools.replaceSubstitution(cn,
+                                iqTreeTools.replaceSubstitution(
+                                        cn,
                                         cn.getSubstitution()
                                                 .transform(this::makeRDFTermTypeFunctionSymbolsSimplifiable)),
                                 t))

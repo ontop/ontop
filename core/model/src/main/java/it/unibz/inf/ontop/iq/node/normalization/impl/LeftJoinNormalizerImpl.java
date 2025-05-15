@@ -371,10 +371,10 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                                                                  IQTree rightGrandChild) {
 
                     // Parent construction node: in case some variables where projected out by the right construction node
-                    Optional<ConstructionNode> optionalProjectingAwayParent = Optional.of(rightChild.getVariables())
-                            .filter(rvs -> !rightChildRequiredVariables.equals(rightGrandChild.getVariables()))
-                            .map(rvs -> Sets.union(leftChild.getVariables(), rvs).immutableCopy())
-                            .map(iqFactory::createConstructionNode);
+                    Optional<ConstructionNode> optionalProjectingAwayParent =
+                            rightChildRequiredVariables.equals(rightGrandChild.getVariables())
+                                    ? Optional.empty()
+                                    : Optional.of(createConstructionNode(substitutionFactory.getSubstitution()));
 
                     return rightGrandChild.acceptVisitor(new IQStateOptionalTransformer<>() {
                         @Override
@@ -617,13 +617,11 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
     private UnaryIQTree createSubTreeWithProvenance(Variable provenanceVariable, IQTree tree,
                                                     Set<Variable> treeVariablesToProject) {
 
-        var projectedVariables = Sets.union(ImmutableSet.of(provenanceVariable), treeVariablesToProject).immutableCopy();
-
-        var constructionNode = iqFactory.createConstructionNode(
-                projectedVariables,
-                substitutionFactory.getSubstitution(provenanceVariable, specialProvenanceConstant));
-
-        return iqFactory.createUnaryIQTree(constructionNode, tree);
+        return iqFactory.createUnaryIQTree(
+                iqTreeTools.createExtendingConstructionNode(
+                        treeVariablesToProject,
+                        substitutionFactory.getSubstitution(provenanceVariable, specialProvenanceConstant)),
+                tree);
     }
 
     private ImmutableTerm transformRightSubstitutionValue(ImmutableTerm value,

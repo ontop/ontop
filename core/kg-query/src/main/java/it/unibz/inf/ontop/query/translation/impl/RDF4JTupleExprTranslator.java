@@ -566,7 +566,7 @@ public class RDF4JTupleExprTranslator {
                 .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
 
         UnaryIQTree constructTree = iqFactory.createUnaryIQTree(
-                iqTreeTools.extendSubTreeWithSubstitution(
+                iqTreeTools.createExtendingConstructionNode(
                         Sets.intersection(projectedVars, subQuery.getVariables()),
                         newSubstitution),
                 subQuery);
@@ -595,9 +595,9 @@ public class RDF4JTupleExprTranslator {
 
         ImmutableSet<Variable> rootVariables = Sets.union(leftVariables, rightVariables).immutableCopy();
 
-        ConstructionNode leftCn = iqTreeTools.extendSubTreeWithSubstitution(leftVariables, nullOnLeft.stream()
+        ConstructionNode leftCn = iqTreeTools.createExtendingConstructionNode(leftVariables, nullOnLeft.stream()
                 .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant())));
-        ConstructionNode rightCn = iqTreeTools.extendSubTreeWithSubstitution(rightVariables, nullOnRight.stream()
+        ConstructionNode rightCn = iqTreeTools.createExtendingConstructionNode(rightVariables, nullOnRight.stream()
                 .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant())));
 
         InjectiveSubstitution<Variable> leftNonProjVarsRenaming = getNonProjVarsRenaming(leftTranslation, rightTranslation, variableGenerator);
@@ -718,7 +718,7 @@ public class RDF4JTupleExprTranslator {
             ImmutableSet<Variable> newNullableVariables = substitution
                     .getPreImage(t -> t.getVariableStream().anyMatch(nullableVariables::contains));
 
-            ConstructionNode constructionNode = iqTreeTools.extendSubTreeWithSubstitution(result.iqTree.getVariables(), substitution);
+            ConstructionNode constructionNode = iqTreeTools.createExtendingConstructionNode(result.iqTree.getVariables(), substitution);
 
             UnaryIQTree tree = iqFactory.createUnaryIQTree(constructionNode, result.iqTree);
 

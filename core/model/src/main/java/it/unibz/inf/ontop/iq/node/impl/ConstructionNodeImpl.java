@@ -548,7 +548,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     protected Optional<ConstructionNode> computeNewProjectionNode(ImmutableSet<Variable> newProjectedVariables,
                                                                         Substitution<ImmutableTerm> theta, IQTree newChild) {
         return Optional.of(theta)
-                .filter(t -> !(t.isEmpty() && newProjectedVariables.equals(newChild.getVariables())))
+                .filter(t -> !t.isEmpty() || !newProjectedVariables.equals(newChild.getVariables()))
                 .map(t -> iqFactory.createConstructionNode(newProjectedVariables, t));
     }
 

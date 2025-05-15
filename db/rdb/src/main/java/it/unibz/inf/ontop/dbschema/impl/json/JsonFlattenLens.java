@@ -180,8 +180,8 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                 FilterNode filterNode = iqFactory.createFilterNode(termFactory.getDBIsNotNull(flattenOutputVariable));
 
                 //If we use a json type or similar, we first need to check if the item is a valid array.
-                ConstructionNode checkArrayConstructionNode = iqFactory.createConstructionNode(
-                        Sets.union(dataNode.getVariables(), ImmutableSet.of(flattenedIfArrayVariable)).immutableCopy(),
+                ConstructionNode checkArrayConstructionNode = iqTreeTools.createExtendingConstructionNode(
+                        dataNode.getVariables(),
                         substitutionFactory.getSubstitution(
                                 flattenedIfArrayVariable,
                                 termFactory.getIfElseNull(termFactory.getDBIsArray(flattenedDBType, flattenedVariable), flattenedVariable)));

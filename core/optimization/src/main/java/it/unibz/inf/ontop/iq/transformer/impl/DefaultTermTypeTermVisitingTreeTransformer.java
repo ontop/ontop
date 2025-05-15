@@ -123,11 +123,11 @@ public class DefaultTermTypeTermVisitingTreeTransformer
     private IQTree replaceTypeTermConstants(ConstructionNode constructionNode, IQTree child, IQTree tree) {
         Substitution<?> substitution = constructionNode.getSubstitution();
         Substitution<?> newSubstitution = substitution.transform(this::replaceTypeTermConstants);
-        if (!newSubstitution.equals(substitution)) {
+        if (!newSubstitution.equals(substitution))
             return iqFactory.createUnaryIQTree(
                     iqTreeTools.replaceSubstitution(constructionNode, newSubstitution),
                     child);
-        }
+
         return tree;
     }
 

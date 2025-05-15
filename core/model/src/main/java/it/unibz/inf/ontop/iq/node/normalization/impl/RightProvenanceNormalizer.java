@@ -98,10 +98,9 @@ public class RightProvenanceNormalizer {
          */
         Variable provenanceVariable = variableGenerator.generateNewVariable(PROV);
 
-        ConstructionNode newRightConstructionNode = iqTreeTools.extendSubTreeWithSubstitution(
+        ConstructionNode newRightConstructionNode = iqTreeTools.createExtendingConstructionNode(
                 rightRequiredVariables,
-                substitutionFactory.getSubstitution(provenanceVariable,
-                        termFactory.getProvenanceSpecialConstant()));
+                substitutionFactory.getSubstitution(provenanceVariable, termFactory.getProvenanceSpecialConstant()));
 
         UnaryIQTree newRightTree = iqFactory.createUnaryIQTree(newRightConstructionNode, rightTree);
         return new RightProvenance(provenanceVariable, newRightTree);

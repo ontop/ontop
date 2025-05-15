@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.iq.node.SliceNode;
@@ -53,6 +54,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final IQTreeTools iqTreeTools;
 
     @AssistedInject
     private ToFullNativeQueryReformulator(@Assisted OBDASpecification obdaSpecification,
@@ -69,12 +71,13 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
                                           QueryContext.Factory queryContextFactory,
                                           IntermediateQueryFactory iqFactory,
                                           TermFactory termFactory,
-                                          SubstitutionFactory substitutionFactory) {
+                                          SubstitutionFactory substitutionFactory, IQTreeTools iqTreeTools) {
         super(obdaSpecification, queryCache, queryUnfolderFactory, translationFactory, queryRewriter, kgQueryFactory,
                 inputQueryTranslator, generalOptimizer, nodeInGraphOptimizer, queryPlanner, queryLoggerFactory, queryContextFactory);
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
 
@@ -150,8 +153,8 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
     private IQTree replaceRDFByDBTermsInConstructionTree(IQTree tree, ImmutableMap<Variable, RDFTermType> rdfTypes) {
         return UnaryIQTreeDecomposition.of(tree, ConstructionNode.class)
                 .map((cn, t) -> iqFactory.createUnaryIQTree(
-                        iqFactory.createConstructionNode(
-                                cn.getVariables(),
+                        iqTreeTools.replaceSubstitution(
+                                cn,
                                 cn.getSubstitution().builder()
                                         .transform(rdfTypes::get, this::replaceRDFByDBTerm)
                                         .build()),

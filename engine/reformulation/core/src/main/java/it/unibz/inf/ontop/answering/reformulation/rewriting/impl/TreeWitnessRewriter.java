@@ -370,9 +370,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
         IQTree result = join(body);
 
         return ImmutableList.of(iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(
-                        Sets.union(result.getVariables(), substitution.getDomain()).immutableCopy(),
-                        substitution), result));
+                iqTreeTools.createExtendingConstructionNode(result.getVariables(), substitution),
+                result));
     }
 
     private IQTree join(ImmutableList<IQTree> atoms) {

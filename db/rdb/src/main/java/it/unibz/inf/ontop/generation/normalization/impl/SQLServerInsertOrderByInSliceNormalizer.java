@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -53,7 +51,7 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
             }
             var topConstruct = iqFactory.createConstructionNode(tree.getVariables());
             var sortVariable = variableGenerator.generateNewVariable("slice_sort_column");
-            var bottomConstruct = iqTreeTools.extendSubTreeWithSubstitution(
+            var bottomConstruct = iqTreeTools.createExtendingConstructionNode(
                     tree.getVariables(),
                     substitutionFactory.getSubstitution(
                             sortVariable,

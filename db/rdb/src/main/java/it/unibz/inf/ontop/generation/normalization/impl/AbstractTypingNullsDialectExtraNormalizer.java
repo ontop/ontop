@@ -22,12 +22,13 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
 
     protected final TermFactory termFactory;
     protected final SubstitutionFactory substitutionFactory;
+    protected final IQTreeTools iqTreeTools;
 
     protected AbstractTypingNullsDialectExtraNormalizer(CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory());
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
-
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -50,7 +51,7 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
                     .build();
 
             return iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(construction.getNode().getVariables(), newSubstitution),
+                    iqTreeTools.replaceSubstitution(construction.getNode(), newSubstitution),
                     construction.getChild());
         }
         return child;

@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.substitution.Substitution;
 
 /**
- * Head node an IntermediateQuery
  *
  * TODO: further explain
  *

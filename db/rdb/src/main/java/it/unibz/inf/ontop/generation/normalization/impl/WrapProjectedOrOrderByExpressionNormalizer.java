@@ -3,9 +3,11 @@ package it.unibz.inf.ontop.generation.normalization.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -27,12 +29,13 @@ public class WrapProjectedOrOrderByExpressionNormalizer extends DefaultRecursive
         implements DialectExtraNormalizer {
 
     private final TermFactory termFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
-    protected WrapProjectedOrOrderByExpressionNormalizer(IntermediateQueryFactory iqFactory,
-                                                         SubstitutionFactory substitutionFactory, TermFactory termFactory) {
-        super(iqFactory);
-        this.termFactory = termFactory;
+    protected WrapProjectedOrOrderByExpressionNormalizer(CoreSingletons coreSingletons) {
+        super(coreSingletons.getIQFactory());
+        this.termFactory = coreSingletons.getTermFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -52,7 +55,7 @@ public class WrapProjectedOrOrderByExpressionNormalizer extends DefaultRecursive
 
         ConstructionNode newRootNode = newSubstitution.equals(initialSubstitution)
                 ? rootNode
-                : iqFactory.createConstructionNode(rootNode.getVariables(), newSubstitution);
+                : iqTreeTools.replaceSubstitution(rootNode, newSubstitution);
 
         return ((newRootNode == rootNode) && (child == newChild))
                 ? tree
