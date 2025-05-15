@@ -40,5 +40,13 @@ public interface QueryNode {
      * Important to know for nodes with filtering conditions when normalizing, so to guarantee convergence.
      *
      */
-    boolean wouldKeepDescendingGroundTermInFilterAbove(Variable variable, boolean isConstant);
+    default boolean wouldKeepDescendingGroundTermInFilterAbove(Variable variable, boolean isConstant)  {
+        return false;
+    }
+
+    @Override
+    int hashCode();
+
+    @Override
+    boolean equals(Object obj);
 }

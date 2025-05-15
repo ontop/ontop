@@ -119,9 +119,8 @@ public class InjectiveBindingLiftState {
                 .flatTransform(injectivityDecompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubstitution)
                 .build();
 
-        Optional<ConstructionNode> newChildConstructionNode =
-                iqTreeTools.createOptionalConstructionNode(() -> newChildVariables, newChildSubstitution)
-                .or(() -> iqTreeTools.createOptionalConstructionNode(newChildVariables, grandChildTree));
+        var newChildConstructionNode =
+                iqTreeTools.createOptionalConstructionNode(newChildVariables, newChildSubstitution, grandChildTree);
 
         // Nothing lifted
         if (newChildConstructionNode

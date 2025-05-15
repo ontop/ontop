@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.AbstractIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtendedProjectionNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
@@ -18,8 +19,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
 public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl implements ExtendedProjectionNode {
 
@@ -82,7 +81,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     private IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> tau, IQTree child,
                                                DescendingSubstitutionChildUpdateFunction updateChildFct) {
 
-        ImmutableSet<Variable> newProjectedVariables = iqTreeTools.computeNewProjectedVariables(tau, getVariables());
+        ImmutableSet<Variable> newProjectedVariables = AbstractIQTree.computeProjectedVariables(tau, getVariables());
 
         try {
             PropagationResults tauPropagationResults = propagateTau(tau, child.getVariables());
@@ -115,7 +114,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         Substitution<NonFunctionalTerm> tauC = tau.restrictRangeTo(NonFunctionalTerm.class);
         Substitution<NonFunctionalTerm> thetaC = substitution.restrictRangeTo(NonFunctionalTerm.class);
 
-        ImmutableSet<Variable> projectedVariablesAfterTauC = iqTreeTools.computeNewProjectedVariables(tauC, projectedVariables);
+        ImmutableSet<Variable> projectedVariablesAfterTauC = AbstractIQTree.computeProjectedVariables(tauC, getVariables());
 
         Substitution<NonFunctionalTerm> newEta = substitutionFactory.onNonFunctionalTerms().unifierBuilder(thetaC)
                 .unify(tauC.stream(), Map.Entry::getKey, Map.Entry::getValue)

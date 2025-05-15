@@ -51,36 +51,7 @@ public class IQTreeTools {
         return Sets.difference(dependents, determinants).immutableCopy();
     }
 
-    /**
-     * Excludes the variables that are not projected by the IQTree
-     *
-     * If a "null" variable is propagated down, throws an UnsatisfiableDescendingSubstitutionException.
-     *
-     */
-    public Optional<Substitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution(
-            IQTree tree, Substitution<? extends VariableOrGroundTerm> descendingSubstitution)
-            throws UnsatisfiableDescendingSubstitutionException {
 
-        Substitution<? extends VariableOrGroundTerm> reducedSubstitution = descendingSubstitution.restrictDomainTo(tree.getVariables());
-
-        if (reducedSubstitution.isEmpty())
-            return Optional.empty();
-
-        if (reducedSubstitution.rangeAnyMatch(ImmutableTerm::isNull)) {
-            throw new UnsatisfiableDescendingSubstitutionException();
-        }
-
-        return Optional.of(reducedSubstitution);
-    }
-
-    public ImmutableSet<Variable> computeNewProjectedVariables(
-            Substitution<? extends ImmutableTerm> descendingSubstitution,
-            ImmutableSet<Variable> projectedVariables) {
-
-        ImmutableSet<Variable> newVariables = descendingSubstitution.restrictDomainTo(projectedVariables).getRangeVariables();
-
-        return Sets.union(newVariables, Sets.difference(projectedVariables, descendingSubstitution.getDomain())).immutableCopy();
-    }
 
     public IQ createMappingIQ(DistinctVariableOnlyDataAtom atom, Substitution<?> substitution, IQTree child) {
         return iqFactory.createIQ(atom, createMappingIQTree(atom, substitution, child));
@@ -137,6 +108,11 @@ public class IQTreeTools {
                 : Optional.of(iqFactory.createConstructionNode(originalSignature));
     }
 
+    public Optional<ConstructionNode> createOptionalConstructionNode(ImmutableSet<Variable> originalSignature, Substitution<?> substitution, IQTree newTree) {
+        return createOptionalConstructionNode(() -> originalSignature, substitution)
+                .or(() -> createOptionalConstructionNode(originalSignature, newTree));
+    }
+
     public IQTree createUnionTreeWithOptionalConstructionNodes(ImmutableSet<Variable> signature, Stream<IQTree> childrenStream) {
         return createUnionTree(
                 signature,
@@ -168,10 +144,6 @@ public class IQTreeTools {
 
     public ImmutableSet<Variable> getChildrenVariables(IQTree leftChild, IQTree rightChild) {
         return Sets.union(leftChild.getVariables(), rightChild.getVariables()).immutableCopy();
-    }
-
-    public ImmutableSet<Variable> getChildrenVariables(IQTree child, Variable newVariable) {
-        return Sets.union(child.getVariables(), ImmutableSet.of(newVariable)).immutableCopy();
     }
 
     public ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> groupingVariables,
@@ -592,12 +564,6 @@ public class IQTreeTools {
     }
 
 
-    /**
-     * Typically thrown when a "null" variable is propagated down
-     *
-     */
-    public static class UnsatisfiableDescendingSubstitutionException extends Exception {
-    }
 
     public static Stream<Variable> getCoOccurringVariables(ImmutableList<IQTree> children) {
         /* quadratic time,

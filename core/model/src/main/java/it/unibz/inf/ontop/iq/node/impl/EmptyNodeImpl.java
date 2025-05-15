@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.impl.AbstractIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -66,8 +67,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
-        return iqFactory.createEmptyNode(
-                iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables));
+        return createEmptyNode(descendingSubstitution);
     }
 
     @Override

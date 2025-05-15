@@ -173,13 +173,12 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         IQTree updatedParentDataNode = normalization.updateChild(filterTree, variableGenerator);
 
-        ConstructionNode constructionNode =
-                iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, normalization.getNormalizedSubstitution())
-                        // In case, we reintroduce a ConstructionNode to get rid of unnecessary variables from the parent relation
-                        // It may be eliminated by the IQ normalization
-                        .orElseGet(() -> iqFactory.createConstructionNode(projectedVariables));
+        var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(
+                projectedVariables,
+                normalization.getNormalizedSubstitution(),
+                updatedParentDataNode);
 
-        IQTree iqTreeBeforeIRISafeConstraints = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
+        IQTree iqTreeBeforeIRISafeConstraints = iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, updatedParentDataNode);
 
         IQTree iqTree = addIRISafeConstraints(iqTreeBeforeIRISafeConstraints, dbParameters);
 

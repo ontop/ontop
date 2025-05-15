@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
+import it.unibz.inf.ontop.iq.impl.AbstractIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
@@ -476,7 +477,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .filter(c -> !c.isDeclaredAsEmpty())
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableSet<Variable> variables = iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables);
+        ImmutableSet<Variable> variables = AbstractIQTree.computeProjectedVariables(descendingSubstitution, getVariables());
         switch (updatedChildren.size()) {
             case 0:
                 return iqFactory.createEmptyNode(variables);
@@ -491,7 +492,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
             VariableGenerator variableGenerator) {
-        ImmutableSet<Variable> updatedProjectedVariables = iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables);
+        ImmutableSet<Variable> updatedProjectedVariables = AbstractIQTree.computeProjectedVariables(descendingSubstitution, getVariables());
 
         ImmutableList<IQTree> updatedChildren = children.stream()
                 .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator))

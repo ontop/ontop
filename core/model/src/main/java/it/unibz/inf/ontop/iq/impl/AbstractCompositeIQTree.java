@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class AbstractCompositeIQTree<N extends QueryNode> implements CompositeIQTree<N> {
+public abstract class AbstractCompositeIQTree<N extends QueryNode> extends AbstractIQTree implements CompositeIQTree<N> {
 
     private final N rootNode;
     private final ImmutableList<IQTree> children;
@@ -44,8 +44,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     // Non final
     private boolean hasBeenSuccessfullyValidate;
 
-    protected final IQTreeTools iqTreeTools;
-    protected final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
 
@@ -53,8 +51,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
                                       IQTreeCache treeCache, IQTreeTools iqTreeTools,
                                       IntermediateQueryFactory iqFactory, TermFactory termFactory,
                                       SubstitutionFactory substitutionFactory) {
-        this.iqTreeTools = iqTreeTools;
-        this.iqFactory = iqFactory;
+        super(iqTreeTools, iqFactory);
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         if (children.isEmpty())
@@ -148,7 +145,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
         try {
             Optional<Substitution<? extends VariableOrGroundTerm>> normalizedSubstitution =
-                    iqTreeTools.normalizeDescendingSubstitution(this, descendingSubstitution);
+                    normalizeDescendingSubstitution(descendingSubstitution);
 
             Optional<ImmutableExpression> newConstraint = normalizeConstraint(constraint, descendingSubstitution);
 
@@ -162,8 +159,8 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
                             .map(s -> applyRegularDescendingSubstitution(s, newConstraint, variableGenerator)))
                     .orElseGet(() -> iqTreeTools.propagateDownOptionalConstraint(this, newConstraint, variableGenerator));
         }
-        catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
-            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, variables));
+        catch (UnsatisfiableDescendingSubstitutionException e) {
+            return createEmptyNode(descendingSubstitution);
         }
     }
 
@@ -309,12 +306,12 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             VariableGenerator variableGenerator) {
         try {
-            return iqTreeTools.normalizeDescendingSubstitution(this, descendingSubstitution)
+            return normalizeDescendingSubstitution(descendingSubstitution)
                     .map(s -> doApplyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
                     .orElse(this);
         }
-        catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
-            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
+        catch (UnsatisfiableDescendingSubstitutionException e) {
+            return createEmptyNode(descendingSubstitution);
         }
     }
 

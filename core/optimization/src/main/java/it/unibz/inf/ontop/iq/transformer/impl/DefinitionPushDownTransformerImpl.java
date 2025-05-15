@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -50,7 +51,8 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
     public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
         Substitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
 
-        ImmutableSet<Variable> newProjectedVariables = iqTreeTools.getChildrenVariables(tree,  request.getNewVariable());
+        Variable newVariable = request.getNewVariable();
+        ImmutableSet<Variable> newProjectedVariables = Sets.union(tree.getVariables(), ImmutableSet.of(newVariable)).immutableCopy();
 
         DefinitionPushDownRequest newRequest = request.newRequest(rootNode.getSubstitution());
         if (newRequest.equals(request))

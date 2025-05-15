@@ -7,6 +7,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.impl.AbstractIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -171,8 +172,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
         ImmutableExpression unoptimizedExpression = descendingSubstitution.apply(getFilterCondition());
 
-        ImmutableSet<Variable> newlyProjectedVariables = iqTreeTools
-                .computeNewProjectedVariables(descendingSubstitution, child.getVariables());
+        ImmutableSet<Variable> newlyProjectedVariables =
+                AbstractIQTree.computeProjectedVariables(descendingSubstitution, child.getVariables());
 
         VariableNullability simplifiedFutureChildVariableNullability = coreUtilsFactory.createSimplifiedVariableNullability(
                 newlyProjectedVariables.stream());

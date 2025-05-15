@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
+import it.unibz.inf.ontop.iq.impl.AbstractIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
@@ -15,13 +16,10 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
-public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree {
-
-    protected final IQTreeTools iqTreeTools;
+public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTree {
 
     protected LeafIQTreeImpl(IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
-        super(iqFactory);
-        this.iqTreeTools = iqTreeTools;
+        super(iqTreeTools, iqFactory);
     }
 
     @Override
@@ -58,12 +56,12 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
             Optional<ImmutableExpression> constraint,
             VariableGenerator variableGenerator) {
         try {
-            return iqTreeTools.normalizeDescendingSubstitution(this, descendingSubstitution)
+            return normalizeDescendingSubstitution(descendingSubstitution)
                     .map(s -> applyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
                     .orElse(this);
         }
-        catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
-            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
+        catch (UnsatisfiableDescendingSubstitutionException e) {
+            return createEmptyNode(descendingSubstitution);
         }
     }
 

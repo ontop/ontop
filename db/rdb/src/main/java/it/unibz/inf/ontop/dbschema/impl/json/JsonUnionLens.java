@@ -238,16 +238,16 @@ public class JsonUnionLens extends JsonLens {
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         ConstructionSubstitutionNormalizer substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
         TermFactory termFactory = coreSingletons.getTermFactory();
-        IQTreeTools iqTreeTools = coreSingletons.getIQTreeTools();
 
         DBConstant provenanceValue = termFactory.getDBStringConstant(value);
         Substitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(variable, provenanceValue);
         ImmutableSet<Variable> allProjectedVariables = Sets.union(child.getKnownVariables(), ImmutableSet.of(variable)).immutableCopy();
+
         ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
-                substitutionNormalizer.normalizeSubstitution(substitution,
-                        allProjectedVariables);
-        ConstructionNode constructionNode =
-                iqTreeTools.createOptionalConstructionNode(() -> allProjectedVariables, normalization.getNormalizedSubstitution()).get();
+                substitutionNormalizer.normalizeSubstitution(substitution, allProjectedVariables);
+
+        ConstructionNode constructionNode = iqFactory.createConstructionNode(
+                allProjectedVariables, normalization.getNormalizedSubstitution());
         return iqFactory.createUnaryIQTree(constructionNode, child);
     }
 

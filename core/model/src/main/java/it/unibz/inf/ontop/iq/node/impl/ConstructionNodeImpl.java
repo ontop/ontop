@@ -547,9 +547,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     @Override
     protected Optional<ConstructionNode> computeNewProjectionNode(ImmutableSet<Variable> newProjectedVariables,
                                                                         Substitution<ImmutableTerm> theta, IQTree newChild) {
-        return Optional.of(theta)
-                .filter(t -> !t.isEmpty() || !newProjectedVariables.equals(newChild.getVariables()))
-                .map(t -> iqFactory.createConstructionNode(newProjectedVariables, t));
+        return iqTreeTools.createOptionalConstructionNode(newProjectedVariables, theta, newChild);
     }
 
     private IQTree mergeWithChild(ConstructionNode childConstructionNode, IQTree grandChild, IQTreeCache treeCache, VariableGenerator variableGenerator) {
