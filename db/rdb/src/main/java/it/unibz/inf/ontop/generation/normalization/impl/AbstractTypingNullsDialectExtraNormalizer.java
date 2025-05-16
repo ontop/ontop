@@ -46,12 +46,11 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
     protected IQTree updateSubQuery(IQTree child, Substitution<ImmutableFunctionalTerm> typedNullMap) {
         var construction = IQTreeTools.UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
         if (construction.isPresent()) {
-            Substitution<ImmutableTerm> newSubstitution = construction.getNode().getSubstitution().builder()
-                    .transformOrRetain(typedNullMap::get, (t, n) -> t.isNull() ? n : t)
-                    .build();
-
             return iqFactory.createUnaryIQTree(
-                    iqTreeTools.replaceSubstitution(construction.getNode(), newSubstitution),
+                    iqTreeTools.replaceSubstitution(construction.getNode(),
+                            s -> s.builder()
+                                    .transformOrRetain(typedNullMap::get, (t, n) -> t.isNull() ? n : t)
+                                    .build()),
                     construction.getChild());
         }
         return child;

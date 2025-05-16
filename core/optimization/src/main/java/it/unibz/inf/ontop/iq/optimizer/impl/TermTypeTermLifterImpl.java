@@ -65,8 +65,7 @@ public class TermTypeTermLifterImpl implements TermTypeTermLifter {
                         iqFactory.createUnaryIQTree(
                                 iqTreeTools.replaceSubstitution(
                                         cn,
-                                        cn.getSubstitution()
-                                                .transform(this::makeRDFTermTypeFunctionSymbolsSimplifiable)),
+                                        s -> s.transform(this::makeRDFTermTypeFunctionSymbolsSimplifiable)),
                                 t))
                 .orElse(tree);
     }

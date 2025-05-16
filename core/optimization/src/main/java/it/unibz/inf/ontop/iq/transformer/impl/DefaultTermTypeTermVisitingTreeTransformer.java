@@ -121,14 +121,9 @@ public class DefaultTermTypeTermVisitingTreeTransformer
     }
 
     private IQTree replaceTypeTermConstants(ConstructionNode constructionNode, IQTree child, IQTree tree) {
-        Substitution<?> substitution = constructionNode.getSubstitution();
-        Substitution<?> newSubstitution = substitution.transform(this::replaceTypeTermConstants);
-        if (!newSubstitution.equals(substitution))
-            return iqFactory.createUnaryIQTree(
-                    iqTreeTools.replaceSubstitution(constructionNode, newSubstitution),
-                    child);
-
-        return tree;
+        return iqFactory.createUnaryIQTree(
+                iqTreeTools.replaceSubstitution(constructionNode, s -> s.transform(this::replaceTypeTermConstants)),
+                child);
     }
 
     /**
@@ -197,12 +192,11 @@ public class DefaultTermTypeTermVisitingTreeTransformer
         if (!construction.isPresent())
             throw new UnexpectedlyFormattedIQTreeException("Was expecting the child to start with a ConstructionNode");
 
-        Substitution<ImmutableTerm> newSubstitution = construction.getNode().getSubstitution().builder()
-                .transformOrRetain(typeFunctionSymbolMap::get, this::enforceUsageOfCommonTypeFunctionSymbol)
-                .build();
-
         return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(tree.getVariables(), newSubstitution),
+                iqTreeTools.replaceSubstitution(construction.getNode(),
+                        s -> s.builder()
+                                .transformOrRetain(typeFunctionSymbolMap::get, this::enforceUsageOfCommonTypeFunctionSymbol)
+                                .build()),
                 construction.getChild());
     }
 

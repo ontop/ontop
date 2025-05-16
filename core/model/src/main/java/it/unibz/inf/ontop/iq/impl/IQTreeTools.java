@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -64,7 +65,7 @@ public class IQTreeTools {
     public EmptyNode createEmptyNode(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
         return iqFactory.createEmptyNode(computeProjectedVariables(descendingSubstitution, projectedVariables));
     }
-    
+
     public IQ createMappingIQ(DistinctVariableOnlyDataAtom atom, Substitution<?> substitution, IQTree child) {
         return iqFactory.createIQ(atom,
                 iqFactory.createUnaryIQTree(
@@ -79,6 +80,11 @@ public class IQTreeTools {
 
     public ConstructionNode replaceSubstitution(ConstructionNode cn, Substitution<?> substitution) {
         return iqFactory.createConstructionNode(cn.getVariables(), substitution);
+    }
+
+    public <T extends ImmutableTerm> ConstructionNode replaceSubstitution(ConstructionNode cn, Function<Substitution<ImmutableTerm>, Substitution<T>> substitutionTransformer) {
+        Substitution<T> newSubstitution = substitutionTransformer.apply(cn.getSubstitution());
+        return replaceSubstitution(cn, newSubstitution);
     }
 
     public ConstructionNode createExtendingConstructionNode(Set<Variable> subTreeVariables, Substitution<?> extendingSubstitution) {

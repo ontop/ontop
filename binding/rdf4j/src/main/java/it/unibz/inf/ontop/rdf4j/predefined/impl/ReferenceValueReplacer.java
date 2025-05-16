@@ -59,15 +59,14 @@ public class ReferenceValueReplacer {
             @Override
             public IQTree transformConstruction(UnaryIQTree tree1, ConstructionNode node, IQTree child) {
                 var newConstructionNode = iqTreeTools.replaceSubstitution(
-                        node,
-                        node.getSubstitution().transform(t -> transformTerm(t, referenceToInputMap)));
+                        node, s -> s.transform(this::transformTerm));
 
                 return iqFactory.createUnaryIQTree(newConstructionNode, child.acceptVisitor(this));
             }
 
             @Override
             public IQTree transformNative(NativeNode node) {
-                String newQueryString = replaceString(node.getNativeQueryString(), referenceToInputMap);
+                String newQueryString = replaceString(node.getNativeQueryString());
 
                 return iqFactory.createNativeNode(node.getVariables(),
                         node.getTypeMap(), node.getColumnNames(), newQueryString, node.getVariableNullability());
@@ -77,52 +76,52 @@ public class ReferenceValueReplacer {
             public IQTree transformEmpty(EmptyNode node) {
                 return node;
             }
+
+            private ImmutableTerm transformTerm(ImmutableTerm term) {
+                if (term instanceof RDFConstant) {
+                    RDFConstant constant = (RDFConstant) term;
+                    String initialValue = constant.getValue();
+                    String newValue = replaceString(constant.getValue());
+                    if (initialValue.equals(newValue))
+                        return constant;
+
+                    return termFactory.getRDFConstant(newValue, constant.getType());
+                }
+                else if (term instanceof DBConstant) {
+                    DBConstant constant = (DBConstant) term;
+                    String initialValue = constant.getValue();
+                    String newValue = replaceString(constant.getValue());
+                    if (initialValue.equals(newValue))
+                        return constant;
+
+                    return termFactory.getDBConstant(newValue, constant.getType());
+                }
+                else if (term instanceof ImmutableFunctionalTerm) {
+                    ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
+
+                    ImmutableList<? extends ImmutableTerm> initialTerms = functionalTerm.getTerms();
+
+                    ImmutableList<ImmutableTerm> newTerms = initialTerms.stream()
+                            .map(this::transformTerm)
+                            .collect(ImmutableCollectors.toList());
+
+                    return initialTerms.equals(newTerms)
+                            ? functionalTerm
+                            : termFactory.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), newTerms);
+                }
+                else
+                    return term;
+            }
+
+            private String replaceString(String str) {
+                return referenceToInputMap.entrySet().stream()
+                        .reduce(str, (s, e) -> s.replaceAll(e.getKey(), e.getValue()),
+                                (s1, s2) -> {
+                                    throw new MinorOntopInternalBugException("Not expected to be run in //");
+                                });
+            }
         });
 
         return iqFactory.createIQ(referenceIq.getProjectionAtom(), newTree);
-    }
-
-    private ImmutableTerm transformTerm(ImmutableTerm term, ImmutableMap<String, String> referenceToInputMap) {
-        if (term instanceof RDFConstant) {
-            RDFConstant constant = (RDFConstant) term;
-            String initialValue = constant.getValue();
-            String newValue = replaceString(constant.getValue(), referenceToInputMap);
-            if (initialValue.equals(newValue))
-                return constant;
-
-            return termFactory.getRDFConstant(newValue, constant.getType());
-        }
-        else if (term instanceof DBConstant) {
-            DBConstant constant = (DBConstant) term;
-            String initialValue = constant.getValue();
-            String newValue = replaceString(constant.getValue(), referenceToInputMap);
-            if (initialValue.equals(newValue))
-                return constant;
-
-            return termFactory.getDBConstant(newValue, constant.getType());
-        }
-        else if (term instanceof ImmutableFunctionalTerm) {
-            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
-
-            ImmutableList<? extends ImmutableTerm> initialTerms = functionalTerm.getTerms();
-
-            ImmutableList<ImmutableTerm> newTerms = initialTerms.stream()
-                    .map(t -> transformTerm(t, referenceToInputMap))
-                    .collect(ImmutableCollectors.toList());
-
-            return initialTerms.equals(newTerms)
-                    ? functionalTerm
-                    : termFactory.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), newTerms);
-        }
-        else
-            return term;
-    }
-
-    private String replaceString(String str, ImmutableMap<String, String> referenceToInputMap) {
-        return referenceToInputMap.entrySet().stream()
-                .reduce(str, (s, e) -> s.replaceAll(e.getKey(), e.getValue()),
-                        (s1, s2) -> {
-                            throw new MinorOntopInternalBugException("Not expected to be run in //");
-                        });
     }
 }

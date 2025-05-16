@@ -87,8 +87,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
 
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-            var newSubstitution = rootNode.getSubstitution().transform(this::transformTerm);
-            var newConstruction = iqTreeTools.replaceSubstitution(rootNode, newSubstitution);
+            var newConstruction = iqTreeTools.replaceSubstitution(rootNode, s -> s.transform(this::transformTerm));
             if (newConstruction.equals(rootNode))
                 return super.transformConstruction(tree, rootNode, child);
 

@@ -155,9 +155,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
                 .map((cn, t) -> iqFactory.createUnaryIQTree(
                         iqTreeTools.replaceSubstitution(
                                 cn,
-                                cn.getSubstitution().builder()
-                                        .transform(rdfTypes::get, this::replaceRDFByDBTerm)
-                                        .build()),
+                                s -> s.builder().transform(rdfTypes::get, this::replaceRDFByDBTerm).build()),
                         t))
                 .orElseThrow(() -> new MinorOntopInternalBugException("Unexpected tree shape (proper exception should have already been thrown)"));
     }

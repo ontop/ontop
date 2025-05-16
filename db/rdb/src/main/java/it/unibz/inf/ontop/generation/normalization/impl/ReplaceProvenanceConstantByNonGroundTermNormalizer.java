@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.DBConstant;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -63,24 +64,24 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DefaultR
 
             DBConstant provenanceConstant = termFactory.getProvenanceSpecialConstant();
 
-            ConstructionNode rightConstructionNode = construction.getNode();
-            return grandChildVariable.isPresent()
-                    ? Optional.of(iqFactory.createBinaryNonCommutativeIQTree(
-                            rootNode,
-                            leftChild,
-                            iqFactory.createUnaryIQTree(
-                                    iqTreeTools.replaceSubstitution(
-                                            rightConstructionNode,
-                                            rightConstructionNode.getSubstitution()
-                                                    .transform(t -> t.equals(provenanceConstant)
-                                                            ? termFactory.getIfThenElse(
-                                                                    termFactory.getDBIsNotNull(grandChildVariable.get()),
-                                                                    termFactory.getDBStringConstant("placeholder1"),
-                                                                    termFactory.getDBStringConstant("placeholder2"))
-                                                            : t)),
-                                    rightGrandChild)))
-                    : Optional.empty();
+            if (grandChildVariable.isEmpty())
+                return Optional.empty();
+
+            ConstructionNode constructionNode = iqTreeTools.replaceSubstitution(
+                    construction.getNode(),
+                    s -> s.transform(t -> t.equals(provenanceConstant) ? getIfThenElse(grandChildVariable.get()) : t));
+
+            return Optional.of(iqFactory.createBinaryNonCommutativeIQTree(
+                    rootNode, leftChild,
+                    iqFactory.createUnaryIQTree(constructionNode, rightGrandChild)));
         }
         return Optional.empty();
+    }
+
+    private ImmutableFunctionalTerm getIfThenElse(Variable grandChildVariable) {
+        return termFactory.getIfThenElse(
+                termFactory.getDBIsNotNull(grandChildVariable),
+                termFactory.getDBStringConstant("placeholder1"),
+                termFactory.getDBStringConstant("placeholder2"));
     }
 }
