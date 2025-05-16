@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.DownConstraint;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -14,8 +14,6 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-
-import java.util.Optional;
 
 /**
  * TODO: find a better name
@@ -70,7 +68,8 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
         @Override
         public IQTree updateChild(IQTree child, VariableGenerator variableGenerator) {
-            return iqTreeTools.applyDescendingSubstitution(child, downRenamingSubstitution,Optional.empty(), variableGenerator);
+            DownConstraint dc = new DownConstraint();
+            return dc.applyDescendingSubstitution(child, downRenamingSubstitution, variableGenerator);
         }
 
         @Override

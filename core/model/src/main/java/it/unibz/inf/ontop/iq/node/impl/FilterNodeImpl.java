@@ -7,7 +7,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.impl.AbstractIQTree;
+import it.unibz.inf.ontop.iq.impl.DescendingSubstitution;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -73,10 +73,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             ExpressionAndSubstitution simplification = conditionSimplifier
                     .simplifyCondition(getFilterCondition(), ImmutableList.of(child), extendedChildVariableNullability);
 
-            Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.of(constraint),
+            var downConstraint = conditionSimplifier.computeDownConstraint(Optional.of(constraint),
                     simplification, extendedChildVariableNullability);
 
-            IQTree newChild = iqTreeTools.applyDescendingSubstitution(child, simplification.getSubstitution(), downConstraint, variableGenerator);
+            IQTree newChild = downConstraint.applyDescendingSubstitution(child, simplification.getSubstitution(), variableGenerator);
 
             return createFilterTree(simplification, child.getVariables(), newChild);
         }
@@ -170,10 +170,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
 
-        ImmutableExpression unoptimizedExpression = descendingSubstitution.apply(getFilterCondition());
+        DescendingSubstitution ds = new DescendingSubstitution(descendingSubstitution, child.getVariables());
 
-        ImmutableSet<Variable> newlyProjectedVariables =
-                iqTreeTools.computeProjectedVariables(descendingSubstitution, child.getVariables());
+        ImmutableExpression unoptimizedExpression = ds.getSubstitution().apply(getFilterCondition());
+
+        ImmutableSet<Variable> newlyProjectedVariables = ds.computeProjectedVariables();
 
         VariableNullability simplifiedFutureChildVariableNullability = coreUtilsFactory.createSimplifiedVariableNullability(
                 newlyProjectedVariables.stream());
@@ -183,21 +184,21 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                     unoptimizedExpression, ImmutableList.of(child), simplifiedFutureChildVariableNullability);
 
             Substitution<? extends VariableOrGroundTerm> downSubstitution =
-                    substitutionFactory.onVariableOrGroundTerms().compose(descendingSubstitution, expressionAndSubstitution.getSubstitution());
+                    substitutionFactory.onVariableOrGroundTerms().compose(ds.getSubstitution(), expressionAndSubstitution.getSubstitution());
 
             VariableNullability extendedVariableNullability = constraint
                     .map(c -> simplifiedFutureChildVariableNullability.extendToExternalVariables(c.getVariableStream()))
                     .orElse(simplifiedFutureChildVariableNullability);
 
-            Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(constraint,
+            var downConstraint = conditionSimplifier.computeDownConstraint(constraint,
                     expressionAndSubstitution, extendedVariableNullability);
 
-            IQTree newChild = child.applyDescendingSubstitution(downSubstitution, downConstraint, variableGenerator);
+            IQTree newChild = child.applyDescendingSubstitution(downSubstitution, downConstraint.getConstraint(), variableGenerator);
 
             return createFilterTree(expressionAndSubstitution, newlyProjectedVariables, newChild);
         }
         catch (UnsatisfiableConditionException e) {
-            return iqFactory.createEmptyNode(newlyProjectedVariables);
+            return iqTreeTools.createEmptyNode(ds);
         }
     }
 

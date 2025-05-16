@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.AbstractIQTree;
+import it.unibz.inf.ontop.iq.impl.DescendingSubstitution;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.AggregationNormalizer;
@@ -111,9 +112,10 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         IQTree filterTree = iqFactory.createUnaryIQTree(filterNode, newSubTree)
                 .applyFreshRenaming(renamingSubstitution);
 
+        DescendingSubstitution ds = new DescendingSubstitution(descendingSubstitution, getVariables());
+
         return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(
-                        iqTreeTools.computeProjectedVariables(descendingSubstitution, getVariables())),
+                iqFactory.createConstructionNode(ds.computeProjectedVariables()),
                 filterTree);
     }
 

@@ -4,6 +4,8 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.DownConstraint;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
@@ -24,12 +26,14 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private ConditionSimplifierImpl(SubstitutionFactory substitutionFactory,
-                                    TermFactory termFactory) {
+                                    TermFactory termFactory, IQTreeTools iqTreeTools) {
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
 
@@ -140,26 +144,21 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
     }
 
     @Override
-    public Optional<ImmutableExpression> computeDownConstraint(Optional<ImmutableExpression> optionalConstraint,
-                                                               ExpressionAndSubstitution conditionSimplificationResults,
-                                                               VariableNullability childVariableNullability) throws UnsatisfiableConditionException {
+    public DownConstraint computeDownConstraint(Optional<ImmutableExpression> optionalConstraint,
+                                                ExpressionAndSubstitution conditionSimplificationResults,
+                                                VariableNullability childVariableNullability) throws UnsatisfiableConditionException {
         if (optionalConstraint.isPresent()) {
             ImmutableExpression substitutedConstraint =
                     conditionSimplificationResults.getSubstitution().apply(optionalConstraint.get());
 
-            ImmutableExpression combinedExpression = conditionSimplificationResults.getOptionalExpression()
-                    .flatMap(e -> termFactory.getConjunction(Stream.of(e, substitutedConstraint)))
-                    .orElse(substitutedConstraint);
+            ImmutableExpression combinedExpression = iqTreeTools.getConjunction(
+                    conditionSimplificationResults.getOptionalExpression(),
+                    substitutedConstraint);
 
-            ImmutableExpression.Evaluation evaluationResults = combinedExpression.evaluate2VL(childVariableNullability);
-
-            if (evaluationResults.isEffectiveFalse())
-                throw new UnsatisfiableConditionException();
-
-            return evaluationResults.getExpression();
+            return new DownConstraint(combinedExpression, childVariableNullability);
         }
         else
-            return conditionSimplificationResults.getOptionalExpression();
+            return new DownConstraint(conditionSimplificationResults.getOptionalExpression());
     }
 
 

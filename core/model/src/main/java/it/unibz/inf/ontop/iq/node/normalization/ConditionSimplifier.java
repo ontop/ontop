@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node.normalization;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.DownConstraint;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -23,9 +24,9 @@ public interface ConditionSimplifier {
                                                 VariableNullability variableNullability)
                     throws UnsatisfiableConditionException;
 
-    Optional<ImmutableExpression> computeDownConstraint(Optional<ImmutableExpression> optionalConstraint,
-                                                        ExpressionAndSubstitution conditionSimplificationResults,
-                                                        VariableNullability childVariableNullability)
+    DownConstraint computeDownConstraint(Optional<ImmutableExpression> optionalConstraint,
+                                         ExpressionAndSubstitution conditionSimplificationResults,
+                                         VariableNullability childVariableNullability)
                             throws UnsatisfiableConditionException;
 
 

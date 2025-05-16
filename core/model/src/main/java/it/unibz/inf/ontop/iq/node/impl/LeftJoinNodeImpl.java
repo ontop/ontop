@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.impl.DownConstraint;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
@@ -331,7 +332,16 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild,
                                           VariableGenerator variableGenerator) {
-        return propagateDownCondition(Optional.of(constraint), leftChild, rightChild, variableGenerator);
+
+        DownConstraint dc = new DownConstraint(Optional.of(constraint));
+        if (dc.getConstraint()
+                .filter(c -> isRejectingRightSpecificNulls(c, leftChild, rightChild))
+                .isPresent())
+            return transformIntoInnerJoinTree(leftChild, rightChild)
+                    .propagateDownConstraint(dc.getConstraint().get(), variableGenerator);
+
+        IQTree newLeftChild = dc.propagateDownOptionalConstraint(leftChild, variableGenerator);
+        return iqFactory.createBinaryNonCommutativeIQTree(this, newLeftChild, rightChild);
     }
 
     @Override
@@ -402,24 +412,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public VariableNonRequirement computeNotInternallyRequiredVariables(IQTree leftChild, IQTree rightChild) {
         return computeVariableNonRequirement(ImmutableList.of(leftChild, rightChild));
-    }
-
-    /**
-     * Can propagate on the left, but not on the right.
-     *
-     * Transforms the left join into an inner join when the constraint is rejecting nulls from the right
-     */
-    private IQTree propagateDownCondition(Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild,
-                                          VariableGenerator variableGenerator) {
-
-        if (constraint
-                .filter(c -> isRejectingRightSpecificNulls(c, leftChild, rightChild))
-                .isPresent())
-            return transformIntoInnerJoinTree(leftChild, rightChild)
-                    .propagateDownConstraint(constraint.get(), variableGenerator);
-
-        IQTree newLeftChild = iqTreeTools.propagateDownOptionalConstraint(leftChild, constraint, variableGenerator);
-        return iqFactory.createBinaryNonCommutativeIQTree(this, newLeftChild, rightChild);
     }
 
     private ExpressionAndSubstitution applyDescendingSubstitutionToExpression(

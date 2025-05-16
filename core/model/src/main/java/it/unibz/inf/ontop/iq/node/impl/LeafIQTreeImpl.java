@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.impl.AbstractIQTree;
+import it.unibz.inf.ontop.iq.impl.DescendingSubstitution;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.model.term.*;
@@ -54,13 +55,14 @@ public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTre
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint,
             VariableGenerator variableGenerator) {
+        DescendingSubstitution ds = new DescendingSubstitution(descendingSubstitution, getVariables());
         try {
-            return normalizeDescendingSubstitution(descendingSubstitution)
+            return ds.normalizeDescendingSubstitution()
                     .map(s -> applyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
                     .orElse(this);
         }
-        catch (UnsatisfiableDescendingSubstitutionException e) {
-            return iqTreeTools.createEmptyNode(descendingSubstitution, getVariables());
+        catch (DescendingSubstitution.UnsatisfiableDescendingSubstitutionException e) {
+            return iqTreeTools.createEmptyNode(ds);
         }
     }
 

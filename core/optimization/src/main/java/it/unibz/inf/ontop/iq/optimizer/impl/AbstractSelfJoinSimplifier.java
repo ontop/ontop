@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.DownConstraint;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
@@ -120,7 +121,8 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                                 ImmutableSet<Variable> projectedVariables,
                                 VariableGenerator variableGenerator) {
 
-        ImmutableList<IQTree> newChildren = iqTreeTools.applyDescendingSubstitution(children, unifier,Optional.empty(), variableGenerator);
+        DownConstraint dc = new DownConstraint();
+        ImmutableList<IQTree> newChildren = dc.applyDescendingSubstitution(children, unifier, variableGenerator);
 
         Optional<ImmutableExpression> newExpression = expression.map(unifier::apply);
 

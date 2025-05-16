@@ -141,26 +141,26 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
 
-        ImmutableSet<Variable> variables = getVariables();
+        DescendingSubstitution ds = new DescendingSubstitution(descendingSubstitution, getVariables());
 
         try {
             Optional<Substitution<? extends VariableOrGroundTerm>> normalizedSubstitution =
-                    normalizeDescendingSubstitution(descendingSubstitution);
+                    ds.normalizeDescendingSubstitution();
 
-            Optional<ImmutableExpression> newConstraint = normalizeConstraint(constraint, descendingSubstitution);
+            DownConstraint newConstraint = normalizeConstraint(constraint, ds);
 
             return normalizedSubstitution
-                    .flatMap(s -> iqTreeTools.extractFreshRenaming(s, variables))
+                    .flatMap(s -> ds.extractFreshRenaming())
                     // Fresh renaming
                     .map(this::applyRestrictedFreshRenaming)
-                    .map(t -> iqTreeTools.propagateDownOptionalConstraint(t, newConstraint, variableGenerator))
+                    .map(t -> newConstraint.propagateDownOptionalConstraint(t, variableGenerator))
                     // Regular substitution
                     .or(() -> normalizedSubstitution
-                            .map(s -> applyRegularDescendingSubstitution(s, newConstraint, variableGenerator)))
-                    .orElseGet(() -> iqTreeTools.propagateDownOptionalConstraint(this, newConstraint, variableGenerator));
+                            .map(s -> applyRegularDescendingSubstitution(s, newConstraint.getConstraint(), variableGenerator)))
+                    .orElseGet(() -> newConstraint.propagateDownOptionalConstraint(this, variableGenerator));
         }
-        catch (UnsatisfiableDescendingSubstitutionException e) {
-            return iqTreeTools.createEmptyNode(descendingSubstitution, getVariables());
+        catch (DescendingSubstitution.UnsatisfiableDescendingSubstitutionException e) {
+            return iqTreeTools.createEmptyNode(ds);
         }
     }
 
@@ -177,19 +177,15 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
 
     protected abstract IQTree applyNonEmptyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution);
 
-    private Optional<ImmutableExpression> normalizeConstraint(Optional<ImmutableExpression> constraint,
-                                                              Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-        if (!constraint.isPresent())
-            return constraint;
+    private DownConstraint normalizeConstraint(Optional<ImmutableExpression> constraint,
+                                               DescendingSubstitution descendingSubstitution) {
+        if (constraint.isEmpty())
+            return new DownConstraint();
 
-        ImmutableSet<Variable> newVariables = getVariables().stream()
-                .map(v -> substitutionFactory.onVariableOrGroundTerms().apply(descendingSubstitution, v))
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable)t)
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> newVariables = descendingSubstitution.getVariableImage();
 
-        return termFactory.getConjunction(constraint.get().flattenAND()
-                .filter(e -> e.getVariableStream().anyMatch(newVariables::contains)));
+        return new DownConstraint(termFactory.getConjunction(constraint.get().flattenAND()
+                .filter(e -> e.getVariableStream().anyMatch(newVariables::contains))));
     }
 
 
@@ -305,13 +301,14 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             VariableGenerator variableGenerator) {
+        DescendingSubstitution ds = new DescendingSubstitution(descendingSubstitution, getVariables());
         try {
-            return normalizeDescendingSubstitution(descendingSubstitution)
+            return ds.normalizeDescendingSubstitution()
                     .map(s -> doApplyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
                     .orElse(this);
         }
-        catch (UnsatisfiableDescendingSubstitutionException e) {
-            return iqTreeTools.createEmptyNode(descendingSubstitution, getVariables());
+        catch (DescendingSubstitution.UnsatisfiableDescendingSubstitutionException e) {
+            return iqTreeTools.createEmptyNode(ds);
         }
     }
 
