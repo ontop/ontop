@@ -78,25 +78,16 @@ public class IQTreeTools {
                 Sets.difference(allVariables, projectedAwayVariables).immutableCopy());
     }
 
-    public ConstructionNode replaceSubstitution(ConstructionNode cn, Substitution<?> substitution) {
-        return iqFactory.createConstructionNode(cn.getVariables(), substitution);
-    }
-
     public <T extends ImmutableTerm> ConstructionNode replaceSubstitution(ConstructionNode cn, Function<Substitution<ImmutableTerm>, Substitution<T>> substitutionTransformer) {
-        Substitution<T> newSubstitution = substitutionTransformer.apply(cn.getSubstitution());
-        return replaceSubstitution(cn, newSubstitution);
+        return iqFactory.createConstructionNode(
+                cn.getVariables(),
+                substitutionTransformer.apply(cn.getSubstitution()));
     }
 
     public ConstructionNode createExtendingConstructionNode(Set<Variable> subTreeVariables, Substitution<?> extendingSubstitution) {
         return iqFactory.createConstructionNode(
                 Sets.union(subTreeVariables, extendingSubstitution.getDomain()).immutableCopy(),
                 extendingSubstitution);
-    }
-
-    public IQTree createTrueTree(Substitution<?> substitution) {
-        return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(substitution.getDomain(), substitution),
-                iqFactory.createTrueNode());
     }
 
     public Optional<ConstructionNode> createOptionalConstructionNode(Supplier<ImmutableSet<Variable>> projectedVariables, Substitution<?> substitution) {

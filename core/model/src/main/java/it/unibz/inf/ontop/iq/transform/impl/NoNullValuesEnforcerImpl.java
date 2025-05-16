@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.DistinctNode;
-import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -100,13 +99,11 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
                     .restrictRangeTo(ImmutableFunctionalTerm.class)
                     .toMap((v, t) -> t.simplifyAsGuaranteedToBeNonNull());
 
-            Substitution<ImmutableTerm> newSubstitution = initialSubstitution.builder()
-                    .transformOrRetain(updatedEntryMap::get, (t, u) -> u.getSimplifiedTerm())
-                    .build();
-
-            ConstructionNode newConstructionNode = initialSubstitution.equals(newSubstitution)
-                    ? rootNode
-                    : iqTreeTools.replaceSubstitution(rootNode, newSubstitution);
+            ConstructionNode newConstructionNode = iqTreeTools.replaceSubstitution(
+                    rootNode,
+                    s -> s.builder()
+                            .transformOrRetain(updatedEntryMap::get, (t, u) -> u.getSimplifiedTerm())
+                            .build());
 
             Set<Variable> simplifiableChildVariables = Sets.union(
                     Sets.difference(rootNode.getVariables(), initialSubstitution.getDomain()),
@@ -118,7 +115,9 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
                     ? child
                     : declareTopVariablesNotNull(child);  // "Recursive"
 
-            return lazyCreateUnaryIQTree(tree, newConstructionNode, newChild);
+            return newConstructionNode.equals(rootNode) && (newChild == child)
+                    ? tree
+                    : iqFactory.createUnaryIQTree(newConstructionNode, newChild);
         }
 
         /**
@@ -127,13 +126,9 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
         @Override
         public IQTree transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree child) {
             IQTree newChild = transformChild(child);
-            return lazyCreateUnaryIQTree(tree, node, newChild);
-        }
-
-        private IQTree lazyCreateUnaryIQTree(UnaryIQTree tree, UnaryOperatorNode node, IQTree child) {
-            return (node == tree.getRootNode() && child == tree.getChild())
+            return newChild == child
                     ? tree
-                    : iqFactory.createUnaryIQTree(node, child);
+                    : iqFactory.createUnaryIQTree(node, newChild);
         }
     }
 }
