@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.impl.DownConstraint;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
@@ -203,9 +203,9 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                             optionalFilterNode.get().getFilterCondition(), ImmutableList.of(child), childVariableNullability);
 
                     var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
-                            new DownConstraint(), simplifiedFilterCondition, childVariableNullability);
+                            new DownPropagation(projectedVariables), simplifiedFilterCondition, childVariableNullability);
 
-                    var newChild = extendedDownConstraint.applyDescendingSubstitution(child, simplifiedFilterCondition.getSubstitution(), variableGenerator);
+                    var newChild = extendedDownConstraint.applyDescendingSubstitution(child, extendedDownConstraint.getSubstitution(), variableGenerator);
 
                     var newOptionalParent = iqTreeTools.createOptionalConstructionNode(child::getVariables, simplifiedFilterCondition.getSubstitution());
 

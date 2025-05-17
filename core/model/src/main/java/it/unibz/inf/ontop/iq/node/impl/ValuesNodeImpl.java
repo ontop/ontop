@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.impl.DownConstraint;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -381,9 +381,10 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         Optional<IQTree> optionalReshapedTree = tryToReshapeValuesNodeToConstructFunctionalTerm(firstStrictEquality, variableGenerator);
         if (optionalReshapedTree.isPresent()) {
             // Propagates down other constraints
-            DownConstraint dc = new DownConstraint(
+            DownPropagation dc = new DownPropagation(
                     termFactory.getConjunction(constraint.flattenAND()
-                        .filter(c -> !c.equals(firstStrictEquality))));
+                        .filter(c -> !c.equals(firstStrictEquality))),
+                    ImmutableSet.of());
 
             return dc.propagateDownOptionalConstraint(optionalReshapedTree.get(), variableGenerator);
         }

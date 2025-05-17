@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.impl.DownConstraint;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
@@ -519,7 +519,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
 
             public LJNormalizationState propagateDownLJCondition() {
-                DownConstraint dc = new DownConstraint(ljCondition);
+                DownPropagation dc = new DownPropagation(ljCondition, ImmutableSet.of());
                 return update(ljCondition, leftChild, dc.propagateDownOptionalConstraint(rightChild, variableGenerator));
             }
 

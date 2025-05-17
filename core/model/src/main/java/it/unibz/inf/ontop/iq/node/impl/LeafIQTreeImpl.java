@@ -2,14 +2,12 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.impl.AbstractIQTree;
-import it.unibz.inf.ontop.iq.impl.DescendingSubstitution;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -55,13 +53,13 @@ public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTre
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint,
             VariableGenerator variableGenerator) {
-        DescendingSubstitution ds = new DescendingSubstitution(descendingSubstitution, getVariables());
+        DownPropagation ds = new DownPropagation(descendingSubstitution, getVariables());
         try {
             return ds.normalizeDescendingSubstitution()
                     .map(s -> applyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
                     .orElse(this);
         }
-        catch (DescendingSubstitution.UnsatisfiableDescendingSubstitutionException e) {
+        catch (DownPropagation.UnsatisfiableDescendingSubstitutionException e) {
             return iqTreeTools.createEmptyNode(ds);
         }
     }

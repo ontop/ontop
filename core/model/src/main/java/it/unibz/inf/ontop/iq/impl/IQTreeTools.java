@@ -53,7 +53,7 @@ public class IQTreeTools {
     }
 
 
-    public EmptyNode createEmptyNode(DescendingSubstitution ds) {
+    public EmptyNode createEmptyNode(DownPropagation ds) {
         return iqFactory.createEmptyNode(ds.computeProjectedVariables());
     }
 

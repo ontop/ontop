@@ -7,8 +7,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
-import it.unibz.inf.ontop.iq.impl.AbstractIQTree;
-import it.unibz.inf.ontop.iq.impl.DescendingSubstitution;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
@@ -473,7 +472,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                                               Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
                                               VariableGenerator variableGenerator) {
 
-        DescendingSubstitution ds = new DescendingSubstitution(descendingSubstitution, getVariables());
+        DownPropagation ds = new DownPropagation(descendingSubstitution, getVariables());
 
         ImmutableList<IQTree> updatedChildren = children.stream()
                 .map(c -> c.applyDescendingSubstitution(ds.getSubstitution(), constraint, variableGenerator))
@@ -495,7 +494,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
             VariableGenerator variableGenerator) {
 
-        DescendingSubstitution ds = new DescendingSubstitution(descendingSubstitution, getVariables());
+        DownPropagation ds = new DownPropagation(descendingSubstitution, getVariables());
 
         ImmutableList<IQTree> updatedChildren = children.stream()
                 .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(ds.getSubstitution(), variableGenerator))

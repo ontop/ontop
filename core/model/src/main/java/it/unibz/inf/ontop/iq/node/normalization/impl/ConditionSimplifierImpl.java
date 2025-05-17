@@ -4,7 +4,7 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.DownConstraint;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
@@ -130,22 +130,28 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
     }
 
     @Override
-    public DownConstraint extendAndSimplifyDownConstraint(DownConstraint downConstraint,
-                                                          ExpressionAndSubstitution conditionSimplificationResults,
-                                                          VariableNullability childVariableNullability) throws UnsatisfiableConditionException {
+    public DownPropagation extendAndSimplifyDownConstraint(DownPropagation downPropagation,
+                                                           ExpressionAndSubstitution conditionSimplificationResults,
+                                                           VariableNullability childVariableNullability) throws UnsatisfiableConditionException {
+
+        Substitution<? extends VariableOrGroundTerm> downSubstitution =
+                downPropagation.getOptionalDescendingSubstitution()
+                                .map(ds ->
+                substitutionFactory.onVariableOrGroundTerms().compose(ds, conditionSimplificationResults.getSubstitution()))
+                        .orElseGet(conditionSimplificationResults::getSubstitution);
 
         Optional<ImmutableExpression> optionalSubstitutedConstraint =
-                downConstraint.getConstraint().map(conditionSimplificationResults.getSubstitution()::apply);
+                downPropagation.getConstraint().map(conditionSimplificationResults.getSubstitution()::apply);
 
         if (optionalSubstitutedConstraint.isPresent()) {
             ImmutableExpression conjunction = iqTreeTools.getConjunction(
                     conditionSimplificationResults.getOptionalExpression(),
                     optionalSubstitutedConstraint.get());
 
-            return new DownConstraint(evaluateCondition(conjunction, childVariableNullability));
+            return new DownPropagation(evaluateCondition(conjunction, childVariableNullability), downSubstitution, downPropagation.getVariables());
         }
 
-        return new DownConstraint(conditionSimplificationResults.getOptionalExpression());
+        return new DownPropagation(conditionSimplificationResults.getOptionalExpression(), downSubstitution, downPropagation.getVariables());
     }
 
 

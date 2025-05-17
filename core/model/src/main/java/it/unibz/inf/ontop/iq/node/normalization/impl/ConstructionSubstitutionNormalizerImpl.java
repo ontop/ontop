@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.DownConstraint;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -68,7 +68,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
         @Override
         public IQTree updateChild(IQTree child, VariableGenerator variableGenerator) {
-            DownConstraint dc = new DownConstraint();
+            DownPropagation dc = new DownPropagation(ImmutableSet.of());
             return dc.applyDescendingSubstitution(child, downRenamingSubstitution, variableGenerator);
         }
 

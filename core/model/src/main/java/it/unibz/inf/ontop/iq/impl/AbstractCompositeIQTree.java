@@ -141,25 +141,25 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
 
-        DescendingSubstitution ds = new DescendingSubstitution(descendingSubstitution, getVariables());
+        DownPropagation ds = new DownPropagation(constraint, descendingSubstitution, getVariables());
 
         try {
             Optional<Substitution<? extends VariableOrGroundTerm>> normalizedSubstitution =
                     ds.normalizeDescendingSubstitution();
 
-            DownConstraint newConstraint = normalizeConstraint(constraint, ds);
+            DownPropagation downPropagation = ds.normalizeConstraint(termFactory);
 
             return normalizedSubstitution
                     .flatMap(s -> ds.extractFreshRenaming())
                     // Fresh renaming
                     .map(this::applyRestrictedFreshRenaming)
-                    .map(t -> newConstraint.propagateDownOptionalConstraint(t, variableGenerator))
+                    .map(t -> downPropagation.propagateDownOptionalConstraint(t, variableGenerator))
                     // Regular substitution
                     .or(() -> normalizedSubstitution
-                            .map(s -> applyRegularDescendingSubstitution(s, newConstraint.getConstraint(), variableGenerator)))
-                    .orElseGet(() -> newConstraint.propagateDownOptionalConstraint(this, variableGenerator));
+                            .map(s -> applyRegularDescendingSubstitution(s, downPropagation.getConstraint(), variableGenerator)))
+                    .orElseGet(() -> downPropagation.propagateDownOptionalConstraint(this, variableGenerator));
         }
-        catch (DescendingSubstitution.UnsatisfiableDescendingSubstitutionException e) {
+        catch (DownPropagation.UnsatisfiableDescendingSubstitutionException e) {
             return iqTreeTools.createEmptyNode(ds);
         }
     }
@@ -176,17 +176,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
     }
 
     protected abstract IQTree applyNonEmptyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution);
-
-    private DownConstraint normalizeConstraint(Optional<ImmutableExpression> constraint,
-                                               DescendingSubstitution descendingSubstitution) {
-        if (constraint.isEmpty())
-            return new DownConstraint();
-
-        ImmutableSet<Variable> newVariables = descendingSubstitution.getVariableImage();
-
-        return new DownConstraint(termFactory.getConjunction(constraint.get().flattenAND()
-                .filter(e -> e.getVariableStream().anyMatch(newVariables::contains))));
-    }
 
 
     protected abstract IQTree applyRegularDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
@@ -301,13 +290,13 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             VariableGenerator variableGenerator) {
-        DescendingSubstitution ds = new DescendingSubstitution(descendingSubstitution, getVariables());
+        DownPropagation ds = new DownPropagation(descendingSubstitution, getVariables());
         try {
             return ds.normalizeDescendingSubstitution()
                     .map(s -> doApplyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
                     .orElse(this);
         }
-        catch (DescendingSubstitution.UnsatisfiableDescendingSubstitutionException e) {
+        catch (DownPropagation.UnsatisfiableDescendingSubstitutionException e) {
             return iqTreeTools.createEmptyNode(ds);
         }
     }

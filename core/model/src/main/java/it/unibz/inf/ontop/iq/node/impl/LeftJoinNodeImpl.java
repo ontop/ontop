@@ -5,7 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.impl.DownConstraint;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
@@ -333,7 +333,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild,
                                           VariableGenerator variableGenerator) {
 
-        DownConstraint dc = new DownConstraint(Optional.of(constraint));
+        DownPropagation dc = new DownPropagation(Optional.of(constraint), ImmutableSet.of());
         if (dc.getConstraint()
                 .filter(c -> isRejectingRightSpecificNulls(c, leftChild, rightChild))
                 .isPresent())

@@ -7,8 +7,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.impl.DescendingSubstitution;
-import it.unibz.inf.ontop.iq.impl.DownConstraint;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -66,7 +65,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
-        var downConstraint = new DownConstraint(Optional.of(constraint));
+        var downConstraint = new DownPropagation(Optional.of(constraint), child.getVariables());
         try {
             VariableNullability extendedChildVariableNullability = downConstraint.extendVariableNullability(child.getVariableNullability());
 
@@ -78,12 +77,12 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                     downConstraint, simplifiedFilterCondition, extendedChildVariableNullability);
 
             IQTree newChild = extendedDownConstraint.applyDescendingSubstitution(
-                    child, simplifiedFilterCondition.getSubstitution(), variableGenerator);
+                    child, extendedDownConstraint.getSubstitution(), variableGenerator);
 
             return createFilterTree(simplifiedFilterCondition, child.getVariables(), newChild);
         }
         catch (UnsatisfiableConditionException e) {
-            return iqFactory.createEmptyNode(child.getVariables());
+            return iqTreeTools.createEmptyNode(downConstraint);
         }
 
     }
@@ -172,11 +171,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
 
-        DescendingSubstitution ds = new DescendingSubstitution(descendingSubstitution, child.getVariables());
-        var downConstraint = new DownConstraint(constraint);
+        var downPropagation = new DownPropagation(constraint, descendingSubstitution, child.getVariables());
 
-        ImmutableExpression unoptimizedExpression = ds.getSubstitution().apply(getFilterCondition());
-        ImmutableSet<Variable> newlyProjectedVariables = ds.computeProjectedVariables();
+        ImmutableExpression unoptimizedExpression = downPropagation.getSubstitution().apply(getFilterCondition());
+        ImmutableSet<Variable> newlyProjectedVariables = downPropagation.computeProjectedVariables();
 
         VariableNullability simplifiedFutureChildVariableNullability = coreUtilsFactory.createSimplifiedVariableNullability(
                 newlyProjectedVariables.stream());
@@ -185,19 +183,18 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             var simplifiedFilterCondition = conditionSimplifier.simplifyCondition(
                     unoptimizedExpression, ImmutableList.of(child), simplifiedFutureChildVariableNullability);
 
-            var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(downConstraint,
-                    simplifiedFilterCondition, downConstraint.extendVariableNullability(simplifiedFutureChildVariableNullability));
-
-            Substitution<? extends VariableOrGroundTerm> downSubstitution =
-                    substitutionFactory.onVariableOrGroundTerms().compose(ds.getSubstitution(), simplifiedFilterCondition.getSubstitution());
+            var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(downPropagation,
+                    simplifiedFilterCondition, downPropagation.extendVariableNullability(simplifiedFutureChildVariableNullability));
 
             IQTree newChild = child.applyDescendingSubstitution(
-                    downSubstitution, extendedDownConstraint.getConstraint(), variableGenerator);
+                    extendedDownConstraint.getSubstitution(),
+                    extendedDownConstraint.getConstraint(),
+                    variableGenerator);
 
             return createFilterTree(simplifiedFilterCondition, newlyProjectedVariables, newChild);
         }
         catch (UnsatisfiableConditionException e) {
-            return iqTreeTools.createEmptyNode(ds);
+            return iqTreeTools.createEmptyNode(downPropagation);
         }
     }
 

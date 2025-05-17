@@ -5,8 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.DownConstraint;
-import it.unibz.inf.ontop.iq.impl.DescendingSubstitution;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtendedProjectionNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
@@ -52,12 +51,12 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                                           Optional<ImmutableExpression> constraint,
                                                           VariableGenerator variableGenerator) throws UnsatisfiableConditionException {
 
-        DownConstraint initialDownConstraint = new DownConstraint(constraint);
-        DownConstraint downConstraint = computeChildConstraint(tauFPropagationResults.theta, initialDownConstraint, child);
+        DownPropagation initialDownPropagation = new DownPropagation(constraint, ImmutableSet.of());
+        DownPropagation downPropagation = computeChildConstraint(tauFPropagationResults.theta, initialDownPropagation, child);
 
         return Optional.of(tauFPropagationResults.delta)
                 .filter(delta -> !delta.isEmpty())
-                .map(delta -> child.applyDescendingSubstitution(delta, downConstraint.getConstraint(), variableGenerator))
+                .map(delta -> child.applyDescendingSubstitution(delta, downPropagation.getConstraint(), variableGenerator))
                 .orElse(child);
     }
 
@@ -74,7 +73,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     private IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> tau, IQTree child,
                                                DescendingSubstitutionChildUpdateFunction updateChildFct) {
 
-        DescendingSubstitution ds = new DescendingSubstitution(tau, getVariables());
+        DownPropagation ds = new DownPropagation(tau, getVariables());
 
         try {
             PropagationResults tauPropagationResults = propagateTau(tau, child.getVariables());
@@ -108,7 +107,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         Substitution<NonFunctionalTerm> tauC = tau.restrictRangeTo(NonFunctionalTerm.class);
         Substitution<NonFunctionalTerm> thetaC = substitution.restrictRangeTo(NonFunctionalTerm.class);
 
-        DescendingSubstitution ds2 = new DescendingSubstitution(tauC, getVariables());
+        DownPropagation ds2 = new DownPropagation(tauC, getVariables());
         ImmutableSet<Variable> projectedVariablesAfterTauC = ds2.computeProjectedVariables();
 
         Substitution<NonFunctionalTerm> newEta = substitutionFactory.onNonFunctionalTerms().unifierBuilder(thetaC)
@@ -195,30 +194,30 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
+        DownPropagation initial = new DownPropagation(Optional.of(constraint), getVariables());
         try {
-            DownConstraint initial = new DownConstraint(Optional.of(constraint));
-            DownConstraint dc = computeChildConstraint(getSubstitution(), initial, child);
+            DownPropagation dc = computeChildConstraint(getSubstitution(), initial, child);
 
             IQTree newChild = dc.propagateDownOptionalConstraint(child, variableGenerator);
             return iqFactory.createUnaryIQTree(this, newChild);
         }
         catch (UnsatisfiableConditionException e) {
-            return iqFactory.createEmptyNode(getVariables());
+            return iqTreeTools.createEmptyNode(initial);
         }
     }
 
-    private DownConstraint computeChildConstraint(Substitution<? extends ImmutableTerm> theta,
-                                                  DownConstraint initialConstraint,
-                                                  IQTree child)
+    private DownPropagation computeChildConstraint(Substitution<? extends ImmutableTerm> theta,
+                                                   DownPropagation initialConstraint,
+                                                   IQTree child)
             throws UnsatisfiableConditionException {
 
         Optional<ImmutableExpression> thetaConstraint = initialConstraint.getConstraint().map(theta::apply);
         if (thetaConstraint.isEmpty())
-            return new DownConstraint();
+            return new DownPropagation(initialConstraint.getVariables());
 
         VariableNullability extendedVariableNullability = initialConstraint.extendVariableNullability(child.getVariableNullability());
 
-        return new DownConstraint(evaluateCondition(thetaConstraint.get(), extendedVariableNullability));
+        return new DownPropagation(evaluateCondition(thetaConstraint.get(), extendedVariableNullability), initialConstraint.getVariables());
     }
 
     @Override
