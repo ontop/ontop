@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.DownConstraint;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
@@ -198,17 +199,17 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                     var childVariableNullability = child.getVariableNullability();
 
                     // TODO: also consider the constraint for simplifying the condition
-                    var simplification = conditionSimplifier.simplifyCondition(
+                    var simplifiedFilterCondition = conditionSimplifier.simplifyCondition(
                             optionalFilterNode.get().getFilterCondition(), ImmutableList.of(child), childVariableNullability);
 
-                    var downConstraint = conditionSimplifier.computeDownConstraint(Optional.empty(),
-                            simplification, childVariableNullability);
+                    var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
+                            new DownConstraint(), simplifiedFilterCondition, childVariableNullability);
 
-                    var newChild = downConstraint.applyDescendingSubstitution(child, simplification.getSubstitution(), variableGenerator);
+                    var newChild = extendedDownConstraint.applyDescendingSubstitution(child, simplifiedFilterCondition.getSubstitution(), variableGenerator);
 
-                    var newOptionalParent = iqTreeTools.createOptionalConstructionNode(child::getVariables, simplification.getSubstitution());
+                    var newOptionalParent = iqTreeTools.createOptionalConstructionNode(child::getVariables, simplifiedFilterCondition.getSubstitution());
 
-                    var newOptionalFilterNode = iqTreeTools.createOptionalFilterNode(simplification.getOptionalExpression());
+                    var newOptionalFilterNode = iqTreeTools.createOptionalFilterNode(simplifiedFilterCondition.getOptionalExpression());
 
                     return new State(ancestors.append(newOptionalParent), newOptionalFilterNode, newChild);
                 }

@@ -14,8 +14,7 @@ import java.util.Optional;
 public class DescendingSubstitution {
     private final Substitution<? extends VariableOrGroundTerm> descendingSubstitution;
     private final ImmutableSet<Variable> projectedVariables;
-
-
+    
     public DescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
         this.descendingSubstitution = descendingSubstitution;
         this.projectedVariables = projectedVariables;

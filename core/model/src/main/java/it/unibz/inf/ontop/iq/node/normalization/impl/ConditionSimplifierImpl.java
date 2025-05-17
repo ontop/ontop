@@ -52,9 +52,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
             throws UnsatisfiableConditionException {
 
         if (nonOptimizedExpression.isPresent()) {
-
-            Optional<ImmutableExpression> optionalExpression = evaluateCondition(nonOptimizedExpression.get(),
-                    variableNullability);
+            Optional<ImmutableExpression> optionalExpression = evaluateCondition(nonOptimizedExpression.get(), variableNullability);
             if (optionalExpression.isPresent())
                 // May throw an exception if unification is rejected
                 return convertIntoExpressionAndSubstitution(optionalExpression.get(), nonLiftableVariables, children, variableNullability);
@@ -65,18 +63,6 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
             return new ExpressionAndSubstitutionImpl(Optional.empty(), substitutionFactory.getSubstitution());
     }
 
-    /**
-     * Empty means true
-     */
-    private Optional<ImmutableExpression> evaluateCondition(ImmutableExpression expression,
-                                                            VariableNullability variableNullability) throws UnsatisfiableConditionException {
-        ImmutableExpression.Evaluation results = expression.evaluate2VL(variableNullability);
-
-        if (results.isEffectiveFalse())
-            throw new UnsatisfiableConditionException();
-
-        return results.getExpression();
-    }
 
 
     /**
@@ -144,22 +130,38 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
     }
 
     @Override
-    public DownConstraint computeDownConstraint(Optional<ImmutableExpression> optionalConstraint,
-                                                ExpressionAndSubstitution conditionSimplificationResults,
-                                                VariableNullability childVariableNullability) throws UnsatisfiableConditionException {
-        if (optionalConstraint.isPresent()) {
-            ImmutableExpression substitutedConstraint =
-                    conditionSimplificationResults.getSubstitution().apply(optionalConstraint.get());
+    public DownConstraint extendAndSimplifyDownConstraint(DownConstraint downConstraint,
+                                                          ExpressionAndSubstitution conditionSimplificationResults,
+                                                          VariableNullability childVariableNullability) throws UnsatisfiableConditionException {
 
-            ImmutableExpression combinedExpression = iqTreeTools.getConjunction(
+        Optional<ImmutableExpression> optionalSubstitutedConstraint =
+                downConstraint.getConstraint().map(conditionSimplificationResults.getSubstitution()::apply);
+
+        if (optionalSubstitutedConstraint.isPresent()) {
+            ImmutableExpression conjunction = iqTreeTools.getConjunction(
                     conditionSimplificationResults.getOptionalExpression(),
-                    substitutedConstraint);
+                    optionalSubstitutedConstraint.get());
 
-            return new DownConstraint(combinedExpression, childVariableNullability);
+            return new DownConstraint(evaluateCondition(conjunction, childVariableNullability));
         }
-        else
-            return new DownConstraint(conditionSimplificationResults.getOptionalExpression());
+
+        return new DownConstraint(conditionSimplificationResults.getOptionalExpression());
     }
+
+
+    /**
+     * Empty means true
+     */
+    public static Optional<ImmutableExpression> evaluateCondition(ImmutableExpression expression,
+                                                                  VariableNullability variableNullability) throws UnsatisfiableConditionException {
+        ImmutableExpression.Evaluation results = expression.evaluate2VL(variableNullability);
+
+        if (results.isEffectiveFalse())
+            throw new UnsatisfiableConditionException();
+
+        return results.getExpression();
+    }
+
 
 
     /**

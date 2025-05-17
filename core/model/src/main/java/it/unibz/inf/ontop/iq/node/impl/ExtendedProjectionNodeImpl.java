@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.node.normalization.impl.ConditionSimplifierImpl.evaluateCondition;
+
 public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl implements ExtendedProjectionNode {
 
     public ExtendedProjectionNodeImpl(SubstitutionFactory substitutionFactory,
@@ -210,13 +212,13 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                                   IQTree child)
             throws UnsatisfiableConditionException {
 
-        if (initialConstraint.getConstraint().isEmpty())
-            return initialConstraint;
+        Optional<ImmutableExpression> thetaConstraint = initialConstraint.getConstraint().map(theta::apply);
+        if (thetaConstraint.isEmpty())
+            return new DownConstraint();
 
-        VariableNullability extendedVariableNullability = child.getVariableNullability()
-                .extendToExternalVariables(initialConstraint.getVariableStream());
+        VariableNullability extendedVariableNullability = initialConstraint.extendVariableNullability(child.getVariableNullability());
 
-        return new DownConstraint(theta.apply(initialConstraint.getConstraint().get()), extendedVariableNullability);
+        return new DownConstraint(evaluateCondition(thetaConstraint.get(), extendedVariableNullability));
     }
 
     @Override

@@ -308,22 +308,22 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     // cache in the state?
                     var childrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(children);
 
-                    ConditionSimplifier.ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
-                            joiningCondition.get(), children, childrenVariableNullability);
+                    var simplifiedJoinCondition = conditionSimplifier.simplifyCondition(
+                            joiningCondition, ImmutableSet.of(), children, childrenVariableNullability);
 
-                    Optional<ImmutableExpression> newJoiningCondition = conditionSimplificationResults.getOptionalExpression();
-                    // TODO: build a proper constraint (more than just the joining condition)
+                    var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
+                            new DownConstraint(), simplifiedJoinCondition, childrenVariableNullability);
 
-                    DownConstraint dc = new DownConstraint(newJoiningCondition);
-                    ImmutableList<IQTree> newChildren = dc.applyDescendingSubstitution(
-                            children, conditionSimplificationResults.getSubstitution(), variableGenerator);
+                    ImmutableList<IQTree> newChildren = extendedDownConstraint.applyDescendingSubstitution(
+                            children, simplifiedJoinCondition.getSubstitution(), variableGenerator);
+
+                    Optional<ImmutableExpression> newJoiningCondition = simplifiedJoinCondition.getOptionalExpression();
 
                     Optional<ConstructionNode> newParent = iqTreeTools.createOptionalConstructionNode(
                             () -> iqTreeTools.getChildrenVariables(children),
-                            conditionSimplificationResults.getSubstitution());
+                            simplifiedJoinCondition.getSubstitution());
 
                     return update(newParent, newJoiningCondition, newChildren);
-
                 }
                 catch (UnsatisfiableConditionException e) {
                     return declareAsEmpty();

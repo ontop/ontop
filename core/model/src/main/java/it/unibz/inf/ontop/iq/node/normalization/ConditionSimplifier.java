@@ -24,9 +24,9 @@ public interface ConditionSimplifier {
                                                 VariableNullability variableNullability)
                     throws UnsatisfiableConditionException;
 
-    DownConstraint computeDownConstraint(Optional<ImmutableExpression> optionalConstraint,
-                                         ExpressionAndSubstitution conditionSimplificationResults,
-                                         VariableNullability childVariableNullability)
+    DownConstraint extendAndSimplifyDownConstraint(DownConstraint downConstraint,
+                                                   ExpressionAndSubstitution conditionSimplificationResults,
+                                                   VariableNullability childVariableNullability)
                             throws UnsatisfiableConditionException;
 
 

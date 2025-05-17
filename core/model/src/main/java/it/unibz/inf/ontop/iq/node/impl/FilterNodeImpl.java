@@ -8,6 +8,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.impl.DescendingSubstitution;
+import it.unibz.inf.ontop.iq.impl.DownConstraint;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -65,20 +66,21 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
+        var downConstraint = new DownConstraint(Optional.of(constraint));
         try {
-            VariableNullability extendedChildVariableNullability = child.getVariableNullability()
-                    .extendToExternalVariables(constraint.getVariableStream());
+            VariableNullability extendedChildVariableNullability = downConstraint.extendVariableNullability(child.getVariableNullability());
 
             // TODO: also consider the constraint for simplifying the condition
-            ExpressionAndSubstitution simplification = conditionSimplifier
-                    .simplifyCondition(getFilterCondition(), ImmutableList.of(child), extendedChildVariableNullability);
+            var simplifiedFilterCondition = conditionSimplifier.simplifyCondition(
+                    getFilterCondition(), ImmutableList.of(child), extendedChildVariableNullability);
 
-            var downConstraint = conditionSimplifier.computeDownConstraint(Optional.of(constraint),
-                    simplification, extendedChildVariableNullability);
+            var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
+                    downConstraint, simplifiedFilterCondition, extendedChildVariableNullability);
 
-            IQTree newChild = downConstraint.applyDescendingSubstitution(child, simplification.getSubstitution(), variableGenerator);
+            IQTree newChild = extendedDownConstraint.applyDescendingSubstitution(
+                    child, simplifiedFilterCondition.getSubstitution(), variableGenerator);
 
-            return createFilterTree(simplification, child.getVariables(), newChild);
+            return createFilterTree(simplifiedFilterCondition, child.getVariables(), newChild);
         }
         catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(child.getVariables());
@@ -171,43 +173,40 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
 
         DescendingSubstitution ds = new DescendingSubstitution(descendingSubstitution, child.getVariables());
+        var downConstraint = new DownConstraint(constraint);
 
         ImmutableExpression unoptimizedExpression = ds.getSubstitution().apply(getFilterCondition());
-
         ImmutableSet<Variable> newlyProjectedVariables = ds.computeProjectedVariables();
 
         VariableNullability simplifiedFutureChildVariableNullability = coreUtilsFactory.createSimplifiedVariableNullability(
                 newlyProjectedVariables.stream());
 
         try {
-            ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(
+            var simplifiedFilterCondition = conditionSimplifier.simplifyCondition(
                     unoptimizedExpression, ImmutableList.of(child), simplifiedFutureChildVariableNullability);
 
+            var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(downConstraint,
+                    simplifiedFilterCondition, downConstraint.extendVariableNullability(simplifiedFutureChildVariableNullability));
+
             Substitution<? extends VariableOrGroundTerm> downSubstitution =
-                    substitutionFactory.onVariableOrGroundTerms().compose(ds.getSubstitution(), expressionAndSubstitution.getSubstitution());
+                    substitutionFactory.onVariableOrGroundTerms().compose(ds.getSubstitution(), simplifiedFilterCondition.getSubstitution());
 
-            VariableNullability extendedVariableNullability = constraint
-                    .map(c -> simplifiedFutureChildVariableNullability.extendToExternalVariables(c.getVariableStream()))
-                    .orElse(simplifiedFutureChildVariableNullability);
+            IQTree newChild = child.applyDescendingSubstitution(
+                    downSubstitution, extendedDownConstraint.getConstraint(), variableGenerator);
 
-            var downConstraint = conditionSimplifier.computeDownConstraint(constraint,
-                    expressionAndSubstitution, extendedVariableNullability);
-
-            IQTree newChild = child.applyDescendingSubstitution(downSubstitution, downConstraint.getConstraint(), variableGenerator);
-
-            return createFilterTree(expressionAndSubstitution, newlyProjectedVariables, newChild);
+            return createFilterTree(simplifiedFilterCondition, newlyProjectedVariables, newChild);
         }
         catch (UnsatisfiableConditionException e) {
             return iqTreeTools.createEmptyNode(ds);
         }
     }
 
-    private IQTree createFilterTree(ExpressionAndSubstitution expressionAndSubstitution, ImmutableSet<Variable> projectedVariables, IQTree child) {
+    private IQTree createFilterTree(ExpressionAndSubstitution simplifiedFilterCondition, ImmutableSet<Variable> projectedVariables, IQTree child) {
 
-        var optionalFilterNode = iqTreeTools.createOptionalFilterNode(expressionAndSubstitution.getOptionalExpression());
+        var optionalFilterNode = iqTreeTools.createOptionalFilterNode(simplifiedFilterCondition.getOptionalExpression());
 
         var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(
-                () -> projectedVariables, expressionAndSubstitution.getSubstitution());
+                () -> projectedVariables, simplifiedFilterCondition.getSubstitution());
 
         return iqTreeTools.createOptionalUnaryIQTree(
                 optionalConstructionNode,
