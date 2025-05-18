@@ -144,10 +144,9 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
         DownPropagation ds = new DownPropagation(constraint, descendingSubstitution, getVariables());
 
         try {
+            DownPropagation downPropagation = ds.normalize(termFactory);
             Optional<Substitution<? extends VariableOrGroundTerm>> normalizedSubstitution =
-                    ds.normalizeDescendingSubstitution();
-
-            DownPropagation downPropagation = ds.normalizeConstraint(termFactory);
+                    ds.getOptionalDescendingSubstitution();
 
             return normalizedSubstitution
                     .flatMap(s -> ds.extractFreshRenaming())
@@ -155,9 +154,10 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
                     .map(this::applyRestrictedFreshRenaming)
                     .map(t -> downPropagation.propagateDownOptionalConstraint(t, variableGenerator))
                     // Regular substitution
-                    .or(() -> normalizedSubstitution
+                    .or(() -> downPropagation.getOptionalDescendingSubstitution()
+                            // applyRegularDescendingSubstitution!
                             .map(s -> applyRegularDescendingSubstitution(s, downPropagation.getConstraint(), variableGenerator)))
-                    .orElseGet(() -> downPropagation.propagateDownOptionalConstraint(this, variableGenerator));
+                    .orElseGet(() -> downPropagation.propagate(this, variableGenerator));
         }
         catch (DownPropagation.UnsatisfiableDescendingSubstitutionException e) {
             return iqTreeTools.createEmptyNode(ds);

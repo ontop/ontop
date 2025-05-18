@@ -33,6 +33,12 @@ public class DownPropagation {
         this.projectedVariables = projectedVariables;
     }
 
+    public DownPropagation(Optional<ImmutableExpression> constraint, Optional<Substitution<? extends VariableOrGroundTerm>> optionalDescendingSubstitution, ImmutableSet<Variable> projectedVariables) {
+        this.constraint = constraint;
+        this.optionalDescendingSubstitution = optionalDescendingSubstitution;
+        this.projectedVariables = projectedVariables;
+    }
+
     public DownPropagation(Optional<ImmutableExpression> constraint, ImmutableSet<Variable> projectedVariables) {
         this.constraint = constraint;
         this.optionalDescendingSubstitution = Optional.empty();
@@ -102,21 +108,6 @@ public class DownPropagation {
     }
 
 
-    /**
-     * If the substitution is a fresh renaming, returns it as an injective substitution
-     */
-    public Optional<InjectiveSubstitution<Variable>> extractFreshRenaming() {
-
-        var descendingSubstitution = optionalDescendingSubstitution.get();
-        Substitution<Variable> var2VarFragment = descendingSubstitution.restrictRangeTo(Variable.class);
-        int size = descendingSubstitution.getDomain().size();
-
-        if (var2VarFragment.getDomain().size() != size
-                || Sets.difference(var2VarFragment.getRangeSet(), projectedVariables).size() != size)
-            return Optional.empty();
-
-        return Optional.of(var2VarFragment.injective());
-    }
 
     /**
      * Excludes the variables that are not projected by the IQTree
@@ -147,20 +138,41 @@ public class DownPropagation {
     public static class UnsatisfiableDescendingSubstitutionException extends Exception {
     }
 
-    public DownPropagation normalizeConstraint(TermFactory termFactory) {
-        if (constraint.isEmpty())
-            return this;
+    public DownPropagation normalize(TermFactory termFactory) throws UnsatisfiableDescendingSubstitutionException {
+        var normalizedSubstitution = normalizeDescendingSubstitution();
 
-        var descendingSubstitution = optionalDescendingSubstitution.get();
-        ImmutableSet<Variable> newVariables = projectedVariables.stream()
-                .map(descendingSubstitution::apply)
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable)t)
-                .collect(ImmutableCollectors.toSet());
+        if (constraint.isEmpty())
+            return new DownPropagation(constraint, normalizedSubstitution, projectedVariables);
+
+        ImmutableSet<?> newVariables = getVar2VarFragment()
+                .apply(projectedVariables);
 
         return new DownPropagation(
                 termFactory.getConjunction(constraint.get().flattenAND()
                         .filter(e -> e.getVariableStream().anyMatch(newVariables::contains))),
-                descendingSubstitution, getVariables());
+                normalizedSubstitution, getVariables());
     }
+
+    private Substitution<Variable> getVar2VarFragment() {
+        var descendingSubstitution = optionalDescendingSubstitution.get();
+        return descendingSubstitution.restrictRangeTo(Variable.class);
+    }
+
+    /**
+     * If the substitution is a fresh renaming, returns it as an injective substitution
+     */
+    public Optional<InjectiveSubstitution<Variable>> extractFreshRenaming() {
+
+        Substitution<Variable> var2VarFragment = getVar2VarFragment();
+
+        var descendingSubstitution = optionalDescendingSubstitution.get();
+        int size = descendingSubstitution.getDomain().size();
+
+        if (var2VarFragment.getDomain().size() != size
+                || Sets.difference(var2VarFragment.getRangeSet(), projectedVariables).size() != size)
+            return Optional.empty();
+
+        return Optional.of(var2VarFragment.injective());
+    }
+
 }
