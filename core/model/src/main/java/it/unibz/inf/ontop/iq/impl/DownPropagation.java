@@ -22,15 +22,11 @@ public class DownPropagation {
 
 
     public DownPropagation(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
-        this.constraint = Optional.empty();
-        this.optionalDescendingSubstitution = Optional.of(descendingSubstitution);
-        this.projectedVariables = projectedVariables;
+        this(Optional.empty(), Optional.of(descendingSubstitution), projectedVariables);
     }
 
     public DownPropagation(Optional<ImmutableExpression> constraint, Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
-        this.constraint = constraint;
-        this.optionalDescendingSubstitution = Optional.of(descendingSubstitution);
-        this.projectedVariables = projectedVariables;
+        this(constraint, Optional.of(descendingSubstitution), projectedVariables);
     }
 
     public DownPropagation(Optional<ImmutableExpression> constraint, Optional<Substitution<? extends VariableOrGroundTerm>> optionalDescendingSubstitution, ImmutableSet<Variable> projectedVariables) {
@@ -40,9 +36,7 @@ public class DownPropagation {
     }
 
     public DownPropagation(Optional<ImmutableExpression> constraint, ImmutableSet<Variable> projectedVariables) {
-        this.constraint = constraint;
-        this.optionalDescendingSubstitution = Optional.empty();
-        this.projectedVariables = projectedVariables;
+        this(constraint, Optional.empty(), projectedVariables);
     }
 
     public DownPropagation(ImmutableSet<Variable> projectedVariables) {
@@ -144,13 +138,12 @@ public class DownPropagation {
         if (constraint.isEmpty())
             return new DownPropagation(constraint, normalizedSubstitution, projectedVariables);
 
-        ImmutableSet<?> newVariables = getVar2VarFragment()
-                .apply(projectedVariables);
+        ImmutableSet<?> newVariables = getVar2VarFragment().apply(projectedVariables);
 
         return new DownPropagation(
                 termFactory.getConjunction(constraint.get().flattenAND()
                         .filter(e -> e.getVariableStream().anyMatch(newVariables::contains))),
-                normalizedSubstitution, getVariables());
+                normalizedSubstitution, projectedVariables);
     }
 
     private Substitution<Variable> getVar2VarFragment() {

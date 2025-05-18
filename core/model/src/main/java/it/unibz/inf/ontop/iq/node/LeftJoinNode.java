@@ -1,11 +1,8 @@
 package it.unibz.inf.ontop.iq.node;
 
-import java.util.Optional;
-
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
 
 /**
  * See IntermediateQueryFactory for creating a new instance.

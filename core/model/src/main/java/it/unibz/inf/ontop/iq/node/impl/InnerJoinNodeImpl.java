@@ -145,12 +145,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
                     downPropagation, simplifiedJoinCondition, downPropagation.extendVariableNullability(simplifiedChildFutureVariableNullability));
 
-            ImmutableList<IQTree> newChildren = children.stream()
-                    .map(c -> c.applyDescendingSubstitution(
-                            extendedDownConstraint.getSubstitution(),
-                            extendedDownConstraint.getConstraint(),
-                            variableGenerator))
-                    .collect(ImmutableCollectors.toList());
+            ImmutableList<IQTree> newChildren = extendedDownConstraint.propagate(children, variableGenerator);
 
             IQTree joinTree = iqTreeTools.createInnerJoinTree(
                     simplifiedJoinCondition.getOptionalExpression(),

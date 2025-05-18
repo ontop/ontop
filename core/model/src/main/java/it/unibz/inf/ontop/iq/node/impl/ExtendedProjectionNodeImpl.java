@@ -126,18 +126,28 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         Substitution<ImmutableFunctionalTerm> thetaF = substitution.restrictRangeTo(ImmutableFunctionalTerm.class);
 
+        // deltaC applied to thetaF as a list of equalities
         ImmutableMultimap<NonFunctionalTerm, ImmutableFunctionalTerm> m = thetaF.stream()
                 .collect(ImmutableCollectors.toMultimap(
                         e -> substitutionFactory.onNonFunctionalTerms().apply(deltaC, e.getKey()),
                         e -> substitutionFactory.onImmutableTerms().apply(deltaC, e.getValue())));
 
-        // for each variable key, picks one value from the group
+        // for each Variable key (not in childVariables), picks one value from the group
         Substitution<ImmutableFunctionalTerm> thetaFBar = m.asMap().entrySet().stream()
                 .filter(e -> e.getKey() instanceof Variable)
                 .filter(e -> !childVariables.contains((Variable)e.getKey()))
                 .collect(substitutionFactory.toSubstitution(
                         e -> (Variable) e.getKey(),
                         e -> e.getValue().iterator().next())); // choose some
+
+        // compare with AbstractJoinTransferLJTransformer.extractEqualities
+        // gets all entries of m that are not in thetaFBar
+        Stream<ImmutableExpression> thetaFRemainingEqualities = m.entries().stream()
+                .filter(e ->
+                        !((e.getKey() instanceof Variable)
+                        && thetaFBar.isDefining((Variable) e.getKey())
+                        && thetaFBar.get((Variable) e.getKey()).equals(e.getValue())))
+                .map(e -> termFactory.getStrictEquality(thetaFBar.applyToTerm(e.getKey()), e.getValue()));
 
         Substitution<ImmutableTerm> gamma = deltaC.builder()
                 .removeFromDomain(thetaF.getDomain())
@@ -147,24 +157,9 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         Substitution<NonFunctionalTerm> newDeltaC = gamma.restrictRangeTo(NonFunctionalTerm.class);
 
-        // compare with AbstractJoinTransferLJTransformer.extractEqualities
-        // gets all entries of m that are not in thetaFBar
-        Stream<ImmutableExpression> thetaFRelatedExpressions = m.entries().stream()
-                .filter(e ->
-                        !((e.getKey() instanceof Variable)
-                        && thetaFBar.isDefining((Variable) e.getKey())
-                        && thetaFBar.get((Variable) e.getKey()).equals(e.getValue())))
-                .map(e -> termFactory.getStrictEquality(thetaFBar.applyToTerm(e.getKey()), e.getValue()));
-
         Stream<ImmutableExpression> blockedExpressions = gamma.builder()
                 .restrictRangeTo(ImmutableFunctionalTerm.class)
                 .toStream(termFactory::getStrictEquality);
-
-        Optional<ImmutableExpression> f = Optional.of(
-                        Stream.concat(thetaFRelatedExpressions, blockedExpressions).collect(ImmutableCollectors.toList()))
-                .filter(l -> !l.isEmpty())
-                .map(termFactory::getConjunction);
-
 
         // tauF propagation
 
@@ -180,11 +175,11 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         Substitution<ImmutableTerm> newTheta = thetaBar.builder().removeFromDomain(tauF.getDomain()).build();
 
-        Optional<ImmutableExpression> newF = termFactory.getConjunction(
-                f,
+        Optional<ImmutableExpression> newF = termFactory.getConjunction(Stream.concat(
+                Stream.concat(thetaFRemainingEqualities, blockedExpressions),
                 Stream.concat(
                         matchingEqualities(tauF, thetaBar),
-                        matchingEqualities(tauF, newDeltaC)));
+                        matchingEqualities(tauF, newDeltaC))));
 
         return new PropagationResults(newTheta, delta, newF);
     }

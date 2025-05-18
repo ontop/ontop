@@ -170,7 +170,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
 
-        var downPropagation = new DownPropagation(constraint, descendingSubstitution, child.getVariables());
+        DownPropagation downPropagation = new DownPropagation(constraint, descendingSubstitution, child.getVariables());
 
         ImmutableExpression unoptimizedExpression = downPropagation.getSubstitution().apply(getFilterCondition());
         ImmutableSet<Variable> newlyProjectedVariables = downPropagation.computeProjectedVariables();
@@ -182,13 +182,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             var simplifiedFilterCondition = conditionSimplifier.simplifyCondition(
                     unoptimizedExpression, ImmutableList.of(child), simplifiedFutureChildVariableNullability);
 
-            var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(downPropagation,
+            DownPropagation extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(downPropagation,
                     simplifiedFilterCondition, downPropagation.extendVariableNullability(simplifiedFutureChildVariableNullability));
 
-            IQTree newChild = child.applyDescendingSubstitution(
-                    extendedDownConstraint.getSubstitution(),
-                    extendedDownConstraint.getConstraint(),
-                    variableGenerator);
+            IQTree newChild = extendedDownConstraint.propagate(child, variableGenerator);
 
             return createFilterTree(simplifiedFilterCondition, newlyProjectedVariables, newChild);
         }
