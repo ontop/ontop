@@ -425,8 +425,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     downPropagation, simplifiedJoinCondition, extendedChildrenVariableNullability);
 
             //TODO: propagate different constraints to different children
-            ImmutableList<IQTree> newChildren = extendedDownConstraint.applyDescendingSubstitution(
-                    children, extendedDownConstraint.getSubstitution(), variableGenerator);
+            ImmutableList<IQTree> newChildren = extendedDownConstraint.propagate(
+                    children, variableGenerator);
 
             InnerJoinNode newJoin = createInnerJoinNode(simplifiedJoinCondition.getOptionalExpression());
 

@@ -314,8 +314,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
                             new DownPropagation(projectedVariables), simplifiedJoinCondition, childrenVariableNullability);
 
-                    ImmutableList<IQTree> newChildren = extendedDownConstraint.applyDescendingSubstitution(
-                            children, extendedDownConstraint.getSubstitution(), variableGenerator);
+                    ImmutableList<IQTree> newChildren = extendedDownConstraint.propagate(
+                            children, variableGenerator);
 
                     Optional<ImmutableExpression> newJoiningCondition = simplifiedJoinCondition.getOptionalExpression();
 

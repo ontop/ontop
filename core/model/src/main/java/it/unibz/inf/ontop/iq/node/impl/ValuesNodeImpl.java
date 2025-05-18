@@ -386,7 +386,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                         .filter(c -> !c.equals(firstStrictEquality))),
                     ImmutableSet.of());
 
-            return dc.propagateDownOptionalConstraint(optionalReshapedTree.get(), variableGenerator);
+            return dc.propagate(optionalReshapedTree.get(), variableGenerator);
         }
 
         IQTree filteredValuesNode = filterValuesNodeEntries(termFactory.getConjunction(

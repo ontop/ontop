@@ -520,7 +520,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
             public LJNormalizationState propagateDownLJCondition() {
                 DownPropagation dc = new DownPropagation(ljCondition, ImmutableSet.of());
-                return update(ljCondition, leftChild, dc.propagateDownOptionalConstraint(rightChild, variableGenerator));
+                IQTree newRightChild = dc.propagate(rightChild, variableGenerator);
+                return update(ljCondition, leftChild, newRightChild);
             }
 
             /**

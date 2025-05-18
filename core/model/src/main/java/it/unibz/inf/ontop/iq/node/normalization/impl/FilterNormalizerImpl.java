@@ -205,7 +205,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                     var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
                             new DownPropagation(projectedVariables), simplifiedFilterCondition, childVariableNullability);
 
-                    var newChild = extendedDownConstraint.applyDescendingSubstitution(child, extendedDownConstraint.getSubstitution(), variableGenerator);
+                    var newChild = extendedDownConstraint.propagate(child, variableGenerator);
 
                     var newOptionalParent = iqTreeTools.createOptionalConstructionNode(child::getVariables, simplifiedFilterCondition.getSubstitution());
 

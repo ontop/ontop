@@ -121,8 +121,8 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                                 ImmutableSet<Variable> projectedVariables,
                                 VariableGenerator variableGenerator) {
 
-        DownPropagation dc = new DownPropagation(ImmutableSet.of());
-        ImmutableList<IQTree> newChildren = dc.applyDescendingSubstitution(children, unifier, variableGenerator);
+        DownPropagation dc = new DownPropagation(unifier, ImmutableSet.of());
+        ImmutableList<IQTree> newChildren = dc.propagate(children, variableGenerator);
 
         Optional<ImmutableExpression> newExpression = expression.map(unifier::apply);
 

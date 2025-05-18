@@ -77,18 +77,19 @@ public class DownPropagation {
     }
 
     public IQTree propagateDownOptionalConstraint(IQTree child, VariableGenerator variableGenerator) {
-        return constraint.map(c -> child.propagateDownConstraint(c, variableGenerator)).orElse(child);
+        return constraint.map(c -> child.propagateDownConstraint(c, variableGenerator))
+                .orElse(child);
     }
 
-    public IQTree applyDescendingSubstitution(IQTree child, Substitution<? extends VariableOrGroundTerm> substitution, VariableGenerator variableGenerator) {
-        return Optional.of(substitution)
+    public IQTree propagate(IQTree child, VariableGenerator variableGenerator) {
+        return optionalDescendingSubstitution
                 .filter(s -> !s.isEmpty())
                 .map(s -> child.applyDescendingSubstitution(s, constraint, variableGenerator))
                 .orElseGet(() -> propagateDownOptionalConstraint(child, variableGenerator));
     }
 
-    public ImmutableList<IQTree> applyDescendingSubstitution(ImmutableList<IQTree> children, Substitution<? extends VariableOrGroundTerm> substitution, VariableGenerator variableGenerator) {
-        return Optional.of(substitution)
+    public ImmutableList<IQTree> propagate(ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
+        return optionalDescendingSubstitution
                 .filter(s -> !s.isEmpty())
                 .map(s -> children.stream()
                         .map(c -> c.applyDescendingSubstitution(s, constraint, variableGenerator))

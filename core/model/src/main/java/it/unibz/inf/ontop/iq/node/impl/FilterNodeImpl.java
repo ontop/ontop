@@ -76,8 +76,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
                     downConstraint, simplifiedFilterCondition, extendedChildVariableNullability);
 
-            IQTree newChild = extendedDownConstraint.applyDescendingSubstitution(
-                    child, extendedDownConstraint.getSubstitution(), variableGenerator);
+            IQTree newChild = extendedDownConstraint.propagate(child, variableGenerator);
 
             return createFilterTree(simplifiedFilterCondition, child.getVariables(), newChild);
         }

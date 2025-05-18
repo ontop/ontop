@@ -336,11 +336,12 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         DownPropagation dc = new DownPropagation(Optional.of(constraint), ImmutableSet.of());
         if (dc.getConstraint()
                 .filter(c -> isRejectingRightSpecificNulls(c, leftChild, rightChild))
-                .isPresent())
-            return transformIntoInnerJoinTree(leftChild, rightChild)
-                    .propagateDownConstraint(dc.getConstraint().get(), variableGenerator);
+                .isPresent()) {
+            IQTree innerJoinTree = transformIntoInnerJoinTree(leftChild, rightChild);
+            return dc.propagate(innerJoinTree, variableGenerator);
+        }
 
-        IQTree newLeftChild = dc.propagateDownOptionalConstraint(leftChild, variableGenerator);
+        IQTree newLeftChild = dc.propagate(leftChild, variableGenerator);
         return iqFactory.createBinaryNonCommutativeIQTree(this, newLeftChild, rightChild);
     }
 
