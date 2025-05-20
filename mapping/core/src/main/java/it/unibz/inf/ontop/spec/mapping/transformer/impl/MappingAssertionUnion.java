@@ -16,6 +16,8 @@ import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -23,6 +25,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.IRI;
 
+import javax.lang.model.element.VariableElement;
 import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.IntStream;
@@ -47,6 +50,7 @@ public class MappingAssertionUnion {
     private final HomomorphismFactory homomorphismFactory;
     private final CoreSingletons coreSingletons;
     private final UnionBasedQueryMerger queryMerger;
+    private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 
     public MappingAssertionUnion(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger) {
         this.cqc = cqc;
@@ -55,6 +59,7 @@ public class MappingAssertionUnion {
         this.homomorphismFactory = coreSingletons.getHomomorphismFactory();
         this.coreSingletons = coreSingletons;
         this.queryMerger = queryMerger;
+        this.dbFunctionSymbolFactory = coreSingletons.getFunctionSymbolFactory().getDBFunctionSymbolFactory();
     }
 
     public MappingAssertionUnion add(MappingAssertion assertion) {
@@ -69,6 +74,7 @@ public class MappingAssertionUnion {
         private final ImmutableList<ExtensionalDataNode> extensionalDataNodes;
         private final Optional<ValuesNode> valuesNode;
         private final DisjunctionOfConjunctions filter;
+        private final ImmutableSet<Variable> nonNullableVariables;
 
         ConjunctiveIQ(DistinctVariableOnlyDataAtom projectionAtom, ConstructionNode constructionNode, ImmutableList<ExtensionalDataNode> extensionalDataNodes, Optional<ValuesNode> valuesNode, DisjunctionOfConjunctions filter) {
 
@@ -148,6 +154,7 @@ public class MappingAssertionUnion {
                             .map(cm -> iqFactory.createValuesNode(cm.keySet(), ImmutableList.of(cm))));
 
             this.filter = filter;
+            this.nonNullableVariables = getNonNullableVariables(filter);
         }
 
         ConjunctiveIQ(ConjunctiveIQ other, DisjunctionOfConjunctions filter, Optional<ValuesNode> valuesNode) {
@@ -156,9 +163,39 @@ public class MappingAssertionUnion {
             this.extensionalDataNodes = other.extensionalDataNodes;
 
             this.filter = filter;
+            this.nonNullableVariables = getNonNullableVariables(filter);
             this.valuesNode = valuesNode;
         }
 
+
+        private ImmutableSet<Variable> getNonNullableVariables(DisjunctionOfConjunctions filter) {
+            class Storage {
+                Set<Variable> vars;
+            };
+
+            return filter.stream()
+                    .map(this::getNonNullableVariables)
+                    .collect(Collector.of(
+                            Storage::new,
+                            (a, c) -> { if (a.vars == null) a.vars = new HashSet<>(c); else a.vars.retainAll(c); },
+                            (c1, c2) -> { throw new MinorOntopInternalBugException("can't happen"); },
+                            a -> { if (a.vars == null) return ImmutableSet.of(); else return ImmutableSet.copyOf(a.vars); }
+                            ));
+        }
+
+
+        private ImmutableSet<Variable> getNonNullableVariables(ImmutableSet<ImmutableExpression> conjunction) {
+            return conjunction.stream()
+                    .flatMap(this::getNonNullableVariables)
+                    .collect(ImmutableCollectors.toSet());
+        }
+
+        private Stream<Variable> getNonNullableVariables(ImmutableExpression a) {
+            if (a.getFunctionSymbol().equals(dbFunctionSymbolFactory.getDBIsNotNull()))
+                return a.getVariableStream();
+
+            return Stream.of();
+        }
 
         IQ asIQ() {
             return iqFactory.createIQ(projectionAtom,
@@ -183,6 +220,10 @@ public class MappingAssertionUnion {
             else return iqFactory.createNaryIQTree(
                             iqFactory.createInnerJoinNode(mergedConditions),
                             Stream.concat(extensionalDataNodes.stream(), valuesNode.stream()).collect(ImmutableCollectors.toList()));
+        }
+
+        ImmutableSet<Variable> getNonNullableVariables() {
+            return nonNullableVariables;
         }
 
         Optional<ImmutableExpression> translate(DisjunctionOfConjunctions filter) {
@@ -441,7 +482,7 @@ public class MappingAssertionUnion {
         return Optional.of(new ExtensionalDataNodeHomomorphismIteratorImpl(
                 h,
                 from.getDatabaseAtoms(),
-                cqc.chase(to.getDatabaseAtoms())));
+                cqc.chase(to.getDatabaseAtoms(), to.getNonNullableVariables())));
     }
 
     private DisjunctionOfConjunctions applyHomomorphism(Homomorphism h, DisjunctionOfConjunctions f) {
