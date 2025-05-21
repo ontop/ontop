@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.AggregationNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
+import it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.AggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -73,33 +74,25 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
         IQTreeCache normalizedTreeCache = treeCache.declareAsNormalizedForOptimizationWithEffect();
 
-        IQTree shrunkChild = notRequiredVariableRemover.optimize(child.normalizeForOptimization(variableGenerator),
+        IQTree shrunkChild = notRequiredVariableRemover.optimize(
+                child.normalizeForOptimization(variableGenerator),
                 aggregationNode.getLocallyRequiredVariables(), variableGenerator);
 
         if (shrunkChild.isDeclaredAsEmpty()) {
-            return normalizeEmptyChild(aggregationNode, normalizedTreeCache);
+            if (!aggregationNode.getGroupingVariables().isEmpty())
+                return iqFactory.createEmptyNode(aggregationNode.getVariables());
+
+            Substitution<ImmutableTerm> newSubstitution = aggregationNode.getSubstitution()
+                    .transform(this::simplifyEmptyAggregate);
+
+            return iqFactory.createUnaryIQTree(
+                    iqFactory.createConstructionNode(aggregationNode.getVariables(), newSubstitution),
+                    iqFactory.createTrueNode(),
+                    normalizedTreeCache);
         }
 
         return new Context(variableGenerator, coreSingletons, normalizedTreeCache)
                 .normalize(shrunkChild, aggregationNode);
-    }
-
-    /**
-     * If the child is empty, returns no tuple if there are some grouping variables.
-     * Otherwise, returns a single tuple.
-     */
-    private IQTree normalizeEmptyChild(AggregationNode aggregationNode, IQTreeCache normalizedTreeCache) {
-        ImmutableSet<Variable> projectedVariables = aggregationNode.getVariables();
-
-        if (!aggregationNode.getGroupingVariables().isEmpty())
-            return iqFactory.createEmptyNode(projectedVariables);
-
-        Substitution<ImmutableTerm> newSubstitution = aggregationNode.getSubstitution()
-                .transform(this::simplifyEmptyAggregate);
-
-        return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(projectedVariables, newSubstitution),
-                iqFactory.createTrueNode(), normalizedTreeCache);
     }
 
     private ImmutableTerm simplifyEmptyAggregate(ImmutableFunctionalTerm aggregateTerm) {
@@ -159,32 +152,22 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             private AggregationNormalizationState(AggregationNode aggregationNode, Optional<ConstructionNode> childConstructionNode,
                                                   IQTree grandChild) {
 
-                this(UnaryOperatorSequence.of(), aggregationNode.getGroupingVariables(), aggregationNode.getSubstitution(),
-                        childConstructionNode, grandChild, Optional.empty());
+                this(UnaryOperatorSequence.of(), Optional.empty(), aggregationNode.getGroupingVariables(), aggregationNode.getSubstitution(),
+                        childConstructionNode, grandChild);
             }
 
             private AggregationNormalizationState(UnaryOperatorSequence<ConstructionNode> ancestors,
+                                                  Optional<FilterNode> sampleFilter,
                                                   ImmutableSet<Variable> groupingVariables,
                                                   Substitution<ImmutableFunctionalTerm> aggregationSubstitution,
                                                   Optional<ConstructionNode> childConstructionNode,
-                                                  IQTree grandChild,
-                                                  Optional<FilterNode> sampleFilter) {
+                                                  IQTree grandChild) {
                 this.ancestors = ancestors;
+                this.sampleFilter = sampleFilter;
                 this.groupingVariables = groupingVariables;
                 this.aggregationSubstitution = aggregationSubstitution;
                 this.childConstructionNode = childConstructionNode;
                 this.grandChild = grandChild;
-                this.sampleFilter = sampleFilter;
-            }
-
-            private AggregationNormalizationState update(UnaryOperatorSequence<ConstructionNode> ancestors,
-                                                         ImmutableSet<Variable> groupingVariables,
-                                                         Substitution<ImmutableFunctionalTerm> aggregationSubstitution,
-                                                         Optional<ConstructionNode> childConstructionNode,
-                                                         IQTree grandChild,
-                                                         Optional<FilterNode> sampleFilter) {
-
-                return new AggregationNormalizationState(ancestors, groupingVariables, aggregationSubstitution, childConstructionNode, grandChild, sampleFilter);
             }
 
             /**
@@ -216,8 +199,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                 Optional<ConstructionNode> newChildConstructionNode = iqTreeTools.createOptionalConstructionNode(
                         newAggregationNode::getChildVariables, substitution.restrictDomainTo(groupingVariables));
 
-                return update(ancestors, groupingVariables, newAggregationSubstitution,
-                        newChildConstructionNode, grandChild, sampleFilter);
+                return new AggregationNormalizationState(ancestors, sampleFilter, groupingVariables,
+                        newAggregationSubstitution, newChildConstructionNode, grandChild);
             }
 
             /**
@@ -236,30 +219,14 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                 if (!groupingVariables.containsAll(substitution.getDomain()))
                     throw new MinorOntopInternalBugException("Was expecting all the non-grouping bindings to be lifted");
 
-
                 // Only projecting grouping variables
                 // (mimicking the special case when GROUP BY reduces itself to a DISTINCT and a projection)
                 ConstructionNode groupingConstructionNode = iqFactory.createConstructionNode(groupingVariables, substitution);
 
-                InjectiveBindingLiftContext context = new InjectiveBindingLiftContext(variableGenerator, coreSingletons);
-
-                // Non-final
-                InjectiveBindingLiftState subState = context.new InjectiveBindingLiftState(groupingConstructionNode, grandChild);
-
-                for (int i = 0; i < MAX_ITERATIONS; i++) {
-                    InjectiveBindingLiftState newSubState = subState.liftBindings();
-
-                    // Convergence
-                    if (newSubState.equals(subState)) {
-                        return convertIntoState(subState);
-                    } else
-                        subState = newSubState;
-                }
-                throw new MinorOntopInternalBugException("AggregationNormalizerImpl.liftGroupingBindings() " +
-                        "did not converge after " + MAX_ITERATIONS);
-            }
-
-            AggregationNormalizationState convertIntoState(InjectiveBindingLiftState subState) {
+                InjectiveBindingLiftState subState = IQStateOptionalTransformer.reachFinalState(
+                        new InjectiveBindingLiftState(groupingConstructionNode, grandChild),
+                        InjectiveBindingLiftState::liftBindings,
+                        MAX_ITERATIONS);
 
                 UnaryOperatorSequence<ConstructionNode> subStateAncestors = subState.getAncestors();
 
@@ -313,9 +280,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                 // Creates a filter over the sample variable so that only rows that have a non-null value in it are kept.
                 Optional<FilterNode> newFilter = iqTreeTools.createOptionalFilterNode(sampleVariable.map(termFactory::getDBIsNotNull));
 
-                return update(newAncestors, newGroupingVariables, finalAggregationSubstitution,
-                        newChildConstructionNode,
-                        subState.getGrandChildTree(), newFilter);
+                return new AggregationNormalizationState(newAncestors, newFilter, newGroupingVariables,
+                        finalAggregationSubstitution, newChildConstructionNode, subState.getGrandChildTree());
             }
 
             /**
@@ -356,10 +322,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                         .build();
 
                 if (liftedSubstitution.isEmpty())
-                    return update(
-                            ancestors,
-                            groupingVariables, newAggregationSubstitution,
-                            childConstructionNode, grandChild, sampleFilter);
+                    return new AggregationNormalizationState(ancestors, sampleFilter, groupingVariables,
+                            newAggregationSubstitution, childConstructionNode, grandChild);
 
                 ConstructionNode liftedConstructionNode = iqFactory.createConstructionNode(
                         Sets.union(groupingVariables, aggregationSubstitution.getDomain()).immutableCopy(),
@@ -368,10 +332,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                 ImmutableSet<Variable> newGroupingVariables = Sets.difference(liftedConstructionNode.getChildVariables(),
                         newAggregationSubstitution.getDomain()).immutableCopy();
 
-                return update(
-                        ancestors.append(liftedConstructionNode),
-                        newGroupingVariables, newAggregationSubstitution,
-                        childConstructionNode, grandChild, sampleFilter);
+                return new AggregationNormalizationState(ancestors.append(liftedConstructionNode), sampleFilter, newGroupingVariables,
+                        newAggregationSubstitution, childConstructionNode, grandChild);
             }
 
 
@@ -395,7 +357,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
          * Decomposes functional terms so as to lift non-aggregation function symbols above and block
          * the aggregation functional terms
          */
-        protected Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition> decomposeFunctionalTerm(
+        private Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition> decomposeFunctionalTerm(
                 ImmutableFunctionalTerm functionalTerm) {
 
             FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
@@ -438,6 +400,5 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                         return termFactory.getFunctionalTermDecomposition(var, substitutionFactory.getSubstitution(var, arg));
                     });
         }
-
     }
 }

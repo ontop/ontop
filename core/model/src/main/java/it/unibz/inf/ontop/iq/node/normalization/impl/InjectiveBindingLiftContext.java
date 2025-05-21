@@ -67,30 +67,29 @@ public class InjectiveBindingLiftContext {
             this.optionalChildConstructionNode = optionalChildConstructionNode;
         }
 
-        public IQTree getGrandChildTree() {
+        protected IQTree getGrandChildTree() {
             return grandChildTree;
         }
 
-        public Optional<ConstructionNode> getChildConstructionNode() {
+        protected Optional<ConstructionNode> getChildConstructionNode() {
             return optionalChildConstructionNode;
         }
 
-        public UnaryOperatorSequence<ConstructionNode> getAncestors() {
+        protected UnaryOperatorSequence<ConstructionNode> getAncestors() {
             return ancestors;
         }
 
-        public InjectiveBindingLiftState liftBindings() {
+        protected Optional<InjectiveBindingLiftState> liftBindings() {
             if (optionalChildConstructionNode.isEmpty())
-                return this;
+                return Optional.empty();
 
             ConstructionNode childConstructionNode = optionalChildConstructionNode.get();
 
             Substitution<ImmutableTerm> childSubstitution = childConstructionNode.getSubstitution();
             if (childSubstitution.isEmpty())
-                return this;
+                return Optional.empty();
 
             VariableNullability grandChildVariableNullability = grandChildTree.getVariableNullability();
-
             ImmutableSet<Variable> nonFreeVariables = childConstructionNode.getVariables();
 
             ImmutableMap<Variable, ImmutableFunctionalTerm.FunctionalTermDecomposition> injectivityDecompositionMap =
@@ -126,14 +125,14 @@ public class InjectiveBindingLiftContext {
             if (newChildConstructionNode.equals(optionalChildConstructionNode)) {
                 if (liftedConstructionNode.isPresent())
                     throw new MinorOntopInternalBugException("Unexpected lifted construction node");
-                return this;
+                return Optional.empty();
             }
 
-            return new InjectiveBindingLiftState(
+            return Optional.of(new InjectiveBindingLiftState(
                     ancestors.append(liftedConstructionNode
                             .orElseThrow(() -> new MinorOntopInternalBugException("A lifted construction node was expected"))),
                     newChildConstructionNode,
-                    grandChildTree);
+                    grandChildTree));
         }
     }
 }

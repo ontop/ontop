@@ -11,13 +11,12 @@ import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
+import it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
@@ -97,31 +96,25 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                 : iqFactory.createUnaryIQTree(distinctNode, child, treeCache);
     }
 
-    class Context extends InjectiveBindingLiftContext {
+    private class Context extends InjectiveBindingLiftContext {
         private final IQTreeCache treeCache;
 
-        public Context(VariableGenerator variableGenerator, CoreSingletons coreSingletons, IQTreeCache treeCache) {
+        Context(VariableGenerator variableGenerator, CoreSingletons coreSingletons, IQTreeCache treeCache) {
             super(variableGenerator, coreSingletons);
             this.treeCache = treeCache;
         }
 
-        private IQTree liftBindingConstructionChild(ConstructionNode constructionNode, IQTree grandChild) {
+        IQTree liftBindingConstructionChild(ConstructionNode constructionNode, IQTree grandChild) {
 
-            // Non-final
-            InjectiveBindingLiftContext.InjectiveBindingLiftState state = new InjectiveBindingLiftState(constructionNode, grandChild);
+            InjectiveBindingLiftState finalState = IQStateOptionalTransformer.reachFinalState(
+                    new InjectiveBindingLiftState(constructionNode, grandChild),
+                    InjectiveBindingLiftState::liftBindings,
+                    MAX_ITERATIONS);
 
-            for (int i = 0; i < MAX_ITERATIONS; i++) {
-                InjectiveBindingLiftState newState = state.liftBindings();
-
-                if (newState.equals(state))
-                    return createNormalizedTree(newState);
-                state = newState;
-            }
-            throw new MinorOntopInternalBugException("DistinctNormalizerImpl.liftBindingConstructionChild() " +
-                    "did not converge after " + MAX_ITERATIONS);
+            return createNormalizedTree(finalState);
         }
 
-        private IQTree createNormalizedTree(InjectiveBindingLiftState state) {
+        IQTree createNormalizedTree(InjectiveBindingLiftState state) {
 
             IQTree grandChildTree = state.getGrandChildTree();
             // No need to have a DISTINCT as a grand child
@@ -144,7 +137,6 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                     // Recursive (for merging top construction nodes)
                     .normalizeForOptimization(variableGenerator);
         }
-
     }
 
 
