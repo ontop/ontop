@@ -169,7 +169,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
         return applyRestrictedFreshRenaming(freshRenamingSubstitution.restrictDomainTo(getVariables()));
     }
 
-    protected IQTree applyRestrictedFreshRenaming(InjectiveSubstitution<Variable> selectedSubstitution) {
+    private IQTree applyRestrictedFreshRenaming(InjectiveSubstitution<Variable> selectedSubstitution) {
         return selectedSubstitution.isEmpty()
                 ? this
                 : applyNonEmptyFreshRenaming(selectedSubstitution);

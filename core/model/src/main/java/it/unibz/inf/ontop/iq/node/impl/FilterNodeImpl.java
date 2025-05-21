@@ -172,7 +172,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
         DownPropagation downPropagation = new DownPropagation(constraint, descendingSubstitution, child.getVariables());
 
-        ImmutableExpression unoptimizedExpression = downPropagation.getSubstitution().apply(getFilterCondition());
+        ImmutableExpression unoptimizedExpression = downPropagation.applySubstitution(getFilterCondition());
         ImmutableSet<Variable> newlyProjectedVariables = downPropagation.computeProjectedVariables();
 
         VariableNullability simplifiedFutureChildVariableNullability = coreUtilsFactory.createSimplifiedVariableNullability(

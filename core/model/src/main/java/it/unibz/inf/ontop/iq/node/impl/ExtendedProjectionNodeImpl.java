@@ -236,8 +236,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 throws UnsatisfiableConditionException;
     }
 
-
-    private static class PropagationResults {
+    protected static class PropagationResults {
 
         public final Substitution<VariableOrGroundTerm> delta;
         public final Optional<ImmutableExpression> filter;

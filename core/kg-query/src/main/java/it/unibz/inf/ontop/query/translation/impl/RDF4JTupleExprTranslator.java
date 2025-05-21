@@ -447,7 +447,7 @@ public class RDF4JTupleExprTranslator {
                         iqFactory.createBinaryNonCommutativeIQTree(iqFactory.createLeftJoinNode(ljCond),
                                 applyInDepthRenaming(leftTranslation.iqTree, leftNonProjVarsRenaming),
                                 applyInDepthRenaming(
-                                        rightTranslation.iqTree.applyDescendingSubstitutionWithoutOptimizing(sharedVarsRenaming, vGen),
+                                        rightTranslation.iqTree.applyFreshRenaming(sharedVarsRenaming),
                                         rightNonProjVarsRenaming))),
                 leftTranslation.nullableVariables);
     }
@@ -489,10 +489,10 @@ public class RDF4JTupleExprTranslator {
         InjectiveSubstitution<Variable> rightNonProjVarsRenaming = getNonProjVarsRenaming(rightTranslation, leftTranslation, variableGenerator);
 
         IQTree leftTree = applyInDepthRenaming(
-                leftTranslation.iqTree.applyDescendingSubstitutionWithoutOptimizing(leftRenamingSubstitution, variableGenerator),
+                leftTranslation.iqTree.applyFreshRenaming(leftRenamingSubstitution),
                 leftNonProjVarsRenaming);
         IQTree rightTree = applyInDepthRenaming(
-                rightTranslation.iqTree.applyDescendingSubstitutionWithoutOptimizing(rightRenamingSubstitution, variableGenerator),
+                rightTranslation.iqTree.applyFreshRenaming(rightRenamingSubstitution),
                 rightNonProjVarsRenaming);
 
         Stream<ImmutableExpression> coalescingStream = toCoalesce.stream()
@@ -549,8 +549,9 @@ public class RDF4JTupleExprTranslator {
                         pe -> termFactory.getVariable(pe.getName()),
                         pe -> termFactory.getVariable(pe.getProjectionAlias().orElse(pe.getName()))));
 
-        Substitution<Variable> substitution = map.entrySet().stream()
-                .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries());
+        InjectiveSubstitution<Variable> substitution = map.entrySet().stream()
+                .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries())
+                .injective();
 
         ImmutableSet<Variable> projectedVars = ImmutableSet.copyOf(map.values());
 
@@ -561,7 +562,7 @@ public class RDF4JTupleExprTranslator {
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
                 Sets.union(child.iqTree.getKnownVariables(), projectedVars));
 
-        IQTree subQuery = child.iqTree.applyDescendingSubstitutionWithoutOptimizing(substitution, variableGenerator);
+        IQTree subQuery = child.iqTree.applyFreshRenaming(substitution);
 
         // Substitution for possibly unbound variables
         Substitution<ImmutableTerm> newSubstitution = Sets.difference(projectedVars, subQuery.getVariables()).stream()

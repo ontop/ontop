@@ -181,7 +181,8 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
         ImmutableMultimap<Variable, GroundFunctionalTerm> binaryEqualitiesSubset = expression.flattenAND()
                 .filter(e -> e.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol)
                 .map(ImmutableFunctionalTerm::getTerms)
-                .filter(args -> args.stream().anyMatch(t -> t instanceof Variable)
+                .filter(args ->
+                        args.stream().anyMatch(t -> t instanceof Variable)
                         && args.stream().anyMatch(t -> t instanceof GroundFunctionalTerm)
                         && args.stream().allMatch(t -> t instanceof Variable || t instanceof GroundFunctionalTerm))
                 .flatMap(args -> args.stream()

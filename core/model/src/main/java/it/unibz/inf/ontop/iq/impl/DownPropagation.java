@@ -65,6 +65,15 @@ public class DownPropagation {
         return optionalDescendingSubstitution.get();
     }
 
+    public ImmutableExpression applySubstitution(ImmutableExpression expression) {
+        return optionalDescendingSubstitution.map(s -> s.apply(expression)).get();
+    }
+
+    public Optional<ImmutableExpression> applySubstitution(Optional<ImmutableExpression> optionalExpression) {
+        return optionalDescendingSubstitution
+                .flatMap(s -> optionalExpression.map(s::apply));
+    }
+
     public Optional<ImmutableExpression> getConstraint() {
         return constraint;
     }

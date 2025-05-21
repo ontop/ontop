@@ -132,8 +132,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
         DownPropagation downPropagation = new DownPropagation(constraint, descendingSubstitution, iqTreeTools.getChildrenVariables(children));
 
-        Optional<ImmutableExpression> unoptimizedExpression = getOptionalFilterCondition()
-                .map(downPropagation.getSubstitution()::apply);
+        var unoptimizedExpression = downPropagation.applySubstitution(getOptionalFilterCondition());
 
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
                 downPropagation.computeProjectedVariables());

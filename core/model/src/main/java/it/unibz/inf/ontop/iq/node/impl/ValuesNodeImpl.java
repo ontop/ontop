@@ -124,17 +124,17 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
         if (isNormalized)
             return this;
-        Optional<ConstructionAndValues> lift = liftSingleValueVariables();
+        Optional<IQTree> lift = liftSingleValueVariables();
         if (lift.isPresent()) {
-            LeafIQTree normalizedLeaf = furtherNormalize(lift.get().valuesNode);
-            return iqFactory.createUnaryIQTree(lift.get().constructionNode, normalizedLeaf,
-                    iqFactory.createIQTreeCache(true));
+            return lift.get();
         }
-        return furtherNormalize(this);
+        IQTree result = furtherNormalize(this);
+        isNormalized = true;
+        return result;
     }
 
 
-    private Optional<ConstructionAndValues> liftSingleValueVariables() {
+    private Optional<IQTree> liftSingleValueVariables() {
 
         ImmutableSet<Variable> singleValueVariables = projectedVariables.stream()
                 .filter(v -> 1 == getValueStream(v)
@@ -144,7 +144,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 .collect(ImmutableCollectors.toSet());
 
         if (!singleValueVariables.isEmpty()) {
-            // Can be normalized into a construction/child node pair. Start by creating ConstructionNode.
+            // Can be normalized into a construction/child node pair.
             Substitution<ImmutableTerm> substitutions = singleValueVariables.stream()
                     .collect(substitutionFactory.toSubstitution(
                             v -> v,
@@ -152,18 +152,20 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
             ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, substitutions);
 
-            // Create the ValueNode
-            ImmutableSet<Variable> multiValueVariables = Sets.difference(projectedVariables, singleValueVariables).immutableCopy();
-
             ImmutableList<ImmutableMap<Variable, Constant>> newValuesNodeValues = valueMaps.stream()
                     .map(tuple -> tuple.entrySet().stream()
-                            .filter(e -> multiValueVariables.contains(e.getKey()))
+                            .filter(e -> !singleValueVariables.contains(e.getKey()))
                             .collect(ImmutableCollectors.toMap()))
                     .collect(ImmutableCollectors.toList());
 
-            ValuesNode valuesNode = iqFactory.createValuesNode(multiValueVariables, newValuesNodeValues);
+            ValuesNode valuesNode = iqFactory.createValuesNode(
+                    Sets.difference(projectedVariables, singleValueVariables).immutableCopy(),
+                    newValuesNodeValues);
 
-            return Optional.of(new ConstructionAndValues(constructionNode, valuesNode));
+            return Optional.of(iqFactory.createUnaryIQTree(
+                    constructionNode,
+                    furtherNormalize(valuesNode),
+                    iqFactory.createIQTreeCache(true)));
         }
         return Optional.empty();
     }
@@ -174,9 +176,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         }
         if ((valuesNode.getVariables().isEmpty()) && (valuesNode.getValues().size() == 1)) {
             return iqFactory.createTrueNode();
-        }
-        if (valuesNode == this) {
-            isNormalized = true;
         }
         return valuesNode;
     }
@@ -233,10 +232,10 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public ValuesNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        ImmutableSet<Variable> newVariables = substitutionFactory.apply(freshRenamingSubstitution, projectedVariables);
-
-        if (newVariables.equals(projectedVariables))
+        if (freshRenamingSubstitution.isEmpty())
             return this;
+
+        ImmutableSet<Variable> newVariables = substitutionFactory.apply(freshRenamingSubstitution, projectedVariables);
 
         var newUniqueConstraints = uniqueConstraints == null
                 ? null
@@ -244,11 +243,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 .map(s -> substitutionFactory.apply(freshRenamingSubstitution, s))
                 .collect(ImmutableCollectors.toSet());
 
-        var newValueMaps =  valueMaps.stream()
-                .map(tuple -> tuple.entrySet().stream()
-                        .map(e -> Maps.immutableEntry(substitutionFactory.apply(freshRenamingSubstitution, e.getKey()), e.getValue()))
-                        .collect(ImmutableCollectors.toMap()))
-                .collect(ImmutableCollectors.toList());
+        var newValueMaps = applyRenaming(freshRenamingSubstitution, valueMaps);
 
         return new ValuesNodeImpl(newVariables, newValueMaps, newUniqueConstraints, iqTreeTools, iqFactory,
                 coreUtilsFactory, settings, substitutionFactory, termFactory);
@@ -312,6 +307,15 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         return iqFactory.createValuesNode(newProjectionVariables, newValues);
     }
 
+    private ImmutableList<ImmutableMap<Variable, Constant>> applyRenaming(InjectiveSubstitution<Variable> renaming, ImmutableList<ImmutableMap<Variable, Constant>> valuesMap) {
+        return valuesMap.stream()
+                .map(tuple -> tuple.entrySet().stream()
+                        .map(e -> Maps.immutableEntry(substitutionFactory.apply(renaming, e.getKey()), e.getValue()))
+                        .collect(ImmutableCollectors.toMap()))
+                .collect(ImmutableCollectors.toList());
+
+    }
+
     private ValuesNode substituteVariables(Substitution<Variable> variableSubstitutionFragment, ValuesNode valuesNode) {
 
         ImmutableSet<Variable> variables = valuesNode.getVariables();
@@ -322,19 +326,14 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         ImmutableList<ImmutableMap<Variable, Constant>> newValues;
         if (newVariables.size() == variables.size()) {
             // one-to-one substitution
-            newValues = valuesNode.getValueMaps().stream()
-                    .map(tuple -> tuple.entrySet().stream()
-                            .map(e -> Maps.immutableEntry(substitutionFactory.apply(variableSubstitutionFragment, e.getKey()), e.getValue()))
-                            .collect(ImmutableCollectors.toMap()))
-                    .collect(ImmutableCollectors.toList());
+            newValues = applyRenaming(variableSubstitutionFragment.injective(), valuesNode.getValueMaps());
         }
         else {
             // many-to-one substitution
             ImmutableSet<Variable> firstFoundVariables = newVariables.stream()
-                    .map(v -> variables.stream()
-                            .filter(u -> substitutionFactory.apply(variableSubstitutionFragment, u).equals(v))
+                    .map(v -> variableSubstitutionFragment.getPreImage(u -> u == v).stream()
                             .findFirst()
-                            .orElseThrow(() -> new MinorOntopInternalBugException("expected a non-empty pre-image")))
+                            .orElse(v))
                     .collect(ImmutableCollectors.toSet());
 
             newValues = valuesNode.getValueMaps().stream()
@@ -605,15 +604,5 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
                 .toString();
         return VALUES_NODE_STR + " " + orderedVariables + valuesString;
-    }
-
-    private static class ConstructionAndValues {
-        public final ConstructionNode constructionNode;
-        public final ValuesNode valuesNode;
-
-        private ConstructionAndValues(ConstructionNode constructionNode, ValuesNode valuesNode) {
-            this.constructionNode = constructionNode;
-            this.valuesNode = valuesNode;
-        }
     }
 }
