@@ -163,10 +163,11 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         Substitution<?> renamedBlockedSubstitution = substitutionFactory.rename(renaming, blockedSubstitution);
         ImmutableExpression condition = termFactory.getConjunction(
                 renamedBlockedSubstitution.builder().toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList()));
-        FilterNode filterNode = iqFactory.createFilterNode(condition);
-        ConstructionNode constructionNode = iqTreeTools.createProjectingConstructionNode(flattenTree.getVariables(), renaming.getRangeSet());
 
-        return iqTreeTools.createUnaryIQTree(constructionNode, filterNode, flattenTree);
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(iqTreeTools.createProjectingConstructionNode(flattenTree.getVariables(), renaming.getRangeSet()))
+                .append(iqFactory.createFilterNode(condition))
+                .build(flattenTree);
     }
 
     private Variable applySubstitution(Variable var, Substitution<? extends VariableOrGroundTerm> sub) {

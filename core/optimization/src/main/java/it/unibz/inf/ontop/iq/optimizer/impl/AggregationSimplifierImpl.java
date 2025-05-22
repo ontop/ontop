@@ -96,21 +96,20 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
                             .flatTransform(simplificationMap::get, d -> d.getDecomposition().getSubstitution())
                             .build();
 
-            AggregationNode newNode = iqFactory.createAggregationNode(rootNode.getGroupingVariables(), newAggregationSubstitution);
-
             IQTree pushDownChildTree = pushDownDefinitions(
                     normalizedChild,
                     simplificationMap.values().stream()
                             .flatMap(s -> s.getPushDownRequests().stream()));
-            UnaryIQTree newAggregationTree = iqFactory.createUnaryIQTree(newNode, pushDownChildTree);
 
             // Substitution of the new parent construction node (containing typically the RDF function)
             Substitution<ImmutableTerm> parentSubstitution = initialSubstitution.builder()
                     .transformOrRemove(simplificationMap::get, d -> d.getDecomposition().getLiftableTerm())
                     .build();
 
-            var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(rootNode::getVariables, parentSubstitution);
-            return iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, newAggregationTree);
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(iqTreeTools.createOptionalConstructionNode(rootNode::getVariables, parentSubstitution))
+                    .append(iqFactory.createAggregationNode(rootNode.getGroupingVariables(), newAggregationSubstitution))
+                    .build(pushDownChildTree);
         }
 
         protected Optional<AggregationSimplification> simplifyAggregationFunctionalTerm(ImmutableFunctionalTerm aggregationFunctionalTerm,

@@ -160,10 +160,10 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         var construction = UnaryIQTreeDecomposition.of(subTree, ConstructionNode.class);
         var slice = UnaryIQTreeDecomposition.of(construction.getTail(), SliceNode.class);
         if (construction.isPresent() && slice.isPresent()) {
-            return iqTreeTools.createUnaryIQTree(
-                    slice.getNode(),
-                    construction.getNode(),
-                    slice.getChild());
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(slice.getNode())
+                    .append(construction.getNode())
+                    .build(slice.getChild());
         }
         return subTree;
     }
@@ -212,11 +212,11 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         var orderBy = UnaryIQTreeDecomposition.of(distinct.getTail(), OrderByNode.class);
 
         if (construction.isPresent() && distinct.isPresent() && orderBy.isPresent()) {
-            return iqTreeTools.createUnaryIQTree(
-                    construction.getNode(),
-                    orderBy.getNode(),
-                    distinct.getNode(),
-                    orderBy.getChild());
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(construction.getNode())
+                    .append(orderBy.getNode())
+                    .append(distinct.getNode())
+                    .build(orderBy.getChild());
         }
         return subTree;
     }

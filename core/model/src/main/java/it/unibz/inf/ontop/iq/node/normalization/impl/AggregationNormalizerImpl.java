@@ -63,10 +63,10 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                 return iqFactory.createTrueNode();
             }
             else {
-                IQTree newTree = iqTreeTools.createUnaryIQTree(
-                        iqFactory.createDistinctNode(),
-                        iqFactory.createConstructionNode(aggregationNode.getGroupingVariables()),
-                        child);
+                IQTree newTree = iqTreeTools.unaryIQTreeBuilder()
+                        .append(iqFactory.createDistinctNode())
+                        .append(iqFactory.createConstructionNode(aggregationNode.getGroupingVariables()))
+                        .build(child);
 
                 return newTree.normalizeForOptimization(variableGenerator);
             }
@@ -338,15 +338,13 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
 
             IQTree asIQTree() {
-                IQTree newChildTree = iqTreeTools.createOptionalUnaryIQTree(childConstructionNode, grandChild);
-
-                UnaryIQTree aggregationTree = iqFactory.createUnaryIQTree(
-                        iqFactory.createAggregationNode(groupingVariables, aggregationSubstitution),
-                        newChildTree, normalizedTreeCache);
-
-                IQTree baseTree = iqTreeTools.createOptionalUnaryIQTree(sampleFilter, aggregationTree);
-
-                return iqTreeTools.createAncestorsUnaryIQTree(ancestors, baseTree)
+                return iqTreeTools.unaryIQTreeBuilder()
+                        .append(ancestors)
+                        .append(sampleFilter)
+                        .append(iqFactory.createAggregationNode(groupingVariables, aggregationSubstitution),
+                                normalizedTreeCache)
+                        .append(childConstructionNode)
+                        .build(grandChild)
                         // Recursive (for merging top construction nodes)
                         .normalizeForOptimization(variableGenerator);
             }

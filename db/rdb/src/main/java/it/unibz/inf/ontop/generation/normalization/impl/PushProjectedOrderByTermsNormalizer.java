@@ -44,12 +44,12 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
 
         @Override
         public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-            var decomposition = ProjectOrderByTermsNormalizer.Decomposition.decomposeTree(tree);
+            var decomposition = ProjectOrderByTermsNormalizer.Decomposition.of(tree);
             if (decomposition.constructionNode.isEmpty() || decomposition.distinctNode.isEmpty() || decomposition.orderByNode.isEmpty()) {
                 var newDescendantTree = transform(decomposition.descendantTree);
                 return decomposition.descendantTree.equals(newDescendantTree)
                         ? tree
-                        : decomposition.rebuildWithNewDescendantTree(newDescendantTree, iqFactory);
+                        : decomposition.rebuildWithNewDescendantTree(newDescendantTree, iqTreeTools);
             }
             var distinct = decomposition.distinctNode.get();
 
@@ -61,12 +61,12 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
             if (onlyDistinct)
                 return super.transformConstruction(tree, rootNode, child);
 
-            var decomposition = ProjectOrderByTermsNormalizer.Decomposition.decomposeTree(tree);
+            var decomposition = ProjectOrderByTermsNormalizer.Decomposition.of(tree);
             if(decomposition.constructionNode.isEmpty() || decomposition.orderByNode.isEmpty()) {
                 var newDescendantTree = transform(decomposition.descendantTree);
                 return decomposition.descendantTree.equals(newDescendantTree)
                         ? tree
-                        : decomposition.rebuildWithNewDescendantTree(newDescendantTree, iqFactory);
+                        : decomposition.rebuildWithNewDescendantTree(newDescendantTree, iqTreeTools);
             }
             return normalize(decomposition);
         }
@@ -100,10 +100,10 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
                     .collect(ImmutableCollectors.toList()));
 
             //Change order from DISTINCT -> CONSTRUCT -> ORDER BY to DISTINCT -> ORDER BY -> CONSTRUCT
-            return iqTreeTools.createUnaryIQTree(
-                    newOrderBy,
-                    construct,
-                    remainingSubtree);
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(newOrderBy)
+                    .append(construct)
+                    .build(remainingSubtree);
         }
     }
 }

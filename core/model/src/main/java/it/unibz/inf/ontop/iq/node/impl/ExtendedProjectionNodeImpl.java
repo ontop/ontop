@@ -77,13 +77,14 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
             IQTree newChild = updateChildFct.apply(tauPropagationResults);
 
-            Optional<FilterNode> filterNode = iqTreeTools.createOptionalFilterNode(tauPropagationResults.filter);
-
             Optional<? extends ExtendedProjectionNode> projectionNode = computeNewProjectionNode(
                     ds.computeProjectedVariables(),
                     tauPropagationResults.theta, newChild);
 
-            return iqTreeTools.createOptionalUnaryIQTree(projectionNode, filterNode, newChild);
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(projectionNode)
+                    .append(iqTreeTools.createOptionalFilterNode(tauPropagationResults.filter))
+                    .build(newChild);
         }
         catch (UnsatisfiableConditionException e) {
             return iqTreeTools.createEmptyNode(ds);

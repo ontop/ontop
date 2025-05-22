@@ -57,6 +57,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         this.variableNullabilityTools = variableNullabilityTools;
         this.iqTreeTools = iqTreeTools;
     }
+
     @Override
     public IQTree normalizeForOptimization(InnerJoinNode innerJoinNode, ImmutableList<IQTree> children,
                                            VariableGenerator variableGenerator, IQTreeCache treeCache) {
@@ -248,7 +249,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     case 0:
                         return iqFactory.createTrueNode();
                     case 1:
-                        return iqTreeTools.createFilterTree(joiningCondition, children.get(0));
+                        return iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(joiningCondition), children.get(0));
                     default:
                         return liftOneLeftJoin()
                                 .orElseGet(() -> iqFactory.createNaryIQTree(
@@ -291,9 +292,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                                                 .mapToObj(children::get))
                                 .collect(ImmutableCollectors.toList()));
 
-                return Optional.of(iqTreeTools.createFilterTree(
-                        joiningCondition,
-                        iqFactory.createBinaryNonCommutativeIQTree(node, newJoinOnLeft, rightChild)));
+                IQTree child = iqFactory.createBinaryNonCommutativeIQTree(node, newJoinOnLeft, rightChild);
+                return Optional.of(iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(joiningCondition), child));
             }
 
             /**

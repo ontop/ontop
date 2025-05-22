@@ -341,10 +341,10 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         return newUnionChildren.equals(unionChildren)
                 ? Optional.empty()
                 : Optional.of(
-                iqTreeTools.createUnaryIQTree(
-                                this,
-                                iqFactory.createDistinctNode(),
-                                iqFactory.createNaryIQTree(union, newUnionChildren))
+                iqTreeTools.unaryIQTreeBuilder()
+                        .append(this)
+                        .append(iqFactory.createDistinctNode())
+                        .build(iqFactory.createNaryIQTree(union, newUnionChildren))
                                 .normalizeForOptimization(variableGenerator));
     }
 

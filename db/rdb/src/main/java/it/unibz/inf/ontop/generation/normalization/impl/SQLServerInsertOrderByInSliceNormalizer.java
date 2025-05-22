@@ -58,12 +58,12 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
                             termFactory.getDBConstant("", termFactory.getTypeFactory().getDBTypeFactory().getDBStringType())));
             var orderByNode = iqFactory.createOrderByNode(ImmutableList.of(iqFactory.createOrderComparator(sortVariable, true)));
 
-            return iqTreeTools.createUnaryIQTree(
-                    sliceNode,
-                    topConstruct,
-                    orderByNode,
-                    bottomConstruct,
-                    transform(child));
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(sliceNode)
+                    .append(topConstruct)
+                    .append(orderByNode)
+                    .append(bottomConstruct)
+                    .build(transform(child));
         }
     }
 }

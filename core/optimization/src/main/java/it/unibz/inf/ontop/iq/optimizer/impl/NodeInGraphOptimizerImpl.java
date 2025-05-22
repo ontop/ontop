@@ -13,10 +13,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.NodeInGraphOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.*;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -273,7 +270,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                 var filterCondition = termFactory.getConjunction(
                         rootNode.getSubstitution().stream()
                                 .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())));
-                return iqTreeTools.createFilterTree(filterCondition, pushedIntensionalNode);
+                return iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(filterCondition), pushedIntensionalNode);
             }
 
             var commonTerm = pushedIntensionalNode.getProjectionAtom().getArguments().stream()

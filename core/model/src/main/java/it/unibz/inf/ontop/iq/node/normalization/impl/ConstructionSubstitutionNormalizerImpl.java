@@ -20,17 +20,11 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
  */
 public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubstitutionNormalizer {
 
-    private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
-    private final IQTreeTools iqTreeTools;
 
     @Inject
-    private ConstructionSubstitutionNormalizerImpl(IntermediateQueryFactory iqFactory,
-                                                   SubstitutionFactory substitutionFactory,
-                                                   IQTreeTools iqTreeTools) {
-        this.iqFactory = iqFactory;
+    private ConstructionSubstitutionNormalizerImpl(SubstitutionFactory substitutionFactory) {
         this.substitutionFactory = substitutionFactory;
-        this.iqTreeTools = iqTreeTools;
     }
 
     /**

@@ -56,10 +56,9 @@ public class RightProvenanceNormalizer {
                                                     VariableGenerator variableGenerator) {
         ImmutableSet<Variable> rightVariables = rightTree.getVariables();
 
-        VariableNullability rightNullability = iqTreeTools.createFilterTree(
-                        leftJoinExpression.flatMap(e -> termFactory.getConjunction(
-                                e.flattenAND().filter(e1 -> rightVariables.containsAll(e1.getVariables())))),
-                        rightTree)
+        Optional<ImmutableExpression> expression = leftJoinExpression.flatMap(e -> termFactory.getConjunction(
+                e.flattenAND().filter(e1 -> rightVariables.containsAll(e1.getVariables()))));
+        VariableNullability rightNullability = iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(expression), rightTree)
                 .getVariableNullability();
 
         return normalizeRightProvenance(rightTree, leftVariables, rightTree.getVariables(), variableGenerator,

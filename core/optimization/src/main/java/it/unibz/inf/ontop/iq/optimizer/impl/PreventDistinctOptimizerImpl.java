@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
@@ -24,13 +23,11 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 public class PreventDistinctOptimizerImpl implements PreventDistinctOptimizer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final OptimizationSingletons optimizationSingletons;
     private final PreventDistinctProjectionSplitter preventDistinctProjectionSplitter;
 
     @Inject
-    private PreventDistinctOptimizerImpl(IntermediateQueryFactory iqFactory, OptimizationSingletons optimizationSingletons, PreventDistinctProjectionSplitter preventDistinctProjectionSplitter) {
-        this.iqFactory = iqFactory;
-        this.optimizationSingletons = optimizationSingletons;
+    private PreventDistinctOptimizerImpl(OptimizationSingletons optimizationSingletons, PreventDistinctProjectionSplitter preventDistinctProjectionSplitter) {
+        this.iqFactory = optimizationSingletons.getCoreSingletons().getIQFactory();
         this.preventDistinctProjectionSplitter = preventDistinctProjectionSplitter;
     }
 
@@ -55,8 +52,14 @@ public class PreventDistinctOptimizerImpl implements PreventDistinctOptimizer {
 
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-            var decomposition = Decomposition.decomposeTree(child);
-            if (decomposition.distinctNode.isPresent()) {
+
+            // Below the Construction, we may find the following nodes: DistinctNode, SliceNode.
+            // Some nodes may be missing but the order must be respected.
+            // There are no multiple instances of the same kind of node.
+            var slice = UnaryIQTreeDecomposition.of(child, SliceNode.class);
+            var distinct = UnaryIQTreeDecomposition.of(slice.getTail(), DistinctNode.class);
+            var descendantTree = distinct.getTail();
+            if (distinct.isPresent()) {
                 var split = preventDistinctProjectionSplitter.split(tree, variableGenerator);
                 var newTree = iqFactory.createUnaryIQTree(split.getConstructionNode(),
                         split.getSubTree());
@@ -67,7 +70,7 @@ public class PreventDistinctOptimizerImpl implements PreventDistinctOptimizer {
                         Sets.difference(
                                 rootNode.getChildVariables(),
                                 split.getPushedVariables()).immutableCopy(),
-                        decomposition.descendantTree))
+                        descendantTree))
                     throw new MinorOntopInternalBugException("Unable to push down substitution terms that are not supported with DISTINCT without a functional dependency.");
                 if (!validatePushedTerms(split.getPushedTerms()))
                     throw new MinorOntopInternalBugException("Unable to push down substitution terms that are not supported with DISTINCT if the functional terms are not deterministic.");
@@ -101,33 +104,6 @@ public class PreventDistinctOptimizerImpl implements PreventDistinctOptimizer {
                 return false;
             return f.getTerms().stream()
                             .allMatch(this::isDeterministic);
-        }
-    }
-
-    /**
-     * Below the Construction, we may find the following nodes: DistinctNode, SliceNode.
-     * Some nodes may be missing but the order must be respected. There are no multiple instances of the same kind of node.
-     */
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    protected static class Decomposition {
-        final Optional<SliceNode> sliceNode;
-        final Optional<DistinctNode> distinctNode;
-
-        final IQTree descendantTree;
-
-        private Decomposition(Optional<SliceNode> sliceNode,
-                              Optional<DistinctNode> distinctNode,
-                              IQTree descendantTree) {
-            this.sliceNode = sliceNode;
-            this.distinctNode = distinctNode;
-            this.descendantTree = descendantTree;
-        }
-
-        static Decomposition decomposeTree(IQTree tree) {
-            var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
-            var distinct = UnaryIQTreeDecomposition.of(slice.getTail(), DistinctNode.class);
-
-            return new Decomposition(slice.getOptionalNode(), distinct.getOptionalNode(), distinct.getTail());
         }
     }
 }

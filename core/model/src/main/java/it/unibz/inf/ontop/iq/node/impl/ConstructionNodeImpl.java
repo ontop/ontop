@@ -519,7 +519,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                         newTopConstructionNode.get(),
                         newChild,
                         treeCache.declareAsNormalizedForOptimizationWithEffect());
-
             }
             else {
                 IQTree newChild = updatedChild

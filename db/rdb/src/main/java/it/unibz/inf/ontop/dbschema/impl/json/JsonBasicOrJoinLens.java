@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -168,8 +167,8 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         ImmutableList<ImmutableExpression> filterConditions = extractFilter(parentAttributeMap, idFactory, coreSingletons);
 
-        IQTree filterTree = iqTreeTools.createFilterTree(
-                filterConditions.stream().reduce(termFactory::getConjunction), parentTree);
+        Optional<ImmutableExpression> expression = filterConditions.stream().reduce(termFactory::getConjunction);
+        IQTree filterTree = iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(expression), parentTree);
 
         IQTree updatedParentDataNode = normalization.updateChild(filterTree, variableGenerator);
 

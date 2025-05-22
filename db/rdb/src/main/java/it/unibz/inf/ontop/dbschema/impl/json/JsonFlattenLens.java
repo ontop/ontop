@@ -171,10 +171,10 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
             IQTree treeBeforeSafenessInfo;
             if (flattenedDBType.getCategory() == DBTermType.Category.ARRAY) {
                 //If we use an array type, we do not need to add a filter to check if it really is an array.
-                treeBeforeSafenessInfo = iqTreeTools.createUnaryIQTree(
-                        constructionNode,
-                        flattennode,
-                        dataNode);
+                treeBeforeSafenessInfo = iqTreeTools.unaryIQTreeBuilder()
+                        .append(constructionNode)
+                        .append(flattennode)
+                        .build(dataNode);
             }
             else {
                 FilterNode filterNode = iqFactory.createFilterNode(termFactory.getDBIsNotNull(flattenOutputVariable));
@@ -186,12 +186,12 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                                 flattenedIfArrayVariable,
                                 termFactory.getIfElseNull(termFactory.getDBIsArray(flattenedDBType, flattenedVariable), flattenedVariable)));
 
-                treeBeforeSafenessInfo = iqTreeTools.createUnaryIQTree(
-                        constructionNode,
-                        filterNode,
-                        flattennode,
-                        checkArrayConstructionNode,
-                        dataNode);
+                treeBeforeSafenessInfo = iqTreeTools.unaryIQTreeBuilder()
+                        .append(constructionNode)
+                        .append(filterNode)
+                        .append(flattennode)
+                        .append(checkArrayConstructionNode)
+                        .build(dataNode);
             }
 
             AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);

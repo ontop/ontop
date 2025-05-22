@@ -70,10 +70,10 @@ public class PreventDistinctProjectionSplitterImpl extends ProjectionSplitterImp
             /* We can bypass the security check for pushing the CONSTRUCT into the DISTINCT used by the normal ProjectionSplitter,
              * as the general circumstances of this use case already revolve around that scenario.
              */
-            return iqTreeTools.createUnaryIQTree(
-                    distinct.getNode(),
-                    constructionNode,
-                    distinct.getChild());
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(distinct.getNode())
+                    .append(constructionNode)
+                    .build(distinct.getChild());
         }
         return super.insertConstructionNode(tree, constructionNode, variableGenerator);
     }

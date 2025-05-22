@@ -65,10 +65,10 @@ public class UnquoteFlattenResultsNormalizer extends DefaultRecursiveIQTreeVisit
                 true);
         Substitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(rootNode.getOutputVariable(), resultSubstitution);
 
-        return iqTreeTools.createUnaryIQTree(
-                iqFactory.createConstructionNode(rootNode.getVariables(child.getVariables()), newSubstitution),
-                rootNode,
-                newChild);
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(iqFactory.createConstructionNode(rootNode.getVariables(child.getVariables()), newSubstitution))
+                .append(rootNode)
+                .build(newChild);
     }
 
 }

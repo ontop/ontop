@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
 import it.unibz.inf.ontop.iq.type.NotYetTypedBinaryMathOperationTransformer;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -109,14 +108,15 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
         }
 
         NativeNode getDatabaseQuery(DBParameters dbParameters) {
-            IQTree tree = iqTreeTools.createUnaryIQTree(
-                    iqFactory.createDistinctNode(),
-                    iqFactory.createConstructionNode(
+            Optional<ImmutableExpression> expression = termFactory.getDBIsNotNull(assertion.getTopChild().getVariables().stream());
+            IQTree child = assertion.getTopChild();
+            IQTree tree = iqTreeTools.unaryIQTreeBuilder()
+                    .append(iqFactory.createDistinctNode())
+                    .append(iqFactory.createConstructionNode(
                             assertion.getTopSubstitution().get(topVariable)
-                                    .getVariableStream().collect(ImmutableCollectors.toSet())),
-                    iqTreeTools.createFilterTree(
-                            termFactory.getDBIsNotNull(assertion.getTopChild().getVariables().stream()),
-                            assertion.getTopChild()));
+                                    .getVariableStream().collect(ImmutableCollectors.toSet())))
+                    .append(iqTreeTools.createOptionalFilterNode(expression))
+                    .build(child);
 
             IQTree transformedTree = mappingEqualityTransformer.transform(tree);
             IQTree binaryMathOperationTransformedTree = mappingBinaryMathOperationTransformer.transform(transformedTree);

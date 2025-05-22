@@ -49,10 +49,10 @@ public class LeftJoinTools {
         ImmutableExpression isNullCondition = termFactory.getDBIsNull(rightProvenance.getProvenanceVariable());
         ImmutableExpression filterCondition = iqTreeTools.getConjunction(nonNullabilityCondition, isNullCondition);
 
-        IQTree minusTree = iqTreeTools.createUnaryIQTree(
-                iqFactory.createConstructionNode(ImmutableSet.of(rightProvenance.getProvenanceVariable())),
-                iqFactory.createFilterNode(filterCondition),
-                iqFactory.createBinaryNonCommutativeIQTree(
+        IQTree minusTree = iqTreeTools.unaryIQTreeBuilder()
+                .append(iqFactory.createConstructionNode(ImmutableSet.of(rightProvenance.getProvenanceVariable())))
+                .append(iqFactory.createFilterNode(filterCondition))
+                .build(iqFactory.createBinaryNonCommutativeIQTree(
                         iqFactory.createLeftJoinNode(),
                         tree,
                         rightProvenance.getRightTree()));

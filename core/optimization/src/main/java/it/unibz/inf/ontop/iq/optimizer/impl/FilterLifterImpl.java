@@ -81,9 +81,10 @@ public class FilterLifterImpl implements FilterLifter {
             child = transformChild(child);
 
             UnaryIQTreeDecomposition<FilterNode> filter = UnaryIQTreeDecomposition.of(child, FilterNode.class);
-            return filter.isPresent()
-                    ? iqTreeTools.createUnaryIQTree(filter.getNode(), fn, filter.getChild())
-                    : iqFactory.createUnaryIQTree(fn, child);
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(filter.getOptionalNode())
+                    .append(fn)
+                    .build(filter.getTail());
         }
 
         @Override
@@ -99,7 +100,7 @@ public class FilterLifterImpl implements FilterLifter {
             Optional<ImmutableExpression> childrenExpression = termFactory.getConjunction(
                     getChildrenExpression(childrenDecomposition));
 
-            return iqTreeTools.createFilterTree(childrenExpression, unionSubtree);
+            return iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(childrenExpression), unionSubtree);
         }
 
         @Override
@@ -115,7 +116,8 @@ public class FilterLifterImpl implements FilterLifter {
                             getChildrenExpression(childrenDecomposition),
                             joinNode.getOptionalFilterCondition().stream());
 
-            return iqTreeTools.createFilterTree(termFactory.getConjunction(conjuncts), joinSubtree);
+            Optional<ImmutableExpression> expression = termFactory.getConjunction(conjuncts);
+            return iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(expression), joinSubtree);
         }
 
         @Override

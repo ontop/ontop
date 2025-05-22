@@ -189,7 +189,6 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         ImmutableSet.Builder<IQ> iqsBuilder = ImmutableSet.builder();
         ImmutableSet<IntensionalDataNode> dataNodes = extractIntensionalDataNodesFromHead(insertTree);
 
-
         InsertClauseNormalizer.Result normalization = insertClauseNormalizer.normalize(dataNodes, whereTree);
         IQTree normalizedSubTree = iqTreeTools.createOptionalUnaryIQTree(normalization.getConstructionNode(), whereTree);
 

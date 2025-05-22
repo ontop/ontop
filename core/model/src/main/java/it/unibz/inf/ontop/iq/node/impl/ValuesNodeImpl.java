@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.UnaryIQTreeBuilder;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
@@ -255,7 +256,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         if (descendingSubstitution.isEmpty())
             return this;
 
-        final UnaryOperatorSequence<UnaryOperatorNode> prefix;
+        final UnaryIQTreeBuilder<UnaryOperatorNode> iqTreeBuilder;
         ValuesNode valuesNode = this;
 
         Substitution<GroundFunctionalTerm> functionalSubstitutionFragment = descendingSubstitution.restrictRangeTo(GroundFunctionalTerm.class);
@@ -269,14 +270,14 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                             .toStream(termFactory::getStrictEquality))
                     .orElseThrow(() -> new MinorOntopInternalBugException("There must be an exception"));
 
-                prefix = UnaryOperatorSequence.of()
+                iqTreeBuilder = iqTreeTools.unaryIQTreeBuilder()
                         .append(iqTreeTools.createProjectingConstructionNode(valuesNode.getVariables(), descendingSubstitution.getDomain()))
                         .append(iqFactory.createFilterNode(filterCondition));
 
                 valuesNode = valuesNode.applyFreshRenaming(renaming);
         }
         else {
-            prefix = UnaryOperatorSequence.of();
+            iqTreeBuilder = iqTreeTools.unaryIQTreeBuilder();
         }
 
         Substitution<Constant> constantSubstitutionFragment = descendingSubstitution.restrictRangeTo(Constant.class);
@@ -285,7 +286,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         Substitution<Variable> variableSubstitutionFragment = descendingSubstitution.restrictRangeTo(Variable.class);
         valuesNode = substituteVariables(variableSubstitutionFragment, valuesNode);
 
-        return iqTreeTools.createAncestorsUnaryIQTree(prefix, valuesNode);
+        return iqTreeBuilder.build(valuesNode);
     }
 
     private ValuesNode substituteConstants(Substitution<Constant> substitution, ValuesNode valuesNode) {

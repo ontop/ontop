@@ -46,7 +46,7 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
                 rootNode.getFilterCondition(),
                 this::pushExpressionDown);
 
-        return iqTreeTools.createFilterTree(result.nonPushedExpression, result.result);
+        return iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(result.nonPushedExpression), result.result);
     }
 
     /**

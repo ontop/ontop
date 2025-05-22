@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -22,7 +23,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
@@ -32,11 +32,13 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
     private final boolean onlyInPresenceOfDistinct;
     private final SubstitutionFactory substitutionFactory;
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
 
     protected ProjectOrderByTermsNormalizer(boolean onlyInPresenceOfDistinct, CoreSingletons coreSingletons) {
         this.onlyInPresenceOfDistinct = onlyInPresenceOfDistinct;
         this.iqFactory = coreSingletons.getIQFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -75,7 +77,7 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
         private IQTree transformConstructionSliceDistinctOrOrderByTree(IQTree tree) {
             IQTree newTree = applyTransformerToDescendantTree(tree);
 
-            Decomposition decomposition = Decomposition.decomposeTree(newTree);
+            Decomposition decomposition = Decomposition.of(newTree);
 
             return decomposition.orderByNode
                     .filter(o -> decomposition.distinctNode.isPresent() || (!onlyInPresenceOfDistinct))
@@ -95,14 +97,14 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
          * The root node of the parent tree must be a ConstructionNode, a SliceNode, a DistinctNode or an OrderByNode
          */
         private IQTree applyTransformerToDescendantTree(IQTree tree) {
-            Decomposition decomposition = Decomposition.decomposeTree(tree);
+            Decomposition decomposition = Decomposition.of(tree);
 
             //Recursive
             IQTree newDescendantTree = transform(decomposition.descendantTree);
 
             return decomposition.descendantTree.equals(newDescendantTree)
                     ? tree
-                    : decomposition.rebuildWithNewDescendantTree(newDescendantTree, iqFactory);
+                    : decomposition.rebuildWithNewDescendantTree(newDescendantTree, iqTreeTools);
         }
 
         private IQTree normalize(IQTree tree, Analysis analysis) {
@@ -271,15 +273,16 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
             this.descendantTree = descendantTree;
         }
 
-        IQTree rebuildWithNewDescendantTree(IQTree newDescendantTree, IntermediateQueryFactory iqFactory) {
-            return Stream.of(orderByNode, constructionNode, distinctNode, sliceNode)
-                    .flatMap(Optional::stream)
-                    .reduce(newDescendantTree,
-                            (t, n) -> iqFactory.createUnaryIQTree(n, t),
-                            (t1, t2) -> { throw new MinorOntopInternalBugException("Must not be run in parallel"); });
+        IQTree rebuildWithNewDescendantTree(IQTree newDescendantTree, IQTreeTools iqTreeTools) {
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(sliceNode)
+                    .append(distinctNode)
+                    .append(constructionNode)
+                    .append(orderByNode)
+                    .build(newDescendantTree);
         }
 
-        static Decomposition decomposeTree(IQTree tree) {
+        static Decomposition of(IQTree tree) {
             var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
             var distinct = UnaryIQTreeDecomposition.of(slice.getTail(), DistinctNode.class);
             var construction = UnaryIQTreeDecomposition.of(distinct.getTail(), ConstructionNode.class);

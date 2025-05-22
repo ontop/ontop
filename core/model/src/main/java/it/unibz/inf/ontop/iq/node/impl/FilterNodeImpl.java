@@ -196,15 +196,13 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     private IQTree createFilterTree(ExpressionAndSubstitution simplifiedFilterCondition, ImmutableSet<Variable> projectedVariables, IQTree child) {
 
-        var optionalFilterNode = iqTreeTools.createOptionalFilterNode(simplifiedFilterCondition.getOptionalExpression());
-
         var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(
                 () -> projectedVariables, simplifiedFilterCondition.getSubstitution());
 
-        return iqTreeTools.createOptionalUnaryIQTree(
-                optionalConstructionNode,
-                optionalFilterNode,
-                child);
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(optionalConstructionNode)
+                .append(iqTreeTools.createOptionalFilterNode(simplifiedFilterCondition.getOptionalExpression()))
+                .build(child);
     }
 
     @Override

@@ -26,6 +26,7 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 public class DistinctNormalizerImpl implements DistinctNormalizer {
 
     private static final int MAX_ITERATIONS = 10000;
+
     private final IntermediateQueryFactory iqFactory;
     private final CoreSingletons coreSingletons;
     private final IQTreeTools iqTreeTools;
@@ -76,12 +77,11 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                     .collect(ImmutableCollectors.toList());
 
             if (!unionChildren.equals(newUnionChildren))
-                return iqTreeTools.createAncestorsUnaryIQTree(
-                                IQTreeTools.UnaryOperatorSequence.of()
-                                        .append(distinctNode)
-                                        .append(orderBy.getOptionalNode())
-                                        .append(filter.getOptionalNode()),
-                                iqFactory.createNaryIQTree(union.getNode(), newUnionChildren))
+                return iqTreeTools.unaryIQTreeBuilder()
+                        .append(distinctNode)
+                        .append(orderBy.getOptionalNode())
+                        .append(filter.getOptionalNode())
+                        .build(iqFactory.createNaryIQTree(union.getNode(), newUnionChildren))
                         .normalizeForOptimization(variableGenerator);
         }
 

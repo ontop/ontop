@@ -89,14 +89,11 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
 
             IQTree pushDownChildTree = pushDownDefinitions(child, definitionsToPushDown);
 
-            UnaryIQTree orderByTree = iqFactory.createUnaryIQTree(
-                    iqFactory.createOrderByNode(newComparators),
-                    pushDownChildTree.acceptTransformer(this));
-
-            return iqTreeTools.createOptionalUnaryIQTree(
+            return iqTreeTools.unaryIQTreeBuilder()
                     // Makes sure no new variable is projected by the returned tree
-                    iqTreeTools.createOptionalConstructionNode(child.getVariables(), pushDownChildTree),
-                    orderByTree);
+                    .append(iqTreeTools.createOptionalConstructionNode(child.getVariables(), pushDownChildTree))
+                    .append(iqFactory.createOrderByNode(newComparators))
+                    .build(pushDownChildTree.acceptTransformer(this));
         }
 
         protected Stream<ComparatorSimplification> simplifyComparator(OrderByNode.OrderComparator comparator,

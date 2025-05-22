@@ -152,7 +152,7 @@ public class QueryTemplateExtractor {
             IQTree newChild = child.acceptTransformer(this);
             Optional<ImmutableExpression> newCondition = transformFilterCondition(rootNode.getFilterCondition());
 
-            return iqTreeTools.createFilterTree(newCondition, newChild);
+            return iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(newCondition), newChild);
         }
 
 

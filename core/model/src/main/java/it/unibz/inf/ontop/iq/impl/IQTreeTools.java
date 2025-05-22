@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -13,7 +14,6 @@ import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -91,13 +91,6 @@ public class IQTreeTools {
         return expression.map(iqFactory::createFilterNode);
     }
 
-    public IQTree createFilterTree(Optional<ImmutableExpression> expression, IQTree child) {
-        return expression
-                .map(iqFactory::createFilterNode)
-                .<IQTree>map(f -> iqFactory.createUnaryIQTree(f, child))
-                .orElse(child);
-    }
-
     public Optional<ConstructionNode> createOptionalConstructionNode(ImmutableSet<Variable> originalSignature, IQTree newTree) {
         // Makes sure no new variable is projected by the returned tree
         return originalSignature.equals(newTree.getVariables())
@@ -126,13 +119,6 @@ public class IQTreeTools {
     }
 
 
-    // TODO: merge with above
-    public IQTree createIQTreeWithSignature(ImmutableSet<Variable> signature, IQTree child) {
-        return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(signature),
-                child);
-    }
-
     public ImmutableSet<Variable> getChildrenVariables(ImmutableList<IQTree> children) {
          return children.stream()
                 .flatMap(c -> c.getVariables().stream())
@@ -155,34 +141,12 @@ public class IQTreeTools {
                 .orElse(tree);
     }
 
-    public IQTree createOptionalUnaryIQTree(Optional<? extends UnaryOperatorNode> optionalNode1, Optional<? extends UnaryOperatorNode> optionalNode2, IQTree tree) {
-        return createAncestorsUnaryIQTree(UnaryOperatorSequence.of().append(optionalNode1).append(optionalNode2), tree);
-    }
-
-    public IQTree createUnaryIQTree(UnaryOperatorNode node1, UnaryOperatorNode node2, IQTree tree) {
-        return iqFactory.createUnaryIQTree(node1,
-                iqFactory.createUnaryIQTree(node2, tree));
-    }
-
-    public IQTree createUnaryIQTree(UnaryOperatorNode node1, UnaryOperatorNode node2, UnaryOperatorNode node3, IQTree tree) {
-        return iqFactory.createUnaryIQTree(node1,
-                iqFactory.createUnaryIQTree(node2,
-                        iqFactory.createUnaryIQTree(node3, tree)));
-    }
-
-    public IQTree createUnaryIQTree(UnaryOperatorNode node1, UnaryOperatorNode node2, UnaryOperatorNode node3, UnaryOperatorNode node4, IQTree tree) {
-        return iqFactory.createUnaryIQTree(node1,
-                iqFactory.createUnaryIQTree(node2,
-                        iqFactory.createUnaryIQTree(node3,
-                                iqFactory.createUnaryIQTree(node4, tree))));
-    }
-
     public Optional<IQTree> createJoinTree(Optional<ImmutableExpression> filter, ImmutableList<? extends IQTree> list) {
         switch (list.size()) {
             case 0:
                 return Optional.empty();
             case 1:
-                return Optional.of(createFilterTree(filter, list.get(0)));
+                return Optional.of(createOptionalUnaryIQTree(createOptionalFilterNode(filter), list.get(0)));
             default:
                 return Optional.of(iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(filter), (ImmutableList)list));
         }
@@ -198,6 +162,10 @@ public class IQTreeTools {
 
     public NaryIQTree createInnerJoinTree(ImmutableList<IQTree> children) {
         return iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(), children);
+    }
+
+    public <T extends UnaryOperatorNode> UnaryIQTreeBuilder<T> unaryIQTreeBuilder() {
+        return new UnaryIQTreeBuilder<>(iqFactory, ImmutableList.of(), ImmutableMap.of());
     }
 
     public static class UnaryOperatorSequence<T extends UnaryOperatorNode> {
