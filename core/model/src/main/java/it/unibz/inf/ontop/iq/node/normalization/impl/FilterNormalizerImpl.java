@@ -175,14 +175,16 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 if (child.isDeclaredAsEmpty())
                     return iqFactory.createEmptyNode(projectedVariables);
 
-                IQTree filterLevelTree = optionalFilterNode
-                        .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, child, treeCache.declareAsNormalizedForOptimizationWithEffect()))
-                        .orElse(child);
+                IQTree filterLevelTree = iqTreeTools.unaryIQTreeBuilder()
+                        .append(optionalFilterNode, treeCache::declareAsNormalizedForOptimizationWithEffect)
+                        .build(child);
 
                 if (ancestors.isEmpty())
                     return filterLevelTree;
 
-                return iqTreeTools.createAncestorsUnaryIQTree(ancestors, filterLevelTree)
+                return iqTreeTools.unaryIQTreeBuilder()
+                        .append(ancestors)
+                        .build(filterLevelTree)
                         // Normalizes the ancestors (recursive)
                         .normalizeForOptimization(variableGenerator);
             }

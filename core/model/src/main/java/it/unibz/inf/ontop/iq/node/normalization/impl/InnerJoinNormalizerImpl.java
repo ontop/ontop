@@ -233,7 +233,9 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 if (joinLevelTree.isDeclaredAsEmpty())
                     return joinLevelTree;
 
-                IQTree ancestorTree = iqTreeTools.createAncestorsUnaryIQTree(ancestors, joinLevelTree);
+                IQTree ancestorTree = iqTreeTools.unaryIQTreeBuilder()
+                        .append(ancestors)
+                        .build(joinLevelTree);
 
                 IQTree nonNormalizedTree = iqTreeTools.createOptionalUnaryIQTree(
                         iqTreeTools.createOptionalConstructionNode(projectedVariables, ancestorTree),

@@ -159,7 +159,7 @@ public class BasicFlattenLifter implements FlattenLifter {
     }
 
     private IQTree asIQTree(NestedUnaryIQTreeDecomposition<FlattenNode> decomposition) {
-        return iqTreeTools.createAncestorsUnaryIQTree(decomposition.getSequence(), decomposition.getChild());
+        return iqTreeTools.unaryIQTreeBuilder().append(decomposition.getSequence()).build(decomposition.getChild());
     }
 
     private NestedUnaryIQTreeDecomposition<FlattenNode> flattenSubtreeOf(IQTree tree) {
@@ -191,7 +191,7 @@ public class BasicFlattenLifter implements FlattenLifter {
         }
 
         IQTree nonLiftableSubtree() {
-            return iqTreeTools.createAncestorsUnaryIQTree(nonLiftableFlatten.getSequence(), nonLiftableFlatten.getChild());
+            return iqTreeTools.unaryIQTreeBuilder().append(nonLiftableFlatten.getSequence()).build(nonLiftableFlatten.getChild());
         }
 
         NestedUnaryIQTreeDecomposition<FlattenNode> insertAboveNonLiftable(UnaryOperatorNode node) {

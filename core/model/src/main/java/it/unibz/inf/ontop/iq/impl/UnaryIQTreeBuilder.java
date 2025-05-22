@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class UnaryIQTreeBuilder<T extends UnaryOperatorNode> {
@@ -39,6 +40,14 @@ public class UnaryIQTreeBuilder<T extends UnaryOperatorNode> {
                         .collect(ImmutableList.toImmutableList()),
                 Stream.concat(treeCacheMap.entrySet().stream(), Stream.of(Maps.immutableEntry(node, treeCache)))
                         .collect(ImmutableCollectors.toMap()));
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    public UnaryIQTreeBuilder<T> append(Optional<? extends T> optionalNode, Supplier<IQTreeCache> treeCacheSupplier) {
+        if (optionalNode.isPresent())
+            return append(optionalNode.get(), treeCacheSupplier.get());
+
+        return this;
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

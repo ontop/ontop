@@ -141,8 +141,9 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             }
 
             IQTree asIQTree() {
-                return iqTreeTools.createAncestorsUnaryIQTree(ancestors,
-                        iqTreeTools.createUnionTree(unionVariables, children));
+                return iqTreeTools.unaryIQTreeBuilder()
+                        .append(ancestors)
+                        .build(iqTreeTools.createUnionTree(unionVariables, children));
             }
 
             Optional<State> liftAnyVariable() {

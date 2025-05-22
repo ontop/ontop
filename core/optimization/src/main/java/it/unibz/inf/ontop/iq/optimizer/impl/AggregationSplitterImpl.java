@@ -234,7 +234,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
                                 return iqTreeTools.createUnionTree(initialAggregationNode.getChildVariables(), g);
                         }
                     })
-                    .map(t -> iqTreeTools.createAncestorsUnaryIQTree(nodes, t))
+                    .map(t -> iqTreeTools.unaryIQTreeBuilder().append(nodes).build(t))
                     .map(t -> renameSomeUnprojectedVariables(t, nonGroupingVariables))
                     .collect(ImmutableCollectors.toList());
 

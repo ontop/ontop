@@ -242,13 +242,6 @@ public class IQTreeTools {
                 .orElse(expression);
     }
 
-    public IQTree createAncestorsUnaryIQTree(UnaryOperatorSequence<? extends UnaryOperatorNode> sequence, IQTree tree) {
-        return sequence.list.reverse().stream()
-                .reduce(tree,
-                        (t, a) -> iqFactory.createUnaryIQTree(a, t),
-                        (t1, t2) -> { throw new MinorOntopInternalBugException("No merge was expected"); });
-    }
-
     public ImmutableList<IQTree> createUnaryOperatorChildren(UnaryOperatorNode node, IQTree child) {
          return createUnaryOperatorChildren(node, child.getChildren());
     }

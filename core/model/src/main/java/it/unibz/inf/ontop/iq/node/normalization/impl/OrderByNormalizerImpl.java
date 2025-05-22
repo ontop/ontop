@@ -133,14 +133,16 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
             }
 
             public IQTree toIQTree() {
-                IQTree orderByLevelTree = optionalOrderByNode
-                        .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, child, treeCache.declareAsNormalizedForOptimizationWithEffect()))
-                        .orElse(child);
+                IQTree orderByLevelTree = iqTreeTools.unaryIQTreeBuilder()
+                        .append(optionalOrderByNode, treeCache::declareAsNormalizedForOptimizationWithEffect)
+                        .build(child);
 
                 if (ancestors.isEmpty())
                     return orderByLevelTree;
 
-                return iqTreeTools.createAncestorsUnaryIQTree(ancestors, orderByLevelTree)
+                return iqTreeTools.unaryIQTreeBuilder()
+                        .append(ancestors)
+                        .build(orderByLevelTree)
                         // Normalizes the ancestors (recursive)
                         .normalizeForOptimization(variableGenerator);
             }

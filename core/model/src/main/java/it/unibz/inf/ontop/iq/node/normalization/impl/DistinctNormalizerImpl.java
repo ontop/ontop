@@ -18,6 +18,8 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Optional;
+
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 
@@ -85,15 +87,18 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                         .normalizeForOptimization(variableGenerator);
         }
 
-        return child.equals(initialChild)
-                ? createDistinctTree(distinctNode, child, treeCache.declareAsNormalizedForOptimizationWithoutEffect())
-                : createDistinctTree(distinctNode, child, treeCache.declareAsNormalizedForOptimizationWithEffect());
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(createOptionalDistinct(child),
+                        child.equals(initialChild)
+                            ? treeCache::declareAsNormalizedForOptimizationWithoutEffect
+                            : treeCache::declareAsNormalizedForOptimizationWithEffect)
+                .build(child);
     }
 
-    private IQTree createDistinctTree(DistinctNode distinctNode, IQTree child, IQTreeCache treeCache) {
+    private Optional<DistinctNode> createOptionalDistinct(IQTree child) {
         return child.isDistinct()
-                ? child
-                : iqFactory.createUnaryIQTree(distinctNode, child, treeCache);
+                ? Optional.empty()
+                : Optional.of(iqFactory.createDistinctNode());
     }
 
     private class Context extends InjectiveBindingLiftContext {
@@ -130,10 +135,10 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                     .map(t -> t.normalizeForOptimization(variableGenerator))
                     .orElse(newGrandChildTree);
 
-            IQTree distinctTree = createDistinctTree(iqFactory.createDistinctNode(), newChildTree,
-                    treeCache.declareAsNormalizedForOptimizationWithEffect());
-
-            return iqTreeTools.createAncestorsUnaryIQTree(state.getAncestors(), distinctTree)
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(state.getAncestors())
+                    .append(createOptionalDistinct(newChildTree), treeCache::declareAsNormalizedForOptimizationWithEffect)
+                    .build(newChildTree)
                     // Recursive (for merging top construction nodes)
                     .normalizeForOptimization(variableGenerator);
         }
