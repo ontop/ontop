@@ -9,14 +9,9 @@ import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -116,30 +111,10 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
 
     @Override
-    public void acceptVisitor(QueryNodeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ExtensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
-
-    @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
         ImmutableMap<Integer, VariableOrGroundTerm> newArguments = substitutionFactory.onVariableOrGroundTerms().applyToTerms(descendingSubstitution, argumentMap);
         return iqFactory.createExtensionalDataNode(relationDefinition, newArguments);
-    }
-
-    @Override
-    public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        return transformer.transformExtensionalData(this);
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
-        return transformer.transformExtensionalData(this, context);
     }
 
     @Override
@@ -164,11 +139,6 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
     private Optional<? extends VariableOrGroundTerm> getArgument(Attribute a) {
         return Optional.ofNullable(argumentMap.get(a.getIndex() - 1));
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor) {
-        return visitor.visitExtensionalData(this);
     }
 
     /**
@@ -359,7 +329,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
             return renamedTree.getPossibleVariableDefinitions();
         }
-        return ImmutableSet.of();
+        return ImmutableSet.of(substitutionFactory.getSubstitution());
     }
 
     public static IQTree merge(ExtensionalDataNode dataNode, IQ definition, VariableGenerator variableGenerator,
@@ -387,6 +357,4 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
                         substitutedDefinition)
                 .normalizeForOptimization(variableGenerator);
     }
-
-
 }

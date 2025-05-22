@@ -8,14 +8,9 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -280,8 +275,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 .map(c -> cardinalityMultimap.containsKey(c)
                         ? c
                         : iqFactory.createUnaryIQTree(
-                        iqFactory.createSliceNode(0, limit - sum),
-                        c))
+                        iqFactory.createSliceNode(0, limit - sum), c))
                 .collect(ImmutableCollectors.toList());
 
         IQTree newUnionTree = iqFactory.createNaryIQTree(childRoot, newChildren)
@@ -372,21 +366,6 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
-    public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
-        return transformer.transformSlice(tree, this, child);
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
-        return transformer.transformSlice(tree, this, child, context);
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
-        return visitor.visitSlice(this, child);
-    }
-
-    @Override
     public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
     }
 
@@ -415,17 +394,6 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     @Override
     public ImmutableSet<Variable> inferStrictDependents(UnaryIQTree tree, IQTree child) {
         return child.inferStrictDependents();
-    }
-
-    @Override
-    public void acceptVisitor(QueryNodeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public SliceNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
     }
 
     @Override

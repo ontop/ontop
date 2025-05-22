@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -29,11 +28,11 @@ public interface IQTree {
      */
     ImmutableSet<Variable> getVariables();
 
-    IQTree acceptTransformer(IQTreeVisitingTransformer transformer);
-
-    <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context);
-
     <T> T acceptVisitor(IQVisitor<T> visitor);
+
+    default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
+        return acceptVisitor(transformer);
+    }
 
     IQTree normalizeForOptimization(VariableGenerator variableGenerator);
 
@@ -124,19 +123,27 @@ public interface IQTree {
     IQTree replaceSubTree(IQTree subTreeToReplace, IQTree newSubTree);
 
     /**
-     * Returns a set of substitutions that define the projected variables when they are constructed.
+     * Returns a set of substitutions that define how the projected variables are constructed.
+     * If a variable is sometimes not built (i.e. it is "free"), it will not appear in some substitutions.
      *
-     * Guarantee: each tuple in the result set having constructed values matches at least one of these substitutions.
+     * Guarantee: if variable appearing in all the substitutions, its values will always come from one the expressions
+     * found in the substitution. Hence, its value is constrained.
      *
-     * It is advised to call this method on a normalized IQ so as to reduce the number of possible substitutions
+     * It is advised to call this method on a normalized IQ to reduce the number of possible substitutions
      * (normalization drops unsatisfiable substitutions).
      *
      *
-     * The intended usage of this method it to determine the definition of a variable from the returned substitution.
-     * Therefore this method is robust to simple variable renaming and to multiple complex substitutions.
+     * The first intended usage of this method it to determine the definition of a variable from the returned substitution.
+     * Therefore, this method is robust to simple variable renaming and to multiple complex substitutions.
      * E.g. if [x/x2], [x2/x3] and [x3/URI("http://myURI{}", x4] are three substitutions found in that order in a same
      * branch,
-     * then x/URI("http://myURI{}", x4) will be the only output substitution for that branch.
+     * then x/RDF(http://myURI{}(x4), IRI) will be the only output substitution for that branch.
+     *
+     * It can also be used in the context of partial unfolding, where only some intensional data nodes have been unfolded,
+     * not the others. In this context, it is common to have some SPARQL variables that remain free
+     * (e.g. if a UNION is present).
+     *
+     * Property: after complete unfolding of the mapping, all the SPARQL variables will be constructed (i.e. not free).
      *
      */
     ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions();

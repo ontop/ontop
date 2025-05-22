@@ -5,19 +5,14 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -43,16 +38,6 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
         this.substitutionFactory = substitutionFactory;
     }
 
-    @Override
-    public void acceptVisitor(QueryNodeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public EmptyNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
@@ -67,21 +52,6 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     @Override
     public ImmutableSet<Variable> getVariables() {
         return projectedVariables;
-    }
-
-    @Override
-    public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        return transformer.transformEmpty(this);
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
-        return transformer.transformEmpty(this, context);
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor) {
-        return visitor.visitEmpty(this);
     }
 
     @Override

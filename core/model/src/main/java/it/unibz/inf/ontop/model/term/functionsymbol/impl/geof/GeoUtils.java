@@ -129,9 +129,7 @@ public class GeoUtils {
                 // Use GeomFromText with one argument to convert text into geometry
                 .map(termFactory::getDBSTGeomFromText)
                 // Set SRID
-                .map(v -> termFactory.getDBSTSetSRID(v, newEPSG))
-                // Convert to text
-                .map(termFactory::getDBAsText);
+                .map(v -> termFactory.getDBSTSetSRID(v, newEPSG));
     }
 
     /**

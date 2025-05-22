@@ -18,16 +18,9 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 
 	/* List of UNSUPPORTED QUERIES */
 
-	private static final String aggregatesManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/aggregates/manifest#";
-	private static final String bindManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/bind/manifest#";
-	private static final String bindingsManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/bindings/manifest#";
 	private static final String functionsManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/functions/manifest#";
 	private static final String constructManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/construct/manifest#";
-	private static final String csvTscResManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/csv-tsv-res/manifest#";
-	private static final String groupingManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/grouping/manifest#";
-	private static final String negationManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/negation/manifest#";
 	private static final String existsManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/exists/manifest#";
-	private static final String projectExpressionManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/project-expression/manifest#";
 	private static final String propertyPathManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/property-path/manifest#";
 	private static final String subqueryManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/subquery/manifest#";
 	private static final String serviceManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/service/manifest#";
@@ -61,22 +54,9 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			// TODO: throw an exception for the FROM clause
 			constructManifest + "constructwhere04", // CONSTRUCT FROM <data.ttl> not supported by the SPARQL-to-IQ translation
 
-			/* NEGATION */
-            negationManifest + "subset-by-exclusion-nex-1", // EXISTS not supported by the SPARQL-to-IQ translation
-			negationManifest + "temporal-proximity-by-exclusion-nex-1", // EXISTS not supported by the SPARQL-to-IQ translation
-			negationManifest + "subset-01", // EXISTS not supported by the SPARQL-to-IQ translation
-			negationManifest + "subset-02", // EXISTS not supported by the SPARQL-to-IQ translation
-			negationManifest + "set-equals-1", // EXISTS not supported by the SPARQL-to-IQ translation
-			negationManifest + "subset-03", // EXISTS not supported by the SPARQL-to-IQ translation
-			negationManifest + "exists-01", // EXISTS not supported by the SPARQL-to-IQ translation
-			negationManifest + "exists-02", // EXISTS not supported by the SPARQL-to-IQ translation
-
 			/* EXISTS */
-			existsManifest + "exists01", // EXISTS not supported by the SPARQL-to-IQ translation
-			existsManifest + "exists02", // EXISTS not supported by the SPARQL-to-IQ translation
-			existsManifest + "exists03", // EXISTS not supported by the SPARQL-to-IQ translation
-			existsManifest + "exists04", // EXISTS not supported by the SPARQL-to-IQ translation
-			existsManifest + "exists05", // EXISTS not supported by the SPARQL-to-IQ translation
+			existsManifest + "exists02", // EXISTS not supported with ground triple
+			existsManifest + "exists03", // quads are not supported by the SI
 
 			/* PROPERTY PATH */
 			propertyPathManifest + "pp02",  // ArbitraryLengthPath not supported
@@ -108,9 +88,8 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			subqueryManifest + "subquery03", // quads are not supported by the SI
 			subqueryManifest + "subquery04", // quads are not supported by the SI
 			subqueryManifest + "subquery05", // quads are not supported by the SI
-			subqueryManifest + "subquery07", // quads are not supported by the SI
+			subqueryManifest + "subquery07" // quads are not supported by the SI
 
-			subqueryManifest + "subquery10" // EXISTS not supported by the SPARQL-to-IQ translation
 	);
 
 	public MemorySPARQL11QueryTest(String testIRI, String name, String queryFileURL, String resultFileURL, Dataset dataSet,

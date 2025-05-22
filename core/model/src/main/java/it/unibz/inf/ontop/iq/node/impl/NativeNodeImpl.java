@@ -9,18 +9,12 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -74,16 +68,6 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     }
 
     @Override
-    public void acceptVisitor(QueryNodeVisitor visitor) {
-        throw new UnsupportedOperationException("Should NativeNode support visitors?");
-    }
-
-    @Override
-    public LeafIQTree acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocalVariables() {
         return variables;
     }
@@ -121,21 +105,6 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     @Override
     public ImmutableMap<Variable, QuotedID> getColumnNames() {
         return columnNames;
-    }
-
-    @Override
-    public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
-        throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor) {
-        return visitor.visitNative(this);
     }
 
     @Override

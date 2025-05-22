@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -50,11 +51,11 @@ public class MutableQueryUnfolder extends AbstractIntensionalQueryMerger {
     }
 
     @Override
-    protected QueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
+    protected AbstractQueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
         return new MutableQueryUnfoldingTransformer(coreUtilsFactory.createVariableGenerator(knownVariables), iqFactory);
     }
 
-    protected class MutableQueryUnfoldingTransformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {
+    protected class MutableQueryUnfoldingTransformer extends AbstractQueryMergingTransformer {
 
         protected MutableQueryUnfoldingTransformer(VariableGenerator variableGenerator, IntermediateQueryFactory iqFactory) {
             super(variableGenerator, iqFactory, substitutionFactory, atomFactory, transformerFactory);

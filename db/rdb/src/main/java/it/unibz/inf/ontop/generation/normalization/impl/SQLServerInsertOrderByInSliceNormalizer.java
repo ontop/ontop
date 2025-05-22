@@ -8,70 +8,72 @@ import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeExtendedTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-public class SQLServerInsertOrderByInSliceNormalizer extends DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator>
-        implements DialectExtraNormalizer {
+public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNormalizer {
 
-    private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
+    private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    protected SQLServerInsertOrderByInSliceNormalizer(IntermediateQueryFactory iqFactory, TermFactory termFactory,
-                                                      SubstitutionFactory substitutionFactory, CoreSingletons coreSingletons) {
-        super(coreSingletons);
-        this.iqFactory = iqFactory;
-        this.substitutionFactory = substitutionFactory;
-        this.termFactory = termFactory;
+    protected SQLServerInsertOrderByInSliceNormalizer(CoreSingletons coreSingletons) {
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.iqFactory = coreSingletons.getIQFactory();
     }
 
     @Override
-    public IQTree transform(IQTree tree, VariableGenerator context) {
-        return super.transform(tree, context);
+    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
+        return tree.acceptVisitor(new Transformer(variableGenerator));
     }
 
-    private boolean isOrderByPresent(IQTree child) {
-        return child.acceptVisitor(new OrderBySearcher());
-    }
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
+        private final VariableGenerator variableGenerator;
 
-    @Override
-    public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child, VariableGenerator context) {
-        if(isOrderByPresent(child)) {
+        protected Transformer(VariableGenerator variableGenerator) {
+            super(SQLServerInsertOrderByInSliceNormalizer.this.iqFactory);
+            this.variableGenerator = variableGenerator;
+        }
+
+        @Override
+        public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
+            if (isOrderByPresent(child)) {
+                return iqFactory.createUnaryIQTree(
+                        sliceNode,
+                        transform(child));
+            }
+            var topConstruct = iqFactory.createConstructionNode(tree.getVariables(), substitutionFactory.getSubstitution());
+            var sortVariable = variableGenerator.generateNewVariable("slice_sort_column");
+            var bottomConstruct = iqFactory.createConstructionNode(
+                    Sets.union(tree.getVariables(), ImmutableSet.of(sortVariable)).immutableCopy(),
+                    substitutionFactory.getSubstitution(
+                            sortVariable,
+                            termFactory.getDBConstant("", termFactory.getTypeFactory().getDBTypeFactory().getDBStringType())));
+            var orderByNode = iqFactory.createOrderByNode(ImmutableList.of(iqFactory.createOrderComparator(sortVariable, true)));
+
             return iqFactory.createUnaryIQTree(
                     sliceNode,
-                    transform(child, context)
-            );
+                    iqFactory.createUnaryIQTree(
+                            topConstruct,
+                            iqFactory.createUnaryIQTree(
+                                    orderByNode,
+                                    iqFactory.createUnaryIQTree(
+                                            bottomConstruct,
+                                            transform(child)))));
         }
-        var topConstruct = iqFactory.createConstructionNode(tree.getVariables(), substitutionFactory.getSubstitution());
-        var sortVariable = context.generateNewVariable("slice_sort_column");
-        var bottomConstruct = iqFactory.createConstructionNode(
-                Sets.union(tree.getVariables(), ImmutableSet.of(sortVariable)).immutableCopy(),
-                substitutionFactory.getSubstitution(
-                        sortVariable,
-                        termFactory.getDBConstant("", termFactory.getTypeFactory().getDBTypeFactory().getDBStringType())));
-        var orderByNode = iqFactory.createOrderByNode(ImmutableList.of(iqFactory.createOrderComparator(sortVariable, true)));
 
-        return iqFactory.createUnaryIQTree(
-                sliceNode,
-                iqFactory.createUnaryIQTree(
-                        topConstruct,
-                        iqFactory.createUnaryIQTree(
-                                orderByNode,
-                                iqFactory.createUnaryIQTree(
-                                        bottomConstruct,
-                                        transform(child, context)
-                                )
-                        )
-                )
-        );
+        private boolean isOrderByPresent(IQTree child) {
+            return child.acceptVisitor(new OrderBySearcher());
+        }
     }
+
+
 
     /**
      * Search for an ORDER BY clause in the child IQTree. Keep searching until a node is found that will cause a new sub-query.
@@ -79,102 +81,82 @@ public class SQLServerInsertOrderByInSliceNormalizer extends DefaultRecursiveIQT
     static class OrderBySearcher implements IQVisitor<Boolean> {
 
         @Override
-        public Boolean visitIntensionalData(IntensionalDataNode dataNode) {
+        public Boolean transformIntensionalData(IntensionalDataNode dataNode) {
             return false;
         }
 
         @Override
-        public Boolean visitExtensionalData(ExtensionalDataNode dataNode) {
+        public Boolean transformExtensionalData(ExtensionalDataNode dataNode) {
             return false;
         }
 
         @Override
-        public Boolean visitEmpty(EmptyNode node) {
+        public Boolean transformEmpty(EmptyNode node) {
             return false;
         }
 
         @Override
-        public Boolean visitTrue(TrueNode node) {
+        public Boolean transformTrue(TrueNode node) {
             return false;
         }
 
         @Override
-        public Boolean visitNative(NativeNode nativeNode) {
+        public Boolean transformNative(NativeNode nativeNode) {
             return false;
         }
 
         @Override
-        public Boolean visitValues(ValuesNode valuesNode) {
+        public Boolean transformValues(ValuesNode valuesNode) {
             return false;
         }
 
         @Override
-        public Boolean visitNonStandardLeafNode(LeafIQTree leafNode) {
+        public Boolean transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
             return false;
         }
 
         @Override
-        public Boolean visitConstruction(ConstructionNode rootNode, IQTree child) {
+        public Boolean transformAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child) {
             return false;
         }
 
         @Override
-        public Boolean visitAggregation(AggregationNode aggregationNode, IQTree child) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitFilter(FilterNode rootNode, IQTree child) {
+        public Boolean transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
             return child.acceptVisitor(this);
         }
 
         @Override
-        public Boolean visitFlatten(FlattenNode rootNode, IQTree child) {
+        public Boolean transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child) {
             return false;
         }
 
         @Override
-        public Boolean visitDistinct(DistinctNode rootNode, IQTree child) {
+        public Boolean transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
             return child.acceptVisitor(this);
         }
 
         @Override
-        public Boolean visitSlice(SliceNode sliceNode, IQTree child) {
+        public Boolean transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
             return false;
         }
 
         @Override
-        public Boolean visitOrderBy(OrderByNode rootNode, IQTree child) {
+        public Boolean transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
             return true;
         }
 
         @Override
-        public Boolean visitNonStandardUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
+        public Boolean transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             return false;
         }
 
         @Override
-        public Boolean visitLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        public Boolean transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             return false;
         }
 
         @Override
-        public Boolean visitNonStandardBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitInnerJoin(InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitUnion(UnionNode rootNode, ImmutableList<IQTree> children) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitNonStandardNaryNode(NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+        public Boolean transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
             return false;
         }
     }

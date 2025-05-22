@@ -1,6 +1,9 @@
 package it.unibz.inf.ontop.iq.node;
 
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 
 import java.util.Optional;
 
@@ -18,4 +21,9 @@ public interface SliceNode extends QueryModifierNode {
      * Length of the slice
      */
     Optional<Long> getLimit();
+
+    @Override
+    default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
+        return visitor.transformSlice(tree, this, child);
+    }
 }

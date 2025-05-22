@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class JoinOrFilterVariableNullabilityTools {
 
@@ -38,25 +39,23 @@ public class JoinOrFilterVariableNullabilityTools {
 
     public VariableNullability getVariableNullability(ImmutableList<IQTree> children,
                                                       Optional<ImmutableExpression> joiningCondition) {
+        Map<Variable, Long> variableOccurrencesCount = children.stream()
+                .map(IQTree::getVariables)
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(v -> v, Collectors.counting()));
 
-        ImmutableMap<Variable, Collection<IQTree>> variableProvenanceMap = children.stream()
-                .flatMap(c -> c.getVariables().stream()
-                        .map(v -> Maps.immutableEntry(v, c)))
-                .collect(ImmutableCollectors.toMultimap())
-                .asMap();
-
-        ImmutableSet<Variable> coOccuringVariables = variableProvenanceMap.entrySet().stream()
-                .filter(e -> e.getValue().size() > 1)
+        ImmutableSet<Variable> coOccurringVariables = variableOccurrencesCount.entrySet().stream()
+                .filter(e -> e.getValue() > 1)
                 .map(Map.Entry::getKey)
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableSet<ImmutableSet<Variable>> nullableGroups = children.stream()
                 .flatMap(c -> c.getVariableNullability().getNullableGroups().stream())
                 .filter(g -> g.stream()
-                        .noneMatch(coOccuringVariables::contains))
+                        .noneMatch(coOccurringVariables::contains))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSet<Variable> scope =  iqTreeTools.getChildrenVariables(children);
+        ImmutableSet<Variable> scope = iqTreeTools.getChildrenVariables(children);
 
         return joiningCondition
                 .map(e -> updateWithFilter(e, nullableGroups, scope))

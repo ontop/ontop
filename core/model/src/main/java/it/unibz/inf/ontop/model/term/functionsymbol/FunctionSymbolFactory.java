@@ -75,6 +75,11 @@ public interface FunctionSymbolFactory {
     SPARQLFunctionSymbol getIRIFunctionSymbol();
 
     /**
+     * For internal use only!
+     */
+    SPARQLFunctionSymbol getBNodeTolerantSPARQLStrFunctionSymbol();
+
+    /**
      * Special function capturing the EBV logic
      * https://www.w3.org/TR/sparql11-query/#ebv
      *

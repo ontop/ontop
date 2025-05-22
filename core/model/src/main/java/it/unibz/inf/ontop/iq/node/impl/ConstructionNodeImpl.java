@@ -9,18 +9,13 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecomposition;
 import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.model.term.*;
@@ -119,12 +114,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    public ConstructionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
-
-    @Override
     public ImmutableSet<Variable> getChildVariables() {
         return childVariables;
     }
@@ -175,21 +164,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
 
     @Override
-    public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
-        return transformer.transformConstruction(tree,this, child);
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
-        return transformer.transformConstruction(tree,this, child, context);
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
-        return visitor.visitConstruction(this, child);
-    }
-
-    @Override
     public void validateNode(IQTree child) throws InvalidQueryNodeException, InvalidIntermediateQueryException {
         validateNode();
 
@@ -209,7 +183,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         if (childDefs.isEmpty()) {
             Substitution<NonVariableTerm> def = substitution.restrictRangeTo(NonVariableTerm.class);
             return def.isEmpty()
-                    ? ImmutableSet.of()
+                    ? ImmutableSet.of(substitutionFactory.getSubstitution())
                     : ImmutableSet.of(def);
         }
 
@@ -494,11 +468,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     @Override
     public int hashCode() {
         return Objects.hash(projectedVariables, substitution);
-    }
-
-    @Override
-    public void acceptVisitor(QueryNodeVisitor visitor) {
-        visitor.visit(this);
     }
 
     @Override

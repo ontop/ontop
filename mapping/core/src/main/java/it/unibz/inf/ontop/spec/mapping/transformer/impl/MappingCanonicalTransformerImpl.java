@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -146,7 +147,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         }
 
         @Override
-        protected AbstractIntensionalQueryMerger.QueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
+        protected AbstractQueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
             VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(knownVariables);
             return new QueryMergingTransformer(variableGenerator);
         }
@@ -155,7 +156,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
             return definition.getTree().getKnownVariables();
         }
 
-        private class QueryMergingTransformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {
+        private class QueryMergingTransformer extends AbstractQueryMergingTransformer {
 
             QueryMergingTransformer(VariableGenerator variableGenerator) {
                 super(variableGenerator, MappingCanonicalTransformerImpl.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
