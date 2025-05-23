@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class NaryIQTreeTools {
@@ -78,6 +79,14 @@ public class NaryIQTreeTools {
                     ? new UnionDecomposition((UnionNode)tree.getRootNode(), ((NaryIQTree)tree))
                     : new UnionDecomposition();
         }
+
+        public static UnionDecomposition withAChildWithLiftableDefinition(IQTree tree, Variable variable) {
+            UnionDecomposition union = of(tree);
+            return union.isPresent()
+                    && union.getNode().hasAChildWithLiftableDefinition(variable, union.getChildren())
+                ? union
+                : new UnionDecomposition();
+        }
     }
 
     public static ImmutableSet<Variable> projectedVariables(ImmutableList<IQTree> children) {
@@ -105,5 +114,13 @@ public class NaryIQTreeTools {
         return variableOccurrencesCount.entrySet().stream()
                 .filter(e -> e.getValue() > 1)
                 .map(Map.Entry::getKey);
+    }
+
+    public static ImmutableList<IQTree> replaceChild(ImmutableList<IQTree> children, int index, IQTree newChild) {
+        return IntStream.range(0, children.size())
+                .mapToObj(i -> i == index
+                        ? newChild
+                        : children.get(i))
+                .collect(ImmutableCollectors.toList());
     }
 }

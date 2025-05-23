@@ -5,7 +5,6 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
 import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
@@ -178,10 +177,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                                               VariableGenerator variableGenerator) {
         if (leftChild.getVariables().contains(variable)) {
             IQTree liftedLeftChild = leftChild.liftIncompatibleDefinitions(variable, variableGenerator);
-            var union = NaryIQTreeTools.UnionDecomposition.of(liftedLeftChild);
-            if (union.isPresent()
-                    && union.getNode().hasAChildWithLiftableDefinition(variable, union.getChildren())) {
-
+            var union = NaryIQTreeTools.UnionDecomposition.withAChildWithLiftableDefinition(liftedLeftChild, variable);
+            if (union.isPresent()) {
                 return iqTreeTools.createUnionTree(
                         projectedVariables(leftChild, rightChild).immutableCopy(),
                         union.getChildren().stream()

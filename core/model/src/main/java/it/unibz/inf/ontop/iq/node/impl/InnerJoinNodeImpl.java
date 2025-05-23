@@ -29,6 +29,8 @@ import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.NaryIQTreeTools.replaceChild;
+
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
@@ -214,14 +216,15 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .mapToObj(i -> Maps.immutableEntry(i, children.get(i)))
                 .filter(e -> e.getValue().isConstructed(variable))
                 // index -> new child
-                .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().liftIncompatibleDefinitions(variable, variableGenerator)))
-                .filter(e -> Optional.of(NaryIQTreeTools.UnionDecomposition.of(e.getValue()))
-                        .filter(IQTreeTools.IQTreeDecomposition::isPresent)
-                        .map(d -> d.getNode().hasAChildWithLiftableDefinition(variable, d.getChildren()))
-                        .filter(Boolean::booleanValue)
-                        .isPresent())
+                .map(e -> Maps.immutableEntry(
+                        e.getKey(),
+                        NaryIQTreeTools.UnionDecomposition.withAChildWithLiftableDefinition(
+                                e.getValue().liftIncompatibleDefinitions(variable, variableGenerator),
+                                variable)))
+                .filter(e -> e.getValue().isPresent())
                 .findFirst()
-                .map(e -> liftUnionChild(e.getKey(), (NaryIQTree) e.getValue(), children, variableGenerator))
+                .map(e -> liftUnionChild(e.getKey(), e.getValue(), children)
+                        .normalizeForOptimization(variableGenerator))
                 .orElseGet(() -> iqFactory.createNaryIQTree(this, children));
     }
 
@@ -446,24 +449,14 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
 
-    private IQTree liftUnionChild(int childIndex, NaryIQTree newUnionChild, ImmutableList<IQTree> initialChildren,
-                                  VariableGenerator variableGenerator) {
+    private IQTree liftUnionChild(int childIndex, NaryIQTreeTools.UnionDecomposition union, ImmutableList<IQTree> initialChildren) {
 
         return iqTreeTools.createUnionTree(
                         NaryIQTreeTools.projectedVariables(initialChildren),
-                        newUnionChild.getChildren().stream()
-                            .map(unionGrandChild -> createJoinSubtree(childIndex, unionGrandChild, initialChildren))
-                            .collect(ImmutableCollectors.toList()))
-                .normalizeForOptimization(variableGenerator);
-    }
-
-    private IQTree createJoinSubtree(int childIndex, IQTree unionGrandChild, ImmutableList<IQTree> initialChildren) {
-        return iqFactory.createNaryIQTree(this,
-                IntStream.range(0, initialChildren.size())
-                        .mapToObj(i -> i == childIndex
-                                ? unionGrandChild
-                                : initialChildren.get(i))
-                        .collect(ImmutableCollectors.toList()));
+                        union.getChildren().stream()
+                            .map(c -> iqFactory.createNaryIQTree(this,
+                                    replaceChild(initialChildren, childIndex, c)))
+                            .collect(ImmutableCollectors.toList()));
     }
 
 }

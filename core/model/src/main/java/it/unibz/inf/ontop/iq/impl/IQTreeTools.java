@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
@@ -23,7 +22,6 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -232,10 +230,6 @@ public class IQTreeTools {
                 .orElse(expression);
     }
 
-    public ImmutableList<IQTree> createUnaryOperatorChildren(UnaryOperatorNode node, IQTree child) {
-         return createUnaryOperatorChildren(node, child.getChildren());
-    }
-
     public ImmutableList<IQTree> createUnaryOperatorChildren(UnaryOperatorNode node, ImmutableList<IQTree> children) {
         return children.stream()
                 .<IQTree>map(c -> iqFactory.createUnaryIQTree(node, c))
@@ -384,14 +378,10 @@ public class IQTreeTools {
 
     public IQTree liftIncompatibleDefinitions(UnaryOperatorNode node, Variable variable, IQTree child, VariableGenerator variableGenerator) {
         IQTree newChild = child.liftIncompatibleDefinitions(variable, variableGenerator);
-
-        // Lift the union above the node
-        var union = NaryIQTreeTools.UnionDecomposition.of(newChild);
+        var union = NaryIQTreeTools.UnionDecomposition.withAChildWithLiftableDefinition(newChild, variable);
         if (union.isPresent()) {
-            if (union.getNode().hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
-                ImmutableList<IQTree> newChildren = createUnaryOperatorChildren(node, newChild);
-                return iqFactory.createNaryIQTree(union.getNode(), newChildren);
-            }
+            ImmutableList<IQTree> newChildren = createUnaryOperatorChildren(node, union.getChildren());
+            return iqFactory.createNaryIQTree(union.getNode(), newChildren);
         }
         return iqFactory.createUnaryIQTree(node, newChild);
     }
