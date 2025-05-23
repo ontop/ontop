@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
@@ -15,7 +16,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 
 
 public class MappingDistinctTransformerImpl implements MappingDistinctTransformer {
@@ -51,8 +51,8 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
         var distinct = UnaryIQTreeDecomposition.of(topConstruction.getTail(), DistinctNode.class);
 
         Optional<IQTree> distinctUnionTree = Optional.of(distinct.getTail())
-                .map(t -> NaryIQTreeDecomposition.of(t, UnionNode.class))
-                .filter(NaryIQTreeDecomposition::isPresent)
+                .map(NaryIQTreeTools.UnionDecomposition::of)
+                .filter(NaryIQTreeTools.UnionDecomposition::isPresent)
                 .map(t -> t.getNode().makeDistinct(t.getChildren()));
 
         IQTree newTree = distinctUnionTree

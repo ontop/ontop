@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
@@ -26,7 +27,6 @@ import java.util.*;
 import java.util.function.BooleanSupplier;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 
 
 public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
@@ -167,7 +167,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                                           IQTreeCache treeCache, BooleanSupplier hasChildChanged) {
         QueryNode newChildRoot = newChild.getRootNode();
             // Only triggered if a child with a known cardinality is present directly under the UNION
-        var union = NaryIQTreeDecomposition.of(newChild, UnionNode.class);
+        var union = NaryIQTreeTools.UnionDecomposition.of(newChild);
         if (union.isPresent()) {
             Optional<IQTree> newTree = union.getChildren().stream().anyMatch(c -> getKnownCardinality(c).isPresent())
                     ? simplifyUnionWithChildrenOfKnownCardinality(union.getNode(), union.getTree(), limit, variableGenerator)
@@ -175,7 +175,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
             if (newTree.isPresent())
                 return newTree.get();
         }
-        var innerJoin = NaryIQTreeDecomposition.of(newChild, InnerJoinNode.class);
+        var innerJoin = NaryIQTreeTools.InnerJoinDecomposition.of(newChild);
         // TODO: consider a more general technique (distinct removal in sub-tree)
         if (innerJoin.isPresent() && limit <= 1) {
             var joinChildren = innerJoin.getChildren();
@@ -198,7 +198,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 return normalizeForOptimization(distinct.getChild(), variableGenerator, treeCache,
                         () -> true);
 
-            var innerUnion = NaryIQTreeDecomposition.of(distinct.getChild(), UnionNode.class);
+            var innerUnion = NaryIQTreeTools.UnionDecomposition.of(distinct.getChild());
             if (innerUnion.isPresent()
                     // If any subtree Ti is distinct we proceed with the optimization
                     && innerUnion.getChildren().stream().anyMatch(IQTree::isDistinct)) {

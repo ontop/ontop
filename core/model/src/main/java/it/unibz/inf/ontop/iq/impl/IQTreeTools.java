@@ -119,12 +119,6 @@ public class IQTreeTools {
     }
 
 
-    public ImmutableSet<Variable> getChildrenVariables(ImmutableList<IQTree> children) {
-         return children.stream()
-                .flatMap(c -> c.getVariables().stream())
-                .collect(ImmutableCollectors.toSet());
-    }
-
     public ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> groupingVariables,
                                                                Substitution<ImmutableFunctionalTerm> substitution) {
         return Sets.union(groupingVariables, substitution.getRangeVariables()).immutableCopy();
@@ -381,34 +375,6 @@ public class IQTreeTools {
         }
     }
 
-    public static class NaryIQTreeDecomposition<T extends NaryOperatorNode> extends IQTreeDecomposition<T, NaryIQTree> {
-        private final ImmutableList<IQTree> children;
-
-        private NaryIQTreeDecomposition(T node, NaryIQTree tree) {
-            super(node, tree);
-            this.children = tree.getChildren();
-        }
-
-        private NaryIQTreeDecomposition() {
-            super(null, null);
-            this.children = null;
-        }
-
-        @Nonnull
-        public ImmutableList<IQTree> getChildren() {
-            return Objects.requireNonNull(children);
-        }
-
-        public <U> Optional<U> map(BiFunction<? super T, ImmutableList<IQTree>, ? extends U> function) {
-            return Optional.ofNullable(node).map(n -> function.apply(n, children));
-        }
-
-        public static <T extends NaryOperatorNode> NaryIQTreeDecomposition<T> of(IQTree tree, Class<T> nodeClass) {
-            return nodeClass.isInstance(tree.getRootNode())
-                    ? new NaryIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((NaryIQTree)tree))
-                    : new NaryIQTreeDecomposition<>();
-        }
-    }
 
 
     public static <T extends QueryNode> boolean contains(IQTree tree, Class<T> nodeClass) {
@@ -420,7 +386,7 @@ public class IQTreeTools {
         IQTree newChild = child.liftIncompatibleDefinitions(variable, variableGenerator);
 
         // Lift the union above the node
-        var union = NaryIQTreeDecomposition.of(newChild, UnionNode.class);
+        var union = NaryIQTreeTools.UnionDecomposition.of(newChild);
         if (union.isPresent()) {
             if (union.getNode().hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
                 ImmutableList<IQTree> newChildren = createUnaryOperatorChildren(node, newChild);
@@ -435,29 +401,5 @@ public class IQTreeTools {
     public Substitution<NonVariableTerm> getEmptyNonVariableSubstitution() {
         return substitutionFactory.getSubstitution();
     }
-
-
-
-    public static Stream<Variable> getCoOccurringVariables(ImmutableList<IQTree> children) {
-        /* quadratic time,
-         return IntStream.range(0, children.size() - 1)
-                .boxed()
-                .flatMap(i -> children.get(i).getVariables().stream()
-                        .filter(v1 -> IntStream.range(i + 1, children.size())
-                                .anyMatch(j -> children.get(j).getVariables().stream().
-                                        anyMatch(v1::equals))));
-         */
-
-        // grouping should be more efficient - n log n
-        Map<Variable, Long> variableOccurrencesCount = children.stream()
-                .map(IQTree::getVariables)
-                .flatMap(Collection::stream)
-                .collect(Collectors.groupingBy(v -> v, Collectors.counting()));
-
-        return variableOccurrencesCount.entrySet().stream()
-                .filter(e -> e.getValue() > 1)
-                .map(Map.Entry::getKey);
-    }
-
 
 }

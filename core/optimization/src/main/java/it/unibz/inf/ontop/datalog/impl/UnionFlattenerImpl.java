@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -18,7 +19,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 
 /**
  * Lifts unions above projections, until a fixed point is reached.
@@ -52,7 +52,7 @@ public class UnionFlattenerImpl implements UnionFlattener {
             IQTree transformedChild = transformChild(child);
 
             // if the child is a union, lift it
-            var union = NaryIQTreeDecomposition.of(transformedChild, UnionNode.class);
+            var union = NaryIQTreeTools.UnionDecomposition.of(transformedChild);
             if (union.isPresent()) {
                 return iqTreeTools.createUnionTree(rootCn.getVariables(),
                             iqTreeTools.createUnaryOperatorChildren(rootCn, union.getChildren()));

@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 
@@ -12,7 +13,6 @@ import javax.inject.Singleton;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.LeftJoinDecomposition;
 
 
@@ -35,7 +35,7 @@ public class RequiredExtensionalDataNodeExtractor {
         if (tree instanceof ExtensionalDataNode)
             return Stream.of((ExtensionalDataNode) tree);
 
-        var join = NaryIQTreeDecomposition.of(tree, InnerJoinNode.class);
+        var join = NaryIQTreeTools.InnerJoinDecomposition.of(tree);
         if (join.isPresent())
             return join.getChildren().stream()
                     .flatMap(t -> extractSomeRequiredNodes(t, fromLeft));

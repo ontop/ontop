@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
@@ -28,7 +29,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
@@ -156,7 +156,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         IQTree newChild = child.liftIncompatibleDefinitions(variable, variableGenerator);
 
         // Lift the union above the construction node (note the different union node compared to IQTreeTools)
-        var union = NaryIQTreeDecomposition.of(newChild, UnionNode.class);
+        var union = NaryIQTreeTools.UnionDecomposition.of(newChild);
         if (union.isPresent()
                 && union.getNode().hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
             ImmutableList<IQTree> newChildren = iqTreeTools.createUnaryOperatorChildren(this, newChild);

@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.AggregationSplitter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -91,7 +92,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
             var distinct = UnaryIQTreeDecomposition.of(construction.getTail(), DistinctNode.class);
             var subConstruction = UnaryIQTreeDecomposition.of(distinct.getTail(), ConstructionNode.class);
 
-            var union = IQTreeTools.NaryIQTreeDecomposition.of(subConstruction.getTail(), UnionNode.class);
+            var union = NaryIQTreeTools.UnionDecomposition.of(subConstruction.getTail());
             if (!union.isPresent())
                 // TODO: log a message, as we are in an unexpected situation
                 return Optional.empty();

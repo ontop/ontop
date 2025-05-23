@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
@@ -130,7 +131,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                               Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
                                               VariableGenerator variableGenerator) {
 
-        DownPropagation downPropagation = new DownPropagation(constraint, descendingSubstitution, iqTreeTools.getChildrenVariables(children));
+        DownPropagation downPropagation = new DownPropagation(constraint, descendingSubstitution, NaryIQTreeTools.projectedVariables(children));
 
         var unoptimizedExpression = downPropagation.applySubstitution(getOptionalFilterCondition());
 
@@ -214,8 +215,9 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .filter(e -> e.getValue().isConstructed(variable))
                 // index -> new child
                 .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().liftIncompatibleDefinitions(variable, variableGenerator)))
-                .filter(e -> IQTreeTools.NaryIQTreeDecomposition.of(e.getValue(), UnionNode.class)
-                        .map((u, c) -> u.hasAChildWithLiftableDefinition(variable, c))
+                .filter(e -> Optional.of(NaryIQTreeTools.UnionDecomposition.of(e.getValue()))
+                        .filter(IQTreeTools.IQTreeDecomposition::isPresent)
+                        .map(d -> d.getNode().hasAChildWithLiftableDefinition(variable, d.getChildren()))
                         .filter(Boolean::booleanValue)
                         .isPresent())
                 .findFirst()
@@ -407,7 +409,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children,
                                           VariableGenerator variableGenerator) {
 
-        DownPropagation downPropagation = new DownPropagation(Optional.of(constraint), iqTreeTools.getChildrenVariables(children));
+        DownPropagation downPropagation = new DownPropagation(Optional.of(constraint), NaryIQTreeTools.projectedVariables(children));
 
         VariableNullability extendedChildrenVariableNullability = downPropagation.extendVariableNullability(variableNullabilityTools.getChildrenVariableNullability(children));
 
@@ -448,10 +450,10 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                   VariableGenerator variableGenerator) {
 
         return iqTreeTools.createUnionTree(
-                iqTreeTools.getChildrenVariables(initialChildren),
-                newUnionChild.getChildren().stream()
-                        .map(unionGrandChild -> createJoinSubtree(childIndex, unionGrandChild, initialChildren))
-                        .collect(ImmutableCollectors.toList()))
+                        NaryIQTreeTools.projectedVariables(initialChildren),
+                        newUnionChild.getChildren().stream()
+                            .map(unionGrandChild -> createJoinSubtree(childIndex, unionGrandChild, initialChildren))
+                            .collect(ImmutableCollectors.toList()))
                 .normalizeForOptimization(variableGenerator);
     }
 

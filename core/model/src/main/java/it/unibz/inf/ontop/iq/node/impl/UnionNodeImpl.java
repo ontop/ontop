@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -88,7 +89,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .map(v -> computeNullableGroup(v, preselectedGroupMap, variableNullabilities))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSet<Variable> scope = iqTreeTools.getChildrenVariables(children);
+        ImmutableSet<Variable> scope = NaryIQTreeTools.projectedVariables(children);
         return coreUtilsFactory.createVariableNullability(nullableGroups, scope);
     }
 
@@ -771,7 +772,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     private IQTree tryToMergeSomeChildrenInAValuesNode(IQTree tree, VariableGenerator variableGenerator, IQTreeCache treeCache,
                                                        boolean isRoot) {
-        var union = IQTreeTools.NaryIQTreeDecomposition.of(tree, UnionNode.class);
+        var union = NaryIQTreeTools.UnionDecomposition.of(tree);
         if (!union.isPresent())
             return tree;
 

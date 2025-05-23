@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
@@ -28,8 +29,6 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 
 /**
  * When an UNION appears as a child of an inner join, looks for other siblings that could be "pushed under the union".
@@ -147,7 +146,7 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
          */
         protected Optional<Map.Entry<NaryIQTree, ImmutableList<Integer>>> extractPushableSiblings(IQTree unionTree,
                                                                                                   ImmutableList<IQTree> children) {
-            var union = NaryIQTreeDecomposition.of(unionTree, UnionNode.class);
+            var union = NaryIQTreeTools.UnionDecomposition.of(unionTree);
             if (!union.isPresent())
                 return Optional.empty();
 

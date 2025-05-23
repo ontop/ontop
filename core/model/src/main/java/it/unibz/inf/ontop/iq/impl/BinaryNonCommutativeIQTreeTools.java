@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -57,15 +56,6 @@ public class BinaryNonCommutativeIQTreeTools {
         }
 
 
-        public <U> Optional<U> map(TriFunction<? super LeftJoinNode, IQTree, IQTree, ? extends U> function) {
-            return Optional.ofNullable(node).map(n -> function.apply(n, leftChild, rightChild));
-        }
-
-        @FunctionalInterface
-        public interface TriFunction<T1, T2, T3, R> {
-            R apply(T1 t1, T2 t2, T3 t3);
-        }
-
         public ImmutableSet<Variable> commonVariables() {
             return BinaryNonCommutativeIQTreeTools.commonVariables(leftChild, rightChild).immutableCopy();
         }
@@ -91,8 +81,9 @@ public class BinaryNonCommutativeIQTreeTools {
          * unique constraint on the right side
          */
         public boolean tolerateLJConditionLifting() {
-            return node.getOptionalFilterCondition().isEmpty() || rightChild.inferUniqueConstraints().stream()
-                    .anyMatch(uc -> leftChild.getVariables().containsAll(uc));
+            return joinCondition().isEmpty()
+                    || rightChild.inferUniqueConstraints().stream()
+                        .anyMatch(uc -> leftChild.getVariables().containsAll(uc));
         }
     }
 
@@ -107,6 +98,4 @@ public class BinaryNonCommutativeIQTreeTools {
     public static Sets.SetView<Variable> commonVariables(IQTree leftChild, IQTree rightChild) {
         return Sets.intersection(leftChild.getVariables(), rightChild.getVariables());
     }
-
-
 }

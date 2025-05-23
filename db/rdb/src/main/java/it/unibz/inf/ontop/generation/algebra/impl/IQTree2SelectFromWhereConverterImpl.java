@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -23,7 +24,6 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 
 public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhereConverter {
 
@@ -84,7 +84,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
          */
         Optional<ImmutableExpression> whereExpression = filterNode
                 .map(JoinOrFilterNode::getOptionalFilterCondition)
-                .orElseGet(() -> NaryIQTreeDecomposition.of(childTree, InnerJoinNode.class)
+                .orElseGet(() -> NaryIQTreeTools.InnerJoinDecomposition.of(childTree)
                         .getOptionalNode()
                         .flatMap(JoinOrFilterNode::getOptionalFilterCondition));
 
@@ -127,7 +127,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
      *
      */
     private SQLExpression convertIntoFromExpression(IQTree tree) {
-        var join = NaryIQTreeDecomposition.of(tree, InnerJoinNode.class);
+        var join = NaryIQTreeTools.InnerJoinDecomposition.of(tree);
         if (join.isPresent()) {
             // Removes the joining condition
             return convertIntoOrdinaryExpression(
@@ -250,12 +250,12 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
     }
 
     private SQLExpression getSubExpressionOfLeftJoinExpression(IQTree tree) {
-        var join = NaryIQTreeDecomposition.of(tree, InnerJoinNode.class);
+        var join = NaryIQTreeTools.InnerJoinDecomposition.of(tree);
         if (join.isPresent()) {
             ImmutableList<IQTree> children = join.getChildren();
             int arity = children.size();
 
-            Optional<ImmutableExpression> filterCondition = join.getNode().getOptionalFilterCondition();
+            Optional<ImmutableExpression> joinCondition = join.joinCondition();
 
             return IntStream.range(1, arity)
                     .boxed()
@@ -263,7 +263,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                             (e, i) -> sqlAlgebraFactory.createSQLInnerJoinExpression(
                                     e,
                                     convertIntoOrdinaryExpression(children.get(i)),
-                                    filterCondition
+                                    joinCondition
                                             // We only consider the joining condition when reaching the ultimate child
                                             .filter(c -> i == (arity - 1))),
                             (e1, e2) -> { throw new MinorOntopInternalBugException("Unexpected");});

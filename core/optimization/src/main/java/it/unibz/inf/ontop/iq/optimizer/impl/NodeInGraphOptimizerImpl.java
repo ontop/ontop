@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.NodeInGraphOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -23,7 +24,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 
 
 /**
@@ -101,7 +101,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
         }
 
         private Optional<Map.Entry<NodeInGraphContext, IQTree>> extractNodeInGraphContextsFromUnionNode(IQTree unionTree) {
-            return NaryIQTreeDecomposition.of(unionTree, UnionNode.class)
+            return NaryIQTreeTools.UnionDecomposition.of(unionTree)
                     .getOptionalNode()
                     .flatMap(n -> unionTree.getChildren().stream()
                             .flatMap(t -> extractContext(t)
@@ -230,7 +230,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             var newProjectedVariables = Sets.union(child.getVariables(), pushedDataAtom.getVariables())
                     .immutableCopy();
 
-            var union = NaryIQTreeDecomposition.of(child, UnionNode.class);
+            var union = NaryIQTreeTools.UnionDecomposition.of(child);
             if (!union.isPresent())
                 throw new MinorOntopInternalBugException("Was expecting the child to be a union node");
 

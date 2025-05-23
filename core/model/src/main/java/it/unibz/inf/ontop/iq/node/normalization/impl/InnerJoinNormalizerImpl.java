@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
@@ -80,7 +81,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             this.initialChildren = initialChildren;
             this.variableGenerator = variableGenerator;
             this.treeCache = treeCache;
-            this.projectedVariables = iqTreeTools.getChildrenVariables(initialChildren);
+            this.projectedVariables = NaryIQTreeTools.projectedVariables(initialChildren);
         }
 
         IQTree normalize() {
@@ -202,7 +203,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                             variableGenerator,
                             variableNullabilityTools.getChildrenVariableNullability(provisionalNewChildren));
 
-                    var projectedVariables = iqTreeTools.getChildrenVariables(children);
+                    var projectedVariables = NaryIQTreeTools.projectedVariables(children);
 
                     ConstructionSubstitutionNormalization normalization = substitutionNormalizer
                             .normalizeSubstitution(bindingLift.getAscendingSubstitution(), projectedVariables);
@@ -323,7 +324,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     Optional<ImmutableExpression> newJoiningCondition = simplifiedJoinCondition.getOptionalExpression();
 
                     Optional<ConstructionNode> newParent = iqTreeTools.createOptionalConstructionNode(
-                            () -> iqTreeTools.getChildrenVariables(children),
+                            () -> NaryIQTreeTools.projectedVariables(children),
                             simplifiedJoinCondition.getSubstitution());
 
                     return update(newParent, newJoiningCondition, newChildren);
@@ -379,7 +380,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
                 return update(
                         Optional.of(iqFactory.createConstructionNode(
-                            iqTreeTools.getChildrenVariables(children))),
+                            NaryIQTreeTools.projectedVariables(children))),
                         newJoiningCondition,
                         newChildren);
             }

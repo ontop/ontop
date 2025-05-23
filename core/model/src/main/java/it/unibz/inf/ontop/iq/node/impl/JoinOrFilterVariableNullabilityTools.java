@@ -1,23 +1,19 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class JoinOrFilterVariableNullabilityTools {
 
@@ -40,7 +36,7 @@ public class JoinOrFilterVariableNullabilityTools {
     public VariableNullability getVariableNullability(ImmutableList<IQTree> children,
                                                       Optional<ImmutableExpression> joiningCondition) {
 
-        ImmutableSet<Variable> coOccurringVariables = IQTreeTools.getCoOccurringVariables(children)
+        ImmutableSet<Variable> coOccurringVariables = NaryIQTreeTools.coOccurringVariablesStream(children)
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableSet<ImmutableSet<Variable>> nullableGroups = children.stream()
@@ -49,7 +45,7 @@ public class JoinOrFilterVariableNullabilityTools {
                         .noneMatch(coOccurringVariables::contains))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSet<Variable> scope = iqTreeTools.getChildrenVariables(children);
+        ImmutableSet<Variable> scope = NaryIQTreeTools.projectedVariables(children);
 
         return joiningCondition
                 .map(e -> updateWithFilter(e, nullableGroups, scope))

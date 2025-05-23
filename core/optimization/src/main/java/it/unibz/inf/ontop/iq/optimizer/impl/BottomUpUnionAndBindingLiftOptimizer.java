@@ -7,7 +7,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.UnionAndBindingLiftOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -17,7 +17,6 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -117,7 +116,7 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
                                                        Optional<ImmutableExpression> optionalFilterCondition,
                                                        ImmutableList<IQTree> newChildren) {
 
-        Stream<Variable> coOccurringVariables = IQTreeTools.getCoOccurringVariables(newChildren);
+        Stream<Variable> coOccurringVariables = NaryIQTreeTools.coOccurringVariablesStream(newChildren);
 
         return Stream.concat(
                     optionalFilterCondition.stream()

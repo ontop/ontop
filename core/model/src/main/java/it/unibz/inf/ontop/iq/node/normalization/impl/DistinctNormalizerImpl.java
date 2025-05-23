@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
 import it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer;
@@ -21,7 +22,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
 
 
 @Singleton
@@ -71,7 +71,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
         // DISTINCT [ORDER BY] [FILTER] UNION
         var orderBy = UnaryIQTreeDecomposition.of(child, OrderByNode.class);
         var filter = UnaryIQTreeDecomposition.of(orderBy.getTail(), FilterNode.class);
-        var union = NaryIQTreeDecomposition.of(filter.getTail(), UnionNode.class);
+        var union = NaryIQTreeTools.UnionDecomposition.of(filter.getTail());
         if (union.isPresent()) {
             ImmutableList<IQTree> unionChildren = union.getChildren();
             ImmutableList<IQTree> newUnionChildren = unionChildren.stream()
