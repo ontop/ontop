@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.rightSpecificVariables;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
 
@@ -278,7 +279,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             Optional<IQTree> liftLeftJoin(int index, LeftJoinNode node, IQTree leftChild, IQTree rightChild) {
 
                 // For safety (although conflicts are unlikely to appear)
-                Set<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables());
+                Set<Variable> rightSpecificVariables = rightSpecificVariables(leftChild, rightChild);
 
                 if (!IntStream.range(0, children.size())
                         .filter(i -> i != index)

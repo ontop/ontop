@@ -2,14 +2,13 @@ package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
@@ -18,7 +17,6 @@ import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -31,7 +29,9 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.BinaryNonCommutativeIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.LeftJoinDecomposition;
+
+
 
 /**
  * Restricted to LJs on the right to limit overlap with existing techniques.
@@ -104,10 +104,33 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
         protected Optional<IQTree> furtherTransformLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             var construction = UnaryIQTreeDecomposition.of(rightChild, ConstructionNode.class);
 
-            return Optional.of(construction.getTail())
-                    .filter(t -> t.getRootNode() instanceof LeftJoinNode)
-                    .map(t -> (BinaryNonCommutativeIQTree) t)
-                    .flatMap(rLJ -> tryToSimplify(LeftJoinAnalysis.of(rootNode, leftChild, rightChild), rLJ));
+            var leftJoinOnTheRight = BinaryNonCommutativeIQTreeTools.LeftJoinDecomposition.of(construction.getTail());
+            if (!leftJoinOnTheRight.isPresent())
+                return Optional.empty();
+
+            LeftJoinDecomposition leftJoin = LeftJoinDecomposition.of(rootNode, leftChild, rightChild);
+
+            Set<Variable> commonVariables = leftJoin.commonVariables();
+
+            // If some variables defined by the construction node are common with the left --> no optimization
+            if (!leftJoinOnTheRight.projectedVariables().containsAll(commonVariables))
+                return Optional.empty();
+
+            // In the presence of a LJ condition, a unique constraint must be present on the right child
+            // and be joined over
+            if (leftJoin.joinCondition().isPresent()
+                    && leftJoin.rightChild().inferUniqueConstraints().stream()
+                    .noneMatch(commonVariables::containsAll))
+                return Optional.empty();
+
+            Optional<IQTree> safeLeftOfRightDescendant = extractSafeLeftOfRightDescendantTree(
+                    leftJoinOnTheRight.leftChild(), commonVariables);
+
+            return safeLeftOfRightDescendant
+                    .filter(r -> canLJBeReduced(leftJoin.leftChild(), r))
+                    // Reduces the LJ to an inner join
+                    .map(r -> buildInnerJoin(leftJoin))
+                    .map(t -> t.normalizeForOptimization(variableGenerator));
         }
 
         @Override
@@ -125,32 +148,6 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
             Transformer newTransformer = new Transformer(variableNullabilitySupplier, variableGenerator,
                     rightProvenanceNormalizer, coreSingletons, otherLJOptimizer, variableNullabilityTools, leftJoinTools);
             return rightChild.acceptTransformer(newTransformer);
-        }
-
-        private Optional<IQTree> tryToSimplify(LeftJoinAnalysis leftJoin,
-                                               BinaryNonCommutativeIQTree rightLJ) {
-
-            Set<Variable> commonVariables = Sets.intersection(leftJoin.leftVariables(), leftJoin.rightVariables());
-
-            // If some variables defined by the construction node are common with the left --> no optimization
-            if (!rightLJ.getVariables().containsAll(commonVariables))
-                return Optional.empty();
-
-            // In the presence of a LJ condition, a unique constraint must be present on the right child
-            // and be joined over
-            if (leftJoin.joinCondition().isPresent()
-                    && leftJoin.rightChild().inferUniqueConstraints().stream()
-                    .noneMatch(commonVariables::containsAll))
-                return Optional.empty();
-
-            Optional<IQTree> safeLeftOfRightDescendant = extractSafeLeftOfRightDescendantTree(
-                    rightLJ.getLeftChild(), commonVariables);
-
-            return safeLeftOfRightDescendant
-                    .filter(r -> canLJBeReduced(leftJoin.leftChild(), r))
-                    // Reduces the LJ to an inner join
-                    .map(r -> buildInnerJoin(leftJoin))
-                    .map(t -> t.normalizeForOptimization(variableGenerator));
         }
 
         private boolean canLJBeReduced(IQTree leftChild, IQTree safeLeftOfRightDescendant) {
@@ -172,15 +169,15 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
             if (!leftChild.getVariables().containsAll(rightVariablesInteractingWithLeft))
                 return Optional.empty();
 
-            var leftJoin = BinaryNonCommutativeIQTreeDecomposition.of(leftChild, LeftJoinNode.class);
+            var leftJoin = LeftJoinDecomposition.of(leftChild);
             if (leftJoin.isPresent())
                 // Recursive
-                return extractSafeLeftOfRightDescendantTree(leftJoin.getLeftChild(), rightVariablesInteractingWithLeft);
+                return extractSafeLeftOfRightDescendantTree(leftJoin.leftChild(), rightVariablesInteractingWithLeft);
             else
                 return Optional.of(leftChild);
         }
 
-        private IQTree buildInnerJoin(LeftJoinAnalysis leftJoin) {
+        private IQTree buildInnerJoin(LeftJoinDecomposition leftJoin) {
             IQTree joinTree = iqTreeTools.createInnerJoinTree(ImmutableList.of(leftJoin.leftChild(), leftJoin.rightChild()));
 
             if (leftJoin.joinCondition().isEmpty())

@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
@@ -27,7 +28,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.BinaryNonCommutativeIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.LeftJoinDecomposition;
 
 
 /**
@@ -117,12 +118,12 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
             IQTree newLeftChild = transform(leftChild);
             IQTree newRightChild = transform(rightChild);
 
-            var newLJ = LeftJoinAnalysis.of(rootNode, newLeftChild, newRightChild);
+            LeftJoinDecomposition newLJ = LeftJoinDecomposition.of(rootNode, newLeftChild, newRightChild);
 
             if (!(newLeftChild.getRootNode() instanceof LeftJoinNode))
                 return buildUnoptimizedLJTree(tree, leftChild, rightChild, newLJ);
 
-            LeftJoinAnalysis normalization = ljConditionExpliciter.makeComplexEqualitiesImplicit(newLJ, variableGenerator);
+            LeftJoinDecomposition normalization = ljConditionExpliciter.makeComplexEqualitiesImplicit(newLJ, variableGenerator);
 
             if (!normalization.tolerateLJConditionLifting())
                 return buildUnoptimizedLJTree(tree, leftChild, rightChild, newLJ);
@@ -141,7 +142,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
             }
         }
 
-        private IQTree buildUnoptimizedLJTree(IQTree tree, IQTree leftChild, IQTree rightChild, LeftJoinAnalysis newLeftJoin) {
+        private IQTree buildUnoptimizedLJTree(IQTree tree, IQTree leftChild, IQTree rightChild, LeftJoinDecomposition newLeftJoin) {
             return newLeftJoin.leftChild().equals(leftChild) && newLeftJoin.rightChild().equals(rightChild)
                     ? tree
                     : iqFactory.createBinaryNonCommutativeIQTree(newLeftJoin.getNode(), newLeftJoin.leftChild(), newLeftJoin.rightChild())
@@ -150,19 +151,17 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
 
         private class SimplificationContext {
 
-            private final LeftJoinAnalysis topLJ;
+            private final LeftJoinDecomposition topLJ;
 
-            private SimplificationContext(LeftJoinAnalysis topLJ) {
+            private SimplificationContext(LeftJoinDecomposition topLJ) {
                 this.topLJ = topLJ;
             }
 
-            private Optional<IQTree> tryToSimplify(ImmutableList<LeftJoinAnalysis> ancestors, IQTree currentLeftChild) {
+            private Optional<IQTree> tryToSimplify(ImmutableList<LeftJoinDecomposition> ancestors, IQTree currentLeftChild) {
 
-                var leftChildLeftJoin = BinaryNonCommutativeIQTreeDecomposition.of(currentLeftChild, LeftJoinNode.class);
-                if (!leftChildLeftJoin.isPresent())
+                var leftLJ = LeftJoinDecomposition.of(currentLeftChild);
+                if (!leftLJ.isPresent())
                     return Optional.empty();
-
-                LeftJoinAnalysis leftLJ = LeftJoinAnalysis.of(leftChildLeftJoin);
 
                 // No optimization if outside the "well-designed fragment" (NB: we ignore LJ conditions)
                 // TODO: do we need this restriction? Isn't it always enforced?
@@ -191,7 +190,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
                 }
                 else {
                     var localRightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(
-                            mergedLocalRightBeforeRenaming, leftChildLeftJoin.getTree().getVariables(),
+                            mergedLocalRightBeforeRenaming, leftLJ.getTree().getVariables(),
                             Optional.empty(), variableGenerator);
 
                     newLocalRightTreeBeforeRenaming = localRightProvenance.getRightTree();
@@ -227,7 +226,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
                         && isTreeIncluded(topLJ.rightChild(), subRightChild, leftVariables);
             }
 
-            private InjectiveSubstitution<Variable> computeRenaming(LeftJoinAnalysis leftLJ) {
+            private InjectiveSubstitution<Variable> computeRenaming(LeftJoinDecomposition leftLJ) {
 
                 var localRightVariablesOnlySharedWithLeft = Sets.difference(Sets.intersection(leftLJ.leftVariables(), leftLJ.rightVariables()), topLJ.rightVariables());
                 var topRightVariablesOnlySharedWithLeft = Sets.difference(Sets.intersection(leftLJ.leftVariables(), topLJ.rightVariables()), leftLJ.rightVariables());
@@ -248,7 +247,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
                         .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
             }
 
-            private Substitution<ImmutableFunctionalTerm> computeSubstitution(LeftJoinAnalysis leftLJ, InjectiveSubstitution<Variable> renaming) {
+            private Substitution<ImmutableFunctionalTerm> computeSubstitution(LeftJoinDecomposition leftLJ, InjectiveSubstitution<Variable> renaming) {
 
                 var localRightVariablesOnlySharedWithLeft = Sets.difference(Sets.intersection(leftLJ.leftVariables(), leftLJ.rightVariables()), topLJ.rightVariables());
                 var topRightVariablesOnlySharedWithLeft = Sets.difference(Sets.intersection(leftLJ.leftVariables(), topLJ.rightVariables()), leftLJ.rightVariables());
@@ -268,7 +267,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
             }
         }
 
-        private Optional<ImmutableExpression> computeCondition(LeftJoinAnalysis lj, Set<Variable> sharedWithLeftVariables, InjectiveSubstitution<Variable> renaming) {
+        private Optional<ImmutableExpression> computeCondition(LeftJoinDecomposition lj, Set<Variable> sharedWithLeftVariables, InjectiveSubstitution<Variable> renaming) {
             return termFactory.getConjunction(
                     lj.joinCondition().map(renaming::apply),
                     sharedWithLeftVariables.stream()

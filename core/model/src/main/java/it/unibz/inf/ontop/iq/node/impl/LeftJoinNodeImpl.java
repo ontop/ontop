@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
 import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
@@ -31,6 +32,7 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.*;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.*;
 
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -181,7 +183,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                     && union.getNode().hasAChildWithLiftableDefinition(variable, union.getChildren())) {
 
                 return iqTreeTools.createUnionTree(
-                        iqTreeTools.getChildrenVariables(leftChild, rightChild),
+                        projectedVariables(leftChild, rightChild).immutableCopy(),
                         union.getChildren().stream()
                                 .<IQTree>map(c -> iqFactory.createBinaryNonCommutativeIQTree(this, c, rightChild))
                                 .collect(ImmutableCollectors.toList()));
@@ -567,15 +569,4 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             return super.applyFilterToVariableNonRequirement(nonRequirementBeforeFilter, children);
     }
 
-    private static Sets.SetView<Variable> rightSpecificVariables(IQTree leftChild, IQTree rightChild) {
-        return Sets.difference(rightChild.getVariables(), leftChild.getVariables());
-    }
-
-    private static Sets.SetView<Variable> projectedVariables(IQTree leftChild, IQTree rightChild) {
-        return Sets.union(leftChild.getVariables(), rightChild.getVariables());
-    }
-
-    private static Sets.SetView<Variable> commonVariables(IQTree leftChild, IQTree rightChild) {
-        return Sets.intersection(leftChild.getVariables(), rightChild.getVariables());
-    }
 }

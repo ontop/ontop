@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -23,7 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.BinaryNonCommutativeIQTreeDecomposition;
+
+import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.LeftJoinDecomposition;
 
 
 /**
@@ -46,7 +46,7 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
         this.iqTreeTools = iqTreeTools;
     }
 
-    public LeftJoinAnalysis makeComplexEqualitiesImplicit(LeftJoinAnalysis leftJoin,
+    public LeftJoinDecomposition makeComplexEqualitiesImplicit(LeftJoinDecomposition leftJoin,
                                                                VariableGenerator variableGenerator) {
 
         if (leftJoin.joinCondition().isEmpty())
@@ -55,7 +55,7 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
         return makeComplexEqualitiesImplicit(leftJoin, substitutionFactory.getSubstitution(), variableGenerator);
     }
 
-    protected LeftJoinAnalysis makeComplexEqualitiesImplicit(LeftJoinAnalysis leftJoin,
+    protected LeftJoinDecomposition makeComplexEqualitiesImplicit(LeftJoinDecomposition leftJoin,
                                                                   Substitution<ImmutableTerm> downSubstitution,
                                                                   VariableGenerator variableGenerator) {
 
@@ -63,7 +63,7 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
 
         var conditionMap = leftJoin.joinCondition().orElseThrow().flattenAND()
                 .collect(ImmutableCollectors.partitioningBy(
-                        e -> isDecomposibleStrictEquality(e, leftJoin.leftChild().getVariables(), rightSpecificVariables)));
+                        e -> isDecomposibleStrictEquality(e, leftJoin.leftVariables(), rightSpecificVariables)));
         var strictEqualities = conditionMap.get(true);
         assert strictEqualities != null;
         if (strictEqualities.isEmpty())
@@ -84,7 +84,7 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
                 iqTreeTools.createExtendingConstructionNode(leftJoin.rightChild().getVariables(), substitutionPair.rightSubstitution),
                 leftJoin.rightChild());
 
-        return LeftJoinAnalysis.of(newLeftJoin, newLeftChild, newRightChild);
+        return LeftJoinDecomposition.of(newLeftJoin, newLeftChild, newRightChild);
     }
 
     private SubstitutionPair computeSubstitutionPair(ImmutableSet<ImmutableExpression> strictEqualities,
@@ -154,31 +154,31 @@ public class ComplexStrictEqualityLeftJoinExpliciter {
 
     private IQTree normalizeLeft(IQTree tree, Substitution<ImmutableTerm> downSubstitution, VariableGenerator variableGenerator) {
 
-        var leftJoin = BinaryNonCommutativeIQTreeDecomposition.of(tree, LeftJoinNode.class);
+        LeftJoinDecomposition leftJoin = LeftJoinDecomposition.of(tree);
         if (!leftJoin.isPresent() ||
                 // Blocks the substitution if there is any right-specific variable in the substitution (unlikely)
                 // Stops the normalization
-                !leftJoin.getLeftChild().getVariables().containsAll(downSubstitution.getRangeVariables()))
+                !leftJoin.leftVariables().containsAll(downSubstitution.getRangeVariables()))
             return downSubstitution.isEmpty()
                     ? tree
                     : iqFactory.createUnaryIQTree(
                             iqTreeTools.createExtendingConstructionNode(tree.getVariables(), downSubstitution),
                             tree);
 
-        if (leftJoin.getNode().getOptionalFilterCondition().isEmpty()) {
-            var newLeftChild = normalizeLeft(leftJoin.getLeftChild(), downSubstitution, variableGenerator);
+        if (leftJoin.joinCondition().isEmpty()) {
+            var newLeftChild = normalizeLeft(leftJoin.leftChild(), downSubstitution, variableGenerator);
             return iqFactory.createBinaryNonCommutativeIQTree(
                     leftJoin.getNode(),
                     newLeftChild,
-                    leftJoin.getRightChild());
+                    leftJoin.rightChild());
         }
 
         var localNormalization = makeComplexEqualitiesImplicit(
-                LeftJoinAnalysis.of(leftJoin),
+                leftJoin,
                 downSubstitution, variableGenerator);
 
         return iqFactory.createBinaryNonCommutativeIQTree(
-                iqFactory.createLeftJoinNode(localNormalization.joinCondition()),
+                localNormalization.getNode(),
                 localNormalization.leftChild(),
                 localNormalization.rightChild());
     }

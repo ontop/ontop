@@ -125,10 +125,6 @@ public class IQTreeTools {
                 .collect(ImmutableCollectors.toSet());
     }
 
-    public ImmutableSet<Variable> getChildrenVariables(IQTree leftChild, IQTree rightChild) {
-        return Sets.union(leftChild.getVariables(), rightChild.getVariables()).immutableCopy();
-    }
-
     public ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> groupingVariables,
                                                                Substitution<ImmutableFunctionalTerm> substitution) {
         return Sets.union(groupingVariables, substitution.getRangeVariables()).immutableCopy();
@@ -254,16 +250,11 @@ public class IQTreeTools {
 
     public static class IQTreeDecomposition<N extends QueryNode, T extends IQTree> {
         protected final N node; // nullable
-        protected final T tree;
-
-        protected IQTreeDecomposition() {
-            this.node = null;
-            this.tree = null;
-        }
+        protected final T tree; // nullable
 
         protected IQTreeDecomposition(N node, T tree) {
-            this.node = Objects.requireNonNull(node);
-            this.tree = Objects.requireNonNull(tree);
+            this.node = node;
+            this.tree = tree;
         }
 
         @Nonnull
@@ -308,6 +299,7 @@ public class IQTreeTools {
         }
 
         private UnaryIQTreeDecomposition(IQTree tree) {
+            super(null, null);
             this.child = null;
             this.tail = Objects.requireNonNull(tree);
         }
@@ -398,6 +390,7 @@ public class IQTreeTools {
         }
 
         private NaryIQTreeDecomposition() {
+            super(null, null);
             this.children = null;
         }
 
@@ -417,46 +410,6 @@ public class IQTreeTools {
         }
     }
 
-    public static class BinaryNonCommutativeIQTreeDecomposition<T extends BinaryNonCommutativeOperatorNode> extends IQTreeDecomposition<T, BinaryNonCommutativeIQTree> {
-        private final IQTree leftChild;
-        private final IQTree rightChild;
-
-        private BinaryNonCommutativeIQTreeDecomposition(T node, BinaryNonCommutativeIQTree tree) {
-            super(node, tree);
-            this.leftChild = tree.getLeftChild();
-            this.rightChild = tree.getRightChild();
-        }
-
-        private BinaryNonCommutativeIQTreeDecomposition() {
-            this.leftChild = null;
-            this.rightChild = null;
-        }
-
-        @Nonnull
-        public IQTree getLeftChild() {
-            return Objects.requireNonNull(leftChild);
-        }
-
-        @Nonnull
-        public IQTree getRightChild() {
-            return Objects.requireNonNull(rightChild);
-        }
-
-        public <U> Optional<U> map(TriFunction<? super T, IQTree, IQTree, ? extends U> function) {
-            return Optional.ofNullable(node).map(n -> function.apply(n, leftChild, rightChild));
-        }
-
-        @FunctionalInterface
-        public interface TriFunction<T1, T2, T3, R> {
-            R apply(T1 t1, T2 t2, T3 t3);
-        }
-
-        public static <T extends BinaryNonCommutativeOperatorNode> BinaryNonCommutativeIQTreeDecomposition<T> of(IQTree tree, Class<T> nodeClass) {
-            return nodeClass.isInstance(tree.getRootNode())
-                    ? new BinaryNonCommutativeIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((BinaryNonCommutativeIQTree)tree))
-                    : new BinaryNonCommutativeIQTreeDecomposition<>();
-        }
-    }
 
     public static <T extends QueryNode> boolean contains(IQTree tree, Class<T> nodeClass) {
         return nodeClass.isInstance(tree.getRootNode()) ||
