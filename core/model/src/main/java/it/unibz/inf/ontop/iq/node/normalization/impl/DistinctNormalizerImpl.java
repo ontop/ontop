@@ -73,12 +73,10 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
         var filter = UnaryIQTreeDecomposition.of(orderBy.getTail(), FilterNode.class);
         var union = NaryIQTreeTools.UnionDecomposition.of(filter.getTail());
         if (union.isPresent()) {
-            ImmutableList<IQTree> unionChildren = union.getChildren();
-            ImmutableList<IQTree> newUnionChildren = unionChildren.stream()
-                    .map(c -> simplifyUnionChild(c, variableGenerator))
-                    .collect(ImmutableCollectors.toList());
+            ImmutableList<IQTree> newUnionChildren = union.transformChildren(
+                    c -> simplifyUnionChild(c, variableGenerator));
 
-            if (!unionChildren.equals(newUnionChildren))
+            if (!union.getChildren().equals(newUnionChildren))
                 return iqTreeTools.unaryIQTreeBuilder()
                         .append(distinctNode)
                         .append(orderBy.getOptionalNode())

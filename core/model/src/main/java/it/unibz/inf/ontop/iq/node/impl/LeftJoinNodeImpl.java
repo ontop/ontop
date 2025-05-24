@@ -177,13 +177,13 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                                               VariableGenerator variableGenerator) {
         if (leftChild.getVariables().contains(variable)) {
             IQTree liftedLeftChild = leftChild.liftIncompatibleDefinitions(variable, variableGenerator);
-            var union = NaryIQTreeTools.UnionDecomposition.withAChildWithLiftableDefinition(liftedLeftChild, variable);
+            NaryIQTreeTools.UnionDecomposition union = NaryIQTreeTools.UnionDecomposition.of(liftedLeftChild)
+                    .filter(d -> d.getNode().hasAChildWithLiftableDefinition(variable, d.getChildren()));
             if (union.isPresent()) {
                 return iqTreeTools.createUnionTree(
                         projectedVariables(leftChild, rightChild).immutableCopy(),
-                        union.getChildren().stream()
-                                .<IQTree>map(c -> iqFactory.createBinaryNonCommutativeIQTree(this, c, rightChild))
-                                .collect(ImmutableCollectors.toList()));
+                        union.transformChildren(c ->
+                                iqFactory.createBinaryNonCommutativeIQTree(this, c, rightChild)));
             }
         }
 

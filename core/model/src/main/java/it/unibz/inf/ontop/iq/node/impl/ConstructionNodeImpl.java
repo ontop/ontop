@@ -155,7 +155,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
         IQTree newChild = child.liftIncompatibleDefinitions(variable, variableGenerator);
         // Lift the union above the construction node (note the different union node compared to IQTreeTools)
-        var union = NaryIQTreeTools.UnionDecomposition.withAChildWithLiftableDefinition(newChild, variable);
+        NaryIQTreeTools.UnionDecomposition union = NaryIQTreeTools.UnionDecomposition.of(newChild)
+                   .filter(d -> d.getNode().hasAChildWithLiftableDefinition(variable, d.getChildren()));
         if (union.isPresent()) {
             ImmutableList<IQTree> newChildren = iqTreeTools.createUnaryOperatorChildren(this, union.getChildren());
             return iqTreeTools.createUnionTree(getVariables(), newChildren);

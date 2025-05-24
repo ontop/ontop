@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq.planner.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -13,7 +12,6 @@ import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -24,14 +22,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
 /**
- * When an UNION appears as a child of an inner join, looks for other siblings that could be "pushed under the union".
+ * When a UNION appears as a child of an inner join, looks for other siblings that could be "pushed under the union".
  * <p>
  * Criteria for selecting siblings: must be leaf and must naturally join (i.e. share a variable) with the union.
  *
@@ -122,76 +119,65 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
             while(true) {
                 // NB: for compilation purposes
                 ImmutableList<IQTree> currentChildren = children;
-
-                Optional<Map.Entry<NaryIQTree, ImmutableList<Integer>>> selectedEntry = currentChildren.stream()
-                        .map(c -> extractPushableSiblings(c, currentChildren))
+                Optional<ImmutableList<IQTree>> push = currentChildren.stream()
+                        .map(NaryIQTreeTools.UnionDecomposition::of)
+                        .filter(IQTreeTools.IQTreeDecomposition::isPresent)
+                        .map(union -> pushLeafIQTreeSiblingsIntoUnion(union, currentChildren))
                         .flatMap(Optional::stream)
                         .findFirst();
 
-                if (selectedEntry.isPresent()) {
-                    children = updateChildren(selectedEntry.get().getKey(), selectedEntry.get().getValue(), currentChildren);
-                }
-                else {
-                    if (currentChildren.equals(initialChildren))
-                        return tree;
+                if (push.isEmpty())
+                    break;
 
-                    return iqTreeTools.createJoinTree(rootNode.getOptionalFilterCondition(), currentChildren)
-                            .orElseThrow(() -> new MinorOntopInternalBugException("At least one child should remain"));
-                }
+                children = push.get();
             }
+            if (children.equals(initialChildren))
+                return tree;
+
+            return iqTreeTools.createJoinTree(rootNode.getOptionalFilterCondition(), children)
+                    .orElseThrow(() -> new MinorOntopInternalBugException("At least one child should remain"));
         }
 
         /**
          * Criteria for selecting siblings: must be leaf and must naturally join (i.e. share a variable) with the union
          */
-        protected Optional<Map.Entry<NaryIQTree, ImmutableList<Integer>>> extractPushableSiblings(IQTree unionTree,
-                                                                                                  ImmutableList<IQTree> children) {
-            var union = NaryIQTreeTools.UnionDecomposition.of(unionTree);
-            if (!union.isPresent())
-                return Optional.empty();
+        protected Optional<ImmutableList<IQTree>> pushLeafIQTreeSiblingsIntoUnion(NaryIQTreeTools.UnionDecomposition union, ImmutableList<IQTree> siblings) {
 
-            ImmutableSet<Variable> unionVariables = union.getTree().getVariables();
-
-            ImmutableList<Integer> pushableSiblings = IntStream.range(0, children.size())
+            ImmutableSet<Variable> unionVariables = union.getNode().getVariables();
+            ImmutableList<Integer> pushableSiblingIndexes = IntStream.range(0, siblings.size())
                     // Leaf siblings ...
-                    .filter(i -> (children.get(i) instanceof LeafIQTree)
+                    .filter(i -> (siblings.get(i) instanceof LeafIQTree)
                             // ... that naturally joins (i.e. share a variable) with the union
-                            && !Sets.intersection(unionVariables, children.get(i).getVariables()).isEmpty())
+                            && !Sets.intersection(unionVariables, siblings.get(i).getVariables()).isEmpty())
                     .boxed()
                     .collect(ImmutableCollectors.toList());
 
-            return pushableSiblings.isEmpty()
-                    ? Optional.empty()
-                    : Optional.of(Maps.immutableEntry(union.getTree(), pushableSiblings));
-        }
-
-        private ImmutableList<IQTree> updateChildren(NaryIQTree unionTree, ImmutableList<Integer> pushableSiblingIndexes,
-                                                     ImmutableList<IQTree> children) {
+            if (pushableSiblingIndexes.isEmpty())
+                return Optional.empty();
 
             ImmutableList<IQTree> pushedSiblings = pushableSiblingIndexes.stream()
-                    .map(children::get)
+                    .map(siblings::get)
                     .collect(ImmutableCollectors.toList());
 
-            ImmutableList<IQTree> newUnionChildren = unionTree.getChildren().stream()
-                    .map(c -> Stream.concat(Stream.of(c), pushedSiblings.stream())
-                            .collect(ImmutableCollectors.toList()))
-                    .map(iqTreeTools::createInnerJoinTree)
-                    .collect(ImmutableCollectors.toList());
+            ImmutableList<IQTree> newUnionChildren = union.transformChildren(
+                    c -> iqTreeTools.createInnerJoinTree(
+                            Stream.concat(Stream.of(c), pushedSiblings.stream()).collect(ImmutableCollectors.toList())));
 
-            ImmutableSet<Variable> newUnionVariables = Sets.union(
-                    unionTree.getVariables(),
-                    pushedSiblings.stream()
-                            .flatMap(s -> s.getVariables().stream())
-                            .collect(ImmutableCollectors.toSet()))
-                    .immutableCopy();
+            ImmutableSet<Variable> newUnionVariables = Stream.concat(
+                            unionVariables.stream(),
+                            pushedSiblings.stream()
+                                    .flatMap(s -> s.getVariables().stream()))
+                    .collect(ImmutableCollectors.toSet());
 
             IQTree newUnionTree = iqTreeTools.createUnionTree(newUnionVariables, newUnionChildren);
 
-            return IntStream.range(0, children.size())
+            ImmutableList<IQTree> newChildren = IntStream.range(0, siblings.size())
                     .filter(i -> !pushableSiblingIndexes.contains(i))
-                    .mapToObj(children::get)
-                    .map(c -> (c == unionTree) ? newUnionTree : c)
+                    .mapToObj(siblings::get)
+                    .map(c -> (c == union.getTree()) ? newUnionTree : c)
                     .collect(ImmutableCollectors.toList());
+
+            return Optional.of(newChildren);
         }
     }
 }

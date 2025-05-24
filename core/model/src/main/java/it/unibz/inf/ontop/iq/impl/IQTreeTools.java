@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -375,17 +374,6 @@ public class IQTreeTools {
         return nodeClass.isInstance(tree.getRootNode()) ||
                 tree.getChildren().stream().anyMatch(t -> contains(t, nodeClass));
     }
-
-    public IQTree liftIncompatibleDefinitions(UnaryOperatorNode node, Variable variable, IQTree child, VariableGenerator variableGenerator) {
-        IQTree newChild = child.liftIncompatibleDefinitions(variable, variableGenerator);
-        var union = NaryIQTreeTools.UnionDecomposition.withAChildWithLiftableDefinition(newChild, variable);
-        if (union.isPresent()) {
-            ImmutableList<IQTree> newChildren = createUnaryOperatorChildren(node, union.getChildren());
-            return iqFactory.createNaryIQTree(union.getNode(), newChildren);
-        }
-        return iqFactory.createUnaryIQTree(node, newChild);
-    }
-
 
 
     public Substitution<NonVariableTerm> getEmptyNonVariableSubstitution() {

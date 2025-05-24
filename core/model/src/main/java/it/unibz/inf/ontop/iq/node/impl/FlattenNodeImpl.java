@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.FlattenNormalizer;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -291,7 +292,14 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator) {
-        return iqTreeTools.liftIncompatibleDefinitions(this, variable, child, variableGenerator);
+        IQTree newChild = child.liftIncompatibleDefinitions(variable, variableGenerator);
+        NaryIQTreeTools.UnionDecomposition union = NaryIQTreeTools.UnionDecomposition.of(newChild)
+                .filter(d -> d.getNode().hasAChildWithLiftableDefinition(variable, d.getChildren()));
+        if (union.isPresent()) {
+            ImmutableList<IQTree> newChildren = iqTreeTools.createUnaryOperatorChildren(this, union.getChildren());
+            return iqFactory.createNaryIQTree(union.getNode(), newChildren);
+        }
+        return iqFactory.createUnaryIQTree(this, newChild);
     }
 
     @Override

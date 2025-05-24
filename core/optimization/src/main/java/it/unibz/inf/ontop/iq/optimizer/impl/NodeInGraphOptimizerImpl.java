@@ -238,9 +238,8 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                     (DataAtom<AtomPredicate>)(DataAtom<?>)pushedDataAtom);
 
             return iqTreeTools.createUnionTree(newProjectedVariables,
-                    child.getChildren().stream()
-                            .map(c -> pushDataAtomIntoChildOfUnion(c, pushedIntensionalNode))
-                            .collect(ImmutableCollectors.toList()));
+                    union.transformChildren(
+                            c -> pushDataAtomIntoChildOfUnion(c, pushedIntensionalNode)));
         }
 
         private boolean isNodeGraphPredicateNode(IQTree child) {

@@ -249,10 +249,10 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
      */
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
-        ImmutableList<IQTree> liftedChildren = children.stream()
-                .map(c -> c.liftIncompatibleDefinitions(variable, variableGenerator))
-                .collect(ImmutableCollectors.toList());
-        
+        ImmutableList<IQTree> liftedChildren = NaryIQTreeTools.transformChildren(
+                children,
+                c -> c.liftIncompatibleDefinitions(variable, variableGenerator));
+
         return iqFactory.createNaryIQTree(this, liftedChildren);
     }
 
@@ -260,9 +260,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children,
                                           VariableGenerator variableGenerator) {
         return iqFactory.createNaryIQTree(this,
-                children.stream()
-                        .map(c -> c.propagateDownConstraint(constraint, variableGenerator))
-                        .collect(ImmutableCollectors.toList()));
+                NaryIQTreeTools.transformChildren(
+                        children,
+                        c -> c.propagateDownConstraint(constraint, variableGenerator)));
     }
 
     @Override
@@ -284,9 +284,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     @Override
     public IQTree removeDistincts(ImmutableList<IQTree> children, IQTreeCache treeCache) {
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(IQTree::removeDistincts)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(
+                children,
+                IQTree::removeDistincts);
 
         IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChildren.equals(children));
         return iqFactory.createNaryIQTree(this, newChildren, newTreeCache);
@@ -497,9 +497,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         DownPropagation ds = new DownPropagation(descendingSubstitution, getVariables());
 
-        ImmutableList<IQTree> updatedChildren = children.stream()
-                .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(ds.getSubstitution(), variableGenerator))
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> updatedChildren = NaryIQTreeTools.transformChildren(
+                children,
+                c -> c.applyDescendingSubstitutionWithoutOptimizing(ds.getSubstitution(), variableGenerator));
 
         return iqTreeTools.createUnionTree(ds.computeProjectedVariables(), updatedChildren);
     }
@@ -507,9 +507,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     @Override
     public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution,
                                      ImmutableList<IQTree> children, IQTreeCache treeCache) {
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(c -> c.applyFreshRenaming(renamingSubstitution))
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(
+                children,
+                c -> c.applyFreshRenaming(renamingSubstitution));
 
         UnionNode newUnionNode = iqFactory.createUnionNode(substitutionFactory.apply(renamingSubstitution, getVariables()));
 
@@ -757,7 +757,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     private IQTree tryToMergeSomeChildrenInAValuesNode(IQTree tree, VariableGenerator variableGenerator, IQTreeCache treeCache) {
         var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
-
         if (construction.isPresent()) {
             IQTree newSubTree = tryToMergeSomeChildrenInAValuesNode(construction.getChild(), variableGenerator, treeCache, false);
             return (construction.getChild() == newSubTree)

@@ -169,9 +169,9 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
             VariableGenerator variableGenerator) {
 
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator))
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(
+                children,
+                c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
 
         return iqTreeTools.createInnerJoinTree(
                 getOptionalFilterCondition().map(descendingSubstitution::apply),
@@ -181,9 +181,9 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, ImmutableList<IQTree> children,
                                      IQTreeCache treeCache) {
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(c -> c.applyFreshRenaming(renamingSubstitution))
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(
+                children,
+                c -> c.applyFreshRenaming(renamingSubstitution));
 
         Optional<ImmutableExpression> newCondition = getOptionalFilterCondition()
                 .map(renamingSubstitution::apply);
@@ -213,20 +213,31 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
         return IntStream.range(0, children.size())
-                .mapToObj(i -> Maps.immutableEntry(i, children.get(i)))
-                .filter(e -> e.getValue().isConstructed(variable))
-                // index -> new child
-                .map(e -> Maps.immutableEntry(
-                        e.getKey(),
-                        NaryIQTreeTools.UnionDecomposition.withAChildWithLiftableDefinition(
-                                e.getValue().liftIncompatibleDefinitions(variable, variableGenerator),
-                                variable)))
-                .filter(e -> e.getValue().isPresent())
+                .mapToObj(i -> liftUnionChild(i, children, variable, variableGenerator))
+                .flatMap(Optional::stream)
                 .findFirst()
-                .map(e -> liftUnionChild(e.getKey(), e.getValue(), children)
-                        .normalizeForOptimization(variableGenerator))
+                .map(t -> t.normalizeForOptimization(variableGenerator))
                 .orElseGet(() -> iqFactory.createNaryIQTree(this, children));
     }
+
+    private Optional<IQTree> liftUnionChild(int childIndex, ImmutableList<IQTree> children, Variable variable, VariableGenerator variableGenerator) {
+        IQTree child = children.get(childIndex);
+        if (!child.isConstructed(variable))
+            return Optional.empty();
+
+        IQTree liftedChild = child.liftIncompatibleDefinitions(variable, variableGenerator);
+        var union = NaryIQTreeTools.UnionDecomposition.of(liftedChild)
+                .filter(d -> d.getNode().hasAChildWithLiftableDefinition(variable, d.getChildren()));
+        if (!union.isPresent())
+            return Optional.empty();
+
+        return Optional.of(iqTreeTools.createUnionTree(
+                NaryIQTreeTools.projectedVariables(children),
+                union.transformChildren(c ->
+                        iqFactory.createNaryIQTree(this,
+                                replaceChild(children, childIndex, c)))));
+    }
+
 
     @Override
     public void validateNode(ImmutableList<IQTree> children) throws InvalidIntermediateQueryException {
@@ -243,9 +254,9 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public IQTree removeDistincts(ImmutableList<IQTree> children, IQTreeCache treeCache) {
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(IQTree::removeDistincts)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(
+                children,
+                IQTree::removeDistincts);
 
         IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChildren.equals(children));
         return iqFactory.createNaryIQTree(this, newChildren, newTreeCache);
@@ -448,15 +459,5 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 : iqFactory.createInnerJoinNode(optionalExpression);
     }
 
-
-    private IQTree liftUnionChild(int childIndex, NaryIQTreeTools.UnionDecomposition union, ImmutableList<IQTree> initialChildren) {
-
-        return iqTreeTools.createUnionTree(
-                        NaryIQTreeTools.projectedVariables(initialChildren),
-                        union.getChildren().stream()
-                            .map(c -> iqFactory.createNaryIQTree(this,
-                                    replaceChild(initialChildren, childIndex, c)))
-                            .collect(ImmutableCollectors.toList()));
-    }
 
 }

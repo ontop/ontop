@@ -178,14 +178,11 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         var innerJoin = NaryIQTreeTools.InnerJoinDecomposition.of(newChild);
         // TODO: consider a more general technique (distinct removal in sub-tree)
         if (innerJoin.isPresent() && limit <= 1) {
-            var joinChildren = innerJoin.getChildren();
-            var newJoinChildren = joinChildren.stream()
-                    // Distinct-s can be eliminated
-                    .map(c -> UnaryIQTreeDecomposition.of(c, DistinctNode.class))
-                    .map(UnaryIQTreeDecomposition::getTail)
-                    .collect(ImmutableCollectors.toList());
+            // Distinct-s can be eliminated
+            var newJoinChildren = innerJoin.transformChildren(
+                    c -> UnaryIQTreeDecomposition.of(c, DistinctNode.class).getTail());
 
-            if (!newJoinChildren.equals(joinChildren)) {
+            if (!innerJoin.getChildren().equals(newJoinChildren)) {
                 var updatedChildTree = iqFactory.createNaryIQTree(innerJoin.getNode(), newJoinChildren);
                 return normalizeForOptimization(updatedChildTree, variableGenerator, treeCache,
                         () -> true);
@@ -198,11 +195,9 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 return normalizeForOptimization(distinct.getChild(), variableGenerator, treeCache,
                         () -> true);
 
-            var innerUnion = NaryIQTreeTools.UnionDecomposition.of(distinct.getChild());
-            if (innerUnion.isPresent()
-                    // If any subtree Ti is distinct we proceed with the optimization
-                    && innerUnion.getChildren().stream().anyMatch(IQTree::isDistinct)) {
-
+            var innerUnion = NaryIQTreeTools.UnionDecomposition.of(distinct.getChild())
+                    .filter(d -> d.getChildren().stream().anyMatch(IQTree::isDistinct));
+            if (innerUnion.isPresent()) {
                 Optional<IQTree> newTree = simplifyDistinctUnionWithDistinctChildren(
                         innerUnion.getNode(), innerUnion.getChildren(), limit, variableGenerator);
 

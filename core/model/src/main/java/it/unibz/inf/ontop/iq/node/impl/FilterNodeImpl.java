@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
@@ -60,7 +61,14 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator) {
-        return iqTreeTools.liftIncompatibleDefinitions(this, variable, child, variableGenerator);
+        IQTree newChild = child.liftIncompatibleDefinitions(variable, variableGenerator);
+        NaryIQTreeTools.UnionDecomposition union = NaryIQTreeTools.UnionDecomposition.of(newChild)
+                      .filter(d -> d.getNode().hasAChildWithLiftableDefinition(variable, d.getChildren()));
+        if (union.isPresent()) {
+            ImmutableList<IQTree> newChildren = iqTreeTools.createUnaryOperatorChildren(this, union.getChildren());
+            return iqFactory.createNaryIQTree(union.getNode(), newChildren);
+        }
+        return iqFactory.createUnaryIQTree(this, newChild);
     }
 
     @Override

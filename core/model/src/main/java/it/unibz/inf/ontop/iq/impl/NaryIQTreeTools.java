@@ -16,6 +16,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -42,6 +44,10 @@ public class NaryIQTreeTools {
 
         public ImmutableSet<Variable> projectedVariables() {
             return NaryIQTreeTools.projectedVariables(children);
+        }
+
+        public ImmutableList<IQTree> transformChildren(java.util.function.UnaryOperator<IQTree> transformer) {
+            return NaryIQTreeTools.transformChildren(children, transformer);
         }
     }
 
@@ -80,12 +86,10 @@ public class NaryIQTreeTools {
                     : new UnionDecomposition();
         }
 
-        public static UnionDecomposition withAChildWithLiftableDefinition(IQTree tree, Variable variable) {
-            UnionDecomposition union = of(tree);
-            return union.isPresent()
-                    && union.getNode().hasAChildWithLiftableDefinition(variable, union.getChildren())
-                ? union
-                : new UnionDecomposition();
+        public UnionDecomposition filter(java.util.function.Predicate<UnionDecomposition> predicate) {
+            return isPresent() && predicate.test(this)
+                    ? this
+                    : new UnionDecomposition();
         }
     }
 
@@ -114,6 +118,10 @@ public class NaryIQTreeTools {
         return variableOccurrencesCount.entrySet().stream()
                 .filter(e -> e.getValue() > 1)
                 .map(Map.Entry::getKey);
+    }
+
+    public static <T> ImmutableList<T> transformChildren(ImmutableList<IQTree> children, Function<IQTree, T> transformer) {
+        return children.stream().map(transformer).collect(ImmutableCollectors.toList());
     }
 
     public static ImmutableList<IQTree> replaceChild(ImmutableList<IQTree> children, int index, IQTree newChild) {

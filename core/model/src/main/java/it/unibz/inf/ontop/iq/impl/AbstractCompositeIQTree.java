@@ -308,9 +308,9 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
         if (equals(subTreeToReplace))
             return newSubTree;
 
-        ImmutableList<IQTree> newChildren = getChildren().stream()
-                .map(c -> c.replaceSubTree(subTreeToReplace, newSubTree))
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(
+                getChildren(),
+                c -> c.replaceSubTree(subTreeToReplace, newSubTree));
 
         return createIQTree(newChildren);
     }

@@ -227,9 +227,9 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
 
             @Override
             public SQLExpression transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-                ImmutableList<SQLExpression> joinedExpressions = tree.getChildren().stream()
-                        .map(c -> convertIntoFromExpression(c))
-                        .collect(ImmutableCollectors.toList());
+                ImmutableList<SQLExpression> joinedExpressions = NaryIQTreeTools.transformChildren(
+                        tree.getChildren(),
+                        c -> convertIntoFromExpression(c));
 
                 return sqlAlgebraFactory.createSQLNaryJoinExpression(joinedExpressions);
             }
@@ -237,9 +237,9 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
             @Override
             public SQLExpression transformUnion(NaryIQTree tree, UnionNode unionNode, ImmutableList<IQTree> children) {
                 ImmutableSortedSet<Variable> signature = getSignature(tree);
-                ImmutableList<SQLExpression> subExpressions = tree.getChildren().stream()
-                        .map(e-> convert(e, signature))
-                        .collect(ImmutableCollectors.toList());
+                ImmutableList<SQLExpression> subExpressions = NaryIQTreeTools.transformChildren(
+                        tree.getChildren(),
+                        c -> convert(c, signature));
                 return sqlAlgebraFactory.createSQLUnionExpression(subExpressions, unionNode.getVariables());
             }
 

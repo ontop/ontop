@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.rightSpecificVariables;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
+import static it.unibz.inf.ontop.iq.impl.NaryIQTreeTools.replaceChild;
 
 
 public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
@@ -190,9 +191,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                                     iqTreeTools.createOptionalConstructionNode(constructionNode.getChildVariables(), grandChild),
                                     grandChild);
 
-                    var provisionalNewChildren = IntStream.range(0, children.size())
-                            .mapToObj(i -> i == position ? selectedGrandChildWithLimitedProjection : children.get(i))
-                            .collect(ImmutableCollectors.toList());
+                    var provisionalNewChildren = replaceChild(children, position, selectedGrandChildWithLimitedProjection);
 
                     var bindingLift = bindingLifter.liftRegularChildBinding(
                             constructionNode,
