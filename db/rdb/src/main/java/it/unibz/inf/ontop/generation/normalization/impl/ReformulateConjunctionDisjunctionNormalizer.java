@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -80,9 +81,9 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
                 return super.transformInnerJoin(tree, rootNode, children);
 
             return iqTreeTools.createInnerJoinTree(Optional.of((ImmutableExpression) newExpression.get()),
-                    children.stream()
-                            .map(child -> child.acceptTransformer(this))
-                            .collect(ImmutableCollectors.toList()));
+                    NaryIQTreeTools.transformChildren(
+                            children,
+                            c -> c.acceptTransformer(this)));
         }
 
         @Override

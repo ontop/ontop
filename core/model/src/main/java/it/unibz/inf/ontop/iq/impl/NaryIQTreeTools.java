@@ -46,7 +46,7 @@ public class NaryIQTreeTools {
             return NaryIQTreeTools.projectedVariables(children);
         }
 
-        public ImmutableList<IQTree> transformChildren(java.util.function.UnaryOperator<IQTree> transformer) {
+        public ImmutableList<IQTree> transformChildren(UnaryOperator<IQTree> transformer) {
             return NaryIQTreeTools.transformChildren(children, transformer);
         }
     }
