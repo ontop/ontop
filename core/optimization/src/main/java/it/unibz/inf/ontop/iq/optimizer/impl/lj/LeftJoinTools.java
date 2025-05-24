@@ -52,8 +52,8 @@ public class LeftJoinTools {
         IQTree minusTree = iqTreeTools.unaryIQTreeBuilder()
                 .append(iqFactory.createConstructionNode(ImmutableSet.of(rightProvenance.getProvenanceVariable())))
                 .append(iqFactory.createFilterNode(filterCondition))
-                .build(iqFactory.createBinaryNonCommutativeIQTree(
-                        iqFactory.createLeftJoinNode(),
+                .build(iqTreeTools.createLeftJoinTree(
+                        Optional.empty(),
                         tree,
                         rightProvenance.getRightTree()));
 

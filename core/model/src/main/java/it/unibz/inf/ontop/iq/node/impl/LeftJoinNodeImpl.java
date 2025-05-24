@@ -222,8 +222,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
                 return updatedRightChild.isDeclaredAsEmpty()
                         ? updatedLeftChild
-                        : iqFactory.createBinaryNonCommutativeIQTree(
-                                iqFactory.createLeftJoinNode(expressionAndCondition.getOptionalExpression()),
+                        : iqTreeTools.createLeftJoinTree(
+                                expressionAndCondition.getOptionalExpression(),
                                 updatedLeftChild, updatedRightChild);
             }
             catch (UnsatisfiableConditionException e) {
@@ -262,12 +262,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         IQTree newLeftChild = leftChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
         IQTree newRightChild = rightChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
 
-        LeftJoinNode newLJNode = getOptionalFilterCondition()
-                .map(descendingSubstitution::apply)
-                .map(iqFactory::createLeftJoinNode)
-                .orElse(this);
+        Optional<ImmutableExpression> newJoinCondition = getOptionalFilterCondition()
+                .map(descendingSubstitution::apply);
 
-        return iqFactory.createBinaryNonCommutativeIQTree(newLJNode, newLeftChild, newRightChild);
+        return iqTreeTools.createLeftJoinTree(newJoinCondition, newLeftChild, newRightChild);
     }
 
     @Override

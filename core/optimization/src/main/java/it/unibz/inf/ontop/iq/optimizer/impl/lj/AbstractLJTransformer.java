@@ -65,8 +65,7 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
                                         .normalizeForOptimization(variableGenerator);
 
         return furtherTransformLeftJoin(rootNode, transformedLeftChild, transformedRightChild)
-                .orElseGet(() -> transformedLeftChild.equals(leftChild)
-                        && transformedRightChild.equals(rightChild)
+                .orElseGet(() -> transformedLeftChild.equals(leftChild) && transformedRightChild.equals(rightChild)
                                 ? tree
                                 : iqFactory.createBinaryNonCommutativeIQTree(rootNode, transformedLeftChild, transformedRightChild))
                                         .normalizeForOptimization(variableGenerator);

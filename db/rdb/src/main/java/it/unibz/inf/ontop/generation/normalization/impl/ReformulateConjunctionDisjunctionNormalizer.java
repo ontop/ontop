@@ -67,8 +67,8 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
             if (newExpression.isEmpty() || newExpression.equals(expression))
                 return super.transformLeftJoin(tree, rootNode, leftChild, rightChild);
 
-            return iqFactory.createBinaryNonCommutativeIQTree(
-                    iqFactory.createLeftJoinNode((ImmutableExpression) newExpression.get()),
+            return iqTreeTools.createLeftJoinTree(
+                    Optional.of((ImmutableExpression) newExpression.get()),
                     leftChild.acceptTransformer(this),
                     rightChild.acceptTransformer(this));
         }

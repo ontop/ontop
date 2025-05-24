@@ -145,8 +145,8 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
             return iqFactory.createUnaryIQTree(
                         iqFactory.createConstructionNode(tree.getVariables()),
-                        iqFactory.createBinaryNonCommutativeIQTree(
-                                iqFactory.createLeftJoinNode(updatedJoinCondition),
+                        iqTreeTools.createLeftJoinTree(
+                                updatedJoinCondition,
                                 updatedChildren.get(0),
                                 updatedChildren.get(1)));
         }
@@ -238,11 +238,10 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             var rightFilter = UnaryIQTreeDecomposition.of(rightChild, FilterNode.class);
 
             if (leftFilter.isPresent() || rightFilter.isPresent()) {
-                IQTree leftJoinTree = iqFactory.createBinaryNonCommutativeIQTree(
-                        iqFactory.createLeftJoinNode(
-                                iqTreeTools.getConjunction(
+                IQTree leftJoinTree = iqTreeTools.createLeftJoinTree(
+                       iqTreeTools.getConjunction(
                                         rootNode.getOptionalFilterCondition(),
-                                        rightFilter.getOptionalNode().map(FilterNode::getFilterCondition))),
+                                        rightFilter.getOptionalNode().map(FilterNode::getFilterCondition)),
                         leftFilter.getTail(),
                         rightFilter.getTail());
 

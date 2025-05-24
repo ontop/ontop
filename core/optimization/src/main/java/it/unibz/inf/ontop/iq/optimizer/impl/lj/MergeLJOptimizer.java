@@ -170,8 +170,8 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
                     newLocalRightTreeBeforeRenaming = localRightProvenance.getRightTree();
                 }
 
-                IQTree newLocalTree = iqFactory.createBinaryNonCommutativeIQTree(
-                        iqFactory.createLeftJoinNode(), leftLJ.leftChild(), newLocalRightTreeBeforeRenaming.applyFreshRenaming(renaming));
+                IQTree newLocalTree = iqTreeTools.createLeftJoinTree(
+                        Optional.empty(), leftLJ.leftChild(), newLocalRightTreeBeforeRenaming.applyFreshRenaming(renaming));
 
                 IQTree newLJTree = ancestors.stream()
                         .reduce(newLocalTree, (t, a) ->

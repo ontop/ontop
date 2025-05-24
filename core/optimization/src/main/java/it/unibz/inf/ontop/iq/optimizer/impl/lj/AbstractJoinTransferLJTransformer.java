@@ -264,8 +264,8 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
         RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(
                 simplifiedRightChild, newLeftChild.getVariables(), newLeftJoinCondition, variableGenerator);
 
-        BinaryNonCommutativeIQTree newLeftJoinTree = iqFactory.createBinaryNonCommutativeIQTree(
-                iqFactory.createLeftJoinNode(newLeftJoinCondition),
+        BinaryNonCommutativeIQTree newLeftJoinTree = iqTreeTools.createLeftJoinTree(
+                newLeftJoinCondition,
                 newLeftChild, rightProvenance.getRightTree());
 
         Variable provenanceVariable = rightProvenance.getProvenanceVariable();

@@ -151,6 +151,10 @@ public class IQTreeTools {
         return iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(), children);
     }
 
+    public BinaryNonCommutativeIQTree createLeftJoinTree(Optional<ImmutableExpression> filter, IQTree leftChild, IQTree rightChild) {
+        return iqFactory.createBinaryNonCommutativeIQTree(iqFactory.createLeftJoinNode(filter), leftChild, rightChild);
+    }
+
     public <T extends UnaryOperatorNode> UnaryIQTreeBuilder<T> unaryIQTreeBuilder() {
         return new UnaryIQTreeBuilder<>(iqFactory, ImmutableList.of(), ImmutableMap.of());
     }

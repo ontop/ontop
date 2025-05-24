@@ -164,11 +164,7 @@ public class QueryTemplateExtractor {
             Optional<ImmutableExpression> newCondition = rootNode.getOptionalFilterCondition()
                     .flatMap(this::transformFilterCondition);
 
-            LeftJoinNode newRootNode = newCondition
-                    .map(c -> iqFactory.createLeftJoinNode(newCondition))
-                    .orElse(rootNode);
-
-            return iqFactory.createBinaryNonCommutativeIQTree(newRootNode, newLeft, newRight);
+            return iqTreeTools.createLeftJoinTree(newCondition, newLeft, newRight);
         }
 
         @Override

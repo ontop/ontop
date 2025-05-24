@@ -444,7 +444,7 @@ public class RDF4JTupleExprTranslator {
                 iqTreeTools.unaryIQTreeBuilder()
                         .append(iqFactory.createConstructionNode(leftTranslation.iqTree.getVariables()))
                         .append(iqFactory.createFilterNode(filter))
-                        .build(iqFactory.createBinaryNonCommutativeIQTree(iqFactory.createLeftJoinNode(ljCond),
+                        .build(iqTreeTools.createLeftJoinTree(Optional.of(ljCond),
                                 applyInDepthRenaming(leftTranslation.iqTree, leftNonProjVarsRenaming),
                                 applyInDepthRenaming(
                                         rightTranslation.iqTree.applyFreshRenaming(sharedVarsRenaming),
@@ -506,7 +506,7 @@ public class RDF4JTupleExprTranslator {
                     .map(c -> topSubstitution.apply(getFilterExpression(c, variables)));
             Optional<ImmutableExpression> joinCondition = termFactory.getConjunction(filterExpression, coalescingStream);
 
-            joinTree = iqFactory.createBinaryNonCommutativeIQTree(iqFactory.createLeftJoinNode(joinCondition), leftTree, rightTree);
+            joinTree = iqTreeTools.createLeftJoinTree(joinCondition, leftTree, rightTree);
 
             nullableVariables = Sets.union(nullableVariablesLeftOrRight, Sets.difference(rightTranslation.iqTree.getVariables(), sharedVariables)).immutableCopy();
         }

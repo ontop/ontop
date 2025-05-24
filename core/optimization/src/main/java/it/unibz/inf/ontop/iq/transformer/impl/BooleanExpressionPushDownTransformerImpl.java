@@ -69,8 +69,8 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
                 rootNode.getOptionalFilterCondition().get(),
                 this::pushExpressionDownIfContainsVariables);
 
-        return iqFactory.createBinaryNonCommutativeIQTree(
-                iqFactory.createLeftJoinNode(result.nonPushedExpression),
+        return iqTreeTools.createLeftJoinTree(
+                result.nonPushedExpression,
                 transformedLeftChild,
                 result.result);
     }

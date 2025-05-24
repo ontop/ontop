@@ -8,6 +8,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerImpl;
@@ -112,13 +113,11 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             var treeVariables = tree.getVariables();
 
-            var leftVariables = leftChild.getVariables();
-
-            if (treeVariables.isEmpty() || leftVariables.containsAll(Sets.intersection(variablesUsedByAncestors, treeVariables)))
+            if (treeVariables.isEmpty() || leftChild.getVariables().containsAll(Sets.intersection(variablesUsedByAncestors, treeVariables)))
                 // Prunes the right child
                 return leftChild.acceptTransformer(this);
 
-            var commonVariables = Sets.intersection(leftVariables, rightChild.getVariables());
+            var commonVariables = BinaryNonCommutativeIQTreeTools.commonVariables(leftChild, rightChild);
 
             var newVariablesUsed = rootNode.getOptionalFilterCondition()
                     .map(ImmutableFunctionalTerm::getVariables)
