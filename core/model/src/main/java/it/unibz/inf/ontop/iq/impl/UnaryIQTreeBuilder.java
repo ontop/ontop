@@ -58,6 +58,13 @@ public class UnaryIQTreeBuilder<T extends UnaryOperatorNode> {
         return this;
     }
 
+    public UnaryIQTreeBuilder<T> append(Stream<T> stream) {
+        return new UnaryIQTreeBuilder<>(
+                iqFactory,
+                Stream.concat(list.stream(), stream).collect(ImmutableCollectors.toList()),
+                treeCacheMap);
+    }
+
     public UnaryIQTreeBuilder<T> append(IQTreeTools.UnaryOperatorSequence<? extends T> sequence) {
         return sequence.stream()
                 .reduce(this, UnaryIQTreeBuilder<T>::append,

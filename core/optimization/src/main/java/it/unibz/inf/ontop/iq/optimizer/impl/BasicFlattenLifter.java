@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.FlattenLifter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -16,7 +17,6 @@ import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.NestedUnaryIQTreeDecomposition;
 
 public class BasicFlattenLifter implements FlattenLifter {
 
@@ -46,36 +46,38 @@ public class BasicFlattenLifter implements FlattenLifter {
         @Override
         public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
             IQTree updatedChild = transformChild(child);
-            NestedUnaryIQTreeDecomposition<FlattenNode> flattenSubtree = flattenSubtreeOf(updatedChild);
-            if (flattenSubtree.getSequence().isEmpty()) {
+            State flattenSubtree = decompose(updatedChild);
+            if (flattenSubtree.liftableFlatten.isEmpty())
                 return iqFactory.createUnaryIQTree(rootNode, updatedChild);
-            }
 
-            NestedUnaryIQTreeDecomposition<FlattenNode> subtree = rootNode.getFilterCondition().flattenAND()
+            State subtree = rootNode.getFilterCondition().flattenAND()
                     .collect(simpleAccumulatorOf(
                             flattenSubtree,
-                            (t, c) -> {
-                                ImmutableSet<Variable> blockingVars = c.getVariables();
-                                FlattenSplit split = split(t, blockingVars);
-                                return split.insertAboveNonLiftable(iqFactory.createFilterNode(c));
+                            (t, conjunct) -> {
+                                State split = split(t.liftableFlatten, t.tail, conjunct.getVariables());
+                                return split.insertAboveNonLiftable(iqFactory.createFilterNode(conjunct));
                             }));
 
-            return asIQTree(subtree);
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(subtree.liftableFlatten)
+                    .build(subtree.tail);
         }
 
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode cn, IQTree child) {
             IQTree updatedChild = transformChild(child);
-            if (tree.getRootNode().equals(cn)) {
+            if (tree.getRootNode().equals(cn))
                 return iqFactory.createUnaryIQTree(cn, updatedChild);
-            }
 
-            FlattenSplit split = splitOf(updatedChild, ImmutableSet.of());
-            NestedUnaryIQTreeDecomposition<FlattenNode> subtree = split.insertAboveNonLiftable(
+            State split = splitOf(updatedChild, ImmutableSet.of());
+            ConstructionNode constructionNode =
                     split.liftableFlatten.stream()
-                            .collect(simpleAccumulatorOf(cn, this::updateConstructionNode)));
+                            .collect(simpleAccumulatorOf(cn, this::updateConstructionNode));
 
-            return asIQTree(subtree);
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(split.liftableFlatten)
+                    .append(constructionNode)
+                    .build(split.nonLiftableSubtree());
         }
 
         private ConstructionNode updateConstructionNode(ConstructionNode cn, FlattenNode fn) {
@@ -94,20 +96,18 @@ public class BasicFlattenLifter implements FlattenLifter {
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode join, ImmutableList<IQTree> initialChildren) {
             ImmutableList<IQTree> children = transformChildren(initialChildren);
 
-            ImmutableSet<Variable> blockingVars = getImplicitJoinCondition(children);
+            ImmutableSet<Variable> blockingVars = NaryIQTreeTools.coOccurringVariablesStream(children)
+                    .collect(ImmutableCollectors.toSet());
 
-            ImmutableList<FlattenSplit> splits = children.stream()
-                    .map(c -> splitOf(c, blockingVars))
-                    .collect(ImmutableCollectors.toList());
+            ImmutableList<State> splits = NaryIQTreeTools.transformChildren(children,
+                    c -> splitOf(c, blockingVars));
 
-            NestedUnaryIQTreeDecomposition<FlattenNode> subtree = NestedUnaryIQTreeDecomposition.of(
-                    UnaryOperatorSequence.of(splits.stream()
-                            .flatMap(fs -> fs.liftableFlatten.stream())),
-                    iqFactory.createNaryIQTree(join, splits.stream()
-                            .map(FlattenSplit::nonLiftableSubtree)
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(splits.stream()
+                            .flatMap(fs -> fs.liftableFlatten.stream()))
+                    .build(iqFactory.createNaryIQTree(join, splits.stream()
+                            .map(State::nonLiftableSubtree)
                             .collect(ImmutableCollectors.toList())));
-
-            return asIQTree(subtree);
         }
 
         /**
@@ -121,87 +121,92 @@ public class BasicFlattenLifter implements FlattenLifter {
             IQTree rightChild = transformChild(initialRightChild);
 
             // all variables involved in the joining condition are blocking
-            ImmutableSet<Variable> blockingVars = Sets.union(
-                    getImplicitJoinCondition(ImmutableList.of(leftChild, rightChild)),
-                    rootNode.getLocallyRequiredVariables()
-            ).immutableCopy();
+            ImmutableSet<Variable> blockingVars = Stream.concat(
+                    NaryIQTreeTools.coOccurringVariablesStream(ImmutableList.of(leftChild, rightChild)),
+                    rootNode.getLocallyRequiredVariables().stream())
+                    .collect(ImmutableCollectors.toSet());
 
-            FlattenSplit leftSplit = splitOf(leftChild, blockingVars);
-            FlattenSplit rightSplit = splitOf(rightChild, blockingVars);
+            State leftSplit = splitOf(leftChild, blockingVars);
+            State rightSplit = splitOf(rightChild, blockingVars);
 
-            NestedUnaryIQTreeDecomposition<FlattenNode> subtree = NestedUnaryIQTreeDecomposition.of(
-                    UnaryOperatorSequence.of(Stream.of(leftSplit, rightSplit)
-                                    .flatMap(c -> c.liftableFlatten.stream())),
-                    iqFactory.createBinaryNonCommutativeIQTree(
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(Stream.of(leftSplit, rightSplit)
+                        .flatMap(c -> c.liftableFlatten.stream()))
+                    .build(iqFactory.createBinaryNonCommutativeIQTree(
                             rootNode,
                             leftSplit.nonLiftableSubtree(),
                             rightSplit.nonLiftableSubtree()));
-
-            return asIQTree(subtree);
         }
 
-        private ImmutableSet<Variable> getImplicitJoinCondition(ImmutableList<IQTree> children) {
-            return children.stream()
-                    .flatMap(n -> n.getVariables().stream())
-                    .collect(ImmutableCollectors.toMultiset())
-                    .entrySet().stream()
-                    .filter(e -> e.getCount() > 1)
-                    .map(Multiset.Entry::getElement)
-                    .collect(ImmutableCollectors.toSet());
-        }
     }
 
-    private FlattenSplit split(NestedUnaryIQTreeDecomposition<FlattenNode> decomposition, ImmutableSet<Variable> blockingVars) {
-        return decomposition.getSequence().stream()
+    private State split(UnaryOperatorSequence<FlattenNode> sequence, IQTree tail, ImmutableSet<Variable> blockingVars) {
+        return sequence.stream()
                 .collect(simpleAccumulatorOf(
-                        new FlattenSplit(UnaryOperatorSequence.of(), NestedUnaryIQTreeDecomposition.of(UnaryOperatorSequence.of(), decomposition.getChild()), blockingVars),
-                        FlattenSplit::addFlattenNode));
-    }
-
-    private IQTree asIQTree(NestedUnaryIQTreeDecomposition<FlattenNode> decomposition) {
-        return iqTreeTools.unaryIQTreeBuilder().append(decomposition.getSequence()).build(decomposition.getChild());
-    }
-
-    private NestedUnaryIQTreeDecomposition<FlattenNode> flattenSubtreeOf(IQTree tree) {
-        return NestedUnaryIQTreeDecomposition.of(tree, FlattenNode.class);
+                        new State(UnaryOperatorSequence.of(), UnaryOperatorSequence.of(), tail, blockingVars),
+                        State::append));
     }
 
 
-    private class FlattenSplit {
+    private State decompose(IQTree tree) {
+        var list = Stream.iterate(
+                        IQTreeTools.UnaryIQTreeDecomposition.of(tree, FlattenNode.class),
+                        IQTreeTools.UnaryIQTreeDecomposition::isPresent,
+                        d -> IQTreeTools.UnaryIQTreeDecomposition.of(d.getChild(), FlattenNode.class))
+                .collect(ImmutableCollectors.toList());
+
+        return new State(
+               UnaryOperatorSequence.of(
+                        list.stream()
+                                .map(IQTreeTools.UnaryIQTreeDecomposition::getNode)),
+                UnaryOperatorSequence.of(),
+                list.isEmpty() ? tree : list.get(list.size() - 1).getChild(),
+                ImmutableSet.of());
+    }
+
+
+    private class State {
         private final UnaryOperatorSequence<FlattenNode> liftableFlatten;
-        private final NestedUnaryIQTreeDecomposition<FlattenNode> nonLiftableFlatten;
+        private final UnaryOperatorSequence<UnaryOperatorNode> nonLiftableUnary;
+        private final IQTree tail;
         private final ImmutableSet<Variable> blockingVars;
 
-        FlattenSplit(UnaryOperatorSequence<FlattenNode> liftableFlatten, NestedUnaryIQTreeDecomposition<FlattenNode> nonLiftableFlatten, ImmutableSet<Variable> blockingVars) {
+        State(UnaryOperatorSequence<FlattenNode> liftableFlatten, UnaryOperatorSequence<UnaryOperatorNode> nonLiftableUnary, IQTree tail, ImmutableSet<Variable> blockingVars) {
             this.liftableFlatten = liftableFlatten;
-            this.nonLiftableFlatten = nonLiftableFlatten;
+            this.nonLiftableUnary = nonLiftableUnary;
+            this.tail = tail;
             this.blockingVars = blockingVars;
         }
 
-        FlattenSplit addFlattenNode(FlattenNode fn) {
+        State append(FlattenNode fn) {
             return Sets.intersection(fn.getLocallyDefinedVariables(), blockingVars).isEmpty()
-                    ? new FlattenSplit(
+                    ? new State(
                         liftableFlatten.append(fn),
-                        nonLiftableFlatten,
+                        nonLiftableUnary,
+                        tail,
                         blockingVars)
-                    : new FlattenSplit(
+                    : new State(
                         liftableFlatten,
-                        nonLiftableFlatten.append(fn),
+                        nonLiftableUnary.append(fn),
+                        tail,
                         Stream.concat(blockingVars.stream(), Stream.of(fn.getFlattenedVariable())).collect(ImmutableCollectors.toSet()));
         }
 
         IQTree nonLiftableSubtree() {
-            return iqTreeTools.unaryIQTreeBuilder().append(nonLiftableFlatten.getSequence()).build(nonLiftableFlatten.getChild());
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(nonLiftableUnary)
+                    .build(tail);
         }
 
-        NestedUnaryIQTreeDecomposition<FlattenNode> insertAboveNonLiftable(UnaryOperatorNode node) {
-            return NestedUnaryIQTreeDecomposition.of(liftableFlatten,
-                    iqFactory.createUnaryIQTree(node, nonLiftableSubtree()));
+        State insertAboveNonLiftable(UnaryOperatorNode node) {
+            return new State(liftableFlatten, UnaryOperatorSequence.of(),
+                    iqFactory.createUnaryIQTree(node, nonLiftableSubtree()), ImmutableSet.of());
         }
     }
 
-    private FlattenSplit splitOf(IQTree tree, ImmutableSet<Variable> blockingVars) {
-        return split(flattenSubtreeOf(tree), blockingVars);
+    private State splitOf(IQTree tree, ImmutableSet<Variable> blockingVars) {
+        var f = decompose(tree);
+        return split(f.liftableFlatten, f.tail, blockingVars);
     }
 
     private static <T,A> Collector<T,?,A> simpleAccumulatorOf(A initial, BiFunction<A,T,A> function) {
