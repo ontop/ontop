@@ -78,7 +78,8 @@ public class ExtensionalDataNodeListContainmentCheck {
     }
 
     private Optional<ChasedExtensionalDataNode> chase(ForeignKeyConstraint fk, ChasedExtensionalDataNode node, VariableGenerator variableGenerator, ImmutableSet<Variable> nonNullableVariables) {
-        if (fk.getComponents().stream().anyMatch(c -> c.getAttribute().isNullable() && !nonNullableVariables.contains(node.getArgument(c.getAttribute().getIndex() - 1))))
+        if (fk.getComponents().stream().anyMatch(c -> c.getAttribute().isNullable()
+                && !nonNullableVariables.contains(node.getArgument(c.getAttribute().getIndex() - 1))))
             return Optional.empty();
 
         ImmutableMap<Integer, VariableOrGroundTerm> referencedArgumentMap = fk.getComponents().stream()
