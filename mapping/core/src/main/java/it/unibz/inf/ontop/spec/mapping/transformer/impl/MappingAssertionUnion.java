@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.constraints.Homomorphism;
 import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeHomomorphismIteratorImpl;
 import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeListContainmentCheck;
+import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -33,15 +34,6 @@ import java.util.stream.Stream;
 
 public class MappingAssertionUnion {
 
-    public static Collector<MappingAssertion, MappingAssertionUnion, Optional<MappingAssertion>> toMappingAssertion(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger) {
-        return Collector.of(
-                () -> new MappingAssertionUnion(cqc, coreSingletons, queryMerger), // Supplier
-                MappingAssertionUnion::add, // Accumulator
-                (b1, b2) -> { throw new MinorOntopInternalBugException("no merge"); }, // Merger
-                MappingAssertionUnion::build, // Finisher
-                Collector.Characteristics.UNORDERED);
-    }
-
     private final List<ConjunctiveIQ> conjunctiveIqs = new ArrayList<>();
     private final List<IQ> otherIqs = new ArrayList<>();
     private final ExtensionalDataNodeListContainmentCheck cqc;
@@ -50,16 +42,16 @@ public class MappingAssertionUnion {
     private final HomomorphismFactory homomorphismFactory;
     private final CoreSingletons coreSingletons;
     private final UnionBasedQueryMerger queryMerger;
-    private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
+    private final TermNullabilityEvaluator termNullabilityEvaluator;
 
-    public MappingAssertionUnion(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger) {
+    public MappingAssertionUnion(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger, TermNullabilityEvaluator termNullabilityEvaluator) {
         this.cqc = cqc;
         this.termFactory = coreSingletons.getTermFactory();
         this.iqFactory = coreSingletons.getIQFactory();
         this.homomorphismFactory = coreSingletons.getHomomorphismFactory();
         this.coreSingletons = coreSingletons;
         this.queryMerger = queryMerger;
-        this.dbFunctionSymbolFactory = coreSingletons.getFunctionSymbolFactory().getDBFunctionSymbolFactory();
+        this.termNullabilityEvaluator = termNullabilityEvaluator;
     }
 
     public MappingAssertionUnion add(MappingAssertion assertion) {
@@ -191,10 +183,9 @@ public class MappingAssertionUnion {
         }
 
         private Stream<Variable> getNonNullableVariables(ImmutableExpression a) {
-            if (a.getFunctionSymbol().equals(dbFunctionSymbolFactory.getDBIsNotNull()))
-                return a.getVariableStream();
-
-            return Stream.of();
+            return a.getTerms().stream()
+                    .flatMap(ImmutableTerm::getVariableStream)
+                            .filter(v -> termNullabilityEvaluator.isFilteringNullValue(a, v));
         }
 
         IQ asIQ() {
@@ -482,6 +473,7 @@ public class MappingAssertionUnion {
         return Optional.of(new ExtensionalDataNodeHomomorphismIteratorImpl(
                 h,
                 from.getDatabaseAtoms(),
+
                 cqc.chase(to.getDatabaseAtoms(), to.getNonNullableVariables())));
     }
 

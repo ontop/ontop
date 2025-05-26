@@ -101,7 +101,7 @@ public class MappingAssertionMergeWithCQCTest {
         IQ affiliatedWriterIQ = getAffiliatedWritersIQ(ImmutableMap.of(0, C));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
         entry.add(new MappingAssertion(authorIQ, null));
         entry.add(new MappingAssertion(affiliatedWriterIQ, null));
         MappingAssertion result = entry.build().get();
@@ -115,7 +115,7 @@ public class MappingAssertionMergeWithCQCTest {
         IQ affiliatedWriterIQ = getAffiliatedWritersIQ(ImmutableMap.of(0, C));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
         entry.add(new MappingAssertion(affiliatedWriterIQ, null));
         entry.add(new MappingAssertion(authorIQ, null));
         MappingAssertion result = entry.build().get();
@@ -149,7 +149,7 @@ public class MappingAssertionMergeWithCQCTest {
         IQ studentIQ2 = getStudentIQ(ImmutableMap.of(0, C, 2, B));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
         entry.add(new MappingAssertion(studentIQ1, null));
         entry.add(new MappingAssertion(studentIQ2, null));
         MappingAssertion result = entry.build().get();
@@ -163,7 +163,7 @@ public class MappingAssertionMergeWithCQCTest {
         IQ studentIQ2 = getStudentIQ(ImmutableMap.of(0, C, 2, B));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
         entry.add(new MappingAssertion(studentIQ2, null));
         entry.add(new MappingAssertion(studentIQ1, null));
         MappingAssertion result = entry.build().get();
@@ -201,7 +201,7 @@ public class MappingAssertionMergeWithCQCTest {
                                 IQ_FACTORY.createExtensionalDataNode(TABLE_ADDRESS, ImmutableMap.of(0, C, 1, B)))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
         entry.add(new MappingAssertion(addressIQ1, null));
         entry.add(new MappingAssertion(addressIQ2, null));
         MappingAssertion result = entry.build().get();
@@ -229,7 +229,7 @@ public class MappingAssertionMergeWithCQCTest {
                                 IQ_FACTORY.createExtensionalDataNode(TABLE_ADDRESS, ImmutableMap.of(0, C, 1, B)))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
         entry.add(new MappingAssertion(addressIQ2, null));
         entry.add(new MappingAssertion(addressIQ1, null));
         MappingAssertion result = entry.build().get();
@@ -259,7 +259,7 @@ public class MappingAssertionMergeWithCQCTest {
                                 IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 3, B)))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
         entry.add(new MappingAssertion(studentIQ1, null));
         entry.add(new MappingAssertion(studentIQ2, null));
         MappingAssertion result = entry.build().get();
@@ -298,7 +298,7 @@ public class MappingAssertionMergeWithCQCTest {
                                 IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 3, B)))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
         entry.add(new MappingAssertion(studentIQ1, null));
         entry.add(new MappingAssertion(studentIQ2, null));
         MappingAssertion result = entry.build().get();
@@ -342,7 +342,7 @@ public class MappingAssertionMergeWithCQCTest {
                                 IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 4, B)))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
         entry.add(new MappingAssertion(studentIQ1, null));
         entry.add(new MappingAssertion(studentIQ2, null));
         MappingAssertion result = entry.build().get();
@@ -389,7 +389,7 @@ public class MappingAssertionMergeWithCQCTest {
                                 IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 4, B)))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
         entry.add(new MappingAssertion(studentIQ2, null));
         entry.add(new MappingAssertion(studentIQ1, null));
         MappingAssertion result = entry.build().get();
@@ -440,7 +440,7 @@ public class MappingAssertionMergeWithCQCTest {
                                 IQ_FACTORY.createExtensionalDataNode(TABLE_STUDENT, ImmutableMap.of(0, C, 3, A, 4, B)))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
         entry.add(new MappingAssertion(studentIQ1, null));
         entry.add(new MappingAssertion(studentIQ2, null));
         MappingAssertion result = entry.build().get();
@@ -491,7 +491,7 @@ public class MappingAssertionMergeWithCQCTest {
                                         ImmutableMap.of(B, TERM_FACTORY.getDBIntegerConstant(3))))))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
         entry.add(new MappingAssertion(studentIQ1, null));
         entry.add(new MappingAssertion(studentIQ2, null));
         MappingAssertion result = entry.build().get();
@@ -527,7 +527,7 @@ public class MappingAssertionMergeWithCQCTest {
                                         ImmutableMap.of(B, TERM_FACTORY.getDBIntegerConstant(3))))))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
         entry.add(new MappingAssertion(studentIQ2, null));
         entry.add(new MappingAssertion(studentIQ1, null));
         MappingAssertion result = entry.build().get();
@@ -563,7 +563,7 @@ public class MappingAssertionMergeWithCQCTest {
                                         ImmutableMap.of(B, TERM_FACTORY.getDBIntegerConstant(3))))))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
         entry.add(new MappingAssertion(studentIQ1, null));
         entry.add(new MappingAssertion(studentIQ2, null));
         MappingAssertion result = entry.build().get();
@@ -611,7 +611,7 @@ public class MappingAssertionMergeWithCQCTest {
                                         ImmutableMap.of(B, TERM_FACTORY.getDBIntegerConstant(3))))))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
         entry.add(new MappingAssertion(studentIQ2, null));
         entry.add(new MappingAssertion(studentIQ1, null));
         MappingAssertion result = entry.build().get();
@@ -682,7 +682,7 @@ public class MappingAssertionMergeWithCQCTest {
                                         MEASUREMENT_TYPE, ImmutableMap.of(0, NAME, 1, TERM_FACTORY.getDBStringConstant("[m/s]")))))));
 
         ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
-        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
         entry.add(new MappingAssertion(mDegreeCelsius, null));
         entry.add(new MappingAssertion(mMeterPerSecond, null));
         entry.add(new MappingAssertion(mMeterPerSecond2, null));
