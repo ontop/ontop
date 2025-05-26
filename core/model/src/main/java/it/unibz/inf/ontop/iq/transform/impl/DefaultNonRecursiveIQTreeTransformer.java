@@ -37,11 +37,6 @@ public abstract class DefaultNonRecursiveIQTreeTransformer implements IQTreeVisi
     }
 
     @Override
-    public IQTree transformNonStandardLeafNode(LeafIQTree leafNode) {
-        return transformLeaf(leafNode);
-    }
-
-    @Override
     public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
         return transformUnaryNode(tree, rootNode, child);
     }
@@ -77,17 +72,7 @@ public abstract class DefaultNonRecursiveIQTreeTransformer implements IQTreeVisi
     }
 
     @Override
-    public IQTree transformNonStandardUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-        return transformUnaryNode(tree, rootNode, child);
-    }
-
-    @Override
     public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        return transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild);
-    }
-
-    @Override
-    public IQTree transformNonStandardBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
         return transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild);
     }
 
@@ -98,11 +83,6 @@ public abstract class DefaultNonRecursiveIQTreeTransformer implements IQTreeVisi
 
     @Override
     public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        return transformNaryCommutativeNode(tree, rootNode, children);
-    }
-
-    @Override
-    public IQTree transformNonStandardNaryNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
         return transformNaryCommutativeNode(tree, rootNode, children);
     }
 

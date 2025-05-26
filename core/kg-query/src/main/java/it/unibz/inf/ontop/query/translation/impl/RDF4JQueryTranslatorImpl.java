@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.query.translation.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.OntopKGQuerySettings;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -21,7 +22,6 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -45,6 +45,7 @@ import java.util.*;
 @Singleton
 public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
+    private final CoreSingletons coreSingletons;
     private final CoreUtilsFactory coreUtilsFactory;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
@@ -52,7 +53,6 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     private final IntermediateQueryFactory iqFactory;
     private final AtomFactory atomFactory;
     private final RDF rdfFactory;
-    private final FunctionSymbolFactory functionSymbolFactory;
     private final InsertClauseNormalizer insertClauseNormalizer;
 
     private final IQTreeTools iqTreeTools;
@@ -61,18 +61,19 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     private static final boolean IS_DEBUG_ENABLED = LOGGER.isDebugEnabled();
 
     @Inject
-    public RDF4JQueryTranslatorImpl(CoreUtilsFactory coreUtilsFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory,
-                                    TypeFactory typeFactory, IntermediateQueryFactory iqFactory, AtomFactory atomFactory, RDF rdfFactory,
-                                    FunctionSymbolFactory functionSymbolFactory,
-                                    InsertClauseNormalizer insertClauseNormalizer, IQTreeTools iqTreeTools, OntopKGQuerySettings settings) {
-        this.coreUtilsFactory = coreUtilsFactory;
-        this.termFactory = termFactory;
-        this.substitutionFactory = substitutionFactory;
-        this.typeFactory = typeFactory;
-        this.iqFactory = iqFactory;
-        this.atomFactory = atomFactory;
+    public RDF4JQueryTranslatorImpl(CoreSingletons coreSingletons,
+                                    RDF rdfFactory,
+                                    InsertClauseNormalizer insertClauseNormalizer,
+                                    IQTreeTools iqTreeTools,
+                                    OntopKGQuerySettings settings) {
+        this.coreSingletons = coreSingletons;
+        this.coreUtilsFactory = coreSingletons.getCoreUtilsFactory();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.typeFactory = coreSingletons.getTypeFactory();
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.atomFactory = coreSingletons.getAtomFactory();
         this.rdfFactory = rdfFactory;
-        this.functionSymbolFactory = functionSymbolFactory;
         this.insertClauseNormalizer = insertClauseNormalizer;
         this.iqTreeTools = iqTreeTools;
         if(settings.isCustomSPARQLFunctionRegistrationEnabled()) {
@@ -267,7 +268,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private RDF4JTupleExprTranslator getTranslator(ImmutableMap<Variable, GroundTerm> externalBindings, @Nullable Dataset dataset, boolean treatBNodeAsVariable) {
-        return new RDF4JTupleExprTranslator(externalBindings, dataset, treatBNodeAsVariable, coreUtilsFactory, substitutionFactory, iqFactory, atomFactory, termFactory, functionSymbolFactory, rdfFactory, typeFactory, iqTreeTools);
+        return new RDF4JTupleExprTranslator(externalBindings, dataset, treatBNodeAsVariable, coreSingletons, rdfFactory, iqTreeTools);
     }
 
     private RDF4JValueTranslator getValueTranslator() {

@@ -25,6 +25,10 @@ mappingId	Municipality
 target		data:municipality/{istat} a :Municipality ; schema:name {name_it}@it , {name_de}@de , {name_en}@en ; schema:geo data:geo/municipality/{istat} .
 source		SELECT * FROM "source1_municipalities"
 
+mappingId	Municipality geo
+target		data:geo/municipality/{istat} a schema:GeoCoordinates ; schema:longitude {longitude} ; schema:latitude {latitude} ; schema:elevation {altitude} .
+source		SELECT * FROM "source1_municipalities"
+
 mappingId	Source 1 - lodging business
 target		data:source1/hospitality/{h_id} a schema:LodgingBusiness ; schema:name {name_en}@en , {name_it}@it , {name_de}@de ; schema:telephone {telephone} ; schema:email {email} .
 source		SELECT * FROM "source1_hospitality"
@@ -33,6 +37,10 @@ mappingId	Source 1 - lodging business - municipality
 target		data:source1/hospitality/{h_id} schema:containedInPlace data:municipality/{istat} .
 source		SELECT h.h_id, m.istat FROM "source1_hospitality" h, "source1_municipalities" m
 			WHERE h.m_id = m.m_id
+
+mappingId	Source 1 - lodging business geo
+target		data:source1/geo/hospitality/{h_id} a schema:GeoCoordinates ; schema:longitude {longitude} ; schema:latitude {latitude} ; schema:elevation {altitude} .
+source		SELECT * FROM "source1_hospitality"
 
 mappingId	Source 1 - hotel
 target		data:source1/hospitality/{h_id} a schema:Hotel .
@@ -100,6 +108,10 @@ mappingId	Source 2 lodging business - accommodation
 target		data:source2/accommodation/{id} a schema:Accommodation ; schema:name {english_title}@en , {italian_title}@it , {german_title}@de ; schema:description {german_description}@de , {italian_description}@it ; :numberOfUnits 1 ; schema:containedInPlace data:source2/hotels/{hotel} ; schema:occupancy data:source2/occupancy/accommodation/{id} .
 source		SELECT * FROM "source2_accommodation"
 
+mappingId	Source 2 lodging business geo
+target		data:source2/geo/hotels/{id} a schema:GeoCoordinates ; schema:longitude {long} ; schema:latitude {lat} ; schema:elevation {alt} .
+source		SELECT * FROM "source2_hotels"
+
 mappingId	Source 2 - room occupancy
 target		data:source2/occupancy/accommodation/{id} a schema:QuantitativeValue ; schema:maxValue {guest_nb} ; schema:unitCode "C62"^^xsd:string .
 source		SELECT * FROM "source2_accommodation"
@@ -118,6 +130,10 @@ mappingId	Source 2 - camping pitch
 target		data:source2/accommodation/{id} a schema:CampingPitch .
 source		SELECT * FROM "source2_accommodation"
 			WHERE acco_type = 3
+
+mappingId	Observation
+target		data:weather/observation/{id} a sosa:Observation ; sosa:resultTime {timestamp} ; sosa:madeBySensor data:weather/sensor/{name}/{platform_id} ; sosa:observedProperty data:measurement/property/{name} ; sosa:hasResult data:weather/observation/result/{id} .
+source		select * from "source3_weather_measurement"
 
 ;This section is commented out until homomorphisms modulo IRI unification is implemented
 ;mappingId	Source 3 - Measurement property

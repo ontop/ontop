@@ -60,27 +60,6 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         return builder.build();
     }
 
-    /**
-     * Ensure geometries are recast back from text.
-     *
-     * At moment only WKT is supported, but in the future GML could also be.
-     * It is therefore important to consider the target datatype for choosing the right normalization.
-     *
-     */
-    @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-
-        //GEOMETRY
-        DBTermType defaultDBGeometryType = dbTypeFactory.getDBGeometryType();
-        DBTypeConversionFunctionSymbol geometryNormFunctionSymbol = createGeometryNormFunctionSymbol(defaultDBGeometryType);
-        // For WKT
-        builder.put(defaultDBGeometryType,typeFactory.getWktLiteralDatatype(), geometryNormFunctionSymbol);
-
-        return builder.build();
-    }
-
     @Override
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
                                        Function<ImmutableTerm, String> termConverter,

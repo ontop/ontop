@@ -5,7 +5,7 @@ import java.util.Optional;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 
 /**
- * Commutative: the children order does not matter
+ * Commutative: the order of children does not matter
  */
 public interface CommutativeJoinNode extends JoinLikeNode, CommutativeJoinOrFilterNode, NaryOperatorNode {
 

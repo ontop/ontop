@@ -59,4 +59,14 @@ public interface AtomFactory {
 
     DistinctVariableOnlyDataAtom getDistinctQuadAtom(Variable subject, Variable property, Variable object,
                                                      Variable namedGraph);
+
+    /**
+     * Nodes in a named graph (subjects and non-literal objects)
+     */
+    DataAtom<AtomPredicate> getGraphNodeAtom(VariableOrGroundTerm node, VariableOrGroundTerm graph);
+
+    /**
+     * Nodes in the default graph (subjects and non-literal objects)
+     */
+    DataAtom<AtomPredicate> getDefaultGraphNodeAtom(VariableOrGroundTerm node);
 }

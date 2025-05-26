@@ -138,11 +138,6 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         }
 
         @Override
-        public IQTree transformNonStandardLeafNode(LeafIQTree rootNode) {
-            throw new RuntimeException("No generic method for non-standard nodes. Please extend this class");
-        }
-
-        @Override
         public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
             ImmutableSet<Variable> variablesToKeep = Sets.difference(tree.getVariables(), variablesToRemove)
                     .immutableCopy();
@@ -196,11 +191,6 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         }
 
         @Override
-        public IQTree transformNonStandardUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-            throw new RuntimeException("No generic method for non-standard nodes. Please extend this class");
-        }
-
-        @Override
         public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             /*
              * If filter condition involves a variable to remove, we are in the special case
@@ -231,12 +221,6 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         }
 
         @Override
-        public IQTree transformNonStandardBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode,
-                                                                   IQTree leftChild, IQTree rightChild) {
-            throw new RuntimeException("No generic method for non-standard nodes. Please extend this class");
-        }
-
-        @Override
         public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             return iqFactory.createNaryIQTree(
                     rootNode,
@@ -262,13 +246,5 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
             return iqFactory.createNaryIQTree(newUnionNode, newChildren)
                     .normalizeForOptimization(variableGenerator);
         }
-
-        @Override
-        public IQTree transformNonStandardNaryNode(IQTree tree, NaryOperatorNode rootNode,
-                                                   ImmutableList<IQTree> children) {
-            throw new RuntimeException("No generic method for non-standard nodes. Please extend this class");
-        }
     }
-
-
 }
