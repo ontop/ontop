@@ -15,10 +15,13 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.function.Function;
 
-public class TDengineDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
+public class TDEngineDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
+
+    private static final String NOT_SUPPORTED_ERRROR_MESSAGE = "%s is not supported in TDEngine";
+    private static final String NOW_STR = "NOW";
 
     @Inject
-    protected TDengineDBFunctionSymbolFactory(TypeFactory typeFactory) {
+    protected TDEngineDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createTDengineRegularFunctionTable(typeFactory), typeFactory);
     }
 
@@ -30,24 +33,20 @@ public class TDengineDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
 
-        /*  TODO-SCAFFOLD: Remove function symbols that are not supported, if any:
-         *-------------------------------------------------------------------
-         *      table.remove("UNSUPPORTED_FUNCTION", arity);
-         */
-        
-        /*  TODO-SCAFFOLD: Change signature of basic functions, if necessary:
-         *-------------------------------------------------------------------
-         *      DBFunctionSymbol nowFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
-         *              CURRENT_TIMESTAMP_STR,
-         *              dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
-         *      table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
-         */
+        table.remove(FORMAT, 3);
+        table.remove(UCASE_STR, 1);
+        table.remove(LCASE_STR, 1);
+        table.remove(REGEXP_REPLACE_STR, 3);
+        table.remove(REGEXP_REPLACE_STR, 4);
+        table.remove(NULLIF_STR, 2);
+
+       DBFunctionSymbol nowFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(
+                NOW_STR, 0, dbTypeFactory.getDBDateTimestampType(), false, abstractRootDBType);
+        table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
 
         return ImmutableTable.copyOf(table);
     }
 
-
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("(POSITION(%s IN %s) > 0)",
@@ -55,94 +54,96 @@ public class TDengineDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
                 termConverter.apply(terms.get(0)));
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
         String before = termConverter.apply(terms.get(1));
 
-        return String.format("SUBSTRING(%s,1,POSITION(%s IN %s)-1)", str, before, str);
+        return String.format("SUBSTRING(%s,1,CAST(POSITION(%s IN %s)-1 as INTEGER))", str, before, str);
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
         String after = termConverter.apply(terms.get(1));
-        return String.format("IF(POSITION(%s IN %s) != 0, SUBSTRING(%s, POSITION(%s IN %s) + LENGTH(%s)), '')", after, str, str, after, str, after);
+
+        return String.format("CASE WHEN POSITION(%s IN %s) != 0 THEN SUBSTRING(%s, CAST(POSITION(%s IN %s) + LENGTH(%s) AS INTEGER)) ELSE '' END", after, str, str, after, str, after);
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
+    @Override
+    public DBFunctionSymbol getDBRight() {
+        return new SimpleTypedDBFunctionSymbolImpl(RIGHT_STR, 2, dbStringType, false,
+                abstractRootDBType,
+                (terms, converter, factory) -> serializeDBRight(terms, converter));
+    }
+
+    private String serializeDBRight(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter) {
+        String str = termConverter.apply(terms.get(0));
+        String length = termConverter.apply(terms.get(1));
+        return String.format("SUBSTRING(%s,CAST(LENGTH(%s)-%s+1 AS INTEGER))", str, str, length);
+    }
+
     @Override
     protected String serializeMD5(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("MD5(%s)", termConverter.apply(terms.get(0)));
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeSHA1(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("SHA1(%s)", termConverter.apply(terms.get(0)));
+        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERRROR_MESSAGE, "SHA1()"));
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("SHA256(%s)", termConverter.apply(terms.get(0)));
+        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERRROR_MESSAGE, "SHA256()"));
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeSHA384(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("SHA384(%s)", termConverter.apply(terms.get(0)));
+        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERRROR_MESSAGE, "SHA384()"));
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("SHA512(%s)", termConverter.apply(terms.get(0)));
+        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERRROR_MESSAGE, "SHA512()"));
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
-    @Override
-    protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String str = termConverter.apply(terms.get(0));
-        return String.format("(LPAD(EXTRACT(TIMEZONE_HOUR FROM %s)::text,2,'0') || ':' || LPAD(EXTRACT(TIMEZONE_MINUTE FROM %s)::text,2,'0'))", str, str);
-    }
-
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
-        return createDBConcatOperator(arity);
+        return createRegularDBConcat(arity);
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected DBConcatFunctionSymbol createDBConcatOperator(int arity) {
-        return new NullRejectingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType,
-                Serializers.getOperatorSerializer(CONCAT_OP_STR));
+        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERRROR_MESSAGE, "Concatenation operator"));
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
-        return new NullToleratingDBConcatFunctionSymbol("CONCAT", arity, dbStringType, abstractRootDBType, false);
+        return new NullRejectingDBConcatFunctionSymbol("CONCAT", arity, dbStringType, abstractRootDBType, false);
     }
 
     @Override
     protected String serializeDateTimeNormWithTZ(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new UnsupportedOperationException("This function (serializeDateTimeNormWithTZ) was not yet implemented.");
+        String str = termConverter.apply(terms.get(0));
+        return String.format("TO_CHAR(%s, 'yyyy-mm-ddThh24:mi:ss.mstz')", str);
     }
 
-    // TODO-SCAFFOLD: Implement DateTimeNorm serialization in ISO 8601 Format 'YYYY-MM-DDTHH:MM:SS+HH:MM'
-    //@Override
-    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new UnsupportedOperationException("This function (serializeDateTimeNorm) was not yet implemented.");
+    @Override
+    protected String serializeDateTimeNormNoTZ(ImmutableList<? extends ImmutableTerm> terms,
+                                               Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String str = termConverter.apply(terms.get(0));
+        return String.format("TO_CHAR(%s, 'yyyy-mm-ddThh24:mi:ss.ms')", str);
     }
 
-    // TODO-SCAFFOLD: Modify this default name, if necessary
+    @Override
+    protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERRROR_MESSAGE, "TZ(timestamp)"));
+    }
+
     @Override
     protected String getUUIDNameInDialect() {
-        return "UUID";
+        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERRROR_MESSAGE, "UUID()"));
     }
 
 }
