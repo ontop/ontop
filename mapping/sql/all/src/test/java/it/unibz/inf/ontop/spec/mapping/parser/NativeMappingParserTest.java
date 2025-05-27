@@ -164,7 +164,14 @@ public class NativeMappingParserTest {
 
     @Test
     public void testLoadConcat() throws Exception {
-        mappingParser.parse(new File(ROOT2 + "mapping-northwind.obda"));
+        var mapping = mappingParser.parse(new File(ROOT2 + "mapping-northwind.obda"));
+        assertEquals(7, mapping.getTripleMaps().get(0).getTargetAtoms().size());
+    }
+
+    @Test
+    public void testLoadMultiline() throws Exception {
+        var mapping = mappingParser.parse(new File(ROOT2 + "mapping-northwind-multiline.obda"));
+        assertEquals(7, mapping.getTripleMaps().get(0).getTargetAtoms().size());
     }
 
     @Test
