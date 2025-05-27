@@ -28,13 +28,11 @@ import java.util.stream.Stream;
 public class IQTreeTools {
 
     private final IntermediateQueryFactory iqFactory;
-    private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
 
     @Inject
-    private IQTreeTools(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+    private IQTreeTools(IntermediateQueryFactory iqFactory, TermFactory termFactory) {
         this.iqFactory = iqFactory;
-        this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
     }
 
@@ -330,10 +328,4 @@ public class IQTreeTools {
         return nodeClass.isInstance(tree.getRootNode()) ||
                 tree.getChildren().stream().anyMatch(t -> contains(t, nodeClass));
     }
-
-
-    public Substitution<NonVariableTerm> getEmptyNonVariableSubstitution() {
-        return substitutionFactory.getSubstitution();
-    }
-
 }

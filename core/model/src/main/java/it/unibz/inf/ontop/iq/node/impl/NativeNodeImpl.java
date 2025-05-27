@@ -20,6 +20,8 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Objects;
@@ -41,9 +43,10 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
                            @Assisted("columnNames") ImmutableMap<Variable, QuotedID> columnNames,
                            @Assisted String nativeQueryString,
                            @Assisted VariableNullability variableNullability,
-                           IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
+                           IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
+                           CoreUtilsFactory coreUtilsFactory,
                            OntopModelSettings settings) {
-        super(iqTreeTools, iqFactory);
+        super(iqTreeTools, iqFactory, substitutionFactory, coreUtilsFactory);
         this.variables = variables;
         this.nativeQueryString = nativeQueryString;
         this.variableNullability = variableNullability;

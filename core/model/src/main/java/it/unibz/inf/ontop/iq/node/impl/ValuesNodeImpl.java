@@ -46,8 +46,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     private final ImmutableSet<Variable> projectedVariables;
     private final ImmutableList<ImmutableMap<Variable, Constant>> valueMaps;
 
-    private final CoreUtilsFactory coreUtilsFactory;
-    private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
     private final OntopModelSettings settings;
 
@@ -92,13 +90,11 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                            @Nullable ImmutableSet<ImmutableSet<Variable>> uniqueConstraints,
                            IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory,
                            OntopModelSettings settings, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
-        super(iqTreeTools, iqFactory);
+        super(iqTreeTools, iqFactory, substitutionFactory, coreUtilsFactory);
 
         this.projectedVariables = projectedVariables;
         this.orderedVariables = ImmutableList.copyOf(projectedVariables);
         this.valueMaps = valueMaps;
-        this.coreUtilsFactory = coreUtilsFactory;
-        this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.uniqueConstraints = uniqueConstraints;
         this.settings = settings;

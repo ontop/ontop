@@ -61,8 +61,6 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     @Nullable
     private Boolean isDistinct;
 
-    private final CoreUtilsFactory coreUtilsFactory;
-    private final SubstitutionFactory substitutionFactory;
     private final QueryTransformerFactory queryTransformerFactory;
 
     /**
@@ -89,12 +87,10 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
                                     CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory,
                                     QueryTransformerFactory queryTransformerFactory) {
-        super(iqTreeTools, iqFactory);
-        this.coreUtilsFactory = coreUtilsFactory;
+        super(iqTreeTools, iqFactory, substitutionFactory, coreUtilsFactory);
         this.relationDefinition = relationDefinition;
         this.argumentMap = argumentMap;
         this.variableNullability = variableNullability;
-        this.substitutionFactory = substitutionFactory;
         this.queryTransformerFactory = queryTransformerFactory;
     }
 

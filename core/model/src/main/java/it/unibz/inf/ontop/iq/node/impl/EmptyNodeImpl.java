@@ -26,17 +26,13 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     private static final String PREFIX = "EMPTY ";
     private final ImmutableSet<Variable> projectedVariables;
-    private final CoreUtilsFactory coreUtilsFactory;
-    private final SubstitutionFactory substitutionFactory;
 
     @AssistedInject
     private EmptyNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                           IQTreeTools iqTreeTools,
                           IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
-        super(iqTreeTools, iqFactory);
+        super(iqTreeTools, iqFactory, substitutionFactory, coreUtilsFactory);
         this.projectedVariables = projectedVariables;
-        this.coreUtilsFactory = coreUtilsFactory;
-        this.substitutionFactory = substitutionFactory;
     }
 
 

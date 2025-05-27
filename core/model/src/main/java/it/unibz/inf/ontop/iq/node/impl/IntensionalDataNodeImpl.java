@@ -27,15 +27,13 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     private static final String INTENSIONAL_DATA_NODE_STR = "INTENSIONAL";
 
     private final AtomFactory atomFactory;
-    private final SubstitutionFactory substitutionFactory;
 
     @AssistedInject
     private IntensionalDataNodeImpl(@Assisted DataAtom<AtomPredicate> atom,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
                                     CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory, SubstitutionFactory substitutionFactory) {
-        super(atom, iqTreeTools, iqFactory, coreUtilsFactory);
+        super(atom, iqTreeTools, iqFactory, substitutionFactory, coreUtilsFactory);
         this.atomFactory = atomFactory;
-        this.substitutionFactory = substitutionFactory;
     }
 
     /**

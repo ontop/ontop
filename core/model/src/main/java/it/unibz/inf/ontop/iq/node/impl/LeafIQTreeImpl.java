@@ -10,14 +10,21 @@ import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
 public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTree {
 
-    protected LeafIQTreeImpl(IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
+    protected final SubstitutionFactory substitutionFactory;
+    protected final CoreUtilsFactory coreUtilsFactory;
+
+    protected LeafIQTreeImpl(IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory) {
         super(iqTreeTools, iqFactory);
+        this.substitutionFactory = substitutionFactory;
+        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     @Override
@@ -78,7 +85,7 @@ public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTre
 
     @Override
     public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions() {
-        return ImmutableSet.of(iqTreeTools.getEmptyNonVariableSubstitution());
+        return ImmutableSet.of(substitutionFactory.getSubstitution());
     }
 
     @Override
