@@ -19,21 +19,32 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import javax.annotation.Nullable;
 
-public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> implements IntensionalDataNode {
+
+public class IntensionalDataNodeImpl extends LeafIQTreeImpl implements IntensionalDataNode {
 
     private static final String INTENSIONAL_DATA_NODE_STR = "INTENSIONAL";
 
     private final AtomFactory atomFactory;
 
+    private final DataAtom<AtomPredicate> atom;
+    // LAZY
+    @Nullable
+    private ImmutableSet<Variable> variables;
+
     @AssistedInject
     private IntensionalDataNodeImpl(@Assisted DataAtom<AtomPredicate> atom,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
                                     CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory, SubstitutionFactory substitutionFactory) {
-        super(atom, iqTreeTools, iqFactory, substitutionFactory, coreUtilsFactory);
+        super(iqTreeTools, iqFactory, substitutionFactory, coreUtilsFactory);
         this.atomFactory = atomFactory;
+
+        this.atom = atom;
+        this.variables = null;
     }
 
     /**
@@ -112,5 +123,46 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     @Override
     public synchronized VariableNonRequirement getVariableNonRequirement() {
         return VariableNonRequirement.empty();
+    }
+
+    public DataAtom<AtomPredicate> getProjectionAtom() {
+        return atom;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getVariables() {
+        return getLocalVariables();
+    }
+
+    @Override
+    public synchronized ImmutableSet<Variable> getLocalVariables() {
+        if (variables == null) {
+            variables = atom.getArguments()
+                    .stream()
+                    .filter(t -> t instanceof Variable)
+                    .map(t -> (Variable)t)
+                    .collect(ImmutableCollectors.toSet());
+        }
+        return variables;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyRequiredVariables() {
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyDefinedVariables() {
+        return getLocalVariables();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getKnownVariables() {
+        return getLocalVariables();
+    }
+
+    @Override
+    public boolean isDeclaredAsEmpty() {
+        return false;
     }
 }
