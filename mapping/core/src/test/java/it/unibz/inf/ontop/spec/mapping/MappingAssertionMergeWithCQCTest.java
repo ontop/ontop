@@ -8,10 +8,13 @@ import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
 import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.transformer.impl.MappingAssertionUnion;
@@ -19,17 +22,24 @@ import org.apache.commons.rdf.api.IRI;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 import static it.unibz.inf.ontop.utils.MappingTestingTools.TERM_FACTORY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class MappingAssertionMergeWithCQCTest {
 
-    private static final NamedRelationDefinition TABLE_AFFILIATED_WRITERS, TABLE_AUTHORS, TABLE_STUDENT, TABLE_ADDRESS, MEASUREMENT, MEASUREMENT_TYPE;
+    private static final NamedRelationDefinition TABLE_AFFILIATED_WRITERS, TABLE_AUTHORS,
+            NULLABLE_TABLE_AUTHORS, NULLABLE_TABLE_AFFILIATED_WRITERS,
+            TABLE_STUDENT, TABLE_ADDRESS,
+            MEASUREMENT, MEASUREMENT_TYPE;
 
     private static final Variable A = TERM_FACTORY.getVariable("a");
     private static final Variable B = TERM_FACTORY.getVariable("b");
     private static final Variable C = TERM_FACTORY.getVariable("c");
+    private static final Variable C0 = TERM_FACTORY.getVariable("c0");
     private static final Variable S = TERM_FACTORY.getVariable("s");
     private static final Variable P = TERM_FACTORY.getVariable("p");
     private static final Variable O = TERM_FACTORY.getVariable("o");
@@ -52,35 +62,46 @@ public class MappingAssertionMergeWithCQCTest {
     private static final IRI ADDRESS = RDF_FACTORY.createIRI("http://www.owl-ontologies.com/Ontology1207768242.owl#Address");
 
     private static final IRI PROP_UNIT = RDF_FACTORY.createIRI("http://example.org/qudt/unit");
-    private static final IRI DEGREES_CELCIUS = RDF_FACTORY.createIRI("http://example.org/qudt-unit/DegreeCelsius");
+    private static final IRI DEGREES_CELSIUS = RDF_FACTORY.createIRI("http://example.org/qudt-unit/DegreeCelsius");
     private static final IRI METERS_PER_SECOND = RDF_FACTORY.createIRI("http://example.org/qudt-unit/MeterPerSecond");
 
+    private static final DBTermType INTEGER_DB_TYPE;
 
     static {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
-        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
+        INTEGER_DB_TYPE = builder.getDBTypeFactory().getDBLargeIntegerType();
         DBTermType stringDBType = builder.getDBTypeFactory().getDBStringType();
         DBTermType largeIntDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
         TABLE_AUTHORS = builder.createDatabaseRelation("tb_authors",
-                "bk_code", integerDBType, false,
-                "wr_id", integerDBType, false);
+                "bk_code", INTEGER_DB_TYPE, false,
+                "wr_id", INTEGER_DB_TYPE, false);
 
         TABLE_AFFILIATED_WRITERS = builder.createDatabaseRelation("tb_affiliated_writers",
-                "wr_code", integerDBType, false);
+                "wr_code", INTEGER_DB_TYPE, false);
         ForeignKeyConstraint.builder("FK", TABLE_AFFILIATED_WRITERS, TABLE_AUTHORS)
                 .add(1, 2)
                 .build();
 
+        NULLABLE_TABLE_AUTHORS = builder.createDatabaseRelation("tb_nullable_authors",
+                "bk_code", INTEGER_DB_TYPE, false,
+                "wr_id", INTEGER_DB_TYPE, false);
+
+        NULLABLE_TABLE_AFFILIATED_WRITERS = builder.createDatabaseRelation("tb_nullable_affiliated_writers",
+                "wr_code", INTEGER_DB_TYPE, true);
+        ForeignKeyConstraint.builder("FK", NULLABLE_TABLE_AFFILIATED_WRITERS, NULLABLE_TABLE_AUTHORS)
+                .add(1, 2)
+                .build();
+
         TABLE_STUDENT = builder.createDatabaseRelation("student",
-                "id", integerDBType, false,
+                "id", INTEGER_DB_TYPE, false,
                 "first_name", stringDBType, false,
                 "last_name", stringDBType, false,
                 "ssn", stringDBType, true,
-                "kind", integerDBType, false);
+                "kind", INTEGER_DB_TYPE, false);
 
         TABLE_ADDRESS = builder.createDatabaseRelation("ADDRESS",
-                "ID", integerDBType, false,
+                "ID", INTEGER_DB_TYPE, false,
                 "STREET", stringDBType, true);
 
         MEASUREMENT = builder.createDatabaseRelation("source3_weather_measurement",
@@ -122,6 +143,93 @@ public class MappingAssertionMergeWithCQCTest {
         assertEquals(getAuthorsIQ(ImmutableMap.of(1, C)), result.getQuery());
     }
 
+    @Test
+    public void testNonRedundancyDueToNullableForeignKey() {
+
+        IQ authorIQ = getNullableAuthorsIQ(ImmutableMap.of(0, A, 1, C));
+        IQ affiliatedWriterIQ = getNullableAffiliatedWritersIQ(ImmutableMap.of(0, C), Optional.empty());
+
+        ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
+        entry.add(new MappingAssertion(authorIQ, null));
+        entry.add(new MappingAssertion(affiliatedWriterIQ, null));
+        MappingAssertion result = entry.build().get();
+        assertEquals(getNullableAuthorsUnionIQ(true), result.getQuery());
+    }
+
+    @Test
+    public void testNonRedundancyDueToNullableForeignKeyInReverseOrder() {
+
+        IQ authorIQ = getNullableAuthorsIQ(ImmutableMap.of(0, A, 1, C));
+        IQ affiliatedWriterIQ = getNullableAffiliatedWritersIQ(ImmutableMap.of(0, C), Optional.empty());
+
+        ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
+        entry.add(new MappingAssertion(affiliatedWriterIQ, null));
+        entry.add(new MappingAssertion(authorIQ, null));
+        MappingAssertion result = entry.build().get();
+        assertEquals(getNullableAuthorsUnionIQ(false), result.getQuery());
+    }
+
+    @Test
+    public void testRedundancyDueToNullableForeignKey() {
+
+        IQ authorIQ = getNullableAuthorsIQ(ImmutableMap.of(0, A, 1, C));
+        IQ affiliatedWriterIQ = getNullableAffiliatedWritersIQ(ImmutableMap.of(0, C), Optional.of(TERM_FACTORY.getDBIsNotNull(C)));
+
+        ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
+        entry.add(new MappingAssertion(authorIQ, null));
+        entry.add(new MappingAssertion(affiliatedWriterIQ, null));
+        MappingAssertion result = entry.build().get();
+        assertEquals(getNullableAuthorsIQ(ImmutableMap.of(1, C)), result.getQuery());
+    }
+
+    @Test
+    public void testRedundancyDueToNullableForeignKeyInReverseOrder() {
+
+        IQ authorIQ = getNullableAuthorsIQ(ImmutableMap.of(0, A, 1, C));
+        IQ affiliatedWriterIQ = getNullableAffiliatedWritersIQ(ImmutableMap.of(0, C), Optional.of(TERM_FACTORY.getDBIsNotNull(C)));
+
+        ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
+        entry.add(new MappingAssertion(affiliatedWriterIQ, null));
+        entry.add(new MappingAssertion(authorIQ, null));
+        MappingAssertion result = entry.build().get();
+        assertEquals(getNullableAuthorsIQ(ImmutableMap.of(1, C)), result.getQuery());
+    }
+
+
+    @Test
+    public void testRedundancyDueToNullableForeignKeyWithLess() {
+
+        IQ authorIQ = getNullableAuthorsIQ(ImmutableMap.of(0, A, 1, C));
+        IQ affiliatedWriterIQ = getNullableAffiliatedWritersIQ(ImmutableMap.of(0, C), Optional.of(
+                TERM_FACTORY.getDBNumericInequality(InequalityLabel.LT, C, TERM_FACTORY.getDBConstant("20", INTEGER_DB_TYPE))));
+
+        ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
+        entry.add(new MappingAssertion(authorIQ, null));
+        entry.add(new MappingAssertion(affiliatedWriterIQ, null));
+        MappingAssertion result = entry.build().get();
+        assertEquals(getNullableAuthorsIQ(ImmutableMap.of(1, C)), result.getQuery());
+    }
+
+    @Test
+    public void testRedundancyDueToNullableForeignKeyWithLessInReverseOrder() {
+
+        IQ authorIQ = getNullableAuthorsIQ(ImmutableMap.of(0, A, 1, C));
+        IQ affiliatedWriterIQ = getNullableAffiliatedWritersIQ(ImmutableMap.of(0, C), Optional.of(
+                TERM_FACTORY.getDBNumericInequality(InequalityLabel.LT, C, TERM_FACTORY.getDBConstant("20", INTEGER_DB_TYPE))));
+
+        ExtensionalDataNodeListContainmentCheck cqc = new ExtensionalDataNodeListContainmentCheck(HOMOMORPHISM_FACTORY, CORE_UTILS_FACTORY);
+        MappingAssertionUnion entry = new MappingAssertionUnion(cqc, CORE_SINGLETONS, UNION_BASED_QUERY_MERGER, TERM_NULLABILITY_EVALUATOR);
+        entry.add(new MappingAssertion(affiliatedWriterIQ, null));
+        entry.add(new MappingAssertion(authorIQ, null));
+        MappingAssertion result = entry.build().get();
+        assertEquals(getNullableAuthorsIQ(ImmutableMap.of(1, C)), result.getQuery());
+    }
+
     private IQ getAuthorsIQ(ImmutableMap<Integer, VariableOrGroundTerm> argumentMap) {
         return IQ_FACTORY.createIQ(ATOM_FACTORY.getDistinctTripleAtom(S, P, O),
                 IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
@@ -132,6 +240,21 @@ public class MappingAssertionMergeWithCQCTest {
                                 TABLE_AUTHORS, argumentMap)));
     }
 
+    private IQ getNullableAuthorsUnionIQ(boolean order) {
+        ImmutableList<IQTree> children = ImmutableList.of(
+                IQ_FACTORY.createExtensionalDataNode(
+                        NULLABLE_TABLE_AUTHORS, ImmutableMap.of(1, C0)),
+                IQ_FACTORY.createExtensionalDataNode(
+                        NULLABLE_TABLE_AFFILIATED_WRITERS, ImmutableMap.of(0, C0)));
+        return IQ_FACTORY.createIQ(ATOM_FACTORY.getDistinctTripleAtom(S, P, O),
+                IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
+                                SUBSTITUTION_FACTORY.getSubstitution(S, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_AUTHOR, ImmutableList.of(C0)),
+                                        P, TERM_FACTORY.getConstantIRI(RDF.TYPE),
+                                        O, TERM_FACTORY.getConstantIRI(AUTHOR))),
+                        IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createUnionNode(ImmutableSet.of(C0)),
+                                order ? children : children.reverse())));
+    }
+
     private IQ getAffiliatedWritersIQ(ImmutableMap<Integer, VariableOrGroundTerm> argumentMap) {
         return IQ_FACTORY.createIQ(ATOM_FACTORY.getDistinctTripleAtom(S, P, O),
                 IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
@@ -140,6 +263,32 @@ public class MappingAssertionMergeWithCQCTest {
                                         O, TERM_FACTORY.getConstantIRI(AUTHOR))),
                         IQ_FACTORY.createExtensionalDataNode(
                                 TABLE_AFFILIATED_WRITERS, argumentMap)));
+    }
+
+    private IQ getNullableAuthorsIQ(ImmutableMap<Integer, VariableOrGroundTerm> argumentMap) {
+        return IQ_FACTORY.createIQ(ATOM_FACTORY.getDistinctTripleAtom(S, P, O),
+                IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
+                                SUBSTITUTION_FACTORY.getSubstitution(S, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_AUTHOR, ImmutableList.of(C)),
+                                        P, TERM_FACTORY.getConstantIRI(RDF.TYPE),
+                                        O, TERM_FACTORY.getConstantIRI(AUTHOR))),
+                        IQ_FACTORY.createExtensionalDataNode(
+                                NULLABLE_TABLE_AUTHORS, argumentMap)));
+    }
+
+    private IQ getNullableAffiliatedWritersIQ(ImmutableMap<Integer, VariableOrGroundTerm> argumentMap, Optional<ImmutableExpression> filter) {
+        IQTree extensional = IQ_FACTORY.createExtensionalDataNode(
+                NULLABLE_TABLE_AFFILIATED_WRITERS, argumentMap);
+
+        IQTree withFilter = filter.
+                <IQTree>map(f -> IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(f), extensional))
+                .orElse(extensional);
+
+        return IQ_FACTORY.createIQ(ATOM_FACTORY.getDistinctTripleAtom(S, P, O),
+                IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
+                                SUBSTITUTION_FACTORY.getSubstitution(S, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_AUTHOR, ImmutableList.of(C)),
+                                        P, TERM_FACTORY.getConstantIRI(RDF.TYPE),
+                                        O, TERM_FACTORY.getConstantIRI(AUTHOR))),
+                        withFilter));
     }
 
     @Test
@@ -644,7 +793,7 @@ public class MappingAssertionMergeWithCQCTest {
                                 SUBSTITUTION_FACTORY.getSubstitution(
                                         S, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_RESULT, ImmutableList.of(ID)),
                                         P, TERM_FACTORY.getConstantIRI(PROP_UNIT),
-                                        O, TERM_FACTORY.getConstantIRI(DEGREES_CELCIUS))),
+                                        O, TERM_FACTORY.getConstantIRI(DEGREES_CELSIUS))),
                         IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(
                                 IQ_FACTORY.createExtensionalDataNode(
                                         MEASUREMENT, ImmutableMap.of(0, ID, 1, NAME)),
