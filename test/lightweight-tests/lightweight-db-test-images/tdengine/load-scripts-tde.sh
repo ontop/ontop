@@ -7,10 +7,11 @@ taosd &
 sleep 5
 
 # create the database
-taos -f /var/custom/db.sql
+taos -f /var/custom/db_functions.sql
+taos -f /var/custom/db_constraints.sql
 # sleep 5
 
 # restat server
 pkill taosd
-sleep 5
+sleep 10
 taosd

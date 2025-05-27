@@ -1,6 +1,6 @@
-CREATE DATABASE IF NOT EXISTS measurements;
+CREATE DATABASE IF NOT EXISTS db_functions;
 
-USE measurements;
+USE db_functions;
 
 CREATE STABLE IF NOT EXISTS electricity ( ts timestamp, curr float, voltage int, phase float, description varchar(64)) TAGS ( location varchar(64),group_id int);
 

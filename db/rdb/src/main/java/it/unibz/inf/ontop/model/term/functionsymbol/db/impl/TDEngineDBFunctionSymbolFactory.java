@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 public class TDEngineDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
-    private static final String NOT_SUPPORTED_ERRROR_MESSAGE = "%s is not supported in TDEngine";
+    private static final String NOT_SUPPORTED_ERROR_MESSAGE = "%s is not supported in TDEngine";
     private static final String NOW_STR = "NOW";
 
     @Inject
@@ -90,22 +90,22 @@ public class TDEngineDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
     @Override
     protected String serializeSHA1(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERRROR_MESSAGE, "SHA1()"));
+        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERROR_MESSAGE, "SHA1()"));
     }
 
     @Override
     protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERRROR_MESSAGE, "SHA256()"));
+        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERROR_MESSAGE, "SHA256()"));
     }
 
     @Override
     protected String serializeSHA384(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERRROR_MESSAGE, "SHA384()"));
+        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERROR_MESSAGE, "SHA384()"));
     }
 
     @Override
     protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERRROR_MESSAGE, "SHA512()"));
+        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERROR_MESSAGE, "SHA512()"));
     }
 
     @Override
@@ -115,7 +115,7 @@ public class TDEngineDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
     @Override
     protected DBConcatFunctionSymbol createDBConcatOperator(int arity) {
-        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERRROR_MESSAGE, "Concatenation operator"));
+        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERROR_MESSAGE, "Concatenation operator"));
     }
 
     @Override
@@ -138,12 +138,74 @@ public class TDEngineDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
     @Override
     protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERRROR_MESSAGE, "TZ(timestamp)"));
+        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERROR_MESSAGE, "TZ(timestamp)"));
     }
 
     @Override
     protected String getUUIDNameInDialect() {
-        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERRROR_MESSAGE, "UUID()"));
+        throw new UnsupportedOperationException(String.format(NOT_SUPPORTED_ERROR_MESSAGE, "UUID()"));
+    }
+
+    /**
+     * XSD CAST functions
+     */
+    @Override
+    protected String serializeCheckAndConvertDouble(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s NMATCH " + numericPattern +
+                        " THEN NULL ELSE CAST(%1$s AS DOUBLE) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertFloat(ImmutableList<? extends ImmutableTerm> terms,
+                                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s NMATCH " + numericPattern + " THEN NULL " +
+                        "WHEN (CAST(%1$s AS FLOAT) NOT BETWEEN -3.40E38 AND -1.18E-38 AND " +
+                        "CAST(%1$s AS FLOAT) NOT BETWEEN 1.18E-38 AND 3.40E38 AND CAST(%1$s AS FLOAT) != 0) THEN NULL " +
+                        "ELSE CAST(%1$s AS FLOAT) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s NMATCH " + numericNonFPPattern + " THEN NULL " +
+                        "ELSE CAST(%1$s AS DECIMAL) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDateFromString(ImmutableList<? extends ImmutableTerm> terms,
+                                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN (%1$s NMATCH " + datePattern1 + " AND " +
+                        "%1$s NMATCH " + datePattern2 +" AND " +
+                        "%1$s NMATCH " + datePattern3 +" AND " +
+                        "%1$s NMATCH " + datePattern4 +" ) " +
+                        " THEN NULL ELSE CAST(%1$s AS DATE) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertIntegerFromBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN UPPER(%1$s) LIKE 'TRUE' THEN 1 " +
+                        "WHEN UPPER(%1$s) LIKE 'FALSE' THEN 0 " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDateTimeFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String timestamp = termConverter.apply(terms.get(0)).replace("Z", "");
+        return String.format("TO_TIMESTAMP(%s, 'yyyy-mm-dd hh:mi:ss.ms.us.ns')", timestamp);
     }
 
 }

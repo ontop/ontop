@@ -11,12 +11,10 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.*;
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_384;
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_512;
 
 public class FunctionsTDEngineTest extends AbstractDockerRDF4JTest {
-    private static final String PROPERTIES_FILE = "/tdengine/prop.properties";
-    private static final String MAPPING_FILE = "/tdengine/mapping.obda";
+    private static final String PROPERTIES_FILE = "/tdengine/functions.properties";
+    private static final String MAPPING_FILE = "/tdengine/functions.obda";
 
     @BeforeAll
     public static void before() throws IOException, SQLException {
