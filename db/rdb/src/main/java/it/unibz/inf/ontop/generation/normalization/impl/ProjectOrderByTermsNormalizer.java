@@ -75,36 +75,33 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
         }
 
         private IQTree transformConstructionSliceDistinctOrOrderByTree(IQTree tree) {
-            IQTree newTree = applyTransformerToDescendantTree(tree);
+            var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
+            var distinct = UnaryIQTreeDecomposition.of(slice.getTail(), DistinctNode.class);
+            var construction = UnaryIQTreeDecomposition.of(distinct.getTail(), ConstructionNode.class);
+            var orderBy = UnaryIQTreeDecomposition.of(construction.getTail(), OrderByNode.class);
 
-            Decomposition decomposition = Decomposition.of(newTree);
+            var initialDescendantTree = orderBy.getTail();
 
-            return decomposition.orderByNode
-                    .filter(o -> decomposition.distinctNode.isPresent() || (!onlyInPresenceOfDistinct))
-                    .map(o -> new Analysis(decomposition.distinctNode.isPresent(), decomposition.constructionNode, o.getComparators(),
-                            decomposition.distinctNode.isPresent()
-                                    ? decomposition.descendantTree
-                                    .normalizeForOptimization(variableGenerator)
-                                    .inferFunctionalDependencies()
+            //Recursive
+            IQTree newDescendantTree = transform(initialDescendantTree);
+            IQTree newTree = iqTreeTools.unaryIQTreeBuilder()
+                    .append(slice.getOptionalNode())
+                    .append(distinct.getOptionalNode())
+                    .append(construction.getOptionalNode())
+                    .append(orderBy.getOptionalNode())
+                    .build(newDescendantTree);
+
+            return orderBy
+                    .getOptionalNode()
+                    .filter(o -> distinct.isPresent() || (!onlyInPresenceOfDistinct))
+                    .map(o -> new Analysis(distinct.isPresent(), construction.getOptionalNode(), o.getComparators(),
+                            distinct.isPresent()
+                                    ? newDescendantTree
+                                            .normalizeForOptimization(variableGenerator)
+                                            .inferFunctionalDependencies()
                                     : FunctionalDependencies.empty()))
                     .map(a -> normalize(newTree, a))
                     .orElse(newTree);
-        }
-
-        /**
-         * Applies the transformer to a descendant tree, and rebuilds the parent tree.
-         *
-         * The root node of the parent tree must be a ConstructionNode, a SliceNode, a DistinctNode or an OrderByNode
-         */
-        private IQTree applyTransformerToDescendantTree(IQTree tree) {
-            Decomposition decomposition = Decomposition.of(tree);
-
-            //Recursive
-            IQTree newDescendantTree = transform(decomposition.descendantTree);
-
-            return decomposition.descendantTree.equals(newDescendantTree)
-                    ? tree
-                    : decomposition.rebuildWithNewDescendantTree(newDescendantTree, iqTreeTools);
         }
 
         private IQTree normalize(IQTree tree, Analysis analysis) {
@@ -244,56 +241,6 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
 
         protected DistinctOrderByDialectLimitationException() {
             super("The dialect requires ORDER BY conditions to be projected but a DISTINCT prevents some of them");
-        }
-    }
-
-    /**
-     * As the ancestors, we may get the following nodes: OrderByNode, ConstructionNode, DistinctNode, SliceNode.
-     * NB: this order is bottom-up.
-     * Some nodes may be missing but the order must be respected. There are no multiple instances of the same kind of node.
-     */
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    protected static class Decomposition {
-        final Optional<SliceNode> sliceNode;
-        final Optional<DistinctNode> distinctNode;
-        final Optional<ConstructionNode> constructionNode;
-        final Optional<OrderByNode> orderByNode;
-
-        final IQTree descendantTree;
-
-        private Decomposition(Optional<SliceNode> sliceNode,
-                              Optional<DistinctNode> distinctNode,
-                              Optional<ConstructionNode> constructionNode,
-                              Optional<OrderByNode> orderByNode,
-                              IQTree descendantTree) {
-            this.sliceNode = sliceNode;
-            this.distinctNode = distinctNode;
-            this.constructionNode = constructionNode;
-            this.orderByNode = orderByNode;
-            this.descendantTree = descendantTree;
-        }
-
-        IQTree rebuildWithNewDescendantTree(IQTree newDescendantTree, IQTreeTools iqTreeTools) {
-            return iqTreeTools.unaryIQTreeBuilder()
-                    .append(sliceNode)
-                    .append(distinctNode)
-                    .append(constructionNode)
-                    .append(orderByNode)
-                    .build(newDescendantTree);
-        }
-
-        static Decomposition of(IQTree tree) {
-            var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
-            var distinct = UnaryIQTreeDecomposition.of(slice.getTail(), DistinctNode.class);
-            var construction = UnaryIQTreeDecomposition.of(distinct.getTail(), ConstructionNode.class);
-            var orderBy = UnaryIQTreeDecomposition.of(construction.getTail(), OrderByNode.class);
-
-            return new Decomposition(
-                    slice.getOptionalNode(),
-                    distinct.getOptionalNode(),
-                    construction.getOptionalNode(),
-                    orderBy.getOptionalNode(),
-                    orderBy.getTail());
         }
     }
 }

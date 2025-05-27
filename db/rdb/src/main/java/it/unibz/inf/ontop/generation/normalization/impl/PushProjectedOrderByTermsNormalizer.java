@@ -7,11 +7,16 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.UnaryIQTreeBuilder;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
+
+import java.util.Optional;
 
 /*
 Used when an ORDER BY node accesses expressions that are defined in a CONSTRUCT above it. Some dialects (like GoogleSQL) do
@@ -44,16 +49,15 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
 
         @Override
         public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-            var decomposition = ProjectOrderByTermsNormalizer.Decomposition.of(tree);
-            if (decomposition.constructionNode.isEmpty() || decomposition.distinctNode.isEmpty() || decomposition.orderByNode.isEmpty()) {
-                var newDescendantTree = transform(decomposition.descendantTree);
-                return decomposition.descendantTree.equals(newDescendantTree)
-                        ? tree
-                        : decomposition.rebuildWithNewDescendantTree(newDescendantTree, iqTreeTools);
-            }
-            var distinct = decomposition.distinctNode.get();
+            var construction = IQTreeTools.UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
+            var orderBy = IQTreeTools.UnaryIQTreeDecomposition.of(construction.getTail(), OrderByNode.class);
 
-            return iqFactory.createUnaryIQTree(distinct, normalize(decomposition));
+            return transform(
+                    Optional.of(rootNode),
+                    construction.getOptionalNode(),
+                    orderBy.getOptionalNode(),
+                    orderBy.getTail())
+                    .orElse(tree);
         }
 
         @Override
@@ -61,22 +65,42 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
             if (onlyDistinct)
                 return super.transformConstruction(tree, rootNode, child);
 
-            var decomposition = ProjectOrderByTermsNormalizer.Decomposition.of(tree);
-            if(decomposition.constructionNode.isEmpty() || decomposition.orderByNode.isEmpty()) {
-                var newDescendantTree = transform(decomposition.descendantTree);
-                return decomposition.descendantTree.equals(newDescendantTree)
-                        ? tree
-                        : decomposition.rebuildWithNewDescendantTree(newDescendantTree, iqTreeTools);
-            }
-            return normalize(decomposition);
+            var orderBy = IQTreeTools.UnaryIQTreeDecomposition.of(child, OrderByNode.class);
+
+            return transform(
+                    Optional.empty(),
+                    Optional.of(rootNode),
+                    orderBy.getOptionalNode(),
+                    orderBy.getTail())
+                    .orElse(tree);
         }
 
-        IQTree normalize(ProjectOrderByTermsNormalizer.Decomposition decomposition) {
-            var construct = decomposition.constructionNode.get();
-            var orderBy = decomposition.orderByNode.get();
-            var remainingSubtree = transform(decomposition.descendantTree);
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        Optional<IQTree> transform(Optional<DistinctNode> distinctNode, Optional<ConstructionNode> constructionNode, Optional<OrderByNode> orderByNode, IQTree descendantTree) {
 
-            var substitution = construct.getSubstitution();
+            var newDescendantTree = transform(descendantTree);
+
+            if (!(constructionNode.isPresent() && orderByNode.isPresent())) {
+                return descendantTree.equals(newDescendantTree)
+                        ? Optional.empty()
+                        : Optional.of(iqTreeTools.unaryIQTreeBuilder()
+                            .append(distinctNode)
+                            .append(constructionNode)
+                            .append(orderByNode)
+                            .build(newDescendantTree));
+            }
+
+            var newOrderBy = normalize(constructionNode.get().getSubstitution(), orderByNode.get());
+
+            //Change order from [DISTINCT] -> CONSTRUCT -> ORDER BY to [DISTINCT] -> ORDER BY -> CONSTRUCT
+            return Optional.of(iqTreeTools.unaryIQTreeBuilder()
+                    .append(distinctNode)
+                    .append(newOrderBy)
+                    .append(constructionNode)
+                    .build(newDescendantTree));
+        }
+
+        OrderByNode normalize(Substitution<ImmutableTerm> substitution, OrderByNode orderBy) {
 
             //Get map of terms used in ORDER BY that are defined in CONSTRUCT
             var orderByTerms = orderBy.getComparators().stream()
@@ -94,16 +118,10 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
                                             "Was expecting a definition with value " + term))));
 
             //Define new ORDER BY node that uses variables from CONSTRUCT instead, where possible
-            var newOrderBy = iqFactory.createOrderByNode(orderBy.getComparators().stream()
+            return iqFactory.createOrderByNode(orderBy.getComparators().stream()
                     .map(comp -> iqFactory.createOrderComparator(definedInConstruct
                             .getOrDefault(comp.getTerm(), comp.getTerm()), comp.isAscending()))
                     .collect(ImmutableCollectors.toList()));
-
-            //Change order from DISTINCT -> CONSTRUCT -> ORDER BY to DISTINCT -> ORDER BY -> CONSTRUCT
-            return iqTreeTools.unaryIQTreeBuilder()
-                    .append(newOrderBy)
-                    .append(construct)
-                    .build(remainingSubtree);
         }
     }
 }
