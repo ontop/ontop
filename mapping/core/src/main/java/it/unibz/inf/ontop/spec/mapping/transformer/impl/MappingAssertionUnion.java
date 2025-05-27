@@ -473,7 +473,6 @@ public class MappingAssertionUnion {
         return Optional.of(new ExtensionalDataNodeHomomorphismIteratorImpl(
                 h,
                 from.getDatabaseAtoms(),
-
                 cqc.chase(to.getDatabaseAtoms(), to.getNonNullableVariables())));
     }
 
