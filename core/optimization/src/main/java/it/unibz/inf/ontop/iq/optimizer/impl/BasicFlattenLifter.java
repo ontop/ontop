@@ -75,8 +75,7 @@ public class BasicFlattenLifter implements FlattenLifter {
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode cn, IQTree child) {
             IQTree updatedChild = transformChild(child);
-            // prevents FLATTEN above the top CONSTRUCTION node in an IQ
-            if (tree == topRoot)
+            if (tree.getRootNode().equals(cn)) // tree == topRoot // prevents FLATTEN above the top CONSTRUCTION node in an IQ
                 return iqFactory.createUnaryIQTree(cn, updatedChild);
 
             LiftingState s = liftFlatten(updatedChild, ImmutableSet.of());
