@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -26,7 +27,7 @@ public class ExtensionalDataNodeListContainmentCheck {
         this.coreUtilsFactory = coreUtilsFactory;
     }
 
-    public boolean isContainedIn(ImmutableList<? extends VariableOrGroundTerm> answerVariables1, ImmutableList<ExtensionalDataNode> nodes1, ImmutableList<? extends VariableOrGroundTerm> answerVariables2, ImmutableList<ExtensionalDataNode> nodes2) {
+    public boolean isContainedIn(ImmutableList<? extends VariableOrGroundTerm> answerVariables1, ImmutableList<ExtensionalDataNode> nodes1, ImmutableSet<Variable> nonNullableVariables1, ImmutableList<? extends VariableOrGroundTerm> answerVariables2, ImmutableList<ExtensionalDataNode> nodes2) {
         Homomorphism.Builder builder = homomorphismFactory.getHomomorphismBuilder();
         // get the substitution for the answer variables first
         // this will ensure that all answer variables are mapped either to constants or
@@ -38,7 +39,7 @@ public class ExtensionalDataNodeListContainmentCheck {
             builder.extend(answerVariables1.get(i), answerVariables2.get(i));
 
         if (builder.isValid()) {
-            ImmutableSet<ChasedExtensionalDataNode> chase = chase(nodes1);
+            ImmutableSet<ChasedExtensionalDataNode> chase = chase(nodes1, nonNullableVariables1);
             ImmutableSet<RelationDefinition> relationsInChase = chase.stream()
                     .map(ChasedExtensionalDataNode::getRelationDefinition)
                     .collect(ImmutableCollectors.toSet());
@@ -58,34 +59,35 @@ public class ExtensionalDataNodeListContainmentCheck {
     }
 
 
-    public ImmutableSet<ChasedExtensionalDataNode> chase(ImmutableList<ExtensionalDataNode> nodes) {
+    public ImmutableSet<ChasedExtensionalDataNode> chase(ImmutableList<ExtensionalDataNode> nodes, ImmutableSet<Variable> nonNullableVariables) {
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(nodes.stream()
                 .flatMap(n -> n.getVariables().stream())
                 .collect(ImmutableCollectors.toSet()));
 
         return nodes.stream()
-                .flatMap(node -> chase(node, variableGenerator))
+                .flatMap(node -> chase(node, variableGenerator, nonNullableVariables))
                 .collect(ImmutableCollectors.toSet());
     }
 
-    private Stream<ChasedExtensionalDataNode> chase(ExtensionalDataNode node, VariableGenerator variableGenerator) {
+    private Stream<ChasedExtensionalDataNode> chase(ExtensionalDataNode node, VariableGenerator variableGenerator, ImmutableSet<Variable> nonNullableVariables) {
         ChasedExtensionalDataNode chasedNode = new ChasedExtensionalDataNode(node, variableGenerator);
         return Stream.concat(Stream.of(chasedNode),
                 node.getRelationDefinition().getForeignKeys().stream()
-                        .map(fk -> chase(fk, chasedNode, variableGenerator))
+                        .map(fk -> chase(fk, chasedNode, variableGenerator, nonNullableVariables))
                         .flatMap(Optional::stream));
     }
 
-    private Optional<ChasedExtensionalDataNode> chase(ForeignKeyConstraint fk, ChasedExtensionalDataNode node, VariableGenerator variableGenerator) {
-        if (fk.getComponents().stream().anyMatch(c -> c.getAttribute().isNullable()))
+    private Optional<ChasedExtensionalDataNode> chase(ForeignKeyConstraint fk, ChasedExtensionalDataNode node, VariableGenerator variableGenerator, ImmutableSet<Variable> nonNullableVariables) {
+        if (fk.getComponents().stream().anyMatch(c -> c.getAttribute().isNullable()
+                && !nonNullableVariables.contains(node.getArgument(c.getAttribute().getIndex() - 1))))
             return Optional.empty();
 
-        ImmutableMap<Integer, VariableOrGroundTerm> map = fk.getComponents().stream()
+        ImmutableMap<Integer, VariableOrGroundTerm> referencedArgumentMap = fk.getComponents().stream()
                 .collect(ImmutableCollectors.toMap(
                         c ->c.getReferencedAttribute().getIndex() - 1,
                         c -> node.getArgument(c.getAttribute().getIndex() - 1)));
 
-        ChasedExtensionalDataNode chasedNode = new ChasedExtensionalDataNode(fk.getReferencedRelation(), map, variableGenerator);
+        ChasedExtensionalDataNode chasedNode = new ChasedExtensionalDataNode(fk.getReferencedRelation(), referencedArgumentMap, variableGenerator);
         return Optional.of(chasedNode);
     }
 

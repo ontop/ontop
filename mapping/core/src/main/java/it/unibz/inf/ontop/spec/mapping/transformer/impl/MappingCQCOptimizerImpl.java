@@ -67,7 +67,7 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                             .containsAll(answerVariables)) {
 
                         if (cqContainmentCheck.isContainedIn(
-                                answerVariables, extensionalDataNodesExceptCurrent, answerVariables, extensionalDataNodes)) {
+                                answerVariables, extensionalDataNodesExceptCurrent, ImmutableSet.of(), answerVariables, extensionalDataNodes)) {
                             //System.out.println("CQC-REMOVED: " + extensionalDataNodes.get(currentIndex) + " FROM " + extensionalDataNodes);
                             log.debug("CQC-REMOVED: " + extensionalDataNodes.get(currentIndex) + " FROM " + extensionalDataNodes);
                             extensionalDataNodes = extensionalDataNodesExceptCurrent;
