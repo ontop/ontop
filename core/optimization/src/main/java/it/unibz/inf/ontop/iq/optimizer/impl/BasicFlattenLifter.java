@@ -79,6 +79,8 @@ public class BasicFlattenLifter implements FlattenLifter {
                 return iqFactory.createUnaryIQTree(cn, updatedChild);
 
             LiftingState s = liftFlatten(updatedChild,
+                    // cannot be lifted if required in the CONSTRUCTION substitution
+                    //          or is projected away by the CONSTRUCTION node
                     Sets.union(cn.getSubstitution().getRangeVariables(),
                             Sets.difference(child.getVariables(), cn.getVariables())).immutableCopy());
             ImmutableSet<Variable> projectedVariables = s.getLifted().stream().reduce(cn.getVariables(),
@@ -153,7 +155,7 @@ public class BasicFlattenLifter implements FlattenLifter {
         private final UnaryOperatorSequence<FlattenNode> lifted;
         private final IQTree tree;
 
-        private LiftingState(UnaryOperatorSequence<FlattenNode> lifted, IQTree tree) {
+        LiftingState(UnaryOperatorSequence<FlattenNode> lifted, IQTree tree) {
             this.lifted = lifted;
             this.tree = tree;
         }
