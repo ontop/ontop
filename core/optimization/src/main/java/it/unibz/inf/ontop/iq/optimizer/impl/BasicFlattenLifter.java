@@ -75,10 +75,12 @@ public class BasicFlattenLifter implements FlattenLifter {
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode cn, IQTree child) {
             IQTree updatedChild = transformChild(child);
-            if (tree.getRootNode().equals(cn)) // tree == topRoot // prevents FLATTEN above the top CONSTRUCTION node in an IQ
+            if (tree == topRoot) // prevents FLATTEN above the top CONSTRUCTION node in an IQ
                 return iqFactory.createUnaryIQTree(cn, updatedChild);
 
-            LiftingState s = liftFlatten(updatedChild, ImmutableSet.of());
+            LiftingState s = liftFlatten(updatedChild,
+                    Sets.union(cn.getSubstitution().getRangeVariables(),
+                            Sets.difference(child.getVariables(), cn.getVariables())).immutableCopy());
             ImmutableSet<Variable> projectedVariables = s.getLifted().stream().reduce(cn.getVariables(),
                     (pv, fn) -> Sets.union(
                         Sets.difference(pv, fn.getLocallyDefinedVariables()),
