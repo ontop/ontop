@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -7,12 +9,11 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.impl.UnaryIQTreeBuilder;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
-import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -90,7 +91,7 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
                             .build(newDescendantTree));
             }
 
-            var newOrderBy = normalize(constructionNode.get().getSubstitution(), orderByNode.get());
+            var newOrderBy = liftOrderBy(constructionNode.get(), orderByNode.get());
 
             //Change order from [DISTINCT] -> CONSTRUCT -> ORDER BY to [DISTINCT] -> ORDER BY -> CONSTRUCT
             return Optional.of(iqTreeTools.unaryIQTreeBuilder()
@@ -100,19 +101,19 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
                     .build(newDescendantTree));
         }
 
-        OrderByNode normalize(Substitution<ImmutableTerm> substitution, OrderByNode orderBy) {
+        OrderByNode liftOrderBy(ConstructionNode construction, OrderByNode orderBy) {
+
+            var substitution = construction.getSubstitution();
+            ImmutableSet<ImmutableTerm> rangeSet = substitution.getRangeSet();
 
             //Get map of terms used in ORDER BY that are defined in CONSTRUCT
-            var orderByTerms = orderBy.getComparators().stream()
+            ImmutableMap<NonGroundTerm, NonGroundTerm> definedInConstruct = orderBy.getComparators().stream()
                     .map(OrderByNode.OrderComparator::getTerm)
-                    .collect(ImmutableCollectors.toSet());
-
-            var definedInConstruct = orderByTerms.stream()
-                    .filter(term -> substitution.getRangeSet().contains(term))
+                    .filter(rangeSet::contains)
+                    .distinct()
                     .collect(ImmutableCollectors.toMap(
                             term -> term,
-                            term -> (NonGroundTerm) substitution.getDomain().stream()
-                                    .filter(t -> substitution.get(t).equals(term))
+                            term -> substitution.getPreImage(t -> t.equals(term)).stream()
                                     .findFirst()
                                     .orElseThrow(() -> new MinorOntopInternalBugException(
                                             "Was expecting a definition with value " + term))));

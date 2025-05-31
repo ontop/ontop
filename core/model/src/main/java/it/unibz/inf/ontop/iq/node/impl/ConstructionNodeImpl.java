@@ -432,7 +432,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                     .collect(ImmutableSet.toImmutableSet());
         }
 
-        Sets.SetView<Variable> childDeterminants = Sets.difference(child.getVariables(), childStrictDependents);
+        Set<Variable> childDeterminants = Sets.difference(child.getVariables(), childStrictDependents);
 
         if (projectedVariables.containsAll(childDeterminants)) {
             VariableNullability nullability = getVariableNullability(child);
