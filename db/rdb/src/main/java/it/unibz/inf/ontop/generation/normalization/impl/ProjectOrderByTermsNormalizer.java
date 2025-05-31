@@ -84,28 +84,25 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
 
             //Recursive
             IQTree newDescendantTree = transform(initialDescendantTree);
-            IQTree newTree = iqTreeTools.unaryIQTreeBuilder()
-                    .append(slice.getOptionalNode())
-                    .append(distinct.getOptionalNode())
-                    .append(construction.getOptionalNode())
-                    .append(orderBy.getOptionalNode())
-                    .build(newDescendantTree);
 
-            return orderBy.isPresent()
-                    ? normalize(newTree,
-                                slice.getOptionalNode(),
-                                distinct.getOptionalNode(),
-                                construction.getOptionalNode(),
-                                orderBy.getNode(),
-                                newDescendantTree)
-                            .orElse(newTree)
-                    : newTree;
+            Optional<ConstructionNode> newOptionalConstructionNode = orderBy.isPresent()
+                    ?  normalize(distinct.getOptionalNode(),
+                            construction.getOptionalNode(),
+                            orderBy.getNode(),
+                            newDescendantTree)
+                        .or(construction::getOptionalNode)
+                    : construction.getOptionalNode();
+
+            return iqTreeTools.unaryIQTreeBuilder()
+                            .append(slice.getOptionalNode())
+                            .append(distinct.getOptionalNode())
+                            .append(newOptionalConstructionNode)
+                            .append(orderBy.getOptionalNode())
+                            .build(newDescendantTree);
         }
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        private Optional<IQTree> normalize(IQTree newTree,
-                                           Optional<SliceNode> optionalSlice,
-                                           Optional<DistinctNode> optionalDistinct,
+        private Optional<ConstructionNode> normalize(Optional<DistinctNode> optionalDistinct,
                                            Optional<ConstructionNode> optionalConstruction,
                                            OrderByNode orderBy,
                                            IQTree newDescendantTree) {
@@ -119,7 +116,8 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
                             .inferFunctionalDependencies()
                     : FunctionalDependencies.empty();
 
-            ImmutableSet<Variable> projectedVariables = newTree.getVariables();
+            ImmutableSet<Variable> projectedVariables = optionalConstruction.map(ConstructionNode::getVariables)
+                    .orElseGet(newDescendantTree::getVariables);
 
             var substitution = optionalConstruction.map(ConstructionNode::getSubstitution)
                     .orElseGet(substitutionFactory::getSubstitution);
@@ -157,12 +155,7 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
 
             ConstructionNode newConstructionNode = iqFactory.createConstructionNode(newProjectedVariables, newSubstitution);
 
-            return Optional.of(iqTreeTools.unaryIQTreeBuilder()
-                            .append(optionalSlice)
-                            .append(optionalDistinct)
-                            .append(newConstructionNode)
-                            .append(orderBy)
-                            .build(newDescendantTree));
+            return Optional.of(newConstructionNode);
         }
 
         /**
