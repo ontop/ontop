@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -56,25 +55,25 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
 
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-            return transformConstructionSliceDistinctOrOrderByTree(tree);
+            return transformSliceDistinctConstructionOrderByTree(tree);
         }
 
         @Override
         public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-            return transformConstructionSliceDistinctOrOrderByTree(tree);
+            return transformSliceDistinctConstructionOrderByTree(tree);
         }
 
         @Override
         public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
-            return transformConstructionSliceDistinctOrOrderByTree(tree);
+            return transformSliceDistinctConstructionOrderByTree(tree);
         }
 
         @Override
         public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-            return transformConstructionSliceDistinctOrOrderByTree(tree);
+            return transformSliceDistinctConstructionOrderByTree(tree);
         }
 
-        private IQTree transformConstructionSliceDistinctOrOrderByTree(IQTree tree) {
+        private IQTree transformSliceDistinctConstructionOrderByTree(IQTree tree) {
             var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
             var distinct = UnaryIQTreeDecomposition.of(slice.getTail(), DistinctNode.class);
             var construction = UnaryIQTreeDecomposition.of(distinct.getTail(), ConstructionNode.class);
@@ -86,7 +85,7 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
             IQTree newDescendantTree = transform(initialDescendantTree);
 
             Optional<ConstructionNode> newOptionalConstructionNode = orderBy.isPresent()
-                    ?  normalize(distinct.getOptionalNode(),
+                    ? normalize(distinct.getOptionalNode(),
                             construction.getOptionalNode(),
                             orderBy.getNode(),
                             newDescendantTree)
