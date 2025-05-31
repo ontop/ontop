@@ -91,29 +91,45 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
                     .append(orderBy.getOptionalNode())
                     .build(newDescendantTree);
 
-            return orderBy
-                    .getOptionalNode()
-                    .filter(o -> distinct.isPresent() || (!onlyInPresenceOfDistinct))
-                    .map(o -> new Analysis(distinct.isPresent(), construction.getOptionalNode(), o.getComparators(),
-                            distinct.isPresent()
-                                    ? newDescendantTree
-                                            .normalizeForOptimization(variableGenerator)
-                                            .inferFunctionalDependencies()
-                                    : FunctionalDependencies.empty()))
-                    .map(a -> normalize(newTree, a))
-                    .orElse(newTree);
+            return orderBy.isPresent()
+                    ? normalize(newTree,
+                                slice.getOptionalNode(),
+                                distinct.getOptionalNode(),
+                                construction.getOptionalNode(),
+                                orderBy.getNode(),
+                                newDescendantTree)
+                            .orElse(newTree)
+                    : newTree;
         }
 
-        private IQTree normalize(IQTree tree, Analysis analysis) {
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        private Optional<IQTree> normalize(IQTree newTree,
+                                           Optional<SliceNode> optionalSlice,
+                                           Optional<DistinctNode> optionalDistinct,
+                                           Optional<ConstructionNode> optionalConstruction,
+                                           OrderByNode orderBy,
+                                           IQTree newDescendantTree) {
 
-            ImmutableSet<Variable> projectedVariables = tree.getVariables();
+            if (!(optionalDistinct.isPresent() || (!onlyInPresenceOfDistinct)))
+                return Optional.empty();
+
+            FunctionalDependencies descendantTreeFunctionalDependencies = optionalDistinct.isPresent()
+                    ? newDescendantTree
+                            .normalizeForOptimization(variableGenerator)
+                            .inferFunctionalDependencies()
+                    : FunctionalDependencies.empty();
+
+            ImmutableSet<Variable> projectedVariables = newTree.getVariables();
+
+            var substitution = optionalConstruction.map(ConstructionNode::getSubstitution)
+                    .orElseGet(substitutionFactory::getSubstitution);
 
             ImmutableSet<ImmutableTerm> alreadyDefinedTerms = Sets.union(
                             projectedVariables,
-                            analysis.getSubstitution().getRangeSet())
+                            substitution.getRangeSet())
                     .immutableCopy();
 
-            ImmutableMap<Variable, NonGroundTerm> newBindings = analysis.sortConditions.stream()
+            ImmutableMap<Variable, NonGroundTerm> newBindings = orderBy.getComparators().stream()
                     .map(OrderByNode.OrderComparator::getTerm)
                     .filter(t -> !alreadyDefinedTerms.contains(t))
                     .distinct() // keep only the first occurrence of the sorting term
@@ -125,11 +141,11 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
                     .collect(ImmutableCollectors.toMap());
 
             if (newBindings.isEmpty())
-                return tree;
+                return Optional.empty();
 
             // decides whether the new bindings can be added
-            if (analysis.hasDistinct && newBindings.values().stream()
-                    .anyMatch(t -> mayImpactDistinct(t, alreadyDefinedTerms, analysis.descendantTreeFunctionalDependencies))) {
+            if (optionalDistinct.isPresent() && newBindings.values().stream()
+                    .anyMatch(t -> mayImpactDistinct(t, alreadyDefinedTerms, descendantTreeFunctionalDependencies))) {
                 throw new DistinctOrderByDialectLimitationException();
             }
 
@@ -137,13 +153,16 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
 
             Substitution<ImmutableTerm> newSubstitution = substitutionFactory.union(
                     newBindings.entrySet().stream().collect(substitutionFactory.toSubstitutionSkippingIdentityEntries()),
-                    analysis.getSubstitution());
+                    substitution);
 
             ConstructionNode newConstructionNode = iqFactory.createConstructionNode(newProjectedVariables, newSubstitution);
 
-            return analysis.constructionNode
-                    .map(n -> updateTopConstructionNode(tree, newConstructionNode))
-                    .orElseGet(() -> insertConstructionNode(tree, newConstructionNode));
+            return Optional.of(iqTreeTools.unaryIQTreeBuilder()
+                            .append(optionalSlice)
+                            .append(optionalDistinct)
+                            .append(newConstructionNode)
+                            .append(orderBy)
+                            .build(newDescendantTree));
         }
 
         /**
@@ -172,66 +191,8 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
             else
                 return false;
         }
-
-        /**
-         * Recursive
-         */
-        private IQTree updateTopConstructionNode(IQTree tree, ConstructionNode newConstructionNode) {
-            var construct = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
-            if (construct.isPresent())
-                return iqFactory.createUnaryIQTree(newConstructionNode, construct.getChild());
-
-            // Recursive
-            var unary = UnaryIQTreeDecomposition.of(tree, UnaryOperatorNode.class);
-            if (unary.isPresent())
-                 return iqFactory.createUnaryIQTree(unary.getNode(), updateTopConstructionNode(unary.getChild(), newConstructionNode));
-
-            throw new MinorOntopInternalBugException("Was expected to reach a ConstructionNode before a non-unary node");
-        }
-
-        /**
-         * Recursive
-         */
-        private IQTree insertConstructionNode(IQTree tree, ConstructionNode newConstructionNode) {
-            // Recursive
-            var distinct = UnaryIQTreeDecomposition.of(tree, DistinctNode.class);
-            if (distinct.isPresent())
-                    return iqFactory.createUnaryIQTree(
-                            distinct.getNode(),
-                            insertConstructionNode(distinct.getChild(), newConstructionNode));
-
-            // Recursive
-            var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
-            if (slice.isPresent())
-                return iqFactory.createUnaryIQTree(
-                        slice.getNode(),
-                        insertConstructionNode(slice.getChild(), newConstructionNode));
-
-            return iqFactory.createUnaryIQTree(newConstructionNode, tree);
-        }
     }
 
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private final class Analysis {
-        final boolean hasDistinct;
-        final Optional<ConstructionNode> constructionNode;
-        final ImmutableList<OrderByNode.OrderComparator> sortConditions;
-        final FunctionalDependencies descendantTreeFunctionalDependencies;
-
-        private Analysis(boolean hasDistinct, Optional<ConstructionNode> constructionNode,
-                         ImmutableList<OrderByNode.OrderComparator> sortConditions,
-                         FunctionalDependencies descendantTreeFunctionalDependencies) {
-            this.hasDistinct = hasDistinct;
-            this.constructionNode = constructionNode;
-            this.sortConditions = sortConditions;
-            this.descendantTreeFunctionalDependencies = descendantTreeFunctionalDependencies;
-        }
-
-        Substitution<ImmutableTerm> getSubstitution() {
-            return constructionNode.map(ConstructionNode::getSubstitution).orElseGet(substitutionFactory::getSubstitution);
-        }
-    }
 
     /**
      * Supposed to be an "internal bug" has the restriction should have been detected before, at the SPARQL level
