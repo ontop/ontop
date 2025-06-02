@@ -522,7 +522,9 @@ public class RDF4JTupleExprTranslator {
         }
 
         var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, topSubstitution);
-        IQTree joinQuery = iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, joinTree);
+        IQTree joinQuery = iqTreeTools.unaryIQTreeBuilder()
+                .append(optionalConstructionNode)
+                .build(joinTree);
 
         return createTranslationResult(joinQuery, nullableVariables);
     }
@@ -816,11 +818,13 @@ public class RDF4JTupleExprTranslator {
 
         Set<Variable> externallyBoundedVariables = Sets.intersection(variables, externalBindings.keySet());
 
-        Optional<ImmutableExpression> conjunction = termFactory.getConjunction(
+        var optionalFilter = iqTreeTools.createOptionalFilterNode(termFactory.getConjunction(
                 externallyBoundedVariables.stream()
-                        .map(v -> termFactory.getStrictEquality(v, externalBindings.get(v))));
+                        .map(v -> termFactory.getStrictEquality(v, externalBindings.get(v)))));
 
-        return iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(conjunction), tree);
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(optionalFilter)
+                .build(tree);
     }
 
 

@@ -153,11 +153,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     simplifiedJoinCondition.getOptionalExpression(),
                     newChildren);
 
-            return iqTreeTools.createOptionalUnaryIQTree(
-                    iqTreeTools.createOptionalConstructionNode(
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(iqTreeTools.createOptionalConstructionNode(
                             downPropagation::computeProjectedVariables,
-                            simplifiedJoinCondition.getSubstitution()),
-                    joinTree);
+                            simplifiedJoinCondition.getSubstitution()))
+                    .build(joinTree);
         }
         catch (UnsatisfiableConditionException e) {
             return iqTreeTools.createEmptyNode(downPropagation);
@@ -440,11 +440,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
             NaryIQTree joinTree = iqFactory.createNaryIQTree(newJoin, newChildren);
 
-            return iqTreeTools.createOptionalUnaryIQTree(
-                    iqTreeTools.createOptionalConstructionNode(
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(iqTreeTools.createOptionalConstructionNode(
                             downPropagation::computeProjectedVariables,
-                            simplifiedJoinCondition.getSubstitution()),
-                    joinTree);
+                            simplifiedJoinCondition.getSubstitution()))
+                    .build(joinTree);
         }
         catch (UnsatisfiableConditionException e) {
             return iqTreeTools.createEmptyNode(downPropagation);

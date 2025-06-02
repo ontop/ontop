@@ -266,10 +266,12 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             var intensionalVariables = pushedIntensionalNode.getVariables();
             var treeVariables = tree.getVariables();
             if (intensionalVariables.containsAll(treeVariables)) {
-                var filterCondition = termFactory.getConjunction(
+                var optionalFilter = iqTreeTools.createOptionalFilterNode(termFactory.getConjunction(
                         rootNode.getSubstitution().stream()
-                                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())));
-                return iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(filterCondition), pushedIntensionalNode);
+                                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()))));
+                return iqTreeTools.unaryIQTreeBuilder()
+                        .append(optionalFilter)
+                        .build(pushedIntensionalNode);
             }
 
             var commonTerm = pushedIntensionalNode.getProjectionAtom().getArguments().stream()

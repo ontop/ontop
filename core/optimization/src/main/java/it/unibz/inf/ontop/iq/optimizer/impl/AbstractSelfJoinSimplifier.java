@@ -135,9 +135,9 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
 
         Substitution<ImmutableTerm> normalizedTopSubstitution = normalization.getNormalizedSubstitution();
 
-        return iqTreeTools.createOptionalUnaryIQTree(
-                iqTreeTools.createOptionalConstructionNode(projectedVariables, normalizedTopSubstitution, normalizedNewTree),
-                normalizedNewTree);
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(iqTreeTools.createOptionalConstructionNode(projectedVariables, normalizedTopSubstitution, normalizedNewTree))
+                .build(normalizedNewTree);
     }
 
 

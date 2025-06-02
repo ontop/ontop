@@ -158,8 +158,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         NaryIQTreeTools.UnionDecomposition union = NaryIQTreeTools.UnionDecomposition.of(newChild)
                    .filter(d -> d.getNode().hasAChildWithLiftableDefinition(variable, d.getChildren()));
         if (union.isPresent()) {
-            ImmutableList<IQTree> newChildren = iqTreeTools.createUnaryOperatorChildren(this, union.getChildren());
-            return iqTreeTools.createUnionTree(getVariables(), newChildren);
+            return iqTreeTools.createUnionTree(
+                    getVariables(),
+                    NaryIQTreeTools.transformChildren(union.getChildren(),
+                        c -> iqFactory.createUnaryIQTree(this, c)));
         }
         return iqFactory.createUnaryIQTree(this, newChild);
     }
@@ -523,9 +525,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 IQTree newChild = updatedChild
                         .normalizeForOptimization(variableGenerator);
 
-                return iqTreeTools.createOptionalUnaryIQTree(
-                        iqTreeTools.createOptionalConstructionNode(projectedVariables, newChild),
-                        newChild);
+                return iqTreeTools.unaryIQTreeBuilder()
+                        .append(iqTreeTools.createOptionalConstructionNode(projectedVariables, newChild))
+                        .build(newChild);
             }
         }
     }

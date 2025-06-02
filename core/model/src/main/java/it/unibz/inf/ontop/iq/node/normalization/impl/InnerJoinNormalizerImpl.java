@@ -187,9 +187,9 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
                 try {
                     IQTree selectedGrandChildWithLimitedProjection =
-                            iqTreeTools.createOptionalUnaryIQTree(
-                                    iqTreeTools.createOptionalConstructionNode(constructionNode.getChildVariables(), grandChild),
-                                    grandChild);
+                            iqTreeTools.unaryIQTreeBuilder()
+                                    .append(iqTreeTools.createOptionalConstructionNode(constructionNode.getChildVariables(), grandChild))
+                                    .build(grandChild);
 
                     var provisionalNewChildren = replaceChild(children, position, selectedGrandChildWithLimitedProjection);
 
@@ -238,9 +238,9 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                         .append(ancestors)
                         .build(joinLevelTree);
 
-                IQTree nonNormalizedTree = iqTreeTools.createOptionalUnaryIQTree(
-                        iqTreeTools.createOptionalConstructionNode(projectedVariables, ancestorTree),
-                        ancestorTree);
+                IQTree nonNormalizedTree = iqTreeTools.unaryIQTreeBuilder()
+                        .append(iqTreeTools.createOptionalConstructionNode(projectedVariables, ancestorTree))
+                        .build(ancestorTree);
 
                 // Normalizes the ancestors (recursive)
                 return nonNormalizedTree.normalizeForOptimization(variableGenerator);
@@ -252,7 +252,9 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     case 0:
                         return iqFactory.createTrueNode();
                     case 1:
-                        return iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(joiningCondition), children.get(0));
+                        return iqTreeTools.unaryIQTreeBuilder()
+                                .append(iqTreeTools.createOptionalFilterNode(joiningCondition))
+                                .build(children.get(0));
                     default:
                         return liftOneLeftJoin()
                                 .orElseGet(() -> iqFactory.createNaryIQTree(
@@ -295,8 +297,9 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                                                 .mapToObj(children::get))
                                 .collect(ImmutableCollectors.toList()));
 
-                IQTree child = iqFactory.createBinaryNonCommutativeIQTree(node, newJoinOnLeft, rightChild);
-                return Optional.of(iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(joiningCondition), child));
+                return Optional.of(iqTreeTools.unaryIQTreeBuilder()
+                        .append(iqTreeTools.createOptionalFilterNode(joiningCondition))
+                        .build(iqFactory.createBinaryNonCommutativeIQTree(node, newJoinOnLeft, rightChild)));
             }
 
             /**

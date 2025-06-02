@@ -246,7 +246,9 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                         leftFilter.getTail(),
                         rightFilter.getTail());
 
-                return iqTreeTools.createOptionalUnaryIQTree(leftFilter.getOptionalNode(), leftJoinTree);
+                return iqTreeTools.unaryIQTreeBuilder()
+                        .append(leftFilter.getOptionalNode())
+                        .build(leftJoinTree);
             }
             return tree;
         }

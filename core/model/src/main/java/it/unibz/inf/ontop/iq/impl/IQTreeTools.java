@@ -13,12 +13,10 @@ import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -102,8 +100,12 @@ public class IQTreeTools {
         return createUnionTree(
                 signature,
                 childrenStream
-                        .map(c -> createOptionalUnaryIQTree(
-                                createOptionalConstructionNode(signature, c), c))
+                        .map(c -> {
+                            Optional<? extends UnaryOperatorNode> optionalNode = createOptionalConstructionNode(signature, c);
+                            return unaryIQTreeBuilder()
+                                    .append(optionalNode)
+                                    .build(c);
+                        })
                         .collect(ImmutableCollectors.toList()));
     }
 
@@ -120,18 +122,15 @@ public class IQTreeTools {
     }
 
 
-    public IQTree createOptionalUnaryIQTree(Optional<? extends UnaryOperatorNode> optionalNode, IQTree tree) {
-        return optionalNode
-                .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, tree))
-                .orElse(tree);
-    }
-
     public Optional<IQTree> createJoinTree(Optional<ImmutableExpression> filter, ImmutableList<? extends IQTree> list) {
         switch (list.size()) {
             case 0:
                 return Optional.empty();
             case 1:
-                return Optional.of(createOptionalUnaryIQTree(createOptionalFilterNode(filter), list.get(0)));
+                Optional<? extends UnaryOperatorNode> optionalNode = createOptionalFilterNode(filter);
+                return Optional.of(unaryIQTreeBuilder()
+                        .append(optionalNode)
+                        .build(list.get(0)));
             default:
                 return Optional.of(iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(filter), (ImmutableList)list));
         }
@@ -225,12 +224,6 @@ public class IQTreeTools {
         return optionalExpression
                 .map(c -> termFactory.getConjunction(expression, c))
                 .orElse(expression);
-    }
-
-    public ImmutableList<IQTree> createUnaryOperatorChildren(UnaryOperatorNode node, ImmutableList<IQTree> children) {
-        return children.stream()
-                .<IQTree>map(c -> iqFactory.createUnaryIQTree(node, c))
-                .collect(ImmutableCollectors.toList());
     }
 
     public static class IQTreeDecomposition<N extends QueryNode, T extends IQTree> {

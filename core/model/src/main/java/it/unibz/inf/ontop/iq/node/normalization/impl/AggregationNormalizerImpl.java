@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.AggregationNormalizer;
@@ -294,7 +293,9 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                 // NB: look at FunctionSymbol.isAggregation()
 
                 // Taken from the child sub-tree
-                VariableNullability variableNullability = iqTreeTools.createOptionalUnaryIQTree(childConstructionNode, grandChild)
+                VariableNullability variableNullability = iqTreeTools.unaryIQTreeBuilder()
+                        .append(childConstructionNode)
+                        .build(grandChild)
                         .getVariableNullability();
 
                 // The simplification may do the "lifting" inside the functional term (having a non-aggregation

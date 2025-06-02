@@ -107,8 +107,9 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
 
             if (simplifiedTree.isPresent()) {
                 var newTree = simplifiedTree.get();
-                return iqTreeTools.createOptionalUnaryIQTree(
-                                iqTreeTools.createOptionalConstructionNode(tree.getVariables(), newTree), newTree)
+                return iqTreeTools.unaryIQTreeBuilder()
+                        .append(iqTreeTools.createOptionalConstructionNode(tree.getVariables(), newTree))
+                        .build(newTree)
                         .normalizeForOptimization(variableGenerator);
             }
             else {

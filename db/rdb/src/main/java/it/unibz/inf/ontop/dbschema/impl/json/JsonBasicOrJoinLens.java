@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -167,8 +168,10 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         ImmutableList<ImmutableExpression> filterConditions = extractFilter(parentAttributeMap, idFactory, coreSingletons);
 
-        Optional<ImmutableExpression> expression = filterConditions.stream().reduce(termFactory::getConjunction);
-        IQTree filterTree = iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(expression), parentTree);
+        var optionalFilter = iqTreeTools.createOptionalFilterNode(filterConditions.stream().reduce(termFactory::getConjunction));
+        IQTree filterTree = iqTreeTools.unaryIQTreeBuilder()
+                .append(optionalFilter)
+                .build(parentTree);
 
         IQTree updatedParentDataNode = normalization.updateChild(filterTree, variableGenerator);
 
@@ -177,7 +180,9 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
                 normalization.getNormalizedSubstitution(),
                 updatedParentDataNode);
 
-        IQTree iqTreeBeforeIRISafeConstraints = iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, updatedParentDataNode);
+        IQTree iqTreeBeforeIRISafeConstraints = iqTreeTools.unaryIQTreeBuilder()
+                .append(optionalConstructionNode)
+                .build(updatedParentDataNode);
 
         IQTree iqTree = addIRISafeConstraints(iqTreeBeforeIRISafeConstraints, dbParameters);
 

@@ -65,8 +65,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         NaryIQTreeTools.UnionDecomposition union = NaryIQTreeTools.UnionDecomposition.of(newChild)
                       .filter(d -> d.getNode().hasAChildWithLiftableDefinition(variable, d.getChildren()));
         if (union.isPresent()) {
-            ImmutableList<IQTree> newChildren = iqTreeTools.createUnaryOperatorChildren(this, union.getChildren());
-            return iqFactory.createNaryIQTree(union.getNode(), newChildren);
+            return iqFactory.createNaryIQTree(
+                    union.getNode(),
+                    NaryIQTreeTools.transformChildren(union.getChildren(),
+                        c -> iqFactory.createUnaryIQTree(this, c)));
         }
         return iqFactory.createUnaryIQTree(this, newChild);
     }

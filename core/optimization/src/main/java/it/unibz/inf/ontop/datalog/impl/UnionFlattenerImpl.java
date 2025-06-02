@@ -54,8 +54,10 @@ public class UnionFlattenerImpl implements UnionFlattener {
             // if the child is a union, lift it
             var union = NaryIQTreeTools.UnionDecomposition.of(transformedChild);
             if (union.isPresent()) {
-                return iqTreeTools.createUnionTree(rootCn.getVariables(),
-                            iqTreeTools.createUnaryOperatorChildren(rootCn, union.getChildren()));
+                return iqTreeTools.createUnionTree(
+                        rootCn.getVariables(),
+                        NaryIQTreeTools.transformChildren(union.getChildren(),
+                                c -> iqFactory.createUnaryIQTree(rootCn, c)));
             }
             // if the child is a construction node, merge it
             var construction = UnaryIQTreeDecomposition.of(transformedChild, ConstructionNode.class);

@@ -190,7 +190,9 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         ImmutableSet<IntensionalDataNode> dataNodes = extractIntensionalDataNodesFromHead(insertTree);
 
         InsertClauseNormalizer.Result normalization = insertClauseNormalizer.normalize(dataNodes, whereTree);
-        IQTree normalizedSubTree = iqTreeTools.createOptionalUnaryIQTree(normalization.getConstructionNode(), whereTree);
+        IQTree normalizedSubTree = iqTreeTools.unaryIQTreeBuilder()
+                .append(normalization.getConstructionNode())
+                .build(whereTree);
 
         // NB: when there is no default graph
         if (normalizedSubTree.isDeclaredAsEmpty())

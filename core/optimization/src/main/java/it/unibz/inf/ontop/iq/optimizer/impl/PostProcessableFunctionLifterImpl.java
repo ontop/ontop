@@ -290,7 +290,9 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                                         .orElseGet(termFactory::getNullConstant)));
 
                 var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(newVarTypeMap::keySet, paddingSubstitution);
-                return iqTreeTools.createOptionalUnaryIQTree(optionalConstructionNode, partiallyPaddedChild);
+                return iqTreeTools.unaryIQTreeBuilder()
+                        .append(optionalConstructionNode)
+                        .build(partiallyPaddedChild);
             }
         }
     }

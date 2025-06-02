@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
+import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -47,7 +48,10 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
                 rootNode.getFilterCondition(),
                 this::pushExpressionDown);
 
-        return iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(result.nonPushedExpression), result.result);
+        var optionalFilter = iqTreeTools.createOptionalFilterNode(result.nonPushedExpression);
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(optionalFilter)
+                .build(result.result);
     }
 
     /**

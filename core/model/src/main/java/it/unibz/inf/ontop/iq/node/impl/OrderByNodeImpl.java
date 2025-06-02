@@ -78,7 +78,9 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
         Optional<OrderByNode> newOrderByNode = applySubstitution(descendingSubstitution);
         IQTree newChild = child.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator);
 
-        return iqTreeTools.createOptionalUnaryIQTree(newOrderByNode, newChild);
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(newOrderByNode)
+                .build(newChild);
     }
 
     @Override
@@ -88,7 +90,9 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
         Optional<OrderByNode> newOrderByNode = applySubstitution(descendingSubstitution);
         IQTree newChild = child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
 
-        return iqTreeTools.createOptionalUnaryIQTree(newOrderByNode, newChild);
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(newOrderByNode)
+                .build(newChild);
     }
 
     @Override

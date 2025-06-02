@@ -243,9 +243,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                         () -> projectedVariables,
                         substitution);
 
-                return iqTreeTools.createOptionalUnaryIQTree(
-                        optionalConstructionNode,
-                        updatedLeftChild);
+                return iqTreeTools.unaryIQTreeBuilder()
+                        .append(optionalConstructionNode)
+                        .build(updatedLeftChild);
             }
             return iqFactory.createBinaryNonCommutativeIQTree(this, updatedLeftChild, updatedRightChild);
         }
