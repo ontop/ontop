@@ -86,6 +86,13 @@ public class NaryIQTreeTools {
                     : new UnionDecomposition();
         }
 
+        public static UnionDecomposition of(IQTreeTools.UnaryIQTreeDecomposition<?> parent) {
+            IQTree tree = parent.getTail();
+            return tree.getRootNode() instanceof UnionNode
+                    ? new UnionDecomposition((UnionNode)tree.getRootNode(), ((NaryIQTree)tree))
+                    : new UnionDecomposition();
+        }
+
         public UnionDecomposition filter(java.util.function.Predicate<UnionDecomposition> predicate) {
             return isPresent() && predicate.test(this)
                     ? this

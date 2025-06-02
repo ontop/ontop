@@ -158,7 +158,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
     private IQTree liftSlice(IQTree subTree) {
         var construction = UnaryIQTreeDecomposition.of(subTree, ConstructionNode.class);
-        var slice = UnaryIQTreeDecomposition.of(construction.getTail(), SliceNode.class);
+        var slice = UnaryIQTreeDecomposition.of(construction, SliceNode.class);
         if (construction.isPresent() && slice.isPresent()) {
             return iqTreeTools.unaryIQTreeBuilder()
                     .append(slice.getNode())
@@ -171,10 +171,10 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     private IQTree dropTopConstruct(IQTree subTree) {
         // Check for the pattern [LIMIT] CONSTRUCT DISTINCT [CONSTRUCT2] ORDER BY
         var slice = UnaryIQTreeDecomposition.of(subTree, SliceNode.class);
-        var construction = UnaryIQTreeDecomposition.of(slice.getTail(), ConstructionNode.class);
-        var distinct = UnaryIQTreeDecomposition.of(construction.getTail(), DistinctNode.class);
-        var construction2 = UnaryIQTreeDecomposition.of(distinct.getTail(), ConstructionNode.class);
-        var orderBy = UnaryIQTreeDecomposition.of(construction2.getTail(), OrderByNode.class);
+        var construction = UnaryIQTreeDecomposition.of(slice, ConstructionNode.class);
+        var distinct = UnaryIQTreeDecomposition.of(construction, DistinctNode.class);
+        var construction2 = UnaryIQTreeDecomposition.of(distinct, ConstructionNode.class);
+        var orderBy = UnaryIQTreeDecomposition.of(construction2, OrderByNode.class);
         // If there is variable substitution in the top construction do not normalize
         if (construction.isPresent() && construction.getNode().getSubstitution().isEmpty()) {
             if (distinct.isPresent()  && orderBy.isPresent()) {
@@ -189,8 +189,8 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
     private IQTree liftOrderByAboveDistinct(IQTree subTree) {
         var construction = UnaryIQTreeDecomposition.of(subTree, ConstructionNode.class);
-        var distinct = UnaryIQTreeDecomposition.of(construction.getTail(), DistinctNode.class);
-        var orderBy = UnaryIQTreeDecomposition.of(distinct.getTail(), OrderByNode.class);
+        var distinct = UnaryIQTreeDecomposition.of(construction, DistinctNode.class);
+        var orderBy = UnaryIQTreeDecomposition.of(distinct, OrderByNode.class);
 
         if (construction.isPresent() && distinct.isPresent() && orderBy.isPresent()) {
             return iqTreeTools.unaryIQTreeBuilder()

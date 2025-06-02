@@ -47,24 +47,14 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
     public SelectFromWhereWithModifiers convert(IQTree tree, ImmutableSortedSet<Variable> signature) {
 
         var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
-        Optional<SliceNode> sliceNode = slice.getOptionalNode();
+        var distinct = UnaryIQTreeDecomposition.of(slice, DistinctNode.class);
+        var construction = UnaryIQTreeDecomposition.of(distinct, ConstructionNode.class);
+        var orderBy = UnaryIQTreeDecomposition.of(construction, OrderByNode.class);
+        var aggregation = UnaryIQTreeDecomposition.of(orderBy, AggregationNode.class);
+        var filter = UnaryIQTreeDecomposition.of(aggregation, FilterNode.class);
 
-        var distinct = UnaryIQTreeDecomposition.of(slice.getTail(), DistinctNode.class);
-        Optional<DistinctNode> distinctNode = distinct.getOptionalNode();
-
-        var construction = UnaryIQTreeDecomposition.of(distinct.getTail(), ConstructionNode.class);
         Optional<ConstructionNode> constructionNode = construction.getOptionalNode();
-
-        var orderBy = UnaryIQTreeDecomposition.of(construction.getTail(), OrderByNode.class);
-        Optional<OrderByNode> orderByNode = orderBy.getOptionalNode();
-
-        var aggregation = UnaryIQTreeDecomposition.of(orderBy.getTail(), AggregationNode.class);
         Optional<AggregationNode> aggregationNode = aggregation.getOptionalNode();
-
-        var filter = UnaryIQTreeDecomposition.of(aggregation.getTail(), FilterNode.class);
-        Optional<FilterNode> filterNode = filter.getOptionalNode();
-
-        IQTree childTree = filter.getTail();
 
         Substitution<ImmutableTerm> substitution = constructionNode
                 .map(c -> aggregationNode
@@ -77,24 +67,26 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                         .map(substitutionFactory::<ImmutableTerm>covariantCast)
                         .orElseGet(substitutionFactory::getSubstitution));
 
+        IQTree childTree = filter.getTail();
         SQLExpression fromExpression = convertIntoFromExpression(childTree);
 
         /*
          * Where expression: from the filter node or from the top inner join of the child tree
          */
-        Optional<ImmutableExpression> whereExpression = filterNode
-                .map(JoinOrFilterNode::getOptionalFilterCondition)
+        Optional<ImmutableExpression> whereExpression = filter.getOptionalNode()
+                .map(FilterNode::getOptionalFilterCondition)
                 .orElseGet(() -> NaryIQTreeTools.InnerJoinDecomposition.of(childTree)
                         .getOptionalNode()
                         .flatMap(JoinOrFilterNode::getOptionalFilterCondition));
 
-        ImmutableList<SQLOrderComparator> comparators = extractComparators(orderByNode, aggregationNode);
+        ImmutableList<SQLOrderComparator> comparators = extractComparators(orderBy.getOptionalNode(), aggregationNode);
 
+        Optional<SliceNode> sliceNode = slice.getOptionalNode();
         return sqlAlgebraFactory.createSelectFromWhere(signature, substitution, fromExpression, whereExpression,
                 aggregationNode
                         .map(AggregationNode::getGroupingVariables)
                         .orElseGet(ImmutableSet::of),
-                distinctNode.isPresent(),
+                distinct.getOptionalNode().isPresent(),
                 sliceNode
                         .flatMap(SliceNode::getLimit),
                 sliceNode

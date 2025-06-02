@@ -145,7 +145,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
             return tree;
 
         var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
-        var construction = UnaryIQTreeDecomposition.of(slice.getTail(), ConstructionNode.class);
+        var construction = UnaryIQTreeDecomposition.of(slice, ConstructionNode.class);
         if (!construction.isPresent())
             throw new MinorOntopInternalBugException("Unexpected tree shape (proper exception should have already been thrown)");
 
@@ -166,7 +166,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
             return substitutionFactory.getSubstitution();
 
         var slice = UnaryIQTreeDecomposition.of(rdfTree, SliceNode.class);
-        var construction = UnaryIQTreeDecomposition.of(slice.getTail(), ConstructionNode.class);
+        var construction = UnaryIQTreeDecomposition.of(slice, ConstructionNode.class);
         if (!construction.isPresent())
             throw new NotFullyTranslatableToNativeQueryException("was expected to have an extended projection at the top. IQ: " + rdfTree);
 

@@ -70,8 +70,8 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
 
         // DISTINCT [ORDER BY] [FILTER] UNION
         var orderBy = UnaryIQTreeDecomposition.of(child, OrderByNode.class);
-        var filter = UnaryIQTreeDecomposition.of(orderBy.getTail(), FilterNode.class);
-        var union = NaryIQTreeTools.UnionDecomposition.of(filter.getTail());
+        var filter = UnaryIQTreeDecomposition.of(orderBy, FilterNode.class);
+        var union = NaryIQTreeTools.UnionDecomposition.of(filter);
         if (union.isPresent()) {
             ImmutableList<IQTree> newUnionChildren = union.transformChildren(
                     c -> simplifyUnionChild(c, variableGenerator));

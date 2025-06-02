@@ -305,6 +305,13 @@ public class IQTreeTools {
                     : new UnaryIQTreeDecomposition<>(tree);
         }
 
+        public static <T extends UnaryOperatorNode> UnaryIQTreeDecomposition<T> of(UnaryIQTreeDecomposition<?> parent, Class<T> nodeClass) {
+            IQTree tree = parent.getTail();
+            return nodeClass.isInstance(tree.getRootNode())
+                    ? new UnaryIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((UnaryIQTree)tree))
+                    : new UnaryIQTreeDecomposition<>(tree);
+        }
+
         public static <T extends UnaryOperatorNode> ImmutableList<UnaryIQTreeDecomposition<T>> of(ImmutableList<IQTree> list, Class<T> nodeClass) {
             return list.stream()
                     .map(c -> UnaryIQTreeDecomposition.of(c, nodeClass))

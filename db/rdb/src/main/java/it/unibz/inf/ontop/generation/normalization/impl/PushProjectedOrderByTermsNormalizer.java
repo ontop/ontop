@@ -51,7 +51,7 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
         @Override
         public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
             var construction = IQTreeTools.UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
-            var orderBy = IQTreeTools.UnaryIQTreeDecomposition.of(construction.getTail(), OrderByNode.class);
+            var orderBy = IQTreeTools.UnaryIQTreeDecomposition.of(construction, OrderByNode.class);
 
             return transform(
                     Optional.of(rootNode),

@@ -57,14 +57,14 @@ public class PreventDistinctOptimizerImpl implements PreventDistinctOptimizer {
             // Some nodes may be missing but the order must be respected.
             // There are no multiple instances of the same kind of node.
             var slice = UnaryIQTreeDecomposition.of(child, SliceNode.class);
-            var distinct = UnaryIQTreeDecomposition.of(slice.getTail(), DistinctNode.class);
-            var descendantTree = distinct.getTail();
+            var distinct = UnaryIQTreeDecomposition.of(slice, DistinctNode.class);
             if (distinct.isPresent()) {
                 var split = preventDistinctProjectionSplitter.split(tree, variableGenerator);
                 var newTree = iqFactory.createUnaryIQTree(split.getConstructionNode(),
                         split.getSubTree());
                 if (newTree.equals(tree))
                     return tree;
+                var descendantTree = distinct.getTail();
                 if (!validatePushedVariables(
                         split.getPushedVariables(),
                         Sets.difference(

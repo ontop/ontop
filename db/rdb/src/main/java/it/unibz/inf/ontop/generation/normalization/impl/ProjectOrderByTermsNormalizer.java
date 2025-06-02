@@ -75,9 +75,9 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
 
         private IQTree transformSliceDistinctConstructionOrderByTree(IQTree tree) {
             var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
-            var distinct = UnaryIQTreeDecomposition.of(slice.getTail(), DistinctNode.class);
-            var construction = UnaryIQTreeDecomposition.of(distinct.getTail(), ConstructionNode.class);
-            var orderBy = UnaryIQTreeDecomposition.of(construction.getTail(), OrderByNode.class);
+            var distinct = UnaryIQTreeDecomposition.of(slice, DistinctNode.class);
+            var construction = UnaryIQTreeDecomposition.of(distinct, ConstructionNode.class);
+            var orderBy = UnaryIQTreeDecomposition.of(construction, OrderByNode.class);
 
             var initialDescendantTree = orderBy.getTail();
 
