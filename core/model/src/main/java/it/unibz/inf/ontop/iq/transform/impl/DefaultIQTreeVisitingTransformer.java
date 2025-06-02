@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 
 /**
@@ -90,12 +89,6 @@ public abstract class DefaultIQTreeVisitingTransformer implements IQTreeVisiting
     @Override
     public IQTree transformUnion(NaryIQTree tree, UnionNode node, ImmutableList<IQTree> children) {
         return transformNaryCommutativeNode(tree, node, children);
-    }
-
-    protected final ImmutableList<IQTree> transformChildren(ImmutableList<IQTree> children) {
-        return children.stream()
-                .map(this::transformChild)
-                .collect(ImmutableCollectors.toList());
     }
 
     protected final IQTree transformChild(IQTree child) {

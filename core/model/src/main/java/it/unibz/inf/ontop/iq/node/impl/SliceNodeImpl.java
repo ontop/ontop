@@ -280,12 +280,11 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
             // No more limit
             return Optional.of(childTree);
 
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(c -> cardinalityMultimap.containsKey(c)
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
+                c -> cardinalityMultimap.containsKey(c)
                         ? c
                         : iqFactory.createUnaryIQTree(
-                        iqFactory.createSliceNode(0, limit - sum), c))
-                .collect(ImmutableCollectors.toList());
+                            iqFactory.createSliceNode(0, limit - sum), c));
 
         IQTree newUnionTree = iqFactory.createNaryIQTree(childRoot, newChildren)
                 .normalizeForOptimization(variableGenerator);
@@ -299,10 +298,9 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     private Optional<IQTree> pushLimitInUnionChildren(UnionNode unionNode, ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
-        ImmutableList<IQTree> newUnionChildren = children.stream()
-                .map(c -> iqFactory.createUnaryIQTree(this, c))
-                .map(c -> c.normalizeForOptimization(variableGenerator))
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newUnionChildren = NaryIQTreeTools.transformChildren(children,
+                c -> iqFactory.createUnaryIQTree(this, c)
+                                    .normalizeForOptimization(variableGenerator));
 
         return children.equals(newUnionChildren)
                 ? Optional.empty()

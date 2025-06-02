@@ -102,7 +102,7 @@ public class BasicFlattenLifter implements FlattenLifter {
          */
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode join, ImmutableList<IQTree> initialChildren) {
-            ImmutableList<IQTree> children = transformChildren(initialChildren);
+            ImmutableList<IQTree> children = NaryIQTreeTools.transformChildren(initialChildren, this::transformChild);
 
             ImmutableSet<Variable> blockingVars = NaryIQTreeTools.coOccurringVariablesStream(children)
                     .collect(ImmutableCollectors.toSet());

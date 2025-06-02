@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.optimizer.SelfJoinUCIQOptimizer;
@@ -72,9 +73,8 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             // Recursive
-            ImmutableList<IQTree> liftedChildren = children.stream()
-                    .map(t -> t.acceptTransformer(this))
-                    .collect(ImmutableCollectors.toList());
+            ImmutableList<IQTree> liftedChildren = NaryIQTreeTools.transformChildren(children,
+                    t -> t.acceptTransformer(this));
 
             return simplifier.transformInnerJoin(rootNode, liftedChildren, tree.getVariables(), variableGenerator)
                     .orElseGet(() -> children.equals(liftedChildren)

@@ -69,7 +69,7 @@ public class UnionFlattenerImpl implements UnionFlattener {
         // merge consecutive unions
         public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
 
-            ImmutableList<IQTree> transformedChildren = transformChildren(children);
+            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
 
             ImmutableList<IQTree> unionGrandChildren = transformedChildren.stream()
                     .filter(t -> t.getRootNode() instanceof UnionNode)

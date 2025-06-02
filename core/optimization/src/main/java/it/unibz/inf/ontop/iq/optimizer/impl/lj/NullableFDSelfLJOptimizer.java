@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
@@ -384,9 +385,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
             if (found)
                 return tree;
 
-            var newChildren = children.stream()
-                    .map(this::transform)
-                    .collect(ImmutableCollectors.toList());
+            var newChildren = NaryIQTreeTools.transformChildren(children, this::transform);
 
             return newChildren.equals(children)
                     ? tree

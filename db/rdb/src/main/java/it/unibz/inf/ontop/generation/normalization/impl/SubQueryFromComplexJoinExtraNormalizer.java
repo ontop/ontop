@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.JoinLikeNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
@@ -62,9 +63,7 @@ public class SubQueryFromComplexJoinExtraNormalizer extends DefaultRecursiveIQTr
 
     @Override
     public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(this::createSubQueryIfJoin)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::createSubQueryIfJoin);
 
         return newChildren.equals(children) && rootNode.equals(tree.getRootNode())
                 ? tree

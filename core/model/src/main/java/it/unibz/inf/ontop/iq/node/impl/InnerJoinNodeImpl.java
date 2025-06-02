@@ -181,8 +181,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, ImmutableList<IQTree> children,
                                      IQTreeCache treeCache) {
-        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(
-                children,
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
                 c -> c.applyFreshRenaming(renamingSubstitution));
 
         Optional<ImmutableExpression> newCondition = getOptionalFilterCondition()
@@ -254,8 +253,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public IQTree removeDistincts(ImmutableList<IQTree> children, IQTreeCache treeCache) {
-        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(
-                children,
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
                 IQTree::removeDistincts);
 
         IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChildren.equals(children));

@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.optimizer.RedundantJoinFKOptimizer;
@@ -61,9 +62,8 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
 
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> initialChildren) {
-            ImmutableList<IQTree> liftedChildren = initialChildren.stream()
-                    .map(t -> t.acceptTransformer(this))
-                    .collect(ImmutableCollectors.toList());
+            ImmutableList<IQTree> liftedChildren = NaryIQTreeTools.transformChildren(initialChildren,
+                    t -> t.acceptTransformer(this));
 
             ImmutableMap<Boolean, ImmutableList<IQTree>> childPartitions = liftedChildren.stream()
                     .collect(ImmutableCollectors.partitioningBy(n -> (n instanceof ExtensionalDataNode)));

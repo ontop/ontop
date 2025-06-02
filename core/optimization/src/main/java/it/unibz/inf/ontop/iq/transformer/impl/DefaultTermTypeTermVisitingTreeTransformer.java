@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -105,9 +106,8 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                         // Non-simplifiable so as to lifted
                         e -> functionSymbolFactory.getRDFTermTypeFunctionSymbol(dictionary, ImmutableSet.copyOf(e.getValue()), false)));
 
-        ImmutableList<IQTree> newChildren = normalizedChildren.stream()
-                .map(c -> enforceUsageOfCommonTypeFunctionSymbol(c, typeFunctionSymbolMap))
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(normalizedChildren,
+                c -> enforceUsageOfCommonTypeFunctionSymbol(c, typeFunctionSymbolMap));
 
         return iqFactory.createNaryIQTree(rootNode, newChildren)
                 // Lifts the RDFTermTypeFunctionSymbols at the root of child definitions

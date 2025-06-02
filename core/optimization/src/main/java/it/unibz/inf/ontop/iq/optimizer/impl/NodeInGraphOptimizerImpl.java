@@ -83,7 +83,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             // Recursive
-            var updatedChildren = transformChildren(children);
+            var updatedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
 
             var nodeInGraphContextMultimap = extractNodeInGraphContexts(updatedChildren);
             var removableNodeInGraphAtoms = selectRemovableNodeInGraphAtoms(nodeInGraphContextMultimap.keySet(), updatedChildren);

@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -146,11 +147,10 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
         ImmutableSet<Variable> expressionVariables = expressionToPushDown.getVariableStream()
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(c -> c.getVariables().containsAll(expressionVariables)
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
+                c -> c.getVariables().containsAll(expressionVariables)
                         ? c.acceptVisitor(this).orElse(c)
-                        : c)
-                .collect(ImmutableCollectors.toList());
+                        : c);
 
         InnerJoinNode newJoinNode = newChildren.equals(children)
                 // Refused by the children
@@ -162,10 +162,9 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
 
     @Override
     public Optional<IQTree> transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(c -> c.acceptVisitor(this)
-                        .orElseGet(() -> wrapInFilter(expressionToPushDown, c)))
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
+                c -> c.acceptVisitor(this)
+                        .orElseGet(() -> wrapInFilter(expressionToPushDown, c)));
 
         return Optional.of(iqFactory.createNaryIQTree(rootNode, newChildren));
     }

@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
@@ -169,9 +170,8 @@ public class QueryTemplateExtractor {
 
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            ImmutableList<IQTree> newChildren = children.stream()
-                    .map(c -> c.acceptTransformer(this))
-                    .collect(ImmutableCollectors.toList());
+            ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
+                    c -> c.acceptTransformer(this));
 
             Optional<ImmutableExpression> newCondition = rootNode.getOptionalFilterCondition()
                     .flatMap(this::transformFilterCondition);

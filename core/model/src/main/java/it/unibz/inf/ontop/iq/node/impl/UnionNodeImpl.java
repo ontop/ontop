@@ -285,8 +285,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     @Override
     public IQTree removeDistincts(ImmutableList<IQTree> children, IQTreeCache treeCache) {
-        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(
-                children,
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
                 IQTree::removeDistincts);
 
         IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChildren.equals(children));
@@ -508,8 +507,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     @Override
     public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution,
                                      ImmutableList<IQTree> children, IQTreeCache treeCache) {
-        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(
-                children,
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
                 c -> c.applyFreshRenaming(renamingSubstitution));
 
         UnionNode newUnionNode = iqFactory.createUnionNode(substitutionFactory.apply(renamingSubstitution, getVariables()));
@@ -530,9 +528,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         /*
          * Cannot lift anything if some children do not have a construction node
          */
-        ImmutableList<UnaryIQTreeDecomposition<ConstructionNode>> liftedChildrenDecompositions = liftedChildren.stream()
-                .map(c -> UnaryIQTreeDecomposition.of(c, ConstructionNode.class))
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<UnaryIQTreeDecomposition<ConstructionNode>> liftedChildrenDecompositions = UnaryIQTreeDecomposition.of(liftedChildren, ConstructionNode.class);
 
         if (liftedChildrenDecompositions.stream()
                 .anyMatch(c -> !c.isPresent()))

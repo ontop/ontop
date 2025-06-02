@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
@@ -145,9 +146,8 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
 
     protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children,
                                                   Function<IQTree, IQTree> childTransformation) {
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(childTransformation)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, childTransformation);
+
         return newChildren.equals(children)
                 ? tree
                 : iqFactory.createNaryIQTree(rootNode, newChildren)

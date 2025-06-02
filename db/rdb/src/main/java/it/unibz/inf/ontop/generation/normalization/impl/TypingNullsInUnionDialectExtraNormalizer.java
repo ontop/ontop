@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
@@ -37,12 +38,10 @@ public class TypingNullsInUnionDialectExtraNormalizer extends AbstractTypingNull
 
     @Override
     public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> updatedChildren = transformChildren(children);
+        ImmutableList<IQTree> updatedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
 
-        ImmutableSet<Variable> nullVariables = updatedChildren.stream()
-                .map(c -> UnaryIQTreeDecomposition.of(c, ConstructionNode.class))
-                .map(UnaryIQTreeDecomposition::getOptionalNode)
-                .flatMap(Optional::stream)
+        ImmutableSet<Variable> nullVariables = UnaryIQTreeDecomposition.getNodeStream(
+                        UnaryIQTreeDecomposition.of(updatedChildren, ConstructionNode.class))
                 .map(this::extractNullVariables)
                 .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toSet());
@@ -54,9 +53,8 @@ public class TypingNullsInUnionDialectExtraNormalizer extends AbstractTypingNull
 
         Substitution<ImmutableFunctionalTerm> typedNullMap = extractTypedNullMap(tree, nullVariables);
 
-        ImmutableList<IQTree> newChildren = updatedChildren.stream()
-                .map(c -> updateSubQuery(c, typedNullMap))
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(updatedChildren,
+                c -> updateSubQuery(c, typedNullMap));
 
         return iqFactory.createNaryIQTree(rootNode, newChildren);
     }

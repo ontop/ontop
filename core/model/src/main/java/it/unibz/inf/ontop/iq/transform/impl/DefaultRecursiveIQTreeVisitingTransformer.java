@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.transform.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 
 /**
@@ -49,7 +50,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
 
     @Override
     protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode node, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> newChildren = transformChildren(children);
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
         return treesEqual(newChildren, children) && nodesEqual(node, tree.getRootNode())
                 ? tree
                 : iqFactory.createNaryIQTree(node, newChildren);

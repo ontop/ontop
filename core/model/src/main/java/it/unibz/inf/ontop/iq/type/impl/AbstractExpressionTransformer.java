@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
@@ -104,9 +105,7 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
 
     @Override
     public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(this::transform)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::transform);
 
         InnerJoinNode newJoinNode = iqFactory.createInnerJoinNode(
                 rootNode.getOptionalFilterCondition()

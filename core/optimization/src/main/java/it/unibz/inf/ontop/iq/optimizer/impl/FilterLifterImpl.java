@@ -6,13 +6,12 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.FilterLifter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
@@ -89,7 +88,7 @@ public class FilterLifterImpl implements FilterLifter {
         @Override
         public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
 
-            children = transformChildren(children);
+            children = NaryIQTreeTools.transformChildren(children, this::transformChild);
             var childrenDecomposition = UnaryIQTreeDecomposition.of(children, FilterNode.class);
 
             IQTree unionSubtree = iqTreeTools.createUnionTree(
@@ -108,7 +107,7 @@ public class FilterLifterImpl implements FilterLifter {
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode joinNode, ImmutableList<IQTree> children) {
 
-            children = transformChildren(children);
+            children = NaryIQTreeTools.transformChildren(children, this::transformChild);
             var childrenDecomposition = UnaryIQTreeDecomposition.of(children, FilterNode.class);
 
             NaryIQTree joinSubtree = iqTreeTools.createInnerJoinTree(

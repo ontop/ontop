@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -169,9 +170,8 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
 
     @Override
     public final IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(this::transformChildWithNewTransformer)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
+                this::transformChildWithNewTransformer);
 
         return newChildren.equals(children) && rootNode.equals(tree.getRootNode())
                 ? tree

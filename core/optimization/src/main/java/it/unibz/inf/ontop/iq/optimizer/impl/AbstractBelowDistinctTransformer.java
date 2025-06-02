@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
@@ -31,9 +32,7 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
 
     @Override
     public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> transformedChildren = children.stream()
-                .map(this::transform)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transform);
 
         return furtherSimplifyInnerJoinChildren(
                     rootNode.getOptionalFilterCondition(),
@@ -98,9 +97,7 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
 
     @Override
     public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(this::transform)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::transform);
 
         return newChildren.equals(children)
                 ? tree

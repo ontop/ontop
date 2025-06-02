@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
@@ -221,9 +222,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             return iqFactory.createNaryIQTree(
                     rootNode,
-                    children.stream()
-                            .map(this::transformNonUniqueChild)
-                            .collect(ImmutableCollectors.toList()));
+                    NaryIQTreeTools.transformChildren(children, this::transformNonUniqueChild));
         }
 
         @Override

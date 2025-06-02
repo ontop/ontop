@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.CompositeIQTreeTransformer;
@@ -309,7 +310,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
         @Override
         public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            ImmutableList<IQTree> newChildren = transformChildren(children);
+            var newChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
             return iqFactory.createNaryIQTree(rootNode, newChildren);
         }
 

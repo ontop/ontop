@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.transform.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
@@ -36,9 +37,7 @@ public class ChildTransformer extends DefaultIQTreeVisitingTransformer {
     protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
         return iqFactory.createNaryIQTree(
                 rootNode,
-                children.stream()
-                        .map(transformer::transform)
-                        .collect(ImmutableCollectors.toList()));
+                NaryIQTreeTools.transformChildren(children, transformer::transform));
     }
 
     @Override
