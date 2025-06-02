@@ -96,10 +96,13 @@ public class FilterLifterImpl implements FilterLifter {
                             childrenDecomposition.get(0).getTail().getVariables(),
                             UnaryIQTreeDecomposition.getTails(childrenDecomposition));
 
-            Optional<ImmutableExpression> childrenExpression = termFactory.getConjunction(
-                    getChildrenExpression(childrenDecomposition));
+            var optionalFilter = iqTreeTools.createOptionalFilterNode(termFactory.getConjunction(
+                    UnaryIQTreeDecomposition.getNodeStream(childrenDecomposition)
+                            .map(FilterNode::getFilterCondition)));
 
-            return iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(childrenExpression), unionSubtree);
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(optionalFilter)
+                    .build(unionSubtree);
         }
 
         @Override
@@ -111,12 +114,14 @@ public class FilterLifterImpl implements FilterLifter {
             NaryIQTree joinSubtree = iqTreeTools.createInnerJoinTree(
                     UnaryIQTreeDecomposition.getTails(childrenDecomposition));
 
-            Stream<ImmutableExpression> conjuncts = Stream.concat(
-                            getChildrenExpression(childrenDecomposition),
-                            joinNode.getOptionalFilterCondition().stream());
+            var optionalFilter = iqTreeTools.createOptionalFilterNode(termFactory.getConjunction(Stream.concat(
+                    UnaryIQTreeDecomposition.getNodeStream(childrenDecomposition)
+                            .map(FilterNode::getFilterCondition),
+                    joinNode.getOptionalFilterCondition().stream())));
 
-            Optional<ImmutableExpression> expression = termFactory.getConjunction(conjuncts);
-            return iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(expression), joinSubtree);
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(optionalFilter)
+                    .build(joinSubtree);
         }
 
         @Override
@@ -127,25 +132,18 @@ public class FilterLifterImpl implements FilterLifter {
             var leftChildFilter = UnaryIQTreeDecomposition.of(leftChild, FilterNode.class);
             var rightChildFilter = UnaryIQTreeDecomposition.of(rightChild, FilterNode.class);
 
-            LeftJoinNode updatedLJ = rightChildFilter.getOptionalNode()
-                    .map(f -> termFactory.getConjunction(rootNode.getOptionalFilterCondition(), Stream.of(f.getFilterCondition())))
-                    .map(iqFactory::createLeftJoinNode)
-                    .orElse(rootNode);
-
-            BinaryNonCommutativeIQTree lJSubtree = iqFactory.createBinaryNonCommutativeIQTree(
-                    updatedLJ,
+            BinaryNonCommutativeIQTree lJSubtree = iqTreeTools.createLeftJoinTree(
+                    iqTreeTools.getConjunction(
+                            rootNode.getOptionalFilterCondition(),
+                            rightChildFilter.getOptionalNode().map(FilterNode::getFilterCondition)),
                     leftChildFilter.getTail(),
                     rightChildFilter.getTail());
 
-            return iqTreeTools.createOptionalUnaryIQTree(leftChildFilter.getOptionalNode(), lJSubtree);
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(leftChildFilter.getOptionalNode())
+                    .build(lJSubtree);
         }
     }
 
-    private Stream<ImmutableExpression> getChildrenExpression(ImmutableList<UnaryIQTreeDecomposition<FilterNode>> childrenDecomposition) {
-        return childrenDecomposition.stream()
-                .filter(UnaryIQTreeDecomposition::isPresent)
-                .map(UnaryIQTreeDecomposition::getNode)
-                .map(FilterNode::getFilterCondition);
-    }
 }
 

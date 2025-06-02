@@ -324,6 +324,12 @@ public class IQTreeTools {
                     .collect(ImmutableCollectors.toList());
         }
 
+        public static <T extends UnaryOperatorNode> Stream<T> getNodeStream(ImmutableList<UnaryIQTreeDecomposition<T>> list) {
+            return list.stream()
+                    .map(UnaryIQTreeDecomposition::getOptionalNode)
+                    .flatMap(Optional::stream);
+        }
+
     }
 
 

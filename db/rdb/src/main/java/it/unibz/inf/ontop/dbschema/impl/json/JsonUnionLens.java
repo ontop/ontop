@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
@@ -200,15 +201,13 @@ public class JsonUnionLens extends JsonLens {
         //Add provenance column to each child
         ImmutableList<IQTree> extendedChildren;
         if (includesProvenanceColumn()) {
-            extendedChildren = children.stream().map(
+            extendedChildren = NaryIQTreeTools.transformChildren(children,
                     child -> addConstantColumn(
                             termFactory.getVariable(getProvenanceColumn(quotedIDFactory)),
                             quotedIDFactory.createRelationID(unionRelations.get(children.indexOf(child)).toArray(new String[0]))
                                     .getComponents().reverse().stream().map(QuotedID::getName).collect(Collectors.joining(".")),
                             child,
-                            coreSingletons
-                    )
-            ).collect(ImmutableCollectors.toList());
+                            coreSingletons));
         }
         else {
             extendedChildren = children;

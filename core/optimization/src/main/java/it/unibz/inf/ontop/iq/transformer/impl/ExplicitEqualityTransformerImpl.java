@@ -245,8 +245,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                         leftFilter.getTail(),
                         rightFilter.getTail());
 
-                Optional<ImmutableExpression> expression = leftFilter.getOptionalNode().map(FilterNode::getFilterCondition);
-                return iqTreeTools.createOptionalUnaryIQTree(iqTreeTools.createOptionalFilterNode(expression), leftJoinTree);
+                return iqTreeTools.createOptionalUnaryIQTree(leftFilter.getOptionalNode(), leftJoinTree);
             }
             return tree;
         }
@@ -255,9 +254,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             var childrenFilters = UnaryIQTreeDecomposition.of(children, FilterNode.class);
 
-            ImmutableList<ImmutableExpression> filterChildExpressions = childrenFilters.stream()
-                    .map(UnaryIQTreeDecomposition::getOptionalNode)
-                    .flatMap(Optional::stream)
+            ImmutableList<ImmutableExpression> filterChildExpressions = UnaryIQTreeDecomposition.getNodeStream(childrenFilters)
                     .map(FilterNode::getFilterCondition)
                     .collect(ImmutableCollectors.toList());
 
