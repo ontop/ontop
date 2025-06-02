@@ -44,19 +44,18 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
 
     protected ProjectionSplit split(IQTree topTree, VariableGenerator variableGenerator, ProjectionDecomposer decomposer) {
 
-        return UnaryIQTreeDecomposition.of(topTree, ConstructionNode.class)
-                .map((cn, t) -> split(cn, t, variableGenerator, decomposer))
-                .orElseGet(() -> new ProjectionSplitImpl(
-                        // "Useless" construction node --> no post-processing
-                        iqFactory.createConstructionNode(topTree.getVariables()),
-                        topTree,
-                        variableGenerator,
-                        ImmutableSet.of(),
-                        ImmutableSet.of()));
-    }
+        var construction = UnaryIQTreeDecomposition.of(topTree, ConstructionNode.class);
+        if (!construction.isPresent())
+            return new ProjectionSplitImpl(
+                // "Useless" construction node --> no post-processing
+                iqFactory.createConstructionNode(topTree.getVariables()),
+                topTree,
+                variableGenerator,
+                ImmutableSet.of(),
+                ImmutableSet.of());
 
-
-    private ProjectionSplit split(ConstructionNode initialRootNode, IQTree initialSubTree, VariableGenerator variableGenerator, ProjectionDecomposer decomposer) {
+        var initialRootNode = construction.getNode();
+        var initialSubTree = construction.getChild();
 
         ProjectionDecomposition decomposition = decomposer.decomposeSubstitution(initialRootNode.getSubstitution(), variableGenerator);
 
@@ -64,6 +63,8 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
                 decomposition.getTopSubstitution().orElseGet(substitutionFactory::getSubstitution));
 
         ImmutableSet<Variable> newSubTreeVariables = postProcessingNode.getChildVariables();
+
+        var subSubstitution = decomposition.getSubSubstitution().orElseGet(substitutionFactory::getSubstitution);
 
         /*
          * NB: the presence of a subSubstitution implies the need to project new variables.
@@ -73,18 +74,14 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
                 : iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(
                         newSubTreeVariables,
-                        decomposition.getSubSubstitution().orElseGet(substitutionFactory::getSubstitution)),
+                        subSubstitution),
                 initialSubTree);
 
         return new ProjectionSplitImpl(postProcessingNode,
                 normalizeNewSubTree(newSubTree, variableGenerator),
                 variableGenerator,
-                decomposition.getSubSubstitution()
-                        .map(Substitution::getRangeVariables)
-                        .orElseGet(ImmutableSet::of),
-                decomposition.getSubSubstitution()
-                        .map(Substitution::getRangeSet)
-                        .orElseGet(ImmutableSet::of));
+                subSubstitution.getRangeVariables(),
+                subSubstitution.getRangeSet());
     }
 
     /**
@@ -92,13 +89,15 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
      *
      */
     protected IQTree normalizeNewSubTree(IQTree newSubTree, VariableGenerator variableGenerator) {
-        return UnaryIQTreeDecomposition.of(newSubTree, ConstructionNode.class)
-                .map((cn, t) -> insertConstructionNode(t, cn, variableGenerator))
-                .orElse(newSubTree);
+        var slice = UnaryIQTreeDecomposition.of(newSubTree, ConstructionNode.class);
+        return slice.isPresent()
+                ? insertConstructionNode(slice.getChild(), slice.getNode(), variableGenerator)
+                : newSubTree;
     }
 
     /**
      * Recursive
+     * Overridden!
      */
     protected IQTree insertConstructionNode(IQTree tree, ConstructionNode constructionNode, VariableGenerator variableGenerator) {
         var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);

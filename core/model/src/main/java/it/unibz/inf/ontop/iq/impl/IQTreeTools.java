@@ -299,10 +299,6 @@ public class IQTreeTools {
             return tail;
         }
 
-        public <U> Optional<U> map(BiFunction<? super T, IQTree, ? extends U> function) {
-            return Optional.ofNullable(node).map(n -> function.apply(n, child));
-        }
-
         public static <T extends UnaryOperatorNode> UnaryIQTreeDecomposition<T> of(IQTree tree, Class<T> nodeClass) {
             return nodeClass.isInstance(tree.getRootNode())
                     ? new UnaryIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((UnaryIQTree)tree))
