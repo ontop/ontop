@@ -60,14 +60,13 @@ public class TermTypeTermLifterImpl implements TermTypeTermLifter {
      *
      */
     private IQTree makeRDFTermTypeFunctionSymbolsSimplifiable(IQTree tree) {
-        return UnaryIQTreeDecomposition.of(tree, ConstructionNode.class)
-                .<IQTree>map((cn, t) ->
-                        iqFactory.createUnaryIQTree(
-                                iqTreeTools.replaceSubstitution(
-                                        cn,
-                                        s -> s.transform(this::makeRDFTermTypeFunctionSymbolsSimplifiable)),
-                                t))
-                .orElse(tree);
+        var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(construction.getOptionalNode()
+                        .map(cn -> iqTreeTools.replaceSubstitution(
+                                cn,
+                                s -> s.transform(this::makeRDFTermTypeFunctionSymbolsSimplifiable))))
+                .build(construction.getTail());
     }
 
     /**

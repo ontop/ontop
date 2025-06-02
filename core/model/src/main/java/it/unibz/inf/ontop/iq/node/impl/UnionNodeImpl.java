@@ -64,7 +64,8 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     public boolean hasAChildWithLiftableDefinition(Variable variable, ImmutableList<IQTree> children) {
         return children.stream()
                 .anyMatch(c -> UnaryIQTreeDecomposition.of(c, ConstructionNode.class)
-                        .map((cn, t) -> cn.getSubstitution().isDefining(variable)).isPresent()
+                        .getOptionalNode()
+                        .map(cn -> cn.getSubstitution().isDefining(variable)).isPresent()
 );
     }
 

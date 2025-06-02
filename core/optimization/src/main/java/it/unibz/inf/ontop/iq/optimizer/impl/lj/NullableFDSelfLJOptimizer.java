@@ -131,15 +131,17 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
         }
 
         private Optional<DataNodeAndProvenanceVariables> extractDataNodeAndProvenance(IQTree rightChild) {
-            var provenance = DataNodeAndProvenanceVariables.of(rightChild, ImmutableSet.of());
-            if (provenance.isPresent())
-                return provenance;
-
             var construction = UnaryIQTreeDecomposition.of(rightChild, ConstructionNode.class);
-            if (construction.isPresent()) {
-                Substitution<ImmutableTerm> substitution = construction.getNode().getSubstitution();
-                if (substitution.rangeAllMatch(t -> t.equals(provenanceConstant))) {
-                    return DataNodeAndProvenanceVariables.of(construction.getChild(), substitution.getDomain());
+            if (construction.getTail() instanceof ExtensionalDataNode) {
+                var extensionalDataNode = (ExtensionalDataNode) construction.getTail();
+                if (!construction.isPresent()) {
+                    return Optional.of(new DataNodeAndProvenanceVariables(extensionalDataNode, ImmutableSet.of()));
+                }
+                else {
+                    Substitution<ImmutableTerm> substitution = construction.getNode().getSubstitution();
+                    if (substitution.rangeAllMatch(t -> t.equals(provenanceConstant))) {
+                        return Optional.of(new DataNodeAndProvenanceVariables(extensionalDataNode, substitution.getDomain()));
+                    }
                 }
             }
             return Optional.empty();
@@ -153,8 +155,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
             var leftArgumentMap = leftNode.getArgumentMap();
             var rightArgumentMap = rightNode.getArgumentMap();
 
-            var commonArgumentMap = Sets.intersection(leftArgumentMap.entrySet(),
-                            rightArgumentMap.entrySet()).stream()
+            var commonArgumentMap = Sets.intersection(leftArgumentMap.entrySet(), rightArgumentMap.entrySet()).stream()
                             .collect(ImmutableCollectors.toMap());
 
             if (commonArgumentMap.isEmpty())
@@ -170,7 +171,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
                         .collect(ImmutableCollectors.toSet());
 
                 var determinantVariables = fd.getDeterminants().stream()
-                        .map(a -> commonArgumentMap.get(a.getIndex() -1))
+                        .map(a -> commonArgumentMap.get(a.getIndex() - 1))
                         .filter(t -> t instanceof Variable)
                         .map(v -> (Variable) v)
                         .collect(ImmutableCollectors.toSet());
@@ -400,13 +401,6 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
         protected DataNodeAndProvenanceVariables(ExtensionalDataNode dataNode, ImmutableSet<Variable> provenanceVariables) {
             this.dataNode = dataNode;
             this.provenanceVariables = provenanceVariables;
-        }
-
-        static Optional<DataNodeAndProvenanceVariables> of(IQTree tree, ImmutableSet<Variable> provenanceVariables) {
-            return Optional.of(tree)
-                    .filter(t -> t instanceof ExtensionalDataNode)
-                    .map(t -> (ExtensionalDataNode)t)
-                    .map(t -> new DataNodeAndProvenanceVariables(t, provenanceVariables));
         }
     }
 }
