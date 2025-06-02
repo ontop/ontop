@@ -131,17 +131,16 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
         }
 
         private Optional<DataNodeAndProvenanceVariables> extractDataNodeAndProvenance(IQTree rightChild) {
-            return DataNodeAndProvenanceVariables.of(rightChild, ImmutableSet.of())
+            var provenance = DataNodeAndProvenanceVariables.of(rightChild, ImmutableSet.of());
+            if (provenance.isPresent())
+                return provenance;
 
-                    .or(() -> UnaryIQTreeDecomposition.of(rightChild, ConstructionNode.class)
-                            .map(this::extractDataNodeAndProvenance)
-                            .orElse(Optional.empty()));
-        }
-
-        private Optional<DataNodeAndProvenanceVariables> extractDataNodeAndProvenance(ConstructionNode cn, IQTree subChild) {
-            if (cn.getSubstitution()
-                    .rangeAllMatch(t -> t.equals(provenanceConstant))) {
-                return DataNodeAndProvenanceVariables.of(subChild, cn.getSubstitution().getDomain());
+            var construction = UnaryIQTreeDecomposition.of(rightChild, ConstructionNode.class);
+            if (construction.isPresent()) {
+                Substitution<ImmutableTerm> substitution = construction.getNode().getSubstitution();
+                if (substitution.rangeAllMatch(t -> t.equals(provenanceConstant))) {
+                    return DataNodeAndProvenanceVariables.of(construction.getChild(), substitution.getDomain());
+                }
             }
             return Optional.empty();
         }

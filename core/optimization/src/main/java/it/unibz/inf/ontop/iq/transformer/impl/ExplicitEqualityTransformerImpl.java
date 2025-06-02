@@ -274,12 +274,10 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         @Override
         public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
             var filterChild = UnaryIQTreeDecomposition.of(child, FilterNode.class);
-            return filterChild
-                    .<IQTree>map((f, t) -> iqFactory.createUnaryIQTree(
-                            iqFactory.createFilterNode(termFactory.getConjunction(
-                                    rootNode.getFilterCondition(),
-                                    f.getFilterCondition())),
-                            t))
+            return filterChild.getOptionalNode()
+                    .map(f -> termFactory.getConjunction(rootNode.getFilterCondition(), f.getFilterCondition()))
+                    .map(iqFactory::createFilterNode)
+                    .map(f -> iqFactory.createUnaryIQTree(f, filterChild.getTail()))
                     .orElse(tree);
         }
 
@@ -395,8 +393,8 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             if (isIdleCn(decomposition))
                 return decomposition.getChild();
 
-            return decomposition
-                    .<IQTree>map((n, t) -> decomposition.getTree())
+            return decomposition.getOptionalNode()
+                    .<IQTree>map(n -> decomposition.getTree())
                     .orElseGet(decomposition::getTail);
         }
     }

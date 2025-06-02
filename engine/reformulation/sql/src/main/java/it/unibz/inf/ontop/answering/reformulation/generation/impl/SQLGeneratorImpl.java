@@ -169,38 +169,19 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     }
 
     private IQTree dropTopConstruct(IQTree subTree) {
-        // Check if it starts with [LIMIT]
-        return UnaryIQTreeDecomposition.of(subTree, SliceNode.class)
-                .<IQTree>map((s, t) ->
-                        iqFactory.createUnaryIQTree(s,
-                                dropTopConstructStep2(t)))
-                .orElse(subTree);
-    }
-
-    private IQTree dropTopConstructStep2(IQTree subTree) {
-        // Check for pattern CONSTRUCT, DISTINCT, [CONSTRUCT], ORDER BY
-        var construction = UnaryIQTreeDecomposition.of(subTree, ConstructionNode.class);
-        if (construction.isPresent()) {
-            // If there is variable substitution in the top construction do not normalize
-            var distinct = UnaryIQTreeDecomposition.of(construction.getTail(), DistinctNode.class);
-            if (distinct.isPresent() && construction.getNode().getSubstitution().isEmpty()) {
-                // CASE 1: CONSTRUCT, DISTINCT, CONSTRUCT, ORDER BY
-                var construction2 = UnaryIQTreeDecomposition.of(distinct.getChild(), ConstructionNode.class);
-                if (construction2.isPresent()) {
-                    var orderBy = UnaryIQTreeDecomposition.of(construction2.getChild(), OrderByNode.class);
-                    if (orderBy.isPresent()) {
-                        // Drop the top construction node
-                        return construction.getChild();
-                    }
-                }
-                else {
-                    // CASE 2: CONSTRUCT, DISTINCT, ORDER BY
-                    var orderBy = UnaryIQTreeDecomposition.of(distinct.getChild(), OrderByNode.class);
-                    if (orderBy.isPresent()) {
-                        // Drop the top construction node
-                        return construction.getChild();
-                    }
-                }
+        // Check for the pattern [LIMIT] CONSTRUCT DISTINCT [CONSTRUCT2] ORDER BY
+        var slice = UnaryIQTreeDecomposition.of(subTree, SliceNode.class);
+        var construction = UnaryIQTreeDecomposition.of(slice.getTail(), ConstructionNode.class);
+        var distinct = UnaryIQTreeDecomposition.of(construction.getTail(), DistinctNode.class);
+        var construction2 = UnaryIQTreeDecomposition.of(distinct.getTail(), ConstructionNode.class);
+        var orderBy = UnaryIQTreeDecomposition.of(construction2.getTail(), OrderByNode.class);
+        // If there is variable substitution in the top construction do not normalize
+        if (construction.isPresent() && construction.getNode().getSubstitution().isEmpty()) {
+            if (distinct.isPresent()  && orderBy.isPresent()) {
+                // Drop the top construction node
+                return iqTreeTools.unaryIQTreeBuilder()
+                        .append(slice.getOptionalNode())
+                        .build(construction.getChild());
             }
         }
         return subTree;

@@ -144,50 +144,43 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
         if (rdfTypes.isEmpty())
             return tree;
 
-        return UnaryIQTreeDecomposition.of(tree, SliceNode.class)
-                .<IQTree>map((s, t) -> iqFactory.createUnaryIQTree(s,
-                        replaceRDFByDBTermsInConstructionTree(t, rdfTypes)))
-                .orElseGet(() -> replaceRDFByDBTermsInConstructionTree(tree, rdfTypes));
-    }
+        var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
+        var construction = UnaryIQTreeDecomposition.of(slice.getTail(), ConstructionNode.class);
+        if (!construction.isPresent())
+            throw new MinorOntopInternalBugException("Unexpected tree shape (proper exception should have already been thrown)");
 
-    private IQTree replaceRDFByDBTermsInConstructionTree(IQTree tree, ImmutableMap<Variable, RDFTermType> rdfTypes) {
-        return UnaryIQTreeDecomposition.of(tree, ConstructionNode.class)
-                .map((cn, t) -> iqFactory.createUnaryIQTree(
-                        iqTreeTools.replaceSubstitution(
-                                cn,
-                                s -> s.builder().transform(rdfTypes::get, this::replaceRDFByDBTerm).build()),
-                        t))
-                .orElseThrow(() -> new MinorOntopInternalBugException("Unexpected tree shape (proper exception should have already been thrown)"));
+        ConstructionNode newConstructionNode = iqTreeTools.replaceSubstitution(
+                construction.getNode(),
+                s -> s.builder()
+                        .transform(rdfTypes::get, this::replaceRDFByDBTerm)
+                        .build());
+
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(slice.getOptionalNode())
+                .append(newConstructionNode)
+                .build(construction.getTail());
     }
 
     private Substitution<ImmutableTerm> extractDefinitions(IQTree rdfTree) throws NotFullyTranslatableToNativeQueryException {
         if (rdfTree.getVariables().isEmpty())
             return substitutionFactory.getSubstitution();
 
-        try {
-            return UnaryIQTreeDecomposition.of(rdfTree, SliceNode.class)
-                    .map((s, t) -> extractDefinitionsFromConstructionTree(t))
-                    .orElseGet(() -> extractDefinitionsFromConstructionTree(rdfTree));
-        }
-        catch (NotFullyTranslatableToNativeQueryRuntimeException e) {
-            throw new NotFullyTranslatableToNativeQueryException(e.getMessage());
-        }
+        var slice = UnaryIQTreeDecomposition.of(rdfTree, SliceNode.class);
+        var construction = UnaryIQTreeDecomposition.of(slice.getTail(), ConstructionNode.class);
+        if (!construction.isPresent())
+            throw new NotFullyTranslatableToNativeQueryException("was expected to have an extended projection at the top. IQ: " + rdfTree);
+
+        Substitution<ImmutableTerm> substitution = construction.getNode().getSubstitution();
+        // NB: should not include any non-projected variable (illegal IQ)
+        Set<Variable> missingVariables = Sets.difference(rdfTree.getVariables(), substitution.getDomain());
+        if (!missingVariables.isEmpty())
+            throw new NotFullyTranslatableToNativeQueryException(String.format(
+                    "its variables %s are missing an independent definition",
+                    missingVariables));
+
+        return substitution;
     }
 
-    private Substitution<ImmutableTerm> extractDefinitionsFromConstructionTree(IQTree rdfTree) {
-        return UnaryIQTreeDecomposition.of(rdfTree, ConstructionNode.class)
-                .map((cn, t) -> {
-                    Substitution<ImmutableTerm> substitution = cn.getSubstitution();
-                    // NB: should not include any non-projected variable (illegal IQ)
-                    Set<Variable> missingVariables = Sets.difference(rdfTree.getVariables(), substitution.getDomain());
-                    if (!missingVariables.isEmpty())
-                        throw new NotFullyTranslatableToNativeQueryRuntimeException(String.format(
-                                "its variables %s are missing an independent definition",
-                                missingVariables));
-                    return substitution;
-                })
-                .orElseThrow(() -> new NotFullyTranslatableToNativeQueryRuntimeException("was expected to have an extended projection at the top. IQ: " + rdfTree));
-    }
 
     private ImmutableTerm replaceRDFByDBTerm(ImmutableTerm definition,
                                                RDFTermType rdfType) {

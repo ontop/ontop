@@ -55,10 +55,9 @@ public class FilterLifterImpl implements FilterLifter {
 
             UnaryIQTreeDecomposition<FilterNode> decomposition = UnaryIQTreeDecomposition.of(child, FilterNode.class);
             return iqFactory.createUnaryIQTree(
-                    decomposition.map((f, t) ->
-                                    iqFactory.createConstructionNode(
-                                            Sets.union(f.getFilterCondition().getVariables(), cn.getVariables()).immutableCopy(),
-                                            cn.getSubstitution()))
+                    decomposition.getOptionalNode()
+                            .map(f -> Sets.union(f.getFilterCondition().getVariables(), cn.getVariables()).immutableCopy())
+                            .map(v -> iqFactory.createConstructionNode(v, cn.getSubstitution()))
                             .orElse(cn),
                     decomposition.getTail());
         }
@@ -69,9 +68,9 @@ public class FilterLifterImpl implements FilterLifter {
 
             UnaryIQTreeDecomposition<FilterNode> decomposition = UnaryIQTreeDecomposition.of(child, FilterNode.class);
             return iqFactory.createUnaryIQTree(
-                    decomposition.map((f, t) ->
-                                    iqFactory.createFilterNode(
-                                            termFactory.getConjunction(filter.getFilterCondition(), f.getFilterCondition())))
+                    decomposition.getOptionalNode()
+                            .map(f -> termFactory.getConjunction(filter.getFilterCondition(), f.getFilterCondition()))
+                            .map(iqFactory::createFilterNode)
                             .orElse(filter),
                     decomposition.getTail());
         }
@@ -128,8 +127,8 @@ public class FilterLifterImpl implements FilterLifter {
             var leftChildFilter = UnaryIQTreeDecomposition.of(leftChild, FilterNode.class);
             var rightChildFilter = UnaryIQTreeDecomposition.of(rightChild, FilterNode.class);
 
-            LeftJoinNode updatedLJ = rightChildFilter
-                    .map((f, t) -> termFactory.getConjunction(rootNode.getOptionalFilterCondition(), Stream.of(f.getFilterCondition())))
+            LeftJoinNode updatedLJ = rightChildFilter.getOptionalNode()
+                    .map(f -> termFactory.getConjunction(rootNode.getOptionalFilterCondition(), Stream.of(f.getFilterCondition())))
                     .map(iqFactory::createLeftJoinNode)
                     .orElse(rootNode);
 

@@ -115,15 +115,12 @@ public class DefaultTermTypeTermVisitingTreeTransformer
     }
 
     private IQTree replaceTypeTermConstants(IQTree child) {
-        return UnaryIQTreeDecomposition.of(child, ConstructionNode.class)
-                .map((cn, t) -> replaceTypeTermConstants(cn, t, child))
-                .orElse(child);
-    }
-
-    private IQTree replaceTypeTermConstants(ConstructionNode constructionNode, IQTree child, IQTree tree) {
-        return iqFactory.createUnaryIQTree(
-                iqTreeTools.replaceSubstitution(constructionNode, s -> s.transform(this::replaceTypeTermConstants)),
-                child);
+        var construction = UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(construction.getOptionalNode()
+                        .map(cn -> iqTreeTools.replaceSubstitution(cn,
+                                        s -> s.transform(this::replaceTypeTermConstants))))
+                .build(construction.getTail());
     }
 
     /**
@@ -155,7 +152,8 @@ public class DefaultTermTypeTermVisitingTreeTransformer
 
     private Optional<ImmutableTerm> extractDefinition(Variable variable, IQTree child) {
         return UnaryIQTreeDecomposition.of(child, ConstructionNode.class)
-                .map((cn, t) -> cn.getSubstitution())
+                .getOptionalNode()
+                .map(ConstructionNode::getSubstitution)
                 .flatMap(s -> Optional.ofNullable(s.get(variable)));
     }
 
