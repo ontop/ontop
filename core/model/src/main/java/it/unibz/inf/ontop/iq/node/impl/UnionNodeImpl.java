@@ -497,11 +497,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         DownPropagation ds = new DownPropagation(descendingSubstitution, getVariables());
 
-        ImmutableList<IQTree> updatedChildren = NaryIQTreeTools.transformChildren(
-                children,
-                c -> c.applyDescendingSubstitutionWithoutOptimizing(ds.getSubstitution(), variableGenerator));
-
-        return iqTreeTools.createUnionTree(ds.computeProjectedVariables(), updatedChildren);
+        return iqTreeTools.createUnionTree(ds.computeProjectedVariables(),
+                NaryIQTreeTools.transformChildren(children,
+                        c -> c.applyDescendingSubstitutionWithoutOptimizing(ds.getSubstitution(), variableGenerator)));
     }
 
     @Override
@@ -557,7 +555,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         ImmutableSet<Variable> unionVariables = newRootNode.getChildVariables();
 
-        Stream<IQTree> newChildrenStream = IntStream.range(0, liftedChildrenDecompositions.size())
+        ImmutableList<IQTree> newChildrenStream = IntStream.range(0, liftedChildrenDecompositions.size())
                 .mapToObj(i -> updateChild(
                         liftedChildrenDecompositions.get(i).getNode(),
                         liftedChildrenDecompositions.get(i).getChild(),
@@ -565,9 +563,12 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         tmpNormalizedChildSubstitutions.get(i),
                         unionVariables,
                         variableGenerator))
-                .flatMap(this::flattenChild);
+                .flatMap(this::flattenChild)
+                .collect(ImmutableCollectors.toList());
 
-        IQTree unionIQ = iqTreeTools.createUnionTreeWithOptionalConstructionNodes(unionVariables, newChildrenStream);
+        IQTree unionIQ = iqTreeTools.createUnionTree(unionVariables,
+                NaryIQTreeTools.transformChildren(newChildrenStream,
+                        c -> iqTreeTools.unaryIQTreeBuilder(unionVariables).build(c)));
 
         return iqFactory.createUnaryIQTree(newRootNode, unionIQ)
                 // TODO: see if needed or if we could opportunistically mark the tree as normalized

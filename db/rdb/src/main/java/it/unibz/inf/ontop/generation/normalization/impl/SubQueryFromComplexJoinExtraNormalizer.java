@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.JoinLikeNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 /**
@@ -56,7 +55,9 @@ public class SubQueryFromComplexJoinExtraNormalizer extends DefaultRecursiveIQTr
         IQTree transformedChild = transformChild(child);
 
         if (transformedChild.getRootNode() instanceof JoinLikeNode) {
-            return iqTreeTools.createDummyConstructionIQTree(transformedChild);
+            return iqFactory.createUnaryIQTree(
+                    iqFactory.createConstructionNode(transformedChild.getVariables()),
+                    transformedChild);
         }
         return transformedChild;
     }

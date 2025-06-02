@@ -239,9 +239,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                         .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
 
                 ImmutableSet<Variable> projectedVariables = projectedVariables(updatedLeftChild, updatedRightChild).immutableCopy();
-                var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(
-                        () -> projectedVariables,
-                        substitution);
+                var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, substitution);
 
                 return iqTreeTools.unaryIQTreeBuilder()
                         .append(optionalConstructionNode)

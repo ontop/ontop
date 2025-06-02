@@ -508,13 +508,9 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                             iqFactory.createLeftJoinNode(ljCondition), leftChild, rightChild, normalizedProperties);
                 }
 
-                IQTree ancestorTree = iqTreeTools.unaryIQTreeBuilder()
+                IQTree nonNormalizedTree = iqTreeTools.unaryIQTreeBuilder(projectedVariables)
                         .append(ancestors)
                         .build(ljLevelTree);
-
-                IQTree nonNormalizedTree = iqTreeTools.unaryIQTreeBuilder()
-                        .append(iqTreeTools.createOptionalConstructionNode(projectedVariables, ancestorTree))
-                        .build(ancestorTree);
 
                 // Normalizes the ancestors (recursive)
                 return nonNormalizedTree.normalizeForOptimization(variableGenerator);

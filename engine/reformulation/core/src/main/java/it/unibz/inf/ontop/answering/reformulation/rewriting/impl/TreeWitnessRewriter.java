@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.*;
@@ -367,16 +368,12 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
         if (substitution.isEmpty())
             return body;
 
-        IQTree result = join(body);
+        IQTree result = iqTreeTools.createOptionalInnerJoinTree(Optional.empty(), body)
+                .orElseThrow(() -> new MinorOntopInternalBugException("Joining tree failed"));
 
         return ImmutableList.of(iqFactory.createUnaryIQTree(
                 iqTreeTools.createExtendingConstructionNode(result.getVariables(), substitution),
                 result));
-    }
-
-    private IQTree join(ImmutableList<IQTree> atoms) {
-        return iqTreeTools.createJoinTree(Optional.empty(), atoms)
-                .orElseThrow(() -> new MinorOntopInternalBugException("Joining tree failed"));
     }
 
     @Override
@@ -431,7 +428,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
             return ucq.get(0);
 
         ImmutableList<IQTree> joined = ucq.stream()
-                .map(this::join)
+                .map(atoms -> iqTreeTools.createOptionalInnerJoinTree(Optional.empty(), atoms)
+                        .orElseThrow(() -> new MinorOntopInternalBugException("Joining tree failed")))
                 .collect(ImmutableCollectors.toList());
 
         // intersection
@@ -439,7 +437,9 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 .filter(v -> joined.stream().allMatch(j -> j.getVariables().contains(v)))
                 .collect(ImmutableCollectors.toSet());
 
-        IQTree unionTree = iqTreeTools.createUnionTreeWithOptionalConstructionNodes(vars, joined.stream());
+        IQTree unionTree = iqTreeTools.createUnionTree(vars,
+                NaryIQTreeTools.transformChildren(joined,
+                        c -> iqTreeTools.unaryIQTreeBuilder(vars).build(c)));
 
         return ImmutableList.of(unionTree);
     }

@@ -187,8 +187,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
                 try {
                     IQTree selectedGrandChildWithLimitedProjection =
-                            iqTreeTools.unaryIQTreeBuilder()
-                                    .append(iqTreeTools.createOptionalConstructionNode(constructionNode.getChildVariables(), grandChild))
+                            iqTreeTools.unaryIQTreeBuilder(constructionNode.getChildVariables())
                                     .build(grandChild);
 
                     var provisionalNewChildren = replaceChild(children, position, selectedGrandChildWithLimitedProjection);
@@ -234,13 +233,9 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 if (joinLevelTree.isDeclaredAsEmpty())
                     return joinLevelTree;
 
-                IQTree ancestorTree = iqTreeTools.unaryIQTreeBuilder()
+                IQTree nonNormalizedTree = iqTreeTools.unaryIQTreeBuilder(projectedVariables)
                         .append(ancestors)
                         .build(joinLevelTree);
-
-                IQTree nonNormalizedTree = iqTreeTools.unaryIQTreeBuilder()
-                        .append(iqTreeTools.createOptionalConstructionNode(projectedVariables, ancestorTree))
-                        .build(ancestorTree);
 
                 // Normalizes the ancestors (recursive)
                 return nonNormalizedTree.normalizeForOptimization(variableGenerator);

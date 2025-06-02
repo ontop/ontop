@@ -213,7 +213,6 @@ public class JsonUnionLens extends JsonLens {
             extendedChildren = children;
         }
 
-
         //Create union of children
         IQTree iqTree = iqTreeTools.createUnionTree(allProjectedVariables, extendedChildren);
 

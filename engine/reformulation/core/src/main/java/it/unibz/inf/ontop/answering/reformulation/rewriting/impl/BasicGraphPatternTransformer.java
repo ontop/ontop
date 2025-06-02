@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
 
 import java.util.Optional;
 
@@ -39,16 +38,15 @@ public abstract class BasicGraphPatternTransformer extends DefaultRecursiveIQTre
         }
         addTransformedBGP(builderChildren, builderBGP.build());
 
-        return formInnerJoin(builderChildren.build(), rootNode.getOptionalFilterCondition());
+        ImmutableList<IQTree> list = builderChildren.build();
+        return iqTreeTools.createOptionalInnerJoinTree(rootNode.getOptionalFilterCondition(), list)
+                .orElseThrow(() -> new IllegalStateException("All triple patterns of BGP have been eliminated by the transformation"));
     }
 
     @Override
     public IQTree transformIntensionalData(IntensionalDataNode intensionalDataNode) {
-        return formInnerJoin(transformBGP(ImmutableList.of(intensionalDataNode)), Optional.empty());
-    }
-
-    private IQTree formInnerJoin(ImmutableList<IQTree> list, Optional<ImmutableExpression> filter) {
-        return iqTreeTools.createJoinTree(filter, list)
+        ImmutableList<IQTree> list = transformBGP(ImmutableList.of(intensionalDataNode));
+        return iqTreeTools.createOptionalInnerJoinTree(Optional.empty(), list)
                 .orElseThrow(() -> new IllegalStateException("All triple patterns of BGP have been eliminated by the transformation"));
     }
 

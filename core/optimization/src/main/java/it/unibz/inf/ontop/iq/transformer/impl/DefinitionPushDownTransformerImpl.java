@@ -149,7 +149,7 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
         ImmutableSet<Variable> newRootNodeVariables = newChildren.stream()
                 .findAny()
                 .map(IQTree::getVariables)
-                .orElseThrow(() -> new MinorOntopInternalBugException("An union always have multiple children"));
+                .orElseThrow(() -> new MinorOntopInternalBugException("A union must always have multiple children"));
 
         return iqTreeTools.createUnionTree(newRootNodeVariables, newChildren);
     }

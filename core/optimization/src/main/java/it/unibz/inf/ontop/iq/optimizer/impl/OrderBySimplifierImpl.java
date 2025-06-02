@@ -89,9 +89,8 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
 
             IQTree pushDownChildTree = pushDownDefinitions(child, definitionsToPushDown);
 
-            return iqTreeTools.unaryIQTreeBuilder()
-                    // Makes sure no new variable is projected by the returned tree
-                    .append(iqTreeTools.createOptionalConstructionNode(child.getVariables(), pushDownChildTree))
+            // Makes sure no new variable is projected by the returned tree
+            return iqTreeTools.unaryIQTreeBuilder(child.getVariables())
                     .append(iqFactory.createOrderByNode(newComparators))
                     .build(pushDownChildTree.acceptTransformer(this));
         }

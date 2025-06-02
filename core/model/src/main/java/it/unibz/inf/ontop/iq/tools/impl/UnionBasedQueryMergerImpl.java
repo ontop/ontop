@@ -8,12 +8,14 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
@@ -54,7 +56,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
         VariableGenerator variableGenerator =  coreUtilsFactory.createVariableGenerator(firstDefinition.getTree().getKnownVariables());
 
-        Stream<IQTree> renamedDefinitions = predicateDefinitions.stream()
+        Stream<IQTree> renamedDefinitionsStream = predicateDefinitions.stream()
                 .skip(1)
                 .map(def -> {
                     // Updates the variable generator
@@ -87,8 +89,12 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
         ImmutableSet<Variable> unionVariables = projectionAtom.getVariables();
 
-        IQTree unionTree = iqTreeTools.createUnionTreeWithOptionalConstructionNodes(unionVariables,
-                Stream.concat(Stream.of(firstDefinition.getTree()), renamedDefinitions));
+        ImmutableList<IQTree> renamedDefinitions = Stream.concat(Stream.of(firstDefinition.getTree()), renamedDefinitionsStream)
+                .collect(ImmutableCollectors.toList());
+
+        IQTree unionTree = iqTreeTools.createUnionTree(unionVariables,
+                NaryIQTreeTools.transformChildren(renamedDefinitions,
+                                c -> iqTreeTools.unaryIQTreeBuilder(unionVariables).build(c)));
 
         return Optional.of(iqFactory.createIQ(projectionAtom, unionTree));
     }

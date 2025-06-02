@@ -230,8 +230,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         if (!union.isPresent())
             return Optional.empty();
 
-        return Optional.of(iqTreeTools.createUnionTree(
-                NaryIQTreeTools.projectedVariables(children),
+        return Optional.of(iqTreeTools.createUnionTree(NaryIQTreeTools.projectedVariables(children),
                 union.transformChildren(c ->
                         iqFactory.createNaryIQTree(this,
                                 replaceChild(children, childIndex, c)))));

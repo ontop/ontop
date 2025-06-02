@@ -134,7 +134,7 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
             if (children.equals(initialChildren))
                 return tree;
 
-            return iqTreeTools.createJoinTree(rootNode.getOptionalFilterCondition(), children)
+            return iqTreeTools.createOptionalInnerJoinTree(rootNode.getOptionalFilterCondition(), children)
                     .orElseThrow(() -> new MinorOntopInternalBugException("At least one child should remain"));
         }
 

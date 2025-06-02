@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -163,7 +162,7 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
                 .map(p -> iqFactory.createExtensionalDataNode(p.relation, p.getArgumentMap()))
                 .collect(ImmutableCollectors.toList());
 
-        IQTree parentTree = iqTreeTools.createJoinTree(Optional.empty(), parents)
+        IQTree parentTree = iqTreeTools.createOptionalInnerJoinTree(Optional.empty(), parents)
                 .orElseThrow(() -> new MetadataExtractionException("At least one base relation was expected"));
 
         ImmutableList<ImmutableExpression> filterConditions = extractFilter(parentAttributeMap, idFactory, coreSingletons);

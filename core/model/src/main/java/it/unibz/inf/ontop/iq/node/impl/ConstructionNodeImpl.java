@@ -158,8 +158,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         NaryIQTreeTools.UnionDecomposition union = NaryIQTreeTools.UnionDecomposition.of(newChild)
                    .filter(d -> d.getNode().hasAChildWithLiftableDefinition(variable, d.getChildren()));
         if (union.isPresent()) {
-            return iqTreeTools.createUnionTree(
-                    getVariables(),
+            return iqTreeTools.createUnionTree(getVariables(),
                     NaryIQTreeTools.transformChildren(union.getChildren(),
                         c -> iqFactory.createUnaryIQTree(this, c)));
         }
@@ -490,34 +489,37 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         IQTree liftedChild = child.normalizeForOptimization(variableGenerator);
         IQTree shrunkChild = notRequiredVariableRemover.optimize(liftedChild, childVariables, variableGenerator);
         var shrunkChildConstruction = UnaryIQTreeDecomposition.of(shrunkChild, ConstructionNode.class);
-        if (shrunkChildConstruction.isPresent())
+        if (shrunkChildConstruction.isPresent()) {
             return mergeWithChild(shrunkChildConstruction.getNode(), shrunkChildConstruction.getChild(), treeCache, variableGenerator);
+        }
         else if (shrunkChild.isDeclaredAsEmpty()) {
             return iqFactory.createEmptyNode(projectedVariables);
         }
         /*
          * If useless, returns the child
          */
-        else if (shrunkChild.getVariables().equals(projectedVariables))
+        else if (shrunkChild.getVariables().equals(projectedVariables)) {
             return shrunkChild;
+        }
         else {
             ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(
                     substitution.transform(t -> t.simplify(shrunkChild.getVariableNullability())),
                     projectedVariables);
 
-            Optional<ConstructionNode> newTopConstructionNode =
-                    iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, normalization.getNormalizedSubstitution());
-
             IQTree updatedChild = normalization.updateChild(shrunkChild, variableGenerator);
-            if (newTopConstructionNode.isPresent()) {
+
+            if (!normalization.getNormalizedSubstitution().isEmpty()) {
+                ConstructionNode newTopConstructionNode =
+                        iqFactory.createConstructionNode(projectedVariables, normalization.getNormalizedSubstitution());
+
                 IQTree newChild = notRequiredVariableRemover.optimize(
                                 updatedChild,
-                                newTopConstructionNode.get().getChildVariables(),
+                                newTopConstructionNode.getChildVariables(),
                                 variableGenerator)
                         .normalizeForOptimization(variableGenerator);
 
                 return iqFactory.createUnaryIQTree(
-                        newTopConstructionNode.get(),
+                        newTopConstructionNode,
                         newChild,
                         treeCache.declareAsNormalizedForOptimizationWithEffect());
             }
@@ -525,8 +527,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 IQTree newChild = updatedChild
                         .normalizeForOptimization(variableGenerator);
 
-                return iqTreeTools.unaryIQTreeBuilder()
-                        .append(iqTreeTools.createOptionalConstructionNode(projectedVariables, newChild))
+                return iqTreeTools.unaryIQTreeBuilder(projectedVariables)
                         .build(newChild);
             }
         }

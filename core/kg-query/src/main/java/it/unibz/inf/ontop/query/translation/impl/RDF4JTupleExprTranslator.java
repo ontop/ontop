@@ -674,7 +674,8 @@ public class RDF4JTupleExprTranslator {
                 // Merges the default trees -> removes duplicates
                 return iqTreeTools.unaryIQTreeBuilder()
                         .append(iqFactory.createDistinctNode())
-                        .append(iqTreeTools.createProjectingConstructionNode(quadNode.getVariables(), ImmutableSet.of(graph)))
+                        .append(iqFactory.createConstructionNode(
+                                Sets.difference(quadNode.getVariables(), ImmutableSet.of(graph)).immutableCopy()))
                         .append(filterNode)
                         .build(quadNode);
             }

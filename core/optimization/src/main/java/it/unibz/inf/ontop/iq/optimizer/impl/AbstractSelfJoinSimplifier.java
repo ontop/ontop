@@ -126,7 +126,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
 
         Optional<ImmutableExpression> newExpression = expression.map(unifier::apply);
 
-        IQTree newTree = iqTreeTools.createJoinTree(newExpression, newChildren)
+        IQTree newTree = iqTreeTools.createOptionalInnerJoinTree(newExpression, newChildren)
                 .orElseThrow(() -> new MinorOntopInternalBugException("Should have been detected before"));
 
         ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =

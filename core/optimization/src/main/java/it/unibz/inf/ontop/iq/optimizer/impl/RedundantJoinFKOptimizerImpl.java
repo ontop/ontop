@@ -81,7 +81,7 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
             }
 
             // The returned tree may not be normalized (to be done at the IQOptimizer level)
-            return iqTreeTools.createJoinTree(
+            return iqTreeTools.createOptionalInnerJoinTree(
                             rootNode.getOptionalFilterCondition(),
                             Stream.concat(Stream.of(optimisedExtensionalChildren.get()), otherChildren.stream())
                                     .collect(ImmutableCollectors.toList()))
@@ -108,7 +108,7 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
                     .filter(n -> !redundantNodes.contains(n))
                     .collect(ImmutableCollectors.toList());
 
-            return Optional.of(iqTreeTools.createJoinTree(newConditions, remainingChildren)
+            return Optional.of(iqTreeTools.createOptionalInnerJoinTree(newConditions, remainingChildren)
                     .orElseThrow(() -> new IllegalStateException("At least one child must remain")));
         }
 

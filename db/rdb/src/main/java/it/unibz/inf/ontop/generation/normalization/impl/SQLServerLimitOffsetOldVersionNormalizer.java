@@ -97,7 +97,9 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
                     .build(normalizedChild);
 
             // Additional CONSTRUCTION necessary when subtree leaf in NaryIQTree (e.g. sub-query)
-            return iqTreeTools.createDummyConstructionIQTree(newTree);
+            return iqFactory.createUnaryIQTree(
+                    iqFactory.createConstructionNode(newTree.getVariables()),
+                    newTree);
         }
 
         private ImmutableFunctionalTerm getOrderBySubTerm(IQTree childTree) {

@@ -233,7 +233,9 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
             if (newVariables.equals(rootNode.getVariables()))
                 return tree.normalizeForOptimization(variableGenerator);
 
-            IQTree unionTree = iqTreeTools.createUnionTreeWithOptionalConstructionNodes(newVariables, children.stream());
+            IQTree unionTree = iqTreeTools.createUnionTree(newVariables,
+                    NaryIQTreeTools.transformChildren(children,
+                            c -> iqTreeTools.unaryIQTreeBuilder(newVariables).build(c)));
 
             // New removal opportunities may appear in the subtree ("RECURSIVE")
             return unionTree.normalizeForOptimization(variableGenerator);

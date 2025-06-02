@@ -33,9 +33,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
-
 public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
 
@@ -266,8 +263,9 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                             .toStream(termFactory::getStrictEquality))
                     .orElseThrow(() -> new MinorOntopInternalBugException("There must be an exception"));
 
-                iqTreeBuilder = iqTreeTools.unaryIQTreeBuilder()
-                        .append(iqTreeTools.createProjectingConstructionNode(valuesNode.getVariables(), descendingSubstitution.getDomain()))
+            iqTreeBuilder = iqTreeTools.unaryIQTreeBuilder()
+                        .append(iqFactory.createConstructionNode(
+                                Sets.difference(valuesNode.getVariables(), descendingSubstitution.getDomain()).immutableCopy()))
                         .append(iqFactory.createFilterNode(filterCondition));
 
                 valuesNode = valuesNode.applyFreshRenaming(renaming);

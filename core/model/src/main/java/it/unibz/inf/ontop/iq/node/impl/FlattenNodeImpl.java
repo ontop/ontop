@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -166,7 +165,8 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 renamedBlockedSubstitution.builder().toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList()));
 
         return iqTreeTools.unaryIQTreeBuilder()
-                .append(iqTreeTools.createProjectingConstructionNode(flattenTree.getVariables(), renaming.getRangeSet()))
+                .append(iqFactory.createConstructionNode(
+                        Sets.difference(flattenTree.getVariables(), renaming.getRangeSet()).immutableCopy()))
                 .append(iqFactory.createFilterNode(condition))
                 .build(flattenTree);
     }

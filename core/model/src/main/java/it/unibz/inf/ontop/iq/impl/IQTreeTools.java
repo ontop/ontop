@@ -57,15 +57,8 @@ public class IQTreeTools {
                         child));
     }
 
-    public ConstructionNode createProjectingConstructionNode(ImmutableSet<Variable> allVariables, ImmutableSet<Variable> projectedAwayVariables) {
-        return iqFactory.createConstructionNode(
-                Sets.difference(allVariables, projectedAwayVariables).immutableCopy());
-    }
-
-    public <T extends ImmutableTerm> ConstructionNode replaceSubstitution(ConstructionNode cn, Function<Substitution<ImmutableTerm>, Substitution<T>> substitutionTransformer) {
-        return iqFactory.createConstructionNode(
-                cn.getVariables(),
-                substitutionTransformer.apply(cn.getSubstitution()));
+    public Optional<FilterNode> createOptionalFilterNode(Optional<ImmutableExpression> expression) {
+        return expression.map(iqFactory::createFilterNode);
     }
 
     public ConstructionNode createExtendingConstructionNode(Set<Variable> subTreeVariables, Substitution<?> extendingSubstitution) {
@@ -74,45 +67,22 @@ public class IQTreeTools {
                 extendingSubstitution);
     }
 
+    public <T extends ImmutableTerm> ConstructionNode replaceSubstitution(ConstructionNode cn, Function<Substitution<ImmutableTerm>, Substitution<T>> substitutionTransformer) {
+        return iqFactory.createConstructionNode(
+                cn.getVariables(),
+                substitutionTransformer.apply(cn.getSubstitution()));
+    }
+
     public Optional<ConstructionNode> createOptionalConstructionNode(Supplier<ImmutableSet<Variable>> projectedVariables, Substitution<?> substitution) {
-        if (substitution.isEmpty())
-            return Optional.empty();
-        return Optional.of(iqFactory.createConstructionNode(projectedVariables.get(), substitution));
+        return substitution.isEmpty()
+            ? Optional.empty()
+            : Optional.of(iqFactory.createConstructionNode(projectedVariables.get(), substitution));
     }
 
-    public Optional<FilterNode> createOptionalFilterNode(Optional<ImmutableExpression> expression) {
-        return expression.map(iqFactory::createFilterNode);
-    }
-
-    public Optional<ConstructionNode> createOptionalConstructionNode(ImmutableSet<Variable> originalSignature, IQTree newTree) {
-        // Makes sure no new variable is projected by the returned tree
-        return originalSignature.equals(newTree.getVariables())
+    public Optional<ConstructionNode> createOptionalConstructionNode(ImmutableSet<Variable> signature, Substitution<?> substitution, IQTree newTree) {
+        return substitution.isEmpty() && signature.equals(newTree.getVariables())
                 ? Optional.empty()
-                : Optional.of(iqFactory.createConstructionNode(originalSignature));
-    }
-
-    public Optional<ConstructionNode> createOptionalConstructionNode(ImmutableSet<Variable> originalSignature, Substitution<?> substitution, IQTree newTree) {
-        return createOptionalConstructionNode(() -> originalSignature, substitution)
-                .or(() -> createOptionalConstructionNode(originalSignature, newTree));
-    }
-
-    public IQTree createUnionTreeWithOptionalConstructionNodes(ImmutableSet<Variable> signature, Stream<IQTree> childrenStream) {
-        return createUnionTree(
-                signature,
-                childrenStream
-                        .map(c -> {
-                            Optional<? extends UnaryOperatorNode> optionalNode = createOptionalConstructionNode(signature, c);
-                            return unaryIQTreeBuilder()
-                                    .append(optionalNode)
-                                    .build(c);
-                        })
-                        .collect(ImmutableCollectors.toList()));
-    }
-
-    public IQTree createDummyConstructionIQTree(IQTree tree) {
-        return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(tree.getVariables()),
-                tree);
+                : Optional.of(iqFactory.createConstructionNode(signature, substitution));
     }
 
 
@@ -121,23 +91,21 @@ public class IQTreeTools {
         return Sets.union(groupingVariables, substitution.getRangeVariables()).immutableCopy();
     }
 
+    public IQTree createUnionTree(ImmutableSet<Variable> variables, ImmutableList<IQTree> children) {
+        return iqFactory.createNaryIQTree(iqFactory.createUnionNode(variables), children);
+    }
 
-    public Optional<IQTree> createJoinTree(Optional<ImmutableExpression> filter, ImmutableList<? extends IQTree> list) {
+    public Optional<IQTree> createOptionalInnerJoinTree(Optional<ImmutableExpression> filter, ImmutableList<? extends IQTree> list) {
         switch (list.size()) {
             case 0:
                 return Optional.empty();
             case 1:
-                Optional<? extends UnaryOperatorNode> optionalNode = createOptionalFilterNode(filter);
                 return Optional.of(unaryIQTreeBuilder()
-                        .append(optionalNode)
+                        .append(createOptionalFilterNode(filter))
                         .build(list.get(0)));
             default:
-                return Optional.of(iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(filter), (ImmutableList)list));
+                return Optional.of(createInnerJoinTree(filter, (ImmutableList)list));
         }
-    }
-
-    public IQTree createUnionTree(ImmutableSet<Variable> variables, ImmutableList<IQTree> children) {
-        return iqFactory.createNaryIQTree(iqFactory.createUnionNode(variables), children);
     }
 
     public NaryIQTree createInnerJoinTree(Optional<ImmutableExpression> filter, ImmutableList<IQTree> children) {
@@ -153,7 +121,11 @@ public class IQTreeTools {
     }
 
     public <T extends UnaryOperatorNode> UnaryIQTreeBuilder<T> unaryIQTreeBuilder() {
-        return new UnaryIQTreeBuilder<>(iqFactory, ImmutableList.of(), ImmutableMap.of());
+        return new UnaryIQTreeBuilder<>(iqFactory, ImmutableList.of(), ImmutableMap.of(), Optional.empty());
+    }
+
+    public <T extends UnaryOperatorNode> UnaryIQTreeBuilder<T> unaryIQTreeBuilder(ImmutableSet<Variable> signature) {
+        return new UnaryIQTreeBuilder<>(iqFactory, ImmutableList.of(), ImmutableMap.of(), Optional.of(signature));
     }
 
     public static class UnaryOperatorSequence<T extends UnaryOperatorNode> {

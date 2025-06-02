@@ -21,7 +21,6 @@ import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
 import java.util.stream.Collector;
@@ -174,7 +173,7 @@ public class MappingAssertionUnion {
                             extensionalDataNodes.stream(), valuesNode.stream())
                     .collect(ImmutableCollectors.toList());
 
-            return iqTreeTools.createJoinTree(mergedConditions, children)
+            return iqTreeTools.createOptionalInnerJoinTree(mergedConditions, children)
                     .orElseGet(iqFactory::createTrueNode);
         }
 
