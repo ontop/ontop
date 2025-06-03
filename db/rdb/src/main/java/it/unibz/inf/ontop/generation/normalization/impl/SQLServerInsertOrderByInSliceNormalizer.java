@@ -47,7 +47,7 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
             if (IQTreeTools.contains(child, OrderByNode.class)) {
                 return iqFactory.createUnaryIQTree(
                         sliceNode,
-                        transform(child));
+                        transformChild(child));
             }
             var topConstruct = iqFactory.createConstructionNode(tree.getVariables());
             var sortVariable = variableGenerator.generateNewVariable("slice_sort_column");
@@ -63,7 +63,7 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
                     .append(topConstruct)
                     .append(orderByNode)
                     .append(bottomConstruct)
-                    .build(transform(child));
+                    .build(transformChild(child));
         }
     }
 }

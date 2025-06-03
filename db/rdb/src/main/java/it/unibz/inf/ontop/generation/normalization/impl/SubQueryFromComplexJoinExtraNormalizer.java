@@ -38,7 +38,7 @@ public class SubQueryFromComplexJoinExtraNormalizer extends DefaultRecursiveIQTr
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transform(tree);
+        return tree.acceptVisitor(this);
     }
 
     @Override

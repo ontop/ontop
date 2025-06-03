@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.FlattenNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -45,7 +44,7 @@ public class UnquoteFlattenResultsNormalizer extends DefaultRecursiveIQTreeVisit
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transform(tree);
+        return tree.acceptVisitor(this);
     }
 
     /**
@@ -55,7 +54,7 @@ public class UnquoteFlattenResultsNormalizer extends DefaultRecursiveIQTreeVisit
      */
     @Override
     public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
-        IQTree newChild = transform(child);
+        IQTree newChild = transformChild(child);
         DBMathBinaryOperator minus = termFactory.getDBFunctionSymbolFactory().getDBMathBinaryOperator("-", termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType());
         ImmutableTerm resultSubstitution = termFactory.getDBCase(
                 Stream.of(Maps.immutableEntry(

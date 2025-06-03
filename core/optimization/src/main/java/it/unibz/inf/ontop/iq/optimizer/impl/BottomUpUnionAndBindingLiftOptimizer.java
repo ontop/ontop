@@ -66,8 +66,7 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
     }
 
     private IQTree liftTree(IQTree previousTree, VariableGenerator variableGenerator) {
-        Lifter lifter = new Lifter(variableGenerator);
-        return lifter.transform(previousTree);
+        return previousTree.acceptVisitor(new Lifter(variableGenerator));
     }
 
     private class Lifter extends DefaultRecursiveIQTreeVisitingTransformer {

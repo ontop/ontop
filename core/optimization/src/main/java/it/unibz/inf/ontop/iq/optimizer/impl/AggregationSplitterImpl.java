@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -34,24 +35,25 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 public class AggregationSplitterImpl implements AggregationSplitter {
 
     private final CoreSingletons coreSingletons;
+    private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
 
     @Inject
     protected AggregationSplitterImpl(CoreSingletons coreSingletons) {
         this.coreSingletons = coreSingletons;
         this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.iqFactory = coreSingletons.getIQFactory();
     }
 
     @Override
     public IQ optimize(IQ query) {
         IQ normalizedQuery = query.normalizeForOptimization();
-        AggregationUnionLifterTransformer transformer = new AggregationUnionLifterTransformer(query.getVariableGenerator());
 
         IQTree tree = normalizedQuery.getTree();
-        IQTree newTree = transformer.transform(tree);
+        IQTree newTree = tree.acceptVisitor(new AggregationUnionLifterTransformer(query.getVariableGenerator()));
         return newTree == tree
                 ? normalizedQuery
-                : coreSingletons.getIQFactory().createIQ(normalizedQuery.getProjectionAtom(), newTree)
+                : iqFactory.createIQ(normalizedQuery.getProjectionAtom(), newTree)
                 .normalizeForOptimization();
     }
 
@@ -67,7 +69,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
         private final QueryTransformerFactory queryTransformerFactory;
 
         protected AggregationUnionLifterTransformer(VariableGenerator variableGenerator) {
-            super(coreSingletons.getIQFactory());
+            super(AggregationSplitterImpl.this.iqFactory);
             this.variableGenerator = variableGenerator;
             this.substitutionFactory = coreSingletons.getSubstitutionFactory();
             this.termFactory = coreSingletons.getTermFactory();

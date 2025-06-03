@@ -74,7 +74,7 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
         @Override
         public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
             // In case of aggregation nodes in the sub-tree
-            IQTree normalizedChild = transform(child)
+            IQTree normalizedChild = transformChild(child)
                     .normalizeForOptimization(variableGenerator);
 
             QueryNode newChildRoot = normalizedChild.getRootNode();

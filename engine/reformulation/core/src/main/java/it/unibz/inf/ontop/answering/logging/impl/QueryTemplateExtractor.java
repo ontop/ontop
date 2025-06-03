@@ -51,10 +51,9 @@ public class QueryTemplateExtractor {
     Optional<QueryTemplateExtraction> extract(IQ iq) {
 
         IQTree initialIQTree = iq.getTree();
-        QueryTemplateTransformer transformer = new QueryTemplateTransformer(coreSingletons,
-                initialIQTree.getKnownVariables(), settings);
+        QueryTemplateTransformer transformer = new QueryTemplateTransformer(initialIQTree.getKnownVariables());
 
-        IQTree newTree = transformer.transform(initialIQTree);
+        IQTree newTree = initialIQTree.acceptVisitor(transformer);
         ImmutableMap<GroundTerm, Variable> parameterMap = transformer.getParameterMap();
 
         if (parameterMap.isEmpty())
@@ -71,32 +70,31 @@ public class QueryTemplateExtractor {
      *
      * Extracts from filter/LJ/joins and intensional data nodes.
      */
-    protected static class QueryTemplateTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    protected class QueryTemplateTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+
+        private final AtomFactory atomFactory;
+        private final TermFactory termFactory;
+        private final IQTreeTools iqTreeTools;
+        private final SPARQLFunctionSymbol sparqlEqFunctionSymbol;
+        private final BooleanFunctionSymbol rdf2BoolFunctionsymbol;
 
         private final VariableGenerator variableGenerator;
 
         // Mutable
         private final Map<GroundTerm, Variable> parameterMap;
-        private final AtomFactory atomFactory;
-        private final OntopModelSettings settings;
-        private final SPARQLFunctionSymbol sparqlEqFunctionSymbol;
-        private final TermFactory termFactory;
-        private final BooleanFunctionSymbol rdf2BoolFunctionsymbol;
-        private final IQTreeTools iqTreeTools;
 
-        protected QueryTemplateTransformer(CoreSingletons coreSingletons, ImmutableSet<Variable> knownVariables,
-                                           OntopModelSettings settings) {
-            super(coreSingletons.getIQFactory());
+        protected QueryTemplateTransformer(ImmutableSet<Variable> knownVariables) {
+            super(QueryTemplateExtractor.this.iqFactory);
             this.atomFactory = coreSingletons.getAtomFactory();
             this.iqTreeTools = coreSingletons.getIQTreeTools();
+            this.termFactory = coreSingletons.getTermFactory();
+            FunctionSymbolFactory functionSymbolFactory = coreSingletons.getFunctionSymbolFactory();
+            this.sparqlEqFunctionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.EQ, 2);
+            this.rdf2BoolFunctionsymbol = functionSymbolFactory.getRDF2DBBooleanFunctionSymbol();
+
             this.variableGenerator = coreSingletons.getCoreUtilsFactory()
                     .createVariableGenerator(knownVariables);
             this.parameterMap = Maps.newLinkedHashMap();
-            this.termFactory = coreSingletons.getTermFactory();
-            this.settings = settings;
-            FunctionSymbolFactory functionSymbolFactory = coreSingletons.getFunctionSymbolFactory();
-            this.sparqlEqFunctionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.EQ, 2);
-            rdf2BoolFunctionsymbol = functionSymbolFactory.getRDF2DBBooleanFunctionSymbol();
         }
 
         public ImmutableMap<GroundTerm, Variable> getParameterMap() {

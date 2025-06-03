@@ -41,8 +41,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        IQTreeVisitingTransformer transformer = new Transformer();
-        return transformer.transform(tree);
+        return tree.acceptVisitor(new Transformer());
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -59,7 +58,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
 
             return iqFactory.createUnaryIQTree(
                     iqFactory.createFilterNode((ImmutableExpression) newExpression),
-                    transform(child));
+                    transformChild(child));
         }
 
         @Override
@@ -71,8 +70,8 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
 
             return iqTreeTools.createLeftJoinTree(
                     Optional.of((ImmutableExpression) newExpression.get()),
-                    transform(leftChild),
-                    transform(rightChild));
+                    transformChild(leftChild),
+                    transformChild(rightChild));
         }
 
         @Override
@@ -83,9 +82,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
                 return super.transformInnerJoin(tree, rootNode, children);
 
             return iqTreeTools.createInnerJoinTree(Optional.of((ImmutableExpression) newExpression.get()),
-                    NaryIQTreeTools.transformChildren(
-                            children,
-                            this::transform));
+                    NaryIQTreeTools.transformChildren(children, this::transformChild));
         }
 
         @Override
@@ -94,7 +91,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
             if (newConstruction.equals(rootNode))
                 return super.transformConstruction(tree, rootNode, child);
 
-            return iqFactory.createUnaryIQTree(newConstruction, transform(child));
+            return iqFactory.createUnaryIQTree(newConstruction, transformChild(child));
         }
 
         @Override
@@ -106,7 +103,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
             if (newOrderBy.equals(rootNode))
                 return super.transformOrderBy(tree, rootNode, child);
 
-            return iqFactory.createUnaryIQTree(newOrderBy, transform(child));
+            return iqFactory.createUnaryIQTree(newOrderBy, transformChild(child));
         }
 
         @Override
@@ -116,7 +113,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
             if (newAggregation.equals(rootNode))
                 return super.transformAggregation(tree, rootNode, child);
 
-            return iqFactory.createUnaryIQTree(newAggregation, transform(child));
+            return iqFactory.createUnaryIQTree(newAggregation, transformChild(child));
         }
 
         private ImmutableTerm transformTerm(ImmutableTerm term) {

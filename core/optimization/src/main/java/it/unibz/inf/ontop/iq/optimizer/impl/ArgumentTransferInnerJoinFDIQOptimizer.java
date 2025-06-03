@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.optimizer.InnerJoinIQOptimizer;
@@ -37,30 +36,25 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
 
     @Inject
     protected ArgumentTransferInnerJoinFDIQOptimizer(CoreSingletons coreSingletons) {
-        simplifier = new SelfJoinFDSimplifier(coreSingletons);
+        this.simplifier = new SelfJoinFDSimplifier(coreSingletons);
         this.iqFactory = coreSingletons.getIQFactory();
     }
 
     @Override
     public IQ optimize(IQ query) {
-
-        ArgumentTransferJoinTransformer transformer = new ArgumentTransferJoinTransformer(simplifier, iqFactory, query.getVariableGenerator());
         IQTree initialTree = query.getTree();
-        IQTree newTree = transformer.transform(initialTree);
+        IQTree newTree = initialTree.acceptVisitor(new ArgumentTransferJoinTransformer(query.getVariableGenerator()));
         return (newTree == initialTree)
                 ? query
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree).normalizeForOptimization();
     }
 
-    protected static class ArgumentTransferJoinTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    protected class ArgumentTransferJoinTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        private final SelfJoinFDSimplifier simplifier;
         private final VariableGenerator variableGenerator;
 
-        protected ArgumentTransferJoinTransformer(SelfJoinFDSimplifier simplifier, IntermediateQueryFactory iqFactory,
-                                                  VariableGenerator variableGenerator) {
-            super(iqFactory);
-            this.simplifier = simplifier;
+        protected ArgumentTransferJoinTransformer(VariableGenerator variableGenerator) {
+            super(ArgumentTransferInnerJoinFDIQOptimizer.this.iqFactory);
             this.variableGenerator = variableGenerator;
         }
 

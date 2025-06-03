@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.QueryContextSimplifiableFunctionSymbol;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.function.Predicate;
 
 public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
@@ -32,10 +31,8 @@ public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
         if (queryContext == null)
             throw new IllegalArgumentException("The query context must not be null");
 
-        var transformer = new QueryContextFunctionTransformer(queryContext);
-
         var initialTree = iq.getTree();
-        var newTree = transformer.transform(initialTree);
+        var newTree = initialTree.acceptVisitor(new QueryContextFunctionTransformer(queryContext));
         return newTree.equals(initialTree)
                 ? iq
                 : coreSingletons.getIQFactory().createIQ(iq.getProjectionAtom(), newTree);

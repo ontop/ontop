@@ -32,10 +32,9 @@ public class BasicFlattenLifter implements FlattenLifter {
 
     @Override
     public IQ optimize(IQ query) {
-        TreeTransformer treeTransformer = new TreeTransformer(query.getTree());
         return iqFactory.createIQ(
                 query.getProjectionAtom(),
-                treeTransformer.transform(query.getTree()));
+                query.getTree().acceptVisitor(new TreeTransformer(query.getTree())));
     }
 
     private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {

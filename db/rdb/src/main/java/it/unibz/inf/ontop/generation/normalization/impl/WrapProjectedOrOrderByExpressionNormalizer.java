@@ -36,12 +36,12 @@ public class WrapProjectedOrOrderByExpressionNormalizer extends DefaultRecursive
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transform(tree);
+        return tree.acceptVisitor(this);
     }
 
     @Override
     public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-        IQTree newChild = transform(child);
+        IQTree newChild = transformChild(child);
         ConstructionNode newRootNode = iqTreeTools.replaceSubstitution(
                 rootNode, s -> s.transform(this::transformTerm));
 
@@ -52,7 +52,7 @@ public class WrapProjectedOrOrderByExpressionNormalizer extends DefaultRecursive
 
     @Override
     public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-        IQTree newChild = transform(child);
+        IQTree newChild = transformChild(child);
         OrderByNode newRootNode = iqFactory.createOrderByNode(
                 rootNode.getComparators().stream()
                         .map(c -> iqFactory.createOrderComparator(
