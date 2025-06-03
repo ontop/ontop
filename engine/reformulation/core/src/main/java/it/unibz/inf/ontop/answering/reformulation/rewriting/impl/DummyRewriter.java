@@ -27,7 +27,6 @@ import com.google.inject.Provider;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
-import it.unibz.inf.ontop.constraints.impl.FullLinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -44,7 +43,6 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
@@ -100,13 +98,12 @@ public class DummyRewriter implements QueryRewriter {
      */
     @Override
 	public IQ rewrite(IQ query) throws EmptyQueryException {
-        IQTreeVisitingTransformer transformer = new BasicGraphPatternTransformer(iqFactory, iqTreeTools) {
+        return iqFactory.createIQ(query.getProjectionAtom(), query.getTree().acceptVisitor(new BasicGraphPatternTransformer(iqFactory, iqTreeTools) {
             @Override
             protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> bgp) {
                 return removeRedundantAtoms(bgp);
             }
-        };
-        return iqFactory.createIQ(query.getProjectionAtom(), transformer.transform(query.getTree()));
+        }));
 	}
 
 	private ImmutableList<IQTree> removeRedundantAtoms(ImmutableList<IntensionalDataNode> bgp) {

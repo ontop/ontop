@@ -319,7 +319,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private IQTree getCanonicalForm(IQTree tree) {
         ClassifiedTBox tbox = reasoner.getClassifiedTBox();
 
-        IQTreeVisitingTransformer transformer =  new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
+        return tree.acceptVisitor(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
             @Override
             public IQTree transformIntensionalData(IntensionalDataNode dataNode) {
                 // TODO: support quads
@@ -355,9 +355,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 return  dataNode;
                 //throw new MinorOntopInternalBugException("Unknown type of triple atoms");
             }
-        };
-
-        return transformer.transform(tree);
+        });
     }
 
 
@@ -385,14 +383,12 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		double startime = System.currentTimeMillis();
 
 		IQTree canonicalTree = getCanonicalForm(query.getTree());
-
-
-        IQTreeVisitingTransformer transformer = new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
+        IQTree rewritingTree = canonicalTree.acceptVisitor(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
             @Override
             public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
                 // fix some order on variables
                 ImmutableSet<Variable> avs = rootNode.getVariables();
-                IQTreeVisitingTransformer bgpTransformer = new BasicGraphPatternTransformer(iqFactory, iqTreeTools) {
+                return iqFactory.createUnaryIQTree(rootNode, child.acceptVisitor(new BasicGraphPatternTransformer(iqFactory, iqTreeTools) {
                     @Override
                     protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
                         ImmutableList<DataAtom<RDFAtomPredicate>> bgp = triplePatterns.stream()
@@ -413,11 +409,9 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                                 .map(TreeWitnessRewriter.this::convertCQ)
                                 .collect(ImmutableCollectors.toList()));
                     }
-                };
-                return iqFactory.createUnaryIQTree(rootNode, bgpTransformer.transform(child));
+                }));
             }
-        };
-        IQTree rewritingTree = transformer.transform(canonicalTree);
+        });
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;

@@ -328,7 +328,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
                         .map(n -> n.extensionalDataNode)
                         .collect(ImmutableCollectors.toSet()));
 
-        return transformer.transform(rightChild)
+        return rightChild.acceptVisitor(transformer)
                 .applyFreshRenaming(renamingSubstitution);
     }
 

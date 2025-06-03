@@ -28,8 +28,7 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        IQTreeVisitingTransformer transformer = new Transformer();
-        return transformer.transform(tree);
+        return tree.acceptVisitor(new Transformer());
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -45,7 +44,7 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
 
             var subLimitTransformer = new SubLimitTransformer(sliceNode.getLimit().get(), this);
 
-            return iqFactory.createUnaryIQTree(sliceNode, subLimitTransformer.transform(child));
+            return iqFactory.createUnaryIQTree(sliceNode, child.acceptVisitor(subLimitTransformer));
         }
     }
 
@@ -69,8 +68,8 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
         @Override
         public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
             if (sliceNode.getOffset() != 0 || sliceNode.getLimit().isEmpty() || sliceNode.getLimit().get() < currentBounds)
-                return eliminateLimitsFromSubQueriesNormalizer.transform(tree);
-            return transform(tree.getChildren().get(0));
+                return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
+            return transformChild(tree.getChildren().get(0));
         }
 
         /**
@@ -78,8 +77,8 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
         */
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            var leftSubTree = transform(tree.getLeftChild());
-            var rightSubTree = eliminateLimitsFromSubQueriesNormalizer.transform(tree.getRightChild());
+            var leftSubTree = transformChild(tree.getLeftChild());
+            var rightSubTree = tree.getRightChild().acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
             if (leftSubTree.equals(tree.getLeftChild()) && rightSubTree.equals(tree.getRightChild()))
                 return tree;
             return iqFactory.createBinaryNonCommutativeIQTree(tree.getRootNode(), leftSubTree, rightSubTree);
@@ -109,17 +108,17 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
         */
         @Override
         protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-            return eliminateLimitsFromSubQueriesNormalizer.transform(tree);
+            return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
         }
 
         @Override
         protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
-            return eliminateLimitsFromSubQueriesNormalizer.transform(tree);
+            return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
         }
 
         @Override
         protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-            return eliminateLimitsFromSubQueriesNormalizer.transform(tree);
+            return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
         }
     }
 }

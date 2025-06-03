@@ -74,7 +74,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
                 variableNullabilityTools,
                 leftJoinTools);
 
-        IQTree newTree = transformer.transform(initialTree);
+        IQTree newTree = initialTree.acceptVisitor(transformer);
 
         return newTree.equals(initialTree)
                 ? query
@@ -137,7 +137,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
         protected IQTree transformBySearchingFromScratch(IQTree tree) {
             Transformer newTransformer = new Transformer(tree::getVariableNullability, variableGenerator,
                     rightProvenanceNormalizer, coreSingletons, otherLJOptimizer, variableNullabilityTools, leftJoinTools);
-            return newTransformer.transform(tree);
+            return tree.acceptVisitor(newTransformer);
         }
 
         @Override
@@ -147,7 +147,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
 
             Transformer newTransformer = new Transformer(variableNullabilitySupplier, variableGenerator,
                     rightProvenanceNormalizer, coreSingletons, otherLJOptimizer, variableNullabilityTools, leftJoinTools);
-            return newTransformer.transform(rightChild);
+            return rightChild.acceptVisitor(newTransformer);
         }
 
         private boolean canLJBeReduced(IQTree leftChild, IQTree safeLeftOfRightDescendant) {

@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
-import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -41,8 +40,7 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        IQTreeVisitingTransformer transformer = new Transformer();
-        return transformer.transform(tree);
+        return tree.acceptVisitor(new Transformer());
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -81,7 +79,7 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         Optional<IQTree> transform(Optional<DistinctNode> distinctNode, Optional<ConstructionNode> constructionNode, Optional<OrderByNode> orderByNode, IQTree descendantTree) {
 
-            var newDescendantTree = transform(descendantTree);
+            var newDescendantTree = transformChild(descendantTree);
 
             if (!(constructionNode.isPresent() && orderByNode.isPresent())) {
                 return descendantTree.equals(newDescendantTree)

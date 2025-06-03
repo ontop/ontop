@@ -1,11 +1,9 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -33,7 +31,7 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transform(tree);
+        return tree.acceptVisitor(this);
     }
 
     protected ImmutableSet<Variable> extractNullVariables(ConstructionNode constructionNode) {

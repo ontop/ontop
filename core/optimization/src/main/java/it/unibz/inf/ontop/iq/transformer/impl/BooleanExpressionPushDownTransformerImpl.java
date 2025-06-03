@@ -41,7 +41,7 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
     @Override
     public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
 
-        IQTree transformedChild = transform(child);
+        IQTree transformedChild = transformChild(child);
 
         PushResult<IQTree> result = pushExpressionDown(
                 transformedChild,
@@ -60,8 +60,8 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
     @Override
     public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
 
-        IQTree transformedLeftChild = transform(leftChild);
-        IQTree transformedRightChild = transform(rightChild);
+        IQTree transformedLeftChild = transformChild(leftChild);
+        IQTree transformedRightChild = transformChild(rightChild);
 
         if (rootNode.getOptionalFilterCondition().isEmpty())
             return leftChild.equals(transformedLeftChild) && rightChild.equals(transformedRightChild)
@@ -83,8 +83,7 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
     @Override
     public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
 
-        ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children,
-                this::transform);
+        ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
 
         if (rootNode.getOptionalFilterCondition().isEmpty())
             return transformedChildren.equals(children)

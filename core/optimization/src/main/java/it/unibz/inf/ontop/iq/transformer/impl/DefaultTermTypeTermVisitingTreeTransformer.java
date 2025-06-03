@@ -72,11 +72,9 @@ public class DefaultTermTypeTermVisitingTreeTransformer
     @Override
     public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         // Recursive (children are normalized separately)
-        ImmutableList<IQTree> normalizedChildren = children.stream()
-                .map(this::transform)
-                // RDF type constants are replaced by functional terms
-                .map(this::replaceTypeTermConstants)
-                .collect(ImmutableCollectors.toList());
+        // RDF type constants are replaced by functional terms
+        ImmutableList<IQTree> normalizedChildren = NaryIQTreeTools.transformChildren(children,
+                c -> replaceTypeTermConstants(transformChild(c)));
 
         ImmutableSet<Variable> metaTermTypeVariables = rootNode.getVariables().stream()
                 .filter(v -> normalizedChildren.stream()
@@ -287,8 +285,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
      *
      */
     private IQTree transformNodeBlockingNonInjectiveBindings(UnaryOperatorNode rootNode, IQTree child) {
-        IQTree normalizedChild = replaceTypeTermConstants(transform(child));
-
+        IQTree normalizedChild = replaceTypeTermConstants(transformChild(child));
         return iqFactory.createUnaryIQTree(rootNode, normalizedChild)
                 .normalizeForOptimization(variableGenerator);
     }

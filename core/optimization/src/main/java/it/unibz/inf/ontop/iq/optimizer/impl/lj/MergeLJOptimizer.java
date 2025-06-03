@@ -68,10 +68,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
     @Override
     public IQ optimize(IQ query) {
         IQTree initialTree = query.getTree();
-
-        Transformer transformer = new Transformer(query.getVariableGenerator());
-
-        IQTree newTree = transformer.transform(initialTree);
+        IQTree newTree = initialTree.acceptVisitor(new Transformer(query.getVariableGenerator()));
 
         return newTree.equals(initialTree)
                 ? query
@@ -89,8 +86,8 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
 
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            IQTree newLeftChild = transform(leftChild);
-            IQTree newRightChild = transform(rightChild);
+            IQTree newLeftChild = transformChild(leftChild);
+            IQTree newRightChild = transformChild(rightChild);
 
             LeftJoinDecomposition newLJ = LeftJoinDecomposition.of(rootNode, newLeftChild, newRightChild);
 

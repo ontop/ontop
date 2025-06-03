@@ -31,7 +31,7 @@ public class EnforceNullOrderNormalizer implements DialectExtraNormalizer {
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transformer.transform(tree);
+        return tree.acceptVisitor(transformer);
     }
 
 

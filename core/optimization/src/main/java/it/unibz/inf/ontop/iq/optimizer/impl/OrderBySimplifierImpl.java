@@ -92,7 +92,7 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
             // Makes sure no new variable is projected by the returned tree
             return iqTreeTools.unaryIQTreeBuilder(child.getVariables())
                     .append(iqFactory.createOrderByNode(newComparators))
-                    .build(transform(pushDownChildTree));
+                    .build(transformChild(pushDownChildTree));
         }
 
         protected Stream<ComparatorSimplification> simplifyComparator(OrderByNode.OrderComparator comparator,

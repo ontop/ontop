@@ -32,8 +32,7 @@ public class EmptyRowsValuesNodeTransformerImpl implements EmptyRowsValuesNodeTr
 
     @Override
     public IQTree transform(IQTree iqTree, VariableGenerator variableGenerator) {
-        IQTreeVisitingTransformer transformer = new Transformer(variableGenerator);
-        return transformer.transform(iqTree);
+        return iqTree.acceptVisitor(new Transformer(variableGenerator));
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

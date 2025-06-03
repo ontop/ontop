@@ -37,7 +37,7 @@ public class ConvertValuesToUnionNormalizer extends DefaultRecursiveIQTreeVisiti
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transform(tree);
+        return tree.acceptVisitor(this);
     }
 
     @Override
@@ -59,5 +59,4 @@ public class ConvertValuesToUnionNormalizer extends DefaultRecursiveIQTreeVisiti
                                 iqFactory.createTrueNode()))
                         .collect(ImmutableCollectors.toList()));
     }
-
 }

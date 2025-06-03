@@ -33,7 +33,7 @@ public abstract class BasicGraphPatternTransformer extends DefaultRecursiveIQTre
             else {
                 addTransformedBGP(builderChildren, builderBGP.build());
                 builderBGP = ImmutableList.builder();
-                builderChildren.add(transform(child));
+                builderChildren.add(transformChild(child));
             }
         }
         addTransformedBGP(builderChildren, builderBGP.build());

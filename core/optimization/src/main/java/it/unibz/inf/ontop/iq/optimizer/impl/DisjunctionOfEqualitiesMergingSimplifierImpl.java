@@ -3,12 +3,9 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.optimizer.DisjunctionOfEqualitiesMergingSimplifier;
-import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.iq.type.impl.AbstractExpressionTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
@@ -38,12 +35,10 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
         IQTree tree = query.getTree();
 
         //Create IN terms where we have disjunctions of equalities.
-        InCreatingTransformer transformer1 = new InCreatingTransformer(coreSingletons);
-        IQTree newTree = transformer1.transform(tree);
+        IQTree newTree = tree.acceptVisitor(new InCreatingTransformer());
 
         //Merge IN terms together.
-        InMergingTransformer transformer2 = new InMergingTransformer(coreSingletons);
-        IQTree finalTree = transformer2.transform(newTree);
+        IQTree finalTree = newTree.acceptVisitor(new InMergingTransformer());
 
         return finalTree == tree
                 ? query
@@ -83,9 +78,9 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
         ));
     }
 
-    protected static class InCreatingTransformer extends AbstractExpressionTransformer {
+    protected class InCreatingTransformer extends AbstractExpressionTransformer {
 
-        protected InCreatingTransformer(CoreSingletons coreSingletons) {
+        protected InCreatingTransformer() {
             super(coreSingletons);
         }
 
@@ -124,9 +119,9 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
         }
     }
 
-    protected static class InMergingTransformer extends AbstractExpressionTransformer {
+    protected class InMergingTransformer extends AbstractExpressionTransformer {
 
-        protected InMergingTransformer(CoreSingletons coreSingletons) {
+        protected InMergingTransformer() {
             super(coreSingletons);
         }
 
@@ -138,7 +133,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
         /**
          * Determines if the given term is a boolean expression of the form [x] AND [y] / [x] OR [y].
          */
-        private static boolean isBooleanOperation(ImmutableTerm term) {
+        private boolean isBooleanOperation(ImmutableTerm term) {
             if(!(term instanceof ImmutableFunctionalTerm))
                 return false;
             var f = (ImmutableFunctionalTerm) term;
@@ -430,7 +425,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
          * Constructs a Disjunction or Conjunction ImmutableExpression based on the value of `conjunction`.
          */
         private ImmutableTerm conjunctionDisjunctionOf(ImmutableList<? extends ImmutableTerm> terms, boolean conjunction) {
-            if(terms.size() == 1)
+            if (terms.size() == 1)
                 return terms.get(0);
             return termFactory.getImmutableExpression(operatorSymbol(terms.size(), conjunction), terms);
         }

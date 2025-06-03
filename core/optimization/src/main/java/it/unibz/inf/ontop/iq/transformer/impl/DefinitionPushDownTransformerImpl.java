@@ -59,7 +59,7 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
         if (newRequest.equals(request))
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(newProjectedVariables, initialSubstitution),
-                    transform(child));
+                    transformChild(child));
 
         ImmutableExpression newCondition = newRequest.getCondition();
         Optional<ImmutableTerm> optionalLocalDefinition = newCondition.evaluate2VL(termFactory.createDummyVariableNullability(newCondition))
@@ -110,13 +110,13 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
         if (leftChild.getVariables().containsAll(requestVariables))
             return iqFactory.createBinaryNonCommutativeIQTree(
                     rootNode,
-                    transform(leftChild),
+                    transformChild(leftChild),
                     rightChild);
         else if (rightChild.getVariables().containsAll(requestVariables))
             return iqFactory.createBinaryNonCommutativeIQTree(
                     rootNode,
                     leftChild,
-                    transform(rightChild));
+                    transformChild(rightChild));
         else
             return blockDefinition(tree);
     }
@@ -132,7 +132,7 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
                 .map(i -> IntStream.range(0, children.size())
                         .mapToObj(j -> i == j
                                 // Pushes down the definition to selected child
-                                ? transform(children.get(j))
+                                ? transformChild(children.get(j))
                                 : children.get(j))
                         .collect(ImmutableCollectors.toList()))
                 .<IQTree>map(newChildren -> iqFactory.createNaryIQTree(rootNode, newChildren))
@@ -143,8 +143,7 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
 
     @Override
     public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
-                this::transform);
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
 
         ImmutableSet<Variable> newRootNodeVariables = newChildren.stream()
                 .findAny()

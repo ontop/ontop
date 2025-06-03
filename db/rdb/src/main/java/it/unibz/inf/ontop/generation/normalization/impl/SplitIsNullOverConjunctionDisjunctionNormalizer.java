@@ -4,12 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.iq.type.impl.AbstractExpressionTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -30,7 +27,7 @@ for dialects such as Denodo that do not allow IS [NOT] NULL to be executed on co
 public class SplitIsNullOverConjunctionDisjunctionNormalizer extends DefaultRecursiveIQTreeVisitingTransformer
         implements DialectExtraNormalizer {
 
-    private final IQTreeTransformer expressionTransformer;
+    private final IQTreeVisitingTransformer expressionTransformer;
 
     @Inject
     protected SplitIsNullOverConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {
@@ -40,7 +37,7 @@ public class SplitIsNullOverConjunctionDisjunctionNormalizer extends DefaultRecu
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return expressionTransformer.transform(tree);
+        return tree.acceptVisitor(expressionTransformer);
     }
 
     protected static class ExpressionTransformer extends AbstractExpressionTransformer {

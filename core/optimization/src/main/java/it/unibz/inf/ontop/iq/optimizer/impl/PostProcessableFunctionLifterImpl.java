@@ -103,7 +103,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
                     // Fix-point before pursing (recursive, potentially dangerous!)
                     if (!normalizedTree.equals(tree)) {
-                        return transform(normalizedTree);
+                        return transformChild(normalizedTree);
                     }
 
                     return IQStateOptionalTransformer.reachFinalState(

@@ -56,7 +56,7 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
 
     @Override
     public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        IQTree transformedLeftChild = transform(leftChild);
+        IQTree transformedLeftChild = transformChild(leftChild);
         // Cannot reuse
         IQTree transformedRightChild = preTransformLJRightChild(rightChild, rootNode.getOptionalFilterCondition(), leftChild.getVariables());
 
@@ -98,31 +98,31 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
     @Override
     public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
         // Recursive
-        return transformUnaryNode(tree, rootNode, child, this::transform);
+        return transformUnaryNode(tree, rootNode, child, this::transformChild);
     }
 
     @Override
     public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
         // Recursive
-        return transformUnaryNode(tree, rootNode, child, this::transform);
+        return transformUnaryNode(tree, rootNode, child, this::transformChild);
     }
 
     @Override
     public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
         // Recursive
-        return transformUnaryNode(tree, sliceNode, child, this::transform);
+        return transformUnaryNode(tree, sliceNode, child, this::transformChild);
     }
 
     @Override
     public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
         // Recursive
-        return transformUnaryNode(tree, rootNode, child, this::transform);
+        return transformUnaryNode(tree, rootNode, child, this::transformChild);
     }
 
     @Override
     public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
         // Recursive
-        return transformNaryCommutativeNode(tree, rootNode, children, this::transform);
+        return transformNaryCommutativeNode(tree, rootNode, children, this::transformChild);
     }
 
     @Override

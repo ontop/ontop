@@ -81,8 +81,8 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
 
             // May need to renormalize the tree (RECURSIVE)
             if ((newChildRoot instanceof ConstructionNode) && (!child.getRootNode().equals(newChildRoot)))
-                return transform(
-                        iqFactory.createUnaryIQTree(rootNode, normalizedChild).normalizeForOptimization(variableGenerator));
+                return transformChild(iqFactory.createUnaryIQTree(rootNode, normalizedChild)
+                        .normalizeForOptimization(variableGenerator));
 
             Substitution<ImmutableFunctionalTerm> initialSubstitution = rootNode.getSubstitution();
 

@@ -50,14 +50,12 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
     @Override
     public IQ optimize(IQ query) {
         var tree = query.getTree();
-        var transformer = new Transformer();
-        var newTree = transformer.transform(tree)
+        var newTree = tree.acceptVisitor(new Transformer())
                 .normalizeForOptimization(query.getVariableGenerator());
 
         return newTree.equals(tree)
                 ? query
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree);
-
     }
 
     protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

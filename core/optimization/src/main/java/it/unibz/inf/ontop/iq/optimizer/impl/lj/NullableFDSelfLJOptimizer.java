@@ -76,7 +76,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
                         coreSingletons),
                 coreSingletons);
 
-        IQTree newTree = transformer.transform(initialTree);
+        IQTree newTree = initialTree.acceptVisitor(transformer);
 
         return newTree.equals(initialTree)
                 ? query
@@ -280,7 +280,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
                 return leftChild;
 
             var replacer = new DataNodeOnLeftReplacer(iqFactory, leftNode, newLeftNode);
-            var newLeft = replacer.transform(leftChild);
+            var newLeft = leftChild.acceptVisitor(replacer);
 
             if (!replacer.hasBeenReplaced())
                 throw new MinorOntopInternalBugException(String.format("Could not replace %s on the left", leftNode));
@@ -302,7 +302,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
             var newTransformer = new CardinalityInsensitiveTransformer(lookForDistinctTransformer,
                     rightChild::getVariableNullability, variableGenerator, requiredDataNodeExtractor,
                     rightProvenanceNormalizer, variableNullabilityTools, coreSingletons);
-            return newTransformer.transform(rightChild);
+            return rightChild.acceptVisitor(newTransformer);
         }
     }
 
@@ -374,7 +374,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             if (found)
                 return tree;
-            var newLeft = transform(leftChild);
+            var newLeft = transformChild(leftChild);
             return newLeft.equals(leftChild)
                     ? tree
                     : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeft, rightChild);
@@ -384,9 +384,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             if (found)
                 return tree;
-
-            var newChildren = NaryIQTreeTools.transformChildren(children, this::transform);
-
+            var newChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
             return newChildren.equals(children)
                     ? tree
                     : iqFactory.createNaryIQTree(rootNode, newChildren);

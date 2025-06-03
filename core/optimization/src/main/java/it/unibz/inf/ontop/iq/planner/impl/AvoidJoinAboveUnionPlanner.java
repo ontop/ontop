@@ -91,7 +91,7 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
 
     protected IQ lift(IQ query) {
         IQTree tree = query.getTree();
-        IQTree newTree = transformer.transform(tree);
+        IQTree newTree = tree.acceptVisitor(transformer);
 
         IQ newIQ = newTree.equals(tree)
                 ? query

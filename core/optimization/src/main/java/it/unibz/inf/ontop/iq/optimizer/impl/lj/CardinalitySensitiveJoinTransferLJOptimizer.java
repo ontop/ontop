@@ -47,11 +47,9 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
     public IQ optimize(IQ query) {
         IQTree initialTree = query.getTree();
 
-        Transformer transformer = new Transformer(
+        IQTree newTree = initialTree.acceptVisitor(new Transformer(
                 initialTree::getVariableNullability,
-                query.getVariableGenerator());
-
-        IQTree newTree = transformer.transform(initialTree);
+                query.getVariableGenerator()));
 
         return newTree.equals(initialTree)
                 ? query
@@ -120,8 +118,7 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
 
         protected IQTree transformBySearchingWithNewVariableNullabilitySupplier(IQTree tree,
                                                                                 Supplier<VariableNullability> variableNullabilitySupplier) {
-            Transformer newTransformer = new Transformer(variableNullabilitySupplier, variableGenerator);
-            return newTransformer.transform(tree);
+            return tree.acceptVisitor(new Transformer(variableNullabilitySupplier, variableGenerator));
         }
 
         @Override
@@ -129,8 +126,7 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
             Supplier<VariableNullability> variableNullabilitySupplier =
                     () -> computeRightChildVariableNullability(rightChild, ljCondition);
 
-            Transformer newTransformer = new Transformer(variableNullabilitySupplier, variableGenerator);
-            return newTransformer.transform(rightChild);
+            return rightChild.acceptVisitor(new Transformer(variableNullabilitySupplier, variableGenerator));
         }
     }
 }

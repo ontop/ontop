@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.PreventDistinctOptimizer;
-import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -34,8 +34,7 @@ public class PreventDistinctOptimizerImpl implements PreventDistinctOptimizer {
     @Override
     public IQ optimize(IQ query) {
         VariableGenerator variableGenerator = query.getVariableGenerator();
-        IQTreeTransformer transformer = new PreventDistinctTransformer(variableGenerator);
-        IQTree newTree = transformer.transform(query.getTree());
+        IQTree newTree = query.getTree().acceptVisitor(new PreventDistinctTransformer(variableGenerator));
         if (newTree.equals(query.getTree()))
             return query;
         return iqFactory.createIQ(query.getProjectionAtom(), newTree);

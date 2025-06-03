@@ -68,7 +68,7 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
                         coreSingletons),
                 coreSingletons);
 
-        IQTree newTree = transformer.transform(initialTree);
+        IQTree newTree = initialTree.acceptVisitor(transformer);
 
         return newTree.equals(initialTree)
                 ? query
@@ -145,7 +145,7 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
             CardinalityInsensitiveTransformer newTransformer = new CardinalityInsensitiveTransformer(lookForDistinctTransformer,
                     variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor,
                     rightProvenanceNormalizer, variableNullabilityTools, coreSingletons);
-            return newTransformer.transform(tree);
+            return tree.acceptVisitor(newTransformer);
         }
 
         @Override

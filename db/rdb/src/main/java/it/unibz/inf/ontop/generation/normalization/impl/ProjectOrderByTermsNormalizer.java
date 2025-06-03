@@ -43,8 +43,7 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        IQTreeVisitingTransformer transformer = new Transformer(variableGenerator);
-        return transformer.transform(tree);
+        return tree.acceptVisitor(new Transformer(variableGenerator));
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -84,7 +83,7 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
             var initialDescendantTree = orderBy.getTail();
 
             //Recursive
-            IQTree newDescendantTree = transform(initialDescendantTree);
+            IQTree newDescendantTree = transformChild(initialDescendantTree);
 
             Optional<ConstructionNode> newOptionalConstructionNode = orderBy.isPresent()
                     ? normalize(distinct.getOptionalNode(),

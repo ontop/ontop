@@ -30,18 +30,20 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
     private final RedundantJoinFKTransformer transformer;
     private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
+    private final TermFactory termFactory;
 
     @Inject
     private RedundantJoinFKOptimizerImpl(CoreSingletons coreSingletons) {
-        this.transformer = new RedundantJoinFKTransformer(coreSingletons);
         this.iqFactory = coreSingletons.getIQFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.transformer = new RedundantJoinFKTransformer();
     }
 
     @Override
     public IQ optimize(IQ query) {
-        IQTree newTree = transformer.transform(query.normalizeForOptimization()
-                .getTree());
+        IQTree newTree = query.normalizeForOptimization()
+                .getTree().acceptVisitor(transformer);
 
         return newTree.equals(query.getTree())
                 ? query
@@ -49,21 +51,15 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
                 .normalizeForOptimization();
     }
 
-    protected static class RedundantJoinFKTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    protected class RedundantJoinFKTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        protected final TermFactory termFactory;
-        private final IQTreeTools iqTreeTools;
-
-        protected RedundantJoinFKTransformer(CoreSingletons coreSingletons) {
-            super(coreSingletons.getIQFactory());
-            this.termFactory = coreSingletons.getTermFactory();
-            this.iqTreeTools = coreSingletons.getIQTreeTools();
+        protected RedundantJoinFKTransformer() {
+            super(RedundantJoinFKOptimizerImpl.this.iqFactory);
         }
 
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> initialChildren) {
-            ImmutableList<IQTree> liftedChildren = NaryIQTreeTools.transformChildren(initialChildren,
-                    this::transform);
+            ImmutableList<IQTree> liftedChildren = NaryIQTreeTools.transformChildren(initialChildren, this::transformChild);
 
             ImmutableMap<Boolean, ImmutableList<IQTree>> childPartitions = liftedChildren.stream()
                     .collect(ImmutableCollectors.partitioningBy(n -> (n instanceof ExtensionalDataNode)));
@@ -164,8 +160,5 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
                     .allMatch(c -> sourceArgumentMap.get(c.getAttribute().getIndex() -1).equals(
                             targetArgumentMap.get(c.getReferencedAttribute().getIndex() -1)));
         }
-
-
     }
-
 }
