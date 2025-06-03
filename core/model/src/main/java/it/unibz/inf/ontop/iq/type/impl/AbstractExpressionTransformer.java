@@ -16,6 +16,8 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Optional;
+
 
 public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
@@ -94,13 +96,12 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
         IQTree newLeftChild = transform(leftChild);
         IQTree newRightChild = transform(rightChild);
 
-        LeftJoinNode newLeftJoinNode = iqFactory.createLeftJoinNode(
-                rootNode.getOptionalFilterCondition()
-                        .map(e -> transformExpression(e, tree)));
+        Optional<ImmutableExpression> newLeftJoinCondition = rootNode.getOptionalFilterCondition()
+                        .map(e -> transformExpression(e, tree));
 
-        return newLeftJoinNode.equals(rootNode) && newLeftChild.equals(leftChild) && newRightChild.equals(rightChild)
+        return newLeftJoinCondition.equals(rootNode.getOptionalFilterCondition()) && newLeftChild.equals(leftChild) && newRightChild.equals(rightChild)
                 ? tree
-                : iqFactory.createBinaryNonCommutativeIQTree(newLeftJoinNode, newLeftChild, newRightChild);
+                : iqTreeTools.createLeftJoinTree(newLeftJoinCondition, newLeftChild, newRightChild);
     }
 
     @Override

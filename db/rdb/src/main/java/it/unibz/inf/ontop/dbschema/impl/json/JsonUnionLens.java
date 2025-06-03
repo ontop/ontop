@@ -214,10 +214,9 @@ public class JsonUnionLens extends JsonLens {
         }
 
         //Create union of children
-        IQTree iqTree = iqTreeTools.createUnionTree(allProjectedVariables, extendedChildren);
-
-        if (this.makeDistinct)
-            iqTree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(), iqTree);
+        IQTree iqTree = iqTreeTools.unaryIQTreeBuilder()
+                .append(iqTreeTools.createOptionalDistinctNode(this.makeDistinct))
+                .build(iqTreeTools.createUnionTree(allProjectedVariables, extendedChildren));
 
         NotYetTypedEqualityTransformer notYetTypedEqualityTransformer = coreSingletons.getNotYetTypedEqualityTransformer();
         IQTree transformedTree = notYetTypedEqualityTransformer.transform(iqTree);

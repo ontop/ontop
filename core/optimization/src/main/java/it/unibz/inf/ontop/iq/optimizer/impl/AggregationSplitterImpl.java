@@ -238,8 +238,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
                     .map(t -> renameSomeUnprojectedVariables(t, nonGroupingVariables))
                     .collect(ImmutableCollectors.toList());
 
-            return iqFactory.createNaryIQTree(
-                    iqFactory.createUnionNode(initialAggregationNode.getVariables()),
+            return iqTreeTools.createUnionTree(initialAggregationNode.getVariables(),
                     topUnionChildren);
         }
 

@@ -210,8 +210,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
         if (construction.isPresent()) {
             Substitution<ImmutableTerm> substitution = construction.getNode().getSubstitution();
             if (substitution.rangeAllMatch(ImmutableTerm::isGround)) {
-                NaryIQTree newTree = iqFactory.createNaryIQTree(
-                        iqFactory.createInnerJoinNode(),
+                NaryIQTree newTree = iqTreeTools.createInnerJoinTree(
                         ImmutableList.of(
                                 construction.getChild(),
                                 iqFactory.createUnaryIQTree(

@@ -19,8 +19,6 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Optional;
-
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 
@@ -86,17 +84,11 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
         }
 
         return iqTreeTools.unaryIQTreeBuilder()
-                .append(createOptionalDistinct(child),
+                .append(iqTreeTools.createOptionalDistinctNode(!child.isDistinct()),
                         child.equals(initialChild)
                             ? treeCache::declareAsNormalizedForOptimizationWithoutEffect
                             : treeCache::declareAsNormalizedForOptimizationWithEffect)
                 .build(child);
-    }
-
-    private Optional<DistinctNode> createOptionalDistinct(IQTree child) {
-        return child.isDistinct()
-                ? Optional.empty()
-                : Optional.of(iqFactory.createDistinctNode());
     }
 
     private class Context extends InjectiveBindingLiftContext {
@@ -135,7 +127,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
 
             return iqTreeTools.unaryIQTreeBuilder()
                     .append(state.getAncestors())
-                    .append(createOptionalDistinct(newChildTree), treeCache::declareAsNormalizedForOptimizationWithEffect)
+                    .append(iqTreeTools.createOptionalDistinctNode(!newChildTree.isDistinct()), treeCache::declareAsNormalizedForOptimizationWithEffect)
                     .build(newChildTree)
                     // Recursive (for merging top construction nodes)
                     .normalizeForOptimization(variableGenerator);

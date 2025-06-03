@@ -229,15 +229,12 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
         ImmutableExpression newCondition = renamingSubstitution.apply(getFilterCondition());
 
-        FilterNode newFilterNode = createFilterNode(newCondition);
+        FilterNode newFilterNode = newCondition.equals(getFilterCondition())
+                ? this
+                : iqFactory.createFilterNode(newCondition);
 
         IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
         return iqFactory.createUnaryIQTree(newFilterNode, newChild, newTreeCache);
     }
 
-    private FilterNode createFilterNode(ImmutableExpression expression) {
-        return expression.equals(getFilterCondition())
-                ? this
-                : iqFactory.createFilterNode(expression);
-    }
 }

@@ -85,6 +85,9 @@ public class IQTreeTools {
                 : Optional.of(iqFactory.createConstructionNode(signature, substitution));
     }
 
+    public Optional<DistinctNode> createOptionalDistinctNode(boolean f) {
+        return f ? Optional.of(iqFactory.createDistinctNode()) : Optional.empty();
+    }
 
     public ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> groupingVariables,
                                                                Substitution<ImmutableFunctionalTerm> substitution) {
