@@ -169,40 +169,33 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
         return Optional.of(iqFactory.createNaryIQTree(rootNode, newChildren));
     }
 
-    /**
-     * Leaf nodes do not accept expressions
-     */
-    private Optional<IQTree> visitLeafNode() {
+    @Override
+    public Optional<IQTree> transformIntensionalData(IntensionalDataNode dataNode) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<IQTree> transformIntensionalData(IntensionalDataNode dataNode) {
-        return visitLeafNode();
-    }
-
-    @Override
     public Optional<IQTree> transformExtensionalData(ExtensionalDataNode dataNode) {
-        return visitLeafNode();
+        return Optional.empty();
     }
 
     @Override
     public Optional<IQTree> transformEmpty(EmptyNode node) {
-        return visitLeafNode();
+        return Optional.empty();
     }
 
     @Override
     public Optional<IQTree> transformTrue(TrueNode node) {
-        return visitLeafNode();
+        return Optional.empty();
     }
 
     @Override
     public Optional<IQTree> transformNative(NativeNode nativeNode) {
-        return visitLeafNode();
+        return Optional.empty();
     }
 
     @Override
     public Optional<IQTree> transformValues(ValuesNode valuesNode) {
-        return visitLeafNode();
+        return Optional.empty();
     }
 }

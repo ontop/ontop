@@ -28,11 +28,17 @@ import java.util.stream.IntStream;
 @Singleton
 public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemover {
 
-    private final CoreSingletons coreSingletons;
+    protected final IntermediateQueryFactory iqFactory;
+    protected final SubstitutionFactory substitutionFactory;
+    protected final IQTreeTools iqTreeTools;
+    protected final ConstructionSubstitutionNormalizer substitutionNormalizer;
 
     @Inject
     protected NotRequiredVariableRemoverImpl(CoreSingletons coreSingletons) {
-        this.coreSingletons = coreSingletons;
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
     }
 
     @Override
@@ -60,20 +66,12 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
      */
     protected class VariableRemoverTransformer implements IQTreeVisitingTransformer {
         protected final ImmutableSet<Variable> variablesToRemove;
-        protected final IntermediateQueryFactory iqFactory;
-        protected final SubstitutionFactory substitutionFactory;
         protected final VariableGenerator variableGenerator;
-        protected final IQTreeTools iqTreeTools;
-        protected final ConstructionSubstitutionNormalizer substitutionNormalizer;
 
         public VariableRemoverTransformer(ImmutableSet<Variable> variablesToRemove,
                                           VariableGenerator variableGenerator) {
             this.variablesToRemove = variablesToRemove;
             this.variableGenerator = variableGenerator;
-            this.iqFactory = coreSingletons.getIQFactory();
-            this.iqTreeTools = coreSingletons.getIQTreeTools();
-            this.substitutionFactory = coreSingletons.getSubstitutionFactory();
-            this.substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
         }
 
         /**
