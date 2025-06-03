@@ -3,11 +3,10 @@ package it.unibz.inf.ontop.iq.visit.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 
 import java.util.stream.Stream;
 
-public abstract class AbstractIQTreeToStreamVisitingTransformer<T> extends AbstractIQVisitor<Stream<T>> {
+public class DefaultIQTreeToStreamVisitingTransformer<T> extends AbstractIQVisitor<Stream<T>> {
 
     @Override
     public Stream<T> transformIntensionalData(IntensionalDataNode node) {

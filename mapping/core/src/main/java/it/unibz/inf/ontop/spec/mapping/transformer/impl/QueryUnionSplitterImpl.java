@@ -6,7 +6,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.visit.impl.AbstractIQTreeToStreamVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultIQTreeToStreamVisitingTransformer;
 import it.unibz.inf.ontop.spec.mapping.transformer.QueryUnionSplitter;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -45,7 +45,7 @@ public class QueryUnionSplitterImpl implements QueryUnionSplitter {
 
     private Optional<NaryIQTree> findFirstSplittableUnion(IQ query) {
 
-        return query.getTree().acceptVisitor(new AbstractIQTreeToStreamVisitingTransformer<NaryIQTree>() {
+        return query.getTree().acceptVisitor(new DefaultIQTreeToStreamVisitingTransformer<NaryIQTree>() {
             @Override
             public Stream<NaryIQTree> transformUnion(NaryIQTree tree, UnionNode node, ImmutableList<IQTree> children) {
                 return Stream.of(tree);

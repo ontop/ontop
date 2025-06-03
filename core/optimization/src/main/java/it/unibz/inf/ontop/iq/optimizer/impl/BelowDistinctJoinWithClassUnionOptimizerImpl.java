@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.BelowDistinctJoinWithClassUnionOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
@@ -21,13 +22,17 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
 
     private final IQTreeTransformer lookForDistinctTransformer;
     private final IntermediateQueryFactory iqFactory;
+    private final CoreSingletons coreSingletons;
+    private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
 
     @Inject
-    protected BelowDistinctJoinWithClassUnionOptimizerImpl(CoreSingletons coreSingletons, IntermediateQueryFactory iqFactory,
+    protected BelowDistinctJoinWithClassUnionOptimizerImpl(CoreSingletons coreSingletons,
                                                            RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
-        this.iqFactory = iqFactory;
+        this.coreSingletons = coreSingletons;
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         this.lookForDistinctTransformer = new LookForDistinctOrLimit1TransformerImpl(
-                t -> new JoinWithClassUnionTransformer(t, coreSingletons, requiredExtensionalDataNodeExtractor),
+                JoinWithClassUnionTransformer::new,
                 coreSingletons);
     }
 
@@ -41,41 +46,37 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
                 .normalizeForOptimization();
     }
 
-    protected static class JoinWithClassUnionTransformer extends AbstractBelowDistinctInnerJoinTransformer {
-        private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
+    protected class JoinWithClassUnionTransformer extends AbstractBelowDistinctInnerJoinTransformer {
 
-        protected JoinWithClassUnionTransformer(IQTreeTransformer lookForDistinctTransformer,
-                                                CoreSingletons coreSingletons,
-                                                RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
-            super(lookForDistinctTransformer, coreSingletons);
-            this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
+        protected JoinWithClassUnionTransformer(IQTreeTransformer lookForDistinctTransformer) {
+            super(lookForDistinctTransformer, BelowDistinctJoinWithClassUnionOptimizerImpl.this.coreSingletons);
         }
 
         /**
-         * Should not return any false positive
-         *
+         * Should not return any false positives
          */
         protected boolean isDetectedAsRedundant(IQTree child, Stream<IQTree> otherChildrenStream) {
             ImmutableSet<IQTree> otherChildren = otherChildrenStream.collect(ImmutableCollectors.toSet());
 
-            return Stream.of(child)
-                    .filter(c -> c.getRootNode() instanceof UnionNode)
-                    .flatMap(c -> c.getChildren().stream())
+            var union = NaryIQTreeTools.UnionDecomposition.of(child);
+            if (union.isPresent())
+                return union.getChildren().stream()
                     .flatMap(c -> extractExtensionalNode(c).stream())
                     .anyMatch(c -> otherChildren.stream()
                             .flatMap(requiredExtensionalDataNodeExtractor::transform)
                             .anyMatch(o -> isDetectedAsRedundant(c, o)));
+            return false;
         }
 
-        private Optional<ExtensionalDataNode> extractExtensionalNode(IQTree unionChild) {
+        private Optional<ExtensionalDataNode> extractExtensionalNode(IQTree child) {
             /*
              * Filters just make much the variables are non-null can be eliminating,
              * because we are interested in cases where we join over these variables
              */
-            var filter = IQTreeTools.UnaryIQTreeDecomposition.of(unionChild, FilterNode.class);
+            var filter = IQTreeTools.UnaryIQTreeDecomposition.of(child, FilterNode.class);
             if (filter.isPresent()) {
                 VariableNullability variableNullability = coreSingletons.getCoreUtilsFactory()
-                        .createEmptyVariableNullability(unionChild.getVariables());
+                        .createEmptyVariableNullability(child.getVariables());
 
                 ImmutableExpression filterCondition = filter.getNode().getFilterCondition();
 
@@ -85,8 +86,8 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
                         // Continue to the child
                         .flatMap(b -> extractExtensionalNode(filter.getChild()));
             }
-            if (unionChild instanceof ExtensionalDataNode)
-                return Optional.of((ExtensionalDataNode) unionChild);
+            if (child instanceof ExtensionalDataNode)
+                return Optional.of((ExtensionalDataNode) child);
 
             return Optional.empty();
         }

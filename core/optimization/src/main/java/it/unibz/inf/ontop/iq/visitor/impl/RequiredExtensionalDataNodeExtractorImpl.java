@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.visit.impl.AbstractIQTreeToStreamVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultIQTreeToStreamVisitingTransformer;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 
 import javax.inject.Inject;
@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 
 
 @Singleton
-public class RequiredExtensionalDataNodeExtractorImpl extends AbstractIQTreeToStreamVisitingTransformer<ExtensionalDataNode>
+public class RequiredExtensionalDataNodeExtractorImpl extends DefaultIQTreeToStreamVisitingTransformer<ExtensionalDataNode>
         implements RequiredExtensionalDataNodeExtractor {
 
     @Inject
