@@ -30,10 +30,6 @@ public interface IQTree {
 
     <T> T acceptVisitor(IQVisitor<T> visitor);
 
-    default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        return acceptVisitor(transformer);
-    }
-
     IQTree normalizeForOptimization(VariableGenerator variableGenerator);
 
     /**

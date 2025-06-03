@@ -76,7 +76,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
                         coreSingletons),
                 coreSingletons);
 
-        IQTree newTree = initialTree.acceptTransformer(transformer);
+        IQTree newTree = transformer.transform(initialTree);
 
         return newTree.equals(initialTree)
                 ? query
@@ -302,7 +302,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
             var newTransformer = new CardinalityInsensitiveTransformer(lookForDistinctTransformer,
                     rightChild::getVariableNullability, variableGenerator, requiredDataNodeExtractor,
                     rightProvenanceNormalizer, variableNullabilityTools, coreSingletons);
-            return rightChild.acceptTransformer(newTransformer);
+            return newTransformer.transform(rightChild);
         }
     }
 

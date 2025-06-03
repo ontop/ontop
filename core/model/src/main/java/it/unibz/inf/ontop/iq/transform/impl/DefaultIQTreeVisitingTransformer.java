@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
  * To be extended by overriding the methods of interest.
  */
 
-public abstract class DefaultIQTreeVisitingTransformer implements IQTreeVisitingTransformer {
+public abstract class DefaultIQTreeVisitingTransformer extends IQTreeVisitingTransformer {
 
     @Override
     public IQTree transformIntensionalData(IntensionalDataNode node) {
@@ -89,10 +89,6 @@ public abstract class DefaultIQTreeVisitingTransformer implements IQTreeVisiting
     @Override
     public IQTree transformUnion(NaryIQTree tree, UnionNode node, ImmutableList<IQTree> children) {
         return transformNaryCommutativeNode(tree, node, children);
-    }
-
-    protected final IQTree transformChild(IQTree child) {
-        return child.acceptVisitor(this);
     }
 
     protected abstract IQTree transformLeaf(LeafIQTree leaf);

@@ -41,7 +41,7 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
     @Override
     public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
 
-        IQTree transformedChild = child.acceptTransformer(this);
+        IQTree transformedChild = transform(child);
 
         PushResult<IQTree> result = pushExpressionDown(
                 transformedChild,
@@ -60,8 +60,8 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
     @Override
     public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
 
-        IQTree transformedLeftChild = leftChild.acceptTransformer(this);
-        IQTree transformedRightChild = rightChild.acceptTransformer(this);
+        IQTree transformedLeftChild = transform(leftChild);
+        IQTree transformedRightChild = transform(rightChild);
 
         if (rootNode.getOptionalFilterCondition().isEmpty())
             return leftChild.equals(transformedLeftChild) && rightChild.equals(transformedRightChild)
@@ -84,7 +84,7 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
     public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
 
         ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children,
-                t -> t.acceptTransformer(this));
+                this::transform);
 
         if (rootNode.getOptionalFilterCondition().isEmpty())
             return transformedChildren.equals(children)
@@ -100,8 +100,7 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
     }
 
     private Optional<IQTree> pushExpressionDown(ImmutableExpression expression, IQTree child) {
-        BooleanExpressionPusher newPusher = new BooleanExpressionPusher(expression, coreSingletons);
-        return child.acceptVisitor(newPusher);
+        return child.acceptVisitor(new BooleanExpressionPusher(expression, coreSingletons));
     }
 
     private Optional<IQTree> pushExpressionDownIfContainsVariables(ImmutableExpression expression, IQTree tree) {

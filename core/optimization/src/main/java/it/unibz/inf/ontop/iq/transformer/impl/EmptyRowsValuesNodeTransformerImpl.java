@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ValuesNode;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transformer.EmptyRowsValuesNodeTransformer;
 import it.unibz.inf.ontop.model.term.Constant;
@@ -31,7 +32,8 @@ public class EmptyRowsValuesNodeTransformerImpl implements EmptyRowsValuesNodeTr
 
     @Override
     public IQTree transform(IQTree iqTree, VariableGenerator variableGenerator) {
-        return iqTree.acceptTransformer(new Transformer(variableGenerator));
+        IQTreeVisitingTransformer transformer = new Transformer(variableGenerator);
+        return transformer.transform(iqTree);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

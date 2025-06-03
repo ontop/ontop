@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.impl.AbstractIQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -74,7 +75,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
     }
 
 
-    protected static class TermTypeVariableVisitor implements IQVisitor<Optional<TermType>> {
+    protected static class TermTypeVariableVisitor extends AbstractIQVisitor<Optional<TermType>> {
 
         protected final Variable variable;
         protected final SingleTermTypeExtractor typeExtractor;
@@ -120,7 +121,8 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         @Override
         public Optional<TermType> transformValues(ValuesNode valuesNode) {
             ImmutableSet<TermType> termTypes = valuesNode.getValueStream(variable)
-                    .flatMap(c -> c.getOptionalType().stream())
+                    .map(Constant::getOptionalType)
+                    .flatMap(Optional::stream)
                     .collect(ImmutableCollectors.toSet());
 
             return termTypes.stream()
@@ -143,7 +145,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
 
         @Override
         public Optional<TermType> transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-            return child.acceptVisitor(this);
+            return transformChild(child);
         }
 
         @Override
@@ -157,22 +159,22 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
             if (flattenNode.getIndexVariable().isPresent() && variable.equals(flattenNode.getIndexVariable().get())) {
                 return flattenNode.getIndexVariableType();
             }
-            return child.acceptVisitor(this);
+            return transformChild(child);
         }
 
         @Override
         public Optional<TermType> transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-            return child.acceptVisitor(this);
+            return transformChild(child);
         }
 
         @Override
         public Optional<TermType> transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
-            return child.acceptVisitor(this);
+            return transformChild(child);
         }
 
         @Override
         public Optional<TermType> transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-            return child.acceptVisitor(this);
+            return transformChild(child);
         }
 
         /**
@@ -181,10 +183,10 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         @Override
         public Optional<TermType> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             if (leftChild.getVariables().contains(variable)) {
-                return leftChild.acceptVisitor(this);
+                return transformChild(leftChild);
             }
             else if (rightChild.getVariables().contains(variable)) {
-                return rightChild.acceptVisitor(this);
+                return transformChild(rightChild);
             }
             else
                 return Optional.empty();
@@ -199,7 +201,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         @Override
         public Optional<TermType> transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             return children.stream()
-                    .map(c -> c.acceptVisitor(this))
+                    .map(this::transformChild)
                     .flatMap(Optional::stream)
                     .findAny(); // pick any of them
         }
@@ -207,7 +209,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         @Override
         public Optional<TermType> transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
             return children.stream()
-                    .map(c -> c.acceptVisitor(this))
+                    .map(this::transformChild)
                     .flatMap(Optional::stream)
                     .findAny(); // pick any of them
         }

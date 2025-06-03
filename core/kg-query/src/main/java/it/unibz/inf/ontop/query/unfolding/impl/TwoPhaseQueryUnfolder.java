@@ -51,7 +51,7 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
 
         // NB: no normalization at that point, because of limitation of getPossibleVariableDefinitions implementation
         // (Problem with join strict equality and condition)
-        IQTree partiallyUnfoldedIQ = firstPhaseTransformer.transform(tree);
+        IQTree partiallyUnfoldedIQ = tree.acceptVisitor(firstPhaseTransformer);
         LOGGER.debug("First phase query unfolding time: {}", System.currentTimeMillis() - before);
 
         if (!firstPhaseTransformer.areSomeIntensionalNodesRemaining())
@@ -68,9 +68,8 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
 
     protected IQTree executeSecondPhaseUnfolding(IQTree partiallyUnfoldedIQ, VariableGenerator variableGenerator){
         long before = System.currentTimeMillis();
-        AbstractQueryMergingTransformer secondPhaseTransformer = new SecondPhaseQueryMergingTransformer(
-                partiallyUnfoldedIQ.getPossibleVariableDefinitions(), mapping, variableGenerator, coreSingletons);
-        IQTree unfoldedIQ = secondPhaseTransformer.transform(partiallyUnfoldedIQ);
+        IQTree unfoldedIQ = partiallyUnfoldedIQ.acceptVisitor(new SecondPhaseQueryMergingTransformer(
+                partiallyUnfoldedIQ.getPossibleVariableDefinitions(), mapping, variableGenerator, coreSingletons));
         LOGGER.debug("Second phase query unfolding time: {}", System.currentTimeMillis() - before);
         return unfoldedIQ;
     }

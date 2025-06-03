@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -27,7 +28,8 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptTransformer(new Transformer());
+        IQTreeVisitingTransformer transformer = new Transformer();
+        return transformer.transform(tree);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -43,7 +45,7 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
 
             var subLimitTransformer = new SubLimitTransformer(sliceNode.getLimit().get(), this);
 
-            return iqFactory.createUnaryIQTree(sliceNode, child.acceptTransformer(subLimitTransformer));
+            return iqFactory.createUnaryIQTree(sliceNode, subLimitTransformer.transform(child));
         }
     }
 

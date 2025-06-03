@@ -141,7 +141,7 @@ public class MappingValuesWrapperImpl implements MappingValuesWrapper {
         public MappingAssertion transformMappingAssertion(MappingAssertion mappingAssertion) {
             var initialTree = mappingAssertion.getQuery().getTree();
 
-            var newTree = transform(initialTree);
+            var newTree = transformChild(initialTree);
 
             return newTree.equals(initialTree)
                     ? mappingAssertion

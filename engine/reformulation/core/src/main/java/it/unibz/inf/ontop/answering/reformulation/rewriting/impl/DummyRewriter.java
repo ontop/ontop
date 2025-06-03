@@ -35,6 +35,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -99,13 +100,13 @@ public class DummyRewriter implements QueryRewriter {
      */
     @Override
 	public IQ rewrite(IQ query) throws EmptyQueryException {
-        return iqFactory.createIQ(query.getProjectionAtom(),
-                query.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory, iqTreeTools) {
+        IQTreeVisitingTransformer transformer = new BasicGraphPatternTransformer(iqFactory, iqTreeTools) {
             @Override
             protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> bgp) {
                 return removeRedundantAtoms(bgp);
             }
-        }));
+        };
+        return iqFactory.createIQ(query.getProjectionAtom(), transformer.transform(query.getTree()));
 	}
 
 	private ImmutableList<IQTree> removeRedundantAtoms(ImmutableList<IntensionalDataNode> bgp) {

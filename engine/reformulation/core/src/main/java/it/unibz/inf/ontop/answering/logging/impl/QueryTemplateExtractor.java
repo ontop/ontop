@@ -147,30 +147,29 @@ public class QueryTemplateExtractor {
 
         @Override
         public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-            IQTree newChild = child.acceptTransformer(this);
             Optional<ImmutableExpression> newCondition = transformFilterCondition(rootNode.getFilterCondition());
 
             return iqTreeTools.unaryIQTreeBuilder()
                     .append(iqTreeTools.createOptionalFilterNode(newCondition))
-                    .build(newChild);
+                    .build(transform(child));
         }
 
 
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            IQTree newLeft = leftChild.acceptTransformer(this);
-            IQTree newRight = rightChild.acceptTransformer(this);
-
             Optional<ImmutableExpression> newCondition = rootNode.getOptionalFilterCondition()
                     .flatMap(this::transformFilterCondition);
 
-            return iqTreeTools.createLeftJoinTree(newCondition, newLeft, newRight);
+            return iqTreeTools.createLeftJoinTree(
+                    newCondition,
+                    transform(leftChild),
+                    transform(rightChild));
         }
 
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
-                    c -> c.acceptTransformer(this));
+                    this::transform);
 
             Optional<ImmutableExpression> newCondition = rootNode.getOptionalFilterCondition()
                     .flatMap(this::transformFilterCondition);

@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 
 import java.util.stream.Stream;
 
-public abstract class AbstractIQTreeToStreamVisitingTransformer<T> implements IQVisitor<Stream<T>> {
+public abstract class AbstractIQTreeToStreamVisitingTransformer<T> extends AbstractIQVisitor<Stream<T>> {
 
     @Override
     public Stream<T> transformIntensionalData(IntensionalDataNode node) {
@@ -94,16 +94,14 @@ public abstract class AbstractIQTreeToStreamVisitingTransformer<T> implements IQ
     }
 
     protected Stream<T> transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode node, IQTree child) {
-        return child.acceptVisitor(this);
+        return transformChild(child);
     }
 
     protected Stream<T> transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode node, ImmutableList<IQTree> children) {
-        return children.stream()
-                .flatMap(c -> c.acceptVisitor(this));
+        return children.stream().flatMap(this::transformChild);
     }
 
     protected Stream<T> transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode node, IQTree leftChild, IQTree rightChild) {
-        return Stream.of(leftChild, rightChild)
-                .flatMap(c -> c.acceptVisitor(this));
+        return Stream.of(leftChild, rightChild).flatMap(this::transformChild);
     }
 }

@@ -51,7 +51,7 @@ public class RequiredExtensionalDataNodeExtractorImpl extends AbstractIQTreeToSt
     @Override
     public Stream<ExtensionalDataNode> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         // Only considers the left child
-        return leftChild.acceptVisitor(this);
+        return transformChild(leftChild);
     }
 
     /**

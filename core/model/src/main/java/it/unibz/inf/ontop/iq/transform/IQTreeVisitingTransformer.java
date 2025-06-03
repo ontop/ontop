@@ -2,16 +2,18 @@ package it.unibz.inf.ontop.iq.transform;
 
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.impl.AbstractIQVisitor;
 
 
-public interface IQTreeVisitingTransformer extends IQVisitor<IQTree>, IQTreeTransformer {
+public abstract class IQTreeVisitingTransformer extends AbstractIQVisitor<IQTree> implements IQTreeTransformer  {
 
-    default IQTree transformNative(NativeNode nativeNode) {
+    @Override
+    public IQTree transformNative(NativeNode nativeNode) {
         throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
     }
 
-    default IQTree transform(IQTree tree) {
+    @Override
+    public IQTree transform(IQTree tree) {
         return tree.acceptVisitor(this);
     }
 }

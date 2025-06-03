@@ -44,8 +44,9 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
         IQTree tree = query.getTree();
         var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
 
-        IQTreeVisitingTransformer transformer = new Transformer(construction.getNode().getSubstitution().getRangeVariables(), cqContainmentCheck);
-        return iqFactory.createIQ(query.getProjectionAtom(), transformer.transform(tree));
+        return iqFactory.createIQ(query.getProjectionAtom(),
+                tree.acceptVisitor(new Transformer(
+                        construction.getNode().getSubstitution().getRangeVariables(), cqContainmentCheck)));
     }
 
     protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

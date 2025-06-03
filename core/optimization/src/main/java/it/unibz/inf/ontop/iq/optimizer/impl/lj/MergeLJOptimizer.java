@@ -71,7 +71,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
 
         Transformer transformer = new Transformer(query.getVariableGenerator());
 
-        IQTree newTree = initialTree.acceptTransformer(transformer);
+        IQTree newTree = transformer.transform(initialTree);
 
         return newTree.equals(initialTree)
                 ? query

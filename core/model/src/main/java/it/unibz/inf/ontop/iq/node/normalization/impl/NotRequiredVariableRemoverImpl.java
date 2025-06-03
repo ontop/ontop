@@ -55,7 +55,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
     protected IQTree removeNonRequiredVariables(IQTree tree, ImmutableSet<Variable> variablesToRemove,
                                                 VariableGenerator variableGenerator) {
-        return new VariableRemoverTransformer(variablesToRemove, variableGenerator).transform(tree);
+        return tree.acceptVisitor(new VariableRemoverTransformer(variablesToRemove, variableGenerator));
     }
 
     /**
@@ -64,7 +64,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
      * {@code ---> } Not called for trees not having any variable to remove.
      *
      */
-    protected class VariableRemoverTransformer implements IQTreeVisitingTransformer {
+    protected class VariableRemoverTransformer extends IQTreeVisitingTransformer {
         protected final ImmutableSet<Variable> variablesToRemove;
         protected final VariableGenerator variableGenerator;
 
@@ -163,27 +163,27 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
         @Override
         public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-            return iqFactory.createUnaryIQTree(rootNode, transform(child));
+            return iqFactory.createUnaryIQTree(rootNode, transformChild(child));
         }
 
         @Override
         public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
-            return iqFactory.createUnaryIQTree(rootNode, transform(child));
+            return iqFactory.createUnaryIQTree(rootNode, transformChild(child));
         }
 
         @Override
         public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-            return iqFactory.createUnaryIQTree(rootNode, transform(child));
+            return iqFactory.createUnaryIQTree(rootNode, transformChild(child));
         }
 
         @Override
         public IQTree transformSlice(UnaryIQTree tree, SliceNode rootNode, IQTree child) {
-            return iqFactory.createUnaryIQTree(rootNode, transform(child));
+            return iqFactory.createUnaryIQTree(rootNode, transformChild(child));
         }
 
         @Override
         public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-            return iqFactory.createUnaryIQTree(rootNode, transform(child));
+            return iqFactory.createUnaryIQTree(rootNode, transformChild(child));
         }
 
         @Override
@@ -212,7 +212,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
             return childVariablesToRemove.isEmpty()
                     ? child
                     : childVariablesToRemove.equals(variablesToRemove)
-                        ? transform(child)
+                        ? transformChild(child)
                         : createNewTransformer(childVariablesToRemove).transform(child);
         }
 

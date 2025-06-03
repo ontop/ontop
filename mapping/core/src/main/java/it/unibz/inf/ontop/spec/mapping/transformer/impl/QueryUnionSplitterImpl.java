@@ -52,7 +52,7 @@ public class QueryUnionSplitterImpl implements QueryUnionSplitter {
             }
             @Override
             public Stream<NaryIQTree> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode node, IQTree leftChild, IQTree rightChild) {
-                return leftChild.acceptVisitor(this);
+                return transformChild(leftChild);
             }
         }).findAny();
     }

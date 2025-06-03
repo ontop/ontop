@@ -181,7 +181,7 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
 
     @Override
     public final IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        IQTree newLeftChild = transform(leftChild);
+        IQTree newLeftChild = transformChild(leftChild);
         IQTree newRightChild = transformChildWithNewTransformer(rightChild);
         return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild) && rootNode.equals(tree.getRootNode())
                 ? tree
@@ -201,10 +201,9 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
     }
 
     private IQTree transformChildWithNewTransformer(IQTree child) {
-        IQTreeVisitingTransformer transformer = new SecondPhaseQueryMergingTransformer(
+        return child.acceptVisitor(new SecondPhaseQueryMergingTransformer(
                 child.getPossibleVariableDefinitions(),
-                mapping, variableGenerator, constraintMap, coreSingletons);
-        return transformer.transform(child);
+                mapping, variableGenerator, constraintMap, coreSingletons));
     }
 
     @Override

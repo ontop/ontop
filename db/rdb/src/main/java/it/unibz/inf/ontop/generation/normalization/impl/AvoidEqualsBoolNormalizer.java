@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.iq.type.impl.AbstractExpressionTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -39,7 +40,7 @@ public class AvoidEqualsBoolNormalizer implements DialectExtraNormalizer {
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
 
-        return tree.acceptTransformer(new AbstractExpressionTransformer(coreSingletons) {
+        IQTreeVisitingTransformer transformer = new AbstractExpressionTransformer(coreSingletons) {
             @Override
             protected boolean isFunctionSymbolToReplace(FunctionSymbol functionSymbol) {
                 return (functionSymbol instanceof AbstractDBNonStrictEqOperator) || (functionSymbol instanceof DefaultDBStrictEqFunctionSymbol);
@@ -74,6 +75,8 @@ public class AvoidEqualsBoolNormalizer implements DialectExtraNormalizer {
             private ImmutableFunctionalTerm noReplace(FunctionSymbol functionSymbol, ImmutableList<ImmutableTerm> newTerms) {
                 return termFactory.getImmutableExpression((BooleanFunctionSymbol) functionSymbol, newTerms);
             }
-        });
+        };
+
+        return transformer.transform(tree);
     }
 }

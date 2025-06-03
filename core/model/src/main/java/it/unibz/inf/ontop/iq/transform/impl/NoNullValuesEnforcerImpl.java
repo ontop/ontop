@@ -78,8 +78,7 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
      *  to simplify itself. Such information is only partially provided by the VariableNullability data structure.
      */
     protected IQTree declareTopVariablesNotNull(IQTree tree) {
-        NotNullTopVariablePropagator transformer = new NotNullTopVariablePropagator(tree.getVariables());
-        return transformer.transform(tree);
+        return tree.acceptVisitor(new NotNullTopVariablePropagator(tree.getVariables()));
     }
 
     protected class NotNullTopVariablePropagator extends DefaultNonRecursiveIQTreeTransformer {
