@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Stream;
 
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
@@ -256,16 +257,17 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private IQTree projectOutAllVars(IQTree tree) {
-        var modifier = UnaryIQTreeDecomposition.of(tree, QueryModifierNode.class);
-        if (modifier.isPresent()) {
-            return iqFactory.createUnaryIQTree(
-                    modifier.getNode(),
-                    projectOutAllVars(modifier.getChild()));
-        }
+        var modifierSequence = IQTreeTools.UnaryOperatorSequence.<QueryModifierNode>of();
+        Stream.iterate(UnaryIQTreeDecomposition.of(tree, QueryModifierNode.class),
+                        IQTreeTools.IQTreeDecomposition::isPresent,
+                        m -> UnaryIQTreeDecomposition.of(m, QueryModifierNode.class))
+                .forEach(m ->
+                        modifierSequence.append(m.getNode()));
 
-        return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(ImmutableSet.of()),
-                tree);
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(modifierSequence)
+                .append(iqFactory.createConstructionNode(ImmutableSet.of()))
+                .build(tree);
     }
 
     private RDF4JTupleExprTranslator getTranslator(ImmutableMap<Variable, GroundTerm> externalBindings, @Nullable Dataset dataset, boolean treatBNodeAsVariable) {

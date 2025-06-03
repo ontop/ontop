@@ -50,14 +50,16 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
         var topConstruction = UnaryIQTreeDecomposition.of(distinctTree, ConstructionNode.class);
         var distinct = UnaryIQTreeDecomposition.of(topConstruction, DistinctNode.class);
 
-        Optional<IQTree> distinctUnionTree = Optional.of(NaryIQTreeTools.UnionDecomposition.of(distinct))
-                .filter(NaryIQTreeTools.UnionDecomposition::isPresent)
-                .map(t -> t.getNode().makeDistinct(t.getChildren()));
-
-        IQTree newTree = distinctUnionTree
-                .map(t -> iqFactory.createUnaryIQTree(topConstruction.getNode(), t))
-                .map(t -> t.normalizeForOptimization(variableGenerator))
-                .orElse(distinctTree);
+        var union = NaryIQTreeTools.UnionDecomposition.of(distinct);
+        IQTree newTree;
+        if (union.isPresent()) {
+            IQTree t = union.getNode().makeDistinct(union.getChildren());
+            newTree = iqFactory.createUnaryIQTree(topConstruction.getNode(), t)
+                                .normalizeForOptimization(variableGenerator);
+        }
+        else {
+            newTree = distinctTree;
+        }
 
         return assertion.copyOf(iqFactory.createIQ(assertion.getProjectionAtom(), newTree));
     }

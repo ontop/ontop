@@ -89,7 +89,7 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
         if (rootNode.getOptionalFilterCondition().isEmpty())
             return transformedChildren.equals(children)
                     ? tree
-                    : iqFactory.createNaryIQTree(rootNode, transformedChildren);
+                    : iqTreeTools.createInnerJoinTree(transformedChildren);
 
         PushResult<ImmutableList<IQTree>> result = pushExpressionDown(
                 transformedChildren,

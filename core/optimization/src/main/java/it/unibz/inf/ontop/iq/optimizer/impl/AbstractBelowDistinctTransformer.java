@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
@@ -23,11 +24,13 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
 
     private final IQTreeTransformer lookForDistinctOrLimit1Transformer;
     protected final CoreSingletons coreSingletons;
+    protected final IntermediateQueryFactory iqFactory;
 
     protected AbstractBelowDistinctTransformer(IQTreeTransformer lookForDistinctOrLimit1Transformer,
                                                CoreSingletons coreSingletons) {
-        this.coreSingletons = coreSingletons;
         this.lookForDistinctOrLimit1Transformer = lookForDistinctOrLimit1Transformer;
+        this.coreSingletons = coreSingletons;
+        this.iqFactory = coreSingletons.getIQFactory();
     }
 
     @Override
@@ -39,7 +42,7 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
                     transformedChildren)
                 .orElseGet(() -> transformedChildren.equals(children)
                         ? tree
-                        : coreSingletons.getIQFactory().createNaryIQTree(rootNode, transformedChildren));
+                        : iqFactory.createNaryIQTree(rootNode, transformedChildren));
     }
 
     /**
@@ -54,54 +57,50 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
     @Override
     public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
-
-        return (newChild.equals(child))
+        return newChild.equals(child)
                 ? tree
-                : coreSingletons.getIQFactory().createUnaryIQTree(rootNode, newChild);
+                : iqFactory.createUnaryIQTree(rootNode, newChild);
     }
 
 
     @Override
     public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
         IQTree newChild = transform(child);
-        return (newChild.equals(child))
+        return newChild.equals(child)
                 ? tree
-                : coreSingletons.getIQFactory().createUnaryIQTree(sliceNode, newChild);
+                : iqFactory.createUnaryIQTree(sliceNode, newChild);
     }
 
     @Override
     public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
-        return (newChild.equals(child))
+        return newChild.equals(child)
                 ? tree
-                : coreSingletons.getIQFactory().createUnaryIQTree(rootNode, newChild);
+                : iqFactory.createUnaryIQTree(rootNode, newChild);
     }
 
     @Override
     public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
-
-        return (newChild.equals(child))
+        return newChild.equals(child)
                 ? tree
-                : coreSingletons.getIQFactory().createUnaryIQTree(rootNode, newChild);
+                : iqFactory.createUnaryIQTree(rootNode, newChild);
     }
 
     @Override
     public IQTree transformFlatten(UnaryIQTree tree, FlattenNode node, IQTree child) {
         IQTree newChild = transform(child);
-
-        return (newChild.equals(child))
+        return newChild.equals(child)
                 ? tree
-                : coreSingletons.getIQFactory().createUnaryIQTree(node, newChild);
+                : iqFactory.createUnaryIQTree(node, newChild);
     }
 
     @Override
     public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::transform);
-
         return newChildren.equals(children)
                 ? tree
-                : coreSingletons.getIQFactory().createNaryIQTree(rootNode, newChildren);
+                : iqFactory.createNaryIQTree(rootNode, newChildren);
     }
 
     @Override
@@ -109,9 +108,9 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
         IQTree newLeftChild = transform(leftChild);
         IQTree newRightChild = transform(rightChild);
 
-        return (newLeftChild.equals(leftChild) && newRightChild.equals(rightChild))
+        return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild)
                 ? tree
-                : coreSingletons.getIQFactory().createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild);
+                : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild);
     }
 
     /**

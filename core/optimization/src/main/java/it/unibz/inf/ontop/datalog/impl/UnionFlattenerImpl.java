@@ -61,7 +61,8 @@ public class UnionFlattenerImpl implements UnionFlattener {
             // if the child is a construction node, merge it
             var construction = UnaryIQTreeDecomposition.of(transformedChild, ConstructionNode.class);
             if (construction.isPresent()) {
-                return rootCn.normalizeForOptimization(transformedChild, variableGenerator, iqFactory.createIQTreeCache());
+                return iqFactory.createUnaryIQTree(rootCn, transformedChild)
+                        .normalizeForOptimization(variableGenerator);
             }
             return iqFactory.createUnaryIQTree(rootCn, transformedChild);
         }
