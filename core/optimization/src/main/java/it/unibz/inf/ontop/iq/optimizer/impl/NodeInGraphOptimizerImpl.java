@@ -51,7 +51,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
     public IQ optimize(IQ query) {
         var tree = query.getTree();
         var transformer = new Transformer();
-        var newTree = tree.acceptTransformer(transformer)
+        var newTree = transformer.transform(tree)
                 .normalizeForOptimization(query.getVariableGenerator());
 
         return newTree.equals(tree)

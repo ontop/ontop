@@ -46,7 +46,7 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
                         childTree.getVariables()),
                 coreSingletons);
 
-        IQTree newTree = initialTree.acceptTransformer(transformer);
+        IQTree newTree = transformer.transform(initialTree);
 
         return newTree.equals(initialTree)
                 ? query
@@ -77,7 +77,7 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
                     ? this
                     : computeNewTransformer(newVariablesUsed.immutableCopy());
 
-            IQTree newChild = child.acceptTransformer(newTransformer);
+            IQTree newChild = newTransformer.transform(child);
             return newChild.equals(child) && rootNode.equals(tree.getRootNode())
                     ? tree
                     : iqFactory.createUnaryIQTree(rootNode, newChild);
@@ -92,7 +92,7 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
                     .map(this::computeNewTransformer)
                     .orElse(this);
 
-            IQTree newChild = child.acceptTransformer(newTransformer);
+            IQTree newChild = newTransformer.transform(child);
             return newChild.equals(child) && rootNode.equals(tree.getRootNode())
                     ? tree
                     : iqFactory.createUnaryIQTree(rootNode, newChild);
@@ -104,7 +104,7 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
         }
 
         protected IQTree applyRecursivelyToUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-            IQTree newChild = child.acceptTransformer(this);
+            IQTree newChild = transform(child);
             return newChild.equals(child) && rootNode.equals(tree.getRootNode())
                     ? tree
                     : iqFactory.createUnaryIQTree(rootNode, newChild);
@@ -116,7 +116,7 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
 
             if (treeVariables.isEmpty() || leftChild.getVariables().containsAll(Sets.intersection(variablesUsedByAncestors, treeVariables)))
                 // Prunes the right child
-                return leftChild.acceptTransformer(this);
+                return transform(leftChild);
 
             var commonVariables = BinaryNonCommutativeIQTreeTools.commonVariables(leftChild, rightChild);
 
@@ -130,8 +130,8 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
                     ? this
                     : computeNewTransformer(newVariablesUsed);
 
-            var newLeft = leftChild.acceptTransformer(newTransformer);
-            var newRight = rightChild.acceptTransformer(newTransformer);
+            var newLeft = newTransformer.transform(leftChild);
+            var newRight = newTransformer.transform(rightChild);
 
             return newLeft.equals(leftChild) && newRight.equals(rightChild)
                     ? tree
@@ -153,7 +153,7 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
                     .orElse(this);
 
             ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
-                            t -> t.acceptTransformer(newTransformer));
+                    newTransformer::transform);
 
             return newChildren.equals(children) && rootNode.equals(tree.getRootNode())
                     ? tree
@@ -162,7 +162,7 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
 
         protected IQTree applyRecursivelyToNaryNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
             ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
-                    t -> t.acceptTransformer(this));
+                    this::transform);
 
             return newChildren.equals(children) && rootNode.equals(tree.getRootNode())
                     ? tree

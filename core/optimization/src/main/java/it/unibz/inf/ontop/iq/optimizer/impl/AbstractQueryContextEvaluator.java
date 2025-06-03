@@ -32,26 +32,23 @@ public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
         if (queryContext == null)
             throw new IllegalArgumentException("The query context must not be null");
 
-        var transformer = new QueryContextFunctionTransformer(queryContext, coreSingletons, functionSymbolPredicate);
+        var transformer = new QueryContextFunctionTransformer(queryContext);
 
         var initialTree = iq.getTree();
-        var newTree = initialTree.acceptTransformer(transformer);
+        var newTree = transformer.transform(initialTree);
         return newTree.equals(initialTree)
                 ? iq
                 : coreSingletons.getIQFactory().createIQ(iq.getProjectionAtom(), newTree);
     }
 
 
-    protected static class QueryContextFunctionTransformer extends AbstractExpressionTransformer {
+    protected class QueryContextFunctionTransformer extends AbstractExpressionTransformer {
 
         private final QueryContext queryContext;
-        private final Predicate<FunctionSymbol> functionSymbolPredicate;
 
-        protected QueryContextFunctionTransformer(QueryContext queryContext, CoreSingletons coreSingletons,
-                                                  Predicate<FunctionSymbol> functionSymbolPredicate) {
+        protected QueryContextFunctionTransformer(QueryContext queryContext) {
             super(coreSingletons);
             this.queryContext = queryContext;
-            this.functionSymbolPredicate = functionSymbolPredicate;
         }
 
         @Override

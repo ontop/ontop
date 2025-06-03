@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -180,7 +181,7 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
 
     @Override
     public final IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        IQTree newLeftChild = leftChild.acceptTransformer(this);
+        IQTree newLeftChild = transform(leftChild);
         IQTree newRightChild = transformChildWithNewTransformer(rightChild);
         return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild) && rootNode.equals(tree.getRootNode())
                 ? tree
@@ -200,9 +201,10 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
     }
 
     private IQTree transformChildWithNewTransformer(IQTree child) {
-        return child.acceptTransformer(
-                new SecondPhaseQueryMergingTransformer(child.getPossibleVariableDefinitions(),
-                        mapping, variableGenerator, constraintMap, coreSingletons));
+        IQTreeVisitingTransformer transformer = new SecondPhaseQueryMergingTransformer(
+                child.getPossibleVariableDefinitions(),
+                mapping, variableGenerator, constraintMap, coreSingletons);
+        return transformer.transform(child);
     }
 
     @Override

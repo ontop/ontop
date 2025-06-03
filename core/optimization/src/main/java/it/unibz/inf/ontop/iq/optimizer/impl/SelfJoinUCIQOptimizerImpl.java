@@ -74,7 +74,7 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             // Recursive
             ImmutableList<IQTree> liftedChildren = NaryIQTreeTools.transformChildren(children,
-                    t -> t.acceptTransformer(this));
+                    this::transform);
 
             return simplifier.transformInnerJoin(rootNode, liftedChildren, tree.getVariables(), variableGenerator)
                     .orElseGet(() -> children.equals(liftedChildren)

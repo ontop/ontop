@@ -35,7 +35,7 @@ public class BasicFlattenLifter implements FlattenLifter {
         TreeTransformer treeTransformer = new TreeTransformer(query.getTree());
         return iqFactory.createIQ(
                 query.getProjectionAtom(),
-                query.getTree().acceptTransformer(treeTransformer));
+                treeTransformer.transform(query.getTree()));
     }
 
     private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {

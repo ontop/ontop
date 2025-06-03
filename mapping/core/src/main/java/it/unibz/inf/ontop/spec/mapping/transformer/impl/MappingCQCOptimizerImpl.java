@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -43,9 +44,8 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
         IQTree tree = query.getTree();
         var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
 
-        return iqFactory.createIQ(
-                query.getProjectionAtom(),
-                tree.acceptTransformer(new Transformer(construction.getNode().getSubstitution().getRangeVariables(), cqContainmentCheck)));
+        IQTreeVisitingTransformer transformer = new Transformer(construction.getNode().getSubstitution().getRangeVariables(), cqContainmentCheck);
+        return iqFactory.createIQ(query.getProjectionAtom(), transformer.transform(tree));
     }
 
     protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

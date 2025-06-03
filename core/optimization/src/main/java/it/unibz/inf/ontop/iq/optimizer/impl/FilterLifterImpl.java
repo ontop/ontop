@@ -32,9 +32,7 @@ public class FilterLifterImpl implements FilterLifter {
     @Override
     public IQ optimize(IQ query) {
         TreeTransformer treeTransformer = new TreeTransformer();
-        return iqFactory.createIQ(
-                query.getProjectionAtom(),
-                query.getTree().acceptTransformer(treeTransformer));
+        return iqFactory.createIQ(query.getProjectionAtom(), treeTransformer.transform(query.getTree()));
     }
 
     private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {

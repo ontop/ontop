@@ -23,7 +23,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
 
     protected IQTree optimize(IQTree tree) {
         AbstractQueryMergingTransformer transformer = createTransformer(tree.getKnownVariables());
-        return tree.acceptTransformer(transformer);
+        return transformer.transform(tree);
     }
 
     protected abstract AbstractQueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables);

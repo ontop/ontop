@@ -63,7 +63,7 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> initialChildren) {
             ImmutableList<IQTree> liftedChildren = NaryIQTreeTools.transformChildren(initialChildren,
-                    t -> t.acceptTransformer(this));
+                    this::transform);
 
             ImmutableMap<Boolean, ImmutableList<IQTree>> childPartitions = liftedChildren.stream()
                     .collect(ImmutableCollectors.partitioningBy(n -> (n instanceof ExtensionalDataNode)));

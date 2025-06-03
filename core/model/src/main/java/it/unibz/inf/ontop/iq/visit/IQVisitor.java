@@ -34,4 +34,8 @@ public interface IQVisitor<T> {
 
     T transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children);
     T transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children);
+
+    default T transform(IQTree tree) {
+        return tree.acceptVisitor(this);
+    }
 }

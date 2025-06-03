@@ -102,7 +102,7 @@ public class UnionFlattenerImpl implements UnionFlattener {
         IQTree prev;
         do {
             prev = tree;
-            tree = tree.acceptTransformer(treeTransformer);
+            tree = treeTransformer.transform(tree);
         } while (!prev.equals(tree));
         return prev;
     }
