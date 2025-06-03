@@ -48,36 +48,17 @@ public class BooleanExpressionPusher extends AbstractIQVisitor<Optional<IQTree>>
 
     @Override
     public Optional<IQTree> transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-        Substitution<ImmutableTerm> substitution = rootNode.getSubstitution();
-
-        ImmutableExpression newExpression = substitution.apply(expressionToPushDown);
-
+        ImmutableExpression newExpression = rootNode.getSubstitution().apply(expressionToPushDown);
         BooleanExpressionPusher newPusher = new BooleanExpressionPusher(newExpression, coreSingletons);
-        IQTree newChild = newPusher.transformChild(child)
-                .orElseGet(() ->  wrapInFilter(newExpression, child));
-
-        return Optional.of(iqFactory.createUnaryIQTree(rootNode, newChild));
-    }
-
-    private UnaryIQTree wrapInFilter(ImmutableExpression expression, IQTree child) {
-        return iqFactory.createUnaryIQTree(iqFactory.createFilterNode(expression), child);
+        return newPusher.visitPassingUnaryNode(rootNode, child);
     }
 
     @Override
     public Optional<IQTree> transformAggregation(UnaryIQTree tree, AggregationNode aggregationNode, IQTree child) {
-        ImmutableSet<Variable> expressionVariables = expressionToPushDown.getVariableStream()
-                .collect(ImmutableCollectors.toSet());
-
-        return (aggregationNode.getGroupingVariables().containsAll(expressionVariables))
+        ImmutableSet<Variable> expressionVariables = getExpressionVariables();
+        return aggregationNode.getGroupingVariables().containsAll(expressionVariables)
                 ? visitPassingUnaryNode(aggregationNode, child)
                 : Optional.empty();
-    }
-
-    protected Optional<IQTree> visitPassingUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
-        IQTree newChild = transformChild(child)
-                .orElseGet(() ->  wrapInFilter(expressionToPushDown, child));
-
-        return Optional.of(iqFactory.createUnaryIQTree(rootNode, newChild));
     }
 
     /**
@@ -111,17 +92,22 @@ public class BooleanExpressionPusher extends AbstractIQVisitor<Optional<IQTree>>
         return visitPassingUnaryNode(rootNode, child);
     }
 
-    /**
-     * The slice blocks
-     */
     @Override
     public Optional<IQTree> transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
+        // blocks
         return Optional.empty();
     }
 
     @Override
     public Optional<IQTree> transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
         return visitPassingUnaryNode(rootNode, child);
+    }
+
+    protected Optional<IQTree> visitPassingUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
+        IQTree newChild = transformChild(child)
+                .orElseGet(() ->  wrapInFilter(expressionToPushDown, child));
+
+        return Optional.of(iqFactory.createUnaryIQTree(rootNode, newChild));
     }
 
     /**
@@ -131,9 +117,7 @@ public class BooleanExpressionPusher extends AbstractIQVisitor<Optional<IQTree>>
      */
     @Override
     public Optional<IQTree> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        ImmutableSet<Variable> expressionVariables = expressionToPushDown.getVariableStream()
-                .collect(ImmutableCollectors.toSet());
-
+        ImmutableSet<Variable> expressionVariables = getExpressionVariables();
         if (leftChild.getVariables().containsAll(expressionVariables)) {
             Optional<IQTree> newLeftChild = transformChild(leftChild);
             return newLeftChild
@@ -145,8 +129,7 @@ public class BooleanExpressionPusher extends AbstractIQVisitor<Optional<IQTree>>
 
     @Override
     public Optional<IQTree> transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableSet<Variable> expressionVariables = expressionToPushDown.getVariableStream()
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> expressionVariables = getExpressionVariables();
 
         ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
                 c -> c.getVariables().containsAll(expressionVariables)
@@ -168,6 +151,14 @@ public class BooleanExpressionPusher extends AbstractIQVisitor<Optional<IQTree>>
                         .orElseGet(() -> wrapInFilter(expressionToPushDown, c)));
 
         return Optional.of(iqFactory.createNaryIQTree(rootNode, newChildren));
+    }
+
+    private UnaryIQTree wrapInFilter(ImmutableExpression expression, IQTree child) {
+        return iqFactory.createUnaryIQTree(iqFactory.createFilterNode(expression), child);
+    }
+
+    private ImmutableSet<Variable> getExpressionVariables() {
+        return expressionToPushDown.getVariableStream().collect(ImmutableCollectors.toSet());
     }
 
     @Override

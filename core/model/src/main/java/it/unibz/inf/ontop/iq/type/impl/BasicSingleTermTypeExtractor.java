@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.iq.visit.impl.AbstractIQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -39,7 +38,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
     }
 
     private Optional<TermType> extractTypeFromVariable(Variable variable, IQTree subTree) {
-        return subTree.acceptVisitor(new TermTypeVariableVisitor(variable, this));
+        return subTree.acceptVisitor(new TermTypeVariableVisitor(variable));
     }
 
     private Optional<TermType> extractType(NonVariableTerm nonVariableTerm, IQTree subTree) {
@@ -59,7 +58,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) nonVariableTerm;
         ImmutableList<? extends ImmutableTerm> terms = functionalTerm.getTerms();
 
-        ImmutableList<? extends ImmutableTerm> newTerms = functionalTerm.getTerms().stream()
+        ImmutableList<ImmutableTerm> newTerms = functionalTerm.getTerms().stream()
                 .map(t -> extractSingleTermType(t, subTree)
                         .filter(tp -> tp instanceof DBTermType)
                         // Casts it to its own type as a way to convey the type
@@ -75,14 +74,12 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
     }
 
 
-    protected static class TermTypeVariableVisitor extends AbstractIQVisitor<Optional<TermType>> {
+    private class TermTypeVariableVisitor extends AbstractIQVisitor<Optional<TermType>> {
 
-        protected final Variable variable;
-        protected final SingleTermTypeExtractor typeExtractor;
+        private final Variable variable;
 
-        protected TermTypeVariableVisitor(Variable variable, SingleTermTypeExtractor typeExtractor) {
+        private TermTypeVariableVisitor(Variable variable) {
             this.variable = variable;
-            this.typeExtractor = typeExtractor;
         }
 
         @Override
@@ -131,16 +128,12 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
 
         @Override
         public Optional<TermType> transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-            return visitExtendedProjection(rootNode, child);
+            return extractSingleTermType(rootNode.getSubstitution().apply(variable), child);
         }
 
         @Override
         public Optional<TermType> transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
-            return visitExtendedProjection(rootNode, child);
-        }
-
-        protected Optional<TermType> visitExtendedProjection(ExtendedProjectionNode rootNode, IQTree child) {
-            return typeExtractor.extractSingleTermType(rootNode.getSubstitution().apply(variable), child);
+            return extractSingleTermType(rootNode.getSubstitution().apply(variable), child);
         }
 
         @Override
