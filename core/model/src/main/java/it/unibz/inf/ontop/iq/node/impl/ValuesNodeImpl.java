@@ -268,7 +268,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                                 Sets.difference(valuesNode.getVariables(), descendingSubstitution.getDomain()).immutableCopy()))
                         .append(iqFactory.createFilterNode(filterCondition));
 
-                valuesNode = valuesNode.applyFreshRenaming(renaming);
+            valuesNode = valuesNode.applyFreshRenaming(renaming);
         }
         else {
             iqTreeBuilder = iqTreeTools.unaryIQTreeBuilder();
@@ -467,8 +467,8 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
         ValuesNode newValueNode = iqFactory.createValuesNode(newProjectedVariables, newValues);
 
-        ConstructionNode constructionNode = iqFactory.createConstructionNode(
-                projectedVariables,
+        ConstructionNode constructionNode = iqTreeTools.createExtendingConstructionNode(
+                newProjectedVariables,
                 substitutionFactory.getSubstitution(variableToReplace,
                         termFactory.getImmutableFunctionalTerm(functionSymbol, newVariables)));
 

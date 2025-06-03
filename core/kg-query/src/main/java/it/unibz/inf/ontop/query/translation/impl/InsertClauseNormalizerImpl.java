@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -37,17 +38,19 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
     private final FunctionSymbolFactory functionSymbolFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     protected InsertClauseNormalizerImpl(CoreUtilsFactory coreUtilsFactory, IntermediateQueryFactory iqFactory,
                                          SubstitutionFactory substitutionFactory,
                                          TermFactory termFactory,
-                                         FunctionSymbolFactory functionSymbolFactory) {
+                                         FunctionSymbolFactory functionSymbolFactory, IQTreeTools iqTreeTools) {
         this.coreUtilsFactory = coreUtilsFactory;
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.functionSymbolFactory = functionSymbolFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -88,11 +91,8 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
         Substitution<ImmutableTerm> substitution = bNodeMap.entrySet().stream()
                 .collect(substitutionFactory.toSubstitution(Map.Entry::getValue, e -> term));
 
-        ImmutableSet<Variable> newProjectedVariables = Sets.union(whereTree.getKnownVariables(), ImmutableSet.copyOf(bNodeMap.values()))
-                .immutableCopy();
-
         return new ResultImpl(bNodeMap,
-                iqFactory.createConstructionNode(newProjectedVariables, substitution));
+                iqTreeTools.createExtendingConstructionNode(whereTree.getKnownVariables(), substitution));
     }
 
     private ImmutableTerm createBNodeDefinitionsFromNonNullableUniqueConstraint(ImmutableSet<Variable> uniqueConstraint) {

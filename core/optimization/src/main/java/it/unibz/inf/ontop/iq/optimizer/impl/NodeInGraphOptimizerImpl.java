@@ -285,8 +285,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                     .collect(substitutionFactory.toSubstitution(v -> commonTerm));
 
             return iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(Sets.union(intensionalVariables, treeVariables).immutableCopy(),
-                            newSubstitution),
+                    iqTreeTools.createExtendingConstructionNode(intensionalVariables, newSubstitution),
                     pushedIntensionalNode);
         }
     }
