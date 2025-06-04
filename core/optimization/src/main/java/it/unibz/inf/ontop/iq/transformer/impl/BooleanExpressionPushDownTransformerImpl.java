@@ -214,7 +214,7 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
 
         private Optional<IQTree> visitPassingUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
             IQTree newChild = transformChild(child)
-                    .orElseGet(() ->  wrapInFilter(expressionToPushDown, child));
+                    .orElseGet(() -> wrapInFilter(expressionToPushDown, child));
 
             return Optional.of(iqFactory.createUnaryIQTree(rootNode, newChild));
         }
@@ -226,8 +226,7 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
          */
         @Override
         public Optional<IQTree> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            ImmutableSet<Variable> expressionVariables = expressionToPushDown.getVariables();
-            if (leftChild.getVariables().containsAll(expressionVariables)) {
+            if (leftChild.getVariables().containsAll(expressionToPushDown.getVariables())) {
                 Optional<IQTree> newLeftChild = transformChild(leftChild);
                 return newLeftChild
                         .map(l -> iqFactory.createBinaryNonCommutativeIQTree(rootNode, l, rightChild));

@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
  *  (ii) recursively applies itself on the children, and
  *  (iii) applies a list of post-transformers to the current tree.
  *
+ *  Used only once, in ExplicitEqualityTransformerImpl
  */
 public final class CompositeIQTreeTransformer implements IQTreeTransformer {
 

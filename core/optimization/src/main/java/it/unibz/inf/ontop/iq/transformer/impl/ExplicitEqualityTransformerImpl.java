@@ -36,7 +36,6 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 
-
 public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransformer {
 
     private final IntermediateQueryFactory iqFactory;
@@ -82,12 +81,12 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
      *
      * - inner join: identical to left join, except that renaming is performed in each branch but the first where the variable appears.
      *
-     * - data node or: if the data atom contains a ground term or a duplicate variable,
+     * - data node: if the data atom contains a ground term or a duplicate variable,
      * create a variable and make the equality explicit by creating a filter.
      *
      * If needed, create a root projection to ensure that the transformed query has the same signature as the input one.
      */
-    class LocalExplicitEqualityEnforcer extends DefaultNonRecursiveIQTreeTransformer {
+    private class LocalExplicitEqualityEnforcer extends DefaultNonRecursiveIQTreeTransformer {
 
         @Override
         public IQTree transformIntensionalData(IntensionalDataNode dn) {
@@ -150,10 +149,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
             return iqFactory.createUnaryIQTree(
                         iqFactory.createConstructionNode(tree.getVariables()),
-                        iqTreeTools.createLeftJoinTree(
-                                updatedJoinCondition,
-                                updatedChildren.get(0),
-                                updatedChildren.get(1)));
+                        iqTreeTools.createLeftJoinTree(updatedJoinCondition, updatedChildren.get(0), updatedChildren.get(1)));
         }
 
         private ImmutableList<InjectiveSubstitution<Variable>> computeSubstitutions(ImmutableList<IQTree> children) {
@@ -177,22 +173,19 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         private boolean isFirstOcc(Variable variable, ImmutableList<IQTree> children, IQTree tree) {
-            return children.stream()
+            return tree == children.stream()
                     .filter(t -> t.getVariables().contains(variable))
                     .findFirst()
-                    .orElseThrow(() -> new MinorOntopInternalBugException("Should be present"))
-                    == tree;
+                    .orElseThrow(() -> new MinorOntopInternalBugException("Should be present"));
         }
 
         private Optional<ImmutableExpression> updateJoinCondition(JoinOrFilterNode node, ImmutableList<InjectiveSubstitution<Variable>> substitutions) {
-            Optional<ImmutableExpression> optionalFilterCondition = node.getOptionalFilterCondition();
             Stream<ImmutableExpression> varEqualities = substitutions.stream()
                     .map(Substitution::builder)
                     .flatMap(b -> b.toStream(termFactory::getStrictEquality));
             
-            return termFactory.getConjunction(optionalFilterCondition, varEqualities);
+            return termFactory.getConjunction(node.getOptionalFilterCondition(), varEqualities);
         }
-
 
         private <T extends VariableOrGroundTerm> ArgumentSubstitution<VariableOrGroundTerm> getArgumentReplacement(Stream<Map.Entry<Integer, T>> argumentStream) {
             Set<Variable> vars = new HashSet<>(); // mutable
@@ -229,8 +222,10 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
      * - if n is a join or filter: merge the boolean expressions
      * - if n is a left join: merge boolean expressions coming from the right, and lift the ones coming from the left.
      * This lift is only performed for optimization purposes: may save a subquery during SQL generation.
+     *
+     * TODO: compare with FilterLifterImpl
      */
-    class FilterChildNormalizer extends DefaultNonRecursiveIQTreeTransformer {
+    private class FilterChildNormalizer extends DefaultNonRecursiveIQTreeTransformer {
 
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
@@ -315,7 +310,6 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             var newChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
             return iqFactory.createNaryIQTree(rootNode, newChildren);
         }
-
     }
 
     /**
