@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.iq.node.*;
 public abstract class DefaultNonRecursiveIQTreeTransformer extends DefaultIQTreeVisitingTransformer {
 
     @Override
-    protected IQTree transformLeaf(LeafIQTree leaf){
+    protected IQTree transformLeaf(LeafIQTree leaf) {
         return leaf;
     }
 

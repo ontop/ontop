@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.AbstractIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.iq.type.impl.AbstractExpressionTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -39,7 +39,7 @@ public class AvoidEqualsBoolNormalizer implements DialectExtraNormalizer {
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
 
-        IQTreeVisitingTransformer transformer = new AbstractExpressionTransformer(coreSingletons) {
+        AbstractIQTreeVisitingTransformer transformer = new AbstractExpressionTransformer(coreSingletons) {
             @Override
             protected boolean isFunctionSymbolToReplace(FunctionSymbol functionSymbol) {
                 return (functionSymbol instanceof AbstractDBNonStrictEqOperator) || (functionSymbol instanceof DefaultDBStrictEqFunctionSymbol);

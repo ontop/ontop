@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.AbstractIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedBinaryMathOperationTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
@@ -20,7 +20,7 @@ import java.util.Optional;
 
 public class NotYetTypedBinaryMathOperationTransformerImpl implements NotYetTypedBinaryMathOperationTransformer {
 
-    private final IQTreeVisitingTransformer expressionTransformer;
+    private final AbstractIQTreeVisitingTransformer expressionTransformer;
 
     @Inject
     protected NotYetTypedBinaryMathOperationTransformerImpl(IntermediateQueryFactory iqFactory,

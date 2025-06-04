@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.AbstractIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -55,7 +55,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
      * {@code ---> } Not called for trees not having any variable to remove.
      *
      */
-    private class VariableRemoverTransformer extends IQTreeVisitingTransformer {
+    private class VariableRemoverTransformer extends AbstractIQTreeVisitingTransformer {
         protected final ImmutableSet<Variable> variablesToRemove;
         protected final VariableGenerator variableGenerator;
 

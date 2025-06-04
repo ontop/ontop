@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.AbstractIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractExpressionTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -27,7 +27,7 @@ for dialects such as Denodo that do not allow IS [NOT] NULL to be executed on co
 public class SplitIsNullOverConjunctionDisjunctionNormalizer extends DefaultRecursiveIQTreeVisitingTransformer
         implements DialectExtraNormalizer {
 
-    private final IQTreeVisitingTransformer expressionTransformer;
+    private final AbstractIQTreeVisitingTransformer expressionTransformer;
 
     @Inject
     protected SplitIsNullOverConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {

@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq;
 
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 
 /**

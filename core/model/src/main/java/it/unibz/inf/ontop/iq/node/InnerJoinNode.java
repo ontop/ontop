@@ -1,16 +1,9 @@
 package it.unibz.inf.ontop.iq.node;
 
-import java.util.Optional;
-
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
 /**
  * See IntermediateQueryFactory for creating a new instance.
