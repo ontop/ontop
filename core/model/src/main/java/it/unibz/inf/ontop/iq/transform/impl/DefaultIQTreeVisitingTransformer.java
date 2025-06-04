@@ -15,12 +15,7 @@ import it.unibz.inf.ontop.iq.transform.AbstractIQTreeVisitingTransformer;
  * To be extended by overriding the methods of interest.
  */
 
-public abstract class DefaultIQTreeVisitingTransformer extends AbstractIQTreeVisitingTransformer implements IQTreeTransformer {
-
-    @Override
-    public IQTree transform(IQTree tree) {
-        return tree.acceptVisitor(this);
-    }
+public abstract class DefaultIQTreeVisitingTransformer extends AbstractIQTreeVisitingTransformer {
 
     @Override
     public IQTree transformIntensionalData(IntensionalDataNode node) {

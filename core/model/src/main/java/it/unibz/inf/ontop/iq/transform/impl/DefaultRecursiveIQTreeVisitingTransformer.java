@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 
 /**
  * Method transformLeaf simply returns the tree unchanged.
@@ -15,12 +16,17 @@ import it.unibz.inf.ontop.iq.node.*;
  *
  * To be extended by overloading the methods of interest.
  */
-public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultIQTreeVisitingTransformer {
+public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultIQTreeVisitingTransformer implements IQTreeTransformer {
 
     protected final IntermediateQueryFactory iqFactory;
 
     protected DefaultRecursiveIQTreeVisitingTransformer(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
+    }
+
+    @Override
+    public IQTree transform(IQTree tree) {
+        return tree.acceptVisitor(this);
     }
 
     protected boolean treesEqual(IQTree tree1, IQTree tree2) {

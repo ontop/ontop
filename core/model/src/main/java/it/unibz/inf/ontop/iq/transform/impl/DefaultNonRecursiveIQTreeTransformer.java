@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.transform.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 
 /**
  * Methods transformLeaf, transformUnaryNode, transformNaryCommutativeNode
@@ -10,7 +11,14 @@ import it.unibz.inf.ontop.iq.node.*;
  *
  * To be extended by overriding the methods of interest.
  */
-public abstract class DefaultNonRecursiveIQTreeTransformer extends DefaultIQTreeVisitingTransformer {
+public abstract class DefaultNonRecursiveIQTreeTransformer extends DefaultIQTreeVisitingTransformer implements IQTreeTransformer {
+
+
+    @Override
+    public IQTree transform(IQTree tree) {
+        return tree.acceptVisitor(this);
+    }
+
 
     @Override
     protected IQTree transformLeaf(LeafIQTree leaf) {
