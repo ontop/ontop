@@ -23,12 +23,12 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    protected SelfJoinSameTermIQOptimizerImpl(CoreSingletons coreSingletons, IntermediateQueryFactory iqFactory,
+    protected SelfJoinSameTermIQOptimizerImpl(CoreSingletons coreSingletons,
                                               RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
-        this.iqFactory = iqFactory;
+        this.iqFactory = coreSingletons.getIQFactory();
         this.lookForDistinctTransformer = new LookForDistinctOrLimit1TransformerImpl(
                 t -> new IQTreeTransformerAdapter(new SameTermSelfJoinTransformer(t, coreSingletons, requiredExtensionalDataNodeExtractor)),
-                coreSingletons);
+                coreSingletons.getIQFactory());
     }
 
     @Override

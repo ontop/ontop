@@ -35,7 +35,7 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         this.lookForDistinctTransformer = new LookForDistinctOrLimit1TransformerImpl(
                 p -> new IQTreeTransformerAdapter(new JoinWithClassUnionTransformer(p)),
-                coreSingletons);
+                coreSingletons.getIQFactory());
     }
 
     @Override

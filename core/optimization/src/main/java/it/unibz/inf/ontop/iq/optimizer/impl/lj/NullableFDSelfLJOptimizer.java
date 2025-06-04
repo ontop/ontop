@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerImpl;
+import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerImpl2;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
@@ -49,6 +50,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
     private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
     private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
+    private final DBConstant provenanceConstant;
 
     @Inject
     protected NullableFDSelfLJOptimizer(RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
@@ -60,22 +62,19 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
         this.variableNullabilityTools = variableNullabilityTools;
         this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
+        this.provenanceConstant = coreSingletons.getTermFactory().getProvenanceSpecialConstant();
     }
 
     @Override
     public IQ optimize(IQ query) {
         IQTree initialTree = query.getTree();
 
-        IQVisitor<IQTree> transformer = new LookForDistinctOrLimit1TransformerImpl(
+        IQVisitor<IQTree> transformer = new LookForDistinctOrLimit1TransformerImpl2(
                 (childTree, parentTransformer) -> new IQTreeTransformerAdapter(new CardinalityInsensitiveTransformer(
                         parentTransformer,
                         childTree::getVariableNullability,
-                        query.getVariableGenerator(),
-                        requiredDataNodeExtractor,
-                        rightProvenanceNormalizer,
-                        variableNullabilityTools,
-                        coreSingletons)),
-                coreSingletons);
+                        query.getVariableGenerator())),
+                iqFactory);
 
         IQTree newTree = initialTree.acceptVisitor(transformer);
 
@@ -84,23 +83,19 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree);
     }
 
-    protected static class CardinalityInsensitiveTransformer extends AbstractLJTransformer {
+    protected class CardinalityInsensitiveTransformer extends AbstractLJTransformer {
 
         private final IQTreeTransformer lookForDistinctTransformer;
-        private final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
-        private final DBConstant provenanceConstant;
 
         protected CardinalityInsensitiveTransformer(IQTreeTransformer lookForDistinctTransformer,
                                                     Supplier<VariableNullability> variableNullabilitySupplier,
-                                                    VariableGenerator variableGenerator, RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
-                                                    RightProvenanceNormalizer rightProvenanceNormalizer,
-                                                    JoinOrFilterVariableNullabilityTools variableNullabilityTools,
-                                                    CoreSingletons coreSingletons) {
-            super(variableNullabilitySupplier, variableGenerator, rightProvenanceNormalizer,
-                    variableNullabilityTools, coreSingletons);
+                                                    VariableGenerator variableGenerator) {
+            super(variableNullabilitySupplier,
+                    variableGenerator,
+                    NullableFDSelfLJOptimizer.this.rightProvenanceNormalizer,
+                    NullableFDSelfLJOptimizer.this.variableNullabilityTools,
+                    NullableFDSelfLJOptimizer.this.coreSingletons);
             this.lookForDistinctTransformer = lookForDistinctTransformer;
-            this.requiredDataNodeExtractor = requiredDataNodeExtractor;
-            this.provenanceConstant = this.termFactory.getProvenanceSpecialConstant();
         }
 
         @Override
@@ -301,8 +296,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
         protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition,
                                                   ImmutableSet<Variable> leftVariables) {
             var newTransformer = new CardinalityInsensitiveTransformer(lookForDistinctTransformer,
-                    rightChild::getVariableNullability, variableGenerator, requiredDataNodeExtractor,
-                    rightProvenanceNormalizer, variableNullabilityTools, coreSingletons);
+                    rightChild::getVariableNullability, variableGenerator);
             return rightChild.acceptVisitor(newTransformer);
         }
     }
