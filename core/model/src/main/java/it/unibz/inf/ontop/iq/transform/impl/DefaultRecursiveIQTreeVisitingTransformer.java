@@ -16,17 +16,12 @@ import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
  *
  * To be extended by overloading the methods of interest.
  */
-public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultIQTreeVisitingTransformer implements IQTreeTransformer {
+public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultIQTreeVisitingTransformer {
 
     protected final IntermediateQueryFactory iqFactory;
 
     protected DefaultRecursiveIQTreeVisitingTransformer(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
-    }
-
-    @Override
-    public IQTree transform(IQTree tree) {
-        return tree.acceptVisitor(this);
     }
 
     protected boolean treesEqual(IQTree tree1, IQTree tree2) {

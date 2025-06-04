@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.node.SliceNode;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
 
 import javax.annotation.Nullable;
 
@@ -24,7 +25,7 @@ public class LookForDistinctOrLimit1TransformerImpl extends DefaultRecursiveIQTr
     public LookForDistinctOrLimit1TransformerImpl(CardinalityFreeTransformerConstructor1 transformerConstructor,
                                                   CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory());
-        this.subTransformer = transformerConstructor.create(this);
+        this.subTransformer = transformerConstructor.create(new IQTreeTransformerAdapter(this));
         this.transformerConstructor3 = null;
     }
 
@@ -37,7 +38,7 @@ public class LookForDistinctOrLimit1TransformerImpl extends DefaultRecursiveIQTr
 
     private IQTreeTransformer getSubTransformer(IQTree child) {
         return subTransformer == null
-                ? transformerConstructor3.create(child, this)
+                ? transformerConstructor3.create(child, new IQTreeTransformerAdapter(this))
                 : subTransformer;
     }
 

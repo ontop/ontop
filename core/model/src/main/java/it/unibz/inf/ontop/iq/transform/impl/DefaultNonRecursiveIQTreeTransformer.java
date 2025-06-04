@@ -11,14 +11,7 @@ import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
  *
  * To be extended by overriding the methods of interest.
  */
-public abstract class DefaultNonRecursiveIQTreeTransformer extends DefaultIQTreeVisitingTransformer implements IQTreeTransformer {
-
-
-    @Override
-    public IQTree transform(IQTree tree) {
-        return tree.acceptVisitor(this);
-    }
-
+public abstract class DefaultNonRecursiveIQTreeTransformer extends DefaultIQTreeVisitingTransformer {
 
     @Override
     protected IQTree transformLeaf(LeafIQTree leaf) {

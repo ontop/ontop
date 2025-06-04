@@ -14,8 +14,9 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerImpl;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
-import it.unibz.inf.ontop.iq.transform.AbstractIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 
@@ -38,11 +39,11 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
     public IQ optimize(IQ query) {
         IQTree initialTree = query.getTree();
 
-        AbstractIQTreeVisitingTransformer transformer = new LookForDistinctOrLimit1TransformerImpl(
-                (childTree, parentTransformer) -> new CardinalityInsensitiveLJPruningTransformer(
+        IQVisitor<IQTree> transformer = new LookForDistinctOrLimit1TransformerImpl(
+                (childTree, parentTransformer) -> new IQTreeTransformerAdapter(new CardinalityInsensitiveLJPruningTransformer(
                         parentTransformer,
                         coreSingletons,
-                        childTree.getVariables()),
+                        childTree.getVariables())),
                 coreSingletons);
 
         IQTree newTree = initialTree.acceptVisitor(transformer);

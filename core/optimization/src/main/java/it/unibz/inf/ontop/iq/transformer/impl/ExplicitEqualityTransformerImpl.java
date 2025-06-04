@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.CompositeIQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -59,8 +60,11 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         this.variableGenerator = variableGenerator;
         this.substitutionFactory = substitutionFactory;
         this.iqTreeTools = iqTreeTools;
-        ImmutableList<IQTreeTransformer> preTransformers = ImmutableList.of(new LocalExplicitEqualityEnforcer());
-        ImmutableList<IQTreeTransformer> postTransformers = ImmutableList.of(new CnLifter(), new FilterChildNormalizer());
+        ImmutableList<IQTreeTransformer> preTransformers = ImmutableList.of(
+                new IQTreeTransformerAdapter(new LocalExplicitEqualityEnforcer()));
+        ImmutableList<IQTreeTransformer> postTransformers = ImmutableList.of(
+                new IQTreeTransformerAdapter(new CnLifter()),
+                new IQTreeTransformerAdapter(new FilterChildNormalizer()));
         this.compositeTransformer = new CompositeIQTreeTransformer(preTransformers, postTransformers, iqFactory);
     }
 
@@ -156,12 +160,8 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             if (children.size() < 2) {
                 throw new ExplicitEqualityTransformerInternalException("At least 2 children are expected");
             }
-            ImmutableSet<Variable> repeatedVariables = children.stream()
-                    .flatMap(t -> t.getVariables().stream())
-                    .collect(ImmutableCollectors.toMultiset()).entrySet().stream()
-                    .filter(e -> e.getCount() > 1)
-                    .map(Multiset.Entry::getElement)
-                    .collect(ImmutableCollectors.toSet());
+            ImmutableSet<Variable> repeatedVariables = NaryIQTreeTools.coOccurringVariablesStream(children)
+                    .collect(ImmutableSet.toImmutableSet());
 
             return children.stream()
                     .map(t -> Sets.intersection(t.getVariables(), repeatedVariables).stream()

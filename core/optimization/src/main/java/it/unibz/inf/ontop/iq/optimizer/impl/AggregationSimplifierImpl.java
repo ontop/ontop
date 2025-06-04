@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.optimizer.AggregationSimplifier;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transformer.impl.RDFTypeDependentSimplifyingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -50,7 +51,7 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
     }
 
     protected IQTreeTransformer createTransformer(VariableGenerator variableGenerator) {
-        return new AggregationSimplifyingTransformer(variableGenerator, optimizationSingletons);
+        return new IQTreeTransformerAdapter(new AggregationSimplifyingTransformer(variableGenerator, optimizationSingletons));
     }
 
     /**

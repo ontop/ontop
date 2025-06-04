@@ -10,6 +10,8 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.BelowDistinctJoinWithClassUnionOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -20,7 +22,7 @@ import java.util.stream.Stream;
 
 public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistinctJoinWithClassUnionOptimizer {
 
-    private final IQTreeTransformer lookForDistinctTransformer;
+    private final IQVisitor<IQTree> lookForDistinctTransformer;
     private final IntermediateQueryFactory iqFactory;
     private final CoreSingletons coreSingletons;
     private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
@@ -32,14 +34,14 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
         this.iqFactory = coreSingletons.getIQFactory();
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         this.lookForDistinctTransformer = new LookForDistinctOrLimit1TransformerImpl(
-                JoinWithClassUnionTransformer::new,
+                p -> new IQTreeTransformerAdapter(new JoinWithClassUnionTransformer(p)),
                 coreSingletons);
     }
 
     @Override
     public IQ optimize(IQ query) {
         IQTree initialTree = query.getTree();
-        IQTree newTree = lookForDistinctTransformer.transform(initialTree);
+        IQTree newTree = initialTree.acceptVisitor(lookForDistinctTransformer);
         return (newTree.equals(initialTree))
                 ? query
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree)

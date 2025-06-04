@@ -3,8 +3,7 @@ package it.unibz.inf.ontop.iq.transform.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
-import it.unibz.inf.ontop.iq.transform.AbstractIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.AbstractIQVisitor;
 
 
 /**
@@ -15,7 +14,12 @@ import it.unibz.inf.ontop.iq.transform.AbstractIQTreeVisitingTransformer;
  * To be extended by overriding the methods of interest.
  */
 
-public abstract class DefaultIQTreeVisitingTransformer extends AbstractIQTreeVisitingTransformer {
+public abstract class DefaultIQTreeVisitingTransformer extends AbstractIQVisitor<IQTree> {
+
+    @Override
+    public IQTree transformNative(NativeNode nativeNode) {
+        throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
+    }
 
     @Override
     public IQTree transformIntensionalData(IntensionalDataNode node) {

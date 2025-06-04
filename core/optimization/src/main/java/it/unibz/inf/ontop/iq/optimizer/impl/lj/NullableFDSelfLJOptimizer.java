@@ -19,8 +19,9 @@ import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerImpl;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
-import it.unibz.inf.ontop.iq.transform.AbstractIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -65,15 +66,15 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
     public IQ optimize(IQ query) {
         IQTree initialTree = query.getTree();
 
-        AbstractIQTreeVisitingTransformer transformer = new LookForDistinctOrLimit1TransformerImpl(
-                (childTree, parentTransformer) -> new CardinalityInsensitiveTransformer(
+        IQVisitor<IQTree> transformer = new LookForDistinctOrLimit1TransformerImpl(
+                (childTree, parentTransformer) -> new IQTreeTransformerAdapter(new CardinalityInsensitiveTransformer(
                         parentTransformer,
                         childTree::getVariableNullability,
                         query.getVariableGenerator(),
                         requiredDataNodeExtractor,
                         rightProvenanceNormalizer,
                         variableNullabilityTools,
-                        coreSingletons),
+                        coreSingletons)),
                 coreSingletons);
 
         IQTree newTree = initialTree.acceptVisitor(transformer);

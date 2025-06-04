@@ -4,9 +4,9 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.transform.AbstractIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.type.PartiallyTypedSimpleCastTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
@@ -17,7 +17,7 @@ import java.util.Optional;
 
 public class PartiallyTypedSimpleCastTransformerImpl implements PartiallyTypedSimpleCastTransformer {
 
-    private final AbstractIQTreeVisitingTransformer expressionTransformer;
+    private final IQVisitor<IQTree> expressionTransformer;
 
     @Inject
     protected PartiallyTypedSimpleCastTransformerImpl(IntermediateQueryFactory iqFactory,

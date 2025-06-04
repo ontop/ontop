@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.optimizer.OrderBySimplifier;
 import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transformer.impl.RDFTypeDependentSimplifyingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
@@ -45,7 +46,7 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
     }
 
     protected IQTreeTransformer createTransformer(VariableGenerator variableGenerator) {
-        return new OrderBySimplifyingTransformer(variableGenerator, optimizationSingletons);
+        return new IQTreeTransformerAdapter(new OrderBySimplifyingTransformer(variableGenerator, optimizationSingletons));
     }
 
 

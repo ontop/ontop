@@ -117,6 +117,11 @@ public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQ
                 .filter(rr -> !rr.equals(list));
     }
 
+    @Override
+    public IQTree transform(IQTree tree) {
+        return tree.acceptVisitor(this);
+    }
+
     private static final class PushResult<T> {
         final T result;
         final Optional<ImmutableExpression>  nonPushedExpression;

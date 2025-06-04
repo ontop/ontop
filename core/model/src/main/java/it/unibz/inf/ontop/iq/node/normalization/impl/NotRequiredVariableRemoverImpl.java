@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
-import it.unibz.inf.ontop.iq.transform.AbstractIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.AbstractIQVisitor;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -55,7 +55,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
      * {@code ---> } Not called for trees not having any variable to remove.
      *
      */
-    private class VariableRemoverTransformer extends AbstractIQTreeVisitingTransformer {
+    private class VariableRemoverTransformer extends AbstractIQVisitor<IQTree> {
         protected final ImmutableSet<Variable> variablesToRemove;
         protected final VariableGenerator variableGenerator;
 
@@ -220,6 +220,11 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
             // New removal opportunities may appear in the subtree ("RECURSIVE")
             return unionTree.normalizeForOptimization(variableGenerator);
+        }
+
+        @Override
+        public IQTree transformNative(NativeNode nativeNode) {
+            throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
         }
     }
 }

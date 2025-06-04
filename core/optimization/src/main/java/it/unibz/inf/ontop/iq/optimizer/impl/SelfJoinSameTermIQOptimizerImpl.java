@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.SelfJoinSameTermIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 
 import javax.inject.Inject;
@@ -17,7 +19,7 @@ import java.util.stream.Stream;
 @Singleton
 public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimizer {
 
-    private final IQTreeTransformer lookForDistinctTransformer;
+    private final IQVisitor<IQTree> lookForDistinctTransformer;
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
@@ -25,14 +27,14 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
                                               RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
         this.iqFactory = iqFactory;
         this.lookForDistinctTransformer = new LookForDistinctOrLimit1TransformerImpl(
-                t -> new SameTermSelfJoinTransformer(t, coreSingletons, requiredExtensionalDataNodeExtractor),
+                t -> new IQTreeTransformerAdapter(new SameTermSelfJoinTransformer(t, coreSingletons, requiredExtensionalDataNodeExtractor)),
                 coreSingletons);
     }
 
     @Override
     public IQ optimize(IQ query) {
         IQTree initialTree = query.getTree();
-        IQTree newTree = lookForDistinctTransformer.transform(initialTree);
+        IQTree newTree = initialTree.acceptVisitor(lookForDistinctTransformer);
         return (newTree.equals(initialTree))
                 ? query
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree)

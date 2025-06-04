@@ -169,4 +169,9 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
                                 request.getDefinitionWhenConditionSatisfied())));
         return iqFactory.createUnaryIQTree(constructionNode, tree);
     }
+
+    @Override
+    public IQTree transform(IQTree tree) {
+        return tree.acceptVisitor(this);
+    }
 }
