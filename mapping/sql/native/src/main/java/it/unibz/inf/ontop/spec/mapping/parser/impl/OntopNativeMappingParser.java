@@ -266,25 +266,27 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 
         String currentLabel = ""; // the reader is working on which label
         String line;
-        while ((line = reader.readLine())!= null) {
-            if (line.trim().equals(END_COLLECTION_SYMBOL)) {
+        while ((line = reader.readLine()) != null) {
+            String trimmedLine = line.trim();
+            if (trimmedLine.equals(END_COLLECTION_SYMBOL)) {
                 current.build(parser).ifPresent(mappings::add);
                 return mappings.build();
             }
-            else if (line.isEmpty()) {
+            else if (trimmedLine.isEmpty()) {
                 current.build(parser).ifPresent(mappings::add);
                 current = new MappingBuilder(invalidMappingIndicators, reader::getLineNumber);
             }
             // skip the comment lines (which have ; as their first non-space symbol)
             //      and invalid mappings
-            else if (line.trim().indexOf(COMMENT_SYMBOL) != 0 && current.isValid()) {
+            else if (trimmedLine.indexOf(COMMENT_SYMBOL) != 0 && current.isValid()) {
                 String[] tokens = line.split("[\t| ]+", 2);
-                String value = tokens[tokens.length - 1].trim();
-                if (tokens.length > 1) {
-                    String label = tokens[0].trim();
-                    if (!label.isEmpty())
-                        currentLabel = label;
-                }
+                String label = tokens[0].trim();
+                if (!label.isEmpty())
+                    currentLabel = label;
+
+                String value = (tokens.length > 1)
+                    ? value = tokens[1].trim()
+                    : "";
 
                 switch (currentLabel) {
                     case MAPPING_ID_LABEL:
