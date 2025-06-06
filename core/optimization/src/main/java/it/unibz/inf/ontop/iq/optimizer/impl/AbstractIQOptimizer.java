@@ -22,8 +22,12 @@ public abstract class AbstractIQOptimizer implements IQOptimizer {
 
         return newTree.equals(initialTree)
                 ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree);
+                : postTransform(iqFactory.createIQ(query.getProjectionAtom(), newTree));
     }
 
     protected abstract IQVisitor<IQTree> getTransformer(IQ query);
+
+    protected IQ postTransform(IQ query) {
+        return query;
+    }
 }

@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -17,19 +16,18 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Singleton
-public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimizer {
+public class SelfJoinSameTermIQOptimizerImpl extends AbstractIQOptimizer implements SelfJoinSameTermIQOptimizer {
 
     private final CoreSingletons coreSingletons;
-    private final IntermediateQueryFactory iqFactory;
     private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
     private final IQVisitor<IQTree> lookForDistinctTransformer;
 
     @Inject
     protected SelfJoinSameTermIQOptimizerImpl(CoreSingletons coreSingletons,
                                               RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
+        super(coreSingletons.getIQFactory());
         this.coreSingletons = coreSingletons;
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
-        this.iqFactory = coreSingletons.getIQFactory();
         this.lookForDistinctTransformer = new CaseInsensitiveIQTreeTransformerAdapter(coreSingletons.getIQFactory()) {
             private final IQVisitor<IQTree> transformer = new SameTermSelfJoinTransformer(new IQTreeTransformerAdapter(this));
 
@@ -41,14 +39,15 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        IQTree initialTree = query.getTree();
-        IQTree newTree = initialTree.acceptVisitor(lookForDistinctTransformer);
-        return (newTree.equals(initialTree))
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree)
-                    .normalizeForOptimization();
+    protected IQVisitor<IQTree> getTransformer(IQ query) {
+        return lookForDistinctTransformer;
     }
+
+    @Override
+    protected IQ postTransform(IQ query) {
+        return query.normalizeForOptimization();
+    }
+
 
     /**
      * TODO: explain

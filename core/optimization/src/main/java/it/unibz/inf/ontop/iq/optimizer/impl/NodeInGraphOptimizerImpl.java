@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.NodeInGraphOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -31,31 +32,28 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
  *    - the node is a variable
  *    - all arguments are ground
  */
-public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
+public class NodeInGraphOptimizerImpl extends AbstractIQOptimizer implements NodeInGraphOptimizer {
 
-    private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
     private final IQTreeTools iqTreeTools;
 
     @Inject
     protected NodeInGraphOptimizerImpl(CoreSingletons coreSingletons) {
-        this.iqFactory = coreSingletons.getIQFactory();
+        super(coreSingletons.getIQFactory());
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
+    @Override
+    protected IQVisitor<IQTree> getTransformer(IQ query) {
+        return new Transformer();
+    }
 
     @Override
-    public IQ optimize(IQ query) {
-        var tree = query.getTree();
-        var newTree = tree.acceptVisitor(new Transformer())
-                .normalizeForOptimization(query.getVariableGenerator());
-
-        return newTree.equals(tree)
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree);
+    protected IQ postTransform(IQ query) {
+        return query.normalizeForOptimization();
     }
 
     protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

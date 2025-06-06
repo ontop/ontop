@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -20,18 +19,17 @@ import javax.inject.Inject;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistinctJoinWithClassUnionOptimizer {
+public class BelowDistinctJoinWithClassUnionOptimizerImpl extends AbstractIQOptimizer implements BelowDistinctJoinWithClassUnionOptimizer {
 
     private final IQVisitor<IQTree> lookForDistinctTransformer;
-    private final IntermediateQueryFactory iqFactory;
     private final CoreSingletons coreSingletons;
     private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
 
     @Inject
     protected BelowDistinctJoinWithClassUnionOptimizerImpl(CoreSingletons coreSingletons,
                                                            RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
+        super(coreSingletons.getIQFactory());
         this.coreSingletons = coreSingletons;
-        this.iqFactory = coreSingletons.getIQFactory();
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         this.lookForDistinctTransformer = new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
             private final IQVisitor<IQTree> transformer = new JoinWithClassUnionTransformer(new IQTreeTransformerAdapter(this));
@@ -44,13 +42,13 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        IQTree initialTree = query.getTree();
-        IQTree newTree = initialTree.acceptVisitor(lookForDistinctTransformer);
-        return newTree.equals(initialTree)
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree)
-                .normalizeForOptimization();
+    protected IQVisitor<IQTree> getTransformer(IQ query) {
+        return lookForDistinctTransformer;
+    }
+
+    @Override
+    protected IQ postTransform(IQ query) {
+        return query.normalizeForOptimization();
     }
 
     protected class JoinWithClassUnionTransformer extends AbstractBelowDistinctInnerJoinTransformer {
