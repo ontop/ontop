@@ -18,8 +18,7 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerImpl;
-import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerImpl2;
+import it.unibz.inf.ontop.iq.optimizer.impl.CaseInsensitiveIQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -59,12 +58,16 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
     public IQ optimize(IQ query) {
         IQTree initialTree = query.getTree();
 
-        IQVisitor<IQTree> transformer = new LookForDistinctOrLimit1TransformerImpl2(
-                (childTree, parentTransformer) -> new IQTreeTransformerAdapter(new CardinalityInsensitiveTransformer(
-                        parentTransformer,
-                        childTree::getVariableNullability,
-                        query.getVariableGenerator())),
-                iqFactory);
+        IQVisitor<IQTree> transformer = new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
+            @Override
+            protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
+                IQVisitor<IQTree> transformer = new CardinalityInsensitiveTransformer(
+                        new IQTreeTransformerAdapter(this),
+                        tree::getVariableNullability,
+                        query.getVariableGenerator());
+                return tree.acceptVisitor(transformer);
+            }
+        };
 
         IQTree newTree = initialTree.acceptVisitor(transformer);
 

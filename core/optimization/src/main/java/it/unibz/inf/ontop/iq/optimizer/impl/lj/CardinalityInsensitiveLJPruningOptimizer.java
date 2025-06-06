@@ -12,8 +12,7 @@ import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerImpl;
-import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerImpl2;
+import it.unibz.inf.ontop.iq.optimizer.impl.CaseInsensitiveIQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
@@ -31,12 +30,10 @@ import java.util.Set;
  */
 @Singleton
 public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptimizer {
-    private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
     protected CardinalityInsensitiveLJPruningOptimizer(CoreSingletons coreSingletons) {
-        this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
     }
 
@@ -44,11 +41,15 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
     public IQ optimize(IQ query) {
         IQTree initialTree = query.getTree();
 
-        IQVisitor<IQTree> transformer = new LookForDistinctOrLimit1TransformerImpl2(
-                (childTree, parentTransformer) -> new IQTreeTransformerAdapter(new CardinalityInsensitiveLJPruningTransformer(
-                        parentTransformer,
-                        childTree.getVariables())),
-                iqFactory);
+        IQVisitor<IQTree> transformer = new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
+            @Override
+            protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
+                IQVisitor<IQTree> transformer = new CardinalityInsensitiveLJPruningTransformer(
+                        new IQTreeTransformerAdapter(this),
+                        tree.getVariables());
+                return tree.acceptVisitor(transformer);
+            }
+        };
 
         IQTree newTree = initialTree.acceptVisitor(transformer);
 

@@ -19,16 +19,25 @@ import java.util.stream.Stream;
 @Singleton
 public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimizer {
 
-    private final IQVisitor<IQTree> lookForDistinctTransformer;
+    private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
+    private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
+    private final IQVisitor<IQTree> lookForDistinctTransformer;
 
     @Inject
     protected SelfJoinSameTermIQOptimizerImpl(CoreSingletons coreSingletons,
                                               RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
+        this.coreSingletons = coreSingletons;
+        this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         this.iqFactory = coreSingletons.getIQFactory();
-        this.lookForDistinctTransformer = new LookForDistinctOrLimit1TransformerImpl(
-                t -> new IQTreeTransformerAdapter(new SameTermSelfJoinTransformer(t, coreSingletons, requiredExtensionalDataNodeExtractor)),
-                coreSingletons.getIQFactory());
+        this.lookForDistinctTransformer = new CaseInsensitiveIQTreeTransformerAdapter(coreSingletons.getIQFactory()) {
+            private final IQVisitor<IQTree> transformer = new SameTermSelfJoinTransformer(new IQTreeTransformerAdapter(this));
+
+            @Override
+            protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
+                return tree.acceptVisitor(transformer);
+            }
+        };
     }
 
     @Override
@@ -44,14 +53,9 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
     /**
      * TODO: explain
      */
-    protected static class SameTermSelfJoinTransformer extends AbstractBelowDistinctInnerJoinTransformer {
-        private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
-
-        protected SameTermSelfJoinTransformer(IQTreeTransformer lookForDistinctTransformer,
-                                              CoreSingletons coreSingletons,
-                                              RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
-            super(lookForDistinctTransformer, coreSingletons);
-            this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
+    protected class SameTermSelfJoinTransformer extends AbstractBelowDistinctInnerJoinTransformer {
+        protected SameTermSelfJoinTransformer(IQTreeTransformer lookForDistinctTransformer) {
+            super(lookForDistinctTransformer, SelfJoinSameTermIQOptimizerImpl.this.coreSingletons);
         }
 
         /**
