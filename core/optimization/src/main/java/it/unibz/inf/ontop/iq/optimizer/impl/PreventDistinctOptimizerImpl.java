@@ -89,8 +89,6 @@ public class PreventDistinctOptimizerImpl implements PreventDistinctOptimizer {
 
         private boolean validatePushedTerms(ImmutableSet<ImmutableTerm> pushedTerms) {
             return pushedTerms.stream()
-                    .filter(term -> term instanceof ImmutableFunctionalTerm)
-                    .map(term -> (ImmutableFunctionalTerm) term)
                     .allMatch(this::isDeterministic);
         }
 

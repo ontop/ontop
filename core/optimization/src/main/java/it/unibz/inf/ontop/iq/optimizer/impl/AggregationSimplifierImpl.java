@@ -34,11 +34,16 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
 
     private final IntermediateQueryFactory iqFactory;
     private final OptimizationSingletons optimizationSingletons;
+    private final TermFactory termFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private AggregationSimplifierImpl(OptimizationSingletons optimizationSingletons) {
-        this.iqFactory = optimizationSingletons.getCoreSingletons().getIQFactory();
         this.optimizationSingletons = optimizationSingletons;
+        CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -51,25 +56,19 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
     }
 
     protected IQTreeTransformer createTransformer(VariableGenerator variableGenerator) {
-        return new IQTreeTransformerAdapter(new AggregationSimplifyingTransformer(variableGenerator, optimizationSingletons));
+        return new IQTreeTransformerAdapter(new AggregationSimplifyingTransformer(variableGenerator));
     }
 
     /**
      * Recursive
      */
-    protected static class AggregationSimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
+    protected class AggregationSimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
 
         private final VariableGenerator variableGenerator;
-        private final TermFactory termFactory;
-        private final IQTreeTools iqTreeTools;
 
-        protected AggregationSimplifyingTransformer(VariableGenerator variableGenerator,
-                                                    OptimizationSingletons optimizationSingletons) {
+        protected AggregationSimplifyingTransformer(VariableGenerator variableGenerator) {
             super(optimizationSingletons);
             this.variableGenerator = variableGenerator;
-            CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
-            this.termFactory = coreSingletons.getTermFactory();
-            this.iqTreeTools = coreSingletons.getIQTreeTools();
         }
 
         @Override

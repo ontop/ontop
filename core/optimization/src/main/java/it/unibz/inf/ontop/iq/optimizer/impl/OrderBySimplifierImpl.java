@@ -31,11 +31,21 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
 
     private final OptimizationSingletons optimizationSingletons;
     private final IntermediateQueryFactory iqFactory;
+    protected final IQTreeTools iqTreeTools;
+    protected final TermFactory termFactory;
+    protected final TypeFactory typeFactory;
+    protected final ImmutableSet<RDFDatatype> nonLexicallyOrderedDatatypes;
 
     @Inject
     protected OrderBySimplifierImpl(OptimizationSingletons optimizationSingletons) {
         this.optimizationSingletons = optimizationSingletons;
         this.iqFactory = optimizationSingletons.getCoreSingletons().getIQFactory();
+        CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.typeFactory = coreSingletons.getTypeFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.nonLexicallyOrderedDatatypes = ImmutableSet.of(typeFactory.getAbstractOntopNumericDatatype(),
+                typeFactory.getXsdBooleanDatatype(), typeFactory.getXsdDatetimeDatatype());
     }
 
     @Override
@@ -46,28 +56,17 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
     }
 
     protected IQTreeTransformer createTransformer(VariableGenerator variableGenerator) {
-        return new IQTreeTransformerAdapter(new OrderBySimplifyingTransformer(variableGenerator, optimizationSingletons));
+        return new IQTreeTransformerAdapter(new OrderBySimplifyingTransformer(variableGenerator));
     }
 
 
-    protected static class OrderBySimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
+    protected class OrderBySimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
 
         protected final VariableGenerator variableGenerator;
-        protected final TermFactory termFactory;
-        protected final TypeFactory typeFactory;
-        protected final ImmutableSet<RDFDatatype> nonLexicallyOrderedDatatypes;
-        protected final IQTreeTools iqTreeTools;
 
-        protected OrderBySimplifyingTransformer(VariableGenerator variableGenerator,
-                                                OptimizationSingletons optimizationSingletons) {
+        protected OrderBySimplifyingTransformer(VariableGenerator variableGenerator) {
             super(optimizationSingletons);
             this.variableGenerator = variableGenerator;
-            CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
-            this.termFactory = coreSingletons.getTermFactory();
-            this.typeFactory = coreSingletons.getTypeFactory();
-            this.iqTreeTools = coreSingletons.getIQTreeTools();
-            this.nonLexicallyOrderedDatatypes = ImmutableSet.of(typeFactory.getAbstractOntopNumericDatatype(),
-                    typeFactory.getXsdBooleanDatatype(), typeFactory.getXsdDatetimeDatatype());
         }
 
         @Override
@@ -179,7 +178,7 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
                                                                         IQTree childTree,
                                                                         boolean isAscending) {
             java.util.function.Function<RDFTermType, Optional<ComparatorSimplification>> fct =
-                    t -> computeSimplification(lexicalTerm, rdfTypeTerm, possibleTypes, t, childTree, isAscending);
+                    t -> computeSimplification(lexicalTerm, rdfTypeTerm, possibleTypes, t, t, childTree, isAscending);
 
             return Stream.of(
                     fct.apply(typeFactory.getXsdDatetimeDatatype()),
@@ -190,15 +189,7 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
                     computeOtherLiteralSimplification(lexicalTerm, rdfTypeTerm, possibleTypes, childTree, isAscending),
                     fct.apply(typeFactory.getIRITermType()),
                     fct.apply(typeFactory.getBlankNodeType()))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get);
-        }
-
-        private Optional<ComparatorSimplification> computeSimplification(ImmutableTerm lexicalTerm, ImmutableTerm rdfTypeTerm,
-                                                                         ImmutableSet<RDFTermType> possibleTypes,
-                                                                         RDFTermType type,
-                                                                         IQTree childTree, boolean isAscending) {
-            return computeSimplification(lexicalTerm, rdfTypeTerm, possibleTypes, type, type, childTree, isAscending);
+                    .flatMap(Optional::stream);
         }
 
         private Optional<ComparatorSimplification> computeSimplification(ImmutableTerm lexicalTerm, ImmutableTerm rdfTypeTerm,

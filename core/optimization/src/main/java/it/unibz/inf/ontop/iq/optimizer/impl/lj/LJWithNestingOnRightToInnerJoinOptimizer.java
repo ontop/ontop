@@ -67,12 +67,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
 
         Transformer transformer = new Transformer(
                 initialTree::getVariableNullability,
-                query.getVariableGenerator(),
-                rightProvenanceNormalizer,
-                coreSingletons,
-                otherLJOptimizer,
-                variableNullabilityTools,
-                leftJoinTools);
+                query.getVariableGenerator());
 
         IQTree newTree = initialTree.acceptVisitor(transformer);
 
@@ -82,22 +77,15 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    protected static class Transformer extends AbstractLJTransformer {
-        private final CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer;
-        private final AtomFactory atomFactory;
-        private final IQTreeTools iqTreeTools;
-        private final LeftJoinTools leftJoinTools;
+    protected class Transformer extends AbstractLJTransformer {
 
         protected Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
-                              VariableGenerator variableGenerator, RightProvenanceNormalizer rightProvenanceNormalizer,
-                              CoreSingletons coreSingletons, CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer,
-                              JoinOrFilterVariableNullabilityTools variableNullabilityTools, LeftJoinTools leftJoinTools) {
-            super(variableNullabilitySupplier, variableGenerator, rightProvenanceNormalizer, variableNullabilityTools,
-                    coreSingletons);
-            this.otherLJOptimizer = otherLJOptimizer;
-            this.atomFactory = coreSingletons.getAtomFactory();
-            this.iqTreeTools = coreSingletons.getIQTreeTools();
-            this.leftJoinTools = leftJoinTools;
+                              VariableGenerator variableGenerator) {
+            super(variableNullabilitySupplier,
+                    variableGenerator,
+                    LJWithNestingOnRightToInnerJoinOptimizer.this.rightProvenanceNormalizer,
+                    LJWithNestingOnRightToInnerJoinOptimizer.this.variableNullabilityTools,
+                    LJWithNestingOnRightToInnerJoinOptimizer.this.coreSingletons);
         }
 
         @Override
@@ -135,8 +123,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
 
         @Override
         protected IQTree transformBySearchingFromScratch(IQTree tree) {
-            Transformer newTransformer = new Transformer(tree::getVariableNullability, variableGenerator,
-                    rightProvenanceNormalizer, coreSingletons, otherLJOptimizer, variableNullabilityTools, leftJoinTools);
+            Transformer newTransformer = new Transformer(tree::getVariableNullability, variableGenerator);
             return tree.acceptVisitor(newTransformer);
         }
 
@@ -145,8 +132,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
             Supplier<VariableNullability> variableNullabilitySupplier =
                     () -> computeRightChildVariableNullability(rightChild, ljCondition);
 
-            Transformer newTransformer = new Transformer(variableNullabilitySupplier, variableGenerator,
-                    rightProvenanceNormalizer, coreSingletons, otherLJOptimizer, variableNullabilityTools, leftJoinTools);
+            Transformer newTransformer = new Transformer(variableNullabilitySupplier, variableGenerator);
             return rightChild.acceptVisitor(newTransformer);
         }
 

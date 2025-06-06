@@ -34,15 +34,19 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
 public class AggregationSplitterImpl implements AggregationSplitter {
 
-    private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
+    private final SubstitutionFactory substitutionFactory;
+    private final TermFactory termFactory;
+    private final QueryTransformerFactory queryTransformerFactory;
 
     @Inject
     protected AggregationSplitterImpl(CoreSingletons coreSingletons) {
-        this.coreSingletons = coreSingletons;
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.iqFactory = coreSingletons.getIQFactory();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.queryTransformerFactory = coreSingletons.getQueryTransformerFactory();
     }
 
     @Override
@@ -64,16 +68,10 @@ public class AggregationSplitterImpl implements AggregationSplitter {
     protected class AggregationUnionLifterTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
         private final VariableGenerator variableGenerator;
-        private final SubstitutionFactory substitutionFactory;
-        private final TermFactory termFactory;
-        private final QueryTransformerFactory queryTransformerFactory;
 
         protected AggregationUnionLifterTransformer(VariableGenerator variableGenerator) {
             super(AggregationSplitterImpl.this.iqFactory);
             this.variableGenerator = variableGenerator;
-            this.substitutionFactory = coreSingletons.getSubstitutionFactory();
-            this.termFactory = coreSingletons.getTermFactory();
-            this.queryTransformerFactory = coreSingletons.getQueryTransformerFactory();
         }
 
         @Override
