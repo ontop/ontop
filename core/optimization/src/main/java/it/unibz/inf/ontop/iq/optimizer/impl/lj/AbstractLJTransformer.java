@@ -2,27 +2,23 @@ package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.AbstractCompositeIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
-public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTransformer {
+public abstract class AbstractLJTransformer extends AbstractCompositeIQTreeVisitingTransformer {
 
     private final Supplier<VariableNullability> variableNullabilitySupplier;
     // LAZY
@@ -30,8 +26,6 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
 
     protected final VariableGenerator variableGenerator;
     protected final RightProvenanceNormalizer rightProvenanceNormalizer;
-    protected final CoreSingletons coreSingletons;
-    protected final IntermediateQueryFactory iqFactory;
     protected final TermFactory termFactory;
     protected final SubstitutionFactory substitutionFactory;
     protected final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
@@ -42,13 +36,12 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
                                     RightProvenanceNormalizer rightProvenanceNormalizer,
                                     JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                     CoreSingletons coreSingletons) {
+        super(coreSingletons.getIQFactory());
         this.variableNullabilitySupplier = variableNullabilitySupplier;
         this.variableGenerator = variableGenerator;
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
         this.variableNullabilityTools = variableNullabilityTools;
 
-        this.coreSingletons = coreSingletons;
-        this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
@@ -62,20 +55,18 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
 
         if (preventRecursiveOptimizationOnRightChild()
                 && !transformedRightChild.equals(rightChild))
-            return iqFactory.createBinaryNonCommutativeIQTree(rootNode, transformedLeftChild, transformedRightChild)
-                                        .normalizeForOptimization(variableGenerator);
+            return postTransformation(iqFactory.createBinaryNonCommutativeIQTree(rootNode, transformedLeftChild, transformedRightChild));
 
         return furtherTransformLeftJoin(rootNode, transformedLeftChild, transformedRightChild)
                 .orElseGet(() -> transformedLeftChild.equals(leftChild) && transformedRightChild.equals(rightChild)
                                 ? tree
-                                : iqFactory.createBinaryNonCommutativeIQTree(rootNode, transformedLeftChild, transformedRightChild))
-                                        .normalizeForOptimization(variableGenerator);
+                                : postTransformation(iqFactory.createBinaryNonCommutativeIQTree(rootNode, transformedLeftChild, transformedRightChild)));
     }
 
     /**
-     * If the right child has just been optimized by this optimizer, stops the optimization.
-     * This allows to run other optimizers before running again this one.
-     * This helps further simplifying the right child before applying the optimization at this level.
+     * If this optimizer has just optimized the right child, stops the optimization.
+     * This allows running other optimizers before running again this one.
+     * This helps further simplify the right child before applying the optimization at this level.
      */
     protected boolean preventRecursiveOptimizationOnRightChild() {
         return false;
@@ -94,6 +85,10 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
         return variableNullability;
     }
 
+    @Override
+    protected IQTree postTransformation(IQTree tree) {
+        return tree.normalizeForOptimization(variableGenerator);
+    }
 
     @Override
     public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
@@ -120,56 +115,29 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
     }
 
     @Override
+    public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
+        return transformUnaryNode(tree, rootNode, child, this::transformBySearchingFromScratch);
+    }
+
+    @Override
+    public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
+        return transformUnaryNode(tree, rootNode, child, this::transformBySearchingFromScratch);
+    }
+
+    @Override
+    public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
+        return transformUnaryNode(tree, rootNode, child, this::transformBySearchingFromScratch);
+    }
+
+    @Override
     public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
         // Recursive
         return transformNaryCommutativeNode(tree, rootNode, children, this::transformChild);
     }
 
     @Override
-    protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-        return transformUnaryNode(tree, rootNode, child, this::transformBySearchingFromScratch);
-    }
-
-    protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child,
-                                        Function<IQTree, IQTree> childTransformation) {
-        IQTree newChild = childTransformation.apply(child);
-        return newChild.equals(child)
-                ? tree
-                : iqFactory.createUnaryIQTree(rootNode, newChild)
-                    .normalizeForOptimization(variableGenerator);
-    }
-
-    @Override
-    protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+    public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         return transformNaryCommutativeNode(tree, rootNode, children, this::transformBySearchingFromScratch);
-    }
-
-    protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children,
-                                                  Function<IQTree, IQTree> childTransformation) {
-        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, childTransformation);
-
-        return newChildren.equals(children)
-                ? tree
-                : iqFactory.createNaryIQTree(rootNode, newChildren)
-                    .normalizeForOptimization(variableGenerator);
-    }
-
-    @Override
-    protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode,
-                                                       IQTree leftChild, IQTree rightChild) {
-        return transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild,
-                this::transformBySearchingFromScratch);
-    }
-
-    protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode,
-                                                       IQTree leftChild, IQTree rightChild,
-                                                       Function<IQTree, IQTree> childTransformation) {
-        IQTree newLeftChild = childTransformation.apply(leftChild);
-        IQTree newRightChild = childTransformation.apply(rightChild);
-        return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild)
-                ? tree
-                : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild)
-                    .normalizeForOptimization(variableGenerator);
     }
 
     protected abstract IQTree transformBySearchingFromScratch(IQTree tree);
@@ -178,7 +146,7 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
      * Can be overridden
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    abstract protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition,
+    protected abstract IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition,
                                                        ImmutableSet<Variable> leftVariables);
 
 
@@ -186,10 +154,7 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
     protected VariableNullability computeRightChildVariableNullability(IQTree rightChild, Optional<ImmutableExpression> ljCondition) {
         VariableNullability bottomUpNullability = rightChild.getVariableNullability();
 
-        VariableNullability nullabilityWithLJCondition = ljCondition
-                .map(c -> variableNullabilityTools.updateWithFilter(c, bottomUpNullability.getNullableGroups(),
-                        rightChild.getVariables()))
-                .orElse(bottomUpNullability);
+        VariableNullability nullabilityWithLJCondition = getVariableNullability(ljCondition, bottomUpNullability, rightChild.getVariables());
 
         ImmutableSet<Variable> nullableVariablesAfterLJCondition = nullabilityWithLJCondition.getNullableVariables();
 
@@ -203,10 +168,7 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
                 .filter(v -> !inheritedNullability.isPossiblyNullable(v))
                 .map(termFactory::getDBIsNotNull));
 
-        return additionalFilter
-                .map(c -> variableNullabilityTools.updateWithFilter(c, nullabilityWithLJCondition.getNullableGroups(),
-                        rightChild.getVariables()))
-                .orElse(nullabilityWithLJCondition);
+        return getVariableNullability(additionalFilter, nullabilityWithLJCondition, rightChild.getVariables());
     }
 
     protected Supplier<VariableNullability> computeChildVariableNullabilityFromConstructionParent(IQTree tree,
@@ -218,16 +180,19 @@ public abstract class AbstractLJTransformer extends DefaultNonRecursiveIQTreeTra
         var isNotNullConditions = termFactory.getConjunction(childVariables.stream()
                 .filter(v -> !rootNode.getSubstitution().isDefining(v))
                 .filter(bottomUpVariableNullability::isPossiblyNullable)
-                .filter(v -> ! inheritedVariableNullability.isPossiblyNullable(v))
+                .filter(v -> !inheritedVariableNullability.isPossiblyNullable(v))
                 .map(termFactory::getDBIsNotNull));
 
-        return () -> isNotNullConditions
-                .map(c -> variableNullabilityTools.updateWithFilter(
-                        c,
-                        child.getVariableNullability().getNullableGroups(),
-                        childVariables))
-                .orElseGet(child::getVariableNullability);
+        return () -> getVariableNullability(isNotNullConditions, child.getVariableNullability(), childVariables);
     }
 
-
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private VariableNullability getVariableNullability(Optional<ImmutableExpression> condition, VariableNullability variableNullability, ImmutableSet<Variable> variables) {
+        return condition
+                .map(c -> variableNullabilityTools.updateWithFilter(
+                        c,
+                        variableNullability.getNullableGroups(),
+                        variables))
+                .orElse(variableNullability);
+    }
 }
