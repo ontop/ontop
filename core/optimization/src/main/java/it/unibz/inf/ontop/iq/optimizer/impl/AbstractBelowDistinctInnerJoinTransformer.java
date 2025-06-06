@@ -2,11 +2,9 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.TrueNode;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -18,19 +16,18 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public abstract class AbstractBelowDistinctInnerJoinTransformer extends AbstractBelowDistinctTransformer {
 
-    protected final IntermediateQueryFactory iqFactory;
     protected final TermFactory termFactory;
     protected final IQTreeTools iqTreeTools;
 
     protected AbstractBelowDistinctInnerJoinTransformer(IQTreeTransformer lookForDistinctTransformer, CoreSingletons coreSingletons) {
         super(lookForDistinctTransformer, coreSingletons);
-        iqFactory = coreSingletons.getIQFactory();
-        termFactory = coreSingletons.getTermFactory();
+        this.termFactory = coreSingletons.getTermFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
@@ -40,7 +37,6 @@ public abstract class AbstractBelowDistinctInnerJoinTransformer extends Abstract
         //Mutable
         final List<IQTree> currentChildren = Lists.newArrayList(partiallySimplifiedChildren);
         IntStream.range(0, partiallySimplifiedChildren.size())
-                .boxed()
                 .filter(i -> isDetectedAsRedundant(
                         currentChildren.get(i),
                         IntStream.range(0, partiallySimplifiedChildren.size())
@@ -77,10 +73,9 @@ public abstract class AbstractBelowDistinctInnerJoinTransformer extends Abstract
         ImmutableSet<Integer> firstIndexes = argumentMap.keySet();
         ImmutableSet<Integer> otherIndexes = otherArgumentMap.keySet();
 
-        Sets.SetView<Integer> allIndexes = Sets.union(firstIndexes, otherIndexes);
-        Sets.SetView<Integer> commonIndexes = Sets.intersection(firstIndexes, otherIndexes);
+        Set<Integer> commonIndexes = Sets.intersection(firstIndexes, otherIndexes);
 
-        return allIndexes.stream()
+        return Sets.union(firstIndexes, otherIndexes).stream()
                 .filter(i -> !(commonIndexes.contains(i) && argumentMap.get(i).equals(otherArgumentMap.get(i))))
                 .noneMatch(argumentMap::containsKey);
     }

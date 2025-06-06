@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
@@ -10,7 +9,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.AbstractCompositeIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 
 import java.util.Optional;
@@ -19,17 +18,21 @@ import java.util.Optional;
  * Transformer where the cardinality does matter for the current tree
  *
  */
-public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursiveIQTreeTransformer {
+public abstract class AbstractBelowDistinctTransformer extends AbstractCompositeIQTreeVisitingTransformer {
 
     private final IQTreeTransformer lookForDistinctOrLimit1Transformer;
     protected final CoreSingletons coreSingletons;
-    protected final IntermediateQueryFactory iqFactory;
 
     protected AbstractBelowDistinctTransformer(IQTreeTransformer lookForDistinctOrLimit1Transformer,
                                                CoreSingletons coreSingletons) {
-        this.lookForDistinctOrLimit1Transformer = lookForDistinctOrLimit1Transformer;
+        super(coreSingletons.getIQFactory());
         this.coreSingletons = coreSingletons;
-        this.iqFactory = coreSingletons.getIQFactory();
+        this.lookForDistinctOrLimit1Transformer = lookForDistinctOrLimit1Transformer;
+    }
+
+    @Override
+    protected IQTree postTransformation(IQTree tree) {
+        return tree;
     }
 
     @Override
@@ -45,93 +48,60 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
     }
 
     /**
-     * Takes in account the interaction between children
+     * Takes account of the interaction between children
      *
-     * Returns empty() if no further optimization has been applied
+     * Returns empty() if no further optimization can be applied
      *
      */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     protected abstract Optional<IQTree> furtherSimplifyInnerJoinChildren(
             Optional<ImmutableExpression> optionalFilterCondition, ImmutableList<IQTree> children);
 
     @Override
     public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-        IQTree newChild = transformChild(child);
-        return newChild.equals(child)
-                ? tree
-                : iqFactory.createUnaryIQTree(rootNode, newChild);
+        return transformUnaryNode(tree, rootNode, child, this::transformChild);
     }
 
+    public IQTree transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree child) {
+        return transformUnaryNode(tree, node, child, this::transformChild);
+    }
 
     @Override
     public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
-        IQTree newChild = transformChild(child);
-        return newChild.equals(child)
-                ? tree
-                : iqFactory.createUnaryIQTree(sliceNode, newChild);
+        return transformUnaryNode(tree, sliceNode, child, this::transformChild);
     }
 
     @Override
     public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-        IQTree newChild = transformChild(child);
-        return newChild.equals(child)
-                ? tree
-                : iqFactory.createUnaryIQTree(rootNode, newChild);
+        return transformUnaryNode(tree, rootNode, child, this::transformChild);
     }
 
     @Override
     public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-        IQTree newChild = transformChild(child);
-        return newChild.equals(child)
-                ? tree
-                : iqFactory.createUnaryIQTree(rootNode, newChild);
+        return transformUnaryNode(tree, rootNode, child, this::transformChild);
     }
 
     @Override
     public IQTree transformFlatten(UnaryIQTree tree, FlattenNode node, IQTree child) {
-        IQTree newChild = transformChild(child);
-        return newChild.equals(child)
-                ? tree
-                : iqFactory.createUnaryIQTree(node, newChild);
+        return transformUnaryNode(tree, node, child, this::transformChild);
+    }
+
+    @Override
+    public IQTree transformAggregation(UnaryIQTree tree, AggregationNode node, IQTree child) {
+        return transformUnaryNode(tree, node, child, this::transformBySearchingFromScratch);
     }
 
     @Override
     public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
-        return newChildren.equals(children)
-                ? tree
-                : iqFactory.createNaryIQTree(rootNode, newChildren);
+        return transformNaryCommutativeNode(tree, rootNode, children, this::transformChild);
     }
 
     @Override
     public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        IQTree newLeftChild = transformChild(leftChild);
-        IQTree newRightChild = transformChild(rightChild);
-
-        return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild)
-                ? tree
-                : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild);
+        return transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild, this::transformChild);
     }
 
-    /**
-     * By default, switch back to the "LookForDistinctTransformer"
-     */
-    @Override
-    protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-        return lookForDistinctOrLimit1Transformer.transform(tree);
-    }
-
-    /**
-     * By default, switch back to the "LookForDistinctTransformer"
-     */
-    protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-        return lookForDistinctOrLimit1Transformer.transform(tree);
-    }
-
-    /**
-     * By default, switch back to the "LookForDistinctTransformer"
-     */
-    protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode,
-                                                       IQTree leftChild, IQTree rightChild) {
+    protected IQTree transformBySearchingFromScratch(IQTree tree) {
         return lookForDistinctOrLimit1Transformer.transform(tree);
     }
 }
