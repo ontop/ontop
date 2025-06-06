@@ -272,7 +272,8 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                                 inferForeignKeysFromParentUCs(keptColumns, baseRelation).stream()
                         )
                         .collect(ImmutableCollectors.toList()),
-                baseRelations);
+                baseRelations,
+                dbParameters.getCoreSingletons());
     }
 
     private ImmutableList<AddForeignKey> inferForeignKeysFromParentUCs(ImmutableSet<QuotedID> keptColumns, NamedRelationDefinition baseRelation) {
@@ -326,7 +327,8 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
 
     @Override
     public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(Lens lens,
-                                                                                    ImmutableList<Attribute> parentAttributes) {
+                                                                                    ImmutableList<Attribute> parentAttributes,
+                                                                                    CoreSingletons coreSingletons) {
         return ImmutableList.of();
     }
 

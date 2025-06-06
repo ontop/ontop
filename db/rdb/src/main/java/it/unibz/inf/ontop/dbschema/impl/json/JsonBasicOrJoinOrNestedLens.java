@@ -12,12 +12,13 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
+import it.unibz.inf.ontop.iq.type.impl.AbstractExpressionTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.RelationExtractor;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.IRISafenessDeclarationFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
@@ -237,10 +238,11 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
 
     protected void insertForeignKeys(Lens relation, MetadataLookup lookup,
                                      List<AddForeignKey> addForeignKeys,
-                                     ImmutableList<NamedRelationDefinition> baseRelations)
+                                     ImmutableList<NamedRelationDefinition> baseRelations,
+                                     CoreSingletons coreSingletons)
             throws MetadataExtractionException {
 
-        List<AddForeignKey> list = extractForeignKeys(relation, addForeignKeys, baseRelations);
+        List<AddForeignKey> list = extractForeignKeys(relation, addForeignKeys, baseRelations, coreSingletons);
 
         for (AddForeignKey fk : list) {
             insertForeignKey(relation, lookup, fk);
@@ -248,10 +250,11 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
     }
 
     private ImmutableList<AddForeignKey> extractForeignKeys(Lens relation, List<AddForeignKey> addForeignKeys,
-                                                            ImmutableList<NamedRelationDefinition> baseRelations) {
+                                                            ImmutableList<NamedRelationDefinition> baseRelations,
+                                                            CoreSingletons coreSingletons) {
         return Stream.concat(
                         addForeignKeys.stream(),
-                        inferForeignKeys(relation, baseRelations))
+                        inferForeignKeys(relation, baseRelations, coreSingletons))
                 .distinct()
                 .collect(ImmutableCollectors.toList());
     }
@@ -260,19 +263,22 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
      * TODO: add FKs towards the base relations
      */
     protected Stream<AddForeignKey> inferForeignKeys(Lens relation,
-                                                     ImmutableList<NamedRelationDefinition> baseRelations) {
+                                                     ImmutableList<NamedRelationDefinition> baseRelations,
+                                                     CoreSingletons coreSingletons) {
         return baseRelations.stream()
-                .flatMap(p -> inferForeignKeysFromParent(relation, p));
+                .flatMap(p -> inferForeignKeysFromParent(relation, p, coreSingletons));
     }
 
     protected Stream<AddForeignKey> inferForeignKeysFromParent(Lens relation,
-                                                               NamedRelationDefinition baseRelation) {
+                                                               NamedRelationDefinition baseRelation,
+                                                               CoreSingletons coreSingletons) {
         return baseRelation.getForeignKeys().stream()
                 .flatMap(fk -> getDerivedFromParentAttributes(
                         relation,
                         fk.getComponents().stream()
                                 .map(ForeignKeyConstraint.Component::getAttribute)
-                                .collect(ImmutableCollectors.toList())).stream()
+                                .collect(ImmutableCollectors.toList()),
+                        coreSingletons).stream()
                         .map(as -> new AddForeignKey(
                                 UUID.randomUUID().toString(),
                                 JsonMetadata.serializeAttributeList(as.stream()),
@@ -322,8 +328,12 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
      * Parent attributes are expected to all come from the same parent
      */
     protected ImmutableList<ImmutableList<Attribute>> getDerivedFromParentAttributes(
-            Lens lens, ImmutableList<Attribute> parentAttributes) {
-        IQ viewIQ = lens.getIQ();
+            Lens lens, ImmutableList<Attribute> parentAttributes, CoreSingletons coreSingletons) {
+        IQ lensIQ = lens.getIQ();
+
+        IQTree simplifiedTree = new IRISafeFunctionRemover(coreSingletons)
+                .transform(lensIQ.getTree())
+                .normalizeForOptimization(lensIQ.getVariableGenerator());
 
         ImmutableList<RelationDefinition> parentRelations = parentAttributes.stream()
                 .map(Attribute::getRelation)
@@ -341,7 +351,7 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
                 throw new MinorOntopInternalBugException("Was expecting all the attributes to come from the same parent");
         }
 
-        Optional<ExtensionalDataNode> optionalParentNode = viewIQ.getTree()
+        Optional<ExtensionalDataNode> optionalParentNode = simplifiedTree
                 .acceptVisitor(new RelationExtractor())
                 .filter(n -> n.getRelationDefinition().equals(parentRelation))
                 .findAny();
@@ -362,7 +372,7 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
         }
 
         ImmutableList<Variable> parentVariables = parentVariableBuilder.build();
-        ImmutableList<Variable> projectedVariables = viewIQ.getProjectionAtom().getArguments();
+        ImmutableList<Variable> projectedVariables = lensIQ.getProjectionAtom().getArguments();
 
         ImmutableList<Integer> parentVariableIndexes = parentVariables.stream()
                 .map(projectedVariables::indexOf)
@@ -376,5 +386,26 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
                 parentVariableIndexes.stream()
                         .map(i -> lens.getAttribute(i + 1))
                         .collect(ImmutableCollectors.toList()));
+    }
+
+    protected static class IRISafeFunctionRemover extends AbstractExpressionTransformer {
+
+        protected IRISafeFunctionRemover(CoreSingletons coreSingletons) {
+            super(coreSingletons.getIQFactory(), coreSingletons.getUniqueTermTypeExtractor(), coreSingletons.getTermFactory());
+        }
+
+        @Override
+        protected boolean isFunctionSymbolToReplace(FunctionSymbol functionSymbol) {
+            return functionSymbol instanceof IRISafenessDeclarationFunctionSymbol;
+        }
+
+        @Override
+        protected ImmutableFunctionalTerm replaceFunctionSymbol(FunctionSymbol functionSymbol,
+                                                                ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
+            if (newTerms.size() != 1)
+                throw new MinorOntopInternalBugException("Was expecting the IRISafe function to be unary");
+
+            return termFactory.getIdentityFunctionalTerm(newTerms.get(0));
+        }
     }
 }

@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.json.JsonLens;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.UUID;
@@ -16,8 +17,11 @@ import java.util.stream.IntStream;
  */
 public class BasicLensFKSaturator implements LensFKSaturator {
 
+    private final CoreSingletons coreSingletons;
+
     @Inject
-    protected BasicLensFKSaturator() {
+    protected BasicLensFKSaturator(CoreSingletons coreSingletons) {
+        this.coreSingletons = coreSingletons;
     }
 
     @Override
@@ -74,7 +78,8 @@ public class BasicLensFKSaturator implements LensFKSaturator {
 
         jsonViewMap.get(childIdOfTarget).getAttributesIncludingParentOnes(
                 childRelation,
-                targetAttributes)
+                targetAttributes,
+                coreSingletons)
                 .forEach(as -> addForeignKey(sourceView, foreignKey, childRelation, as));
     }
 

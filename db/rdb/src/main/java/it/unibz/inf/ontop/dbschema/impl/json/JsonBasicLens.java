@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
@@ -47,12 +48,13 @@ public class JsonBasicLens extends JsonBasicOrJoinLens {
      */
     @Override
     public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(Lens lens,
-                                                                                    ImmutableList<Attribute> parentAttributes) {
+                                                                                    ImmutableList<Attribute> parentAttributes,
+                                                                                    CoreSingletons coreSingletons) {
         if (filterExpression != null && (!filterExpression.isEmpty()))
             // TODO: log a warning
             return ImmutableList.of();
 
-        return getDerivedFromParentAttributes(lens, parentAttributes);
+        return getDerivedFromParentAttributes(lens, parentAttributes, coreSingletons);
     }
 
     public boolean propagateUniqueConstraintsUp(Lens relation, ImmutableList<NamedRelationDefinition> parents,
