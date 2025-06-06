@@ -23,7 +23,6 @@ public class PreventDistinctProjectionSplitterImpl extends ProjectionSplitterImp
 
     private final ProjectionDecomposer decomposer;
 
-    private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
 
     @Inject
@@ -37,7 +36,6 @@ public class PreventDistinctProjectionSplitterImpl extends ProjectionSplitterImp
             t -> !shouldSplit(t),
             n -> true
         );
-        this.iqFactory = iqFactory;
         this.iqTreeTools = iqTreeTools;
     }
 

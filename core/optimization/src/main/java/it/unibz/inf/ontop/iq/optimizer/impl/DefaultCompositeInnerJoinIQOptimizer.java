@@ -7,9 +7,7 @@ import it.unibz.inf.ontop.iq.optimizer.*;
 
 import javax.inject.Inject;
 
-public class DefaultCompositeInnerJoinIQOptimizer implements InnerJoinIQOptimizer {
-
-    private final ImmutableList<IQOptimizer> optimizers;
+public class DefaultCompositeInnerJoinIQOptimizer extends CompositeIQOptimizer implements InnerJoinIQOptimizer {
 
     @Inject
     private DefaultCompositeInnerJoinIQOptimizer(
@@ -18,21 +16,12 @@ public class DefaultCompositeInnerJoinIQOptimizer implements InnerJoinIQOptimize
             ArgumentTransferInnerJoinFDIQOptimizer fdIQOptimizer,
             RedundantJoinFKOptimizer fkOptimizer,
             BelowDistinctJoinWithClassUnionOptimizer belowDistinctClassUnionOptimizer) {
-        this.optimizers = ImmutableList.of(
+
+        super(ImmutableList.of(
                 selfJoinUCIQOptimizer,
                 fdIQOptimizer,
                 selfJoinSameTermIQOptimizer,
                 fkOptimizer,
-                belowDistinctClassUnionOptimizer);
-    }
-
-    @Override
-    public IQ optimize(IQ query) {
-        return optimizers.stream()
-                .reduce(query,
-                        (q, o) -> o.optimize(q),
-                        (q1, q2) -> {
-                            throw new MinorOntopInternalBugException("Merge is not supported");
-                        });
+                belowDistinctClassUnionOptimizer));
     }
 }

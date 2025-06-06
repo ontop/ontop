@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 
 public class BooleanExpressionPushDownOptimizerImpl implements BooleanExpressionPushDownOptimizer {
 
-
     private final BooleanExpressionPushDownTransformer transformer;
     private final IntermediateQueryFactory iqFactory;
 

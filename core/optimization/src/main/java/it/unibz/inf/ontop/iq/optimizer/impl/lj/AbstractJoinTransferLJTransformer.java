@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
-import it.unibz.inf.ontop.dbschema.FunctionalDependency;
-import it.unibz.inf.ontop.dbschema.RelationDefinition;
-import it.unibz.inf.ontop.dbschema.UniqueConstraint;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
@@ -105,6 +102,10 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
                 .collect(ImmutableCollectors.toSet());
     }
 
+    private ImmutableList<Integer> getIndexes(Stream<Attribute> attributeStream) {
+        return attributeStream.map(a -> a.getIndex() - 1)
+                .collect(ImmutableCollectors.toList());
+    }
 
     /**
      * Matches an unique constraint whose determinants are nullable in the tree
@@ -113,10 +114,8 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
                                          ImmutableSet<ExtensionalDataNode> sameRelationLeftNodes,
                                          ImmutableMap<Integer, ? extends VariableOrGroundTerm> rightArgumentMap) {
 
-        ImmutableList<Integer> indexes = uniqueConstraint.getDeterminants().stream()
-                .map(a -> a.getIndex() - 1)
-                .collect(ImmutableCollectors.toList());
-
+        ImmutableList<Integer> indexes = getIndexes(uniqueConstraint.getDeterminants().stream());
+                ;
         if (!rightArgumentMap.keySet().containsAll(indexes))
             return Optional.empty();
 
@@ -127,13 +126,11 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
                                                                ImmutableCollection<ExtensionalDataNode> leftNodes,
                                                                ImmutableMap<Integer,? extends VariableOrGroundTerm> rightArgumentMap) {
         // NB: order matters
-        ImmutableList<Integer> leftIndexes = fk.getComponents().stream()
-                .map(c -> c.getAttribute().getIndex() - 1)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<Integer> leftIndexes = getIndexes(fk.getComponents().stream()
+                .map(ForeignKeyConstraint.Component::getAttribute));
 
-        ImmutableList<Integer> rightIndexes = fk.getComponents().stream()
-                .map(c -> c.getReferencedAttribute().getIndex() - 1)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<Integer> rightIndexes = getIndexes(fk.getComponents().stream()
+                .map(ForeignKeyConstraint.Component::getReferencedAttribute));
 
         return leftNodes.stream()
                 .map(ExtensionalDataNode::getArgumentMap)
@@ -153,10 +150,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
                                                                          ImmutableSet<ExtensionalDataNode> sameRelationLeftNodes,
                                                                          ImmutableMap<Integer,? extends VariableOrGroundTerm> rightArgumentMap) {
 
-        ImmutableSet<Integer> determinantIndexes = functionalDependency.getDeterminants().stream()
-                .map(a -> a.getIndex() - 1)
-                .collect(ImmutableCollectors.toSet());
-
+        ImmutableList<Integer> determinantIndexes = getIndexes(functionalDependency.getDeterminants().stream());
         if (!rightArgumentMap.keySet().containsAll(determinantIndexes))
             return Optional.empty();
 
