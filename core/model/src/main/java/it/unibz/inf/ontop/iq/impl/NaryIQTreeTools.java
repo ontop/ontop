@@ -106,7 +106,7 @@ public class NaryIQTreeTools {
                 .collect(ImmutableCollectors.toSet());
     }
 
-    public static Stream<Variable> coOccurringVariablesStream(ImmutableList<IQTree> children) {
+    public static Stream<Variable> coOccurringVariablesStream(Collection<? extends IQTree> children) {
         /* quadratic time,
          return IntStream.range(0, children.size() - 1)
                 .boxed()

@@ -108,17 +108,8 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
 
             NormalizationBeforeUnification normalization = normalizeDataNodes(dataNodes, constraint);
 
-            ImmutableMultiset<Variable> variableOccurrences = dataNodes.stream()
-                    .flatMap(n -> n.getArgumentMap().values().stream())
-                    .filter(d -> d instanceof Variable)
-                    .map(d -> (Variable) d)
-                    .collect(ImmutableCollectors.toMultiset());
-
             ImmutableSet<ImmutableExpression> expressions = Stream.concat(
-                            variableOccurrences.entrySet().stream()
-                                    // Co-occurring terms
-                                    .filter(e -> e.getCount() > 1)
-                                    .map(Multiset.Entry::getElement)
+                            NaryIQTreeTools.coOccurringVariablesStream(dataNodes)
                                     .map(termFactory::getDBIsNotNull),
                             normalization.equalities.stream())
                     .collect(ImmutableCollectors.toSet());
