@@ -1,0 +1,24 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"", "\"T\""],
+      "baseRelation": ["\"T\""],
+      "iriSafeConstraints": {
+        "added": [
+          "\"T_ID\""
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"R\""],
+      "baseRelation": ["\"R\""],
+      "iriSafeConstraints": {
+        "added": [
+          "\"T_ID\""
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}
