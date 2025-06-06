@@ -47,7 +47,7 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
     public IQ optimize(IQ query) {
         IQTree initialTree = query.getTree();
         IQTree newTree = initialTree.acceptVisitor(lookForDistinctTransformer);
-        return (newTree.equals(initialTree))
+        return newTree.equals(initialTree)
                 ? query
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree)
                 .normalizeForOptimization();
@@ -62,6 +62,7 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
         /**
          * Should not return any false positives
          */
+        @Override
         protected boolean isDetectedAsRedundant(IQTree child, Stream<IQTree> otherChildrenStream) {
             ImmutableSet<IQTree> otherChildren = otherChildrenStream.collect(ImmutableCollectors.toSet());
 
@@ -93,6 +94,7 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
                         // Continue to the child
                         .flatMap(b -> extractExtensionalNode(filter.getChild()));
             }
+
             if (child instanceof ExtensionalDataNode)
                 return Optional.of((ExtensionalDataNode) child);
 

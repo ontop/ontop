@@ -7,7 +7,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -15,7 +14,9 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -35,10 +36,9 @@ import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.LeftJoi
  */
 @Singleton
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class MergeLJOptimizer implements LeftJoinIQOptimizer {
+public class MergeLJOptimizer extends AbstractIQOptimizer implements LeftJoinIQOptimizer {
 
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
-    private final IntermediateQueryFactory iqFactory;
     private final CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer;
     private final LJWithNestingOnRightToInnerJoinOptimizer ljReductionOptimizer;
     private final ComplexStrictEqualityLeftJoinExpliciter ljConditionExpliciter;
@@ -54,8 +54,8 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
                                LJWithNestingOnRightToInnerJoinOptimizer ljReductionOptimizer,
                                ComplexStrictEqualityLeftJoinExpliciter ljConditionExpliciter,
                                LeftJoinTools leftJoinTools) {
+        super(coreSingletons.getIQFactory());
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
-        this.iqFactory = coreSingletons.getIQFactory();
         this.otherLJOptimizer = joinTransferLJOptimizer;
         this.ljReductionOptimizer = ljReductionOptimizer;
         this.ljConditionExpliciter = ljConditionExpliciter;
@@ -66,13 +66,8 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        IQTree initialTree = query.getTree();
-        IQTree newTree = initialTree.acceptVisitor(new Transformer(query.getVariableGenerator()));
-
-        return newTree.equals(initialTree)
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree);
+    protected IQVisitor<IQTree> getTransformer(IQ query) {
+        return new Transformer(query.getVariableGenerator());
     }
 
     protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

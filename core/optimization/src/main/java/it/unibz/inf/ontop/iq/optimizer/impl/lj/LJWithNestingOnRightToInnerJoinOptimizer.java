@@ -5,18 +5,17 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -39,11 +38,10 @@ import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.LeftJoi
  *
  */
 @Singleton
-public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptimizer {
+public class LJWithNestingOnRightToInnerJoinOptimizer extends AbstractIQOptimizer implements LeftJoinIQOptimizer {
 
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
     private final CoreSingletons coreSingletons;
-    private final IntermediateQueryFactory iqFactory;
     private final CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer;
     private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
     private final LeftJoinTools leftJoinTools;
@@ -52,28 +50,21 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
     protected LJWithNestingOnRightToInnerJoinOptimizer(RightProvenanceNormalizer rightProvenanceNormalizer,
                                                        CoreSingletons coreSingletons,
                                                        CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer,
-                                                       JoinOrFilterVariableNullabilityTools variableNullabilityTools, LeftJoinTools leftJoinTools) {
+                                                       JoinOrFilterVariableNullabilityTools variableNullabilityTools,
+                                                       LeftJoinTools leftJoinTools) {
+        super(coreSingletons.getIQFactory());
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
         this.coreSingletons = coreSingletons;
-        this.iqFactory = coreSingletons.getIQFactory();
         this.otherLJOptimizer = otherLJOptimizer;
         this.variableNullabilityTools = variableNullabilityTools;
         this.leftJoinTools = leftJoinTools;
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        IQTree initialTree = query.getTree();
-
-        Transformer transformer = new Transformer(
-                initialTree::getVariableNullability,
+    protected IQVisitor<IQTree> getTransformer(IQ query) {
+        return new Transformer(
+                query.getTree()::getVariableNullability,
                 query.getVariableGenerator());
-
-        IQTree newTree = initialTree.acceptVisitor(transformer);
-
-        return newTree.equals(initialTree)
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

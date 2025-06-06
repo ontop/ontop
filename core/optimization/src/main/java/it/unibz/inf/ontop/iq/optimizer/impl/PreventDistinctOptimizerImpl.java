@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.PreventDistinctOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -19,24 +20,19 @@ import javax.inject.Inject;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 
-public class PreventDistinctOptimizerImpl implements PreventDistinctOptimizer {
+public class PreventDistinctOptimizerImpl extends AbstractIQOptimizer implements PreventDistinctOptimizer {
 
-    private final IntermediateQueryFactory iqFactory;
     private final PreventDistinctProjectionSplitter preventDistinctProjectionSplitter;
 
     @Inject
     private PreventDistinctOptimizerImpl(OptimizationSingletons optimizationSingletons, PreventDistinctProjectionSplitter preventDistinctProjectionSplitter) {
-        this.iqFactory = optimizationSingletons.getCoreSingletons().getIQFactory();
+        super(optimizationSingletons.getCoreSingletons().getIQFactory());
         this.preventDistinctProjectionSplitter = preventDistinctProjectionSplitter;
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        VariableGenerator variableGenerator = query.getVariableGenerator();
-        IQTree newTree = query.getTree().acceptVisitor(new PreventDistinctTransformer(variableGenerator));
-        if (newTree.equals(query.getTree()))
-            return query;
-        return iqFactory.createIQ(query.getProjectionAtom(), newTree);
+    protected IQVisitor<IQTree> getTransformer(IQ query) {
+        return new PreventDistinctTransformer(query.getVariableGenerator());
     }
 
     private class PreventDistinctTransformer extends DefaultRecursiveIQTreeVisitingTransformer {

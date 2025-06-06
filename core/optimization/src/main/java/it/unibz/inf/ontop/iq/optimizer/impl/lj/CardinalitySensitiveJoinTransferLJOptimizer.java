@@ -6,7 +6,6 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.UniqueConstraint;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -16,6 +15,8 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -23,12 +24,11 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @Singleton
-public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOptimizer {
+public class CardinalitySensitiveJoinTransferLJOptimizer extends AbstractIQOptimizer implements LeftJoinIQOptimizer {
 
     private final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
     private final CoreSingletons coreSingletons;
-    private final IntermediateQueryFactory iqFactory;
     private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
 
     @Inject
@@ -36,25 +36,20 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
                                                           RightProvenanceNormalizer rightProvenanceNormalizer,
                                                           JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                                           CoreSingletons coreSingletons) {
+        super(coreSingletons.getIQFactory());
         this.requiredDataNodeExtractor = requiredDataNodeExtractor;
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
         this.coreSingletons = coreSingletons;
-        this.iqFactory = coreSingletons.getIQFactory();
         this.variableNullabilityTools = variableNullabilityTools;
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        IQTree initialTree = query.getTree();
-
-        IQTree newTree = initialTree.acceptVisitor(new Transformer(
-                initialTree::getVariableNullability,
-                query.getVariableGenerator()));
-
-        return newTree.equals(initialTree)
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree);
+    protected IQVisitor<IQTree> getTransformer(IQ query) {
+        return new Transformer(
+                query.getTree()::getVariableNullability,
+                query.getVariableGenerator());
     }
+
 
     protected class Transformer extends AbstractJoinTransferLJTransformer {
 

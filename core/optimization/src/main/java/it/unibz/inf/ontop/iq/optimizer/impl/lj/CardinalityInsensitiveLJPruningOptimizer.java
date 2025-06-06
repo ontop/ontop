@@ -6,12 +6,12 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.CaseInsensitiveIQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
@@ -29,19 +29,16 @@ import java.util.Set;
  * in a cardinality-insensitive context
  */
 @Singleton
-public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptimizer {
-    private final IntermediateQueryFactory iqFactory;
+public class CardinalityInsensitiveLJPruningOptimizer extends AbstractIQOptimizer implements LeftJoinIQOptimizer {
 
     @Inject
     protected CardinalityInsensitiveLJPruningOptimizer(CoreSingletons coreSingletons) {
-        this.iqFactory = coreSingletons.getIQFactory();
+        super(coreSingletons.getIQFactory());
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        IQTree initialTree = query.getTree();
-
-        IQVisitor<IQTree> transformer = new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
+    protected IQVisitor<IQTree> getTransformer(IQ query) {
+        return new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
             @Override
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
                 IQVisitor<IQTree> transformer = new CardinalityInsensitiveLJPruningTransformer(
@@ -50,12 +47,6 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
                 return tree.acceptVisitor(transformer);
             }
         };
-
-        IQTree newTree = initialTree.acceptVisitor(transformer);
-
-        return newTree.equals(initialTree)
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree);
     }
 
     // TODO: unclear why it's called non-recursive
