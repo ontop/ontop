@@ -37,23 +37,20 @@ public class NodeInGraphOptimizerImpl extends AbstractIQOptimizer implements Nod
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
     private final IQTreeTools iqTreeTools;
+    private final Transformer transformer;
 
     @Inject
     protected NodeInGraphOptimizerImpl(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory());
+        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.transformer = new Transformer();
     }
 
     @Override
     protected IQVisitor<IQTree> getTransformer(IQ query) {
-        return new Transformer();
-    }
-
-    @Override
-    protected IQ postTransform(IQ query) {
-        return query.normalizeForOptimization();
+        return transformer;
     }
 
     protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

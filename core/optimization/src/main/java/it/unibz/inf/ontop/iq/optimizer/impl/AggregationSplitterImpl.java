@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.AggregationSplitter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -32,9 +33,8 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
 
-public class AggregationSplitterImpl implements AggregationSplitter {
+public class AggregationSplitterImpl extends AbstractIQOptimizer implements AggregationSplitter {
 
-    private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
@@ -42,23 +42,16 @@ public class AggregationSplitterImpl implements AggregationSplitter {
 
     @Inject
     protected AggregationSplitterImpl(CoreSingletons coreSingletons) {
+        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION, NORMALIZE_FOR_OPTIMIZATION);
         this.iqTreeTools = coreSingletons.getIQTreeTools();
-        this.iqFactory = coreSingletons.getIQFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.queryTransformerFactory = coreSingletons.getQueryTransformerFactory();
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        IQ normalizedQuery = query.normalizeForOptimization();
-
-        IQTree tree = normalizedQuery.getTree();
-        IQTree newTree = tree.acceptVisitor(new AggregationUnionLifterTransformer(query.getVariableGenerator()));
-        return newTree == tree
-                ? normalizedQuery
-                : iqFactory.createIQ(normalizedQuery.getProjectionAtom(), newTree)
-                .normalizeForOptimization();
+    protected IQVisitor<IQTree> getTransformer(IQ query) {
+        return new AggregationUnionLifterTransformer(query.getVariableGenerator());
     }
 
 

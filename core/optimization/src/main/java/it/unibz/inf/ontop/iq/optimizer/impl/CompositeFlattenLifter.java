@@ -10,7 +10,6 @@ public class CompositeFlattenLifter extends CompositeIQOptimizer implements Flat
     private CompositeFlattenLifter(FilterLifter filterLifter,
                                    BasicFlattenLifter flattenLifter,
                                    BooleanExpressionPushDownOptimizer pushDownOptimizer) {
-
         super(ImmutableList.of(filterLifter, flattenLifter, pushDownOptimizer));
     }
 }

@@ -25,7 +25,7 @@ public class SelfJoinSameTermIQOptimizerImpl extends AbstractIQOptimizer impleme
     @Inject
     protected SelfJoinSameTermIQOptimizerImpl(CoreSingletons coreSingletons,
                                               RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
-        super(coreSingletons.getIQFactory());
+        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.coreSingletons = coreSingletons;
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         this.lookForDistinctTransformer = new CaseInsensitiveIQTreeTransformerAdapter(coreSingletons.getIQFactory()) {
@@ -42,12 +42,6 @@ public class SelfJoinSameTermIQOptimizerImpl extends AbstractIQOptimizer impleme
     protected IQVisitor<IQTree> getTransformer(IQ query) {
         return lookForDistinctTransformer;
     }
-
-    @Override
-    protected IQ postTransform(IQ query) {
-        return query.normalizeForOptimization();
-    }
-
 
     /**
      * TODO: explain

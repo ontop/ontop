@@ -54,7 +54,7 @@ public class MergeLJOptimizer extends AbstractIQOptimizer implements LeftJoinIQO
                                LJWithNestingOnRightToInnerJoinOptimizer ljReductionOptimizer,
                                ComplexStrictEqualityLeftJoinExpliciter ljConditionExpliciter,
                                LeftJoinTools leftJoinTools) {
-        super(coreSingletons.getIQFactory());
+        super(coreSingletons.getIQFactory(), NO_ACTION);
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
         this.otherLJOptimizer = joinTransferLJOptimizer;
         this.ljReductionOptimizer = ljReductionOptimizer;

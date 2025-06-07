@@ -36,18 +36,13 @@ public class ArgumentTransferInnerJoinFDIQOptimizer extends AbstractIQOptimizer 
 
     @Inject
     protected ArgumentTransferInnerJoinFDIQOptimizer(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory());
+        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.simplifier = new SelfJoinFDSimplifier(coreSingletons);
     }
 
     @Override
     protected IQVisitor<IQTree> getTransformer(IQ query) {
         return new ArgumentTransferJoinTransformer(query.getVariableGenerator());
-    }
-
-    @Override
-    protected IQ postTransform(IQ query) {
-        return query.normalizeForOptimization();
     }
 
     protected class ArgumentTransferJoinTransformer extends DefaultRecursiveIQTreeVisitingTransformer {

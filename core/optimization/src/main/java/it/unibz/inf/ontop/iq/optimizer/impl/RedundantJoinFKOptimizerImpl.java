@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.optimizer.RedundantJoinFKOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -25,30 +26,23 @@ import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
+public class RedundantJoinFKOptimizerImpl extends AbstractIQOptimizer implements RedundantJoinFKOptimizer {
 
-    private final RedundantJoinFKTransformer transformer;
-    private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
     private final TermFactory termFactory;
+    private final RedundantJoinFKTransformer transformer;
 
     @Inject
     private RedundantJoinFKOptimizerImpl(CoreSingletons coreSingletons) {
-        this.iqFactory = coreSingletons.getIQFactory();
+        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION, NORMALIZE_FOR_OPTIMIZATION);
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.termFactory = coreSingletons.getTermFactory();
         this.transformer = new RedundantJoinFKTransformer();
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        IQTree newTree = query.normalizeForOptimization()
-                .getTree().acceptVisitor(transformer);
-
-        return newTree.equals(query.getTree())
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree)
-                .normalizeForOptimization();
+    protected IQVisitor<IQTree> getTransformer(IQ query) {
+        return transformer;
     }
 
     protected class RedundantJoinFKTransformer extends DefaultRecursiveIQTreeVisitingTransformer {

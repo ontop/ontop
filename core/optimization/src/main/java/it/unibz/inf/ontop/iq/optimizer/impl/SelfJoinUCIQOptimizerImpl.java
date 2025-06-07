@@ -33,18 +33,13 @@ public class SelfJoinUCIQOptimizerImpl extends AbstractIQOptimizer implements Se
     @Inject
     public SelfJoinUCIQOptimizerImpl(SelfJoinUCSimplifier simplifier,
                                      CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory());
+        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.simplifier = simplifier;
     }
 
     @Override
     protected IQVisitor<IQTree> getTransformer(IQ query) {
         return new SelfJoinUCTransformer(query.getVariableGenerator());
-    }
-
-    @Override
-    protected IQ postTransform(IQ query) {
-        return query.normalizeForOptimization();
     }
 
     private class SelfJoinUCTransformer extends DefaultRecursiveIQTreeVisitingTransformer {

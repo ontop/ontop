@@ -10,30 +10,31 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.FilterLifter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.TermFactory;
 
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
-public class FilterLifterImpl implements FilterLifter {
+public class FilterLifterImpl extends AbstractIQOptimizer implements FilterLifter {
 
-    private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
+    private final TreeTransformer transformer;
 
     @Inject
     private FilterLifterImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory, IQTreeTools iqTreeTools) {
-        this.iqFactory = iqFactory;
+        // no equality check
+        super(iqFactory, NO_ACTION);
         this.termFactory = termFactory;
         this.iqTreeTools = iqTreeTools;
+        this.transformer = new TreeTransformer();
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        return iqFactory.createIQ(
-                query.getProjectionAtom(),
-                query.getTree().acceptVisitor(new TreeTransformer()));
+    protected IQVisitor<IQTree> getTransformer(IQ query) {
+        return transformer;
     }
 
     private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {

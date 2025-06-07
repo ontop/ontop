@@ -52,7 +52,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer extends AbstractIQOptimize
                                                        CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer,
                                                        JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                                        LeftJoinTools leftJoinTools) {
-        super(coreSingletons.getIQFactory());
+        super(coreSingletons.getIQFactory(), NO_ACTION);
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
         this.coreSingletons = coreSingletons;
         this.otherLJOptimizer = otherLJOptimizer;

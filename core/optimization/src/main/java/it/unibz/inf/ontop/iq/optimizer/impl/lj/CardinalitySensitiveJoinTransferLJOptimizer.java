@@ -36,7 +36,7 @@ public class CardinalitySensitiveJoinTransferLJOptimizer extends AbstractIQOptim
                                                           RightProvenanceNormalizer rightProvenanceNormalizer,
                                                           JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                                           CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory());
+        super(coreSingletons.getIQFactory(), NO_ACTION);
         this.requiredDataNodeExtractor = requiredDataNodeExtractor;
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
         this.coreSingletons = coreSingletons;

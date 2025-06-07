@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -14,9 +13,8 @@ import it.unibz.inf.ontop.iq.node.AggregationNode;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.optimizer.AggregationSimplifier;
-import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transformer.impl.RDFTypeDependentSimplifyingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
@@ -30,33 +28,25 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import javax.inject.Inject;
 import java.util.Optional;
 
-public class AggregationSimplifierImpl implements AggregationSimplifier {
+public class AggregationSimplifierImpl extends AbstractIQOptimizer implements AggregationSimplifier {
 
-    private final IntermediateQueryFactory iqFactory;
     private final OptimizationSingletons optimizationSingletons;
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
 
     @Inject
     private AggregationSimplifierImpl(OptimizationSingletons optimizationSingletons) {
+        // no equality check
+        super(optimizationSingletons.getCoreSingletons().getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.optimizationSingletons = optimizationSingletons;
         CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
-        this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        VariableGenerator variableGenerator = query.getVariableGenerator();
-        IQTreeTransformer transformer = createTransformer(variableGenerator);
-        IQTree newTree = transformer.transform(query.getTree())
-                .normalizeForOptimization(variableGenerator);
-        return iqFactory.createIQ(query.getProjectionAtom(), newTree);
-    }
-
-    protected IQTreeTransformer createTransformer(VariableGenerator variableGenerator) {
-        return new IQTreeTransformerAdapter(new AggregationSimplifyingTransformer(variableGenerator));
+    protected IQVisitor<IQTree> getTransformer(IQ query) {
+        return new AggregationSimplifyingTransformer(query.getVariableGenerator());
     }
 
     /**

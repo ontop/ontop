@@ -28,7 +28,7 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl extends AbstractIQOpti
     @Inject
     protected BelowDistinctJoinWithClassUnionOptimizerImpl(CoreSingletons coreSingletons,
                                                            RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
-        super(coreSingletons.getIQFactory());
+        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.coreSingletons = coreSingletons;
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         this.lookForDistinctTransformer = new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
@@ -44,11 +44,6 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl extends AbstractIQOpti
     @Override
     protected IQVisitor<IQTree> getTransformer(IQ query) {
         return lookForDistinctTransformer;
-    }
-
-    @Override
-    protected IQ postTransform(IQ query) {
-        return query.normalizeForOptimization();
     }
 
     protected class JoinWithClassUnionTransformer extends AbstractBelowDistinctInnerJoinTransformer {

@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.impl.UnaryIQTreeBuilder;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.FlattenLifter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -19,22 +20,20 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
-public class BasicFlattenLifter implements FlattenLifter {
+public class BasicFlattenLifter extends AbstractIQOptimizer implements FlattenLifter {
 
-    private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
 
     @Inject
     private BasicFlattenLifter(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
-        this.iqFactory = iqFactory;
+        // no equality check
+        super(iqFactory, NO_ACTION);
         this.iqTreeTools = iqTreeTools;
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        return iqFactory.createIQ(
-                query.getProjectionAtom(),
-                query.getTree().acceptVisitor(new TreeTransformer(query.getTree())));
+    protected IQVisitor<IQTree> getTransformer(IQ query) {
+        return new TreeTransformer(query.getTree());
     }
 
     private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {

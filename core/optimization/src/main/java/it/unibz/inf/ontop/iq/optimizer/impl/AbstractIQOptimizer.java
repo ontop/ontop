@@ -6,28 +6,37 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 
+import java.util.function.Function;
+
 public abstract class AbstractIQOptimizer implements IQOptimizer {
     protected final IntermediateQueryFactory iqFactory;
+    private final Function<IQ, IQ> postTransformerAction;
+    private final Function<IQ, IQ> preTransformerAction;
 
-    public AbstractIQOptimizer(IntermediateQueryFactory iqFactory) {
+    protected static final Function<IQ, IQ> NO_ACTION = q -> q;
+    protected static final Function<IQ, IQ> NORMALIZE_FOR_OPTIMIZATION = IQ::normalizeForOptimization;
+
+    public AbstractIQOptimizer(IntermediateQueryFactory iqFactory, Function<IQ, IQ> postTransformerAction) {
+        this(iqFactory, NO_ACTION, postTransformerAction);
+    }
+
+    public AbstractIQOptimizer(IntermediateQueryFactory iqFactory, Function<IQ, IQ> preTransformerAction, Function<IQ, IQ> postTransformerAction) {
         this.iqFactory = iqFactory;
+        this.preTransformerAction = preTransformerAction;
+        this.postTransformerAction = postTransformerAction;
     }
 
     @Override
     public IQ optimize(IQ query) {
         IQVisitor<IQTree> transformer = getTransformer(query);
 
-        IQTree initialTree = query.getTree();
-        IQTree newTree = initialTree.acceptVisitor(transformer);
+        IQ before = preTransformerAction.apply(query);
+        IQTree newTree = before.getTree().acceptVisitor(transformer);
 
-        return newTree.equals(initialTree)
+        return newTree.equals(query.getTree())
                 ? query
-                : postTransform(iqFactory.createIQ(query.getProjectionAtom(), newTree));
+                : postTransformerAction.apply(iqFactory.createIQ(query.getProjectionAtom(), newTree));
     }
 
     protected abstract IQVisitor<IQTree> getTransformer(IQ query);
-
-    protected IQ postTransform(IQ query) {
-        return query;
-    }
 }

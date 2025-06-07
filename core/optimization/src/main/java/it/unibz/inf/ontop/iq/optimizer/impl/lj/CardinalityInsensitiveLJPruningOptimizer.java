@@ -33,7 +33,7 @@ public class CardinalityInsensitiveLJPruningOptimizer extends AbstractIQOptimize
 
     @Inject
     protected CardinalityInsensitiveLJPruningOptimizer(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory());
+        super(coreSingletons.getIQFactory(), NO_ACTION);
     }
 
     @Override

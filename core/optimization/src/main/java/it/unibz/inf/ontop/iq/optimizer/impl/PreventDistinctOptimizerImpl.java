@@ -26,7 +26,7 @@ public class PreventDistinctOptimizerImpl extends AbstractIQOptimizer implements
 
     @Inject
     private PreventDistinctOptimizerImpl(OptimizationSingletons optimizationSingletons, PreventDistinctProjectionSplitter preventDistinctProjectionSplitter) {
-        super(optimizationSingletons.getCoreSingletons().getIQFactory());
+        super(optimizationSingletons.getCoreSingletons().getIQFactory(), NO_ACTION);
         this.preventDistinctProjectionSplitter = preventDistinctProjectionSplitter;
     }
 
