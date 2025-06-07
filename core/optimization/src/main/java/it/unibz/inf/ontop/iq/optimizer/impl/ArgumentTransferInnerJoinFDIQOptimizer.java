@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.optimizer.InnerJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -29,24 +30,24 @@ import java.util.stream.Stream;
 /**
  * TODO: explain
  */
-public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimizer {
+public class ArgumentTransferInnerJoinFDIQOptimizer extends AbstractIQOptimizer implements InnerJoinIQOptimizer {
 
-    private final IntermediateQueryFactory iqFactory;
     private final SelfJoinFDSimplifier simplifier;
 
     @Inject
     protected ArgumentTransferInnerJoinFDIQOptimizer(CoreSingletons coreSingletons) {
+        super(coreSingletons.getIQFactory());
         this.simplifier = new SelfJoinFDSimplifier(coreSingletons);
-        this.iqFactory = coreSingletons.getIQFactory();
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        IQTree initialTree = query.getTree();
-        IQTree newTree = initialTree.acceptVisitor(new ArgumentTransferJoinTransformer(query.getVariableGenerator()));
-        return (newTree == initialTree)
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree).normalizeForOptimization();
+    protected IQVisitor<IQTree> getTransformer(IQ query) {
+        return new ArgumentTransferJoinTransformer(query.getVariableGenerator());
+    }
+
+    @Override
+    protected IQ postTransform(IQ query) {
+        return query.normalizeForOptimization();
     }
 
     protected class ArgumentTransferJoinTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
