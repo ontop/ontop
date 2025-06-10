@@ -1,4 +1,4 @@
-FROM tdengine/tdengine:3.3.5.0
+FROM tdengine/tdengine:3.3.5.8
 
 RUN mkdir /var/custom/
 
