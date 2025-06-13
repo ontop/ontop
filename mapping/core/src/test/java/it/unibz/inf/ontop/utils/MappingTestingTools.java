@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
+import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
@@ -58,6 +59,7 @@ public class MappingTestingTools {
     public static final NamedRelationDefinition TABLE3_AR3;
     public static final NamedRelationDefinition TABLE4_AR3;
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
+    public static final TermNullabilityEvaluator TERM_NULLABILITY_EVALUATOR;
 
     static {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -85,6 +87,7 @@ public class MappingTestingTools {
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
+        TERM_NULLABILITY_EVALUATOR = injector.getInstance(TermNullabilityEvaluator.class);
 
         EMPTY_PREFIX_MANAGER = SPECIFICATION_FACTORY.createPrefixManager(ImmutableMap.of());
 
