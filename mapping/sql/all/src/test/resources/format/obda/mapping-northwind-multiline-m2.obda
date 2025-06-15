@@ -14,5 +14,6 @@ target		<http://www.optique-project.eu/resource/employeesLocation/{EMPLOYEEID}> 
                    <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/ADDRESS> {ADDRESS} ;
                    <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/REGION> {REGION} ;
                    <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/POSTALCODE> {POSTALCODE} .
-source		SELECT * FROM NORTHWIND.EMPLOYEES
+source		SELECT * FROM
+            NORTHWIND.EMPLOYEES
 ]]
