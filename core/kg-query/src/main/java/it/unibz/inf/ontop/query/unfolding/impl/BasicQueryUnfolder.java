@@ -36,7 +36,6 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
     private final QueryTransformerFactory transformerFactory;
     private final AtomFactory atomFactory;
     private final UnionBasedQueryMerger queryMerger;
-    private final CoreUtilsFactory coreUtilsFactory;
 
     /**
      * See {@link QueryUnfolder.Factory#create(Mapping)}
@@ -44,21 +43,21 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
     @AssistedInject
     private BasicQueryUnfolder(@Assisted Mapping mapping, IntermediateQueryFactory iqFactory,
                                SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
-                               UnionBasedQueryMerger queryMerger, CoreUtilsFactory coreUtilsFactory,
+                               UnionBasedQueryMerger queryMerger,
                                AtomFactory atomFactory) {
         super(iqFactory);
         this.mapping = mapping;
         this.substitutionFactory = substitutionFactory;
         this.transformerFactory = transformerFactory;
         this.queryMerger = queryMerger;
-        this.coreUtilsFactory = coreUtilsFactory;
         this.atomFactory = atomFactory;
     }
 
     @Override
-    protected AbstractQueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
-        return new BasicQueryUnfoldingTransformer(coreUtilsFactory.createVariableGenerator(knownVariables));
+    protected IQTree transformTree(IQ query) {
+        return query.getTree().acceptVisitor(new BasicQueryUnfoldingTransformer(query.getVariableGenerator()));
     }
+
 
     protected class BasicQueryUnfoldingTransformer extends AbstractQueryMergingTransformer {
 

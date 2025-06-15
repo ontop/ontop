@@ -45,8 +45,9 @@ public class AggregationSimplifierImpl extends AbstractIQOptimizer implements Ag
     }
 
     @Override
-    protected IQVisitor<IQTree> getTransformer(IQ query) {
-        return new AggregationSimplifyingTransformer(query.getVariableGenerator());
+    protected IQTree transformTree(IQ query) {
+        IQVisitor<IQTree> transformer = new AggregationSimplifyingTransformer(query.getVariableGenerator());
+        return query.getTree().acceptVisitor(transformer);
     }
 
     /**

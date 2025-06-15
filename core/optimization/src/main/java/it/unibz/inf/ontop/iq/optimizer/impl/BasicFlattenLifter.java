@@ -32,9 +32,11 @@ public class BasicFlattenLifter extends AbstractIQOptimizer implements FlattenLi
     }
 
     @Override
-    protected IQVisitor<IQTree> getTransformer(IQ query) {
-        return new TreeTransformer(query.getTree());
+    protected IQTree transformTree(IQ query) {
+        IQVisitor<IQTree> transformer = new TreeTransformer(query.getTree());
+        return query.getTree().acceptVisitor(transformer);
     }
+
 
     private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
         private final IQTree topRoot;

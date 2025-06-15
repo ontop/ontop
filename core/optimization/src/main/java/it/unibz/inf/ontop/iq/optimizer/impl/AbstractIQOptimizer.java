@@ -4,6 +4,8 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 
 import java.util.function.Function;
@@ -28,15 +30,17 @@ public abstract class AbstractIQOptimizer implements IQOptimizer {
 
     @Override
     public IQ optimize(IQ query) {
-        IQVisitor<IQTree> transformer = getTransformer(query);
-
         IQ before = preTransformerAction.apply(query);
-        IQTree newTree = before.getTree().acceptVisitor(transformer);
+        IQTree newTree = transformTree(before);
 
         return newTree.equals(query.getTree())
                 ? query
                 : postTransformerAction.apply(iqFactory.createIQ(query.getProjectionAtom(), newTree));
     }
 
-    protected abstract IQVisitor<IQTree> getTransformer(IQ query);
+    protected static IQTreeTransformer transformerOf(IQVisitor<IQTree> visitor) {
+        return new IQTreeTransformerAdapter(visitor);
+    }
+
+    protected abstract IQTree transformTree(IQ query);
 }

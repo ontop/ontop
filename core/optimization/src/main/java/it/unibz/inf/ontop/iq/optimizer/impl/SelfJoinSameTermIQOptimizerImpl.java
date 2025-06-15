@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.SelfJoinSameTermIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 
@@ -29,7 +28,7 @@ public class SelfJoinSameTermIQOptimizerImpl extends AbstractIQOptimizer impleme
         this.coreSingletons = coreSingletons;
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         this.lookForDistinctTransformer = new CaseInsensitiveIQTreeTransformerAdapter(coreSingletons.getIQFactory()) {
-            private final IQVisitor<IQTree> transformer = new SameTermSelfJoinTransformer(new IQTreeTransformerAdapter(this));
+            private final IQVisitor<IQTree> transformer = new SameTermSelfJoinTransformer(transformerOf(this));
 
             @Override
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
@@ -39,8 +38,8 @@ public class SelfJoinSameTermIQOptimizerImpl extends AbstractIQOptimizer impleme
     }
 
     @Override
-    protected IQVisitor<IQTree> getTransformer(IQ query) {
-        return lookForDistinctTransformer;
+    protected IQTree transformTree(IQ query) {
+        return query.getTree().acceptVisitor(lookForDistinctTransformer);
     }
 
     /**

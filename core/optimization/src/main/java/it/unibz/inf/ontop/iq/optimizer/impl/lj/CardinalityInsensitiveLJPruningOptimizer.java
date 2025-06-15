@@ -12,10 +12,10 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.AggregationSimplifierImpl;
 import it.unibz.inf.ontop.iq.optimizer.impl.CaseInsensitiveIQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -37,17 +37,19 @@ public class CardinalityInsensitiveLJPruningOptimizer extends AbstractIQOptimize
     }
 
     @Override
-    protected IQVisitor<IQTree> getTransformer(IQ query) {
-        return new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
+    protected IQTree transformTree(IQ query) {
+        IQVisitor<IQTree> transformer = new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
             @Override
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
                 IQVisitor<IQTree> transformer = new CardinalityInsensitiveLJPruningTransformer(
-                        new IQTreeTransformerAdapter(this),
+                        transformerOf(this),
                         tree.getVariables());
                 return tree.acceptVisitor(transformer);
             }
         };
+        return query.getTree().acceptVisitor(transformer);
     }
+
 
     // TODO: unclear why it's called non-recursive
     private class CardinalityInsensitiveLJPruningTransformer extends DefaultNonRecursiveIQTreeTransformer {

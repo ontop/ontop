@@ -4,7 +4,6 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
@@ -13,7 +12,6 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.NodeInGraphOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -49,9 +47,10 @@ public class NodeInGraphOptimizerImpl extends AbstractIQOptimizer implements Nod
     }
 
     @Override
-    protected IQVisitor<IQTree> getTransformer(IQ query) {
-        return transformer;
+    protected IQTree transformTree(IQ query) {
+        return query.getTree().acceptVisitor(transformer);
     }
+
 
     protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 

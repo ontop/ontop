@@ -61,11 +61,13 @@ public class LJWithNestingOnRightToInnerJoinOptimizer extends AbstractIQOptimize
     }
 
     @Override
-    protected IQVisitor<IQTree> getTransformer(IQ query) {
-        return new Transformer(
+    protected IQTree transformTree(IQ query) {
+        IQVisitor<IQTree> transformer = new Transformer(
                 query.getTree()::getVariableNullability,
                 query.getVariableGenerator());
+        return query.getTree().acceptVisitor(transformer);
     }
+
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     protected class Transformer extends AbstractLJTransformer {

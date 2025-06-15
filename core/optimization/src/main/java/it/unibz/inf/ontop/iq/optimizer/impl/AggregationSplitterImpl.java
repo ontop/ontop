@@ -8,7 +8,6 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -50,8 +49,9 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
     }
 
     @Override
-    protected IQVisitor<IQTree> getTransformer(IQ query) {
-        return new AggregationUnionLifterTransformer(query.getVariableGenerator());
+    protected IQTree transformTree(IQ query) {
+        IQVisitor<IQTree> transformer = new AggregationUnionLifterTransformer(query.getVariableGenerator());
+        return query.getTree().acceptVisitor(transformer);
     }
 
 

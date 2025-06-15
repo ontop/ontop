@@ -4,7 +4,6 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.optimizer.splitter.PreventDistinctProjectionSplitter;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -31,9 +30,11 @@ public class PreventDistinctOptimizerImpl extends AbstractIQOptimizer implements
     }
 
     @Override
-    protected IQVisitor<IQTree> getTransformer(IQ query) {
-        return new PreventDistinctTransformer(query.getVariableGenerator());
+    protected IQTree transformTree(IQ query) {
+        IQVisitor<IQTree> transformer = new PreventDistinctTransformer(query.getVariableGenerator());
+        return query.getTree().acceptVisitor(transformer);
     }
+
 
     private class PreventDistinctTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 

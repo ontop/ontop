@@ -813,10 +813,10 @@ public class QueryMergingTest {
         }
 
         @Override
-        protected AbstractQueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
-            VariableGenerator variableGenerator = CORE_UTILS_FACTORY.createVariableGenerator(knownVariables);
-            return new BasicQueryMergingTransformer(variableGenerator);
+        protected IQTree transformTree(IQ query) {
+            return query.getTree().acceptVisitor(new BasicQueryMergingTransformer(query.getVariableGenerator()));
         }
+
 
         private class BasicQueryMergingTransformer extends AbstractQueryMergingTransformer {
 

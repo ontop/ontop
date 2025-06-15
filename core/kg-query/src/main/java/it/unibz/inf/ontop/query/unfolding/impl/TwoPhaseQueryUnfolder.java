@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
 import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -26,7 +27,6 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
     private static final Logger LOGGER = LoggerFactory.getLogger(TwoPhaseQueryUnfolder.class);
 
     private final Mapping mapping;
-    private final CoreUtilsFactory coreUtilsFactory;
 
     private final CoreSingletons coreSingletons;
 
@@ -34,35 +34,27 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
      * See {@link QueryUnfolder.Factory#create(Mapping)}
      */
     @AssistedInject
-    private TwoPhaseQueryUnfolder(@Assisted Mapping mapping, IntermediateQueryFactory iqFactory,
-                                  CoreUtilsFactory coreUtilsFactory,
-                                  CoreSingletons coreSingletons) {
-        super(iqFactory);
+    private TwoPhaseQueryUnfolder(@Assisted Mapping mapping, CoreSingletons coreSingletons) {
+        super(coreSingletons.getIQFactory());
         this.mapping = mapping;
-        this.coreUtilsFactory = coreUtilsFactory;
         this.coreSingletons = coreSingletons;
     }
 
     @Override
-    protected IQTree optimize(IQTree tree) {
+    protected IQTree transformTree(IQ query) {
         long before = System.currentTimeMillis();
-        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(tree.getKnownVariables());
+        VariableGenerator variableGenerator = query.getVariableGenerator();
         FirstPhaseQueryMergingTransformer firstPhaseTransformer = new FirstPhaseQueryMergingTransformer(mapping, variableGenerator, coreSingletons);
 
         // NB: no normalization at that point, because of limitation of getPossibleVariableDefinitions implementation
         // (Problem with join strict equality and condition)
-        IQTree partiallyUnfoldedIQ = tree.acceptVisitor(firstPhaseTransformer);
+        IQTree partiallyUnfoldedIQ = query.getTree().acceptVisitor(firstPhaseTransformer);
         LOGGER.debug("First phase query unfolding time: {}", System.currentTimeMillis() - before);
 
         if (!firstPhaseTransformer.areSomeIntensionalNodesRemaining())
             return partiallyUnfoldedIQ;
 
         return executeSecondPhaseUnfolding(partiallyUnfoldedIQ, variableGenerator);
-    }
-
-    @Override
-    protected AbstractQueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
-        throw new MinorOntopInternalBugException("This method should not be called");
     }
 
 

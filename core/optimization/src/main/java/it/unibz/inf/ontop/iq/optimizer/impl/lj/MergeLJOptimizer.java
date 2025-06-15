@@ -15,6 +15,8 @@ import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.AggregationSimplifierImpl;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -66,9 +68,12 @@ public class MergeLJOptimizer extends AbstractIQOptimizer implements LeftJoinIQO
     }
 
     @Override
-    protected IQVisitor<IQTree> getTransformer(IQ query) {
-        return new Transformer(query.getVariableGenerator());
+    protected IQTree transformTree(IQ query) {
+        IQVisitor<IQTree> transformer = new Transformer(query.getVariableGenerator());
+        return query.getTree().acceptVisitor(transformer);
     }
+
+
 
     protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 

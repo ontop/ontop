@@ -24,41 +24,27 @@ import java.util.stream.Stream;
  * TODO: explicit assumptions
  */
 @Singleton
-public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLiftOptimizer {
+public class BottomUpUnionAndBindingLiftOptimizer extends AbstractIQOptimizer implements UnionAndBindingLiftOptimizer {
 
     private static final int ITERATION_BOUND = 10000;
-    private final IntermediateQueryFactory iqFactory;
 
     @Inject
     private BottomUpUnionAndBindingLiftOptimizer(IntermediateQueryFactory iqFactory) {
-        this.iqFactory = iqFactory;
+        super(iqFactory, NORMALIZE_FOR_OPTIMIZATION, NO_ACTION);
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        IQ bindingLiftedQuery = query.normalizeForOptimization();
-        VariableGenerator variableGenerator = query.getVariableGenerator();
-        IQTree newTree = liftUnionsInTree(bindingLiftedQuery.getTree(), variableGenerator);
-
-        return newTree.equals(query.getTree())
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree);
-    }
-
-    /**
-     * TODO: refactor
-     */
-    private IQTree liftUnionsInTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQVisitor<IQTree> lifter = new Lifter(variableGenerator);
+    protected IQTree transformTree(IQ query) {
+        IQVisitor<IQTree> lifter = new Lifter(query.getVariableGenerator());
 
         // Non-final
         IQTree previousTree;
-        IQTree newTree = tree;
+        IQTree newTree = query.getTree();
         int i=0;
         do {
             previousTree = newTree;
             newTree = previousTree.acceptVisitor(lifter)
-                    .normalizeForOptimization(variableGenerator);
+                    .normalizeForOptimization(query.getVariableGenerator());
 
         } while (!newTree.equals(previousTree) && (++i < ITERATION_BOUND));
 

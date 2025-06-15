@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.DisjunctionOfEqualitiesMergingSimplifier;
 import it.unibz.inf.ontop.iq.type.impl.AbstractExpressionTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -21,30 +22,25 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class DisjunctionOfEqualitiesMergingSimplifierImpl implements DisjunctionOfEqualitiesMergingSimplifier {
+public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOptimizer implements DisjunctionOfEqualitiesMergingSimplifier {
 
-    private final CoreSingletons coreSingletons;
     private static final int MAX_ARITY = 8;
+
+    private final IQVisitor<IQTree> inCreatingTransformer;
+    private final IQVisitor<IQTree> inMergingTransformer;
 
     @Inject
     protected DisjunctionOfEqualitiesMergingSimplifierImpl(CoreSingletons coreSingletons) {
-        this.coreSingletons = coreSingletons;
+        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
+        this.inCreatingTransformer = new InCreatingTransformer(coreSingletons);
+        this.inMergingTransformer = new InMergingTransformer(coreSingletons);
     }
 
     @Override
-    public IQ optimize(IQ query) {
+    public IQTree transformTree(IQ query) {
         IQTree tree = query.getTree();
-
-        //Create IN terms where we have disjunctions of equalities.
-        IQTree newTree = tree.acceptVisitor(new InCreatingTransformer());
-
-        //Merge IN terms together.
-        IQTree finalTree = newTree.acceptVisitor(new InMergingTransformer());
-
-        return finalTree == tree
-                ? query
-                : coreSingletons.getIQFactory().createIQ(query.getProjectionAtom(), finalTree)
-                .normalizeForOptimization();
+        IQTree newTree = tree.acceptVisitor(inCreatingTransformer);
+        return newTree.acceptVisitor(inMergingTransformer);
     }
 
 
@@ -81,7 +77,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
 
     protected class InCreatingTransformer extends AbstractExpressionTransformer {
 
-        protected InCreatingTransformer() {
+        protected InCreatingTransformer(CoreSingletons coreSingletons) {
             super(coreSingletons);
         }
 
@@ -124,7 +120,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
         CONJUNCTION,
         DISJUNCTION;
 
-        public BooleanOperation dual() {
+        BooleanOperation dual() {
             switch (this) {
                 case CONJUNCTION:
                     return DISJUNCTION;
@@ -135,7 +131,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
             }
         }
 
-        public static Optional<BooleanOperation> of(ImmutableFunctionalTerm term) {
+        static Optional<BooleanOperation> of(ImmutableFunctionalTerm term) {
             if (term.getFunctionSymbol() instanceof DBAndFunctionSymbol)
                 return Optional.of(CONJUNCTION);
             if (term.getFunctionSymbol() instanceof DBOrFunctionSymbol)
@@ -146,7 +142,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
 
     protected class InMergingTransformer extends AbstractExpressionTransformer {
 
-        protected InMergingTransformer() {
+        protected InMergingTransformer(CoreSingletons coreSingletons) {
             super(coreSingletons);
         }
 

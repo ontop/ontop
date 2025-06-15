@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.FilterLifter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.TermFactory;
 
 import java.util.stream.Stream;
@@ -33,8 +32,8 @@ public class FilterLifterImpl extends AbstractIQOptimizer implements FilterLifte
     }
 
     @Override
-    protected IQVisitor<IQTree> getTransformer(IQ query) {
-        return transformer;
+    protected IQTree transformTree(IQ query) {
+        return query.getTree().acceptVisitor(transformer);
     }
 
     private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {

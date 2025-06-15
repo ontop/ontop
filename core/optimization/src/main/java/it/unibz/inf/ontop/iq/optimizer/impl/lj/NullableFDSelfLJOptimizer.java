@@ -21,7 +21,6 @@ import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.CaseInsensitiveIQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -65,18 +64,20 @@ public class NullableFDSelfLJOptimizer extends AbstractIQOptimizer implements Le
     }
 
     @Override
-    protected IQVisitor<IQTree> getTransformer(IQ query) {
-        return new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
+    protected IQTree transformTree(IQ query) {
+        IQVisitor<IQTree> transformer = new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
             @Override
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
                 IQVisitor<IQTree> transformer = new CardinalityInsensitiveTransformer(
-                        new IQTreeTransformerAdapter(this),
+                        transformerOf(this),
                         tree::getVariableNullability,
                         query.getVariableGenerator());
                 return tree.acceptVisitor(transformer);
             }
         };
+        return query.getTree().acceptVisitor(transformer);
     }
+
 
     protected class CardinalityInsensitiveTransformer extends AbstractLJTransformer {
 

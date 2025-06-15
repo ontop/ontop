@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.BelowDistinctJoinWithClassUnionOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -32,7 +31,7 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl extends AbstractIQOpti
         this.coreSingletons = coreSingletons;
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         this.lookForDistinctTransformer = new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
-            private final IQVisitor<IQTree> transformer = new JoinWithClassUnionTransformer(new IQTreeTransformerAdapter(this));
+            private final IQVisitor<IQTree> transformer = new JoinWithClassUnionTransformer(transformerOf(this));
 
             @Override
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
@@ -42,9 +41,10 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl extends AbstractIQOpti
     }
 
     @Override
-    protected IQVisitor<IQTree> getTransformer(IQ query) {
-        return lookForDistinctTransformer;
+    protected IQTree transformTree(IQ query) {
+        return query.getTree().acceptVisitor(lookForDistinctTransformer);
     }
+
 
     protected class JoinWithClassUnionTransformer extends AbstractBelowDistinctInnerJoinTransformer {
 

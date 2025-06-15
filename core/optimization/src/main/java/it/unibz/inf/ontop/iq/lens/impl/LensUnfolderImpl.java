@@ -5,38 +5,34 @@ import it.unibz.inf.ontop.iq.lens.LensUnfolder;
 import it.unibz.inf.ontop.dbschema.Lens;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.impl.ExtensionalDataNodeImpl;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-public class LensUnfolderImpl implements LensUnfolder {
+public class LensUnfolderImpl extends AbstractIQOptimizer implements LensUnfolder {
 
     protected final CoreSingletons coreSingletons;
-    protected final IntermediateQueryFactory iqFactory;
 
     @Inject
     protected LensUnfolderImpl(CoreSingletons coreSingletons) {
+        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.coreSingletons = coreSingletons;
-        this.iqFactory = coreSingletons.getIQFactory();
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        IQTree initialTree = query.getTree();
-        int maxLevel = Lens.getMaxLevel(initialTree);
+    public IQTree transformTree(IQ query) {
+        IQTree tree = query.getTree();
+        int maxLevel = Lens.getMaxLevel(tree);
         if (maxLevel < 1)
-            return query;
+            return tree;
 
-        IQTree newTree = initialTree.acceptVisitor(new MaxLevelLensUnfoldingTransformer(maxLevel, query.getVariableGenerator()));
-
-        return newTree.equals(initialTree)
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree)
-                .normalizeForOptimization();
+        IQVisitor<IQTree> transformer = new MaxLevelLensUnfoldingTransformer(maxLevel, query.getVariableGenerator());
+        return tree.acceptVisitor(transformer);
     }
 
     protected class MaxLevelLensUnfoldingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {

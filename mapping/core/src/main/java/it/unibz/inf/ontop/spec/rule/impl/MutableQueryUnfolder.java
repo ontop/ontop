@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.spec.rule.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
@@ -14,7 +13,6 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
@@ -35,7 +33,6 @@ public class MutableQueryUnfolder extends AbstractIntensionalQueryMerger {
     private final Map<MappingAssertionIndex, MappingAssertion> mutableMapping;
     private final SubstitutionFactory substitutionFactory;
     private final QueryTransformerFactory transformerFactory;
-    private final CoreUtilsFactory coreUtilsFactory;
     private final AtomFactory atomFactory;
 
     public MutableQueryUnfolder(Map<MappingAssertionIndex, MappingAssertion> mutableMapping,
@@ -46,19 +43,19 @@ public class MutableQueryUnfolder extends AbstractIntensionalQueryMerger {
         this.mutableMapping = mutableMapping;
         this.substitutionFactory = substitutionFactory;
         this.transformerFactory = transformerFactory;
-        this.coreUtilsFactory = coreUtilsFactory;
         this.atomFactory = atomFactory;
     }
 
     @Override
-    protected AbstractQueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
-        return new MutableQueryUnfoldingTransformer(coreUtilsFactory.createVariableGenerator(knownVariables), iqFactory);
+    protected IQTree transformTree(IQ query) {
+        return query.getTree().acceptVisitor(new MutableQueryUnfoldingTransformer(query.getVariableGenerator()));
     }
+
 
     protected class MutableQueryUnfoldingTransformer extends AbstractQueryMergingTransformer {
 
-        protected MutableQueryUnfoldingTransformer(VariableGenerator variableGenerator, IntermediateQueryFactory iqFactory) {
-            super(variableGenerator, iqFactory, substitutionFactory, atomFactory, transformerFactory);
+        protected MutableQueryUnfoldingTransformer(VariableGenerator variableGenerator) {
+            super(variableGenerator, MutableQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
         }
 
         @Override

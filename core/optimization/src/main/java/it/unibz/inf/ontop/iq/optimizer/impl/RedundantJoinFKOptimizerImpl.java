@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
@@ -16,7 +15,6 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.optimizer.RedundantJoinFKOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -41,9 +39,10 @@ public class RedundantJoinFKOptimizerImpl extends AbstractIQOptimizer implements
     }
 
     @Override
-    protected IQVisitor<IQTree> getTransformer(IQ query) {
-        return transformer;
+    protected IQTree transformTree(IQ query) {
+        return query.getTree().acceptVisitor(transformer);
     }
+
 
     protected class RedundantJoinFKTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 

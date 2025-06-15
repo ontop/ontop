@@ -38,9 +38,11 @@ public class SelfJoinUCIQOptimizerImpl extends AbstractIQOptimizer implements Se
     }
 
     @Override
-    protected IQVisitor<IQTree> getTransformer(IQ query) {
-        return new SelfJoinUCTransformer(query.getVariableGenerator());
+    protected IQTree transformTree(IQ query) {
+        IQVisitor<IQTree> transformer = new SelfJoinUCTransformer(query.getVariableGenerator());
+        return query.getTree().acceptVisitor(transformer);
     }
+
 
     private class SelfJoinUCTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
