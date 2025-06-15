@@ -39,15 +39,16 @@ public abstract class AbstractBelowDistinctInnerJoinTransformer extends Abstract
         IntStream.range(0, partiallySimplifiedChildren.size())
                 .filter(i -> isDetectedAsRedundant(
                         currentChildren.get(i),
-                        IntStream.range(0, partiallySimplifiedChildren.size())
-                                .filter(j -> j!= i)
+                        IntStream.range(0, currentChildren.size())
+                                .filter(j -> j != i)
                                 .mapToObj(currentChildren::get)))
                 // SIDE-EFFECT
                 .forEach(i -> currentChildren.set(i, iqFactory.createTrueNode()));
 
         ImmutableSet<Variable> variablesToFilterNulls = IntStream.range(0, partiallySimplifiedChildren.size())
                 .filter(i -> currentChildren.get(i).getRootNode() instanceof TrueNode)
-                .mapToObj(i -> partiallySimplifiedChildren.get(i).getVariables())
+                .mapToObj(partiallySimplifiedChildren::get)
+                .map(IQTree::getVariables)
                 .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toSet());
 

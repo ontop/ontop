@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.UnionAndBindingLiftOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -36,22 +37,27 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
     @Override
     public IQ optimize(IQ query) {
         IQ bindingLiftedQuery = query.normalizeForOptimization();
-        return liftUnionsInTree(bindingLiftedQuery);
+        VariableGenerator variableGenerator = query.getVariableGenerator();
+        IQTree newTree = liftUnionsInTree(bindingLiftedQuery.getTree(), variableGenerator);
+
+        return newTree.equals(query.getTree())
+                ? query
+                : iqFactory.createIQ(query.getProjectionAtom(), newTree);
     }
 
     /**
      * TODO: refactor
      */
-    private IQ liftUnionsInTree(IQ query) {
-        VariableGenerator variableGenerator = query.getVariableGenerator();
+    private IQTree liftUnionsInTree(IQTree tree, VariableGenerator variableGenerator) {
+        IQVisitor<IQTree> lifter = new Lifter(variableGenerator);
 
         // Non-final
         IQTree previousTree;
-        IQTree newTree = query.getTree();
+        IQTree newTree = tree;
         int i=0;
         do {
             previousTree = newTree;
-            newTree = liftTree(previousTree, variableGenerator)
+            newTree = previousTree.acceptVisitor(lifter)
                     .normalizeForOptimization(variableGenerator);
 
         } while (!newTree.equals(previousTree) && (++i < ITERATION_BOUND));
@@ -59,14 +65,7 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
         if (i >= ITERATION_BOUND)
             throw new MinorOntopInternalBugException(getClass().getName() + " did not converge after "
                     + ITERATION_BOUND + " iterations");
-
-        return newTree.equals(query.getTree())
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree);
-    }
-
-    private IQTree liftTree(IQTree previousTree, VariableGenerator variableGenerator) {
-        return previousTree.acceptVisitor(new Lifter(variableGenerator));
+        return newTree;
     }
 
     private class Lifter extends DefaultRecursiveIQTreeVisitingTransformer {

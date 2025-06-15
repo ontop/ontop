@@ -130,11 +130,7 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer extends AbstractIQOpt
             return lookForDistinctTransformer.transform(tree);
         }
 
-        protected IQTree transformBySearchingFromScratchFromDistinctTree(IQTree tree) {
-            return transformBySearchingFromScratchFromDistinctTree(tree, tree::getVariableNullability);
-        }
-
-        protected IQTree transformBySearchingFromScratchFromDistinctTree(IQTree tree, Supplier<VariableNullability> variableNullabilitySupplier) {
+        protected final IQTree transformBySearchingFromScratchFromDistinctTree(IQTree tree, Supplier<VariableNullability> variableNullabilitySupplier) {
             CardinalityInsensitiveTransformer newTransformer = new CardinalityInsensitiveTransformer(lookForDistinctTransformer,
                     variableNullabilitySupplier, variableGenerator);
             return tree.acceptVisitor(newTransformer);
@@ -168,7 +164,8 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer extends AbstractIQOpt
 
         @Override
         public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            return transformNaryCommutativeNode(tree, rootNode, children, this::transformBySearchingFromScratchFromDistinctTree);
+            return transformNaryCommutativeNode(tree, rootNode, children,
+                    t -> transformBySearchingFromScratchFromDistinctTree(t, t::getVariableNullability));
         }
     }
 

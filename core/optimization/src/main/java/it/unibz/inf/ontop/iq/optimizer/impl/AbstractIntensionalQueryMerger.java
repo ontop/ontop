@@ -21,6 +21,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
         return iqFactory.createIQ(query.getProjectionAtom(), newTree);
     }
 
+    // overridden!
     protected IQTree optimize(IQTree tree) {
         return tree.acceptVisitor(createTransformer(tree.getKnownVariables()));
     }

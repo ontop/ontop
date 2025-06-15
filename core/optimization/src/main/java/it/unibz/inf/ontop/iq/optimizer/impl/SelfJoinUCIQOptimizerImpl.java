@@ -31,7 +31,7 @@ public class SelfJoinUCIQOptimizerImpl extends AbstractIQOptimizer implements Se
     private final SelfJoinUCSimplifier simplifier;
 
     @Inject
-    public SelfJoinUCIQOptimizerImpl(SelfJoinUCSimplifier simplifier,
+    private SelfJoinUCIQOptimizerImpl(SelfJoinUCSimplifier simplifier,
                                      CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.simplifier = simplifier;
@@ -63,7 +63,7 @@ public class SelfJoinUCIQOptimizerImpl extends AbstractIQOptimizer implements Se
         }
     }
 
-    protected static class SelfJoinUCSimplifier extends AbstractSelfJoinSimplifier<UniqueConstraint> {
+    private static class SelfJoinUCSimplifier extends AbstractSelfJoinSimplifier<UniqueConstraint> {
 
         @Inject
         protected SelfJoinUCSimplifier(CoreSingletons coreSingletons) {

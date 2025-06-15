@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -46,6 +47,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
                 .normalizeForOptimization();
     }
 
+
     /**
      * Determines if the given term is a Strict Equality functional term that does not contain null constants and uses a constant.
      */
@@ -68,14 +70,13 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
      * they can be merged with other IN calls.
      */
     private static Optional<ImmutableFunctionalTerm> convertSingleEqualities(ImmutableTerm term, TermFactory termFactory) {
-        if(!isConvertableEquality(term))
+        if (!isConvertableEquality(term))
             return Optional.empty();
         var f = (ImmutableFunctionalTerm) term;
         return Optional.of(termFactory.getImmutableExpression(
                 termFactory.getDBFunctionSymbolFactory().getStrictDBIn(2),
                 f.getTerm(0) instanceof Constant ? f.getTerm(1) : f.getTerm(0),
-                f.getTerm(1) instanceof Constant ? f.getTerm(1) : f.getTerm(0)
-        ));
+                f.getTerm(1) instanceof Constant ? f.getTerm(1) : f.getTerm(0)));
     }
 
     protected class InCreatingTransformer extends AbstractExpressionTransformer {
@@ -119,6 +120,30 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
         }
     }
 
+    private enum BooleanOperation {
+        CONJUNCTION,
+        DISJUNCTION;
+
+        public BooleanOperation dual() {
+            switch (this) {
+                case CONJUNCTION:
+                    return DISJUNCTION;
+                case DISJUNCTION:
+                    return CONJUNCTION;
+                default:
+                    throw new IllegalArgumentException("Unknown operation " + this);
+            }
+        }
+
+        public static Optional<BooleanOperation> of(ImmutableFunctionalTerm term) {
+            if (term.getFunctionSymbol() instanceof DBAndFunctionSymbol)
+                return Optional.of(CONJUNCTION);
+            if (term.getFunctionSymbol() instanceof DBOrFunctionSymbol)
+                return Optional.of(DISJUNCTION);
+            return Optional.empty();
+        }
+    }
+
     protected class InMergingTransformer extends AbstractExpressionTransformer {
 
         protected InMergingTransformer() {
@@ -133,34 +158,30 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
         /**
          * Determines if the given term is a boolean expression of the form [x] AND [y] / [x] OR [y].
          */
-        private boolean isBooleanOperation(ImmutableTerm term) {
-            if(!(term instanceof ImmutableFunctionalTerm))
-                return false;
-            var f = (ImmutableFunctionalTerm) term;
-            return f.getFunctionSymbol() instanceof DBAndFunctionSymbol || f.getFunctionSymbol() instanceof DBOrFunctionSymbol;
+        private boolean isBooleanOperation(ImmutableFunctionalTerm f) {
+            return BooleanOperation.of(f).isPresent();
         }
 
-        /**
-         * Helper method that returns the BooleanFunctionSymbol corresponding to the given arity, depending on the value of `conjunction`.
-         */
-        private BooleanFunctionSymbol operatorSymbol(int arity, boolean conjunction) {
-            return conjunction
-                    ? termFactory.getDBFunctionSymbolFactory().getDBAnd(arity)
-                    : termFactory.getDBFunctionSymbolFactory().getDBOr(arity);
+        private boolean isIn(ImmutableFunctionalTerm f) {
+            return f.getFunctionSymbol() instanceof DBInFunctionSymbol;
         }
 
         /**
          * Assign an integer to different types of terms to sort them in the `mergeAll` method.
          */
-        private int rankTerms(ImmutableTerm term, boolean conjunction) {
-            if(!(term instanceof ImmutableFunctionalTerm))
+        private int rankTerms(ImmutableTerm term, BooleanOperation operation) {
+            if (!(term instanceof ImmutableFunctionalTerm))
                 return 3;
             var f = (ImmutableFunctionalTerm) term;
-            if(isBooleanOperation(f) && ((f.getFunctionSymbol() instanceof DBAndFunctionSymbol) != conjunction))
-                return 2;
-            if(isBooleanOperation(f) && ((f.getFunctionSymbol() instanceof DBAndFunctionSymbol) == conjunction))
-                return 1;
-            if(f.getFunctionSymbol() instanceof DBInFunctionSymbol)
+            Optional<BooleanOperation> optionalOp = BooleanOperation.of(f);
+            if (optionalOp.isPresent()) {
+                BooleanOperation op = optionalOp.get();
+                if (op != operation)
+                    return 2;
+                else
+                    return 1;
+            }
+            if (isIn(f))
                 return 0;
             return 4;
         }
@@ -168,72 +189,78 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
         /**
          * Merges all given terms with each other, using either a conjunction or disjunction, given by the parameter.
          */
-        private ImmutableTerm mergeAll(ImmutableList<ImmutableTerm> terms, boolean conjunction) {
+        private ImmutableTerm mergeAll(ImmutableList<ImmutableTerm> terms, BooleanOperation operation) {
             //First sort terms so that simpler terms are considered first.
             var sorted = terms.stream()
-                    .sorted((t1, t2) -> rankTerms(t1, conjunction) - rankTerms(t2, conjunction))
+                    .sorted((t1, t2) -> rankTerms(t1, operation) - rankTerms(t2, operation))
                     .collect(ImmutableCollectors.toList());
             return sorted.stream()
                     .skip(1)
                     .reduce(sorted.get(0),
                             (current, next) -> {
-                                if(isBooleanOperation(current) && ((ImmutableFunctionalTerm) current).getArity() > MAX_ARITY)
-                                    return conjunction
-                                            ? termFactory.getConjunction((ImmutableExpression) next, (ImmutableExpression) current)
-                                            : termFactory.getDisjunction((ImmutableExpression) next, (ImmutableExpression) current);
-                                return merge(current, next, conjunction);
+                                if (current instanceof ImmutableFunctionalTerm
+                                        && isBooleanOperation((ImmutableFunctionalTerm) current)
+                                        && ((ImmutableFunctionalTerm) current).getArity() > MAX_ARITY) {
+                                    switch (operation) {
+                                        case CONJUNCTION:
+                                            return termFactory.getConjunction((ImmutableExpression) next, (ImmutableExpression) current);
+                                        case DISJUNCTION:
+                                            return termFactory.getDisjunction((ImmutableExpression) next, (ImmutableExpression) current);
+                                    }
+                                }
+                                return merge(current, next, operation);
                             },
                             (m1, m2) -> { throw new UnsupportedOperationException("This should never happen!"); });
         }
 
         /**
-         * Constructs a Conjunction or Disjunction (based on `conjunction` argument). Any IN operations will be merged
-         * over the boolean operation, if possible.
+         * Constructs a Conjunction or Disjunction (based on the `operation` argument).
+         * Any IN operations will be merged over the boolean operation, if possible.
          */
-        private ImmutableTerm merge(ImmutableTerm left, ImmutableTerm right, boolean conjunction) {
+        private ImmutableTerm merge(ImmutableTerm left, ImmutableTerm right, BooleanOperation operation) {
 
-            if(!(left instanceof ImmutableFunctionalTerm) || !(right instanceof ImmutableFunctionalTerm)) {
+            if (!(left instanceof ImmutableFunctionalTerm) || !(right instanceof ImmutableFunctionalTerm)) {
                 //We can only simplify FunctionalTerms
-                return conjunctionDisjunctionOf(ImmutableList.of(left, right), conjunction);
+                return booleanExpressionOf(operation, left, right);
             }
 
-            var fLeft = convertSingleEqualities(left, termFactory).orElse((ImmutableFunctionalTerm) left);
-            var fRight = convertSingleEqualities(right, termFactory).orElse((ImmutableFunctionalTerm) right);
+            ImmutableFunctionalTerm fLeft = convertSingleEqualities(left, termFactory).orElse((ImmutableFunctionalTerm) left);
+            ImmutableFunctionalTerm fRight = convertSingleEqualities(right, termFactory).orElse((ImmutableFunctionalTerm) right);
 
-
-            if(fRight.getFunctionSymbol() instanceof DBInFunctionSymbol) {
-                return mergeInto(fLeft, fRight, conjunction);
-            }
-            if(fLeft.getFunctionSymbol() instanceof DBInFunctionSymbol) {
-                return mergeInto(fRight, fLeft, conjunction);
-            }
-
-            if(!isBooleanOperation(fLeft) || !isBooleanOperation(fRight)) {
+            if (!isMergeable(fLeft) || !isMergeable(fRight)) {
                 //We can only merge IN, AND, or OR
-                return conjunctionDisjunctionOf(ImmutableList.of(left, right), conjunction);
+                return booleanExpressionOf(operation, left, right);
             }
 
-            if(fLeft.getArity() > MAX_ARITY || fRight.getArity() > MAX_ARITY)
-                return conjunctionDisjunctionOf(ImmutableList.of(left, right), conjunction);
+            if (isIn(fRight)) {
+                return mergeInto(fLeft, fRight, operation);
+            }
+            if (isIn(fLeft)) {
+                return mergeInto(fRight, fLeft, operation);
+            }
 
-            if(!Sets.intersection(findAllSearchTerms(fLeft), findAllSearchTerms(fRight)).isEmpty())
-                return crossMerge(fLeft, fRight, conjunction);
-            return conjunctionDisjunctionOf(ImmutableList.of(left, right), conjunction);
+            if (!Sets.intersection(findAllSearchTerms(fLeft), findAllSearchTerms(fRight)).isEmpty())
+                return crossMerge(fLeft, fRight, operation);
+
+            return booleanExpressionOf(operation, left, right);
         }
 
         /**
          * Cross-expands boolean expressions of the form `(a * b) * (c * d)`.
          * where `*` is a boolean AND or OR (not necessarily the same each time it appears).
          */
-        private ImmutableTerm crossMerge(ImmutableFunctionalTerm left, ImmutableFunctionalTerm right, boolean conjunction) {
-            var rightConjunction = right.getFunctionSymbol() instanceof DBAndFunctionSymbol;
+        private ImmutableTerm crossMerge(ImmutableFunctionalTerm left, ImmutableFunctionalTerm right, BooleanOperation operation) {
+            var rightConjunction = BooleanOperation.of(right);
+            if (rightConjunction.isEmpty())
+                throw new MinorOntopInternalBugException("Right must be a boolean operation");
+
             var terms = right.getTerms().stream()
-                    .map(t -> merge(left, t, conjunction))
-                    .flatMap(t -> (isBooleanOperation(t) && ((ImmutableFunctionalTerm) t).getFunctionSymbol() instanceof DBAndFunctionSymbol == rightConjunction)
+                    .map(t -> merge(left, t, operation))
+                    .flatMap(t -> BooleanOperation.of((ImmutableFunctionalTerm) t).equals(rightConjunction)
                             ? ((ImmutableFunctionalTerm) t).getTerms().stream()
-                            : Stream.of(t))
-                    .collect(ImmutableCollectors.toList());
-            return conjunctionDisjunctionOf(terms, rightConjunction);
+                            : Stream.of(t));
+
+            return booleanExpressionOf(rightConjunction.get(), terms);
         }
 
         /**
@@ -241,59 +268,62 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
          * if it is a AND or OR.
          */
         private ImmutableSet<ImmutableTerm> findAllSearchTerms(ImmutableFunctionalTerm term) {
-            if(term.getFunctionSymbol() instanceof DBInFunctionSymbol) {
+            if (isIn(term)) {
                 return ImmutableSet.of(term.getTerm(0));
             }
-            if(isBooleanOperation(term)) {
+            if (isBooleanOperation(term)) {
                 return term.getTerms().stream()
                         .filter(t -> t instanceof ImmutableFunctionalTerm)
-                        .flatMap(t -> findAllSearchTerms((ImmutableFunctionalTerm) t).stream())
+                        .map(t -> (ImmutableFunctionalTerm) t)
+                        .map(this::findAllSearchTerms)
+                        .flatMap(Collection::stream)
                         .collect(ImmutableCollectors.toSet());
             }
             return ImmutableSet.of();
         }
 
+        private boolean isMergeable(ImmutableFunctionalTerm t) {
+            return (isBooleanOperation(t) && t.getArity() <= MAX_ARITY) || isIn(t);
+        }
+
         /**
          * Merges an IN function call into a complex boolean expression.
          */
-        private ImmutableTerm mergeInto(ImmutableTerm target, ImmutableFunctionalTerm in, boolean conjunction) {
-            var targetFunction = Optional.of(target)
-                    .filter(t -> t instanceof ImmutableFunctionalTerm)
-                    .map(t -> (ImmutableFunctionalTerm) t);
+        private ImmutableTerm mergeInto(ImmutableTerm target, ImmutableFunctionalTerm in, BooleanOperation operation) {
+            if (!(target instanceof ImmutableFunctionalTerm))
+                return booleanExpressionOf(operation, target, in);
 
-            if(targetFunction
-                        .filter(t -> (isBooleanOperation(t) && t.getArity() <= MAX_ARITY) || (t.getFunctionSymbol() instanceof DBInFunctionSymbol))
-                        .isEmpty()
-                    || !findAllSearchTerms(targetFunction.get()).contains(in.getTerm(0))
-            ) {
+            ImmutableFunctionalTerm f = (ImmutableFunctionalTerm)target;
+
+            if (!isMergeable(f)
+                    || !findAllSearchTerms(f).contains(in.getTerm(0))) {
                 /* We can only merge into AND, OR, or IN FunctionSymbols and only if
                 *    - target has any IN terms that may be merged
                 *    - target does not already have too many children
                  */
-                return conjunctionDisjunctionOf(ImmutableList.of(target, in), conjunction);
+                return booleanExpressionOf(operation, target, in);
             }
 
-            
-            var f = targetFunction.get();
-            if(f.getFunctionSymbol() instanceof DBInFunctionSymbol) {
+            if (isIn(f)) {
                 //If target is an IN expression, we simply merge.
-                if(canMergeWith(f.getTerms(), in.getTerms()))
-                    return mergeWith(f.getTerms(), in.getTerms(), conjunction);
-                return conjunctionDisjunctionOf(ImmutableList.of(f, in), conjunction);
+                if (canMergeWith(f.getTerms(), in.getTerms()))
+                    return mergeWith(f.getTerms(), in.getTerms(), operation);
+
+                return booleanExpressionOf(operation, f, in);
             }
 
-            //Otherwise, it is an AND or OR FunctionSymbol.
+            //Otherwise, it is an AND or an OR FunctionSymbol.
 
             //In some cases, we may be able to completely neglect the `target` operation because it is already implied by the `in`
             // or because it implies the `in` term.
-            if((conjunction && isImpliedBy(in, f)) || (!conjunction && isImpliedBy(f, in))) {
+            if ((operation == BooleanOperation.CONJUNCTION && isImpliedBy(in, f))
+                    || (operation == BooleanOperation.DISJUNCTION && isImpliedBy(f, in))) {
                 return in;
             }
 
-            var targetConjunction = f.getFunctionSymbol() instanceof DBAndFunctionSymbol;
-            return targetConjunction == conjunction 
-                    ? mergeSameOperation(f, in, conjunction)
-                    : mergeOppositeOperation(f, in, conjunction);
+            return BooleanOperation.of(f).get() == operation
+                    ? mergeSameOperation(f, in, operation)
+                    : mergeDualOperation(f, in, operation);
         }
 
         /**
@@ -303,15 +333,16 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
          *                      can be merged into ANY of its children.
          */
         private boolean canMergeInto(ImmutableTerm target, ImmutableFunctionalTerm in) {
-            if(!(target instanceof ImmutableFunctionalTerm))
+            if (!(target instanceof ImmutableFunctionalTerm))
                 return false;
-            var f = (ImmutableFunctionalTerm) target;
 
-            if(f.getFunctionSymbol() instanceof DBInFunctionSymbol)
+            var f = (ImmutableFunctionalTerm) target;
+            if (isIn(f))
                 return canMergeWith(f.getTerms(), in.getTerms());
-            if(isBooleanOperation(f))
+            if (isBooleanOperation(f))
                 return f.getTerms().stream()
                         .anyMatch(child -> canMergeInto(child, in));
+
             return false;
         }
 
@@ -320,31 +351,28 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
          * where x, y are any expressions and z is an IN expression.
          * Here, a disjunction with z must be applied to x and to y.
          */
-        private ImmutableTerm mergeOppositeOperation(ImmutableFunctionalTerm operation, ImmutableFunctionalTerm in, boolean conjunction) {
-            var canCancel = operation.getTerms().stream()
+        private ImmutableTerm mergeDualOperation(ImmutableFunctionalTerm functionalTerm, ImmutableFunctionalTerm in, BooleanOperation dualOperation) {
+            var canCancel = functionalTerm.getTerms().stream()
                     .collect(ImmutableCollectors.partitioningBy(
-                            child -> canMergeInto(child, in))
-                    );
+                            child -> canMergeInto(child, in)));
 
             var finalTerms = Streams.concat(
                     canCancel.get(false).isEmpty()
                             ? Stream.of()
-                            : Stream.of(termFactory.getImmutableExpression(
-                                    operatorSymbol(2, conjunction),
-                                    conjunctionDisjunctionOf(canCancel.get(false), !conjunction),
-                                    in
-                    )),
+                            : Stream.of(
+                                booleanExpressionOf(dualOperation,
+                                    booleanExpressionOf(dualOperation.dual(), canCancel.get(false)),
+                                    in)),
                     canCancel.get(true).stream()
-                            .map(term -> mergeInto(term, in, conjunction))
-            ).collect(ImmutableCollectors.toList());
+                            .map(term -> mergeInto(term, in, dualOperation)));
 
-            return conjunctionDisjunctionOf(finalTerms, !conjunction);
+            return booleanExpressionOf(dualOperation.dual(), finalTerms);
         }
 
         private boolean isImpliedByTerm(ImmutableTerm determinant, ImmutableTerm dependent) {
-            if(!(determinant instanceof ImmutableFunctionalTerm) || !(dependent instanceof ImmutableFunctionalTerm))
-                return false;
-            return isImpliedBy((ImmutableFunctionalTerm) determinant, (ImmutableFunctionalTerm) dependent);
+            return (determinant instanceof ImmutableFunctionalTerm)
+                    && (dependent instanceof ImmutableFunctionalTerm)
+                    && isImpliedBy((ImmutableFunctionalTerm) determinant, (ImmutableFunctionalTerm) dependent);
         }
 
         /**
@@ -353,30 +381,42 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
          * of the list of matches of IN2.
          */
         private boolean isImpliedBy(ImmutableFunctionalTerm determinant, ImmutableFunctionalTerm dependent) {
-            if(determinant.getFunctionSymbol() instanceof DBInFunctionSymbol && dependent.getFunctionSymbol() instanceof DBInFunctionSymbol) {
+            if (isIn(determinant) && isIn(dependent)) {
                 //IN1 --> IN2 <==> search(IN1) = search(IN2) AND terms(IN1) subsetof terms(IN2)
                 return determinant.getTerm(0).equals(dependent.getTerm(0))
                         && Sets.difference(ImmutableSet.copyOf(determinant.getTerms()), ImmutableSet.copyOf(dependent.getTerms())).isEmpty();
             }
-            if(determinant.getFunctionSymbol() instanceof DBInFunctionSymbol && isBooleanOperation(dependent)) {
-                if(dependent.getFunctionSymbol() instanceof DBAndFunctionSymbol) {
-                    return dependent.getTerms().stream()
-                            .allMatch(term -> isImpliedByTerm(determinant, term));
-                } else {
-                    return dependent.getTerms().stream()
-                            .anyMatch(term -> isImpliedByTerm(determinant, term));
+            Optional<BooleanOperation> dependentOperation = BooleanOperation.of(dependent);
+            if (isIn(determinant)) {
+                if (dependentOperation.isPresent()) {
+                    switch (dependentOperation.get()) {
+                        case CONJUNCTION:
+                            return dependent.getTerms().stream()
+                                    .allMatch(term -> isImpliedByTerm(determinant, term));
+                        case DISJUNCTION:
+                            return dependent.getTerms().stream()
+                                    .anyMatch(term -> isImpliedByTerm(determinant, term));
+                        default:
+                            throw new MinorOntopInternalBugException("Unexpected boolean operation: " + dependentOperation.get());
+                    }
                 }
             }
-            if(dependent.getFunctionSymbol() instanceof DBInFunctionSymbol && isBooleanOperation(determinant)) {
-                if(determinant.getFunctionSymbol() instanceof DBAndFunctionSymbol) {
-                    return determinant.getTerms().stream()
-                            .anyMatch(term -> isImpliedByTerm(term, dependent));
-                } else {
-                    return determinant.getTerms().stream()
-                            .allMatch(term -> isImpliedByTerm(term, dependent));
+            Optional<BooleanOperation> determinantOperation = BooleanOperation.of(determinant);
+            if (isIn(dependent)) {
+                if (determinantOperation.isPresent()) {
+                    switch (determinantOperation.get()) {
+                        case CONJUNCTION:
+                            return determinant.getTerms().stream()
+                                    .anyMatch(term -> isImpliedByTerm(term, dependent));
+                        case DISJUNCTION:
+                            return determinant.getTerms().stream()
+                                    .allMatch(term -> isImpliedByTerm(term, dependent));
+                        default:
+                            throw new MinorOntopInternalBugException("Unexpected boolean operation: " + determinantOperation.get());
+                    }
                 }
             }
-            if(isBooleanOperation(determinant) && isBooleanOperation(dependent)) {
+            if (determinantOperation.isPresent() && dependentOperation.isPresent()) {
                 throw new UnsupportedOperationException("This condition is not implemented because it should not come up.");
             }
             return false;
@@ -389,45 +429,64 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
          * If none of them can be merged with z, we can instead reformulate to
          * (x AND y AND z)
          */
-        private ImmutableTerm mergeSameOperation(ImmutableFunctionalTerm operation, ImmutableFunctionalTerm in, boolean conjunction) {
-            var compatibleChild = operation.getTerms().stream()
+        private ImmutableTerm mergeSameOperation(ImmutableFunctionalTerm functionalTerm, ImmutableFunctionalTerm in, BooleanOperation operation) {
+            var compatibleChild = functionalTerm.getTerms().stream()
                     .filter(child -> canMergeInto(child, in))
                     .findFirst();
-            if(compatibleChild.isPresent()) {
-                return termFactory.getImmutableExpression(
-                        operatorSymbol(operation.getArity(), conjunction),
-                        operation.getTerms().stream()
+
+            if (compatibleChild.isPresent()) {
+                return booleanExpressionOf(operation,
+                        functionalTerm.getTerms().stream()
                                 .map(child -> child == compatibleChild.get()
-                                        ? mergeInto(child, in, conjunction)
-                                        : child)
-                                .collect(ImmutableCollectors.toList())
-                );
+                                        ? mergeInto(child, in, operation)
+                                        : child));
             }
             else {
-                return termFactory.getImmutableExpression(
-                        operatorSymbol(operation.getArity() + 1, conjunction),
+                return booleanExpressionOf(operation,
                         Streams.concat(
-                                operation.getTerms().stream(),
-                                Stream.of(in)
-                        ).collect(ImmutableCollectors.toList())
-                );
+                                functionalTerm.getTerms().stream(),
+                                Stream.of(in)));
             }
         }
 
         @Override
         protected ImmutableFunctionalTerm replaceFunctionSymbol(FunctionSymbol functionSymbol, ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
-            if(newTerms.size() > MAX_ARITY)
+            if (newTerms.size() > MAX_ARITY)
                 return termFactory.getImmutableExpression((BooleanFunctionSymbol) functionSymbol, newTerms);
-            return (ImmutableFunctionalTerm) mergeAll(newTerms, functionSymbol instanceof DBAndFunctionSymbol);
+
+            return (ImmutableFunctionalTerm) mergeAll(newTerms,
+                    functionSymbol instanceof DBAndFunctionSymbol
+                            ? BooleanOperation.CONJUNCTION
+                            : BooleanOperation.DISJUNCTION);
         }
 
         /**
-         * Constructs a Disjunction or Conjunction ImmutableExpression based on the value of `conjunction`.
+         * Constructs a Disjunction or Conjunction ImmutableExpression based on the value of `operation`.
          */
-        private ImmutableTerm conjunctionDisjunctionOf(ImmutableList<? extends ImmutableTerm> terms, boolean conjunction) {
+        private ImmutableTerm booleanExpressionOf(BooleanOperation operation, ImmutableList<? extends ImmutableTerm> terms) {
             if (terms.size() == 1)
                 return terms.get(0);
-            return termFactory.getImmutableExpression(operatorSymbol(terms.size(), conjunction), terms);
+
+            BooleanFunctionSymbol functionSymbol;
+            switch (operation) {
+                case CONJUNCTION:
+                    functionSymbol = termFactory.getDBFunctionSymbolFactory().getDBAnd(terms.size());
+                    break;
+                case DISJUNCTION:
+                    functionSymbol = termFactory.getDBFunctionSymbolFactory().getDBOr(terms.size());
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown operation " + operation);
+            }
+            return termFactory.getImmutableExpression(functionSymbol, terms);
+        }
+
+        private ImmutableTerm booleanExpressionOf(BooleanOperation operation, Stream<? extends ImmutableTerm> termsStream) {
+            return booleanExpressionOf(operation, termsStream.collect(ImmutableCollectors.toList()));
+        }
+
+        private ImmutableTerm booleanExpressionOf(BooleanOperation operation, ImmutableTerm term1, ImmutableTerm term2) {
+            return booleanExpressionOf(operation, ImmutableList.of(term1, term2));
         }
 
         /**
@@ -437,19 +496,17 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
          */
         private boolean canMergeWith(ImmutableList<? extends ImmutableTerm> ownTerms, ImmutableList<? extends ImmutableTerm> otherTerms) {
             return ownTerms.get(0).equals(otherTerms.get(0))
-                    && (
-                    ownTerms.stream().skip(1)
+                    && (ownTerms.stream().skip(1)
                             .allMatch(t -> t instanceof Constant)
                             && otherTerms.stream().skip(1)
-                            .allMatch(t -> t instanceof Constant)
-            );
+                            .allMatch(t -> t instanceof Constant));
         }
 
         /**
-         * Merges two individual IN terms based on their child terms. If `conjunction` is true, we compute the set intersection of their
+         * Merges two individuals IN terms based on their child terms. If `conjunction` is true, we compute the set intersection of their
          * values, otherwise we compute the set union.
          */
-        private ImmutableExpression mergeWith(ImmutableList<? extends ImmutableTerm> ownTerms, ImmutableList<? extends ImmutableTerm> otherTerms, boolean conjunction) {
+        private ImmutableExpression mergeWith(ImmutableList<? extends ImmutableTerm> ownTerms, ImmutableList<? extends ImmutableTerm> otherTerms, BooleanOperation operation) {
             //as the merging procedure will destroy any short-circuiting guarantees anyway, we can transform the list of children to a set here.
             ImmutableSet<ImmutableTerm> ownChildren = ownTerms.stream()
                     .skip(1)
@@ -459,13 +516,14 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl implements Disjunction
                     .collect(ImmutableCollectors.toSet());
             ImmutableList<ImmutableTerm> mergedChildren = Streams.concat(
                     Stream.of(ownTerms.get(0)),
-                    conjunction ? Sets.intersection(ownChildren, otherChildren).stream() : Sets.union(ownChildren, otherChildren).stream()
+                    operation == BooleanOperation.CONJUNCTION
+                            ? Sets.intersection(ownChildren, otherChildren).stream()
+                            : Sets.union(ownChildren, otherChildren).stream()
             ).collect(ImmutableCollectors.toList());
+
             return termFactory.getImmutableExpression(
                     termFactory.getDBFunctionSymbolFactory().getStrictDBIn(mergedChildren.size()),
-                    mergedChildren
-            );
+                    mergedChildren);
         }
     }
-
 }

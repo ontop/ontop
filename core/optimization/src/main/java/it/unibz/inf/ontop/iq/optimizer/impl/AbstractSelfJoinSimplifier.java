@@ -25,12 +25,13 @@ import java.util.stream.Stream;
 
 public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency> {
 
-    private final OptimizationState noSolutionState;
     protected final IntermediateQueryFactory iqFactory;
     protected final TermFactory termFactory;
     protected final SubstitutionFactory substitutionFactory;
-    private final ConstructionSubstitutionNormalizer substitutionNormalizer;
     protected final IQTreeTools iqTreeTools;
+
+    private final ConstructionSubstitutionNormalizer substitutionNormalizer;
+    private final OptimizationState noSolutionState;
 
     public AbstractSelfJoinSimplifier(CoreSingletons coreSingletons) {
         this.iqFactory = coreSingletons.getIQFactory();
