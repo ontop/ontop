@@ -130,7 +130,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         LOGGER.debug("New query after lifting order by above distinct:\n{}\n", treeAfterOrderByLifting);
 
         // TODO: check if still needed
-        IQTree flattenSubTree = unionFlattener.optimize(treeAfterOrderByLifting, variableGenerator);
+        IQTree flattenSubTree = unionFlattener.transform(treeAfterOrderByLifting, variableGenerator);
         LOGGER.debug("New query after flattening the union:\n{}\n", flattenSubTree);
 
         IQTree pushedDownSubTree = pushDownTransformer.transform(flattenSubTree);

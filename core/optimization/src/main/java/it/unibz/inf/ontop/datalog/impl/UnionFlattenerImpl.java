@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -35,6 +34,20 @@ public class UnionFlattenerImpl implements UnionFlattener {
     private UnionFlattenerImpl(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
         this.iqTreeTools = iqTreeTools;
+    }
+
+    /**
+     * TODO: why a fix point?
+     */
+    @Override
+    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
+        TreeTransformer treeTransformer = new TreeTransformer(variableGenerator);
+        IQTree prev;
+        do {
+            prev = tree;
+            tree = tree.acceptVisitor(treeTransformer);
+        } while (!prev.equals(tree));
+        return prev;
     }
 
     private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -88,22 +101,4 @@ public class UnionFlattenerImpl implements UnionFlattener {
         }
     }
 
-    /**
-     * TODO: why a fix point?
-     */
-    @Override
-    public IQ optimize(IQ query) {
-        return iqFactory.createIQ(query.getProjectionAtom(), optimize(query.getTree(), query.getVariableGenerator()));
-    }
-
-    @Override
-    public IQTree optimize(IQTree tree, VariableGenerator variableGenerator) {
-        TreeTransformer treeTransformer = new TreeTransformer(variableGenerator);
-        IQTree prev;
-        do {
-            prev = tree;
-            tree = tree.acceptVisitor(treeTransformer);
-        } while (!prev.equals(tree));
-        return prev;
-    }
 }

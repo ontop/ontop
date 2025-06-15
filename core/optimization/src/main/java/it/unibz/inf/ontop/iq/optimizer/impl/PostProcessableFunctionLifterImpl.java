@@ -33,9 +33,8 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
 
 @Singleton
-public class PostProcessableFunctionLifterImpl implements PostProcessableFunctionLifter {
+public class PostProcessableFunctionLifterImpl extends AbstractIQOptimizer implements PostProcessableFunctionLifter {
 
-    private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
@@ -47,8 +46,9 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
     @Inject
     protected PostProcessableFunctionLifterImpl(OptimizationSingletons optimizationSingletons) {
+        // no equality check
+        super(optimizationSingletons.getCoreSingletons().getIQFactory(), NO_ACTION);
         CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
-        this.iqFactory = coreSingletons.getIQFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.termFactory = coreSingletons.getTermFactory();
@@ -59,10 +59,9 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
     }
 
     @Override
-    public IQ optimize(IQ query) {
+    protected IQTree transformTree(IQ query) {
         Context context = new Context(query.getVariableGenerator());
-        IQTree newTree = context.lift(query.getTree());
-        return iqFactory.createIQ(query.getProjectionAtom(), newTree);
+        return context.lift(query.getTree());
     }
 
 

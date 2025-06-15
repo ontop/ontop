@@ -75,7 +75,7 @@ public class UnionFlattenerTest {
         IQ iq = IQ_FACTORY.createIQ(PROJECTION_ATOM1, union1);
         System.out.println("\nBefore optimization: \n" + iq);
 
-        IQ optimizedIQ = UNION_FLATTENER.optimize(iq)
+        IQ optimizedIQ = UNION_FLATTENER_optimize(iq)
                 .normalizeForOptimization();
         System.out.println("\nAfter optimization: \n" + optimizedIQ);
 
@@ -118,7 +118,7 @@ public class UnionFlattenerTest {
         IQ iq = IQ_FACTORY.createIQ(PROJECTION_ATOM2, c);
         System.out.println("\nBefore optimization: \n" + iq);
 
-        IQ optimizedIQ = UNION_FLATTENER.optimize(iq);
+        IQ optimizedIQ = UNION_FLATTENER_optimize(iq);
         System.out.println("\nAfter optimization: \n" + optimizedIQ);
 
 
@@ -172,7 +172,7 @@ public class UnionFlattenerTest {
         IQ iq = IQ_FACTORY.createIQ(PROJECTION_ATOM2, c1);
         System.out.println("\nBefore optimization: \n" + iq);
 
-        IQ optimizedIQ = UNION_FLATTENER.optimize(iq);
+        IQ optimizedIQ = UNION_FLATTENER_optimize(iq);
         System.out.println("\nAfter optimization: \n" + optimizedIQ);
 
 
@@ -237,7 +237,7 @@ public class UnionFlattenerTest {
         IQ iq = IQ_FACTORY.createIQ(PROJECTION_ATOM2, c3);
         System.out.println("\nBefore optimization: \n" + iq);
 
-        IQ optimizedIQ = UNION_FLATTENER.optimize(iq);
+        IQ optimizedIQ = UNION_FLATTENER_optimize(iq);
         System.out.println("\nAfter optimization: \n" + optimizedIQ);
 
 
@@ -269,5 +269,10 @@ public class UnionFlattenerTest {
 
     private static ImmutableFunctionalTerm generateURI2(VariableOrGroundTerm argument1, VariableOrGroundTerm argument2) {
         return TERM_FACTORY.getIRIFunctionalTerm(uriTemplate2, ImmutableList.of(argument1, argument2));
+    }
+
+    private static IQ UNION_FLATTENER_optimize(IQ query) {
+        return IQ_FACTORY.createIQ(query.getProjectionAtom(),
+                UNION_FLATTENER.transform(query.getTree(), query.getVariableGenerator()));
     }
 }

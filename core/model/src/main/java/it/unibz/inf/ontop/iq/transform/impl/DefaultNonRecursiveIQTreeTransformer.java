@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.transform.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 
 /**
  * Methods transformLeaf, transformUnaryNode, transformNaryCommutativeNode
