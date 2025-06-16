@@ -21,7 +21,7 @@ public class FilterLifterImpl extends AbstractIQOptimizer implements FilterLifte
 
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
-    private final TreeTransformer transformer;
+    private final Transformer transformer;
 
     @Inject
     private FilterLifterImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory, IQTreeTools iqTreeTools) {
@@ -29,7 +29,7 @@ public class FilterLifterImpl extends AbstractIQOptimizer implements FilterLifte
         super(iqFactory, NO_ACTION);
         this.termFactory = termFactory;
         this.iqTreeTools = iqTreeTools;
-        this.transformer = new TreeTransformer();
+        this.transformer = new Transformer();
     }
 
     @Override
@@ -37,9 +37,9 @@ public class FilterLifterImpl extends AbstractIQOptimizer implements FilterLifte
         return tree.acceptVisitor(transformer);
     }
 
-    private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        TreeTransformer() {
+        Transformer() {
             super(FilterLifterImpl.this.iqFactory);
         }
 

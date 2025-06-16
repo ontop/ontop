@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
@@ -50,12 +51,10 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
         return tree.acceptVisitor(new Transformer(variableGenerator));
     }
 
-    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-        private final VariableGenerator variableGenerator;
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
         Transformer(VariableGenerator variableGenerator) {
-            super(SQLServerLimitOffsetOldVersionNormalizer.this.iqFactory);
-            this.variableGenerator = variableGenerator;
+            super(SQLServerLimitOffsetOldVersionNormalizer.this.iqFactory, variableGenerator);
         }
 
         // Transformation necessary for versions 8,9,10 of SQL Server when a SliceNode is present

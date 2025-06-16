@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.impl.UnaryIQTreeBuilder;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.FlattenLifter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -34,15 +33,14 @@ public class BasicFlattenLifter extends AbstractIQOptimizer implements FlattenLi
 
     @Override
     protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQVisitor<IQTree> transformer = new TreeTransformer(tree);
-        return tree.acceptVisitor(transformer);
+        return tree.acceptVisitor(new Transformer(tree));
     }
 
 
-    private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
         private final IQTree topRoot;
 
-        TreeTransformer(IQTree topRoot) {
+        Transformer(IQTree topRoot) {
             super(BasicFlattenLifter.this.iqFactory);
             this.topRoot = topRoot;
         }

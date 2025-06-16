@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.generation.normalization.impl;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -21,59 +22,66 @@ import java.util.stream.Stream;
  * For DBMS such as SQLServer and Oracle that do not expect boolean expressions to be projected
  */
 @Singleton
-public class WrapProjectedOrOrderByExpressionNormalizer extends DefaultRecursiveIQTreeVisitingTransformer
-        implements DialectExtraNormalizer {
+public class WrapProjectedOrOrderByExpressionNormalizer implements DialectExtraNormalizer {
 
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
+    private final Transformer transformer;
 
     @Inject
     protected WrapProjectedOrOrderByExpressionNormalizer(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory());
         this.termFactory = coreSingletons.getTermFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.transformer = new Transformer(coreSingletons.getIQFactory());
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(this);
+        return tree.acceptVisitor(transformer);
     }
 
-    @Override
-    public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-        IQTree newChild = transformChild(child);
-        ConstructionNode newRootNode = iqTreeTools.replaceSubstitution(
-                rootNode, s -> s.transform(this::transformTerm));
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        return newRootNode.equals(rootNode) && (child == newChild)
-                ? tree
-                : iqFactory.createUnaryIQTree(newRootNode, newChild);
-    }
+        Transformer(IntermediateQueryFactory iqFactory) {
+            super(iqFactory);
+        }
 
-    @Override
-    public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-        IQTree newChild = transformChild(child);
-        OrderByNode newRootNode = iqFactory.createOrderByNode(
-                rootNode.getComparators().stream()
-                        .map(c -> iqFactory.createOrderComparator(
-                                (NonGroundTerm) transformTerm(c.getTerm()), c.isAscending()))
-                        .collect(ImmutableCollectors.toList()));
+        @Override
+        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
+            IQTree newChild = transformChild(child);
+            ConstructionNode newRootNode = iqTreeTools.replaceSubstitution(
+                    rootNode, s -> s.transform(this::transformTerm));
 
-        return newRootNode.equals(rootNode) && (child == newChild)
-                ? tree
-                : iqFactory.createUnaryIQTree(newRootNode, newChild);
-    }
+            return newRootNode.equals(rootNode) && (child == newChild)
+                    ? tree
+                    : iqFactory.createUnaryIQTree(newRootNode, newChild);
+        }
 
-    private ImmutableTerm transformTerm(ImmutableTerm term) {
-        if (term instanceof ImmutableExpression)
-            return transformExpression((ImmutableExpression) term);
+        @Override
+        public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
+            IQTree newChild = transformChild(child);
+            OrderByNode newRootNode = iqFactory.createOrderByNode(
+                    rootNode.getComparators().stream()
+                            .map(c -> iqFactory.createOrderComparator(
+                                    (NonGroundTerm) transformTerm(c.getTerm()), c.isAscending()))
+                            .collect(ImmutableCollectors.toList()));
 
-        return term;
-    }
+            return newRootNode.equals(rootNode) && (child == newChild)
+                    ? tree
+                    : iqFactory.createUnaryIQTree(newRootNode, newChild);
+        }
 
-    protected ImmutableFunctionalTerm transformExpression(ImmutableExpression definition) {
-        return termFactory.getDBCaseElseNull(Stream.of(
-                Maps.immutableEntry(definition, termFactory.getDBBooleanConstant(true)),
-                Maps.immutableEntry(termFactory.getDBNot(definition), termFactory.getDBBooleanConstant(false))), false);
+        private ImmutableTerm transformTerm(ImmutableTerm term) {
+            if (term instanceof ImmutableExpression)
+                return transformExpression((ImmutableExpression) term);
+
+            return term;
+        }
+
+        protected ImmutableFunctionalTerm transformExpression(ImmutableExpression definition) {
+            return termFactory.getDBCaseElseNull(Stream.of(
+                    Maps.immutableEntry(definition, termFactory.getDBBooleanConstant(true)),
+                    Maps.immutableEntry(termFactory.getDBNot(definition), termFactory.getDBBooleanConstant(false))), false);
+        }
     }
 }
