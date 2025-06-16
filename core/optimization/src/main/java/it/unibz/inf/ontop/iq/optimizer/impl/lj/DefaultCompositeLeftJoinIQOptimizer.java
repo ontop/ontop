@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.CompositeIQOptimizer;
@@ -16,12 +15,11 @@ public class DefaultCompositeLeftJoinIQOptimizer extends CompositeIQOptimizer im
             CardinalityInsensitiveLJPruningOptimizer cardinalityInsensitiveLJPruningOptimizer,
             NullableFDSelfLJOptimizer nullableFDOptimizer) {
 
-        super(ImmutableList.of(
-                cardinalitySensitiveJoinTransferLJOptimizer,
+        super(cardinalitySensitiveJoinTransferLJOptimizer,
                 cardinalityInsensitiveJoinTransferLJOptimizer,
                 ljWithNestingOnRightToInnerJoinOptimizer,
                 mergeLJOptimizer,
                 cardinalityInsensitiveLJPruningOptimizer,
-                nullableFDOptimizer));
+                nullableFDOptimizer);
     }
 }

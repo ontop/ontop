@@ -64,16 +64,18 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
     private static final Logger LOGGER = LoggerFactory.getLogger(AvoidJoinAboveUnionPlanner.class);
     
     private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
-    private final AvoidJoinAboveUnionTransformer transformer;
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
+
+    private final AvoidJoinAboveUnionTransformer transformer;
 
     @Inject
     protected AvoidJoinAboveUnionPlanner(GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
-                                         AvoidJoinAboveUnionTransformer transformer,
-                                         IntermediateQueryFactory iqFactory) {
+                                         IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
         this.generalOptimizer = generalOptimizer;
-        this.transformer = transformer;
         this.iqFactory = iqFactory;
+        this.iqTreeTools = iqTreeTools;
+        this.transformer = new AvoidJoinAboveUnionTransformer();
     }
 
     /**
@@ -83,6 +85,7 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
     @Override
     public IQ optimize(IQ query) {
         IQ liftedQuery = lift(query);
+        LOGGER.debug("Planned IQ:\n{}\n", liftedQuery);
         return liftedQuery.equals(query)
                 ? query
                 // Re-applies the structural and semantic optimizations
@@ -93,22 +96,15 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
         IQTree tree = query.getTree();
         IQTree newTree = tree.acceptVisitor(transformer);
 
-        IQ newIQ = newTree.equals(tree)
+        return newTree.equals(tree)
                 ? query
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree);
-
-        LOGGER.debug("Planned IQ:\n{}\n", newIQ);
-        return newIQ;
     }
 
-    @Singleton
-    protected static class AvoidJoinAboveUnionTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
-        private final IQTreeTools iqTreeTools;
+    private class AvoidJoinAboveUnionTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        @Inject
-        protected AvoidJoinAboveUnionTransformer(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
-            super(iqFactory);
-            this.iqTreeTools = iqTreeTools;
+        AvoidJoinAboveUnionTransformer() {
+            super(AvoidJoinAboveUnionPlanner.this.iqFactory);
         }
 
         @Override
