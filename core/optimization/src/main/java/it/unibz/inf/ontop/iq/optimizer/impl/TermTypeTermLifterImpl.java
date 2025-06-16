@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
@@ -16,16 +15,15 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 @Singleton
-public class TermTypeTermLifterImpl implements TermTypeTermLifter {
+public class TermTypeTermLifterImpl extends AbstractIQOptimizer implements TermTypeTermLifter {
 
     private final OptimizerFactory transformerFactory;
-    private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
 
@@ -33,21 +31,19 @@ public class TermTypeTermLifterImpl implements TermTypeTermLifter {
     private TermTypeTermLifterImpl(OptimizerFactory transformerFactory,
                                    IntermediateQueryFactory iqFactory,
                                    TermFactory termFactory, IQTreeTools iqTreeTools) {
+        super(iqFactory, NO_ACTION);
         this.transformerFactory = transformerFactory;
-        this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.iqTreeTools = iqTreeTools;
     }
 
     @Override
-    public IQ optimize(IQ query) {
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
         TermTypeTermLiftTransformer transformer = transformerFactory.createRDFTermTypeConstantTransformer(
-                query.getVariableGenerator());
-        IQTree transformedTree = transformer.transform(query.getTree());
+                variableGenerator);
+        IQTree transformedTree = transformer.transform(tree);
 
-        IQTree newTree = makeRDFTermTypeFunctionSymbolsSimplifiable(transformedTree);
-
-        return iqFactory.createIQ(query.getProjectionAtom(), newTree);
+        return makeRDFTermTypeFunctionSymbolsSimplifiable(transformedTree, variableGenerator);
     }
 
     /**
@@ -59,14 +55,15 @@ public class TermTypeTermLifterImpl implements TermTypeTermLifter {
      * (they cannot be processed by the DB engine).
      *
      */
-    private IQTree makeRDFTermTypeFunctionSymbolsSimplifiable(IQTree tree) {
+    private IQTree makeRDFTermTypeFunctionSymbolsSimplifiable(IQTree tree, VariableGenerator variableGenerator) {
         var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
         return iqTreeTools.unaryIQTreeBuilder()
                 .append(construction.getOptionalNode()
                         .map(cn -> iqTreeTools.replaceSubstitution(
                                 cn,
                                 s -> s.transform(this::makeRDFTermTypeFunctionSymbolsSimplifiable))))
-                .build(construction.getTail());
+                .build(construction.getTail())
+                .normalizeForOptimization(variableGenerator);
     }
 
     /**
