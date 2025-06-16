@@ -1,13 +1,13 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.SelfJoinSameTermIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -38,8 +38,8 @@ public class SelfJoinSameTermIQOptimizerImpl extends AbstractIQOptimizer impleme
     }
 
     @Override
-    protected IQTree transformTree(IQ query) {
-        return query.getTree().acceptVisitor(lookForDistinctTransformer);
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+        return tree.acceptVisitor(lookForDistinctTransformer);
     }
 
     /**

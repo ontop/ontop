@@ -30,21 +30,21 @@ public class BottomUpUnionAndBindingLiftOptimizer extends AbstractIQOptimizer im
 
     @Inject
     private BottomUpUnionAndBindingLiftOptimizer(IntermediateQueryFactory iqFactory) {
-        super(iqFactory, NORMALIZE_FOR_OPTIMIZATION, NO_ACTION);
+        super(iqFactory, NO_ACTION);
     }
 
     @Override
-    protected IQTree transformTree(IQ query) {
-        IQVisitor<IQTree> lifter = new Lifter(query.getVariableGenerator());
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+        IQVisitor<IQTree> lifter = new Lifter(variableGenerator);
 
         // Non-final
         IQTree previousTree;
-        IQTree newTree = query.getTree();
+        IQTree newTree = tree.normalizeForOptimization(variableGenerator);
         int i=0;
         do {
             previousTree = newTree;
             newTree = previousTree.acceptVisitor(lifter)
-                    .normalizeForOptimization(query.getVariableGenerator());
+                    .normalizeForOptimization(variableGenerator);
 
         } while (!newTree.equals(previousTree) && (++i < ITERATION_BOUND));
 

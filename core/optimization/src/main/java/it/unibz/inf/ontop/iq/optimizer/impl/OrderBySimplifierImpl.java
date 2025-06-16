@@ -47,9 +47,9 @@ public class OrderBySimplifierImpl extends AbstractIQOptimizer implements OrderB
     }
 
     @Override
-    protected IQTree transformTree(IQ query) {
-        IQVisitor<IQTree> transformer = new OrderBySimplifyingTransformer(query.getVariableGenerator());
-        return query.getTree().acceptVisitor(transformer);
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+        IQVisitor<IQTree> transformer = new OrderBySimplifyingTransformer(variableGenerator);
+        return tree.acceptVisitor(transformer);
     }
 
     protected class OrderBySimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {

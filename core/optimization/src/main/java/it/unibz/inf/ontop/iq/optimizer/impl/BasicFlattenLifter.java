@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.stream.Stream;
 
@@ -32,9 +33,9 @@ public class BasicFlattenLifter extends AbstractIQOptimizer implements FlattenLi
     }
 
     @Override
-    protected IQTree transformTree(IQ query) {
-        IQVisitor<IQTree> transformer = new TreeTransformer(query.getTree());
-        return query.getTree().acceptVisitor(transformer);
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+        IQVisitor<IQTree> transformer = new TreeTransformer(tree);
+        return tree.acceptVisitor(transformer);
     }
 
 

@@ -47,8 +47,8 @@ public class MutableQueryUnfolder extends AbstractIntensionalQueryMerger {
     }
 
     @Override
-    protected IQTree transformTree(IQ query) {
-        return query.getTree().acceptVisitor(new MutableQueryUnfoldingTransformer(query.getVariableGenerator()));
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+        return tree.acceptVisitor(new MutableQueryUnfoldingTransformer(variableGenerator));
     }
 
 

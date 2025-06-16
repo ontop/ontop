@@ -44,11 +44,9 @@ public class CardinalitySensitiveJoinTransferLJOptimizer extends AbstractIQOptim
     }
 
     @Override
-    protected IQTree transformTree(IQ query) {
-        IQVisitor<IQTree> transformer = new Transformer(
-                query.getTree()::getVariableNullability,
-                query.getVariableGenerator());
-        return query.getTree().acceptVisitor(transformer);
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+        IQVisitor<IQTree> transformer = new Transformer(tree::getVariableNullability, variableGenerator);
+        return tree.acceptVisitor(transformer);
     }
 
 

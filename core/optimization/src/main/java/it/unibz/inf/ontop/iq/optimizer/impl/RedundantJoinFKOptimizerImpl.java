@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -32,15 +33,16 @@ public class RedundantJoinFKOptimizerImpl extends AbstractIQOptimizer implements
 
     @Inject
     private RedundantJoinFKOptimizerImpl(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION, NORMALIZE_FOR_OPTIMIZATION);
+        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.termFactory = coreSingletons.getTermFactory();
         this.transformer = new RedundantJoinFKTransformer();
     }
 
     @Override
-    protected IQTree transformTree(IQ query) {
-        return query.getTree().acceptVisitor(transformer);
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+        return tree.normalizeForOptimization(variableGenerator)
+                .acceptVisitor(transformer);
     }
 
 

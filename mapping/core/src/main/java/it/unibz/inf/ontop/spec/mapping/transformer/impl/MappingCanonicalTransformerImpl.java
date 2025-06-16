@@ -147,9 +147,8 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         }
 
         @Override
-        protected IQTree transformTree(IQ query) {
-            VariableGenerator variableGenerator = query.getVariableGenerator();
-            return query.getTree().acceptVisitor(new QueryMergingTransformer(variableGenerator));
+        protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+            return tree.acceptVisitor(new QueryMergingTransformer(variableGenerator));
         }
 
 

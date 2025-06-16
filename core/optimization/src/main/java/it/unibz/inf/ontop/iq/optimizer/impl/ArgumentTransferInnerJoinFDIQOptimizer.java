@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.dbschema.FunctionalDependency;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -40,9 +39,9 @@ public class ArgumentTransferInnerJoinFDIQOptimizer extends AbstractIQOptimizer 
     }
 
     @Override
-    protected IQTree transformTree(IQ query) {
-        IQVisitor<IQTree> transformer = new ArgumentTransferJoinTransformer(query.getVariableGenerator());
-        return query.getTree().acceptVisitor(transformer);
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+        IQVisitor<IQTree> transformer = new ArgumentTransferJoinTransformer(variableGenerator);
+        return tree.acceptVisitor(transformer);
     }
 
     protected class ArgumentTransferJoinTransformer extends DefaultRecursiveIQTreeVisitingTransformer {

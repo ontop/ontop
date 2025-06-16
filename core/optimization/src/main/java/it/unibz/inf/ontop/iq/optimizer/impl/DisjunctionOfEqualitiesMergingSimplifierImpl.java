@@ -4,7 +4,6 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.DisjunctionOfEqualitiesMergingSimplifier;
 import it.unibz.inf.ontop.iq.type.impl.AbstractExpressionTransformer;
@@ -17,6 +16,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBInFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBOrFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,8 +37,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
     }
 
     @Override
-    public IQTree transformTree(IQ query) {
-        IQTree tree = query.getTree();
+    public IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
         IQTree newTree = tree.acceptVisitor(inCreatingTransformer);
         return newTree.acceptVisitor(inMergingTransformer);
     }

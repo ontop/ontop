@@ -2,10 +2,10 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.BooleanExpressionPushDownOptimizer;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 public class BooleanExpressionPushDownOptimizerImpl extends AbstractIQOptimizer implements BooleanExpressionPushDownOptimizer {
 
@@ -19,7 +19,7 @@ public class BooleanExpressionPushDownOptimizerImpl extends AbstractIQOptimizer 
     }
 
     @Override
-    protected IQTree transformTree(IQ query) {
-        return transformer.transform(query.getTree());
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+        return transformer.transform(tree);
     }
 }

@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.Set;
@@ -31,14 +32,12 @@ import java.util.Set;
 @Singleton
 public class CardinalityInsensitiveLJPruningOptimizer extends AbstractIQOptimizer implements LeftJoinIQOptimizer {
 
+    private final IQVisitor<IQTree> transformer;
+
     @Inject
     protected CardinalityInsensitiveLJPruningOptimizer(CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory(), NO_ACTION);
-    }
-
-    @Override
-    protected IQTree transformTree(IQ query) {
-        IQVisitor<IQTree> transformer = new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
+        this.transformer = new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
             @Override
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
                 IQVisitor<IQTree> transformer = new CardinalityInsensitiveLJPruningTransformer(
@@ -47,7 +46,11 @@ public class CardinalityInsensitiveLJPruningOptimizer extends AbstractIQOptimize
                 return tree.acceptVisitor(transformer);
             }
         };
-        return query.getTree().acceptVisitor(transformer);
+    }
+
+    @Override
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+        return tree.acceptVisitor(transformer);
     }
 
 

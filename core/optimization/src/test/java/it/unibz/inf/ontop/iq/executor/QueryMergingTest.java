@@ -813,8 +813,8 @@ public class QueryMergingTest {
         }
 
         @Override
-        protected IQTree transformTree(IQ query) {
-            return query.getTree().acceptVisitor(new BasicQueryMergingTransformer(query.getVariableGenerator()));
+        protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+            return tree.acceptVisitor(new BasicQueryMergingTransformer(variableGenerator));
         }
 
 

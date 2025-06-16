@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
@@ -64,18 +63,18 @@ public class NullableFDSelfLJOptimizer extends AbstractIQOptimizer implements Le
     }
 
     @Override
-    protected IQTree transformTree(IQ query) {
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
         IQVisitor<IQTree> transformer = new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
             @Override
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
                 IQVisitor<IQTree> transformer = new CardinalityInsensitiveTransformer(
                         transformerOf(this),
                         tree::getVariableNullability,
-                        query.getVariableGenerator());
+                        variableGenerator);
                 return tree.acceptVisitor(transformer);
             }
         };
-        return query.getTree().acceptVisitor(transformer);
+        return tree.acceptVisitor(transformer);
     }
 
 

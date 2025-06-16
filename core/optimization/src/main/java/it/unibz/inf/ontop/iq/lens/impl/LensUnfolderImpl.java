@@ -25,13 +25,12 @@ public class LensUnfolderImpl extends AbstractIQOptimizer implements LensUnfolde
     }
 
     @Override
-    public IQTree transformTree(IQ query) {
-        IQTree tree = query.getTree();
+    public IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
         int maxLevel = Lens.getMaxLevel(tree);
         if (maxLevel < 1)
             return tree;
 
-        IQVisitor<IQTree> transformer = new MaxLevelLensUnfoldingTransformer(maxLevel, query.getVariableGenerator());
+        IQVisitor<IQTree> transformer = new MaxLevelLensUnfoldingTransformer(maxLevel, variableGenerator);
         return tree.acceptVisitor(transformer);
     }
 

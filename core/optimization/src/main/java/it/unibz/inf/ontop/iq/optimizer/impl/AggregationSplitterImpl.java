@@ -41,7 +41,7 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
 
     @Inject
     protected AggregationSplitterImpl(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION, NORMALIZE_FOR_OPTIMIZATION);
+        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.termFactory = coreSingletons.getTermFactory();
@@ -49,9 +49,10 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
     }
 
     @Override
-    protected IQTree transformTree(IQ query) {
-        IQVisitor<IQTree> transformer = new AggregationUnionLifterTransformer(query.getVariableGenerator());
-        return query.getTree().acceptVisitor(transformer);
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+        IQVisitor<IQTree> transformer = new AggregationUnionLifterTransformer(variableGenerator);
+        return tree.normalizeForOptimization(variableGenerator)
+                .acceptVisitor(transformer);
     }
 
 

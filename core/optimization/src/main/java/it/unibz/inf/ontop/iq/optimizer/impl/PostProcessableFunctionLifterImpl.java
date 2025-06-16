@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -59,9 +58,9 @@ public class PostProcessableFunctionLifterImpl extends AbstractIQOptimizer imple
     }
 
     @Override
-    protected IQTree transformTree(IQ query) {
-        Context context = new Context(query.getVariableGenerator());
-        return context.lift(query.getTree());
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+        Context context = new Context(variableGenerator);
+        return context.lift(tree);
     }
 
 

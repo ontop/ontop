@@ -54,8 +54,8 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
     }
 
     @Override
-    protected IQTree transformTree(IQ query) {
-        return query.getTree().acceptVisitor(new BasicQueryUnfoldingTransformer(query.getVariableGenerator()));
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+        return tree.acceptVisitor(new BasicQueryUnfoldingTransformer(variableGenerator));
     }
 
 
