@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
@@ -15,6 +16,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctio
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.utils.Interval;
 
 import java.util.UUID;
 import java.util.function.Function;
@@ -283,6 +285,20 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     protected String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("(SECOND(%s) * 1000000)", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDurationSum(ImmutableList<? extends ImmutableTerm> terms,
+                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        Interval interval = new Interval(((DBConstant)terms.get(1)).getValue());
+        String intervalYearMonth = String.format("%d-%d",
+                interval.getYears(), interval.getMonths());
+        String intervalDayTime = String.format("%d %d:%d:%f",
+                interval.getDays(), interval.getHours(), interval.getMinutes(),
+                interval.getTotalSeconds());
+        String sign = interval.isNegative() ? "-" : "+";
+        return String.format("%s %s INTERVAL '%s' YEAR TO MONTH %s INTERVAL '%s' DAY TO SECOND",
+                termConverter.apply(terms.get(0)), sign, intervalYearMonth, sign, intervalDayTime);
     }
 
 }

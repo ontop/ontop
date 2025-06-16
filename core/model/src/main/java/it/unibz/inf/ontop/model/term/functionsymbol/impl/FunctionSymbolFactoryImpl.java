@@ -57,6 +57,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final FunctionSymbol identityFunctionSymbol;
     private final SPARQLFunctionSymbol bnodeTolerantSPARQLStrFunctionSymbol;
 
+    private final FunctionSymbol durationFunctionSymbol;
+
     /**
      * Created in init()
      */
@@ -114,6 +116,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.identityFunctionSymbol = new IdentityFunctionSymbol(dbTypeFactory.getAbstractRootDBType());
 
         this.bnodeTolerantSPARQLStrFunctionSymbol = new BNodeTolerantStrSPARQLFunctionSymbolImpl(abstractRDFType, xsdStringType);
+
+        this.durationFunctionSymbol = new DurationSumFunctionSymbolImpl(typeFactory.getXsdDatetimeDatatype(),
+                typeFactory.getXsdDurationDatatype());
     }
 
     @Inject
@@ -724,5 +729,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public SPARQLFunctionSymbol getBNodeTolerantSPARQLStrFunctionSymbol() {
         return bnodeTolerantSPARQLStrFunctionSymbol;
+    }
+
+    @Override
+    public FunctionSymbol getDurationSumFunctionSymbol() {
+        return durationFunctionSymbol;
     }
 }

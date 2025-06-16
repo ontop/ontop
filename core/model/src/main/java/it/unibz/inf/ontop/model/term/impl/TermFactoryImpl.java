@@ -795,6 +795,11 @@ public class TermFactoryImpl implements TermFactory {
 	 */
 
 	@Override
+	public ImmutableFunctionalTerm getDBDurationSum(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDurationSum(), arg1, arg2);
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getDBWeeksBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBWeeksBetweenFromDateTime(), arg1, arg2);
 	}
@@ -1392,7 +1397,12 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDateTrunc(datePart), dbDatetimeTerm, datePartTerm);
 	}
 
-    @Override
+	@Override
+	public ImmutableFunctionalTerm getDBDuration(ImmutableTerm dateOrDatetimeTerm, ImmutableTerm durationTerm) {
+		return getImmutableFunctionalTerm(functionSymbolFactory.getDurationSumFunctionSymbol(), dateOrDatetimeTerm, durationTerm);
+	}
+
+	@Override
     public ImmutableFunctionalTerm getIdentityFunctionalTerm(ImmutableTerm term) {
 		return getImmutableFunctionalTerm(functionSymbolFactory.getIdentity(), term);
     }

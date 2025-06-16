@@ -328,7 +328,33 @@ public class RDF4JValueExprTranslator {
             }
         }
         if (expr instanceof MathExpr) {
-            return new ExtendedTerm(getFunctionalTerm(NumericalOperations.get(((MathExpr) expr).getOperator()),
+            var operator = ((MathExpr) expr).getOperator();
+            if (operator == MathExpr.MathOp.PLUS || operator == MathExpr.MathOp.MINUS) {
+                if (isSPARQLDuration(term1)) {
+                    RDFConstant durationTerm;
+                    if (operator == MathExpr.MathOp.MINUS) {
+                        durationTerm = termFactory.getRDFLiteralConstant(
+                                "-" + ((RDFConstant) term1).getValue(), termFactory.getTypeFactory().getXsdDurationDatatype());
+                    } else {
+                        durationTerm = (RDFConstant) term1;
+                    }
+                    return new ExtendedTerm(termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getDurationSumFunctionSymbol(),
+                            term2, durationTerm), existsMap);
+                }
+
+                if (isSPARQLDuration(term2)) {
+                    RDFConstant durationTerm;
+                    if (operator == MathExpr.MathOp.MINUS) {
+                        durationTerm = termFactory.getRDFLiteralConstant(
+                                "-" + ((RDFConstant) term2).getValue(), termFactory.getTypeFactory().getXsdDurationDatatype());
+                    } else {
+                        durationTerm = (RDFConstant) term2;
+                    }
+                    return new ExtendedTerm(termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getDurationSumFunctionSymbol(),
+                            term1, durationTerm), existsMap);
+                }
+            }
+            return new ExtendedTerm(getFunctionalTerm(NumericalOperations.get(operator),
                     term1, term2), existsMap);
         }
         /*
@@ -451,6 +477,11 @@ public class RDF4JValueExprTranslator {
             return SPARQL.DAY;
         else
             return uri;
+    }
+
+    private boolean isSPARQLDuration(ImmutableTerm term) {
+        return term instanceof RDFConstant
+                && ((RDFConstant) term).getType().isA(termFactory.getTypeFactory().getXsdDurationDatatype());
     }
 
 

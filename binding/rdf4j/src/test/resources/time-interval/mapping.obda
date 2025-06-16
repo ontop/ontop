@@ -1,0 +1,9 @@
+[PrefixDeclaration]
+:		http://vocabulary.example.org/
+xsd:		http://www.w3.org/2001/XMLSchema#
+
+[MappingDeclaration] @collection [[
+mappingId	person
+target		:person/{id} a :Person ; :name {name} ; :birthDate {birth_date}^^xsd:dateTime .
+source		SELECT id, name, birth_date FROM "person";
+]]

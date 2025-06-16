@@ -631,6 +631,7 @@ public interface TermFactory {
 	/**
 	 * Time extension - duration arithmetic
 	 */
+	ImmutableFunctionalTerm getDBDurationSum(ImmutableTerm dateOrDatetimeTerm, ImmutableTerm durationTerm);
 	ImmutableFunctionalTerm getDBWeeksBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableFunctionalTerm getDBWeeksBetweenFromDate(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableFunctionalTerm getDBDaysBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
@@ -662,6 +663,7 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getDBDateTrunc(ImmutableTerm dbDatetimeTerm, ImmutableTerm datePartTerm, String datePart);
 
+	ImmutableFunctionalTerm getDBDuration(ImmutableTerm dateOrDatetimeTerm, ImmutableTerm durationTerm);
 	/**
 	 * Simplifies as its argument
 	 */

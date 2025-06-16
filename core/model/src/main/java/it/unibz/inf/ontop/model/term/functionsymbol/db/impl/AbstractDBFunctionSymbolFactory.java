@@ -105,6 +105,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBFunctionSymbol tzFunctionSymbol;
 
     // Time extension - duration arithmetic
+    private DBFunctionSymbol durationSumFunctionSymbol;
     private DBFunctionSymbol weeksBetweenFromDateTimeFunctionSymbol;
     private DBFunctionSymbol weeksBetweenFromDateFunctionSymbol;
     private DBFunctionSymbol daysBetweenFromDateTimeFunctionSymbol;
@@ -475,6 +476,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         dateTruncFunctionSymbol = createDateTruncFunctionSymbol();
         tzFunctionSymbol = createTzFunctionSymbol();
 
+        durationSumFunctionSymbol = createDurationSumFunctionSymbol();
         weeksBetweenFromDateTimeFunctionSymbol = createWeeksBetweenFromDateTimeFunctionSymbol();
         weeksBetweenFromDateFunctionSymbol = createWeeksBetweenFromDateFunctionSymbol();
         daysBetweenFromDateTimeFunctionSymbol = createDaysBetweenFromDateTimeFunctionSymbol();
@@ -1114,6 +1116,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     /**
      * Time extension - duration arithmetic
      */
+    @Override
+    public DBFunctionSymbol getDBDurationSum() {
+        return durationSumFunctionSymbol;
+    }
+
     @Override
     public DBFunctionSymbol getDBWeeksBetweenFromDateTime() { return weeksBetweenFromDateTimeFunctionSymbol; }
 
@@ -1806,6 +1813,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      * Time extension - duration arithmetic
      */
 
+    protected abstract String serializeDurationSum(ImmutableList<? extends ImmutableTerm> terms,
+                                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory);
+
     protected abstract String serializeWeeksBetweenFromDateTime(ImmutableList<? extends ImmutableTerm> terms,
                                                                 Function<ImmutableTerm, String> termConverter,
                                                                 TermFactory termFactory);
@@ -1841,6 +1851,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     /**
      * Time extension - duration arithmetic
      */
+    protected DBFunctionSymbol createDurationSumFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_DURATION_SUM", ImmutableList.of(rootDBType, rootDBType), rootDBType, false,
+                this::serializeDurationSum);
+    }
+
     protected DBFunctionSymbol createWeeksBetweenFromDateTimeFunctionSymbol() {
         return new DBFunctionSymbolWithSerializerImpl("DB_WEEK_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
                 this::serializeWeeksBetweenFromDateTime);

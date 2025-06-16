@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
@@ -9,6 +10,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.utils.Interval;
 
 import java.util.function.Function;
 
@@ -426,5 +428,17 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
     @Override
     protected String serializeQuarter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("QUARTER(%s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDurationSum(ImmutableList<? extends ImmutableTerm> terms,
+                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        Interval interval = new Interval(((DBConstant)terms.get(1)).getValue());
+        String dialectInterval = String.format("%d YEARS %d MONTHS %d DAYS %d HOURS %d MINUTES %f SECONDS",
+                interval.getYears(), interval.getMonths(), interval.getDays(),
+                interval.getHours(), interval.getMinutes(), interval.getTotalSeconds());
+        String sign = interval.isNegative() ? "-" : "+";
+        return String.format("%s %s INTERVAL('%s')",
+                termConverter.apply(terms.get(0)), sign, dialectInterval);
     }
 }

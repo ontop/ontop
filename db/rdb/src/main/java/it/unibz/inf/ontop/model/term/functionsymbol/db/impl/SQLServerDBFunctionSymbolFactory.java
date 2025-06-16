@@ -3,15 +3,13 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.IncrementalEvaluation;
-import it.unibz.inf.ontop.model.term.NonNullConstant;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.SQLServerDBTypeFactory;
+import it.unibz.inf.ontop.utils.Interval;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
@@ -705,5 +703,11 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     protected DBFunctionSymbol createDBVariance(DBTermType inputType, boolean isPop, boolean isDistinct) {
         DBTermType targetType = inputType.equals(dbIntegerType) ? dbDecimalType : inputType;
         return new NullIgnoringDBVarianceFunctionSymbol(isPop ? "VARP" : "VAR", inputType, targetType, isPop, isDistinct);
+    }
+
+    @Override
+    protected String serializeDurationSum(ImmutableList<? extends ImmutableTerm> terms,
+                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Interval addition not yet implemented for SQL Server");
     }
 }
