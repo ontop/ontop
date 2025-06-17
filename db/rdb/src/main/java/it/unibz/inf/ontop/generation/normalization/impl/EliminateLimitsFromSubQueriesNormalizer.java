@@ -1,11 +1,9 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -19,21 +17,21 @@ Used to get rid of limits in sub-queries that are not necessary, for dialects li
 public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final Transformer transformer;
+    private final EliminateLimitsFromSubQueriesTransformer eliminateLimitsFromSubQueriesNormalizer;
 
     @Inject
     protected EliminateLimitsFromSubQueriesNormalizer(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
-        this.transformer = new Transformer();
+        this.eliminateLimitsFromSubQueriesNormalizer = new EliminateLimitsFromSubQueriesTransformer();
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(transformer);
+        return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
     }
 
-    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-        Transformer() {
+    private class EliminateLimitsFromSubQueriesTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+        EliminateLimitsFromSubQueriesTransformer() {
             super(EliminateLimitsFromSubQueriesNormalizer.this.iqFactory);
         }
 
@@ -43,7 +41,7 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
             if (sliceNode.getOffset() != 0 || sliceNode.getLimit().isEmpty())
                 return super.transformSlice(tree, sliceNode, child);
 
-            var subLimitTransformer = new SubLimitTransformer(sliceNode.getLimit().get(), this);
+            var subLimitTransformer = new SubLimitTransformer(sliceNode.getLimit().get());
             return iqFactory.createUnaryIQTree(sliceNode, child.acceptVisitor(subLimitTransformer));
         }
     }
@@ -53,13 +51,23 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
      */
     private class SubLimitTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        private final Transformer eliminateLimitsFromSubQueriesNormalizer;
         private final long currentBounds;
 
-        protected SubLimitTransformer(long currentBounds, Transformer eliminateLimitsFromSubQueriesNormalizer) {
+        SubLimitTransformer(long currentBounds) {
             super(EliminateLimitsFromSubQueriesNormalizer.this.iqFactory);
-            this.eliminateLimitsFromSubQueriesNormalizer = eliminateLimitsFromSubQueriesNormalizer;
             this.currentBounds = currentBounds;
+        }
+
+        /**
+         * On left joins, we only apply the transformation to the left child
+         */
+        @Override
+        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+            var leftSubTree = transformChild(tree.getLeftChild());
+            var rightSubTree = tree.getRightChild().acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
+            if (leftSubTree.equals(tree.getLeftChild()) && rightSubTree.equals(tree.getRightChild()))
+                return tree;
+            return iqFactory.createBinaryNonCommutativeIQTree(tree.getRootNode(), leftSubTree, rightSubTree);
         }
 
         /**If the child slice has a lower limit than the parent, we cannot drop it
@@ -73,29 +81,28 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
         }
 
         @Override
-        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-            return super.transformUnaryNode(tree, rootNode, child);
-        }
-
-        /**
-         * All other nodes are not modified and passed back to the original normalizer to continue.
-         * This includes ORDER BY, DISTINCT, FILTER and more
-         */
-        @Override
-        protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+        public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
             return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
         }
 
-        /**
-         * On left joins, we only apply the transformation to the left child
-        */
         @Override
-        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            var leftSubTree = transformChild(tree.getLeftChild());
-            var rightSubTree = tree.getRightChild().acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
-            if (leftSubTree.equals(tree.getLeftChild()) && rightSubTree.equals(tree.getRightChild()))
-                return tree;
-            return iqFactory.createBinaryNonCommutativeIQTree(tree.getRootNode(), leftSubTree, rightSubTree);
+        public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
+            return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
+        }
+
+        @Override
+        public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
+            return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
+        }
+
+        @Override
+        public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
+            return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
+        }
+
+        @Override
+        public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
+            return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
         }
     }
 }

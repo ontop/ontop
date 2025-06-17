@@ -290,25 +290,50 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 .normalizeForOptimization(variableGenerator);
     }
 
+    @Override
     protected IQTree transformLeaf(LeafIQTree leaf){
         return leaf.normalizeForOptimization(variableGenerator);
     }
 
     @Override
-    protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-        return super.transformUnaryNode(tree, rootNode, child)
+    public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
+        return super.transformOrderBy(tree, rootNode, child)
                 .normalizeForOptimization(variableGenerator);
     }
 
     @Override
-    protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-        return super.transformNaryCommutativeNode(tree, rootNode, children)
+    public IQTree transformSlice(UnaryIQTree tree, SliceNode rootNode, IQTree child) {
+        return super.transformSlice(tree, rootNode, child)
                 .normalizeForOptimization(variableGenerator);
     }
 
     @Override
-    protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
-        return super.transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild)
+    public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
+        return super.transformFilter(tree, rootNode, child)
+                .normalizeForOptimization(variableGenerator);
+    }
+
+    @Override
+    public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
+        return super.transformFlatten(tree, rootNode, child)
+                .normalizeForOptimization(variableGenerator);
+    }
+
+    @Override
+    public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
+        return super.transformConstruction(tree, rootNode, child)
+                .normalizeForOptimization(variableGenerator);
+    }
+
+    @Override
+    public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+        return super.transformInnerJoin(tree, rootNode, children)
+                .normalizeForOptimization(variableGenerator);
+    }
+
+    @Override
+    public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        return super.transformLeftJoin(tree, rootNode, leftChild, rightChild)
                 .normalizeForOptimization(variableGenerator);
     }
 

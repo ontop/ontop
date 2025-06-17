@@ -49,7 +49,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
     }
 
     @Override
-    protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode node, ImmutableList<IQTree> children) {
+    protected final IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode node, ImmutableList<IQTree> children) {
         ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
         return treesEqual(newChildren, children) && nodesEqual(node, tree.getRootNode())
                 ? tree
@@ -57,7 +57,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
     }
 
     @Override
-    protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode node, IQTree leftChild, IQTree rightChild) {
+    protected final IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode node, IQTree leftChild, IQTree rightChild) {
         IQTree newLeftChild = transformChild(leftChild);
         IQTree newRightChild = transformChild(rightChild);
         return treesEqual(newLeftChild, leftChild) && treesEqual(newRightChild, rightChild) && nodesEqual(node, tree.getRootNode())
