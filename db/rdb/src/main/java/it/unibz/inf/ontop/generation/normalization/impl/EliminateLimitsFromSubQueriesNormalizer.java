@@ -64,9 +64,10 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             var leftSubTree = transformChild(tree.getLeftChild());
-            var rightSubTree = tree.getRightChild().acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
+            var rightSubTree = defaultToParentTransformer(tree.getRightChild());
             if (leftSubTree.equals(tree.getLeftChild()) && rightSubTree.equals(tree.getRightChild()))
                 return tree;
+
             return iqFactory.createBinaryNonCommutativeIQTree(tree.getRootNode(), leftSubTree, rightSubTree);
         }
 
@@ -76,32 +77,37 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
         @Override
         public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
             if (sliceNode.getOffset() != 0 || sliceNode.getLimit().isEmpty() || sliceNode.getLimit().get() < currentBounds)
-                return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
+                return defaultToParentTransformer(tree);
+
             return transformChild(tree.getChildren().get(0));
         }
 
         @Override
         public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-            return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
+            return defaultToParentTransformer(tree);
         }
 
         @Override
         public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-            return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
+            return defaultToParentTransformer(tree);
         }
 
         @Override
         public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-            return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
+            return defaultToParentTransformer(tree);
         }
 
         @Override
         public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
-            return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
+            return defaultToParentTransformer(tree);
         }
 
         @Override
         public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
+            return defaultToParentTransformer(tree);
+        }
+
+        private IQTree defaultToParentTransformer(IQTree tree) {
             return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
         }
     }

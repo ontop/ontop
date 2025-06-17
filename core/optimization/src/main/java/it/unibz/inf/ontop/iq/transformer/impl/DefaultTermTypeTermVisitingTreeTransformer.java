@@ -291,7 +291,22 @@ public class DefaultTermTypeTermVisitingTreeTransformer
     }
 
     @Override
-    protected IQTree transformLeaf(LeafIQTree leaf){
+    public IQTree transformTrue(TrueNode leaf){
+        return leaf.normalizeForOptimization(variableGenerator);
+    }
+
+    @Override
+    public IQTree transformExtensionalData(ExtensionalDataNode leaf){
+        return leaf.normalizeForOptimization(variableGenerator);
+    }
+
+    @Override
+    public IQTree transformIntensionalData(IntensionalDataNode leaf){
+        return leaf.normalizeForOptimization(variableGenerator);
+    }
+
+    @Override
+    public IQTree transformEmpty(EmptyNode leaf){
         return leaf.normalizeForOptimization(variableGenerator);
     }
 

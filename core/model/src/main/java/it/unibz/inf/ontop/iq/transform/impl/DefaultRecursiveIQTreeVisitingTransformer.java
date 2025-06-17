@@ -36,7 +36,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
     }
 
     @Override
-    protected IQTree transformLeaf(LeafIQTree leaf){
+    protected final IQTree transformLeaf(LeafIQTree leaf){
         return leaf;
     }
 
