@@ -26,13 +26,15 @@ public class WrapProjectedOrOrderByExpressionNormalizer implements DialectExtraN
 
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
+    private final IntermediateQueryFactory iqFactory;
     private final Transformer transformer;
 
     @Inject
     protected WrapProjectedOrOrderByExpressionNormalizer(CoreSingletons coreSingletons) {
         this.termFactory = coreSingletons.getTermFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
-        this.transformer = new Transformer(coreSingletons.getIQFactory());
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.transformer = new Transformer();
     }
 
     @Override
@@ -42,8 +44,8 @@ public class WrapProjectedOrOrderByExpressionNormalizer implements DialectExtraN
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        Transformer(IntermediateQueryFactory iqFactory) {
-            super(iqFactory);
+        Transformer() {
+            super(WrapProjectedOrOrderByExpressionNormalizer.this.iqFactory);
         }
 
         @Override
@@ -72,16 +74,14 @@ public class WrapProjectedOrOrderByExpressionNormalizer implements DialectExtraN
         }
 
         private ImmutableTerm transformTerm(ImmutableTerm term) {
-            if (term instanceof ImmutableExpression)
-                return transformExpression((ImmutableExpression) term);
+            if (term instanceof ImmutableExpression) {
+                ImmutableExpression definition = (ImmutableExpression) term;
+                return termFactory.getDBCaseElseNull(Stream.of(
+                        Maps.immutableEntry(definition, termFactory.getDBBooleanConstant(true)),
+                        Maps.immutableEntry(termFactory.getDBNot(definition), termFactory.getDBBooleanConstant(false))), false);
+            }
 
             return term;
-        }
-
-        protected ImmutableFunctionalTerm transformExpression(ImmutableExpression definition) {
-            return termFactory.getDBCaseElseNull(Stream.of(
-                    Maps.immutableEntry(definition, termFactory.getDBBooleanConstant(true)),
-                    Maps.immutableEntry(termFactory.getDBNot(definition), termFactory.getDBBooleanConstant(false))), false);
         }
     }
 }

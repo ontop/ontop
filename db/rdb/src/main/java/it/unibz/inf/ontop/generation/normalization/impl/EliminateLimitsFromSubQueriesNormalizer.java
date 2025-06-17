@@ -44,7 +44,6 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
                 return super.transformSlice(tree, sliceNode, child);
 
             var subLimitTransformer = new SubLimitTransformer(sliceNode.getLimit().get(), this);
-
             return iqFactory.createUnaryIQTree(sliceNode, child.acceptVisitor(subLimitTransformer));
         }
     }
@@ -54,10 +53,10 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
      */
     private class SubLimitTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        private final DefaultRecursiveIQTreeVisitingTransformer eliminateLimitsFromSubQueriesNormalizer;
+        private final Transformer eliminateLimitsFromSubQueriesNormalizer;
         private final long currentBounds;
 
-        protected SubLimitTransformer(long currentBounds, DefaultRecursiveIQTreeVisitingTransformer eliminateLimitsFromSubQueriesNormalizer) {
+        protected SubLimitTransformer(long currentBounds, Transformer eliminateLimitsFromSubQueriesNormalizer) {
             super(EliminateLimitsFromSubQueriesNormalizer.this.iqFactory);
             this.eliminateLimitsFromSubQueriesNormalizer = eliminateLimitsFromSubQueriesNormalizer;
             this.currentBounds = currentBounds;
@@ -73,6 +72,20 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
             return transformChild(tree.getChildren().get(0));
         }
 
+        @Override
+        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
+            return super.transformUnaryNode(tree, rootNode, child);
+        }
+
+        /**
+         * All other nodes are not modified and passed back to the original normalizer to continue.
+         * This includes ORDER BY, DISTINCT, FILTER and more
+         */
+        @Override
+        protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+            return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
+        }
+
         /**
          * On left joins, we only apply the transformation to the left child
         */
@@ -83,43 +96,6 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
             if (leftSubTree.equals(tree.getLeftChild()) && rightSubTree.equals(tree.getRightChild()))
                 return tree;
             return iqFactory.createBinaryNonCommutativeIQTree(tree.getRootNode(), leftSubTree, rightSubTree);
-        }
-
-        /**
-         * On inner joins, unions and constructions, we keep going inside this normalizer.
-        */
-        @Override
-        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            return super.transformNaryCommutativeNode(tree, rootNode, children);
-        }
-
-        @Override
-        public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            return super.transformNaryCommutativeNode(tree, rootNode, children);
-        }
-
-        @Override
-        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-            return super.transformUnaryNode(tree, rootNode, child);
-        }
-
-        /**
-         * All other nodes are not modified and passed back to the original normalizer to continue.
-         * This includes ORDER BY, DISTINCT, FILTER and more
-        */
-        @Override
-        protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-            return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
-        }
-
-        @Override
-        protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
-            return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
-        }
-
-        @Override
-        protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-            return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
         }
     }
 }

@@ -30,6 +30,7 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer
         implements DialectExtraNormalizer {
 
     private final TermFactory termFactory;
+    private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
     private final Transformer transformer;
 
@@ -37,7 +38,8 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer
     protected ReplaceProvenanceConstantByNonGroundTermNormalizer(CoreSingletons coreSingletons) {
         this.termFactory = coreSingletons.getTermFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
-        this.transformer = new Transformer(coreSingletons.getIQFactory());
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.transformer = new Transformer();
     }
 
     @Override
@@ -47,8 +49,8 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        protected Transformer(IntermediateQueryFactory iqFactory) {
-            super(iqFactory);
+        protected Transformer() {
+            super(ReplaceProvenanceConstantByNonGroundTermNormalizer.this.iqFactory);
         }
 
         @Override

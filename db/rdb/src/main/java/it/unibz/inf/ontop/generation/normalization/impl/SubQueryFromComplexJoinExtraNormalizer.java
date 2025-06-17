@@ -56,6 +56,15 @@ public class SubQueryFromComplexJoinExtraNormalizer implements DialectExtraNorma
                     : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild);
         }
 
+        @Override
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+            ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::createSubQueryIfJoin);
+
+            return newChildren.equals(children) && rootNode.equals(tree.getRootNode())
+                    ? tree
+                    : iqFactory.createNaryIQTree(rootNode, newChildren);
+        }
+
         private IQTree createSubQueryIfJoin(IQTree child) {
             IQTree transformedChild = transformChild(child);
 
@@ -67,13 +76,5 @@ public class SubQueryFromComplexJoinExtraNormalizer implements DialectExtraNorma
             return transformedChild;
         }
 
-        @Override
-        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::createSubQueryIfJoin);
-
-            return newChildren.equals(children) && rootNode.equals(tree.getRootNode())
-                    ? tree
-                    : iqFactory.createNaryIQTree(rootNode, newChildren);
-        }
     }
 }

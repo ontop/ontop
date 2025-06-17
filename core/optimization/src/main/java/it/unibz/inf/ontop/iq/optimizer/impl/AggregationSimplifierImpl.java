@@ -55,11 +55,8 @@ public class AggregationSimplifierImpl extends AbstractIQOptimizer implements Ag
      */
     protected class AggregationSimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
 
-        private final VariableGenerator variableGenerator;
-
         protected AggregationSimplifyingTransformer(VariableGenerator variableGenerator) {
-            super(optimizationSingletons);
-            this.variableGenerator = variableGenerator;
+            super(optimizationSingletons,  variableGenerator);
         }
 
         @Override

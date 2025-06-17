@@ -54,11 +54,8 @@ public class OrderBySimplifierImpl extends AbstractIQOptimizer implements OrderB
 
     protected class OrderBySimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
 
-        protected final VariableGenerator variableGenerator;
-
         protected OrderBySimplifyingTransformer(VariableGenerator variableGenerator) {
-            super(optimizationSingletons);
-            this.variableGenerator = variableGenerator;
+            super(optimizationSingletons, variableGenerator);
         }
 
         @Override

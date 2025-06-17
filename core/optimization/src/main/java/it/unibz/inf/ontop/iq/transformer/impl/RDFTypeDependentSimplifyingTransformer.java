@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
@@ -14,6 +15,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbo
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -21,12 +23,12 @@ import java.util.stream.Stream;
 /**
  * TODO: find a better name
  */
-public abstract class RDFTypeDependentSimplifyingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+public abstract class RDFTypeDependentSimplifyingTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
     private final OptimizerFactory optimizerFactory;
 
-    protected RDFTypeDependentSimplifyingTransformer(OptimizationSingletons optimizationSingletons) {
-        super(optimizationSingletons.getCoreSingletons().getIQFactory());
+    protected RDFTypeDependentSimplifyingTransformer(OptimizationSingletons optimizationSingletons, VariableGenerator variableGenerator) {
+        super(optimizationSingletons.getCoreSingletons().getIQFactory(), variableGenerator);
         this.optimizerFactory = optimizationSingletons.getOptimizerFactory();
     }
 

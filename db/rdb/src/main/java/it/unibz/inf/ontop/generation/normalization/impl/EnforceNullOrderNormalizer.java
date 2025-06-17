@@ -21,12 +21,16 @@ import java.util.stream.Stream;
 
 public class EnforceNullOrderNormalizer implements DialectExtraNormalizer {
 
-    private final IQVisitor<IQTree> transformer;
+    private final IntermediateQueryFactory iqFactory;
+    private final TermFactory termFactory;
+    private final EnforceNullOrderIQTreeVisitingTransformer transformer;
 
     @Inject
     protected EnforceNullOrderNormalizer(IntermediateQueryFactory iqFactory,
                                          TermFactory termFactory) {
-        transformer = new EnforceNullOrderIQTreeVisitingTransformer(iqFactory, termFactory);
+        this.iqFactory = iqFactory;
+        this.termFactory = termFactory;
+        this.transformer = new EnforceNullOrderIQTreeVisitingTransformer();
     }
 
     @Override
@@ -35,13 +39,10 @@ public class EnforceNullOrderNormalizer implements DialectExtraNormalizer {
     }
 
 
-    protected static class EnforceNullOrderIQTreeVisitingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    protected class EnforceNullOrderIQTreeVisitingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        private final TermFactory termFactory;
-
-        protected EnforceNullOrderIQTreeVisitingTransformer(IntermediateQueryFactory iqFactory, TermFactory termFactory) {
-            super(iqFactory);
-            this.termFactory = termFactory;
+        protected EnforceNullOrderIQTreeVisitingTransformer() {
+            super(EnforceNullOrderNormalizer.this.iqFactory);
         }
 
         @Override
