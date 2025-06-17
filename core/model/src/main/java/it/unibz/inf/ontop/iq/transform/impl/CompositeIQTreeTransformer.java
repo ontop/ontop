@@ -54,24 +54,24 @@ public final class CompositeIQTreeTransformer implements IQTreeTransformer {
     private class ChildTransformer extends DefaultIQTreeVisitingTransformer {
 
         @Override
-        protected IQTree transformLeaf(LeafIQTree leaf) {
+        protected final IQTree transformLeaf(LeafIQTree leaf) {
             return leaf;
         }
 
         @Override
-        protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+        protected final IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
             return iqFactory.createUnaryIQTree(rootNode, CompositeIQTreeTransformer.this.transform(child));
         }
 
         @Override
-        protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+        protected final IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
             return iqFactory.createNaryIQTree(
                     rootNode,
                     NaryIQTreeTools.transformChildren(children, CompositeIQTreeTransformer.this::transform));
         }
 
         @Override
-        protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
+        protected final IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
             return iqFactory.createBinaryNonCommutativeIQTree(
                     rootNode,
                     CompositeIQTreeTransformer.this.transform(leftChild),

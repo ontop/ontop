@@ -41,7 +41,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
     }
 
     @Override
-    protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode node, IQTree child) {
+    protected final IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode node, IQTree child) {
         IQTree newChild = transformChild(child);
         return treesEqual(newChild, child) && nodesEqual(node, tree.getRootNode())
                 ? tree

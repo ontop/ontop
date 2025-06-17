@@ -76,25 +76,6 @@ public class PostProcessableFunctionLifterImpl extends AbstractIQOptimizer imple
 
             return tree.acceptVisitor(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
                 @Override
-                protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-                    return super.transformUnaryNode(tree, rootNode, child)
-                            .normalizeForOptimization(variableGenerator);
-                }
-
-                @Override
-                public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-                    return super.transformInnerJoin(tree, rootNode, children)
-                            .normalizeForOptimization(variableGenerator);
-                }
-
-                @Override
-                public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode,
-                                                IQTree leftChild, IQTree rightChild) {
-                    return super.transformLeftJoin(tree, rootNode, leftChild, rightChild)
-                            .normalizeForOptimization(variableGenerator);
-                }
-
-                @Override
                 public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
                     IQTree normalizedTree = super.transformUnion(tree, rootNode, children)
                             .normalizeForOptimization(variableGenerator);
@@ -113,6 +94,61 @@ public class PostProcessableFunctionLifterImpl extends AbstractIQOptimizer imple
                                     State::liftAnyVariable,
                                     LOOPING_BOUND)
                             .asIQTree()
+                            .normalizeForOptimization(variableGenerator);
+                }
+
+                @Override
+                public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+                    return super.transformInnerJoin(tree, rootNode, children)
+                            .normalizeForOptimization(variableGenerator);
+                }
+
+                @Override
+                public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode,
+                                                IQTree leftChild, IQTree rightChild) {
+                    return super.transformLeftJoin(tree, rootNode, leftChild, rightChild)
+                            .normalizeForOptimization(variableGenerator);
+                }
+
+                @Override
+                public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
+                    return super.transformOrderBy(tree, rootNode, child)
+                            .normalizeForOptimization(variableGenerator);
+                }
+
+                @Override
+                public IQTree transformSlice(UnaryIQTree tree, SliceNode rootNode, IQTree child) {
+                    return super.transformSlice(tree, rootNode, child)
+                            .normalizeForOptimization(variableGenerator);
+                }
+
+                @Override
+                public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
+                    return super.transformDistinct(tree, rootNode, child)
+                            .normalizeForOptimization(variableGenerator);
+                }
+
+                @Override
+                public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
+                    return super.transformFilter(tree, rootNode, child)
+                            .normalizeForOptimization(variableGenerator);
+                }
+
+                @Override
+                public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
+                    return super.transformFlatten(tree, rootNode, child)
+                            .normalizeForOptimization(variableGenerator);
+                }
+
+                @Override
+                public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
+                    return super.transformAggregation(tree, rootNode, child)
+                            .normalizeForOptimization(variableGenerator);
+                }
+
+                @Override
+                public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
+                    return super.transformConstruction(tree, rootNode, child)
                             .normalizeForOptimization(variableGenerator);
                 }
             });
