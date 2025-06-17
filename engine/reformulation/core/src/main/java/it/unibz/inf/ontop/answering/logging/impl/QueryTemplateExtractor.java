@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.answering.logging.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -13,7 +12,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -37,21 +36,31 @@ import java.util.stream.IntStream;
 @Singleton
 public class QueryTemplateExtractor {
 
-    private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
     private final OntopModelSettings settings;
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
+    private final IQTreeTools iqTreeTools;
+    private final SPARQLFunctionSymbol sparqlEqFunctionSymbol;
+    private final BooleanFunctionSymbol rdf2BoolFunctionSymbol;
+
 
     @Inject
     protected QueryTemplateExtractor(CoreSingletons coreSingletons, OntopModelSettings settings) {
-        this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
         this.settings = settings;
+        this.atomFactory = coreSingletons.getAtomFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.termFactory = coreSingletons.getTermFactory();
+        FunctionSymbolFactory functionSymbolFactory = coreSingletons.getFunctionSymbolFactory();
+        this.sparqlEqFunctionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.EQ, 2);
+        this.rdf2BoolFunctionSymbol = functionSymbolFactory.getRDF2DBBooleanFunctionSymbol();
     }
 
     Optional<QueryTemplateExtraction> extract(IQ iq) {
 
         IQTree initialIQTree = iq.getTree();
-        QueryTemplateTransformer transformer = new QueryTemplateTransformer(initialIQTree.getKnownVariables());
+        QueryTemplateTransformer transformer = new QueryTemplateTransformer(iq.getVariableGenerator());
 
         IQTree newTree = initialIQTree.acceptVisitor(transformer);
         ImmutableMap<GroundTerm, Variable> parameterMap = transformer.getParameterMap();
@@ -70,30 +79,13 @@ public class QueryTemplateExtractor {
      *
      * Extracts from filter/LJ/joins and intensional data nodes.
      */
-    protected class QueryTemplateTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
-
-        private final AtomFactory atomFactory;
-        private final TermFactory termFactory;
-        private final IQTreeTools iqTreeTools;
-        private final SPARQLFunctionSymbol sparqlEqFunctionSymbol;
-        private final BooleanFunctionSymbol rdf2BoolFunctionsymbol;
-
-        private final VariableGenerator variableGenerator;
+    protected class QueryTemplateTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
         // Mutable
         private final Map<GroundTerm, Variable> parameterMap;
 
-        protected QueryTemplateTransformer(ImmutableSet<Variable> knownVariables) {
-            super(QueryTemplateExtractor.this.iqFactory);
-            this.atomFactory = coreSingletons.getAtomFactory();
-            this.iqTreeTools = coreSingletons.getIQTreeTools();
-            this.termFactory = coreSingletons.getTermFactory();
-            FunctionSymbolFactory functionSymbolFactory = coreSingletons.getFunctionSymbolFactory();
-            this.sparqlEqFunctionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.EQ, 2);
-            this.rdf2BoolFunctionsymbol = functionSymbolFactory.getRDF2DBBooleanFunctionSymbol();
-
-            this.variableGenerator = coreSingletons.getCoreUtilsFactory()
-                    .createVariableGenerator(knownVariables);
+        protected QueryTemplateTransformer(VariableGenerator variableGenerator) {
+            super(QueryTemplateExtractor.this.iqFactory, variableGenerator);
             this.parameterMap = Maps.newLinkedHashMap();
         }
 
@@ -196,7 +188,7 @@ public class QueryTemplateExtractor {
          * Transforms ground terms in SPARQL equalities
          */
         private ImmutableExpression transformSubExpression(ImmutableExpression expression) {
-            if (expression.getFunctionSymbol().equals(rdf2BoolFunctionsymbol)) {
+            if (expression.getFunctionSymbol().equals(rdf2BoolFunctionSymbol)) {
                 ImmutableTerm subTerm = expression.getTerm(0);
                 if (subTerm instanceof ImmutableFunctionalTerm) {
                     ImmutableFunctionalTerm subFunctionalTerm = (ImmutableFunctionalTerm) subTerm;
@@ -212,7 +204,7 @@ public class QueryTemplateExtractor {
                         return newTerms.equals(initialTerms)
                                 ? expression
                                 : termFactory.getImmutableExpression(
-                                        rdf2BoolFunctionsymbol,
+                                        rdf2BoolFunctionSymbol,
                                         termFactory.getImmutableFunctionalTerm(sparqlEqFunctionSymbol, newTerms));
                     }
                 }

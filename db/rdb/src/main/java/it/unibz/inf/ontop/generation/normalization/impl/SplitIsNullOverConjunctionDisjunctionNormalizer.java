@@ -24,14 +24,12 @@ CASE WHEN <expr1> OR|AND <expr2> THEN FALSE[TRUE] WHEN NOT <expr1> OR|AND <expr2
 for dialects such as Denodo that do not allow IS [NOT] NULL to be executed on conjunctions/disjunctions.
  */
 @Singleton
-public class SplitIsNullOverConjunctionDisjunctionNormalizer extends DefaultRecursiveIQTreeVisitingTransformer
-        implements DialectExtraNormalizer {
+public class SplitIsNullOverConjunctionDisjunctionNormalizer implements DialectExtraNormalizer {
 
     private final IQVisitor<IQTree> expressionTransformer;
 
     @Inject
     protected SplitIsNullOverConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory());
         this.expressionTransformer = new ExpressionTransformer(coreSingletons);
     }
 
@@ -56,20 +54,19 @@ public class SplitIsNullOverConjunctionDisjunctionNormalizer extends DefaultRecu
                                                                 ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
             ImmutableTerm subTerm = newTerms.get(0);
             var isNullOrNotFunctionSymbol = (DBIsNullOrNotFunctionSymbol)functionSymbol;
-            if(!(subTerm instanceof NonGroundExpressionImpl))
+            if (!(subTerm instanceof NonGroundExpressionImpl))
                 return termFactory.getImmutableFunctionalTerm(functionSymbol, newTerms);
             NonGroundExpressionImpl subTermNonGroundExpression = (NonGroundExpressionImpl)subTerm;
             FunctionSymbol subTermFunctionSymbol = subTermNonGroundExpression.getFunctionSymbol();
-            if(subTermFunctionSymbol == null || !(subTermFunctionSymbol instanceof DBOrFunctionSymbol || subTermFunctionSymbol instanceof DBAndFunctionSymbol))
+            if (!(subTermFunctionSymbol instanceof DBOrFunctionSymbol || subTermFunctionSymbol instanceof DBAndFunctionSymbol))
                 return termFactory.getImmutableFunctionalTerm(functionSymbol, newTerms);
             var whenNotNullTerm = termFactory.getDBBooleanConstant(!isNullOrNotFunctionSymbol.isTrueWhenNull());
             var whenNullTerm = termFactory.getDBBooleanConstant(isNullOrNotFunctionSymbol.isTrueWhenNull());
-            var newFunctionSymbol = termFactory.getDBCase(
+            return termFactory.getDBCase(
                     Stream.of(
                             Maps.immutableEntry(subTermNonGroundExpression, whenNotNullTerm),
-                            Maps.immutableEntry(termFactory.getDBNot(subTermNonGroundExpression), whenNotNullTerm)
-                    ), whenNullTerm, false);
-            return newFunctionSymbol;
+                            Maps.immutableEntry(termFactory.getDBNot(subTermNonGroundExpression), whenNotNullTerm)),
+                    whenNullTerm, false);
         }
     }
 }

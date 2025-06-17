@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
@@ -25,49 +26,54 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
  *
  */
 @Singleton
-public class SubQueryFromComplexJoinExtraNormalizer extends DefaultRecursiveIQTreeVisitingTransformer
-        implements DialectExtraNormalizer {
+public class SubQueryFromComplexJoinExtraNormalizer implements DialectExtraNormalizer {
 
-    private final IQTreeTools iqTreeTools;
+    private final Transformer transformer;
 
     @Inject
     protected SubQueryFromComplexJoinExtraNormalizer(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory());
-        this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.transformer = new Transformer(coreSingletons.getIQFactory());
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(this);
+        return tree.acceptVisitor(transformer);
     }
 
-    @Override
-    public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        IQTree newLeftChild = createSubQueryIfJoin(leftChild);
-        IQTree newRightChild = createSubQueryIfJoin(rightChild);
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild) && rootNode.equals(tree.getRootNode())
-                ? tree
-                : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild);
-    }
-
-    private IQTree createSubQueryIfJoin(IQTree child) {
-        IQTree transformedChild = transformChild(child);
-
-        if (transformedChild.getRootNode() instanceof JoinLikeNode) {
-            return iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(transformedChild.getVariables()),
-                    transformedChild);
+        protected Transformer(IntermediateQueryFactory iqFactory) {
+            super(iqFactory);
         }
-        return transformedChild;
-    }
 
-    @Override
-    public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::createSubQueryIfJoin);
+        @Override
+        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+            IQTree newLeftChild = createSubQueryIfJoin(leftChild);
+            IQTree newRightChild = createSubQueryIfJoin(rightChild);
 
-        return newChildren.equals(children) && rootNode.equals(tree.getRootNode())
-                ? tree
-                : iqFactory.createNaryIQTree(rootNode, newChildren);
+            return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild) && rootNode.equals(tree.getRootNode())
+                    ? tree
+                    : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild);
+        }
+
+        private IQTree createSubQueryIfJoin(IQTree child) {
+            IQTree transformedChild = transformChild(child);
+
+            if (transformedChild.getRootNode() instanceof JoinLikeNode) {
+                return iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(transformedChild.getVariables()),
+                        transformedChild);
+            }
+            return transformedChild;
+        }
+
+        @Override
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+            ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::createSubQueryIfJoin);
+
+            return newChildren.equals(children) && rootNode.equals(tree.getRootNode())
+                    ? tree
+                    : iqFactory.createNaryIQTree(rootNode, newChildren);
+        }
     }
 }

@@ -30,17 +30,19 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
     private final TermFactory termFactory;
     private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
+    private final Transformer transformer;
 
     @Inject
     protected ReformulateConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {
         this.termFactory = coreSingletons.getTermFactory();
         this.iqFactory = coreSingletons.getIQFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.transformer = new Transformer();
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(new Transformer());
+        return tree.acceptVisitor(transformer);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

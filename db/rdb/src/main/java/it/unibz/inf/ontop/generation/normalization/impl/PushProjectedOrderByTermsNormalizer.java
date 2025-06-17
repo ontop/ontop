@@ -28,6 +28,7 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
 
     private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
+    private final Transformer transformer;
     private final boolean onlyDistinct;
 
     protected PushProjectedOrderByTermsNormalizer(boolean onlyDistinct,
@@ -35,11 +36,12 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
         this.iqFactory = coreSingletons.getIQFactory();
         this.onlyDistinct = onlyDistinct;
         this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.transformer = new Transformer();
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(new Transformer());
+        return tree.acceptVisitor(transformer);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

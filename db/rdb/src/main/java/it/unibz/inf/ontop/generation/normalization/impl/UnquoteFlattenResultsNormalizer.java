@@ -24,50 +24,57 @@ import java.util.stream.Stream;
  * These quotation marks have to be removed with an additional construction.
  */
 @Singleton
-public class UnquoteFlattenResultsNormalizer extends DefaultRecursiveIQTreeVisitingTransformer
-        implements DialectExtraNormalizer {
+public class UnquoteFlattenResultsNormalizer implements DialectExtraNormalizer {
 
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
+    private final Transformer transformer;
 
     @Inject
     protected UnquoteFlattenResultsNormalizer(IntermediateQueryFactory iqFactory,
                                               SubstitutionFactory substitutionFactory,
                                               TermFactory termFactory,
                                               IQTreeTools iqTreeTools) {
-        super(iqFactory);
+        this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         this.iqTreeTools = iqTreeTools;
+        this.transformer = new Transformer();
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(this);
+        return tree.acceptVisitor(transformer);
     }
 
-    /**
-    * Adds a construction node over any flatten call with the following expression:
-     * `CASE WHEN STARTSWITH(<output>, '"') THEN SUBSTRING(<output>, 2, LENGTH(<output>) - 2) ELSE <output> END`
-     * This removes encasing quotation marks from flatten results.
-     */
-    @Override
-    public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
-        IQTree newChild = transformChild(child);
-        DBMathBinaryOperator minus = termFactory.getDBFunctionSymbolFactory().getDBMathBinaryOperator("-", termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType());
-        ImmutableTerm resultSubstitution = termFactory.getDBCase(
-                Stream.of(Maps.immutableEntry(
-                        termFactory.getDBStartsWith(ImmutableList.of(rootNode.getOutputVariable(), termFactory.getDBStringConstant("\""))),
-                        termFactory.getDBSubString3(rootNode.getOutputVariable(), termFactory.getDBIntegerConstant(2), termFactory.getImmutableFunctionalTerm(minus, termFactory.getDBCharLength(rootNode.getOutputVariable()), termFactory.getDBIntegerConstant(2))))),
-                rootNode.getOutputVariable(),
-                true);
-        Substitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(rootNode.getOutputVariable(), resultSubstitution);
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
+        protected Transformer() {
+            super(UnquoteFlattenResultsNormalizer.this.iqFactory);
+        }
 
-        return iqTreeTools.unaryIQTreeBuilder()
-                .append(iqFactory.createConstructionNode(rootNode.getVariables(child.getVariables()), newSubstitution))
-                .append(rootNode)
-                .build(newChild);
+        /**
+         * Adds a construction node over any flatten call with the following expression:
+         * `CASE WHEN STARTSWITH(<output>, '"') THEN SUBSTRING(<output>, 2, LENGTH(<output>) - 2) ELSE <output> END`
+         * This removes encasing quotation marks from flatten results.
+         */
+        @Override
+        public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
+            IQTree newChild = transformChild(child);
+            DBMathBinaryOperator minus = termFactory.getDBFunctionSymbolFactory().getDBMathBinaryOperator("-", termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType());
+            ImmutableTerm resultSubstitution = termFactory.getDBCase(
+                    Stream.of(Maps.immutableEntry(
+                            termFactory.getDBStartsWith(ImmutableList.of(rootNode.getOutputVariable(), termFactory.getDBStringConstant("\""))),
+                            termFactory.getDBSubString3(rootNode.getOutputVariable(), termFactory.getDBIntegerConstant(2), termFactory.getImmutableFunctionalTerm(minus, termFactory.getDBCharLength(rootNode.getOutputVariable()), termFactory.getDBIntegerConstant(2))))),
+                    rootNode.getOutputVariable(),
+                    true);
+            Substitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(rootNode.getOutputVariable(), resultSubstitution);
+
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(iqFactory.createConstructionNode(rootNode.getVariables(child.getVariables()), newSubstitution))
+                    .append(rootNode)
+                    .build(newChild);
+        }
     }
-
 }

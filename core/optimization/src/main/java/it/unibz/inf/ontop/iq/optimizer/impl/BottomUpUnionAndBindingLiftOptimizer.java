@@ -10,8 +10,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.UnionAndBindingLiftOptimizer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -35,7 +34,7 @@ public class BottomUpUnionAndBindingLiftOptimizer extends AbstractIQOptimizer im
 
     @Override
     protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQVisitor<IQTree> lifter = new Lifter(variableGenerator);
+        Lifter lifter = new Lifter(variableGenerator);
 
         // Non-final
         IQTree previousTree;
@@ -54,12 +53,10 @@ public class BottomUpUnionAndBindingLiftOptimizer extends AbstractIQOptimizer im
         return newTree;
     }
 
-    private class Lifter extends DefaultRecursiveIQTreeVisitingTransformer {
-        private final VariableGenerator variableGenerator;
+    private class Lifter extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
         protected Lifter(VariableGenerator variableGenerator) {
-            super(BottomUpUnionAndBindingLiftOptimizer.this.iqFactory);
-            this.variableGenerator = variableGenerator;
+            super(BottomUpUnionAndBindingLiftOptimizer.this.iqFactory, variableGenerator);
         }
 
         @Override

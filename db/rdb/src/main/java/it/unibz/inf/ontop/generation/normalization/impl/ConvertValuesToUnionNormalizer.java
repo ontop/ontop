@@ -23,40 +23,45 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
  *
  * @author Lukas Sundqvist
  */
-public class ConvertValuesToUnionNormalizer extends DefaultRecursiveIQTreeVisitingTransformer implements DialectExtraNormalizer {
+public class ConvertValuesToUnionNormalizer implements DialectExtraNormalizer {
     private final SubstitutionFactory substitutionFactory;
     private final IQTreeTools iqTreeTools;
+    private final IntermediateQueryFactory iqFactory;
+    private final Transformer transformer;
 
     @Inject
     protected  ConvertValuesToUnionNormalizer(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory, IQTreeTools iqTreeTools) {
-        super(iqFactory);
         this.substitutionFactory = substitutionFactory;
         this.iqTreeTools = iqTreeTools;
+        this.iqFactory = iqFactory;
+        this.transformer = new Transformer();
     }
-
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(this);
+        return tree.acceptVisitor(transformer);
     }
 
-    @Override
-    public IQTree transformValues(ValuesNode node) {
-        return convertToUnion(node);
-    }
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-    private IQTree convertToUnion(ValuesNode valuesNode) {
-        ImmutableList<Variable> orderedVariables = valuesNode.getOrderedVariables();
-        ImmutableList<Substitution<ImmutableTerm>> substitutionList =
-                valuesNode.getValues().stream()
-                        .map(tuple -> substitutionFactory.<ImmutableTerm>getSubstitution(orderedVariables, tuple))
-                .collect(ImmutableCollectors.toList());
+        Transformer() {
+            super(ConvertValuesToUnionNormalizer.this.iqFactory);
+        }
 
-        return iqTreeTools.createUnionTree(valuesNode.getVariables(),
-                substitutionList.stream()
-                        .map(substitution -> iqFactory.createUnaryIQTree(
-                                iqTreeTools.createExtendingConstructionNode(ImmutableSet.of(), substitution),
-                                iqFactory.createTrueNode()))
-                        .collect(ImmutableCollectors.toList()));
+        @Override
+        public IQTree transformValues(ValuesNode node) {
+            ImmutableList<Variable> orderedVariables = node.getOrderedVariables();
+            ImmutableList<Substitution<ImmutableTerm>> substitutionList =
+                    node.getValues().stream()
+                            .map(tuple -> substitutionFactory.<ImmutableTerm>getSubstitution(orderedVariables, tuple))
+                            .collect(ImmutableCollectors.toList());
+
+            return iqTreeTools.createUnionTree(node.getVariables(),
+                    substitutionList.stream()
+                            .map(substitution -> iqFactory.createUnaryIQTree(
+                                    iqTreeTools.createExtendingConstructionNode(ImmutableSet.of(), substitution),
+                                    iqFactory.createTrueNode()))
+                            .collect(ImmutableCollectors.toList()));
+        }
     }
 }

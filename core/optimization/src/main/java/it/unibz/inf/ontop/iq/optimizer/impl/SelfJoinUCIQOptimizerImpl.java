@@ -7,15 +7,13 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.UniqueConstraint;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.optimizer.SelfJoinUCIQOptimizer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -39,18 +37,14 @@ public class SelfJoinUCIQOptimizerImpl extends AbstractIQOptimizer implements Se
 
     @Override
     protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQVisitor<IQTree> transformer = new SelfJoinUCTransformer(variableGenerator);
-        return tree.acceptVisitor(transformer);
+        return tree.acceptVisitor(new SelfJoinUCTransformer(variableGenerator));
     }
 
 
-    private class SelfJoinUCTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
-
-        private final VariableGenerator variableGenerator;
+    private class SelfJoinUCTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
         protected SelfJoinUCTransformer(VariableGenerator variableGenerator) {
-            super(SelfJoinUCIQOptimizerImpl.this.iqFactory);
-            this.variableGenerator = variableGenerator;
+            super(SelfJoinUCIQOptimizerImpl.this.iqFactory,  variableGenerator);
         }
 
         @Override

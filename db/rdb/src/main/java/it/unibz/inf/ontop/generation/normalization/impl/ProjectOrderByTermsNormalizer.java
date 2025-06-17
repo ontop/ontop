@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
@@ -45,12 +46,10 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
         return tree.acceptVisitor(new Transformer(variableGenerator));
     }
 
-    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-        private final VariableGenerator variableGenerator;
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
         Transformer(VariableGenerator variableGenerator) {
-            super(ProjectOrderByTermsNormalizer.this.iqFactory);
-            this.variableGenerator = variableGenerator;
+            super(ProjectOrderByTermsNormalizer.this.iqFactory, variableGenerator);
         }
 
         @Override

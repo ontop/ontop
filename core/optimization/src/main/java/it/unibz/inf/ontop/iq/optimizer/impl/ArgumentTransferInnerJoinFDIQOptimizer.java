@@ -12,8 +12,7 @@ import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.optimizer.InnerJoinIQOptimizer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -40,17 +39,13 @@ public class ArgumentTransferInnerJoinFDIQOptimizer extends AbstractIQOptimizer 
 
     @Override
     protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQVisitor<IQTree> transformer = new ArgumentTransferJoinTransformer(variableGenerator);
-        return tree.acceptVisitor(transformer);
+        return tree.acceptVisitor(new ArgumentTransferJoinTransformer(variableGenerator));
     }
 
-    protected class ArgumentTransferJoinTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
-
-        private final VariableGenerator variableGenerator;
+    protected class ArgumentTransferJoinTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
         protected ArgumentTransferJoinTransformer(VariableGenerator variableGenerator) {
-            super(ArgumentTransferInnerJoinFDIQOptimizer.this.iqFactory);
-            this.variableGenerator = variableGenerator;
+            super(ArgumentTransferInnerJoinFDIQOptimizer.this.iqFactory, variableGenerator);
         }
 
         @Override

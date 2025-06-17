@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -25,62 +26,70 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
  * (causing a MINUS encoded with a LJ and filter is null not to work)
  */
 @Singleton
-public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DefaultRecursiveIQTreeVisitingTransformer
+public class ReplaceProvenanceConstantByNonGroundTermNormalizer
         implements DialectExtraNormalizer {
 
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
+    private final Transformer transformer;
 
     @Inject
     protected ReplaceProvenanceConstantByNonGroundTermNormalizer(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory());
         this.termFactory = coreSingletons.getTermFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.transformer = new Transformer(coreSingletons.getIQFactory());
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(this);
+        return tree.acceptVisitor(transformer);
     }
 
-    @Override
-    public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        IQTree newLeftChild = transformChild(leftChild);
-        IQTree newRightChild = transformChild(rightChild);
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        return furtherTransformLJ(rootNode, leftChild, rightChild)
-                .orElseGet(() -> newLeftChild.equals(leftChild) && newRightChild.equals(rightChild)
-                        ? tree
-                        : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild));
-    }
-
-    private Optional<IQTree> furtherTransformLJ(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        var construction = UnaryIQTreeDecomposition.of(rightChild, ConstructionNode.class);
-        if (construction.isPresent()) {
-            IQTree rightGrandChild = construction.getChild();
-            Optional<Variable> grandChildVariable = rightGrandChild.getVariables().stream()
-                    .findAny();
-
-            DBConstant provenanceConstant = termFactory.getProvenanceSpecialConstant();
-
-            if (grandChildVariable.isEmpty())
-                return Optional.empty();
-
-            ConstructionNode constructionNode = iqTreeTools.replaceSubstitution(
-                    construction.getNode(),
-                    s -> s.transform(t -> t.equals(provenanceConstant) ? getIfThenElse(grandChildVariable.get()) : t));
-
-            return Optional.of(iqFactory.createBinaryNonCommutativeIQTree(
-                    rootNode, leftChild,
-                    iqFactory.createUnaryIQTree(constructionNode, rightGrandChild)));
+        protected Transformer(IntermediateQueryFactory iqFactory) {
+            super(iqFactory);
         }
-        return Optional.empty();
-    }
 
-    private ImmutableFunctionalTerm getIfThenElse(Variable grandChildVariable) {
-        return termFactory.getIfThenElse(
-                termFactory.getDBIsNotNull(grandChildVariable),
-                termFactory.getDBStringConstant("placeholder1"),
-                termFactory.getDBStringConstant("placeholder2"));
+        @Override
+        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+            IQTree newLeftChild = transformChild(leftChild);
+            IQTree newRightChild = transformChild(rightChild);
+
+            return furtherTransformLJ(rootNode, leftChild, rightChild)
+                    .orElseGet(() -> newLeftChild.equals(leftChild) && newRightChild.equals(rightChild)
+                            ? tree
+                            : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild));
+        }
+
+        private Optional<IQTree> furtherTransformLJ(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+            var construction = UnaryIQTreeDecomposition.of(rightChild, ConstructionNode.class);
+            if (construction.isPresent()) {
+                IQTree rightGrandChild = construction.getChild();
+                Optional<Variable> grandChildVariable = rightGrandChild.getVariables().stream()
+                        .findAny();
+
+                DBConstant provenanceConstant = termFactory.getProvenanceSpecialConstant();
+
+                if (grandChildVariable.isEmpty())
+                    return Optional.empty();
+
+                ConstructionNode constructionNode = iqTreeTools.replaceSubstitution(
+                        construction.getNode(),
+                        s -> s.transform(t -> t.equals(provenanceConstant) ? getIfThenElse(grandChildVariable.get()) : t));
+
+                return Optional.of(iqFactory.createBinaryNonCommutativeIQTree(
+                        rootNode, leftChild,
+                        iqFactory.createUnaryIQTree(constructionNode, rightGrandChild)));
+            }
+            return Optional.empty();
+        }
+
+        private ImmutableFunctionalTerm getIfThenElse(Variable grandChildVariable) {
+            return termFactory.getIfThenElse(
+                    termFactory.getDBIsNotNull(grandChildVariable),
+                    termFactory.getDBStringConstant("placeholder1"),
+                    termFactory.getDBStringConstant("placeholder2"));
+        }
     }
 }

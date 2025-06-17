@@ -19,15 +19,17 @@ Used to get rid of limits in sub-queries that are not necessary, for dialects li
 public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
+    private final Transformer transformer;
 
     @Inject
     protected EliminateLimitsFromSubQueriesNormalizer(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
+        this.transformer = new Transformer();
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(new Transformer());
+        return tree.acceptVisitor(transformer);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

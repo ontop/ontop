@@ -5,12 +5,10 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.optimizer.splitter.PreventDistinctProjectionSplitter;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.PreventDistinctOptimizer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -31,18 +29,14 @@ public class PreventDistinctOptimizerImpl extends AbstractIQOptimizer implements
 
     @Override
     protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQVisitor<IQTree> transformer = new PreventDistinctTransformer(variableGenerator);
-        return tree.acceptVisitor(transformer);
+        return tree.acceptVisitor(new PreventDistinctTransformer(variableGenerator));
     }
 
 
-    private class PreventDistinctTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
-
-        private final VariableGenerator variableGenerator;
+    private class PreventDistinctTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
         public PreventDistinctTransformer(VariableGenerator variableGenerator) {
-            super(PreventDistinctOptimizerImpl.this.iqFactory);
-            this.variableGenerator = variableGenerator;
+            super(PreventDistinctOptimizerImpl.this.iqFactory, variableGenerator);
         }
 
         @Override

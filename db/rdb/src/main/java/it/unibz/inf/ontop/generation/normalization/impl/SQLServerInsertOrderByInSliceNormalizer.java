@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -34,12 +35,10 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
         return tree.acceptVisitor(new Transformer(variableGenerator));
     }
 
-    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-        private final VariableGenerator variableGenerator;
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
         protected Transformer(VariableGenerator variableGenerator) {
-            super(SQLServerInsertOrderByInSliceNormalizer.this.iqFactory);
-            this.variableGenerator = variableGenerator;
+            super(SQLServerInsertOrderByInSliceNormalizer.this.iqFactory,  variableGenerator);
         }
 
         @Override

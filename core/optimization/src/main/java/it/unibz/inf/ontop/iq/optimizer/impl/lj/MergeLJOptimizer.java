@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -67,17 +68,13 @@ public class MergeLJOptimizer extends AbstractIQOptimizer implements LeftJoinIQO
 
     @Override
     protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQVisitor<IQTree> transformer = new Transformer(variableGenerator);
-        return tree.acceptVisitor(transformer);
+        return tree.acceptVisitor(new Transformer(variableGenerator));
     }
 
-    protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-
-        private final VariableGenerator variableGenerator;
+    protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
         protected Transformer(VariableGenerator variableGenerator) {
-            super(MergeLJOptimizer.this.iqFactory);
-            this.variableGenerator = variableGenerator;
+            super(MergeLJOptimizer.this.iqFactory, variableGenerator);
         }
 
         @Override
