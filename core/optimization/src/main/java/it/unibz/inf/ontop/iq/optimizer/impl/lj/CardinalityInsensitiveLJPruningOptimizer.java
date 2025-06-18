@@ -78,12 +78,28 @@ public class CardinalityInsensitiveLJPruningOptimizer extends AbstractIQOptimize
             return optionalExpression.map(ImmutableFunctionalTerm::getVariables).orElseGet(ImmutableSet::of);
         }
 
-        /**
-         * Default behavior mainly for DISTINCT and LIMIT 1
-         */
-        @Override
-        protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+        private IQTree defaultTransformUnaryNode(UnaryIQTree tree) {
             return lookForDistinctTransformer.transform(tree);
+        }
+
+        @Override
+        public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
+            return defaultTransformUnaryNode(tree);
+        }
+
+        @Override
+        public IQTree transformSlice(UnaryIQTree tree, SliceNode rootNode, IQTree child) {
+            return defaultTransformUnaryNode(tree);
+        }
+
+        @Override
+        public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
+            return defaultTransformUnaryNode(tree);
+        }
+
+        @Override
+        public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
+            return defaultTransformUnaryNode(tree);
         }
 
         @Override
