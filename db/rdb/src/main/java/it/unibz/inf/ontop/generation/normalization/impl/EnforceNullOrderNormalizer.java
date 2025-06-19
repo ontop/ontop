@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -39,9 +38,9 @@ public class EnforceNullOrderNormalizer implements DialectExtraNormalizer {
     }
 
 
-    protected class EnforceNullOrderIQTreeVisitingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    private class EnforceNullOrderIQTreeVisitingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        protected EnforceNullOrderIQTreeVisitingTransformer() {
+        EnforceNullOrderIQTreeVisitingTransformer() {
             super(EnforceNullOrderNormalizer.this.iqFactory);
         }
 
@@ -58,7 +57,7 @@ public class EnforceNullOrderNormalizer implements DialectExtraNormalizer {
         }
 
         /**
-         * Tries to append a IS_NOT_NULL order condition before so as to enforce NULL as the smallest value
+         * Tries to append an IS_NOT_NULL order condition before to enforce NULL as the smallest value
          *
          * NB: we don't simplify the expression in case a DISTINCT is present.
          *
@@ -76,6 +75,4 @@ public class EnforceNullOrderNormalizer implements DialectExtraNormalizer {
                     .orElseGet(() -> Stream.of(condition));
         }
     }
-
-
 }

@@ -66,7 +66,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             var expression = rootNode.getOptionalFilterCondition();
             var newExpression = expression.map(this::transformTerm);
-            if (newExpression.isEmpty() || newExpression.equals(expression))
+            if (newExpression.equals(expression))
                 return super.transformLeftJoin(tree, rootNode, leftChild, rightChild);
 
             return iqTreeTools.createLeftJoinTree(
@@ -79,7 +79,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             var expression = rootNode.getOptionalFilterCondition();
             var newExpression = expression.map(this::transformTerm);
-            if (newExpression.isEmpty() || newExpression.equals(expression))
+            if (newExpression.equals(expression))
                 return super.transformInnerJoin(tree, rootNode, children);
 
             return iqTreeTools.createInnerJoinTree(Optional.of((ImmutableExpression) newExpression.get()),

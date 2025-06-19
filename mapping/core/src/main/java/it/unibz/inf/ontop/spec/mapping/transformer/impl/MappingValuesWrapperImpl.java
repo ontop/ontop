@@ -49,12 +49,12 @@ public class MappingValuesWrapperImpl implements MappingValuesWrapper {
             return mapping;
     }
 
-    protected static class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    private static class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
         private final QuotedIDFactory rawQuotedIqFactory;
         private final DBParameters dbParameters;
         private final AtomFactory atomFactory;
 
-        protected Transformer(DBParameters dbParameters) {
+        Transformer(DBParameters dbParameters) {
             super(dbParameters.getCoreSingletons().getIQFactory());
             this.dbParameters = dbParameters;
             this.rawQuotedIqFactory = new RawQuotedIDFactory(dbParameters.getQuotedIDFactory());
@@ -104,14 +104,13 @@ public class MappingValuesWrapperImpl implements MappingValuesWrapper {
 
         }
 
-        protected RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters)  {
+        private RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters)  {
             SingleTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
             var builder = AbstractRelationDefinition.attributeListBuilder();
 
             var iqTree = iq.getTree();
             var variableNullability = iqTree.getVariableNullability();
             var rootType= dbParameters.getDBTypeFactory().getAbstractRootDBType();
-
 
             for (Variable v : iq.getProjectionAtom().getArguments()) {
                 var attributeId = rawQuotedIqFactory.createAttributeID(v.getName());
@@ -128,7 +127,7 @@ public class MappingValuesWrapperImpl implements MappingValuesWrapper {
             return builder;
         }
 
-        protected AtomPredicate createTemporaryPredicate(RelationID relationId, int arity, CoreSingletons coreSingletons) {
+        private AtomPredicate createTemporaryPredicate(RelationID relationId, int arity, CoreSingletons coreSingletons) {
             DBTermType dbRootType = coreSingletons.getTypeFactory().getDBTypeFactory().getAbstractRootDBType();
 
             return new TemporaryLensPredicate(
@@ -138,7 +137,7 @@ public class MappingValuesWrapperImpl implements MappingValuesWrapper {
                             .mapToObj(i -> dbRootType).collect(ImmutableCollectors.toList()));
         }
 
-        public MappingAssertion transformMappingAssertion(MappingAssertion mappingAssertion) {
+        private MappingAssertion transformMappingAssertion(MappingAssertion mappingAssertion) {
             var initialTree = mappingAssertion.getQuery().getTree();
 
             var newTree = transformChild(initialTree);

@@ -30,7 +30,7 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 
 /**
- * Lifts meta term type definitions are blocked by unions.
+ * Lifts meta term type definitions blocked by unions.
  *
  * Also makes sure that type terms are lifted above AggregationNode-s and DistinctNode-s.
  *

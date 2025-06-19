@@ -45,7 +45,7 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
 
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-        private Transformer() {
+        Transformer() {
             super(BooleanExpressionPushDownTransformerImpl.this.iqFactory);
         }
 
@@ -68,13 +68,11 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
 
+            if (rootNode.getOptionalFilterCondition().isEmpty())
+                return super.transformLeftJoin(tree, rootNode, leftChild, rightChild);
+
             IQTree transformedLeftChild = transformChild(leftChild);
             IQTree transformedRightChild = transformChild(rightChild);
-
-            if (rootNode.getOptionalFilterCondition().isEmpty())
-                return leftChild.equals(transformedLeftChild) && rightChild.equals(transformedRightChild)
-                        ? tree
-                        : iqFactory.createBinaryNonCommutativeIQTree(rootNode, transformedLeftChild, transformedRightChild);
 
             // Expressions involving variables not on the right are not pushed
             PushResult<IQTree> result = pushExpressionDown(
@@ -88,12 +86,10 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
 
-            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
-
             if (rootNode.getOptionalFilterCondition().isEmpty())
-                return transformedChildren.equals(children)
-                        ? tree
-                        : iqTreeTools.createInnerJoinTree(transformedChildren);
+                return super.transformInnerJoin(tree, rootNode, children);
+
+            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
 
             PushResult<ImmutableList<IQTree>> result = pushExpressionDown(
                     transformedChildren,
@@ -226,13 +222,10 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
          */
         @Override
         public Optional<IQTree> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            if (leftChild.getVariables().containsAll(expressionToPushDown.getVariables())) {
-                Optional<IQTree> newLeftChild = transformChild(leftChild);
-                return newLeftChild
-                        .map(l -> iqFactory.createBinaryNonCommutativeIQTree(rootNode, l, rightChild));
-            }
-            else
-                return Optional.empty();
+            return leftChild.getVariables().containsAll(expressionToPushDown.getVariables())
+                ? transformChild(leftChild)
+                        .map(l -> iqFactory.createBinaryNonCommutativeIQTree(rootNode, l, rightChild))
+                : Optional.empty();
         }
 
         @Override

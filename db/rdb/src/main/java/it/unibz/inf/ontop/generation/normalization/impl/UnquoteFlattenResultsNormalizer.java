@@ -50,7 +50,7 @@ public class UnquoteFlattenResultsNormalizer implements DialectExtraNormalizer {
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-        protected Transformer() {
+        Transformer() {
             super(UnquoteFlattenResultsNormalizer.this.iqFactory);
         }
 
