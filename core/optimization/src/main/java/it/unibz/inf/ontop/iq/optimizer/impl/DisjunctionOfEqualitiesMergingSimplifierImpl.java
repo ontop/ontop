@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.DisjunctionOfEqualitiesMergingSimplifier;
-import it.unibz.inf.ontop.iq.type.impl.AbstractExpressionTransformer;
+import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
@@ -26,14 +26,16 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
 
     private static final int MAX_ARITY = 8;
 
+    private final CoreSingletons coreSingletons;
     private final IQVisitor<IQTree> inCreatingTransformer;
     private final IQVisitor<IQTree> inMergingTransformer;
 
     @Inject
     protected DisjunctionOfEqualitiesMergingSimplifierImpl(CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
-        this.inCreatingTransformer = new InCreatingTransformer(coreSingletons);
-        this.inMergingTransformer = new InMergingTransformer(coreSingletons);
+        this.coreSingletons = coreSingletons;
+        this.inCreatingTransformer = new InCreatingTransformer();
+        this.inMergingTransformer = new InMergingTransformer();
     }
 
     @Override
@@ -74,9 +76,9 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
                 f.getTerm(1) instanceof Constant ? f.getTerm(1) : f.getTerm(0)));
     }
 
-    protected class InCreatingTransformer extends AbstractExpressionTransformer {
+    protected class InCreatingTransformer extends AbstractTermTransformer {
 
-        protected InCreatingTransformer(CoreSingletons coreSingletons) {
+        protected InCreatingTransformer() {
             super(coreSingletons);
         }
 
@@ -139,9 +141,9 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
         }
     }
 
-    protected class InMergingTransformer extends AbstractExpressionTransformer {
+    protected class InMergingTransformer extends AbstractTermTransformer {
 
-        protected InMergingTransformer(CoreSingletons coreSingletons) {
+        protected InMergingTransformer() {
             super(coreSingletons);
         }
 

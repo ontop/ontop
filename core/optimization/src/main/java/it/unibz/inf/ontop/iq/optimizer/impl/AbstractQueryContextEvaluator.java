@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.QueryContextEvaluator;
-import it.unibz.inf.ontop.iq.type.impl.AbstractExpressionTransformer;
+import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -39,7 +39,7 @@ public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
     }
 
 
-    protected class QueryContextFunctionTransformer extends AbstractExpressionTransformer {
+    protected class QueryContextFunctionTransformer extends AbstractTermTransformer {
 
         private final QueryContext queryContext;
 

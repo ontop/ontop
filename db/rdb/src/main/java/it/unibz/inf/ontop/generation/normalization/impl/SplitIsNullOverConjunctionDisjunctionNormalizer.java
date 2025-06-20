@@ -5,8 +5,7 @@ import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.type.impl.AbstractExpressionTransformer;
+import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -38,7 +37,7 @@ public class SplitIsNullOverConjunctionDisjunctionNormalizer implements DialectE
         return tree.acceptVisitor(expressionTransformer);
     }
 
-    protected static class ExpressionTransformer extends AbstractExpressionTransformer {
+    protected static class ExpressionTransformer extends AbstractTermTransformer {
 
         protected ExpressionTransformer(CoreSingletons coreSingletons) {
             super(coreSingletons);

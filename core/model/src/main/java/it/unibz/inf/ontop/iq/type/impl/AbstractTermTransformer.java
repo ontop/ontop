@@ -19,7 +19,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Optional;
 
 
-public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+public abstract class AbstractTermTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
     protected final SingleTermTypeExtractor typeExtractor;
     protected final TermFactory termFactory;
@@ -27,16 +27,16 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
 
     // this constructor is needed because some uses are in the "parts" of CoreSingletons,
     // which would introduce a cyclic dependency for Guice
-    protected AbstractExpressionTransformer(IntermediateQueryFactory iqFactory,
-                                            SingleTermTypeExtractor typeExtractor,
-                                            TermFactory termFactory, IQTreeTools iqTreeTools) {
+    protected AbstractTermTransformer(IntermediateQueryFactory iqFactory,
+                                      SingleTermTypeExtractor typeExtractor,
+                                      TermFactory termFactory, IQTreeTools iqTreeTools) {
         super(iqFactory);
         this.typeExtractor = typeExtractor;
         this.termFactory = termFactory;
         this.iqTreeTools = iqTreeTools;
     }
 
-    protected AbstractExpressionTransformer(CoreSingletons coreSingletons) {
+    protected AbstractTermTransformer(CoreSingletons coreSingletons) {
         this(coreSingletons.getIQFactory(),
                 coreSingletons.getUniqueTermTypeExtractor(),
                 coreSingletons.getTermFactory(),

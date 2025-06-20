@@ -38,7 +38,7 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
     }
 
 
-    protected static class ExpressionTransformer extends AbstractExpressionTransformer {
+    protected static class ExpressionTransformer extends AbstractTermTransformer {
 
         protected ExpressionTransformer(IntermediateQueryFactory iqFactory,
                                         SingleTermTypeExtractor typeExtractor,

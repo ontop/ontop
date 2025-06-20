@@ -28,11 +28,13 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 @Singleton
 public class SubQueryFromComplexJoinExtraNormalizer implements DialectExtraNormalizer {
 
+    private final IntermediateQueryFactory iqFactory;
     private final Transformer transformer;
 
     @Inject
     protected SubQueryFromComplexJoinExtraNormalizer(CoreSingletons coreSingletons) {
-        this.transformer = new Transformer(coreSingletons.getIQFactory());
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.transformer = new Transformer();
     }
 
     @Override
@@ -42,8 +44,8 @@ public class SubQueryFromComplexJoinExtraNormalizer implements DialectExtraNorma
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        protected Transformer(IntermediateQueryFactory iqFactory) {
-            super(iqFactory);
+        Transformer() {
+            super(SubQueryFromComplexJoinExtraNormalizer.this.iqFactory);
         }
 
         @Override

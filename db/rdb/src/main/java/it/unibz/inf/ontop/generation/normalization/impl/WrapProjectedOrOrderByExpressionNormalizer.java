@@ -5,11 +5,11 @@ import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.HomogeneousIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.node.DefaultQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -27,14 +27,14 @@ public class WrapProjectedOrOrderByExpressionNormalizer implements DialectExtraN
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
     private final IntermediateQueryFactory iqFactory;
-    private final Transformer transformer;
+    private final HomogeneousIQTreeVisitingTransformer transformer;
 
     @Inject
     protected WrapProjectedOrOrderByExpressionNormalizer(CoreSingletons coreSingletons) {
         this.termFactory = coreSingletons.getTermFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.iqFactory = coreSingletons.getIQFactory();
-        this.transformer = new Transformer();
+        this.transformer = new HomogeneousIQTreeVisitingTransformer(new Transformer(), iqFactory);
     }
 
     @Override
@@ -42,35 +42,21 @@ public class WrapProjectedOrOrderByExpressionNormalizer implements DialectExtraN
         return tree.acceptVisitor(transformer);
     }
 
-    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    private class Transformer extends DefaultQueryNodeTransformer {
 
-        Transformer() {
-            super(WrapProjectedOrOrderByExpressionNormalizer.this.iqFactory);
+        @Override
+        public ConstructionNode transform(ConstructionNode constructionNode) {
+            return iqTreeTools.replaceSubstitution(
+                    constructionNode, s -> s.transform(this::transformTerm));
         }
 
         @Override
-        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-            IQTree newChild = transformChild(child);
-            ConstructionNode newRootNode = iqTreeTools.replaceSubstitution(
-                    rootNode, s -> s.transform(this::transformTerm));
-
-            return newRootNode.equals(rootNode) && (child == newChild)
-                    ? tree
-                    : iqFactory.createUnaryIQTree(newRootNode, newChild);
-        }
-
-        @Override
-        public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-            IQTree newChild = transformChild(child);
-            OrderByNode newRootNode = iqFactory.createOrderByNode(
+        public OrderByNode transform(OrderByNode rootNode) {
+            return iqFactory.createOrderByNode(
                     rootNode.getComparators().stream()
                             .map(c -> iqFactory.createOrderComparator(
                                     (NonGroundTerm) transformTerm(c.getTerm()), c.isAscending()))
                             .collect(ImmutableCollectors.toList()));
-
-            return newRootNode.equals(rootNode) && (child == newChild)
-                    ? tree
-                    : iqFactory.createUnaryIQTree(newRootNode, newChild);
         }
 
         private ImmutableTerm transformTerm(ImmutableTerm term) {
