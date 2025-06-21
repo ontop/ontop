@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransf
  */
 public abstract class CaseInsensitiveIQTreeTransformerAdapter extends DefaultRecursiveIQTreeVisitingTransformer {
 
-    public CaseInsensitiveIQTreeTransformerAdapter(IntermediateQueryFactory iqFactory) {
+    protected CaseInsensitiveIQTreeTransformerAdapter(IntermediateQueryFactory iqFactory) {
         super(iqFactory);
     }
 

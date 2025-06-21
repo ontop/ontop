@@ -26,20 +26,17 @@ public class TypingNullsInConstructionNodeDialectExtraNormalizer extends Abstrac
 
     @Override
     public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-        IQTree newChild = transformChild(child);
-
         ImmutableSet<Variable> nullVariables = extractNullVariables(rootNode);
 
         if (nullVariables.isEmpty())
-            return newChild.equals(child)
-                    ? tree
-                    : iqFactory.createUnaryIQTree(rootNode, newChild);
+            return super.transformConstruction(tree, rootNode, child);
 
         Substitution<ImmutableFunctionalTerm> typedNullMap = nullVariables.stream()
                 .collect(substitutionFactory.toSubstitution(
                         v -> v,
                         v -> termFactory.getTypedNull(defaultType)));
 
+        IQTree newChild = transformChild(child);
         return updateSubQuery(iqFactory.createUnaryIQTree(rootNode, newChild), typedNullMap);
     }
 }

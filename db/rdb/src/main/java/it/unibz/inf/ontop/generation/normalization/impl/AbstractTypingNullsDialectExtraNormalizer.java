@@ -4,9 +4,11 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.node.DefaultQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -42,15 +44,15 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
      * Replaces NULL bindings in top construction nodes if a type is defined
      */
     protected IQTree updateSubQuery(IQTree child, Substitution<ImmutableFunctionalTerm> typedNullMap) {
-        var construction = IQTreeTools.UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
-        if (construction.isPresent()) {
-            return iqFactory.createUnaryIQTree(
-                    iqTreeTools.replaceSubstitution(construction.getNode(),
-                            s -> s.builder()
-                                    .transformOrRetain(typedNullMap::get, (t, n) -> t.isNull() ? n : t)
-                                    .build()),
-                    construction.getChild());
-        }
-        return child;
+        var transformer = new DefaultQueryNodeTransformer(iqFactory) {
+            @Override
+            public ConstructionNode transform(ConstructionNode rootNode, UnaryIQTree tree) {
+                return iqTreeTools.replaceSubstitution(rootNode,
+                        s -> s.builder()
+                                .transformOrRetain(typedNullMap::get, (t, n) -> t.isNull() ? n : t)
+                                .build());
+            }
+        };
+        return child.acceptVisitor(transformer.treeTransformer());
     }
 }
