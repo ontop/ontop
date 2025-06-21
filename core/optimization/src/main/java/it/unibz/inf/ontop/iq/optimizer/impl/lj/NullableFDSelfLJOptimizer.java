@@ -332,16 +332,14 @@ public class NullableFDSelfLJOptimizer extends AbstractIQOptimizer implements Le
      * To be kept in sync with RequiredExtensionalDataNodeExtractor.
      * Not safe to run in parallel
      */
-    private static class DataNodeOnLeftReplacer extends DefaultNonRecursiveIQTreeTransformer {
+    private class DataNodeOnLeftReplacer extends DefaultNonRecursiveIQTreeTransformer {
 
-        private final IntermediateQueryFactory iqFactory;
         private final ExtensionalDataNode nodeToBeReplaced;
         private final ExtensionalDataNode replacingNode;
         private boolean found;
 
         protected DataNodeOnLeftReplacer(IntermediateQueryFactory iqFactory, ExtensionalDataNode nodeToBeReplaced,
                                          ExtensionalDataNode replacingNode) {
-            this.iqFactory = iqFactory;
             this.nodeToBeReplaced = nodeToBeReplaced;
             this.replacingNode = replacingNode;
             this.found = false;
@@ -353,7 +351,7 @@ public class NullableFDSelfLJOptimizer extends AbstractIQOptimizer implements Le
 
         @Override
         public IQTree transformExtensionalData(ExtensionalDataNode dataNode) {
-            if ((!found) && dataNode.equals(nodeToBeReplaced)) {
+            if (!found && dataNode.equals(nodeToBeReplaced)) {
                 found = true;
                 return replacingNode;
             }
