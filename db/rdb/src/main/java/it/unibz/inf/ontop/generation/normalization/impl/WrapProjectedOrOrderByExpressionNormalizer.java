@@ -5,10 +5,11 @@ import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
-import it.unibz.inf.ontop.iq.transform.impl.HomogeneousIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.IQTreeVisitingNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.DefaultQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -27,14 +28,14 @@ public class WrapProjectedOrOrderByExpressionNormalizer implements DialectExtraN
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
     private final IntermediateQueryFactory iqFactory;
-    private final HomogeneousIQTreeVisitingTransformer transformer;
+    private final IQTreeVisitingNodeTransformer transformer;
 
     @Inject
     protected WrapProjectedOrOrderByExpressionNormalizer(CoreSingletons coreSingletons) {
         this.termFactory = coreSingletons.getTermFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.iqFactory = coreSingletons.getIQFactory();
-        this.transformer = new HomogeneousIQTreeVisitingTransformer(new Transformer(), iqFactory);
+        this.transformer = new IQTreeVisitingNodeTransformer(new Transformer(), iqFactory);
     }
 
     @Override
@@ -45,13 +46,13 @@ public class WrapProjectedOrOrderByExpressionNormalizer implements DialectExtraN
     private class Transformer extends DefaultQueryNodeTransformer {
 
         @Override
-        public ConstructionNode transform(ConstructionNode constructionNode) {
+        public ConstructionNode transform(ConstructionNode constructionNode, UnaryIQTree tree) {
             return iqTreeTools.replaceSubstitution(
                     constructionNode, s -> s.transform(this::transformTerm));
         }
 
         @Override
-        public OrderByNode transform(OrderByNode rootNode) {
+        public OrderByNode transform(OrderByNode rootNode, UnaryIQTree tree) {
             return iqFactory.createOrderByNode(
                     rootNode.getComparators().stream()
                             .map(c -> iqFactory.createOrderComparator(

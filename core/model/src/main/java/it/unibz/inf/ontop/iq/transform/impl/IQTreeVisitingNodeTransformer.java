@@ -6,20 +6,20 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.iq.transform.node.QueryNodeTransformer;
 
 import java.util.stream.IntStream;
 
 /**
  * Uses a HomogeneousQueryNodeTransformer
  */
-public final class HomogeneousIQTreeVisitingTransformer extends DefaultIQTreeVisitingTransformer {
+public final class IQTreeVisitingNodeTransformer extends DefaultIQTreeVisitingTransformer {
 
-    private final HomogeneousQueryNodeTransformer nodeTransformer;
+    private final QueryNodeTransformer nodeTransformer;
     private final IntermediateQueryFactory iqFactory;
 
-    public HomogeneousIQTreeVisitingTransformer(HomogeneousQueryNodeTransformer nodeTransformer,
-                                                IntermediateQueryFactory iqFactory) {
+    public IQTreeVisitingNodeTransformer(QueryNodeTransformer nodeTransformer,
+                                         IntermediateQueryFactory iqFactory) {
         this.nodeTransformer = nodeTransformer;
         this.iqFactory = iqFactory;
     }
@@ -51,52 +51,52 @@ public final class HomogeneousIQTreeVisitingTransformer extends DefaultIQTreeVis
 
     @Override
     public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-        return transformUnaryNode(tree, nodeTransformer.transform(rootNode), child);
+        return transformUnaryNode(tree, nodeTransformer.transform(rootNode, tree), child);
     }
 
     @Override
     public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
-        return transformUnaryNode(tree, nodeTransformer.transform(rootNode), child);
+        return transformUnaryNode(tree, nodeTransformer.transform(rootNode, tree), child);
     }
 
     @Override
     public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-        return transformUnaryNode(tree, nodeTransformer.transform(rootNode), child);
+        return transformUnaryNode(tree, nodeTransformer.transform(rootNode, tree), child);
     }
 
     @Override
     public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-        return transformUnaryNode(tree, nodeTransformer.transform(rootNode), child);
+        return transformUnaryNode(tree, nodeTransformer.transform(rootNode, tree), child);
     }
 
     @Override
     public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
-        return transformUnaryNode(tree, nodeTransformer.transform(sliceNode), child);
+        return transformUnaryNode(tree, nodeTransformer.transform(sliceNode, tree), child);
     }
 
     @Override
     public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-        return transformUnaryNode(tree, nodeTransformer.transform(rootNode), child);
+        return transformUnaryNode(tree, nodeTransformer.transform(rootNode, tree), child);
     }
 
     @Override
     public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
-        return transformUnaryNode(tree, nodeTransformer.transform(rootNode), child);
+        return transformUnaryNode(tree, nodeTransformer.transform(rootNode, tree), child);
     }
 
     @Override
     public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        return transformBinaryNonCommutativeNode(tree, nodeTransformer.transform(rootNode), leftChild, rightChild);
+        return transformBinaryNonCommutativeNode(tree, nodeTransformer.transform(rootNode, tree), leftChild, rightChild);
     }
 
     @Override
     public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-        return transformNaryCommutativeNode(tree, nodeTransformer.transform(rootNode), children);
+        return transformNaryCommutativeNode(tree, nodeTransformer.transform(rootNode, tree), children);
     }
 
     @Override
     public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        return transformNaryCommutativeNode(tree, nodeTransformer.transform(rootNode), children);
+        return transformNaryCommutativeNode(tree, nodeTransformer.transform(rootNode, tree), children);
     }
 
     @Override

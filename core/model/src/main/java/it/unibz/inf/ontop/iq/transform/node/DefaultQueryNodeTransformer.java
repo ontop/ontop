@@ -1,10 +1,13 @@
 package it.unibz.inf.ontop.iq.transform.node;
 
+import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 
-public class DefaultQueryNodeTransformer implements HomogeneousQueryNodeTransformer {
+public class DefaultQueryNodeTransformer implements QueryNodeTransformer {
     @Override
-    public FilterNode transform(FilterNode filterNode) {
+    public FilterNode transform(FilterNode filterNode, UnaryIQTree tree) {
         return filterNode;
     }
 
@@ -14,12 +17,12 @@ public class DefaultQueryNodeTransformer implements HomogeneousQueryNodeTransfor
     }
 
     @Override
-    public LeftJoinNode transform(LeftJoinNode leftJoinNode) {
+    public LeftJoinNode transform(LeftJoinNode leftJoinNode, BinaryNonCommutativeIQTree tree) {
         return leftJoinNode;
     }
 
     @Override
-    public UnionNode transform(UnionNode unionNode) {
+    public UnionNode transform(UnionNode unionNode, NaryIQTree tree) {
         return unionNode;
     }
 
@@ -29,22 +32,22 @@ public class DefaultQueryNodeTransformer implements HomogeneousQueryNodeTransfor
     }
 
     @Override
-    public InnerJoinNode transform(InnerJoinNode innerJoinNode) {
+    public InnerJoinNode transform(InnerJoinNode innerJoinNode, NaryIQTree tree) {
         return innerJoinNode;
     }
 
     @Override
-    public ConstructionNode transform(ConstructionNode constructionNode) {
+    public ConstructionNode transform(ConstructionNode constructionNode, UnaryIQTree tree) {
         return constructionNode;
     }
 
     @Override
-    public AggregationNode transform(AggregationNode aggregationNode) {
+    public AggregationNode transform(AggregationNode aggregationNode, UnaryIQTree tree) {
         return aggregationNode;
     }
 
     @Override
-    public FlattenNode transform(FlattenNode flattenNode) {
+    public FlattenNode transform(FlattenNode flattenNode, UnaryIQTree tree) {
         return flattenNode;
     }
 
@@ -64,17 +67,17 @@ public class DefaultQueryNodeTransformer implements HomogeneousQueryNodeTransfor
     }
 
     @Override
-    public DistinctNode transform(DistinctNode distinctNode) {
+    public DistinctNode transform(DistinctNode distinctNode, UnaryIQTree tree) {
         return distinctNode;
     }
 
     @Override
-    public SliceNode transform(SliceNode sliceNode) {
+    public SliceNode transform(SliceNode sliceNode, UnaryIQTree tree) {
         return sliceNode;
     }
 
     @Override
-    public OrderByNode transform(OrderByNode orderByNode) {
+    public OrderByNode transform(OrderByNode orderByNode, UnaryIQTree tree) {
         return orderByNode;
     }
 }

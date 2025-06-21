@@ -3,6 +3,9 @@ package it.unibz.inf.ontop.iq.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 
@@ -11,7 +14,7 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.*;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.iq.transform.node.QueryNodeTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -19,7 +22,7 @@ import java.util.Optional;
 /**
  * Renames query nodes according to one renaming substitution.
  */
-public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
+public class QueryNodeRenamer implements QueryNodeTransformer {
 
     private final IntermediateQueryFactory iqFactory;
     private final InjectiveSubstitution<Variable> renamingSubstitution;
@@ -35,7 +38,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     }
 
     @Override
-    public FilterNode transform(FilterNode filterNode) {
+    public FilterNode transform(FilterNode filterNode, UnaryIQTree tree) {
         ImmutableExpression booleanExpression = filterNode.getFilterCondition();
         return iqFactory.createFilterNode(renamingSubstitution.apply(booleanExpression));
     }
@@ -48,13 +51,13 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     }
 
     @Override
-    public LeftJoinNode transform(LeftJoinNode leftJoinNode) {
+    public LeftJoinNode transform(LeftJoinNode leftJoinNode, BinaryNonCommutativeIQTree tree) {
         Optional<ImmutableExpression> optionalExpression = leftJoinNode.getOptionalFilterCondition();
         return iqFactory.createLeftJoinNode(optionalExpression.map(renamingSubstitution::apply));
     }
 
     @Override
-    public UnionNode transform(UnionNode unionNode){
+    public UnionNode transform(UnionNode unionNode, NaryIQTree tree) {
         return iqFactory.createUnionNode(substitutionFactory.apply(renamingSubstitution, unionNode.getVariables()));
     }
 
@@ -67,13 +70,13 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     }
 
     @Override
-    public InnerJoinNode transform(InnerJoinNode innerJoinNode) {
+    public InnerJoinNode transform(InnerJoinNode innerJoinNode, NaryIQTree tree) {
         Optional<ImmutableExpression> optionalExpression = innerJoinNode.getOptionalFilterCondition();
         return iqFactory.createInnerJoinNode(optionalExpression.map(renamingSubstitution::apply));
     }
 
     @Override
-    public ConstructionNode transform(ConstructionNode constructionNode) {
+    public ConstructionNode transform(ConstructionNode constructionNode, UnaryIQTree tree) {
         Substitution<ImmutableTerm> substitution = constructionNode.getSubstitution();
         return iqFactory.createConstructionNode(
                 substitutionFactory.apply(renamingSubstitution, constructionNode.getVariables()),
@@ -81,7 +84,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     }
 
     @Override
-    public AggregationNode transform(AggregationNode aggregationNode) throws QueryNodeTransformationException {
+    public AggregationNode transform(AggregationNode aggregationNode, UnaryIQTree tree) throws QueryNodeTransformationException {
         Substitution<ImmutableFunctionalTerm> substitution = aggregationNode.getSubstitution();
         return iqFactory.createAggregationNode(
                 substitutionFactory.apply(renamingSubstitution, aggregationNode.getGroupingVariables()),
@@ -89,7 +92,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     }
 
     @Override
-    public FlattenNode transform(FlattenNode flattenNode) {
+    public FlattenNode transform(FlattenNode flattenNode, UnaryIQTree tree) {
         return iqFactory.createFlattenNode(
                 substitutionFactory.apply(renamingSubstitution, flattenNode.getOutputVariable()),
                 substitutionFactory.apply(renamingSubstitution, flattenNode.getFlattenedVariable()),
@@ -117,19 +120,19 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     }
 
     @Override
-    public DistinctNode transform(DistinctNode distinctNode) {
+    public DistinctNode transform(DistinctNode distinctNode, UnaryIQTree tree) {
         return iqFactory.createDistinctNode();
     }
 
     @Override
-    public SliceNode transform(SliceNode sliceNode) {
+    public SliceNode transform(SliceNode sliceNode, UnaryIQTree tree) {
         return sliceNode.getLimit()
                 .map(l -> iqFactory.createSliceNode(sliceNode.getOffset(), l))
                 .orElseGet(() -> iqFactory.createSliceNode(sliceNode.getOffset()));
     }
 
     @Override
-    public OrderByNode transform(OrderByNode orderByNode) {
+    public OrderByNode transform(OrderByNode orderByNode, UnaryIQTree tree) {
         ImmutableList<OrderByNode.OrderComparator> newComparators = orderByNode.getComparators().stream()
                 .map(c -> iqFactory.createOrderComparator(
                         substitutionFactory.onNonGroundTerms().rename(renamingSubstitution, c.getTerm()),
