@@ -27,9 +27,8 @@ public class NotYetTypedBinaryMathOperationTransformerImpl implements NotYetType
                                                             SingleTermTypeExtractor typeExtractor,
                                                             TermFactory termFactory,
                                                             IQTreeTools iqTreeTools) {
-        this.expressionTransformer = new ExpressionTransformer(iqFactory,
-                                                                typeExtractor,
-                                                                termFactory, iqTreeTools);
+        this.expressionTransformer = new ExpressionTransformer(iqFactory, typeExtractor, termFactory, iqTreeTools)
+                .treeTransformer();
     }
 
     @Override

@@ -59,6 +59,6 @@ public class QueryRenamerImpl implements QueryRenamer {
 
     private IQTree applyRenaming(IQTree tree) {
         QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(iqFactory, renamingSubstitution, atomFactory, substitutionFactory);
-        return tree.acceptVisitor(new IQTreeVisitingNodeTransformer(nodeTransformer, iqFactory));
+        return tree.acceptVisitor(nodeTransformer.treeTransformer());
     }
 }

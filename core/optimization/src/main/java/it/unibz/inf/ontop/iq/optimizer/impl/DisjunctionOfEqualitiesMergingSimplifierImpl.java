@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.DisjunctionOfEqualitiesMergingSimplifier;
+import it.unibz.inf.ontop.iq.transform.impl.IQTreeVisitingNodeTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -34,8 +35,8 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
     protected DisjunctionOfEqualitiesMergingSimplifierImpl(CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.coreSingletons = coreSingletons;
-        this.inCreatingTransformer = new InCreatingTransformer();
-        this.inMergingTransformer = new InMergingTransformer();
+        this.inCreatingTransformer = new InCreatingTransformer().treeTransformer();
+        this.inMergingTransformer = new InMergingTransformer().treeTransformer();
     }
 
     @Override

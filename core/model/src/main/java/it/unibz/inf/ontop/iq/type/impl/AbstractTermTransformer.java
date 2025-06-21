@@ -8,9 +8,8 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.node.DefaultQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -19,7 +18,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Optional;
 
 
-public abstract class AbstractTermTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+public abstract class AbstractTermTransformer extends DefaultQueryNodeTransformer {
 
     protected final SingleTermTypeExtractor typeExtractor;
     protected final TermFactory termFactory;
@@ -44,77 +43,45 @@ public abstract class AbstractTermTransformer extends DefaultRecursiveIQTreeVisi
     }
 
     @Override
-    public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-        IQTree newChild = transformChild(child);
-        ConstructionNode newConstruction = iqTreeTools.replaceSubstitution(rootNode, s -> s.transform(t -> transformTerm(t, child)));
-
-        return newConstruction.equals(rootNode) && newChild.equals(child)
-                ? tree
-                : iqFactory.createUnaryIQTree(newConstruction, newChild);
+    public ConstructionNode transform(ConstructionNode rootNode, UnaryIQTree tree) {
+        return iqTreeTools.replaceSubstitution(rootNode,
+                s -> s.transform(t -> transformTerm(t, tree.getChild())));
     }
 
     @Override
-    public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
-        IQTree newChild = transformChild(child);
-        AggregationNode newAggregation = iqFactory.createAggregationNode(
+    public AggregationNode transform(AggregationNode rootNode, UnaryIQTree tree) {
+        return iqFactory.createAggregationNode(
                 rootNode.getGroupingVariables(),
                 rootNode.getSubstitution()
-                        .transform(t -> transformFunctionalTerm(t, child)));
-
-        return newAggregation.equals(rootNode) && newChild.equals(child)
-                ? tree
-                : iqFactory.createUnaryIQTree(newAggregation, newChild);
+                        .transform(t -> transformFunctionalTerm(t, tree.getChild())));
     }
 
     @Override
-    public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-        IQTree newChild = transformChild(child);
-        FilterNode newFilterNode = iqFactory.createFilterNode(
+    public FilterNode transform(FilterNode rootNode, UnaryIQTree tree) {
+        return iqFactory.createFilterNode(
                 transformExpression(rootNode.getFilterCondition(), tree));
-
-        return newFilterNode.equals(rootNode) && newChild.equals(child)
-                ? tree
-                : iqFactory.createUnaryIQTree(newFilterNode, newChild);
     }
 
     @Override
-    public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-        IQTree newChild = transformChild(child);
-        OrderByNode newOrderBy = iqFactory.createOrderByNode(rootNode.getComparators().stream()
+    public OrderByNode transform(OrderByNode rootNode, UnaryIQTree tree) {
+        return iqFactory.createOrderByNode(rootNode.getComparators().stream()
                 .map(c -> iqFactory.createOrderComparator(
                         transformNonGroundTerm(c.getTerm(), tree),
                         c.isAscending()))
                 .collect(ImmutableCollectors.toList()));
-
-        return newOrderBy.equals(rootNode) && newChild.equals(child)
-                ? tree
-                : iqFactory.createUnaryIQTree(newOrderBy, newChild);
     }
 
     @Override
-    public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        IQTree newLeftChild = transformChild(leftChild);
-        IQTree newRightChild = transformChild(rightChild);
-
-        Optional<ImmutableExpression> newLeftJoinCondition = rootNode.getOptionalFilterCondition()
-                        .map(e -> transformExpression(e, tree));
-
-        return newLeftJoinCondition.equals(rootNode.getOptionalFilterCondition()) && newLeftChild.equals(leftChild) && newRightChild.equals(rightChild)
-                ? tree
-                : iqTreeTools.createLeftJoinTree(newLeftJoinCondition, newLeftChild, newRightChild);
+    public LeftJoinNode transform(LeftJoinNode rootNode, BinaryNonCommutativeIQTree tree) {
+        return iqFactory.createLeftJoinNode(rootNode.getOptionalFilterCondition()
+                        .map(e -> transformExpression(e, tree)));
     }
 
     @Override
-    public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
-
-        InnerJoinNode newJoinNode = iqFactory.createInnerJoinNode(
+    public InnerJoinNode transform(InnerJoinNode rootNode, NaryIQTree tree) {
+        return iqFactory.createInnerJoinNode(
                 rootNode.getOptionalFilterCondition()
                 .map(e -> transformExpression(e, tree)));
-
-        return newJoinNode.equals(rootNode) && newChildren.equals(children)
-                ? tree
-                : iqFactory.createNaryIQTree(newJoinNode, newChildren);
     }
 
     protected ImmutableTerm transformTerm(ImmutableTerm term, IQTree tree) {

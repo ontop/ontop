@@ -9,8 +9,8 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
-import it.unibz.inf.ontop.iq.transform.impl.IQTreeVisitingNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.DefaultQueryNodeTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -27,15 +27,13 @@ public class WrapProjectedOrOrderByExpressionNormalizer implements DialectExtraN
 
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
-    private final IntermediateQueryFactory iqFactory;
-    private final IQTreeVisitingNodeTransformer transformer;
+    private final IQVisitor<IQTree> transformer;
 
     @Inject
     protected WrapProjectedOrOrderByExpressionNormalizer(CoreSingletons coreSingletons) {
         this.termFactory = coreSingletons.getTermFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
-        this.iqFactory = coreSingletons.getIQFactory();
-        this.transformer = new IQTreeVisitingNodeTransformer(new Transformer(), iqFactory);
+        this.transformer = new Transformer(coreSingletons.getIQFactory()).treeTransformer();
     }
 
     @Override
@@ -44,6 +42,10 @@ public class WrapProjectedOrOrderByExpressionNormalizer implements DialectExtraN
     }
 
     private class Transformer extends DefaultQueryNodeTransformer {
+
+        public Transformer(IntermediateQueryFactory iqFactory) {
+            super(iqFactory);
+        }
 
         @Override
         public ConstructionNode transform(ConstructionNode constructionNode, UnaryIQTree tree) {

@@ -27,9 +27,8 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
     protected NotYetTypedEqualityTransformerImpl(IntermediateQueryFactory iqFactory,
                                                  SingleTermTypeExtractor typeExtractor,
                                                  TermFactory termFactory, IQTreeTools iqTreeTools) {
-        this.expressionTransformer = new ExpressionTransformer(iqFactory,
-                                                                typeExtractor,
-                                                                termFactory, iqTreeTools);
+        this.expressionTransformer = new ExpressionTransformer(iqFactory, typeExtractor, termFactory, iqTreeTools)
+                .treeTransformer();
     }
 
     @Override

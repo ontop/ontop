@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.transform.impl.IQTreeVisitingNodeTransformer;
+import it.unibz.inf.ontop.iq.transform.node.QueryNodeTransformer;
 import it.unibz.inf.ontop.iq.type.PartiallyTypedSimpleCastTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -24,9 +26,8 @@ public class PartiallyTypedSimpleCastTransformerImpl implements PartiallyTypedSi
                                                       SingleTermTypeExtractor typeExtractor,
                                                       TermFactory termFactory,
                                                       IQTreeTools iqTreeTools) {
-        this.expressionTransformer = new ExpressionTransformer(iqFactory,
-                                                                typeExtractor,
-                                                                termFactory, iqTreeTools);
+        this.expressionTransformer = new ExpressionTransformer(iqFactory, typeExtractor, termFactory, iqTreeTools)
+                .treeTransformer();
     }
 
     @Override

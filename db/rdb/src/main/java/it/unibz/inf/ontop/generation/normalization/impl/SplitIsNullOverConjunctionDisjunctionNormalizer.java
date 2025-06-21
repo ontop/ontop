@@ -30,7 +30,7 @@ public class SplitIsNullOverConjunctionDisjunctionNormalizer implements DialectE
 
     @Inject
     protected SplitIsNullOverConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {
-        this.expressionTransformer = new ExpressionTransformer(coreSingletons);
+        this.expressionTransformer = new ExpressionTransformer(coreSingletons).treeTransformer();
     }
 
     @Override

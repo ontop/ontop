@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.transform.impl.IQTreeVisitingNodeTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -32,7 +33,7 @@ public class AvoidEqualsBoolNormalizer implements DialectExtraNormalizer {
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
 
-        IQVisitor<IQTree> transformer = new AbstractTermTransformer(coreSingletons) {
+        var transformer = new AbstractTermTransformer(coreSingletons) {
             @Override
             protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol, ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
                 if ((functionSymbol instanceof AbstractDBNonStrictEqOperator) || (functionSymbol instanceof DefaultDBStrictEqFunctionSymbol)) {
@@ -64,6 +65,6 @@ public class AvoidEqualsBoolNormalizer implements DialectExtraNormalizer {
             }
         };
 
-        return tree.acceptVisitor(transformer);
+        return tree.acceptVisitor(transformer.treeTransformer());
     }
 }

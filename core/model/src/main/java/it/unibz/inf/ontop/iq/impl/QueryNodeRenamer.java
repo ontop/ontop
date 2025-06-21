@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 
+import it.unibz.inf.ontop.iq.transform.node.DefaultQueryNodeTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -22,16 +23,15 @@ import java.util.Optional;
 /**
  * Renames query nodes according to one renaming substitution.
  */
-public class QueryNodeRenamer implements QueryNodeTransformer {
+public class QueryNodeRenamer extends DefaultQueryNodeTransformer {
 
-    private final IntermediateQueryFactory iqFactory;
     private final InjectiveSubstitution<Variable> renamingSubstitution;
     private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
 
     public QueryNodeRenamer(IntermediateQueryFactory iqFactory, InjectiveSubstitution<Variable> renamingSubstitution,
                             AtomFactory atomFactory, SubstitutionFactory substitutionFactory) {
-        this.iqFactory = iqFactory;
+        super(iqFactory);
         this.renamingSubstitution = renamingSubstitution;
         this.atomFactory = atomFactory;
         this.substitutionFactory = substitutionFactory;

@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.QueryContextEvaluator;
+import it.unibz.inf.ontop.iq.transform.impl.IQTreeVisitingNodeTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -32,8 +33,10 @@ public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
         if (queryContext == null)
             throw new IllegalArgumentException("The query context must not be null");
 
+        var transformer = new QueryContextFunctionTransformer(queryContext).treeTransformer();
+
         var initialTree = iq.getTree();
-        var newTree = initialTree.acceptVisitor(new QueryContextFunctionTransformer(queryContext));
+        var newTree = initialTree.acceptVisitor(transformer);
         return newTree.equals(initialTree)
                 ? iq
                 : coreSingletons.getIQFactory().createIQ(iq.getProjectionAtom(), newTree);
