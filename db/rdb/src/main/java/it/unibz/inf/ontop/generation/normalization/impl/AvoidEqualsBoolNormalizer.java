@@ -4,13 +4,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractDBNonStrictEqOperator;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.DefaultDBStrictEqFunctionSymbol;
@@ -25,16 +22,10 @@ import java.util.Optional;
  */
 public class AvoidEqualsBoolNormalizer implements DialectExtraNormalizer {
 
-    private final IntermediateQueryFactory iqFactory;
-    private final TermFactory termFactory;
-    private final SingleTermTypeExtractor typeExtractor;
     private final CoreSingletons coreSingletons;
 
     @Inject
     protected AvoidEqualsBoolNormalizer(CoreSingletons coreSingletons) {
-        this.iqFactory = coreSingletons.getIQFactory();
-        this.termFactory = coreSingletons.getTermFactory();
-        this.typeExtractor = coreSingletons.getUniqueTermTypeExtractor();
         this.coreSingletons = coreSingletons;
     }
 
@@ -47,7 +38,7 @@ public class AvoidEqualsBoolNormalizer implements DialectExtraNormalizer {
                 if ((functionSymbol instanceof AbstractDBNonStrictEqOperator) || (functionSymbol instanceof DefaultDBStrictEqFunctionSymbol)) {
 
                     if (newTerms.size() != 2)
-                        return Optional.of(noReplace(functionSymbol, newTerms));
+                        return Optional.empty();
 
                     var otherTerm = newTerms.stream()
                             .filter(t -> t instanceof ImmutableExpression)
@@ -57,23 +48,19 @@ public class AvoidEqualsBoolNormalizer implements DialectExtraNormalizer {
                     var constantTerm = newTerms.stream()
                             .filter(t -> t instanceof Constant)
                             .map(t -> (Constant) t)
-                            .filter(t -> t.equals(termFactory.getDBBooleanConstant(true)) || t.equals(termFactory.getDBBooleanConstant(false)))
+                            .filter(t -> t.equals(termFactory.getDBBooleanConstant(true))
+                                    || t.equals(termFactory.getDBBooleanConstant(false)))
                             .findFirst();
 
                     if (otherTerm.isEmpty() || constantTerm.isEmpty())
-                        return Optional.of(noReplace(functionSymbol, newTerms));
+                        return Optional.empty();
 
                     var requiresTrue = constantTerm.get().equals(termFactory.getDBBooleanConstant(true));
-
                     if (requiresTrue)
                         return Optional.of(otherTerm.get());
                     return Optional.of(otherTerm.get().negate(termFactory));
                 }
                 return Optional.empty();
-            }
-
-            private ImmutableFunctionalTerm noReplace(FunctionSymbol functionSymbol, ImmutableList<ImmutableTerm> newTerms) {
-                return termFactory.getImmutableExpression((BooleanFunctionSymbol) functionSymbol, newTerms);
             }
         };
 
