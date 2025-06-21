@@ -145,16 +145,12 @@ public abstract class AbstractTermTransformer extends DefaultRecursiveIQTreeVisi
 
         FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
 
-        if (isFunctionSymbolToReplace(functionSymbol)) {
-            return replaceFunctionSymbol(functionSymbol, newTerms, tree);
-        }
-        else
-            return newTerms.equals(initialTerms)
+        var optionalFunctionalTerm = replaceFunctionSymbol(functionSymbol, newTerms, tree);
+        return optionalFunctionalTerm
+                .orElseGet(() -> newTerms.equals(initialTerms)
                     ? functionalTerm
-                    : termFactory.getImmutableFunctionalTerm(functionSymbol, newTerms);
+                    : termFactory.getImmutableFunctionalTerm(functionSymbol, newTerms));
     }
 
-    protected abstract boolean isFunctionSymbolToReplace(FunctionSymbol functionSymbol);
-
-    protected abstract ImmutableFunctionalTerm replaceFunctionSymbol(FunctionSymbol functionSymbol, ImmutableList<ImmutableTerm> newTerms, IQTree tree);
+    protected abstract Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol, ImmutableList<ImmutableTerm> newTerms, IQTree tree);
 }

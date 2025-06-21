@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.QueryContextSimplifiableFunctionSymbol;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
@@ -49,19 +50,20 @@ public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
         }
 
         @Override
-        protected boolean isFunctionSymbolToReplace(FunctionSymbol functionSymbol) {
-            return (functionSymbol instanceof QueryContextSimplifiableFunctionSymbol)
-                    && functionSymbolPredicate.test(functionSymbol);
-        }
+        protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol,
 
-        @Override
-        protected ImmutableFunctionalTerm replaceFunctionSymbol(FunctionSymbol functionSymbol,
-                                                                ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
-            ImmutableTerm newTerm = ((QueryContextSimplifiableFunctionSymbol) functionSymbol).simplifyWithContext(newTerms,
-                    queryContext, termFactory);
-            if (newTerm instanceof ImmutableFunctionalTerm)
-                return (ImmutableFunctionalTerm) newTerm;
-            return termFactory.getIdentityFunctionalTerm(newTerm);
+                                                                          ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
+
+            if (functionSymbol instanceof QueryContextSimplifiableFunctionSymbol
+                    && functionSymbolPredicate.test(functionSymbol)) {
+
+                ImmutableTerm newTerm = ((QueryContextSimplifiableFunctionSymbol) functionSymbol).simplifyWithContext(newTerms,
+                        queryContext, termFactory);
+                if (newTerm instanceof ImmutableFunctionalTerm)
+                    return Optional.of((ImmutableFunctionalTerm) newTerm);
+                return Optional.of(termFactory.getIdentityFunctionalTerm(newTerm));
+            }
+            return Optional.empty();
         }
     }
 }

@@ -47,46 +47,40 @@ public class NotYetTypedBinaryMathOperationTransformerImpl implements NotYetType
         }
 
         @Override
-        protected boolean isFunctionSymbolToReplace(FunctionSymbol functionSymbol) {
-            return functionSymbol instanceof DefaultUntypedDBMathBinaryOperator;
-        }
-
-        @Override
-        protected ImmutableFunctionalTerm replaceFunctionSymbol(FunctionSymbol functionSymbol,
+        protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol,
                                                                 ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
-            if (newTerms.size() != 2)
-                throw new MinorOntopInternalBugException("Was expecting untyped math operations to be binary");
+            if (functionSymbol instanceof DefaultUntypedDBMathBinaryOperator) {
+                DefaultUntypedDBMathBinaryOperator operator = (DefaultUntypedDBMathBinaryOperator) functionSymbol;
 
-            DefaultUntypedDBMathBinaryOperator operator = (DefaultUntypedDBMathBinaryOperator)functionSymbol;
+                if (newTerms.size() != 2)
+                    throw new MinorOntopInternalBugException("Was expecting untyped math operations to be binary");
 
-            ImmutableTerm term1 = newTerms.get(0);
-            ImmutableTerm term2 = newTerms.get(1);
+                ImmutableTerm term1 = newTerms.get(0);
+                ImmutableTerm term2 = newTerms.get(1);
 
-            ImmutableList<Optional<TermType>> extractedTypes = newTerms.stream()
-                    .map(t -> typeExtractor.extractSingleTermType(t, tree))
-                    .collect(ImmutableCollectors.toList());
-
-            if (extractedTypes.stream()
-                    .allMatch(type -> type
-                            .filter(t -> t instanceof DBTermType)
-                            .isPresent())) {
-                ImmutableList<DBTermType> types = extractedTypes.stream()
-                        .map(Optional::get)
-                        .map(t -> (DBTermType) t)
+                ImmutableList<Optional<TermType>> extractedTypes = newTerms.stream()
+                        .map(t -> typeExtractor.extractSingleTermType(t, tree))
                         .collect(ImmutableCollectors.toList());
 
-                DBTermType type1 = types.get(0);
-                DBTermType type2 = types.get(1);
+                if (extractedTypes.stream()
+                        .allMatch(type -> type
+                                .filter(t -> t instanceof DBTermType)
+                                .isPresent())) {
+                    ImmutableList<DBTermType> types = extractedTypes.stream()
+                            .map(Optional::get)
+                            .map(t -> (DBTermType) t)
+                            .collect(ImmutableCollectors.toList());
 
-                return termFactory.getDBBinaryNumericFunctionalTerm(
-                        operator.getMathOperatorString(),
-                        type1,
-                        type2,
-                        term1,
-                        term2);
+                    DBTermType type1 = types.get(0);
+                    DBTermType type2 = types.get(1);
+
+                    return Optional.of(termFactory.getDBBinaryNumericFunctionalTerm(
+                            operator.getMathOperatorString(), type1, type2, term1, term2));
+                }
+                else
+                    return Optional.of(termFactory.getImmutableFunctionalTerm(functionSymbol, term1, term2));
             }
-            else
-                return termFactory.getImmutableFunctionalTerm(functionSymbol, term1, term2);
+            return Optional.empty();
         }
     }
 

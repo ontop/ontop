@@ -83,37 +83,36 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
         }
 
         @Override
-        protected boolean isFunctionSymbolToReplace(FunctionSymbol functionSymbol) {
-            return functionSymbol instanceof DBOrFunctionSymbol;
-        }
+        protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol, ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
+            if (functionSymbol instanceof DBOrFunctionSymbol) {
 
-        @Override
-        protected ImmutableFunctionalTerm replaceFunctionSymbol(FunctionSymbol functionSymbol, ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
-            //Partition terms into those that can be converted to a IN term and those that cannot.
-            var equalities = newTerms.stream()
-                    .collect(ImmutableCollectors.partitioningBy(DisjunctionOfEqualitiesMergingSimplifierImpl::isConvertableEquality));
-            //Create IN terms and group them by their first term (= search term)
-            var converted = equalities.get(true)
-                    .stream()
-                    .map(t -> convertSingleEqualities(t, termFactory).orElseThrow())
-                    .collect(Collectors.groupingBy(t -> t.getTerm(0)));
+                //Partition terms into those that can be converted to a IN term and those that cannot.
+                var equalities = newTerms.stream()
+                        .collect(ImmutableCollectors.partitioningBy(DisjunctionOfEqualitiesMergingSimplifierImpl::isConvertableEquality));
+                //Create IN terms and group them by their first term (= search term)
+                var converted = equalities.get(true)
+                        .stream()
+                        .map(t -> convertSingleEqualities(t, termFactory).orElseThrow())
+                        .collect(Collectors.groupingBy(t -> t.getTerm(0)));
 
-            //Join all IN terms with the same search term together, then create a disjunction containing all new terms.
-            return termFactory.getDisjunction(
-                    Streams.concat(
-                        equalities.get(false).stream()
-                                .map(t -> (ImmutableExpression) t),
-                        converted.entrySet().stream()
-                                .map(entry -> termFactory.getImmutableExpression(
-                                        termFactory.getDBFunctionSymbolFactory().getStrictDBIn(1 + entry.getValue().size()),
-                                        Streams.concat(
-                                                Stream.of(entry.getKey()),
-                                                entry.getValue().stream()
-                                                        .flatMap(t -> t.getTerms().stream().skip(1))
-                                        ).collect(ImmutableCollectors.toList())
-                                ))
-                    )
-            ).orElseThrow();
+                //Join all IN terms with the same search term together, then create a disjunction containing all new terms.
+                return Optional.of(termFactory.getDisjunction(
+                        Streams.concat(
+                                equalities.get(false).stream()
+                                        .map(t -> (ImmutableExpression) t),
+                                converted.entrySet().stream()
+                                        .map(entry -> termFactory.getImmutableExpression(
+                                                termFactory.getDBFunctionSymbolFactory().getStrictDBIn(1 + entry.getValue().size()),
+                                                Streams.concat(
+                                                        Stream.of(entry.getKey()),
+                                                        entry.getValue().stream()
+                                                                .flatMap(t -> t.getTerms().stream().skip(1))
+                                                ).collect(ImmutableCollectors.toList())
+                                        ))
+                        )
+                ).orElseThrow());
+            }
+            return Optional.empty();
         }
     }
 
@@ -145,11 +144,6 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
 
         protected InMergingTransformer() {
             super(coreSingletons);
-        }
-
-        @Override
-        protected boolean isFunctionSymbolToReplace(FunctionSymbol functionSymbol) {
-            return (functionSymbol instanceof DBAndFunctionSymbol) || (functionSymbol instanceof DBOrFunctionSymbol);
         }
 
         /**
@@ -447,14 +441,17 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
         }
 
         @Override
-        protected ImmutableFunctionalTerm replaceFunctionSymbol(FunctionSymbol functionSymbol, ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
-            if (newTerms.size() > MAX_ARITY)
-                return termFactory.getImmutableExpression((BooleanFunctionSymbol) functionSymbol, newTerms);
+        protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol, ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
+            if ((functionSymbol instanceof DBAndFunctionSymbol) || (functionSymbol instanceof DBOrFunctionSymbol)) {
+                if (newTerms.size() > MAX_ARITY)
+                    return Optional.of(termFactory.getImmutableExpression((BooleanFunctionSymbol) functionSymbol, newTerms));
 
-            return (ImmutableFunctionalTerm) mergeAll(newTerms,
-                    functionSymbol instanceof DBAndFunctionSymbol
-                            ? BooleanOperation.CONJUNCTION
-                            : BooleanOperation.DISJUNCTION);
+                return Optional.of((ImmutableFunctionalTerm) mergeAll(newTerms,
+                        functionSymbol instanceof DBAndFunctionSymbol
+                                ? BooleanOperation.CONJUNCTION
+                                : BooleanOperation.DISJUNCTION));
+            }
+            return Optional.empty();
         }
 
         /**

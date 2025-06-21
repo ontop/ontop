@@ -45,32 +45,32 @@ public class PartiallyTypedSimpleCastTransformerImpl implements PartiallyTypedSi
         }
 
         @Override
-        protected boolean isFunctionSymbolToReplace(FunctionSymbol functionSymbol) {
-            if (!(functionSymbol instanceof DBTypeConversionFunctionSymbol))
-                return false;
-            DBTypeConversionFunctionSymbol conversionFunctionSymbol = (DBTypeConversionFunctionSymbol) functionSymbol;
-            return conversionFunctionSymbol.isSimple()
-                    && (!conversionFunctionSymbol.isTemporary())
-                    && (!conversionFunctionSymbol.getInputType().isPresent())
-                    && conversionFunctionSymbol.getArity() == 1
-                    // Temporary HACK (preventing TIMESTAMPTZ to DATE to be considered as injective)
-                    // TODO: refactor the approach around "simple" casts
-                    && conversionFunctionSymbol.getTargetType().getCategory() != DBTermType.Category.DATE;
-        }
-
-        @Override
-        protected ImmutableFunctionalTerm replaceFunctionSymbol(FunctionSymbol functionSymbol,
+        protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol,
                                                                 ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
-            ImmutableTerm subTerm = newTerms.get(0);
-            Optional<DBTermType> inputType = typeExtractor.extractSingleTermType(subTerm, tree)
-                    .filter(t -> t instanceof DBTermType)
-                    .map(t -> (DBTermType) t);
-            return inputType
-                    .map(t -> termFactory.getDBCastFunctionalTerm(
-                            t,
-                            ((DBTypeConversionFunctionSymbol)functionSymbol).getTargetType(),
-                            subTerm))
-                    .orElseGet(() -> termFactory.getImmutableFunctionalTerm(functionSymbol, newTerms));
+
+            if (functionSymbol instanceof DBTypeConversionFunctionSymbol) {
+                DBTypeConversionFunctionSymbol conversionFunctionSymbol = (DBTypeConversionFunctionSymbol) functionSymbol;
+                if (conversionFunctionSymbol.isSimple()
+                        && (!conversionFunctionSymbol.isTemporary())
+                        && (!conversionFunctionSymbol.getInputType().isPresent())
+                        && conversionFunctionSymbol.getArity() == 1
+                        // Temporary HACK (preventing TIMESTAMPTZ to DATE to be considered as injective)
+                        // TODO: refactor the approach around "simple" casts
+                        && conversionFunctionSymbol.getTargetType().getCategory() != DBTermType.Category.DATE) {
+
+                    ImmutableTerm subTerm = newTerms.get(0);
+                    Optional<DBTermType> inputType = typeExtractor.extractSingleTermType(subTerm, tree)
+                            .filter(t -> t instanceof DBTermType)
+                            .map(t -> (DBTermType) t);
+                    return Optional.of(inputType
+                            .map(t -> termFactory.getDBCastFunctionalTerm(
+                                    t,
+                                    conversionFunctionSymbol.getTargetType(),
+                                    subTerm))
+                            .orElseGet(() -> termFactory.getImmutableFunctionalTerm(conversionFunctionSymbol, newTerms)));
+                }
+            }
+            return Optional.empty();
         }
     }
 

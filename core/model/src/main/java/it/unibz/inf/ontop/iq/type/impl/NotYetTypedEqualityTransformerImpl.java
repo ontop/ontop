@@ -46,47 +46,44 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
             super(iqFactory, typeExtractor, termFactory, iqTreeTools);
         }
 
-        @Override
-        protected boolean isFunctionSymbolToReplace(FunctionSymbol functionSymbol) {
-            return functionSymbol instanceof NotYetTypedEqualityFunctionSymbol;
-        }
-
         /**
          * NB: It tries to reduce equalities into strict equalities.
          *
          * Essential for integers and strings as these kinds of types are often used to build IRIs.
          */
         @Override
-        protected ImmutableFunctionalTerm replaceFunctionSymbol(FunctionSymbol functionSymbol,
+        protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol,
                                                                 ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
-            if (newTerms.size() != 2)
-                throw new MinorOntopInternalBugException("Was expecting the not yet typed equalities to be binary");
+            if (functionSymbol instanceof NotYetTypedEqualityFunctionSymbol) {
+                if (newTerms.size() != 2)
+                    throw new MinorOntopInternalBugException("Was expecting the not yet typed equalities to be binary");
 
-            ImmutableTerm term1 = newTerms.get(0);
-            ImmutableTerm term2 = newTerms.get(1);
+                ImmutableTerm term1 = newTerms.get(0);
+                ImmutableTerm term2 = newTerms.get(1);
 
-            ImmutableList<Optional<TermType>> extractedTypes = newTerms.stream()
-                    .map(t -> typeExtractor.extractSingleTermType(t, tree))
-                    .collect(ImmutableCollectors.toList());
-
-            if (extractedTypes.stream()
-                    .allMatch(type -> type
-                            .filter(t -> t instanceof DBTermType)
-                            .isPresent())) {
-                ImmutableList<DBTermType> types = extractedTypes.stream()
-                        .map(Optional::get)
-                        .map(t -> (DBTermType) t)
+                ImmutableList<Optional<TermType>> extractedTypes = newTerms.stream()
+                        .map(t -> typeExtractor.extractSingleTermType(t, tree))
                         .collect(ImmutableCollectors.toList());
 
-                DBTermType type1 = types.get(0);
-                DBTermType type2 = types.get(1);
+                if (extractedTypes.stream()
+                        .allMatch(type -> type
+                                .filter(t -> t instanceof DBTermType)
+                                .isPresent())) {
+                    ImmutableList<DBTermType> types = extractedTypes.stream()
+                            .map(Optional::get)
+                            .map(t -> (DBTermType) t)
+                            .collect(ImmutableCollectors.toList());
 
-                return type1.equals(type2)
-                        ? transformSameTypeEquality(type1, term1, term2, tree)
-                        : transformDifferentTypesEquality(type1, type2, term1, term2);
+                    DBTermType type1 = types.get(0);
+                    DBTermType type2 = types.get(1);
+
+                    return Optional.of(type1.equals(type2)
+                            ? transformSameTypeEquality(type1, term1, term2, tree)
+                            : transformDifferentTypesEquality(type1, type2, term1, term2));
+                } else
+                    return Optional.of(termFactory.getDBNonStrictDefaultEquality(term1, term2));
             }
-            else
-                return termFactory.getDBNonStrictDefaultEquality(term1, term2);
+            return Optional.empty();
         }
 
         private ImmutableExpression transformSameTypeEquality(DBTermType type, ImmutableTerm term1, ImmutableTerm term2,

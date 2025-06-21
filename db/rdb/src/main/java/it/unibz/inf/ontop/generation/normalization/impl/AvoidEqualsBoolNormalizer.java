@@ -16,6 +16,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractDBNonStrictE
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.DefaultDBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Optional;
+
 /**
  * Some dialects like SQLServer and Oracle don't support expressions like `<expression> = true`, but they may appear in
  * the generated queries under certain conditions. This normalizer searches such cases and replaces them by just `<expression>`.
@@ -41,34 +43,33 @@ public class AvoidEqualsBoolNormalizer implements DialectExtraNormalizer {
 
         IQVisitor<IQTree> transformer = new AbstractTermTransformer(coreSingletons) {
             @Override
-            protected boolean isFunctionSymbolToReplace(FunctionSymbol functionSymbol) {
-                return (functionSymbol instanceof AbstractDBNonStrictEqOperator) || (functionSymbol instanceof DefaultDBStrictEqFunctionSymbol);
-            }
+            protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol, ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
+                if ((functionSymbol instanceof AbstractDBNonStrictEqOperator) || (functionSymbol instanceof DefaultDBStrictEqFunctionSymbol)) {
 
-            @Override
-            protected ImmutableFunctionalTerm replaceFunctionSymbol(FunctionSymbol functionSymbol, ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
-                if (newTerms.size() != 2)
-                    return noReplace(functionSymbol, newTerms);
+                    if (newTerms.size() != 2)
+                        return Optional.of(noReplace(functionSymbol, newTerms));
 
-                var otherTerm = newTerms.stream()
-                        .filter(t -> t instanceof ImmutableExpression)
-                        .map(t -> (ImmutableExpression) t)
-                        .findFirst();
+                    var otherTerm = newTerms.stream()
+                            .filter(t -> t instanceof ImmutableExpression)
+                            .map(t -> (ImmutableExpression) t)
+                            .findFirst();
 
-                var constantTerm = newTerms.stream()
-                        .filter(t -> t instanceof Constant)
-                        .map(t -> (Constant) t)
-                        .filter(t -> t.equals(termFactory.getDBBooleanConstant(true)) || t.equals(termFactory.getDBBooleanConstant(false)))
-                        .findFirst();
+                    var constantTerm = newTerms.stream()
+                            .filter(t -> t instanceof Constant)
+                            .map(t -> (Constant) t)
+                            .filter(t -> t.equals(termFactory.getDBBooleanConstant(true)) || t.equals(termFactory.getDBBooleanConstant(false)))
+                            .findFirst();
 
-                if (otherTerm.isEmpty() || constantTerm.isEmpty())
-                    return noReplace(functionSymbol, newTerms);
+                    if (otherTerm.isEmpty() || constantTerm.isEmpty())
+                        return Optional.of(noReplace(functionSymbol, newTerms));
 
-                var requiresTrue = constantTerm.get().equals(termFactory.getDBBooleanConstant(true));
+                    var requiresTrue = constantTerm.get().equals(termFactory.getDBBooleanConstant(true));
 
-                if (requiresTrue)
-                    return otherTerm.get();
-                return otherTerm.get().negate(termFactory);
+                    if (requiresTrue)
+                        return Optional.of(otherTerm.get());
+                    return Optional.of(otherTerm.get().negate(termFactory));
+                }
+                return Optional.empty();
             }
 
             private ImmutableFunctionalTerm noReplace(FunctionSymbol functionSymbol, ImmutableList<ImmutableTerm> newTerms) {

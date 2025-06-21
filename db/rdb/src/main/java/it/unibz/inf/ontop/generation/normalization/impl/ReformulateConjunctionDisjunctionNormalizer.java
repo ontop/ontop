@@ -50,23 +50,18 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
         }
 
         @Override
-        protected boolean isFunctionSymbolToReplace(FunctionSymbol fs) {
-            return (fs instanceof DBOrFunctionSymbol) || (fs instanceof DBAndFunctionSymbol);
-        }
-
-        @Override
-        protected ImmutableFunctionalTerm replaceFunctionSymbol(FunctionSymbol fs, ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
+        protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol fs, ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
             if (fs instanceof DBOrFunctionSymbol) {
-                return negate(termFactory.getImmutableFunctionalTerm(
+                return Optional.of(negate(termFactory.getImmutableFunctionalTerm(
                         termFactory.getDBFunctionSymbolFactory().getDBAnd(fs.getArity()),
-                        newTerms));
+                        newTerms)));
             }
             if (fs instanceof DBAndFunctionSymbol) {
-                return negate(termFactory.getImmutableFunctionalTerm(
+                return Optional.of(negate(termFactory.getImmutableFunctionalTerm(
                         termFactory.getDBFunctionSymbolFactory().getDBOr(fs.getArity()),
-                        newTerms));
+                        newTerms)));
             }
-            throw new MinorOntopInternalBugException("Unsupported function symbol: " + fs);
+            return Optional.empty();
         }
 
         private ImmutableFunctionalTerm negate(ImmutableFunctionalTerm term) {
