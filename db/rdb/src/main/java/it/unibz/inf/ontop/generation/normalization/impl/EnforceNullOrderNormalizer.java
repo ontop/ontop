@@ -9,6 +9,8 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.node.DefaultQueryNodeTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -22,14 +24,14 @@ public class EnforceNullOrderNormalizer implements DialectExtraNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
-    private final EnforceNullOrderIQTreeVisitingTransformer transformer;
+    private final IQVisitor<IQTree> transformer;
 
     @Inject
     protected EnforceNullOrderNormalizer(IntermediateQueryFactory iqFactory,
                                          TermFactory termFactory) {
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
-        this.transformer = new EnforceNullOrderIQTreeVisitingTransformer();
+        this.transformer = new EnforceNullOrderIQTreeVisitingTransformer().treeTransformer();
     }
 
     @Override
@@ -38,22 +40,18 @@ public class EnforceNullOrderNormalizer implements DialectExtraNormalizer {
     }
 
 
-    private class EnforceNullOrderIQTreeVisitingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    private class EnforceNullOrderIQTreeVisitingTransformer extends DefaultQueryNodeTransformer {
 
         EnforceNullOrderIQTreeVisitingTransformer() {
             super(EnforceNullOrderNormalizer.this.iqFactory);
         }
 
         @Override
-        public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-            VariableNullability variableNullability = child.getVariableNullability();
-            ImmutableList<OrderByNode.OrderComparator> conditions = rootNode.getComparators().stream()
+        public OrderByNode transform(OrderByNode rootNode, UnaryIQTree tree) {
+            VariableNullability variableNullability = tree.getChild().getVariableNullability();
+            return iqFactory.createOrderByNode(rootNode.getComparators().stream()
                     .flatMap(c -> extendCondition(c, variableNullability))
-                    .collect(ImmutableCollectors.toList());
-
-            return iqFactory.createUnaryIQTree(
-                    iqFactory.createOrderByNode(conditions),
-                    transformChild(child));
+                    .collect(ImmutableCollectors.toList()));
         }
 
         /**
