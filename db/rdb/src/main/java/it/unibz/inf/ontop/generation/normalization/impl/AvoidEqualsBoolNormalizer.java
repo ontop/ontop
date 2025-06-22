@@ -38,7 +38,7 @@ public class AvoidEqualsBoolNormalizer implements DialectExtraNormalizer {
 
     private class TermTransformer extends AbstractTermTransformer {
         TermTransformer() {
-            super(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools(), coreSingletons.getTermFactory());
+            super(coreSingletons.getIQFactory(), coreSingletons.getTermFactory());
         }
 
         @Override

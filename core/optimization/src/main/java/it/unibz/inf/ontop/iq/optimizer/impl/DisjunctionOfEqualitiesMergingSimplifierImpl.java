@@ -78,7 +78,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
 
     private class InCreatingTermTransformer extends AbstractTermTransformer {
         InCreatingTermTransformer() {
-            super(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools(), coreSingletons.getTermFactory());
+            super(coreSingletons.getIQFactory(), coreSingletons.getTermFactory());
         }
 
         @Override
@@ -141,7 +141,7 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
 
     private class InMergingTermTransformer extends AbstractTermTransformer {
         InMergingTermTransformer() {
-            super(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools(), coreSingletons.getTermFactory());
+            super(coreSingletons.getIQFactory(), coreSingletons.getTermFactory());
         }
 
         /**

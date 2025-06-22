@@ -16,19 +16,17 @@ import java.util.Optional;
 
 public abstract class AbstractTermTransformer implements TermTransformer {
     protected final IntermediateQueryFactory iqFactory;
-    protected final IQTreeTools iqTreeTools;
     protected final TermFactory termFactory;
 
-    protected AbstractTermTransformer(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools, TermFactory termFactory) {
+    protected AbstractTermTransformer(IntermediateQueryFactory iqFactory, TermFactory termFactory) {
         this.iqFactory = iqFactory;
-        this.iqTreeTools = iqTreeTools;
         this.termFactory = termFactory;
     }
 
     public IQTreeTransformer treeTransformer() {
         return new IQTreeTransformerAdapter(
                 new IQTreeVisitingNodeTransformer(
-                        new QueryNodeTransformerAdapter(iqFactory, iqTreeTools, this), iqFactory));
+                        new QueryNodeTransformerAdapter(iqFactory, this), iqFactory));
     }
 
     @Override

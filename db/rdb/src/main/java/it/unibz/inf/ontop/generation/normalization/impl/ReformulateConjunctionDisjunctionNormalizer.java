@@ -37,7 +37,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
 
     private class TermTransformer extends AbstractTermTransformer {
         TermTransformer() {
-            super(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools(), coreSingletons.getTermFactory());
+            super(coreSingletons.getIQFactory(), coreSingletons.getTermFactory());
         }
 
         @Override

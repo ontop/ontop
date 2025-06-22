@@ -43,7 +43,7 @@ public class SplitIsNullOverConjunctionDisjunctionNormalizer implements DialectE
     private class ExpressionTransformer extends AbstractTermTransformer {
 
         ExpressionTransformer() {
-            super(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools(), coreSingletons.getTermFactory());
+            super(coreSingletons.getIQFactory(), coreSingletons.getTermFactory());
         }
 
         @Override

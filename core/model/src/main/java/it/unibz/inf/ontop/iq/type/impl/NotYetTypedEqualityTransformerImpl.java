@@ -23,9 +23,9 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
 
     @Inject
     protected NotYetTypedEqualityTransformerImpl(IntermediateQueryFactory iqFactory,
-                                                 SingleTermTypeExtractor typeExtractor,
-                                                 TermFactory termFactory, IQTreeTools iqTreeTools) {
-        this.expressionTransformer = new ExpressionTransformer(iqFactory, iqTreeTools, typeExtractor, termFactory)
+                                                 TermFactory termFactory,
+                                                 SingleTermTypeExtractor typeExtractor) {
+        this.expressionTransformer = new ExpressionTransformer(iqFactory, termFactory, typeExtractor)
                 .treeTransformer();
     }
 
@@ -35,8 +35,8 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
     }
 
     private static class ExpressionTransformer extends AbstractTypedTermTransformer {
-        protected ExpressionTransformer(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools, SingleTermTypeExtractor typeExtractor, TermFactory termFactory) {
-            super(iqFactory, iqTreeTools, termFactory, typeExtractor);
+        ExpressionTransformer(IntermediateQueryFactory iqFactory, TermFactory termFactory, SingleTermTypeExtractor typeExtractor) {
+            super(iqFactory, termFactory, typeExtractor);
         }
 
         /**

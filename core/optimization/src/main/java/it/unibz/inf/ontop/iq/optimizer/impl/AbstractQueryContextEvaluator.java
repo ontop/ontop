@@ -48,7 +48,7 @@ public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
         private final QueryContext queryContext;
 
         TermTransformer(QueryContext queryContext) {
-            super(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools(), coreSingletons.getTermFactory());
+            super(coreSingletons.getIQFactory(), coreSingletons.getTermFactory());
             this.queryContext = queryContext;
         }
 

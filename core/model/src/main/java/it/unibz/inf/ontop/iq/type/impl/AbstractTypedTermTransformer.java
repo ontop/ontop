@@ -13,8 +13,8 @@ import java.util.Optional;
 public abstract class AbstractTypedTermTransformer extends AbstractTermTransformer {
     protected final SingleTermTypeExtractor typeExtractor;
 
-    protected AbstractTypedTermTransformer(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools, TermFactory termFactory, SingleTermTypeExtractor typeExtractor) {
-        super(iqFactory, iqTreeTools, termFactory);
+    protected AbstractTypedTermTransformer(IntermediateQueryFactory iqFactory, TermFactory termFactory, SingleTermTypeExtractor typeExtractor) {
+        super(iqFactory, termFactory);
         this.typeExtractor = typeExtractor;
     }
 
