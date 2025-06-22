@@ -22,13 +22,12 @@ import java.util.Optional;
  */
 public class AvoidEqualsBoolNormalizer implements DialectExtraNormalizer {
 
-    private final CoreSingletons coreSingletons;
     private final IQTreeTransformer transformer;
 
     @Inject
     protected AvoidEqualsBoolNormalizer(CoreSingletons coreSingletons) {
-        this.coreSingletons = coreSingletons;
-        this.transformer = new Transformer().treeTransformer();
+        this.transformer = new TermTransformer(coreSingletons.getTermFactory())
+                .treeTransformer(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools());
     }
 
     @Override
@@ -36,9 +35,9 @@ public class AvoidEqualsBoolNormalizer implements DialectExtraNormalizer {
         return transformer.transform(tree);
     }
 
-    private class Transformer extends AbstractTermTransformer {
-        Transformer() {
-            super(coreSingletons);
+    private static class TermTransformer extends AbstractTermTransformer {
+        protected TermTransformer(TermFactory termFactory) {
+            super(termFactory);
         }
 
         @Override

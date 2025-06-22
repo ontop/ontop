@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
@@ -31,7 +30,8 @@ public class SplitIsNullOverConjunctionDisjunctionNormalizer implements DialectE
 
     @Inject
     protected SplitIsNullOverConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {
-        this.expressionTransformer = new ExpressionTransformer(coreSingletons).treeTransformer();
+        this.expressionTransformer = new ExpressionTransformerBase(coreSingletons.getTermFactory())
+                .treeTransformer(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools());
     }
 
     @Override
@@ -39,10 +39,10 @@ public class SplitIsNullOverConjunctionDisjunctionNormalizer implements DialectE
         return expressionTransformer.transform(tree);
     }
 
-    protected static class ExpressionTransformer extends AbstractTermTransformer {
+    private static class ExpressionTransformerBase extends AbstractTermTransformer {
 
-        protected ExpressionTransformer(CoreSingletons coreSingletons) {
-            super(coreSingletons);
+        protected ExpressionTransformerBase(TermFactory termFactory) {
+            super(termFactory);
         }
 
         @Override

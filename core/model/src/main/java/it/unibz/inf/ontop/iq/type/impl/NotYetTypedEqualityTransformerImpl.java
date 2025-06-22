@@ -11,9 +11,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.NotYetTypedEqualityFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.inject.Inject;
 import java.util.Optional;
@@ -27,8 +25,8 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
     protected NotYetTypedEqualityTransformerImpl(IntermediateQueryFactory iqFactory,
                                                  SingleTermTypeExtractor typeExtractor,
                                                  TermFactory termFactory, IQTreeTools iqTreeTools) {
-        this.expressionTransformer = new ExpressionTransformer(iqFactory, typeExtractor, termFactory, iqTreeTools)
-                .treeTransformer();
+        this.expressionTransformer = new ExpressionTransformer(typeExtractor, termFactory)
+                .treeTransformer(iqFactory, iqTreeTools);
     }
 
     @Override
@@ -36,13 +34,9 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
         return expressionTransformer.transform(tree);
     }
 
-
-    protected static class ExpressionTransformer extends AbstractTermTransformer {
-
-        protected ExpressionTransformer(IntermediateQueryFactory iqFactory,
-                                        SingleTermTypeExtractor typeExtractor,
-                                        TermFactory termFactory, IQTreeTools iqTreeTools) {
-            super(iqFactory, typeExtractor, termFactory, iqTreeTools);
+    private static class ExpressionTransformer extends AbstractTypedTermTransformer {
+        protected ExpressionTransformer(SingleTermTypeExtractor typeExtractor, TermFactory termFactory) {
+            super(termFactory, typeExtractor);
         }
 
         /**
@@ -99,7 +93,7 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
             }
         }
 
-        protected ImmutableExpression transformDifferentTypesEquality(DBTermType type1, DBTermType type2,
+        private ImmutableExpression transformDifferentTypesEquality(DBTermType type1, DBTermType type2,
                                                                       ImmutableTerm term1, ImmutableTerm term2) {
             /*
              * If not type declares that the equality cannot be reduced to a strict equality
@@ -157,7 +151,7 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
          * Constants in the mapping are indeed uncontrolled and may have a different lexical value
          * that the ones returned by the DB, which would make the test fail.
          */
-        protected boolean areIndependentFromConstants(ImmutableTerm term1, ImmutableTerm term2, IQTree tree) {
+        private boolean areIndependentFromConstants(ImmutableTerm term1, ImmutableTerm term2, IQTree tree) {
             return !((term1 instanceof DBConstant) || (term2 instanceof DBConstant));
         }
 

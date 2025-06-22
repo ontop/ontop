@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBAndFunctionSymbol;
@@ -22,13 +21,12 @@ import java.util.Optional;
  */
 public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtraNormalizer {
 
-    private final CoreSingletons coreSingletons;
     private final IQTreeTransformer transformer;
 
     @Inject
     protected ReformulateConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {
-        this.coreSingletons = coreSingletons;
-        this.transformer = new Transformer().treeTransformer();
+        this.transformer = new TermTransformer(coreSingletons.getTermFactory())
+                .treeTransformer(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools());
     }
 
     @Override
@@ -36,9 +34,9 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
         return transformer.transform(tree);
     }
 
-    private class Transformer extends AbstractTermTransformer {
-        Transformer() {
-            super(coreSingletons);
+    private static class TermTransformer extends AbstractTermTransformer {
+        protected TermTransformer(TermFactory termFactory) {
+            super(termFactory);
         }
 
         @Override

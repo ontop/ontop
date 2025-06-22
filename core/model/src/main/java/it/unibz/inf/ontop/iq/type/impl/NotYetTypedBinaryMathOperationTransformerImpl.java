@@ -12,8 +12,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.DefaultUntypedDBMathBinaryOperator;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.inject.Inject;
 import java.util.Optional;
@@ -27,8 +25,8 @@ public class NotYetTypedBinaryMathOperationTransformerImpl implements NotYetType
                                                             SingleTermTypeExtractor typeExtractor,
                                                             TermFactory termFactory,
                                                             IQTreeTools iqTreeTools) {
-        this.expressionTransformer = new ExpressionTransformer(iqFactory, typeExtractor, termFactory, iqTreeTools)
-                .treeTransformer();
+        this.expressionTransformer = new ExpressionTransformer(typeExtractor, termFactory)
+                .treeTransformer(iqFactory, iqTreeTools);
     }
 
     @Override
@@ -37,12 +35,9 @@ public class NotYetTypedBinaryMathOperationTransformerImpl implements NotYetType
     }
 
 
-    protected static class ExpressionTransformer extends AbstractTermTransformer {
-
-        protected ExpressionTransformer(IntermediateQueryFactory iqFactory,
-                                        SingleTermTypeExtractor typeExtractor,
-                                        TermFactory termFactory, IQTreeTools iqTreeTools) {
-            super(iqFactory, typeExtractor, termFactory, iqTreeTools);
+    private static class ExpressionTransformer extends AbstractTypedTermTransformer {
+        protected ExpressionTransformer(SingleTermTypeExtractor typeExtractor, TermFactory termFactory) {
+            super(termFactory, typeExtractor);
         }
 
         @Override

@@ -6,10 +6,10 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.QueryContextEvaluator;
-import it.unibz.inf.ontop.iq.transform.impl.IQTreeVisitingNodeTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.QueryContextSimplifiableFunctionSymbol;
 
@@ -33,7 +33,8 @@ public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
         if (queryContext == null)
             throw new IllegalArgumentException("The query context must not be null");
 
-        var transformer = new QueryContextFunctionTransformer(queryContext).treeTransformer();
+        var transformer = new TermTransformer(queryContext, coreSingletons.getTermFactory())
+                .treeTransformer(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools());
 
         var initialTree = iq.getTree();
         var newTree = transformer.transform(initialTree);
@@ -43,12 +44,12 @@ public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
     }
 
 
-    protected class QueryContextFunctionTransformer extends AbstractTermTransformer {
+    private class TermTransformer extends AbstractTermTransformer {
 
         private final QueryContext queryContext;
 
-        protected QueryContextFunctionTransformer(QueryContext queryContext) {
-            super(coreSingletons);
+        protected TermTransformer(QueryContext queryContext, TermFactory termFactory) {
+            super(termFactory);
             this.queryContext = queryContext;
         }
 

@@ -24,8 +24,8 @@ public class PartiallyTypedSimpleCastTransformerImpl implements PartiallyTypedSi
                                                       SingleTermTypeExtractor typeExtractor,
                                                       TermFactory termFactory,
                                                       IQTreeTools iqTreeTools) {
-        this.expressionTransformer = new ExpressionTransformer(iqFactory, typeExtractor, termFactory, iqTreeTools)
-                .treeTransformer();
+        this.expressionTransformer = new ExpressionTransformer(typeExtractor, termFactory)
+                .treeTransformer(iqFactory, iqTreeTools);
     }
 
     @Override
@@ -33,14 +33,9 @@ public class PartiallyTypedSimpleCastTransformerImpl implements PartiallyTypedSi
         return expressionTransformer.transform(tree);
     }
 
-
-    protected static class ExpressionTransformer extends AbstractTermTransformer {
-
-        protected ExpressionTransformer(IntermediateQueryFactory iqFactory,
-                                        SingleTermTypeExtractor typeExtractor,
-                                        TermFactory termFactory,
-                                        IQTreeTools iqTreeTools) {
-            super(iqFactory, typeExtractor, termFactory, iqTreeTools);
+    private static class ExpressionTransformer extends AbstractTypedTermTransformer {
+        protected ExpressionTransformer(SingleTermTypeExtractor typeExtractor, TermFactory termFactory) {
+            super(termFactory, typeExtractor);
         }
 
         @Override
