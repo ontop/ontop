@@ -2,12 +2,12 @@ package it.unibz.inf.ontop.iq.transform.node;
 
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
-import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transform.impl.IQTreeVisitingNodeTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 
 public class DefaultQueryNodeTransformer implements QueryNodeTransformer {
     protected final IntermediateQueryFactory iqFactory;
@@ -16,8 +16,9 @@ public class DefaultQueryNodeTransformer implements QueryNodeTransformer {
         this.iqFactory = iqFactory;
     }
 
-    public IQVisitor<IQTree> treeTransformer() {
-        return new IQTreeVisitingNodeTransformer(this, iqFactory);
+    public IQTreeTransformer treeTransformer() {
+        return new IQTreeTransformerAdapter(
+                new IQTreeVisitingNodeTransformer(this, iqFactory));
     }
 
     @Override

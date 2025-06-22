@@ -6,9 +6,8 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.DisjunctionOfEqualitiesMergingSimplifier;
-import it.unibz.inf.ontop.iq.transform.impl.IQTreeVisitingNodeTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -28,8 +27,8 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
     private static final int MAX_ARITY = 8;
 
     private final CoreSingletons coreSingletons;
-    private final IQVisitor<IQTree> inCreatingTransformer;
-    private final IQVisitor<IQTree> inMergingTransformer;
+    private final IQTreeTransformer inCreatingTransformer;
+    private final IQTreeTransformer inMergingTransformer;
 
     @Inject
     protected DisjunctionOfEqualitiesMergingSimplifierImpl(CoreSingletons coreSingletons) {
@@ -41,8 +40,8 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
 
     @Override
     public IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQTree newTree = tree.acceptVisitor(inCreatingTransformer);
-        return newTree.acceptVisitor(inMergingTransformer);
+        IQTree newTree = inCreatingTransformer.transform(tree);
+        return inMergingTransformer.transform(newTree);
     }
 
 

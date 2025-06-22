@@ -100,7 +100,7 @@ public final class IQTreeVisitingNodeTransformer extends DefaultIQTreeVisitingTr
     }
 
     @Override
-    protected final IQTree transformLeaf(LeafIQTree leaf) {
+    protected IQTree transformLeaf(LeafIQTree leaf) {
         throw new MinorOntopInternalBugException("should never happen");
     }
 

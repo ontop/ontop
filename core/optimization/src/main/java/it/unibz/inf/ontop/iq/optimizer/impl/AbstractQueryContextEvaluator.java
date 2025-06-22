@@ -36,7 +36,7 @@ public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
         var transformer = new QueryContextFunctionTransformer(queryContext).treeTransformer();
 
         var initialTree = iq.getTree();
-        var newTree = initialTree.acceptVisitor(transformer);
+        var newTree = transformer.transform(initialTree);
         return newTree.equals(initialTree)
                 ? iq
                 : coreSingletons.getIQFactory().createIQ(iq.getProjectionAtom(), newTree);

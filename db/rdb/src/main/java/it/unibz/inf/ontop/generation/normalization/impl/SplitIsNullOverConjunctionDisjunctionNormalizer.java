@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -26,7 +27,7 @@ for dialects such as Denodo that do not allow IS [NOT] NULL to be executed on co
 @Singleton
 public class SplitIsNullOverConjunctionDisjunctionNormalizer implements DialectExtraNormalizer {
 
-    private final IQVisitor<IQTree> expressionTransformer;
+    private final IQTreeTransformer expressionTransformer;
 
     @Inject
     protected SplitIsNullOverConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {
@@ -35,7 +36,7 @@ public class SplitIsNullOverConjunctionDisjunctionNormalizer implements DialectE
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(expressionTransformer);
+        return expressionTransformer.transform(tree);
     }
 
     protected static class ExpressionTransformer extends AbstractTermTransformer {

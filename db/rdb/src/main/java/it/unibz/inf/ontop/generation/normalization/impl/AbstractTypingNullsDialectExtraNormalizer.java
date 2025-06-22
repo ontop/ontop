@@ -53,6 +53,6 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
                                 .build());
             }
         };
-        return child.acceptVisitor(transformer.treeTransformer());
+        return transformer.treeTransformer().transform(child);
     }
 }

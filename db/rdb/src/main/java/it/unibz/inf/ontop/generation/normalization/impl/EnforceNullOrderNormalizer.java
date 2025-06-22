@@ -8,9 +8,8 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.DefaultQueryNodeTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -24,7 +23,7 @@ public class EnforceNullOrderNormalizer implements DialectExtraNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
-    private final IQVisitor<IQTree> transformer;
+    private final IQTreeTransformer transformer;
 
     @Inject
     protected EnforceNullOrderNormalizer(IntermediateQueryFactory iqFactory,
@@ -36,7 +35,7 @@ public class EnforceNullOrderNormalizer implements DialectExtraNormalizer {
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(transformer);
+        return transformer.transform(tree);
     }
 
 

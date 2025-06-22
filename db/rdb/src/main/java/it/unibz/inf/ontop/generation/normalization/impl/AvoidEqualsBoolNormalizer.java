@@ -5,9 +5,8 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.transform.impl.IQTreeVisitingNodeTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractDBNonStrictEqOperator;
@@ -24,47 +23,52 @@ import java.util.Optional;
 public class AvoidEqualsBoolNormalizer implements DialectExtraNormalizer {
 
     private final CoreSingletons coreSingletons;
+    private final IQTreeTransformer transformer;
 
     @Inject
     protected AvoidEqualsBoolNormalizer(CoreSingletons coreSingletons) {
         this.coreSingletons = coreSingletons;
+        this.transformer = new Transformer().treeTransformer();
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
+        return transformer.transform(tree);
+    }
 
-        var transformer = new AbstractTermTransformer(coreSingletons) {
-            @Override
-            protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol, ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
-                if ((functionSymbol instanceof AbstractDBNonStrictEqOperator) || (functionSymbol instanceof DefaultDBStrictEqFunctionSymbol)) {
+    private class Transformer extends AbstractTermTransformer {
+        Transformer() {
+            super(coreSingletons);
+        }
 
-                    if (newTerms.size() != 2)
-                        return Optional.empty();
+        @Override
+        protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol, ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
+            if ((functionSymbol instanceof AbstractDBNonStrictEqOperator) || (functionSymbol instanceof DefaultDBStrictEqFunctionSymbol)) {
 
-                    var otherTerm = newTerms.stream()
-                            .filter(t -> t instanceof ImmutableExpression)
-                            .map(t -> (ImmutableExpression) t)
-                            .findFirst();
+                if (newTerms.size() != 2)
+                    return Optional.empty();
 
-                    var constantTerm = newTerms.stream()
-                            .filter(t -> t instanceof Constant)
-                            .map(t -> (Constant) t)
-                            .filter(t -> t.equals(termFactory.getDBBooleanConstant(true))
-                                    || t.equals(termFactory.getDBBooleanConstant(false)))
-                            .findFirst();
+                var otherTerm = newTerms.stream()
+                        .filter(t -> t instanceof ImmutableExpression)
+                        .map(t -> (ImmutableExpression) t)
+                        .findFirst();
 
-                    if (otherTerm.isEmpty() || constantTerm.isEmpty())
-                        return Optional.empty();
+                var constantTerm = newTerms.stream()
+                        .filter(t -> t instanceof Constant)
+                        .map(t -> (Constant) t)
+                        .filter(t -> t.equals(termFactory.getDBBooleanConstant(true))
+                                || t.equals(termFactory.getDBBooleanConstant(false)))
+                        .findFirst();
 
-                    var requiresTrue = constantTerm.get().equals(termFactory.getDBBooleanConstant(true));
-                    if (requiresTrue)
-                        return Optional.of(otherTerm.get());
-                    return Optional.of(otherTerm.get().negate(termFactory));
-                }
-                return Optional.empty();
+                if (otherTerm.isEmpty() || constantTerm.isEmpty())
+                    return Optional.empty();
+
+                var requiresTrue = constantTerm.get().equals(termFactory.getDBBooleanConstant(true));
+                if (requiresTrue)
+                    return Optional.of(otherTerm.get());
+                return Optional.of(otherTerm.get().negate(termFactory));
             }
-        };
-
-        return tree.acceptVisitor(transformer.treeTransformer());
+            return Optional.empty();
+        }
     }
 }

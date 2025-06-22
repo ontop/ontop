@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -22,7 +23,7 @@ import java.util.Optional;
 public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtraNormalizer {
 
     private final CoreSingletons coreSingletons;
-    private final IQVisitor<IQTree> transformer;
+    private final IQTreeTransformer transformer;
 
     @Inject
     protected ReformulateConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {
@@ -32,7 +33,7 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(transformer);
+        return transformer.transform(tree);
     }
 
     private class Transformer extends AbstractTermTransformer {
