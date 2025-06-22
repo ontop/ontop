@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.iq.type.impl;
 
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -11,8 +13,8 @@ import java.util.Optional;
 public abstract class AbstractTypedTermTransformer extends AbstractTermTransformer {
     protected final SingleTermTypeExtractor typeExtractor;
 
-    protected AbstractTypedTermTransformer(TermFactory termFactory, SingleTermTypeExtractor typeExtractor) {
-        super(termFactory);
+    protected AbstractTypedTermTransformer(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools, TermFactory termFactory, SingleTermTypeExtractor typeExtractor) {
+        super(iqFactory, iqTreeTools, termFactory);
         this.typeExtractor = typeExtractor;
     }
 

@@ -26,12 +26,13 @@ for dialects such as Denodo that do not allow IS [NOT] NULL to be executed on co
 @Singleton
 public class SplitIsNullOverConjunctionDisjunctionNormalizer implements DialectExtraNormalizer {
 
+    private final CoreSingletons coreSingletons;
     private final IQTreeTransformer expressionTransformer;
 
     @Inject
     protected SplitIsNullOverConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {
-        this.expressionTransformer = new ExpressionTransformerBase(coreSingletons.getTermFactory())
-                .treeTransformer(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools());
+        this.coreSingletons = coreSingletons;
+        this.expressionTransformer = new ExpressionTransformer().treeTransformer();
     }
 
     @Override
@@ -39,10 +40,10 @@ public class SplitIsNullOverConjunctionDisjunctionNormalizer implements DialectE
         return expressionTransformer.transform(tree);
     }
 
-    private static class ExpressionTransformerBase extends AbstractTermTransformer {
+    private class ExpressionTransformer extends AbstractTermTransformer {
 
-        protected ExpressionTransformerBase(TermFactory termFactory) {
-            super(termFactory);
+        ExpressionTransformer() {
+            super(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools(), coreSingletons.getTermFactory());
         }
 
         @Override

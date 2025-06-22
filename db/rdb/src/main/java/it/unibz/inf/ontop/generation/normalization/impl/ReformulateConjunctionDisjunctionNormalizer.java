@@ -21,12 +21,13 @@ import java.util.Optional;
  */
 public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtraNormalizer {
 
+    private final CoreSingletons coreSingletons;
     private final IQTreeTransformer transformer;
 
     @Inject
     protected ReformulateConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {
-        this.transformer = new TermTransformer(coreSingletons.getTermFactory())
-                .treeTransformer(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools());
+        this.coreSingletons = coreSingletons;
+        this.transformer = new TermTransformer().treeTransformer();
     }
 
     @Override
@@ -34,9 +35,9 @@ public class ReformulateConjunctionDisjunctionNormalizer implements DialectExtra
         return transformer.transform(tree);
     }
 
-    private static class TermTransformer extends AbstractTermTransformer {
-        protected TermTransformer(TermFactory termFactory) {
-            super(termFactory);
+    private class TermTransformer extends AbstractTermTransformer {
+        TermTransformer() {
+            super(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools(), coreSingletons.getTermFactory());
         }
 
         @Override

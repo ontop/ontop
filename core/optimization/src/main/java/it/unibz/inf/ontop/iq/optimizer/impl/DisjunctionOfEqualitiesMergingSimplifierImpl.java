@@ -34,10 +34,8 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
     protected DisjunctionOfEqualitiesMergingSimplifierImpl(CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.coreSingletons = coreSingletons;
-        this.inCreatingTransformer = new InCreatingTermTransformer()
-                .treeTransformer(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools());
-        this.inMergingTransformer = new InMergingTermTransformer()
-                .treeTransformer(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools());
+        this.inCreatingTransformer = new InCreatingTermTransformer().treeTransformer();
+        this.inMergingTransformer = new InMergingTermTransformer().treeTransformer();
     }
 
     @Override
@@ -79,8 +77,8 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
     }
 
     private class InCreatingTermTransformer extends AbstractTermTransformer {
-        protected InCreatingTermTransformer() {
-            super(coreSingletons.getTermFactory());
+        InCreatingTermTransformer() {
+            super(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools(), coreSingletons.getTermFactory());
         }
 
         @Override
@@ -142,8 +140,8 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
     }
 
     private class InMergingTermTransformer extends AbstractTermTransformer {
-        protected InMergingTermTransformer() {
-            super(coreSingletons.getTermFactory());
+        InMergingTermTransformer() {
+            super(coreSingletons.getIQFactory(), coreSingletons.getIQTreeTools(), coreSingletons.getTermFactory());
         }
 
         /**
