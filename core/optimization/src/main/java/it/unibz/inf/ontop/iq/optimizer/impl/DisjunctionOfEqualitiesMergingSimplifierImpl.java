@@ -442,14 +442,11 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
 
         @Override
         protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol, ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
-            if ((functionSymbol instanceof DBAndFunctionSymbol) || (functionSymbol instanceof DBOrFunctionSymbol)) {
-                if (newTerms.size() > MAX_ARITY)
-                    return Optional.of(termFactory.getImmutableExpression((BooleanFunctionSymbol) functionSymbol, newTerms));
-
-                return Optional.of((ImmutableFunctionalTerm) mergeAll(newTerms,
-                        functionSymbol instanceof DBAndFunctionSymbol
-                                ? BooleanOperation.CONJUNCTION
-                                : BooleanOperation.DISJUNCTION));
+            if (functionSymbol instanceof DBAndFunctionSymbol && newTerms.size() <= MAX_ARITY)  {
+                return Optional.of((ImmutableFunctionalTerm) mergeAll(newTerms, BooleanOperation.CONJUNCTION));
+            }
+            if (functionSymbol instanceof DBOrFunctionSymbol && newTerms.size() <= MAX_ARITY)  {
+                return Optional.of((ImmutableFunctionalTerm) mergeAll(newTerms, BooleanOperation.DISJUNCTION));
             }
             return Optional.empty();
         }

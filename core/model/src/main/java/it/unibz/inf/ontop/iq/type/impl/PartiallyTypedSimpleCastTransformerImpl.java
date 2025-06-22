@@ -58,19 +58,15 @@ public class PartiallyTypedSimpleCastTransformerImpl implements PartiallyTypedSi
                         && conversionFunctionSymbol.getTargetType().getCategory() != DBTermType.Category.DATE) {
 
                     ImmutableTerm subTerm = newTerms.get(0);
-                    Optional<DBTermType> inputType = typeExtractor.extractSingleTermType(subTerm, tree)
-                            .filter(t -> t instanceof DBTermType)
-                            .map(t -> (DBTermType) t);
-                    return Optional.of(inputType
+                    Optional<DBTermType> inputType = getDBTermType(subTerm, tree);
+                    return inputType
                             .map(t -> termFactory.getDBCastFunctionalTerm(
                                     t,
                                     conversionFunctionSymbol.getTargetType(),
-                                    subTerm))
-                            .orElseGet(() -> termFactory.getImmutableFunctionalTerm(conversionFunctionSymbol, newTerms)));
+                                    subTerm));
                 }
             }
             return Optional.empty();
         }
     }
-
 }

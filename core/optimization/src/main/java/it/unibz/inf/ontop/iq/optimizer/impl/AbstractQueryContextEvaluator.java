@@ -54,7 +54,6 @@ public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
 
         @Override
         protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol,
-
                                                                           ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
 
             if (functionSymbol instanceof QueryContextSimplifiableFunctionSymbol

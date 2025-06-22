@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.transform.node.DefaultQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -82,6 +83,12 @@ public abstract class AbstractTermTransformer extends DefaultQueryNodeTransforme
         return iqFactory.createInnerJoinNode(
                 rootNode.getOptionalFilterCondition()
                 .map(e -> transformExpression(e, tree)));
+    }
+
+    protected final Optional<DBTermType> getDBTermType(ImmutableTerm term, IQTree tree) {
+         return typeExtractor.extractSingleTermType(term, tree)
+                .filter(t -> t instanceof DBTermType)
+                .map(t -> (DBTermType) t);
     }
 
     protected ImmutableTerm transformTerm(ImmutableTerm term, IQTree tree) {

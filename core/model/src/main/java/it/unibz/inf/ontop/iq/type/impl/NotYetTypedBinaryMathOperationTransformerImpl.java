@@ -57,30 +57,15 @@ public class NotYetTypedBinaryMathOperationTransformerImpl implements NotYetType
                 ImmutableTerm term1 = newTerms.get(0);
                 ImmutableTerm term2 = newTerms.get(1);
 
-                ImmutableList<Optional<TermType>> extractedTypes = newTerms.stream()
-                        .map(t -> typeExtractor.extractSingleTermType(t, tree))
-                        .collect(ImmutableCollectors.toList());
+                Optional<DBTermType> optionalType1 = getDBTermType(term1, tree);
+                Optional<DBTermType> optionalType2 = getDBTermType(term2, tree);
 
-                if (extractedTypes.stream()
-                        .allMatch(type -> type
-                                .filter(t -> t instanceof DBTermType)
-                                .isPresent())) {
-                    ImmutableList<DBTermType> types = extractedTypes.stream()
-                            .map(Optional::get)
-                            .map(t -> (DBTermType) t)
-                            .collect(ImmutableCollectors.toList());
-
-                    DBTermType type1 = types.get(0);
-                    DBTermType type2 = types.get(1);
-
+                if (optionalType1.isPresent() && optionalType2.isPresent()) {
                     return Optional.of(termFactory.getDBBinaryNumericFunctionalTerm(
-                            operator.getMathOperatorString(), type1, type2, term1, term2));
+                            operator.getMathOperatorString(), optionalType1.get(), optionalType2.get(), term1, term2));
                 }
-                else
-                    return Optional.of(termFactory.getImmutableFunctionalTerm(functionSymbol, term1, term2));
             }
             return Optional.empty();
         }
     }
-
 }

@@ -49,23 +49,24 @@ public class SplitIsNullOverConjunctionDisjunctionNormalizer implements DialectE
         protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol,
                                                                           ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
             if (functionSymbol instanceof DBIsNullOrNotFunctionSymbol) {
-                ImmutableTerm subTerm = newTerms.get(0);
                 var isNullOrNotFunctionSymbol = (DBIsNullOrNotFunctionSymbol) functionSymbol;
-                if (!(subTerm instanceof NonGroundExpressionImpl))
-                    return Optional.of(termFactory.getImmutableFunctionalTerm(functionSymbol, newTerms));
 
-                NonGroundExpressionImpl subTermNonGroundExpression = (NonGroundExpressionImpl) subTerm;
-                FunctionSymbol subTermFunctionSymbol = subTermNonGroundExpression.getFunctionSymbol();
-                if (!(subTermFunctionSymbol instanceof DBOrFunctionSymbol || subTermFunctionSymbol instanceof DBAndFunctionSymbol))
-                    return Optional.of(termFactory.getImmutableFunctionalTerm(functionSymbol, newTerms));
+                ImmutableTerm subTerm = newTerms.get(0);
+                if (subTerm instanceof NonGroundExpressionImpl) {
+                    NonGroundExpressionImpl subTermNonGroundExpression = (NonGroundExpressionImpl) subTerm;
 
-                var whenNotNullTerm = termFactory.getDBBooleanConstant(!isNullOrNotFunctionSymbol.isTrueWhenNull());
-                var whenNullTerm = termFactory.getDBBooleanConstant(isNullOrNotFunctionSymbol.isTrueWhenNull());
-                return Optional.of(termFactory.getDBCase(
-                        Stream.of(
-                                Maps.immutableEntry(subTermNonGroundExpression, whenNotNullTerm),
-                                Maps.immutableEntry(termFactory.getDBNot(subTermNonGroundExpression), whenNotNullTerm)),
-                        whenNullTerm, false));
+                    FunctionSymbol subTermFunctionSymbol = subTermNonGroundExpression.getFunctionSymbol();
+                    if (subTermFunctionSymbol instanceof DBOrFunctionSymbol || subTermFunctionSymbol instanceof DBAndFunctionSymbol) {
+
+                        var whenNotNullTerm = termFactory.getDBBooleanConstant(!isNullOrNotFunctionSymbol.isTrueWhenNull());
+                        var whenNullTerm = termFactory.getDBBooleanConstant(isNullOrNotFunctionSymbol.isTrueWhenNull());
+                        return Optional.of(termFactory.getDBCase(
+                                Stream.of(
+                                        Maps.immutableEntry(subTermNonGroundExpression, whenNotNullTerm),
+                                        Maps.immutableEntry(termFactory.getDBNot(subTermNonGroundExpression), whenNotNullTerm)),
+                                whenNullTerm, false));
+                    }
+                }
             }
             return Optional.empty();
         }

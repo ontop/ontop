@@ -60,27 +60,18 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
                 ImmutableTerm term1 = newTerms.get(0);
                 ImmutableTerm term2 = newTerms.get(1);
 
-                ImmutableList<Optional<TermType>> extractedTypes = newTerms.stream()
-                        .map(t -> typeExtractor.extractSingleTermType(t, tree))
-                        .collect(ImmutableCollectors.toList());
+                Optional<DBTermType> optionalType1 = getDBTermType(term1, tree);
+                Optional<DBTermType> optionalType2 = getDBTermType(term2, tree);
 
-                if (extractedTypes.stream()
-                        .allMatch(type -> type
-                                .filter(t -> t instanceof DBTermType)
-                                .isPresent())) {
-                    ImmutableList<DBTermType> types = extractedTypes.stream()
-                            .map(Optional::get)
-                            .map(t -> (DBTermType) t)
-                            .collect(ImmutableCollectors.toList());
-
-                    DBTermType type1 = types.get(0);
-                    DBTermType type2 = types.get(1);
+                if (optionalType1.isPresent() && optionalType2.isPresent()) {
+                    DBTermType type1 = optionalType1.get();
+                    DBTermType type2 = optionalType2.get();
 
                     return Optional.of(type1.equals(type2)
                             ? transformSameTypeEquality(type1, term1, term2, tree)
                             : transformDifferentTypesEquality(type1, type2, term1, term2));
-                } else
-                    return Optional.of(termFactory.getDBNonStrictDefaultEquality(term1, term2));
+                }
+                return Optional.of(termFactory.getDBNonStrictDefaultEquality(term1, term2));
             }
             return Optional.empty();
         }
