@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.CompositeIQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -59,17 +60,17 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         this.variableGenerator = variableGenerator;
         this.substitutionFactory = substitutionFactory;
         this.iqTreeTools = iqTreeTools;
-        ImmutableList<IQTreeTransformer> preTransformers = ImmutableList.of(
-                new IQTreeTransformerAdapter(new LocalExplicitEqualityEnforcer()));
         ImmutableList<IQTreeTransformer> postTransformers = ImmutableList.of(
                 new IQTreeTransformerAdapter(new CnLifter()),
                 new IQTreeTransformerAdapter(new FilterChildNormalizer()));
-        this.compositeTransformer = new CompositeIQTreeTransformer(preTransformers, postTransformers, iqFactory);
+        this.compositeTransformer = new CompositeIQTreeTransformer(postTransformers, iqFactory);
     }
 
     @Override
     public IQTree transform(IQTree tree) {
-          return compositeTransformer.transform(tree);
+        var transformer = new LocalExplicitEqualityEnforcer();
+        IQTree newTree = tree.acceptVisitor(transformer);
+        return compositeTransformer.transform(newTree);
     }
 
 
@@ -86,7 +87,11 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
      *
      * If needed, create a root projection to ensure that the transformed query has the same signature as the input one.
      */
-    private class LocalExplicitEqualityEnforcer extends DefaultNonRecursiveIQTreeTransformer {
+    private class LocalExplicitEqualityEnforcer extends DefaultRecursiveIQTreeVisitingTransformer {
+
+        LocalExplicitEqualityEnforcer() {
+            super(ExplicitEqualityTransformerImpl.this.iqFactory);
+        }
 
         @Override
         public IQTree transformIntensionalData(IntensionalDataNode dn) {
@@ -127,7 +132,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             ImmutableList<InjectiveSubstitution<Variable>> substitutions = computeSubstitutions(children);
             if (substitutions.stream().allMatch(Substitution::isEmpty))
-                return tree;
+                return super.transformInnerJoin(tree, rootNode, children);
 
             Optional<ImmutableExpression> updatedJoinCondition = updateJoinCondition(rootNode, substitutions);
             ImmutableList<IQTree> updatedChildren = updateJoinChildren(substitutions, children);
@@ -142,7 +147,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             ImmutableList<IQTree> children = ImmutableList.of(leftChild, rightChild);
             ImmutableList<InjectiveSubstitution<Variable>> substitutions = computeSubstitutions(children);
             if (substitutions.stream().allMatch(Substitution::isEmpty))
-                return tree;
+                return super.transformLeftJoin(tree, rootNode, leftChild, rightChild);
 
             Optional<ImmutableExpression> updatedJoinCondition = updateJoinCondition(rootNode, substitutions);
             ImmutableList<IQTree> updatedChildren = updateJoinChildren(substitutions, children);
@@ -169,6 +174,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         private ImmutableList<IQTree> updateJoinChildren(ImmutableList<InjectiveSubstitution<Variable>> substitutions, ImmutableList<IQTree> children) {
             return IntStream.range(0, substitutions.size())
                     .mapToObj(i -> children.get(i).applyFreshRenaming(substitutions.get(i)))
+                    .map(this::transformChild)
                     .collect(ImmutableCollectors.toList());
         }
 

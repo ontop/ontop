@@ -19,15 +19,12 @@ import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
  */
 public final class CompositeIQTreeTransformer implements IQTreeTransformer {
 
-    private final ImmutableList<IQTreeTransformer> preTransformers;
     private final ImmutableList<IQTreeTransformer> postTransformers;
     private final DefaultIQTreeVisitingTransformer childTransformer;
     private final IntermediateQueryFactory iqFactory;
 
-    public CompositeIQTreeTransformer(ImmutableList<IQTreeTransformer> preTransformers,
-                                      ImmutableList<IQTreeTransformer> postTransformers,
+    public CompositeIQTreeTransformer(ImmutableList<IQTreeTransformer> postTransformers,
                                       IntermediateQueryFactory iqFactory) {
-        this.preTransformers = preTransformers;
         this.postTransformers = postTransformers;
         this.iqFactory = iqFactory;
         this.childTransformer = new ChildTransformer();
@@ -37,10 +34,6 @@ public final class CompositeIQTreeTransformer implements IQTreeTransformer {
     public IQTree transform(IQTree initialTree) {
         //Non-final
         IQTree currentTree = initialTree;
-
-        for (IQTreeTransformer transformer : preTransformers) {
-            currentTree = transformer.transform(currentTree);
-        }
 
         currentTree = currentTree.acceptVisitor(childTransformer);
 
