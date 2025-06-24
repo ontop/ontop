@@ -705,8 +705,7 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         return new NullIgnoringDBVarianceFunctionSymbol(isPop ? "VARP" : "VAR", inputType, targetType, isPop, isDistinct);
     }
 
-    @Override
-    protected String serializeDurationSum(ImmutableList<? extends ImmutableTerm> terms,
+    protected String serializeDurationAdd(ImmutableList<? extends ImmutableTerm> terms,
                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         throw new UnsupportedOperationException("Interval addition not yet implemented for SQL Server");
     }

@@ -24,6 +24,8 @@ public interface TypeFactory {
 
 	RDFDatatype getAbstractOntopNumericDatatype();
 	RDFDatatype getAbstractOntopDateOrDatetimeDatatype();
+	RDFDatatype getAbstractOntopTemporalDatatype();
+	RDFDatatype getAbstractOntopNumericOrTemporalDatatype();
 
 	RDFDatatype getAbstractRDFSLiteral();
 

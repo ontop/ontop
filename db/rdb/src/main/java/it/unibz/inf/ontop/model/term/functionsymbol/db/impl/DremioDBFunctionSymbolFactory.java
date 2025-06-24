@@ -287,8 +287,7 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return String.format("(SECOND(%s) * 1000000)", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
     }
 
-    @Override
-    protected String serializeDurationSum(ImmutableList<? extends ImmutableTerm> terms,
+    protected String serializeDurationAdd(ImmutableList<? extends ImmutableTerm> terms,
                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         Interval interval = new Interval(((DBConstant)terms.get(1)).getValue());
         String intervalYearMonth = String.format("%d-%d",
@@ -297,6 +296,7 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                 interval.getDays(), interval.getHours(), interval.getMinutes(),
                 interval.getTotalSeconds());
         String sign = interval.isNegative() ? "-" : "+";
+        // decimal part of the second is not recognized
         return String.format("%s %s INTERVAL '%s' YEAR TO MONTH %s INTERVAL '%s' DAY TO SECOND",
                 termConverter.apply(terms.get(0)), sign, intervalYearMonth, sign, intervalDayTime);
     }

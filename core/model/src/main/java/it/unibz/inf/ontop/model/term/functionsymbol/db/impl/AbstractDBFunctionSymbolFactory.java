@@ -105,7 +105,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBFunctionSymbol tzFunctionSymbol;
 
     // Time extension - duration arithmetic
-    private DBFunctionSymbol durationSumFunctionSymbol;
+    private DBFunctionSymbol durationAddFromDateTimeFunctionSymbol;
+    private DBFunctionSymbol durationAddFromDateFunctionSymbol;
     private DBFunctionSymbol weeksBetweenFromDateTimeFunctionSymbol;
     private DBFunctionSymbol weeksBetweenFromDateFunctionSymbol;
     private DBFunctionSymbol daysBetweenFromDateTimeFunctionSymbol;
@@ -476,7 +477,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         dateTruncFunctionSymbol = createDateTruncFunctionSymbol();
         tzFunctionSymbol = createTzFunctionSymbol();
 
-        durationSumFunctionSymbol = createDurationSumFunctionSymbol();
+        durationAddFromDateTimeFunctionSymbol = createDurationAddFromDateTimeFunctionSymbol();
+        durationAddFromDateFunctionSymbol = createDurationAddFromDateFunctionSymbol();
         weeksBetweenFromDateTimeFunctionSymbol = createWeeksBetweenFromDateTimeFunctionSymbol();
         weeksBetweenFromDateFunctionSymbol = createWeeksBetweenFromDateFunctionSymbol();
         daysBetweenFromDateTimeFunctionSymbol = createDaysBetweenFromDateTimeFunctionSymbol();
@@ -1117,9 +1119,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      * Time extension - duration arithmetic
      */
     @Override
-    public DBFunctionSymbol getDBDurationSum() {
-        return durationSumFunctionSymbol;
-    }
+    public DBFunctionSymbol getDBDurationAddFromDateTime() { return durationAddFromDateTimeFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol getDBDurationAddFromDate() { return durationAddFromDateFunctionSymbol; }
 
     @Override
     public DBFunctionSymbol getDBWeeksBetweenFromDateTime() { return weeksBetweenFromDateTimeFunctionSymbol; }
@@ -1813,8 +1816,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      * Time extension - duration arithmetic
      */
 
-    protected abstract String serializeDurationSum(ImmutableList<? extends ImmutableTerm> terms,
-                                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory);
+    protected abstract String serializeDurationAddFromDateTime(ImmutableList<? extends ImmutableTerm> terms,
+                                                               Function<ImmutableTerm, String> termConverter, TermFactory termFactory);
+
+    protected abstract String serializeDurationAddFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory);
 
     protected abstract String serializeWeeksBetweenFromDateTime(ImmutableList<? extends ImmutableTerm> terms,
                                                                 Function<ImmutableTerm, String> termConverter,
@@ -1851,12 +1857,17 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     /**
      * Time extension - duration arithmetic
      */
-    protected DBFunctionSymbol createDurationSumFunctionSymbol() {
-        return new DBFunctionSymbolWithSerializerImpl("DB_DURATION_SUM", ImmutableList.of(rootDBType, rootDBType), rootDBType, false,
-                this::serializeDurationSum);
+    protected DBFunctionSymbol createDurationAddFromDateTimeFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_DURATION_ADD_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), rootDBType, false,
+                this::serializeDurationAddFromDateTime);
     }
 
-    protected DBFunctionSymbol createWeeksBetweenFromDateTimeFunctionSymbol() {
+    protected DBFunctionSymbol createDurationAddFromDateFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_DURATION_ADD_FROM_DATE", ImmutableList.of(rootDBType, rootDBType), rootDBType, false,
+                this::serializeDurationAddFromDate);
+    }
+
+protected DBFunctionSymbol createWeeksBetweenFromDateTimeFunctionSymbol() {
         return new DBFunctionSymbolWithSerializerImpl("DB_WEEK_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
                 this::serializeWeeksBetweenFromDateTime);
     }

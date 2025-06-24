@@ -329,33 +329,7 @@ public class RDF4JValueExprTranslator {
         }
         if (expr instanceof MathExpr) {
             var operator = ((MathExpr) expr).getOperator();
-            if (operator == MathExpr.MathOp.PLUS || operator == MathExpr.MathOp.MINUS) {
-                if (isSPARQLDuration(term1)) {
-                    RDFConstant durationTerm;
-                    if (operator == MathExpr.MathOp.MINUS) {
-                        durationTerm = termFactory.getRDFLiteralConstant(
-                                "-" + ((RDFConstant) term1).getValue(), termFactory.getTypeFactory().getXsdDurationDatatype());
-                    } else {
-                        durationTerm = (RDFConstant) term1;
-                    }
-                    return new ExtendedTerm(termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getDurationSumFunctionSymbol(),
-                            term2, durationTerm), existsMap);
-                }
-
-                if (isSPARQLDuration(term2)) {
-                    RDFConstant durationTerm;
-                    if (operator == MathExpr.MathOp.MINUS) {
-                        durationTerm = termFactory.getRDFLiteralConstant(
-                                "-" + ((RDFConstant) term2).getValue(), termFactory.getTypeFactory().getXsdDurationDatatype());
-                    } else {
-                        durationTerm = (RDFConstant) term2;
-                    }
-                    return new ExtendedTerm(termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getDurationSumFunctionSymbol(),
-                            term1, durationTerm), existsMap);
-                }
-            }
-            return new ExtendedTerm(getFunctionalTerm(NumericalOperations.get(operator),
-                    term1, term2), existsMap);
+            return new ExtendedTerm(getFunctionalTerm(NumericalOperations.get(operator), term1, term2), existsMap);
         }
         /*
          * Restriction: the first argument must be LANG(...) and the second  a constant
@@ -478,12 +452,6 @@ public class RDF4JValueExprTranslator {
         else
             return uri;
     }
-
-    private boolean isSPARQLDuration(ImmutableTerm term) {
-        return term instanceof RDFConstant
-                && ((RDFConstant) term).getType().isA(termFactory.getTypeFactory().getXsdDurationDatatype());
-    }
-
 
     /**
      * Translates a RDF4J "Var" (which can be a variable or a constant) into a Ontop term.

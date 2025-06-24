@@ -136,5 +136,8 @@ public interface FunctionSymbolFactory {
 
     FunctionSymbol getIdentity();
 
-    FunctionSymbol getDurationSumFunctionSymbol();
+    FunctionSymbol getDateTimeDurationAddFunctionSymbol();
+
+    FunctionSymbol getDateDurationAddFunctionSymbol();
+
 }

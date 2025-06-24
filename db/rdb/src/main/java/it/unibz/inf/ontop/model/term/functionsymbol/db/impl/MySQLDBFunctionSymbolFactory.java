@@ -534,8 +534,7 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         return super.getNullIgnoringDBVariance(dbType, isPop, false);
     }
 
-    @Override
-    protected String serializeDurationSum(ImmutableList<? extends ImmutableTerm> terms,
+    protected String serializeDurationAdd(ImmutableList<? extends ImmutableTerm> terms,
                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         Interval interval = new Interval(((DBConstant)terms.get(1)).getValue());
         String intervalYearMonth = String.format("%d-%d",

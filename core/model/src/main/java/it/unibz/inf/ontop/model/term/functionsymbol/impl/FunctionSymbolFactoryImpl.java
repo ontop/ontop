@@ -57,7 +57,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final FunctionSymbol identityFunctionSymbol;
     private final SPARQLFunctionSymbol bnodeTolerantSPARQLStrFunctionSymbol;
 
-    private final FunctionSymbol durationFunctionSymbol;
+    private final FunctionSymbol dateTimeDurationAddFunctionSymbol;
+    private final FunctionSymbol dateDurationAddFunctionSymbol;
 
     /**
      * Created in init()
@@ -117,8 +118,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
         this.bnodeTolerantSPARQLStrFunctionSymbol = new BNodeTolerantStrSPARQLFunctionSymbolImpl(abstractRDFType, xsdStringType);
 
-        this.durationFunctionSymbol = new DurationSumFunctionSymbolImpl(typeFactory.getXsdDatetimeDatatype(),
-                typeFactory.getXsdDurationDatatype());
+        this.dateTimeDurationAddFunctionSymbol = new DurationAdditionFunctionSymbolImpl(typeFactory.getXsdDatetimeDatatype(),
+                typeFactory.getXsdDurationDatatype(), typeFactory);
+
+        this.dateDurationAddFunctionSymbol = new DurationAdditionFunctionSymbolImpl(typeFactory.getXsdDate(),
+                typeFactory.getXsdDurationDatatype(), typeFactory);
     }
 
     @Inject
@@ -147,6 +151,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         RDFDatatype xsdDate = typeFactory.getXsdDate();
         RDFDatatype abstractNumericType = typeFactory.getAbstractOntopNumericDatatype();
         RDFDatatype dateOrDatetime = typeFactory.getAbstractOntopDateOrDatetimeDatatype();
+        RDFDatatype temporalOrNumeric = typeFactory.getAbstractOntopNumericOrTemporalDatatype();
 
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType dbBoolean = dbTypeFactory.getDBBooleanType();
@@ -190,8 +195,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new Sha384SPARQLFunctionSymbolImpl(xsdString),
                 new Sha512SPARQLFunctionSymbolImpl(xsdString),
                 new NumericBinarySPARQLFunctionSymbolImpl("SP_MULTIPLY", SPARQL.NUMERIC_MULTIPLY, abstractNumericType),
-                new NumericBinarySPARQLFunctionSymbolImpl("SP_ADD", SPARQL.NUMERIC_ADD, abstractNumericType),
-                new NumericBinarySPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.NUMERIC_SUBTRACT, abstractNumericType),
+                new NumericBinarySPARQLFunctionSymbolImpl("SP_ADD", SPARQL.NUMERIC_ADD, temporalOrNumeric),
+                new NumericBinarySPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.NUMERIC_SUBTRACT, temporalOrNumeric),
                 new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal),
                 new NonStrictEqSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
                 new LessThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
@@ -732,7 +737,12 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     @Override
-    public FunctionSymbol getDurationSumFunctionSymbol() {
-        return durationFunctionSymbol;
+    public FunctionSymbol getDateTimeDurationAddFunctionSymbol() {
+        return dateTimeDurationAddFunctionSymbol;
+    }
+
+    @Override
+    public FunctionSymbol getDateDurationAddFunctionSymbol() {
+        return dateDurationAddFunctionSymbol;
     }
 }

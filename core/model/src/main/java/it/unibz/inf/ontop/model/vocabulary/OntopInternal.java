@@ -11,6 +11,8 @@ public class OntopInternal {
 
     public static final IRI NUMERIC;
     public static final IRI DATE_OR_DATETIME;
+    public static final IRI TEMPORAL;
+    public static final IRI TEMPORAL_OR_NUMERIC;
 
     /**
      * TODO: remove it!
@@ -28,6 +30,8 @@ public class OntopInternal {
 
         NUMERIC = rdfFactory.createIRI(PREFIX + "numeric");
         DATE_OR_DATETIME = rdfFactory.createIRI(PREFIX + "dateOrDateTime");
+        TEMPORAL = rdfFactory.createIRI(PREFIX + "temporal");
+        TEMPORAL_OR_NUMERIC = rdfFactory.createIRI(PREFIX + "temporalOrNumeric");
         UNSUPPORTED = rdfFactory.createIRI(PREFIX + "unsupported");
         PREFIX_XSD = "xsd:";
         PREFIX_RDF = "rdf:";

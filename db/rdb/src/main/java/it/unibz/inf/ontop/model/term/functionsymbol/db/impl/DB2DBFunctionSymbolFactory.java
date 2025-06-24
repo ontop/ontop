@@ -430,8 +430,7 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
         return String.format("QUARTER(%s)", termConverter.apply(terms.get(0)));
     }
 
-    @Override
-    protected String serializeDurationSum(ImmutableList<? extends ImmutableTerm> terms,
+    protected String serializeDurationAdd(ImmutableList<? extends ImmutableTerm> terms,
                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         Interval interval = new Interval(((DBConstant)terms.get(1)).getValue());
         String dialectInterval = String.format("%d YEARS %d MONTHS %d DAYS %d HOURS %d MINUTES %f SECONDS",

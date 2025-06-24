@@ -372,7 +372,8 @@ public interface DBFunctionSymbolFactory {
     FunctionSymbol getDBGetSRID();
 
     // Time extension - duration arithmetic
-    DBFunctionSymbol getDBDurationSum();
+    DBFunctionSymbol getDBDurationAddFromDateTime();
+    DBFunctionSymbol getDBDurationAddFromDate();
     DBFunctionSymbol getDBWeeksBetweenFromDateTime();
     DBFunctionSymbol getDBWeeksBetweenFromDate();
     DBFunctionSymbol getDBDaysBetweenFromDateTime();
