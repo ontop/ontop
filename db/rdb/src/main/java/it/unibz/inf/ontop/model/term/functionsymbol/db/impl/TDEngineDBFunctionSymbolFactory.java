@@ -29,7 +29,6 @@ public class TDEngineDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
             TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
-        System.out.println("****** call TDEngineDBFunctionSymbolFactory.createTDengineRegularFunctionTable");
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
 
