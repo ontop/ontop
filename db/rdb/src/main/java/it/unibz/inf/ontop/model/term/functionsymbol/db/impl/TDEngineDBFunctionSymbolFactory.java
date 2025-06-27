@@ -29,7 +29,7 @@ public class TDEngineDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
             TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
-
+        System.out.println("****** call TDEngineDBFunctionSymbolFactory.createTDengineRegularFunctionTable");
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
 
@@ -125,6 +125,7 @@ public class TDEngineDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
     @Override
     protected String serializeDateTimeNormWithTZ(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        System.out.printf("call TDEngineDBFunctionSymbolFactory serializeDateTimeNormWithTZ \n");
         String str = termConverter.apply(terms.get(0));
         return String.format("TO_CHAR(%s, 'yyyy-mm-ddThh24:mi:ss.mstz')", str);
     }
