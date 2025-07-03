@@ -84,4 +84,11 @@ public class BindWithFunctionsPrestoTest extends AbstractBindTestWithFunctions {
     protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
         return ImmutableSet.of("\"215.340000000000000000\"^^xsd:decimal");
     }
+
+    @Disabled("Presto does not support REGEXP_LIKE with three arguments")
+    @Test
+    @Override
+    public void testCaseInsensitiveREGEX() {
+        super.testCaseInsensitiveREGEX();
+    }
 }

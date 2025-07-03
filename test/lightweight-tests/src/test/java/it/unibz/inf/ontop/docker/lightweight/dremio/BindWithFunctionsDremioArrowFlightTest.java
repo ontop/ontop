@@ -71,4 +71,11 @@ public class BindWithFunctionsDremioArrowFlightTest extends AbstractBindTestWith
     protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
         return ImmutableSet.of("\"215.340000\"^^xsd:decimal");
     }
+
+    @Disabled("Dremio does not support REGEXP_LIKE with three arguments")
+    @Test
+    @Override
+    public void testCaseInsensitiveREGEX() {
+        super.testCaseInsensitiveREGEX();
+    }
 }

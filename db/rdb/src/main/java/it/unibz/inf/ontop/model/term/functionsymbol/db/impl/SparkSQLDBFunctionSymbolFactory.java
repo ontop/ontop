@@ -344,6 +344,11 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
         }
         return super.getDBDateTrunc(datePart);
     }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
+        throw new UnsupportedOperationException(REGEXP_LIKE_STR + "3: " + UNSUPPORTED_MSG);
+    }
 }
 
 

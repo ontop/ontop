@@ -71,6 +71,13 @@ public class BindWithFunctionsCDataDynamoDBTest extends AbstractBindTestWithFunc
     @Test
     @Disabled("REGEX is not yet supported")
     @Override
+    public void testCaseInsensitiveREGEX() {
+        super.testCaseInsensitiveREGEX();
+    }
+
+    @Test
+    @Disabled("REGEX is not yet supported")
+    @Override
     public void testREPLACE() {
         super.testREPLACE();
     }
