@@ -5,26 +5,14 @@ import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractDockerRDF4JTest;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.junit.jupiter.api.*;
-
-import java.io.IOException;
-import java.sql.SQLException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.*;
 
-public class FunctionsTDEngineTest extends AbstractDockerRDF4JTest {
-    private static final String PROPERTIES_FILE = "/tdengine/functions.properties";
-    private static final String MAPPING_FILE = "/tdengine/functions.obda";
-
-    @BeforeAll
-    public static void before() throws IOException, SQLException {
-        initOBDA(MAPPING_FILE, null, PROPERTIES_FILE);
-    }
-
-    @AfterAll
-    public static void after() throws SQLException {
-        release();
-    }
+public abstract class AbstractFunctionsTDEngineTest extends AbstractDockerRDF4JTest {
+    protected static final String OBDA_FILE = "/tdengine/functions.obda";
 
     @Test
     public void testAndBind() {

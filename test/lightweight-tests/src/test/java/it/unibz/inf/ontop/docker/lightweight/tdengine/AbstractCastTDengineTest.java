@@ -2,32 +2,13 @@ package it.unibz.inf.ontop.docker.lightweight.tdengine;
 
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.docker.lightweight.AbstractCastFunctionsTest;
 import it.unibz.inf.ontop.docker.lightweight.AbstractDockerRDF4JTest;
-import it.unibz.inf.ontop.docker.lightweight.TDEngineLightWeightTest;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
-@TDEngineLightWeightTest
-public class CastTDEngineTest extends AbstractDockerRDF4JTest {
+public abstract class AbstractCastTDengineTest extends AbstractDockerRDF4JTest {
 
     protected static final String OBDA_FILE = "/tdengine/functions.obda";
-    protected static final String PROPERTIES_FILE = "/tdengine/functions.properties";
-
-    @BeforeAll
-    public static void before() throws IOException, SQLException {
-        initOBDA(OBDA_FILE, null, PROPERTIES_FILE);
-    }
-
-    @AfterAll
-    public static void after() throws SQLException {
-        release();
-    }
 
     @Test
     public void testCastFloatFromFloat() {
