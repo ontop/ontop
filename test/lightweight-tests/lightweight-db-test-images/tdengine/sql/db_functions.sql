@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS db_functions;
 
 USE db_functions;
 
-CREATE STABLE IF NOT EXISTS electricity ( ts timestamp, curr float, voltage int, phase float, description varchar(64)) TAGS ( location varchar(64),group_id int);
+CREATE STABLE IF NOT EXISTS electricity ( ts timestamp, curr float, voltage int, phase double, description varchar(64)) TAGS ( location varchar(64),group_id int);
 
 CREATE TABLE IF NOT EXISTS d1001 USING electricity ( location, group_id ) TAGS ( "San Francisco", 1 );
 

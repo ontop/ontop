@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DelegatingMetadataProvider;
 import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
-import it.unibz.inf.ontop.docker.lightweight.TDEngineLightWeightTest;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -27,26 +26,23 @@ import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@TDEngineLightWeightTest
-public class ConstraintTDEngineTest {
+public abstract class AbstractConstraintTDengineTest {
 
-    private static final String PROPERTIES_FILE = "/tdengine/constraints.properties";
-
-
-    private ImmutableMap<String, RelationDefinition> relations;
+    private static ImmutableMap<String, RelationDefinition> relations;
 
     private static final String TB_PRESSURE = "PRESSURE_MEASUREMENTS";
     private static final String TB_TEMPERATURE = "TEMPERATURE_MEASUREMENTS";;
 
-    protected Properties properties;
+    private static Properties properties;
 
-    private static final Logger log = LoggerFactory.getLogger(ConstraintTDEngineTest.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractConstraintTDengineTest.class);
 
+    protected abstract String getPropertiesFile();
 
     @BeforeEach
     public void setUp() throws IOException, SQLException, MetadataExtractionException {
         properties = new Properties();
-        try (InputStream pStream = getClass().getResourceAsStream(PROPERTIES_FILE)) {
+        try (InputStream pStream = getClass().getResourceAsStream(getPropertiesFile())) {
             properties.load(pStream);
         }
 
