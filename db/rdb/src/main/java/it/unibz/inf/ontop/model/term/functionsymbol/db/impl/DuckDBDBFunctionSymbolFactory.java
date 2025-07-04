@@ -163,6 +163,11 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
+        throw new UnsupportedOperationException("DuckDB Regex matches with three arguments is not supported by Ontop.");
+    }
+
+    @Override
     public DBFunctionSymbol getDBCharLength() {
         return this.charLengthFunctionSymbol;
     }
