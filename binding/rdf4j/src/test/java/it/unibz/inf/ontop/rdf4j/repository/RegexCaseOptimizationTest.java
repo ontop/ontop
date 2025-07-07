@@ -54,7 +54,7 @@ public class RegexCaseOptimizationTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void testPatternLCase() {
+    public void testMixedCases() {
         String sparql = "PREFIX ex: <http://employee.example.org/voc#>\n" +
                 "SELECT ?v\n" +
                 "WHERE {\n" +
@@ -62,7 +62,7 @@ public class RegexCaseOptimizationTest extends AbstractRDF4JTest {
                 "FILTER (REGEX(UCASE(?name), LCASE(\"Ger\"), \"i\"))\n" +
                 "}";
         String sql = reformulateIntoNativeQuery(sparql);
-        assertFalse(sql.contains("LOWER") && sql.contains("UPPER"));
+        assertFalse(sql.contains("LOWER") || sql.contains("UPPER"));
 
         runQueryAndCompare(sparql, ImmutableSet.of("http://employee.example.org/data/person/1"));
     }
