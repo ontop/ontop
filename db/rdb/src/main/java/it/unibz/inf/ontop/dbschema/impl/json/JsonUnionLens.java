@@ -108,7 +108,8 @@ public class JsonUnionLens extends JsonLens {
     }
 
     @Override
-    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(Lens lens, ImmutableList<Attribute> parentAttributes) {
+    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(Lens lens, ImmutableList<Attribute> parentAttributes,
+                                                                                    CoreSingletons coreSingletons) {
         return ImmutableList.of();
     }
 

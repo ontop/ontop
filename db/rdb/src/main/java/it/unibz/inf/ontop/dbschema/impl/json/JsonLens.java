@@ -105,7 +105,7 @@ public abstract class JsonLens extends JsonOpenObject {
      * Parent attributes are expected to all come from the same parent.
      */
     public abstract ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(
-            Lens lens, ImmutableList<Attribute> parentAttributes);
+            Lens lens, ImmutableList<Attribute> parentAttributes, CoreSingletons coreSingletons);
 
     protected RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters)  {
         SingleTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
