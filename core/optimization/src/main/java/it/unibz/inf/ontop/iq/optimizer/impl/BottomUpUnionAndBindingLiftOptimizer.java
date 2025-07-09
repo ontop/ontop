@@ -60,11 +60,6 @@ public class BottomUpUnionAndBindingLiftOptimizer extends AbstractIQOptimizer im
         }
 
         @Override
-        protected boolean nodesEqual(QueryNode node1, QueryNode node2) {
-            return true;
-        }
-
-        @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode node, ImmutableList<IQTree> children) {
             NaryIQTree newTree = (NaryIQTree) super.transformInnerJoin(tree, node, children);
 

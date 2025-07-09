@@ -59,11 +59,6 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
         }
 
         @Override
-        protected boolean nodesEqual(QueryNode node1, QueryNode node2) {
-            return true;
-        }
-
-        @Override
         protected boolean treesEqual(IQTree tree1, IQTree tree2) {
             return tree1 == tree2;
         }

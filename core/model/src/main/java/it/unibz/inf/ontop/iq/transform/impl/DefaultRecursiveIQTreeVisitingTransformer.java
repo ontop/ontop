@@ -32,12 +32,6 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
         return trees1.equals(trees2);
     }
 
-    protected boolean nodesEqual(QueryNode node1, QueryNode node2) {
-        if (node1 != node2)
-            throw new MinorOntopInternalBugException("Nodes are not equal: " + node1 + " != " + node2);
-        return node1.equals(node2);
-    }
-
     @Override
     protected final IQTree transformLeaf(LeafIQTree leaf){
         return leaf;
@@ -46,7 +40,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
     @Override
     protected final IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode node, IQTree child) {
         IQTree newChild = transformChild(child);
-        return treesEqual(newChild, child) && nodesEqual(node, tree.getRootNode())
+        return treesEqual(newChild, child)
                 ? tree
                 : iqFactory.createUnaryIQTree(node, newChild);
     }
@@ -54,7 +48,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
     @Override
     protected final IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode node, ImmutableList<IQTree> children) {
         ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
-        return treesEqual(newChildren, children) && nodesEqual(node, tree.getRootNode())
+        return treesEqual(newChildren, children)
                 ? tree
                 : iqFactory.createNaryIQTree(node, newChildren);
     }
@@ -63,7 +57,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
     protected final IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode node, IQTree leftChild, IQTree rightChild) {
         IQTree newLeftChild = transformChild(leftChild);
         IQTree newRightChild = transformChild(rightChild);
-        return treesEqual(newLeftChild, leftChild) && treesEqual(newRightChild, rightChild) && nodesEqual(node, tree.getRootNode())
+        return treesEqual(newLeftChild, leftChild) && treesEqual(newRightChild, rightChild)
                 ? tree
                 : iqFactory.createBinaryNonCommutativeIQTree(node, newLeftChild, newRightChild);
     }
