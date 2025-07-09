@@ -53,9 +53,7 @@ public class SelfJoinUCIQOptimizerImpl extends AbstractIQOptimizer implements Se
             ImmutableList<IQTree> liftedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
 
             return simplifier.transformInnerJoin(rootNode, liftedChildren, tree.getVariables(), variableGenerator)
-                    .orElseGet(() -> children.equals(liftedChildren)
-                            ? tree
-                            : iqFactory.createNaryIQTree(rootNode, liftedChildren));
+                    .orElseGet(() -> withTransformedChildren(tree, liftedChildren));
         }
     }
 

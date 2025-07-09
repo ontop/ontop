@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.JoinLikeNode;
@@ -50,21 +49,12 @@ public class SubQueryFromComplexJoinExtraNormalizer implements DialectExtraNorma
 
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            IQTree newLeftChild = createSubQueryIfJoin(leftChild);
-            IQTree newRightChild = createSubQueryIfJoin(rightChild);
-
-            return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild) && rootNode.equals(tree.getRootNode())
-                    ? tree
-                    : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild);
+            return withTransformedChildren(tree, createSubQueryIfJoin(leftChild), createSubQueryIfJoin(rightChild));
         }
 
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::createSubQueryIfJoin);
-
-            return newChildren.equals(children) && rootNode.equals(tree.getRootNode())
-                    ? tree
-                    : iqFactory.createNaryIQTree(rootNode, newChildren);
+            return withTransformedChildren(tree, NaryIQTreeTools.transformChildren(children, this::createSubQueryIfJoin));
         }
 
         private IQTree createSubQueryIfJoin(IQTree child) {
@@ -77,6 +67,5 @@ public class SubQueryFromComplexJoinExtraNormalizer implements DialectExtraNorma
             }
             return transformedChild;
         }
-
     }
 }

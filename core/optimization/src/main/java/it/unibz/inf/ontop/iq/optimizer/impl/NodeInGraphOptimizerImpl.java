@@ -52,9 +52,9 @@ public class NodeInGraphOptimizerImpl extends AbstractIQOptimizer implements Nod
     }
 
 
-    protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        protected Transformer() {
+        Transformer() {
             super(NodeInGraphOptimizerImpl.this.iqFactory);
         }
 

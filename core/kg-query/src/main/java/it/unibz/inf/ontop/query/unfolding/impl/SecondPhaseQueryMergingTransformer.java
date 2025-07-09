@@ -173,30 +173,19 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
         ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
                 this::transformChildWithNewTransformer);
 
-        return newChildren.equals(children) && rootNode.equals(tree.getRootNode())
-                ? tree
-                : iqFactory.createNaryIQTree(rootNode, newChildren);
+        return withTransformedChildren(tree, newChildren);
     }
 
     @Override
     public final IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         IQTree newLeftChild = transformChild(leftChild);
         IQTree newRightChild = transformChildWithNewTransformer(rightChild);
-        return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild) && rootNode.equals(tree.getRootNode())
-                ? tree
-                : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild);
+        return withTransformedChildren(tree, newLeftChild, newRightChild);
     }
 
     @Override
     public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-        return transformUnaryTreeUsingLocalDefinitions(tree, rootNode, child);
-    }
-
-    public IQTree transformUnaryTreeUsingLocalDefinitions(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-        IQTree newChild = transformChildWithNewTransformer(child);
-        return newChild.equals(child)
-                ? tree
-                : iqFactory.createUnaryIQTree(rootNode, newChild);
+        return withTransformedChild(tree, transformChildWithNewTransformer(child));
     }
 
     private IQTree transformChildWithNewTransformer(IQTree child) {
@@ -207,7 +196,7 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
 
     @Override
     public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
-        return transformUnaryTreeUsingLocalDefinitions(tree, rootNode, child);
+        return withTransformedChild(tree, transformChildWithNewTransformer(child));
     }
 
     @Override

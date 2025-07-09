@@ -66,9 +66,7 @@ public class RedundantJoinFKOptimizerImpl extends AbstractIQOptimizer implements
 
             var optimisedExtensionalChildren = optimizeExtensionalChildren(extensionalChildren);
             if (optimisedExtensionalChildren.isEmpty()) {
-                return liftedChildren.equals(initialChildren)
-                        ? tree
-                        : iqFactory.createNaryIQTree(rootNode, liftedChildren);
+                return withTransformedChildren(tree, liftedChildren);
             }
 
             // The returned tree may not be normalized (to be done at the IQOptimizer level)

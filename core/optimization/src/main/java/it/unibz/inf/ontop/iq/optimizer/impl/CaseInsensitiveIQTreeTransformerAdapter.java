@@ -20,20 +20,14 @@ public abstract class CaseInsensitiveIQTreeTransformerAdapter extends DefaultRec
 
     @Override
     public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-        IQTree newChild = transformCardinalityInsensitiveTree(child);
-        return newChild.equals(child)
-                ? tree
-                : iqFactory.createUnaryIQTree(rootNode, newChild);
+        return withTransformedChild(tree, transformCardinalityInsensitiveTree(child));
     }
 
     @Override
     public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
         // LIMIT 1
         if (sliceNode.getOffset() == 0 && sliceNode.getLimit().filter(l -> l <= 1).isPresent()) {
-            IQTree newChild = transformCardinalityInsensitiveTree(child);
-            return newChild.equals(child)
-                    ? tree
-                    : iqFactory.createUnaryIQTree(sliceNode, newChild);
+            return withTransformedChild(tree, transformCardinalityInsensitiveTree(child));
         }
         return super.transformSlice(tree, sliceNode, child);
     }

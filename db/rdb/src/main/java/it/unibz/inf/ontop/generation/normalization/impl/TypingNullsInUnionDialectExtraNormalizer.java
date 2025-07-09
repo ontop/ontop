@@ -47,9 +47,7 @@ public class TypingNullsInUnionDialectExtraNormalizer extends AbstractTypingNull
                 .collect(ImmutableCollectors.toSet());
 
         if (nullVariables.isEmpty())
-            return updatedChildren.equals(children)
-                    ? tree
-                    : iqFactory.createNaryIQTree(rootNode, updatedChildren);
+            return withTransformedChildren(tree, updatedChildren);
 
         Substitution<ImmutableFunctionalTerm> typedNullMap = extractTypedNullMap(tree, nullVariables);
 

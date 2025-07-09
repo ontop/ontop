@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.transform.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;

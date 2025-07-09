@@ -59,9 +59,7 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer
             IQTree newRightChild = transformChild(rightChild);
 
             return furtherTransformLJ(rootNode, leftChild, rightChild)
-                    .orElseGet(() -> newLeftChild.equals(leftChild) && newRightChild.equals(rightChild)
-                            ? tree
-                            : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild));
+                    .orElseGet(() -> withTransformedChildren(tree, newLeftChild, newRightChild));
         }
 
         private Optional<IQTree> furtherTransformLJ(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
