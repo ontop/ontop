@@ -1,26 +1,17 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.utils.VariableGenerator;
+import com.google.inject.Singleton;
 
-public class PostgresDialectExtraNormalizer implements DialectExtraNormalizer {
-
-    private final TypingNullsInUnionDialectExtraNormalizer typingNullNormalizer;
-    private final OnlyInPresenceOfDistinctProjectOrderByTermsNormalizer projectionNormalizer;
+@Singleton
+public class PostgresDialectExtraNormalizer extends CompositeDialectNormalizer {
 
     @Inject
     protected PostgresDialectExtraNormalizer(TypingNullsInUnionDialectExtraNormalizer typingNullNormalizer,
                                              OnlyInPresenceOfDistinctProjectOrderByTermsNormalizer projectionNormalizer) {
-        this.typingNullNormalizer = typingNullNormalizer;
-        this.projectionNormalizer = projectionNormalizer;
-    }
-
-    @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return projectionNormalizer.transform(
-                typingNullNormalizer.transform(tree, variableGenerator),
-                variableGenerator);
+        super(ImmutableList.of(
+                typingNullNormalizer,
+                projectionNormalizer));
     }
 }

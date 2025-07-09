@@ -49,7 +49,7 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        protected Transformer() {
+        Transformer() {
             super(ReplaceProvenanceConstantByNonGroundTermNormalizer.this.iqFactory);
         }
 

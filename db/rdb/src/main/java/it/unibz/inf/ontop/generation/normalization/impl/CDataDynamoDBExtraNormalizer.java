@@ -1,22 +1,14 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.utils.VariableGenerator;
+import com.google.inject.Singleton;
 
-public class CDataDynamoDBExtraNormalizer implements DialectExtraNormalizer {
-
-    private final ReformulateConjunctionDisjunctionNormalizer reformulateConjunctionDisjunctionNormalizer;
-
+@Singleton
+public class CDataDynamoDBExtraNormalizer extends CompositeDialectNormalizer {
 
     @Inject
     protected CDataDynamoDBExtraNormalizer(ReformulateConjunctionDisjunctionNormalizer reformulateConjunctionDisjunctionNormalizer) {
-        this.reformulateConjunctionDisjunctionNormalizer = reformulateConjunctionDisjunctionNormalizer;
-    }
-
-    @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-              return reformulateConjunctionDisjunctionNormalizer.transform(tree, variableGenerator);
+        super(ImmutableList.of(reformulateConjunctionDisjunctionNormalizer));
     }
 }

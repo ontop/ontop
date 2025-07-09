@@ -17,17 +17,17 @@ Used to get rid of limits in sub-queries that are not necessary, for dialects li
 public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final EliminateLimitsFromSubQueriesTransformer eliminateLimitsFromSubQueriesNormalizer;
+    private final EliminateLimitsFromSubQueriesTransformer eliminateLimitsFromSubQueriesTransformer;
 
     @Inject
     protected EliminateLimitsFromSubQueriesNormalizer(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
-        this.eliminateLimitsFromSubQueriesNormalizer = new EliminateLimitsFromSubQueriesTransformer();
+        this.eliminateLimitsFromSubQueriesTransformer = new EliminateLimitsFromSubQueriesTransformer();
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
+        return tree.acceptVisitor(eliminateLimitsFromSubQueriesTransformer);
     }
 
     private class EliminateLimitsFromSubQueriesTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -108,7 +108,7 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
         }
 
         private IQTree defaultToParentTransformer(IQTree tree) {
-            return tree.acceptVisitor(eliminateLimitsFromSubQueriesNormalizer);
+            return tree.acceptVisitor(eliminateLimitsFromSubQueriesTransformer);
         }
     }
 }

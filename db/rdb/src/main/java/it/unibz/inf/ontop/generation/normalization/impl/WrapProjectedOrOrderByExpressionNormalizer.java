@@ -27,13 +27,15 @@ public class WrapProjectedOrOrderByExpressionNormalizer implements DialectExtraN
 
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
+    private final IntermediateQueryFactory iqFactory;
     private final IQTreeTransformer transformer;
 
     @Inject
     protected WrapProjectedOrOrderByExpressionNormalizer(CoreSingletons coreSingletons) {
         this.termFactory = coreSingletons.getTermFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
-        this.transformer = new Transformer(coreSingletons.getIQFactory()).treeTransformer();
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.transformer = new Transformer().treeTransformer();
     }
 
     @Override
@@ -43,8 +45,8 @@ public class WrapProjectedOrOrderByExpressionNormalizer implements DialectExtraN
 
     private class Transformer extends DefaultQueryNodeTransformer {
 
-        public Transformer(IntermediateQueryFactory iqFactory) {
-            super(iqFactory);
+        Transformer() {
+            super(WrapProjectedOrOrderByExpressionNormalizer.this.iqFactory);
         }
 
         @Override

@@ -60,11 +60,13 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
         ProjectionDecomposition decomposition = decomposer.decomposeSubstitution(initialRootNode.getSubstitution(), variableGenerator);
 
         ConstructionNode postProcessingNode = iqFactory.createConstructionNode(initialRootNode.getVariables(),
-                decomposition.getTopSubstitution().orElseGet(substitutionFactory::getSubstitution));
+                decomposition.getTopSubstitution()
+                        .orElseGet(substitutionFactory::getSubstitution));
 
         ImmutableSet<Variable> newSubTreeVariables = postProcessingNode.getChildVariables();
 
-        var subSubstitution = decomposition.getSubSubstitution().orElseGet(substitutionFactory::getSubstitution);
+        var subSubstitution = decomposition.getSubSubstitution()
+                .orElseGet(substitutionFactory::getSubstitution);
 
         /*
          * NB: the presence of a subSubstitution implies the need to project new variables.

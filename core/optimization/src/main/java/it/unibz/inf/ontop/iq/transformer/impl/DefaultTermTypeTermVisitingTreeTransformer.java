@@ -231,13 +231,6 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toSet());
 
-        return createConstructionValuesTree(valuesNode, metaTermTypeVariables, possibleConstants);
-    }
-
-    IQTree createConstructionValuesTree(ValuesNode valuesNode,
-                                        ImmutableSet<Variable> metaTermTypeVariables,
-                                        ImmutableSet<RDFTermTypeConstant> possibleConstants) {
-
         InjectiveSubstitution<Variable> renaming = metaTermTypeVariables.stream()
                 .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
@@ -262,8 +255,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
             RDFTermTypeConstant typeConstant = (RDFTermTypeConstant) constant;
             return dictionary.convert(typeConstant);
         }
-        else
-            return constant;
+        return constant;
     }
 
 

@@ -37,7 +37,7 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
-        protected Transformer(VariableGenerator variableGenerator) {
+        Transformer(VariableGenerator variableGenerator) {
             super(SQLServerInsertOrderByInSliceNormalizer.this.iqFactory,  variableGenerator);
         }
 
