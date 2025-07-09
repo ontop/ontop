@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.transform.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
@@ -32,6 +33,8 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
     }
 
     protected boolean nodesEqual(QueryNode node1, QueryNode node2) {
+        if (node1 != node2)
+            throw new MinorOntopInternalBugException("Nodes are not equal: " + node1 + " != " + node2);
         return node1.equals(node2);
     }
 
