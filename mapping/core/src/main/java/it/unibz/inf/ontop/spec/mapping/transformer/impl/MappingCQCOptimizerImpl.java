@@ -48,11 +48,11 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                         construction.getNode().getSubstitution().getRangeVariables(), cqContainmentCheck)));
     }
 
-    protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
         private final ImmutableSet<Variable> constructionTreeVariables;
         private final ExtensionalDataNodeListContainmentCheck cqContainmentCheck;
 
-        protected Transformer(ImmutableSet<Variable> constructionTreeVariables, ExtensionalDataNodeListContainmentCheck cqContainmentCheck) {
+        Transformer(ImmutableSet<Variable> constructionTreeVariables, ExtensionalDataNodeListContainmentCheck cqContainmentCheck) {
             super(MappingCQCOptimizerImpl.this.iqFactory);
             this.cqContainmentCheck = cqContainmentCheck;
             this.constructionTreeVariables = constructionTreeVariables;

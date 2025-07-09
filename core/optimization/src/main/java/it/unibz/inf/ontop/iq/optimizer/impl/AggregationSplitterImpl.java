@@ -71,9 +71,8 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
             IQTree liftedChild = transformChild(child);
 
             return tryToLift(rootNode, liftedChild)
-                    .orElseGet(() -> liftedChild == child
-                            ? tree
-                            : iqFactory.createUnaryIQTree(rootNode, liftedChild));
+                    // uses ==
+                    .orElseGet(() -> withTransformedChild(tree, liftedChild));
         }
 
         private Optional<IQTree> tryToLift(AggregationNode rootNode, IQTree child) {

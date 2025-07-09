@@ -42,9 +42,9 @@ public class ArgumentTransferInnerJoinFDIQOptimizer extends AbstractIQOptimizer 
         return tree.acceptVisitor(new ArgumentTransferJoinTransformer(variableGenerator));
     }
 
-    protected class ArgumentTransferJoinTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
+    private class ArgumentTransferJoinTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
-        protected ArgumentTransferJoinTransformer(VariableGenerator variableGenerator) {
+        ArgumentTransferJoinTransformer(VariableGenerator variableGenerator) {
             super(ArgumentTransferInnerJoinFDIQOptimizer.this.iqFactory, variableGenerator);
         }
 
@@ -55,9 +55,9 @@ public class ArgumentTransferInnerJoinFDIQOptimizer extends AbstractIQOptimizer 
         }
     }
 
-    protected static class SelfJoinFDSimplifier extends AbstractSelfJoinSimplifier<FunctionalDependency> {
+    private static class SelfJoinFDSimplifier extends AbstractSelfJoinSimplifier<FunctionalDependency> {
 
-        protected SelfJoinFDSimplifier(CoreSingletons coreSingletons) {
+        SelfJoinFDSimplifier(CoreSingletons coreSingletons) {
             super(coreSingletons);
         }
 
@@ -102,12 +102,12 @@ public class ArgumentTransferInnerJoinFDIQOptimizer extends AbstractIQOptimizer 
         }
 
         /**
-         * Selects as target the node with largest number of external arguments.
+         * Selects as target the node with the largest number of external arguments.
          *
          * Why? Partially arbitrary, but such a target is more likely that it cannot be eliminated by the optimization
          * based on the same terms.
          */
-        protected ExtensionalDataNode selectTargetDataNode(Collection<ExtensionalDataNode> dataNodes, FunctionalDependency constraint) {
+        private ExtensionalDataNode selectTargetDataNode(Collection<ExtensionalDataNode> dataNodes, FunctionalDependency constraint) {
             ImmutableSet<Attribute> dependentAttributes = constraint.getDependents();
             ImmutableSet<Attribute> determinantAttributes = constraint.getDeterminants();
 
@@ -171,5 +171,4 @@ public class ArgumentTransferInnerJoinFDIQOptimizer extends AbstractIQOptimizer 
                     .collect(ImmutableCollectors.toSet());
         }
     }
-
 }

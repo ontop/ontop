@@ -79,12 +79,12 @@ public class QueryTemplateExtractor {
      *
      * Extracts from filter/LJ/joins and intensional data nodes.
      */
-    protected class QueryTemplateTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
+    private class QueryTemplateTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
         // Mutable
         private final Map<GroundTerm, Variable> parameterMap;
 
-        protected QueryTemplateTransformer(VariableGenerator variableGenerator) {
+        QueryTemplateTransformer(VariableGenerator variableGenerator) {
             super(QueryTemplateExtractor.this.iqFactory, variableGenerator);
             this.parameterMap = Maps.newLinkedHashMap();
         }

@@ -820,7 +820,7 @@ public class QueryMergingTest {
 
         private class BasicQueryMergingTransformer extends AbstractQueryMergingTransformer {
 
-            protected BasicQueryMergingTransformer(VariableGenerator variableGenerator) {
+            BasicQueryMergingTransformer(VariableGenerator variableGenerator) {
                 super(variableGenerator, IQ_FACTORY, SUBSTITUTION_FACTORY, ATOM_FACTORY, TRANSFORMER_FACTORY);
             }
 

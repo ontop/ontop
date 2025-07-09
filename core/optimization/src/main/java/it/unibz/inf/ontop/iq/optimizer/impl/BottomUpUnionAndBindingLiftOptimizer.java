@@ -55,7 +55,7 @@ public class BottomUpUnionAndBindingLiftOptimizer extends AbstractIQOptimizer im
 
     private class Lifter extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
-        protected Lifter(VariableGenerator variableGenerator) {
+        Lifter(VariableGenerator variableGenerator) {
             super(BottomUpUnionAndBindingLiftOptimizer.this.iqFactory, variableGenerator);
         }
 

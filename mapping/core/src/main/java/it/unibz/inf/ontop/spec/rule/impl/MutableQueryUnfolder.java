@@ -52,9 +52,9 @@ public class MutableQueryUnfolder extends AbstractIntensionalQueryMerger {
     }
 
 
-    protected class MutableQueryUnfoldingTransformer extends AbstractQueryMergingTransformer {
+    private class MutableQueryUnfoldingTransformer extends AbstractQueryMergingTransformer {
 
-        protected MutableQueryUnfoldingTransformer(VariableGenerator variableGenerator) {
+        MutableQueryUnfoldingTransformer(VariableGenerator variableGenerator) {
             super(variableGenerator, MutableQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
         }
 

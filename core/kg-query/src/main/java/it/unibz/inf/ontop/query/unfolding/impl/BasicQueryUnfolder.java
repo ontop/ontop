@@ -59,9 +59,9 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
     }
 
 
-    protected class BasicQueryUnfoldingTransformer extends AbstractQueryMergingTransformer {
+    private class BasicQueryUnfoldingTransformer extends AbstractQueryMergingTransformer {
 
-        protected BasicQueryUnfoldingTransformer(VariableGenerator variableGenerator) {
+        BasicQueryUnfoldingTransformer(VariableGenerator variableGenerator) {
             super(variableGenerator, BasicQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
         }
 
