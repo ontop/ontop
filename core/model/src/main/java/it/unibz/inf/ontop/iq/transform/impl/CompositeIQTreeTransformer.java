@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 
 /**
  *
@@ -19,11 +20,11 @@ import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
  */
 public final class CompositeIQTreeTransformer implements IQTreeTransformer {
 
-    private final ImmutableList<IQTreeTransformer> postTransformers;
+    private final ImmutableList<IQVisitor<IQTree>> postTransformers;
     private final DefaultIQTreeVisitingTransformer childTransformer;
     private final IntermediateQueryFactory iqFactory;
 
-    public CompositeIQTreeTransformer(ImmutableList<IQTreeTransformer> postTransformers,
+    public CompositeIQTreeTransformer(ImmutableList<IQVisitor<IQTree>> postTransformers,
                                       IntermediateQueryFactory iqFactory) {
         this.postTransformers = postTransformers;
         this.iqFactory = iqFactory;
@@ -33,12 +34,10 @@ public final class CompositeIQTreeTransformer implements IQTreeTransformer {
     @Override
     public IQTree transform(IQTree initialTree) {
         //Non-final
-        IQTree currentTree = initialTree;
+        IQTree currentTree = initialTree.acceptVisitor(childTransformer);
 
-        currentTree = currentTree.acceptVisitor(childTransformer);
-
-        for (IQTreeTransformer transformer : postTransformers) {
-            currentTree = transformer.transform(currentTree);
+        for (IQVisitor<IQTree> visitor : postTransformers) {
+            currentTree = currentTree.acceptVisitor(visitor);
         }
 
         return currentTree;
