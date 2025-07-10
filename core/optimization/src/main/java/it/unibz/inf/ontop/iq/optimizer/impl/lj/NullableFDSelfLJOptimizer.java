@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
@@ -23,6 +24,7 @@ import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -44,22 +46,23 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 public class NullableFDSelfLJOptimizer extends AbstractIQOptimizer implements LeftJoinIQOptimizer {
 
     private final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
-    private final RightProvenanceNormalizer rightProvenanceNormalizer;
-    private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
-    private final CoreSingletons coreSingletons;
     private final DBConstant provenanceConstant;
+
+    private final IQTreeTools iqTreeTools;
+    private final SubstitutionFactory substitutionFactory;
+    private final TermFactory termFactory;
+    private final IntermediateQueryFactory iqFactory;
 
     @Inject
     protected NullableFDSelfLJOptimizer(RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
-                                        RightProvenanceNormalizer rightProvenanceNormalizer,
-                                        JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                         CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory(), NO_ACTION);
         this.requiredDataNodeExtractor = requiredDataNodeExtractor;
-        this.rightProvenanceNormalizer = rightProvenanceNormalizer;
-        this.variableNullabilityTools = variableNullabilityTools;
-        this.coreSingletons = coreSingletons;
         this.provenanceConstant = coreSingletons.getTermFactory().getProvenanceSpecialConstant();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.iqFactory = coreSingletons.getIQFactory();
     }
 
     @Override
@@ -69,7 +72,6 @@ public class NullableFDSelfLJOptimizer extends AbstractIQOptimizer implements Le
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
                 IQVisitor<IQTree> transformer = new CardinalityInsensitiveTransformer(
                         transformerOf(this),
-                        tree::getVariableNullability,
                         variableGenerator);
                 return tree.acceptVisitor(transformer);
             }
@@ -83,13 +85,8 @@ public class NullableFDSelfLJOptimizer extends AbstractIQOptimizer implements Le
         private final IQTreeTransformer lookForDistinctTransformer;
 
         protected CardinalityInsensitiveTransformer(IQTreeTransformer lookForDistinctTransformer,
-                                                    Supplier<VariableNullability> variableNullabilitySupplier,
                                                     VariableGenerator variableGenerator) {
-            super(variableNullabilitySupplier,
-                    variableGenerator,
-                    NullableFDSelfLJOptimizer.this.rightProvenanceNormalizer,
-                    NullableFDSelfLJOptimizer.this.variableNullabilityTools,
-                    NullableFDSelfLJOptimizer.this.coreSingletons);
+            super(NullableFDSelfLJOptimizer.this.iqFactory, variableGenerator);
             this.lookForDistinctTransformer = lookForDistinctTransformer;
         }
 
@@ -290,8 +287,7 @@ public class NullableFDSelfLJOptimizer extends AbstractIQOptimizer implements Le
         @Override
         protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition,
                                                   ImmutableSet<Variable> leftVariables) {
-            var newTransformer = new CardinalityInsensitiveTransformer(lookForDistinctTransformer,
-                    rightChild::getVariableNullability, variableGenerator);
+            var newTransformer = new CardinalityInsensitiveTransformer(lookForDistinctTransformer, variableGenerator);
             return rightChild.acceptVisitor(newTransformer);
         }
     }

@@ -1,52 +1,27 @@
 package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
-import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 public abstract class AbstractLJTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-    private final Supplier<VariableNullability> variableNullabilitySupplier;
-    // LAZY
-    private VariableNullability variableNullability;
-
     protected final VariableGenerator variableGenerator;
-    protected final RightProvenanceNormalizer rightProvenanceNormalizer;
-    protected final TermFactory termFactory;
-    protected final SubstitutionFactory substitutionFactory;
-    protected final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
-    protected final IQTreeTools iqTreeTools;
 
-    protected AbstractLJTransformer(Supplier<VariableNullability> variableNullabilitySupplier,
-                                    VariableGenerator variableGenerator,
-                                    RightProvenanceNormalizer rightProvenanceNormalizer,
-                                    JoinOrFilterVariableNullabilityTools variableNullabilityTools,
-                                    CoreSingletons coreSingletons) {
+    protected AbstractLJTransformer(IntermediateQueryFactory iqFactory, VariableGenerator variableGenerator) {
 
-        super(coreSingletons.getIQFactory(), t -> t.normalizeForOptimization(variableGenerator));
+        super(iqFactory, t -> t.normalizeForOptimization(variableGenerator));
 
-        this.variableNullabilitySupplier = variableNullabilitySupplier;
         this.variableGenerator = variableGenerator;
-        this.rightProvenanceNormalizer = rightProvenanceNormalizer;
-        this.variableNullabilityTools = variableNullabilityTools;
-
-        this.termFactory = coreSingletons.getTermFactory();
-        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
-        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
@@ -77,13 +52,6 @@ public abstract class AbstractLJTransformer extends DefaultRecursiveIQTreeVisiti
      */
     protected abstract Optional<IQTree> furtherTransformLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild);
 
-    protected synchronized VariableNullability getInheritedVariableNullability() {
-        if (variableNullability == null)
-            variableNullability = variableNullabilitySupplier.get();
-
-        return variableNullability;
-    }
-
 
     @Override
     public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
@@ -113,51 +81,4 @@ public abstract class AbstractLJTransformer extends DefaultRecursiveIQTreeVisiti
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     protected abstract IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition,
                                                        ImmutableSet<Variable> leftVariables);
-
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    protected VariableNullability computeRightChildVariableNullability(IQTree rightChild, Optional<ImmutableExpression> ljCondition) {
-        VariableNullability bottomUpNullability = rightChild.getVariableNullability();
-
-        VariableNullability nullabilityWithLJCondition = getVariableNullability(ljCondition, bottomUpNullability, rightChild.getVariables());
-
-        ImmutableSet<Variable> nullableVariablesAfterLJCondition = nullabilityWithLJCondition.getNullableVariables();
-
-        if (nullableVariablesAfterLJCondition.isEmpty())
-            return nullabilityWithLJCondition;
-
-        VariableNullability inheritedNullability = getInheritedVariableNullability();
-
-        // Non-nullability information coming from the ancestors
-        Optional<ImmutableExpression> additionalFilter = termFactory.getConjunction(nullableVariablesAfterLJCondition.stream()
-                .filter(v -> !inheritedNullability.isPossiblyNullable(v))
-                .map(termFactory::getDBIsNotNull));
-
-        return getVariableNullability(additionalFilter, nullabilityWithLJCondition, rightChild.getVariables());
-    }
-
-    protected Supplier<VariableNullability> computeChildVariableNullabilityFromConstructionParent(IQTree tree,
-                                                                                                ConstructionNode rootNode, IQTree child) {
-        var childVariables = child.getVariables();
-        var inheritedVariableNullability = getInheritedVariableNullability();
-        var bottomUpVariableNullability = tree.getVariableNullability();
-
-        var isNotNullConditions = termFactory.getConjunction(childVariables.stream()
-                .filter(v -> !rootNode.getSubstitution().isDefining(v))
-                .filter(bottomUpVariableNullability::isPossiblyNullable)
-                .filter(v -> !inheritedVariableNullability.isPossiblyNullable(v))
-                .map(termFactory::getDBIsNotNull));
-
-        return () -> getVariableNullability(isNotNullConditions, child.getVariableNullability(), childVariables);
-    }
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private VariableNullability getVariableNullability(Optional<ImmutableExpression> condition, VariableNullability variableNullability, ImmutableSet<Variable> variables) {
-        return condition
-                .map(c -> variableNullabilityTools.updateWithFilter(
-                        c,
-                        variableNullability.getNullableGroups(),
-                        variables))
-                .orElse(variableNullability);
-    }
 }

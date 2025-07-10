@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
@@ -28,9 +29,11 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
-public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransformer {
+public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransformerWithVariableNullability {
 
     protected final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
+    protected final IQTreeTools iqTreeTools;
+    protected final SubstitutionFactory substitutionFactory;
 
     protected AbstractJoinTransferLJTransformer(Supplier<VariableNullability> variableNullabilitySupplier,
                                                 VariableGenerator variableGenerator,
@@ -41,6 +44,8 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
         super(variableNullabilitySupplier, variableGenerator, rightProvenanceNormalizer, variableNullabilityTools,
                 coreSingletons);
         this.requiredDataNodeExtractor = requiredDataNodeExtractor;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
     }
 
     /**

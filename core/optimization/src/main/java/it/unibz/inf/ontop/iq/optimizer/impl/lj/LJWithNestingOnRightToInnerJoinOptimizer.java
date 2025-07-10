@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -21,6 +22,7 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -45,6 +47,8 @@ public class LJWithNestingOnRightToInnerJoinOptimizer extends AbstractIQOptimize
     private final CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer;
     private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
     private final LeftJoinTools leftJoinTools;
+    private final IQTreeTools iqTreeTools;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
     protected LJWithNestingOnRightToInnerJoinOptimizer(RightProvenanceNormalizer rightProvenanceNormalizer,
@@ -58,6 +62,8 @@ public class LJWithNestingOnRightToInnerJoinOptimizer extends AbstractIQOptimize
         this.otherLJOptimizer = otherLJOptimizer;
         this.variableNullabilityTools = variableNullabilityTools;
         this.leftJoinTools = leftJoinTools;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
     }
 
     @Override
@@ -68,7 +74,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer extends AbstractIQOptimize
 
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    protected class Transformer extends AbstractLJTransformer {
+    protected class Transformer extends AbstractLJTransformerWithVariableNullability {
 
         protected Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
                               VariableGenerator variableGenerator) {
