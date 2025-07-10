@@ -10,9 +10,7 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.FilterLifter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.stream.Stream;
@@ -53,13 +51,14 @@ public class FilterLifterImpl extends AbstractIQOptimizer implements FilterLifte
                 return iqFactory.createUnaryIQTree(cn, transformedChild);
             }
 
-            UnaryIQTreeDecomposition<FilterNode> decomposition = UnaryIQTreeDecomposition.of(transformedChild, FilterNode.class);
+            // TODO: this code is unreachable - check the intention
+            var filter = UnaryIQTreeDecomposition.of(transformedChild, FilterNode.class);
             return iqFactory.createUnaryIQTree(
-                    decomposition.getOptionalNode()
+                    filter.getOptionalNode()
                             .map(f -> Sets.union(f.getFilterCondition().getVariables(), cn.getVariables()).immutableCopy())
                             .map(v -> iqFactory.createConstructionNode(v, cn.getSubstitution()))
                             .orElse(cn),
-                    decomposition.getTail());
+                    filter.getTail());
         }
 
         @Override
@@ -79,7 +78,7 @@ public class FilterLifterImpl extends AbstractIQOptimizer implements FilterLifte
         public IQTree transformFlatten(UnaryIQTree tree, FlattenNode fn, IQTree child) {
             IQTree transformedChild = transformChild(child);
             var filter = UnaryIQTreeDecomposition.of(transformedChild, FilterNode.class);
-
+            // TODO: check why this is sound
             return iqTreeTools.unaryIQTreeBuilder()
                     .append(filter.getOptionalNode())
                     .append(fn)
@@ -91,6 +90,7 @@ public class FilterLifterImpl extends AbstractIQOptimizer implements FilterLifte
             ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
             var filters = UnaryIQTreeDecomposition.of(transformedChildren, FilterNode.class);
 
+            // TODO: check why this is sound
             var optionalFilter = iqTreeTools.createOptionalFilterNode(termFactory.getConjunction(
                     UnaryIQTreeDecomposition.getNodeStream(filters)
                             .map(FilterNode::getFilterCondition)));

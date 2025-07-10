@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -41,6 +42,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
     private final VariableGenerator variableGenerator;
     private final SubstitutionFactory substitutionFactory;
     private final IQTreeTools iqTreeTools;
+    private final ImmutableList<IQVisitor<IQTree>> visitors;
 
     @AssistedInject
     public ExplicitEqualityTransformerImpl(@Assisted VariableGenerator variableGenerator,
@@ -55,17 +57,20 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         this.variableGenerator = variableGenerator;
         this.substitutionFactory = substitutionFactory;
         this.iqTreeTools = iqTreeTools;
+        this.visitors = ImmutableList.of(
+                new LocalExplicitEqualityEnforcer(),
+                new ConstructionNodeLifter(),
+                new FilterChildNormalizer());
     }
 
     @Override
     public IQTree transform(IQTree tree) {
-        var transformer0 = new LocalExplicitEqualityEnforcer();
-        IQTree newTree0 = tree.acceptVisitor(transformer0);
-        var transformer1 = new ConstructionNodeLifter();
-        IQTree newTree1 = newTree0.acceptVisitor(transformer1);
-        var transformer2 = new FilterChildNormalizer();
-        IQTree newTree2 = newTree1.acceptVisitor(transformer2);
-        return newTree2;
+        // non-final
+        IQTree current = tree;
+        for (IQVisitor<IQTree> visitor : visitors) {
+            current = current.acceptVisitor(visitor);
+        }
+        return current;
     }
 
 
@@ -217,10 +222,10 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
 
     /**
-     * Affects each filter or (left) join n in the tree.
+     * Affects each filter, left join and inner join n in the tree.
      * For each child of n, deletes its root if it is a filter node.
      * Then:
-     * - if n is a join or filter: merge the boolean expressions
+     * - if n is an inner join or filter: merge the boolean expressions
      * - if n is a left join: merge boolean expressions coming from the right, and lift the ones coming from the left.
      * This lift is only performed for optimization purposes: may save a subquery during SQL generation.
      *
@@ -309,7 +314,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
     /**
      * - Default behavior: for each child, deletes its root if it is a substitution-free construction node
-     *     (i.e. a simple projection), and lift the projection if needed
+     *   (i.e., a simple projection), and lift the projection if needed
      * - Distinct or slice nodes: does not apply
      */
     class ConstructionNodeLifter extends DefaultRecursiveIQTreeVisitingTransformer {
