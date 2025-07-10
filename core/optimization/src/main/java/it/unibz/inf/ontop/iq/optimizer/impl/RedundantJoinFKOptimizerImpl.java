@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
@@ -46,9 +47,9 @@ public class RedundantJoinFKOptimizerImpl extends AbstractIQOptimizer implements
     }
 
 
-    protected class RedundantJoinFKTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    private class RedundantJoinFKTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        protected RedundantJoinFKTransformer() {
+        RedundantJoinFKTransformer() {
             super(RedundantJoinFKOptimizerImpl.this.iqFactory);
         }
 
@@ -72,18 +73,14 @@ public class RedundantJoinFKOptimizerImpl extends AbstractIQOptimizer implements
             // The returned tree may not be normalized (to be done at the IQOptimizer level)
             return iqTreeTools.createOptionalInnerJoinTree(
                             rootNode.getOptionalFilterCondition(),
-                            Stream.concat(Stream.of(optimisedExtensionalChildren.get()), otherChildren.stream())
+                            Stream.concat(optimisedExtensionalChildren.stream(), otherChildren.stream())
                                     .collect(ImmutableCollectors.toList()))
                     .orElseThrow(() -> new IllegalStateException("The optimization should not eliminate all the children"));
         }
 
-        protected Optional<IQTree> optimizeExtensionalChildren(ImmutableList<ExtensionalDataNode> extensionalChildren) {
-            ImmutableMap<RelationDefinition, Collection<ExtensionalDataNode>> dataNodeMap = extensionalChildren.stream()
-                    .collect(ImmutableCollectors.toMultimap(
-                            ExtensionalDataNode::getRelationDefinition,
-                            c -> c)).asMap();
+        private Optional<IQTree> optimizeExtensionalChildren(ImmutableList<ExtensionalDataNode> extensionalChildren) {
 
-            ImmutableSet<ExtensionalDataNode> redundantNodes = extractRedundantNodes(dataNodeMap);
+            ImmutableSet<ExtensionalDataNode> redundantNodes = extractRedundantNodes(extensionalChildren);
 
             if (redundantNodes.isEmpty())
                 return Optional.empty();
@@ -104,16 +101,19 @@ public class RedundantJoinFKOptimizerImpl extends AbstractIQOptimizer implements
         /**
          * Limitations: assumes that FK transitive closure has already been done
          */
-        private ImmutableSet<ExtensionalDataNode> extractRedundantNodes(
-                ImmutableMap<RelationDefinition, Collection<ExtensionalDataNode>> dataNodeMap) {
+        private ImmutableSet<ExtensionalDataNode> extractRedundantNodes(ImmutableList<ExtensionalDataNode> extensionalChildren) {
+
+            ImmutableMultimap<RelationDefinition, ExtensionalDataNode> dataNodeMultimap = extensionalChildren.stream()
+                    .collect(ImmutableCollectors.toMultimap(
+                            ExtensionalDataNode::getRelationDefinition,
+                            c -> c));
 
             // Mutable . Used for avoiding FK loops
             Set<ExtensionalDataNode> redundantNodes = new HashSet<>();
 
-            for (Map.Entry<RelationDefinition, Collection<ExtensionalDataNode>> entry: dataNodeMap.entrySet()) {
+            for (Map.Entry<RelationDefinition, Collection<ExtensionalDataNode>> entry: dataNodeMultimap.asMap().entrySet()) {
                 redundantNodes.addAll(entry.getKey().getForeignKeys().stream()
-                        .flatMap(fk -> Optional.ofNullable(dataNodeMap.get(fk.getReferencedRelation())).stream()
-                                .flatMap(Collection::stream)
+                        .flatMap(fk -> dataNodeMultimap.get(fk.getReferencedRelation()).stream()
                                 .filter(targetNode -> isJustHavingFKArguments(fk, targetNode))
                                 .filter(targetNode -> entry.getValue().stream()
                                                 .anyMatch(s -> (!redundantNodes.contains(s))
