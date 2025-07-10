@@ -70,6 +70,7 @@ public class DummyRewriter implements QueryRewriter {
         this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
+
     @Override
     public void setTBox(ClassifiedTBox reasoner) {
 
@@ -97,12 +98,12 @@ public class DummyRewriter implements QueryRewriter {
      */
     @Override
 	public IQ rewrite(IQ query) throws EmptyQueryException {
-        return iqFactory.createIQ(query.getProjectionAtom(), query.getTree().acceptVisitor(new BasicGraphPatternTransformer(iqFactory, iqTreeTools) {
+        return iqFactory.createIQ(query.getProjectionAtom(),  new BasicGraphPatternTransformer(iqFactory, iqTreeTools) {
             @Override
             protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> bgp) {
                 return removeRedundantAtoms(bgp);
             }
-        }));
+        }.transform(query.getTree()));
 	}
 
 	private ImmutableList<IQTree> removeRedundantAtoms(ImmutableList<IntensionalDataNode> bgp) {

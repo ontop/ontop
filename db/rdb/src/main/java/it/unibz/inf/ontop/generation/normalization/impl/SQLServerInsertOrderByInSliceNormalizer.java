@@ -44,9 +44,7 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
         @Override
         public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
             if (IQTreeTools.contains(child, OrderByNode.class)) {
-                return iqFactory.createUnaryIQTree(
-                        sliceNode,
-                        transformChild(child));
+                return super.transformSlice(tree, sliceNode, child);
             }
             var topConstruct = iqFactory.createConstructionNode(tree.getVariables());
             var sortVariable = variableGenerator.generateNewVariable("slice_sort_column");

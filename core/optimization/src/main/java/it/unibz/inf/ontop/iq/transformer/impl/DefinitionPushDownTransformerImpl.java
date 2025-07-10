@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
 public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTransformer {
@@ -140,20 +141,22 @@ public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTran
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             ImmutableSet<Variable> requestVariables = request.getDefinitionAndConditionVariables();
 
-            return IntStream.range(0, children.size())
+            OptionalInt selectedChild = IntStream.range(0, children.size())
                     .filter(i -> children.get(i).getVariables().containsAll(requestVariables))
-                    .boxed()
-                    .findAny()
-                    .map(i -> IntStream.range(0, children.size())
+                    .findAny();
+
+            if (selectedChild.isEmpty())
+                return blockDefinition(tree);
+
+            int i = selectedChild.getAsInt();
+            ImmutableList<IQTree> newChildren = IntStream.range(0, children.size())
                             .mapToObj(j -> i == j
                                     // Pushes down the definition to selected child
                                     ? transformChild(children.get(j))
                                     : children.get(j))
-                            .collect(ImmutableCollectors.toList()))
-                    .<IQTree>map(newChildren -> iqFactory.createNaryIQTree(rootNode, newChildren))
+                            .collect(ImmutableCollectors.toList());
 
-                    // Otherwise, blocks the definition
-                    .orElseGet(() -> blockDefinition(tree));
+            return iqFactory.createNaryIQTree(rootNode, newChildren);
         }
 
         @Override
@@ -193,7 +196,7 @@ public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTran
             return blockDefinition(leaf);
         }
 
-        protected IQTree blockDefinition(IQTree tree) {
+        private IQTree blockDefinition(IQTree tree) {
             Variable newVariable = request.getNewVariable();
 
             ConstructionNode constructionNode = iqTreeTools.createExtendingConstructionNode(

@@ -71,9 +71,9 @@ public class MergeLJOptimizer extends AbstractIQOptimizer implements LeftJoinIQO
         return tree.acceptVisitor(new Transformer(variableGenerator));
     }
 
-    protected class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
-        protected Transformer(VariableGenerator variableGenerator) {
+        Transformer(VariableGenerator variableGenerator) {
             super(MergeLJOptimizer.this.iqFactory, variableGenerator);
         }
 

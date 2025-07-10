@@ -383,11 +383,11 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
     }
 
 
-    protected class ReplaceNodeByTrueTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    private class ReplaceNodeByTrueTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
         private final ImmutableSet<ExtensionalDataNode> dataNodesToReplace;
 
-        protected ReplaceNodeByTrueTransformer(ImmutableSet<ExtensionalDataNode> dataNodesToReplace) {
+        ReplaceNodeByTrueTransformer(ImmutableSet<ExtensionalDataNode> dataNodesToReplace) {
             super(AbstractJoinTransferLJTransformer.this.iqFactory);
             this.dataNodesToReplace = dataNodesToReplace;
         }

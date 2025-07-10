@@ -60,32 +60,26 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
     /**
      * Assumes that the tree is normalized
      */
-    protected class AggregationUnionLifterTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
+    private class AggregationUnionLifterTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
-        protected AggregationUnionLifterTransformer(VariableGenerator variableGenerator) {
+        AggregationUnionLifterTransformer(VariableGenerator variableGenerator) {
             super(AggregationSplitterImpl.this.iqFactory, variableGenerator);
         }
 
+        // uses == for withTransformedChild
         @Override
         public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
             IQTree liftedChild = transformChild(child);
 
-            return tryToLift(rootNode, liftedChild)
-                    // uses ==
-                    .orElseGet(() -> withTransformedChild(tree, liftedChild));
-        }
-
-        private Optional<IQTree> tryToLift(AggregationNode rootNode, IQTree child) {
-
             ImmutableSet<Variable> groupingVariables = rootNode.getGroupingVariables();
 
-            var construction = UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
+            var construction = UnaryIQTreeDecomposition.of(liftedChild, ConstructionNode.class);
             var distinct = UnaryIQTreeDecomposition.of(construction, DistinctNode.class);
             var subConstruction = UnaryIQTreeDecomposition.of(distinct, ConstructionNode.class);
             var union = NaryIQTreeTools.UnionDecomposition.of(subConstruction);
             if (!union.isPresent())
                 // TODO: log a message, as we are in an unexpected situation
-                return Optional.empty();
+                return withTransformedChild(tree, liftedChild);
 
             /*
              * After normalization, grouping variable definitions are expected to be lifted above
@@ -94,7 +88,7 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
              * For the sake of simplicity, we exclude variables defined by the child construction node.
              */
             ImmutableSet<Variable> groupingVariablesWithDifferentDefinitions = groupingVariables.stream()
-                    .filter(child::isConstructed)
+                    .filter(liftedChild::isConstructed)
                     .filter(v -> construction.getOptionalNode()
                             .filter(n -> n.getSubstitution().isDefining(v))
                             .isEmpty())
@@ -104,7 +98,7 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
                     .collect(ImmutableCollectors.toSet());
 
             if (groupingVariablesWithDifferentDefinitions.isEmpty())
-                return Optional.empty();
+                return withTransformedChild(tree, liftedChild);
 
             ImmutableMultiset<IQTree> unionChildren = ImmutableMultiset.copyOf(union.getChildren());
             VariableNullability variableNullability = union.getTree().getVariableNullability();
@@ -119,10 +113,9 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
                     });
 
             if (groups.size() <= 1)
-                return Optional.empty();
+                return withTransformedChild(tree, liftedChild);
 
-            return Optional.of(
-                    liftUnion(
+            return liftUnion(
                             groups,
                             UnaryOperatorSequence.of()
                                     .append(rootNode)
@@ -130,7 +123,7 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
                                     .append(distinct.getOptionalNode())
                                     .append(subConstruction.getOptionalNode()),
                             rootNode,
-                            unionChildren));
+                            unionChildren);
         }
 
         private Stream<ImmutableSet<IQTree>> tryToSplit(ImmutableSet<IQTree> initialGroup, Variable groupingVariable,
@@ -202,7 +195,7 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
                     .map(ChildGroup::getTrees);
         }
 
-        protected IQTree liftUnion(ImmutableList<ImmutableSet<IQTree>> groups, UnaryOperatorSequence<? extends UnaryOperatorNode> nodes,
+        private IQTree liftUnion(ImmutableList<ImmutableSet<IQTree>> groups, UnaryOperatorSequence<? extends UnaryOperatorNode> nodes,
                                    AggregationNode initialAggregationNode, ImmutableMultiset<IQTree> unionChildren) {
             Set<Variable> nonGroupingVariables = Sets.difference(initialAggregationNode.getChildVariables(), initialAggregationNode.getGroupingVariables());
 

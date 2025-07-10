@@ -95,8 +95,7 @@ public class BottomUpUnionAndBindingLiftOptimizer extends AbstractIQOptimizer im
         Stream<Variable> coOccurringVariables = NaryIQTreeTools.coOccurringVariablesStream(newChildren);
 
         return Stream.concat(
-                    optionalFilterCondition.stream()
-                        .flatMap(ImmutableTerm::getVariableStream),
+                    optionalFilterCondition.stream().flatMap(ImmutableTerm::getVariableStream),
                     coOccurringVariables)
                 .distinct()
                 .filter(tree::isConstructed);

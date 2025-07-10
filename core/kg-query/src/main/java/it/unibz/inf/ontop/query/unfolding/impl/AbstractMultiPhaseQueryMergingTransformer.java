@@ -55,6 +55,7 @@ public abstract class AbstractMultiPhaseQueryMergingTransformer extends Abstract
                                         .mapToObj(i -> variableGenerator.generateNewVariable())
                                         .collect(ImmutableCollectors.toList())),
                         termFactory.getRDFTermTypeConstant(objectConstant.getType())));
+
         return strictEquality.evaluate2VL(termFactory.createDummyVariableNullability(strictEquality))
                 .getValue()
                 .filter(v -> v.equals(ImmutableExpression.Evaluation.BooleanValue.FALSE))

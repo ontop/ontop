@@ -43,7 +43,7 @@ public class SelfJoinUCIQOptimizerImpl extends AbstractIQOptimizer implements Se
 
     private class SelfJoinUCTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
-        protected SelfJoinUCTransformer(VariableGenerator variableGenerator) {
+        SelfJoinUCTransformer(VariableGenerator variableGenerator) {
             super(SelfJoinUCIQOptimizerImpl.this.iqFactory,  variableGenerator);
         }
 

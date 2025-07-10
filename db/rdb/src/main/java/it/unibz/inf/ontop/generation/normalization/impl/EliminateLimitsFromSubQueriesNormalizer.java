@@ -46,9 +46,6 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
         }
     }
 
-    /**
-     * Calling super.transform[...] continues in this transformer, normal transform calls are redirected to the parent transformer.
-     */
     private class SubLimitTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
         private final long currentBounds;

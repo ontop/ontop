@@ -35,11 +35,11 @@ public class LensUnfolderImpl extends AbstractIQOptimizer implements LensUnfolde
         return tree.acceptVisitor(transformer);
     }
 
-    protected class MaxLevelLensUnfoldingTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
+    private class MaxLevelLensUnfoldingTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
-        protected final int maxLevel;
+        private final int maxLevel;
 
-        protected MaxLevelLensUnfoldingTransformer(int maxLevel, VariableGenerator variableGenerator) {
+        MaxLevelLensUnfoldingTransformer(int maxLevel, VariableGenerator variableGenerator) {
             super(LensUnfolderImpl.this.iqFactory,  variableGenerator);
             this.maxLevel = maxLevel;
         }

@@ -48,6 +48,7 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                         construction.getNode().getSubstitution().getRangeVariables(), cqContainmentCheck)));
     }
 
+    // TODO: compare with RedundantJoinFKTransformer
     // used to use == for comparing the transformed children
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
         private final ImmutableSet<Variable> constructionTreeVariables;

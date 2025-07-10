@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
@@ -65,27 +66,20 @@ public abstract class AbstractQueryMergingTransformer extends DefaultRecursiveIQ
      * Does NOT look for intensional data nodes inside the definitions
      */
     private IQTree replaceIntensionalData(IntensionalDataNode dataNode, IQ definition) {
+        if (!definition.getProjectionAtom().getPredicate().equals(dataNode.getProjectionAtom().getPredicate()))
+            throw new IllegalStateException("Incompatible predicates");
+
         InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
                 variableGenerator, definition.getTree().getKnownVariables());
 
-        IQ renamedIQ = transformerFactory.createRenamer(renamingSubstitution).transform(definition);
+        IQ renamedDefinition = transformerFactory.createRenamer(renamingSubstitution).transform(definition);
 
-        Substitution<? extends VariableOrGroundTerm> descendingSubstitution = extractSubstitution(
-                atomFactory.getDistinctVariableOnlyDataAtom(renamedIQ.getProjectionAtom().getPredicate(),
-                        substitutionFactory.apply(renamingSubstitution, renamedIQ.getProjectionAtom().getArguments())),
-                dataNode.getProjectionAtom());
+        Substitution<? extends VariableOrGroundTerm> descendingSubstitution = substitutionFactory.getSubstitution(
+                renamedDefinition.getProjectionAtom().getArguments(),
+                dataNode.getProjectionAtom().getArguments());
 
-        return renamedIQ.getTree()
+        return renamedDefinition.getTree()
                 .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator)
                 .normalizeForOptimization(variableGenerator);
-    }
-
-    private Substitution<? extends VariableOrGroundTerm> extractSubstitution(DistinctVariableOnlyDataAtom sourceAtom,
-                                                                             DataAtom<AtomPredicate> targetAtom) {
-        if (!sourceAtom.getPredicate().equals(targetAtom.getPredicate())) {
-            throw new IllegalStateException("Incompatible predicates");
-        }
-
-        return substitutionFactory.getSubstitution(sourceAtom.getArguments(), targetAtom.getArguments());
     }
 }

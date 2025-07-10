@@ -61,8 +61,11 @@ public class PreventDistinctOptimizerImpl extends AbstractIQOptimizer implements
                                 split.getPushedVariables()).immutableCopy(),
                         descendantTree))
                     throw new MinorOntopInternalBugException("Unable to push down substitution terms that are not supported with DISTINCT without a functional dependency.");
-                if (!validatePushedTerms(split.getPushedTerms()))
+
+                if (!split.getPushedTerms().stream()
+                        .allMatch(this::isDeterministic))
                     throw new MinorOntopInternalBugException("Unable to push down substitution terms that are not supported with DISTINCT if the functional terms are not deterministic.");
+
                 return newTree;
             }
             return super.transformConstruction(tree, rootNode, child);
@@ -74,23 +77,18 @@ public class PreventDistinctOptimizerImpl extends AbstractIQOptimizer implements
                     .allMatch(v -> functionalDependencies.getDeterminantsOf(v).stream()
                                     .anyMatch(determinants ->
                                             keptVariables.containsAll(determinants)
-                                            && Sets.intersection(determinants, pushedVariables).isEmpty()
-                                    ));
-        }
-
-        private boolean validatePushedTerms(ImmutableSet<ImmutableTerm> pushedTerms) {
-            return pushedTerms.stream()
-                    .allMatch(this::isDeterministic);
+                                            && Sets.intersection(determinants, pushedVariables).isEmpty()));
         }
 
         private boolean isDeterministic(ImmutableTerm term) {
-            if(!(term instanceof ImmutableFunctionalTerm))
-                return true;
-            var f = (ImmutableFunctionalTerm) term;
-            if(!f.getFunctionSymbol().isDeterministic())
-                return false;
-            return f.getTerms().stream()
-                            .allMatch(this::isDeterministic);
+            if (term instanceof ImmutableFunctionalTerm) {
+                var f = (ImmutableFunctionalTerm) term;
+                if (!f.getFunctionSymbol().isDeterministic())
+                    return false;
+                return f.getTerms().stream()
+                        .allMatch(this::isDeterministic);
+            }
+            return true;
         }
     }
 }

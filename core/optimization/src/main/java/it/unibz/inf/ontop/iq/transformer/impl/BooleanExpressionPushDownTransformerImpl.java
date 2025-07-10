@@ -147,7 +147,7 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
 
         private final ImmutableExpression expressionToPushDown;
 
-        private BooleanExpressionPusher(ImmutableExpression expressionToPushDown) {
+        BooleanExpressionPusher(ImmutableExpression expressionToPushDown) {
             this.expressionToPushDown = expressionToPushDown;
         }
 
