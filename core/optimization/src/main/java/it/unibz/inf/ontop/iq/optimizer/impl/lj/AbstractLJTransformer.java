@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
-import it.unibz.inf.ontop.iq.visit.impl.AbstractCompositeIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public abstract class AbstractLJTransformer extends AbstractCompositeIQTreeVisitingTransformer {
+public abstract class AbstractLJTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
     private final Supplier<VariableNullability> variableNullabilitySupplier;
     // LAZY
@@ -75,8 +75,7 @@ public abstract class AbstractLJTransformer extends AbstractCompositeIQTreeVisit
     /**
      * Returns empty if no optimization has been applied
      */
-    protected abstract Optional<IQTree> furtherTransformLeftJoin(LeftJoinNode rootNode, IQTree leftChild,
-                                                        IQTree rightChild);
+    protected abstract Optional<IQTree> furtherTransformLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild);
 
     protected synchronized VariableNullability getInheritedVariableNullability() {
         if (variableNullability == null)
@@ -85,29 +84,6 @@ public abstract class AbstractLJTransformer extends AbstractCompositeIQTreeVisit
         return variableNullability;
     }
 
-    @Override
-    public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-        // Recursive
-        return transformUnaryNode(tree, rootNode, child, this::transformChild);
-    }
-
-    @Override
-    public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-        // Recursive
-        return transformUnaryNode(tree, rootNode, child, this::transformChild);
-    }
-
-    @Override
-    public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
-        // Recursive
-        return transformUnaryNode(tree, sliceNode, child, this::transformChild);
-    }
-
-    @Override
-    public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-        // Recursive
-        return transformUnaryNode(tree, rootNode, child, this::transformChild);
-    }
 
     @Override
     public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
@@ -122,12 +98,6 @@ public abstract class AbstractLJTransformer extends AbstractCompositeIQTreeVisit
     @Override
     public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
         return transformUnaryNode(tree, rootNode, child, this::transformBySearchingFromScratch);
-    }
-
-    @Override
-    public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-        // Recursive
-        return transformNaryCommutativeNode(tree, rootNode, children, this::transformChild);
     }
 
     @Override
