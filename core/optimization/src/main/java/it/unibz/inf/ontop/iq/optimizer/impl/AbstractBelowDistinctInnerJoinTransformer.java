@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.TrueNode;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -26,14 +27,14 @@ public abstract class AbstractBelowDistinctInnerJoinTransformer extends Abstract
     protected final IQTreeTools iqTreeTools;
 
     protected AbstractBelowDistinctInnerJoinTransformer(IQTreeTransformer lookForDistinctTransformer, CoreSingletons coreSingletons) {
-        super(lookForDistinctTransformer, coreSingletons);
+        super(lookForDistinctTransformer, coreSingletons.getIQFactory());
         this.termFactory = coreSingletons.getTermFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     @Override
-    protected Optional<IQTree> furtherSimplifyInnerJoinChildren(Optional<ImmutableExpression> optionalFilterCondition,
-                                                                ImmutableList<IQTree> partiallySimplifiedChildren) {
+    protected Optional<IQTree> furtherTransformInnerJoin(InnerJoinNode rootNode,
+                                                         ImmutableList<IQTree> partiallySimplifiedChildren) {
         //Mutable
         final List<IQTree> currentChildren = Lists.newArrayList(partiallySimplifiedChildren);
         IntStream.range(0, partiallySimplifiedChildren.size())
@@ -52,7 +53,7 @@ public abstract class AbstractBelowDistinctInnerJoinTransformer extends Abstract
                 .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toSet());
 
-        Optional<ImmutableExpression> expression = termFactory.getConjunction(optionalFilterCondition,
+        Optional<ImmutableExpression> expression = termFactory.getConjunction(rootNode.getOptionalFilterCondition(),
                 variablesToFilterNulls.stream().map(termFactory::getDBIsNotNull));
 
         // NB: will be normalized later on

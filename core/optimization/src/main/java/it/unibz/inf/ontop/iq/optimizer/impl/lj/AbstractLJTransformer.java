@@ -36,7 +36,9 @@ public abstract class AbstractLJTransformer extends AbstractCompositeIQTreeVisit
                                     RightProvenanceNormalizer rightProvenanceNormalizer,
                                     JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                     CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory());
+
+        super(coreSingletons.getIQFactory(), t -> t.normalizeForOptimization(variableGenerator));
+
         this.variableNullabilitySupplier = variableNullabilitySupplier;
         this.variableGenerator = variableGenerator;
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
@@ -55,12 +57,10 @@ public abstract class AbstractLJTransformer extends AbstractCompositeIQTreeVisit
 
         if (preventRecursiveOptimizationOnRightChild()
                 && !transformedRightChild.equals(rightChild))
-            return postTransformation(iqFactory.createBinaryNonCommutativeIQTree(rootNode, transformedLeftChild, transformedRightChild));
+            return postTransformer.apply(iqFactory.createBinaryNonCommutativeIQTree(rootNode, transformedLeftChild, transformedRightChild));
 
         return furtherTransformLeftJoin(rootNode, transformedLeftChild, transformedRightChild)
-                .orElseGet(() -> transformedLeftChild.equals(leftChild) && transformedRightChild.equals(rightChild)
-                                ? tree
-                                : postTransformation(iqFactory.createBinaryNonCommutativeIQTree(rootNode, transformedLeftChild, transformedRightChild)));
+                .orElseGet(() -> withTransformedChildren(tree, transformedLeftChild, transformedRightChild));
     }
 
     /**
@@ -83,11 +83,6 @@ public abstract class AbstractLJTransformer extends AbstractCompositeIQTreeVisit
             variableNullability = variableNullabilitySupplier.get();
 
         return variableNullability;
-    }
-
-    @Override
-    protected IQTree postTransformation(IQTree tree) {
-        return tree.normalizeForOptimization(variableGenerator);
     }
 
     @Override

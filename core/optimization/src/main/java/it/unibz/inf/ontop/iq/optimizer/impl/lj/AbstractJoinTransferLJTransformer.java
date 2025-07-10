@@ -399,6 +399,4 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
                     : dataNode;
         }
     }
-
-
 }

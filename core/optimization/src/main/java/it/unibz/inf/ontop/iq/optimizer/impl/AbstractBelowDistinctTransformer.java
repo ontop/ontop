@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
@@ -10,7 +11,6 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.AbstractCompositeIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
 
 import java.util.Optional;
 
@@ -21,30 +21,19 @@ import java.util.Optional;
 public abstract class AbstractBelowDistinctTransformer extends AbstractCompositeIQTreeVisitingTransformer {
 
     private final IQTreeTransformer lookForDistinctOrLimit1Transformer;
-    protected final CoreSingletons coreSingletons;
 
     protected AbstractBelowDistinctTransformer(IQTreeTransformer lookForDistinctOrLimit1Transformer,
-                                               CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory());
-        this.coreSingletons = coreSingletons;
+                                               IntermediateQueryFactory iqFactory) {
+        super(iqFactory, t -> t);
         this.lookForDistinctOrLimit1Transformer = lookForDistinctOrLimit1Transformer;
-    }
-
-    @Override
-    protected IQTree postTransformation(IQTree tree) {
-        return tree;
     }
 
     @Override
     public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
         ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
 
-        return furtherSimplifyInnerJoinChildren(
-                    rootNode.getOptionalFilterCondition(),
-                    transformedChildren)
-                .orElseGet(() -> transformedChildren.equals(children)
-                        ? tree
-                        : iqFactory.createNaryIQTree(rootNode, transformedChildren));
+        return furtherTransformInnerJoin(rootNode, transformedChildren)
+                .orElseGet(() -> withTransformedChildren(tree, transformedChildren));
     }
 
     /**
@@ -54,8 +43,8 @@ public abstract class AbstractBelowDistinctTransformer extends AbstractComposite
      *
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    protected abstract Optional<IQTree> furtherSimplifyInnerJoinChildren(
-            Optional<ImmutableExpression> optionalFilterCondition, ImmutableList<IQTree> children);
+    protected abstract Optional<IQTree> furtherTransformInnerJoin(
+            InnerJoinNode rootNode, ImmutableList<IQTree> children);
 
     @Override
     public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
