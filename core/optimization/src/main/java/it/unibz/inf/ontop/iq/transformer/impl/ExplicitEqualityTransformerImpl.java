@@ -61,7 +61,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
     public IQTree transform(IQTree tree) {
         var transformer0 = new LocalExplicitEqualityEnforcer();
         IQTree newTree0 = tree.acceptVisitor(transformer0);
-        var transformer1 = new CnLifter();
+        var transformer1 = new ConstructionNodeLifter();
         IQTree newTree1 = newTree0.acceptVisitor(transformer1);
         var transformer2 = new FilterChildNormalizer();
         IQTree newTree2 = newTree1.acceptVisitor(transformer2);
@@ -234,13 +234,11 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+            IQTree transformedLeftChild = transformChild(leftChild);
+            IQTree transformedRightChild = transformChild(rightChild);
 
-            IQTree liftedLeftChild = transformChild(leftChild);
-            IQTree liftedRightChild = transformChild(rightChild);
-
-            var leftFilter = UnaryIQTreeDecomposition.of(liftedLeftChild, FilterNode.class);
-            var rightFilter = UnaryIQTreeDecomposition.of(liftedRightChild, FilterNode.class);
-
+            var leftFilter = UnaryIQTreeDecomposition.of(transformedLeftChild, FilterNode.class);
+            var rightFilter = UnaryIQTreeDecomposition.of(transformedRightChild, FilterNode.class);
             if (leftFilter.isPresent() || rightFilter.isPresent()) {
                 IQTree leftJoinTree = iqTreeTools.createLeftJoinTree(
                        iqTreeTools.getConjunction(
@@ -253,38 +251,35 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                         .append(leftFilter.getOptionalNode())
                         .build(leftJoinTree);
             }
-            return withTransformedChildren(tree, liftedLeftChild, liftedRightChild);
+            return withTransformedChildren(tree, transformedLeftChild, transformedRightChild);
         }
 
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            ImmutableList<IQTree> liftedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
-            var childrenFilters = UnaryIQTreeDecomposition.of(liftedChildren, FilterNode.class);
+            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
+            var filters = UnaryIQTreeDecomposition.of(transformedChildren, FilterNode.class);
 
-            ImmutableList<ImmutableExpression> filterChildExpressions = UnaryIQTreeDecomposition.getNodeStream(childrenFilters)
-                    .map(FilterNode::getFilterCondition)
-                    .collect(ImmutableCollectors.toList());
-
-            if (!filterChildExpressions.isEmpty())
+            if (filters.stream().anyMatch(IQTreeTools.IQTreeDecomposition::isPresent))
                 return iqTreeTools.createInnerJoinTree(
                         termFactory.getConjunction(
                                 rootNode.getOptionalFilterCondition(),
-                                filterChildExpressions.stream()),
-                        UnaryIQTreeDecomposition.getTails(childrenFilters));
+                                UnaryIQTreeDecomposition.getNodeStream(filters)
+                                        .map(FilterNode::getFilterCondition)),
+                        UnaryIQTreeDecomposition.getTails(filters));
 
-            return withTransformedChildren(tree, liftedChildren);
+            return withTransformedChildren(tree, transformedChildren);
         }
 
         @Override
         public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-            IQTree liftedChild = transformChild(child);
-            var filterChild = UnaryIQTreeDecomposition.of(liftedChild, FilterNode.class);
-            if (filterChild.isPresent())
+            IQTree transformedChild = transformChild(child);
+            var filter = UnaryIQTreeDecomposition.of(transformedChild, FilterNode.class);
+            if (filter.isPresent())
                     return iqFactory.createUnaryIQTree(iqFactory.createFilterNode(
-                            termFactory.getConjunction(rootNode.getFilterCondition(), filterChild.getNode().getFilterCondition())),
-                        filterChild.getChild());
+                            termFactory.getConjunction(rootNode.getFilterCondition(), filter.getNode().getFilterCondition())),
+                        filter.getChild());
 
-            return withTransformedChild(tree,  liftedChild);
+            return withTransformedChild(tree, transformedChild);
         }
 
 
@@ -317,19 +312,19 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
      *     (i.e. a simple projection), and lift the projection if needed
      * - Distinct or slice nodes: does not apply
      */
-    class CnLifter extends DefaultRecursiveIQTreeVisitingTransformer {
+    class ConstructionNodeLifter extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        CnLifter() {
+        ConstructionNodeLifter() {
             super(ExplicitEqualityTransformerImpl.this.iqFactory);
         }
 
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode node, IQTree child) {
-            IQTree liftedChild = transformChild(child);
-            var construction = UnaryIQTreeDecomposition.of(liftedChild, ConstructionNode.class);
+            IQTree transformedChild = transformChild(child);
+            var construction = UnaryIQTreeDecomposition.of(transformedChild, ConstructionNode.class);
             if (isProjectionConstructionNode(construction))
                 return iqFactory.createUnaryIQTree(node, construction.getChild());
-            return withTransformedChild(tree, liftedChild);
+            return withTransformedChild(tree, transformedChild);
         }
 
         @Override
@@ -353,40 +348,39 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         private IQTree defaultTransformUnaryNode(UnaryIQTree tree, UnaryOperatorNode node, IQTree child) {
-            IQTree liftedChild = transformChild(child);
-            var construction = UnaryIQTreeDecomposition.of(liftedChild, ConstructionNode.class);
+            IQTree transformedChild = transformChild(child);
+            var construction = UnaryIQTreeDecomposition.of(transformedChild, ConstructionNode.class);
             if (isProjectionConstructionNode(construction))
                 return iqTreeTools.unaryIQTreeBuilder()
                         .append(iqFactory.createConstructionNode(tree.getVariables()))
                         .append(node)
                         .build(construction.getChild());
 
-            return withTransformedChild(tree, liftedChild);
+            return withTransformedChild(tree, transformedChild);
         }
 
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode node, ImmutableList<IQTree> children) {
-            ImmutableList<IQTree> liftedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
-            var childrenConstruction = UnaryIQTreeDecomposition.of(liftedChildren, ConstructionNode.class);
-            if (childrenConstruction.stream().anyMatch(this::isProjectionConstructionNode))
+            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
+            var constructions = UnaryIQTreeDecomposition.of(transformedChildren, ConstructionNode.class);
+            if (constructions.stream().anyMatch(this::isProjectionConstructionNode))
                     return iqFactory.createUnaryIQTree(
                             iqFactory.createConstructionNode(tree.getVariables()),
                             iqFactory.createNaryIQTree(node,
-                                    childrenConstruction.stream()
+                                    constructions.stream()
                                             .map(this::trimProjectionConstructionNode)
                                             .collect(ImmutableCollectors.toList())));
 
-            return withTransformedChildren(tree, liftedChildren);
+            return withTransformedChildren(tree, transformedChildren);
         }
 
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode node, IQTree leftChild, IQTree rightChild) {
-            IQTree liftedLeftChild = transformChild(leftChild);
-            IQTree liftedRightChild = transformChild(rightChild);
+            IQTree transformedLeftChild = transformChild(leftChild);
+            IQTree transformedRightChild = transformChild(rightChild);
 
-            var leftConstruction = UnaryIQTreeDecomposition.of(liftedLeftChild, ConstructionNode.class);
-            var rightConstruction = UnaryIQTreeDecomposition.of(liftedRightChild, ConstructionNode.class);
-
+            var leftConstruction = UnaryIQTreeDecomposition.of(transformedLeftChild, ConstructionNode.class);
+            var rightConstruction = UnaryIQTreeDecomposition.of(transformedRightChild, ConstructionNode.class);
             if (isProjectionConstructionNode(leftConstruction) || isProjectionConstructionNode(rightConstruction))
                 return iqFactory.createUnaryIQTree(
                         iqFactory.createConstructionNode(tree.getVariables()),
@@ -394,14 +388,14 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                                 trimProjectionConstructionNode(leftConstruction),
                                 trimProjectionConstructionNode(rightConstruction)));
 
-            return withTransformedChildren(tree, liftedLeftChild, liftedRightChild);
+            return withTransformedChildren(tree, transformedLeftChild, transformedRightChild);
         }
 
         private boolean isProjectionConstructionNode(UnaryIQTreeDecomposition<ConstructionNode> decomposition) {
-           return decomposition.getOptionalNode()
-                   .map(ConstructionNode::getSubstitution)
-                   .filter(Substitution::isEmpty)
-                   .isPresent();
+            return decomposition.getOptionalNode()
+                    .map(ConstructionNode::getSubstitution)
+                    .filter(Substitution::isEmpty)
+                    .isPresent();
         }
 
         private IQTree trimProjectionConstructionNode(UnaryIQTreeDecomposition<ConstructionNode> decomposition) {

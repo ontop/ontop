@@ -10,7 +10,9 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.FilterLifter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.stream.Stream;
@@ -45,7 +47,6 @@ public class FilterLifterImpl extends AbstractIQOptimizer implements FilterLifte
 
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode cn, IQTree child) {
-
             IQTree transformedChild = transformChild(child);
 
             if (tree.getRootNode().equals(cn)) {
@@ -62,23 +63,23 @@ public class FilterLifterImpl extends AbstractIQOptimizer implements FilterLifte
         }
 
         @Override
-        public IQTree transformFilter(UnaryIQTree tree, FilterNode filter, IQTree child) {
+        public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
             IQTree transformedChild = transformChild(child);
+            var filter = UnaryIQTreeDecomposition.of(transformedChild, FilterNode.class);
 
-            UnaryIQTreeDecomposition<FilterNode> decomposition = UnaryIQTreeDecomposition.of(transformedChild, FilterNode.class);
             return iqFactory.createUnaryIQTree(
-                    decomposition.getOptionalNode()
-                            .map(f -> termFactory.getConjunction(filter.getFilterCondition(), f.getFilterCondition()))
+                    filter.getOptionalNode()
+                            .map(f -> termFactory.getConjunction(rootNode.getFilterCondition(), f.getFilterCondition()))
                             .map(iqFactory::createFilterNode)
-                            .orElse(filter),
-                    decomposition.getTail());
+                            .orElse(rootNode),
+                    filter.getTail());
         }
 
         @Override
         public IQTree transformFlatten(UnaryIQTree tree, FlattenNode fn, IQTree child) {
             IQTree transformedChild = transformChild(child);
+            var filter = UnaryIQTreeDecomposition.of(transformedChild, FilterNode.class);
 
-            UnaryIQTreeDecomposition<FilterNode> filter = UnaryIQTreeDecomposition.of(transformedChild, FilterNode.class);
             return iqTreeTools.unaryIQTreeBuilder()
                     .append(filter.getOptionalNode())
                     .append(fn)
@@ -87,17 +88,16 @@ public class FilterLifterImpl extends AbstractIQOptimizer implements FilterLifte
 
         @Override
         public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-
             ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
-            var childrenDecomposition = UnaryIQTreeDecomposition.of(transformedChildren, FilterNode.class);
-
-            IQTree unionSubtree = iqTreeTools.createUnionTree(
-                            childrenDecomposition.get(0).getTail().getVariables(),
-                            UnaryIQTreeDecomposition.getTails(childrenDecomposition));
+            var filters = UnaryIQTreeDecomposition.of(transformedChildren, FilterNode.class);
 
             var optionalFilter = iqTreeTools.createOptionalFilterNode(termFactory.getConjunction(
-                    UnaryIQTreeDecomposition.getNodeStream(childrenDecomposition)
+                    UnaryIQTreeDecomposition.getNodeStream(filters)
                             .map(FilterNode::getFilterCondition)));
+
+            IQTree unionSubtree = iqTreeTools.createUnionTree(
+                            filters.get(0).getTail().getVariables(),
+                            UnaryIQTreeDecomposition.getTails(filters));
 
             return iqTreeTools.unaryIQTreeBuilder()
                     .append(optionalFilter)
@@ -106,17 +106,17 @@ public class FilterLifterImpl extends AbstractIQOptimizer implements FilterLifte
 
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode joinNode, ImmutableList<IQTree> children) {
-
-            ImmutableList<IQTree> transformChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
-            var childrenDecomposition = UnaryIQTreeDecomposition.of(transformChildren, FilterNode.class);
-
-            NaryIQTree joinSubtree = iqTreeTools.createInnerJoinTree(
-                    UnaryIQTreeDecomposition.getTails(childrenDecomposition));
+            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
+            var filters = UnaryIQTreeDecomposition.of(transformedChildren, FilterNode.class);
 
             var optionalFilter = iqTreeTools.createOptionalFilterNode(termFactory.getConjunction(Stream.concat(
-                    UnaryIQTreeDecomposition.getNodeStream(childrenDecomposition)
+                    UnaryIQTreeDecomposition.getNodeStream(filters)
                             .map(FilterNode::getFilterCondition),
                     joinNode.getOptionalFilterCondition().stream())));
+
+            NaryIQTree joinSubtree = iqTreeTools.createInnerJoinTree(
+                    // no condition!
+                    UnaryIQTreeDecomposition.getTails(filters));
 
             return iqTreeTools.unaryIQTreeBuilder()
                     .append(optionalFilter)
@@ -128,18 +128,18 @@ public class FilterLifterImpl extends AbstractIQOptimizer implements FilterLifte
             IQTree transformedLeftChild = transformChild(leftChild);
             IQTree transformedRightChild = transformChild(rightChild);
 
-            var leftChildFilter = UnaryIQTreeDecomposition.of(transformedLeftChild, FilterNode.class);
-            var rightChildFilter = UnaryIQTreeDecomposition.of(transformedRightChild, FilterNode.class);
+            var leftFilter = UnaryIQTreeDecomposition.of(transformedLeftChild, FilterNode.class);
+            var rightFilter = UnaryIQTreeDecomposition.of(transformedRightChild, FilterNode.class);
 
             BinaryNonCommutativeIQTree lJSubtree = iqTreeTools.createLeftJoinTree(
                     iqTreeTools.getConjunction(
                             rootNode.getOptionalFilterCondition(),
-                            rightChildFilter.getOptionalNode().map(FilterNode::getFilterCondition)),
-                    leftChildFilter.getTail(),
-                    rightChildFilter.getTail());
+                            rightFilter.getOptionalNode().map(FilterNode::getFilterCondition)),
+                    leftFilter.getTail(),
+                    rightFilter.getTail());
 
             return iqTreeTools.unaryIQTreeBuilder()
-                    .append(leftChildFilter.getOptionalNode())
+                    .append(leftFilter.getOptionalNode())
                     .build(lJSubtree);
         }
     }
