@@ -23,14 +23,6 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
         this.iqFactory = iqFactory;
     }
 
-    protected boolean treesEqual(IQTree tree1, IQTree tree2) {
-        return tree1.equals(tree2);
-    }
-
-    protected boolean treesEqual(ImmutableList<IQTree> trees1, ImmutableList<IQTree> trees2) {
-        return trees1.equals(trees2);
-    }
-
     @Override
     protected final IQTree transformLeaf(LeafIQTree leaf){
         return leaf;
@@ -42,7 +34,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
     }
 
     protected final UnaryIQTree withTransformedChild(UnaryIQTree tree, IQTree newChild) {
-        return treesEqual(newChild, tree.getChild())
+        return newChild.equals(tree.getChild())
                 ? tree
                 : iqFactory.createUnaryIQTree(tree.getRootNode(), newChild);
     }
@@ -53,7 +45,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
     }
 
     protected final NaryIQTree withTransformedChildren(NaryIQTree tree, ImmutableList<IQTree> newChildren) {
-        return treesEqual(newChildren, tree.getChildren())
+        return newChildren.equals(tree.getChildren())
                 ? tree
                 : iqFactory.createNaryIQTree(tree.getRootNode(), newChildren);
     }
@@ -64,7 +56,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
     }
 
     protected final BinaryNonCommutativeIQTree withTransformedChildren(BinaryNonCommutativeIQTree tree, IQTree newLeftChild, IQTree newRightChild) {
-        return treesEqual(newLeftChild, tree.getLeftChild()) && treesEqual(newRightChild, tree.getRightChild())
+        return newLeftChild.equals(tree.getLeftChild()) && newRightChild.equals(tree.getRightChild())
                 ? tree
                 : iqFactory.createBinaryNonCommutativeIQTree(tree.getRootNode(), newLeftChild, newRightChild);
     }

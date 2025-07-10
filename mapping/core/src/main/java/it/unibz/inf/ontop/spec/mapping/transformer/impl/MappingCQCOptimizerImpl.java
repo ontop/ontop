@@ -48,6 +48,7 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                         construction.getNode().getSubstitution().getRangeVariables(), cqContainmentCheck)));
     }
 
+    // used to use == for comparing the transformed children
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
         private final ImmutableSet<Variable> constructionTreeVariables;
         private final ExtensionalDataNodeListContainmentCheck cqContainmentCheck;
@@ -56,11 +57,6 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
             super(MappingCQCOptimizerImpl.this.iqFactory);
             this.cqContainmentCheck = cqContainmentCheck;
             this.constructionTreeVariables = constructionTreeVariables;
-        }
-
-        @Override
-        protected boolean treesEqual(IQTree tree1, IQTree tree2) {
-            return tree1 == tree2;
         }
 
         @Override
