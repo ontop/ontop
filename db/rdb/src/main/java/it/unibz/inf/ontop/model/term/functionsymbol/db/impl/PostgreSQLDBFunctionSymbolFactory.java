@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
@@ -391,9 +392,18 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                      * Normalizes the flag
                      *   - DOT_ALL: s -> n
                      */
-                    ImmutableTerm flagTerm = termFactory.getDBReplace(terms.get(2),
-                            termFactory.getDBStringConstant("s"),
-                            termFactory.getDBStringConstant("n"));
+                    ImmutableTerm flagTerm;
+                    if (terms.get(2) instanceof Constant) {
+                        Constant flagConstant = (Constant) terms.get(2);
+                        flagTerm = flagConstant.getValue().equals("s")
+                                ? termFactory.getDBStringConstant("n")
+                                : termFactory.getDBStringConstant(flagConstant.getValue());
+                    } else {
+                        // If it is not a constant, we assume it is a variable
+                        flagTerm = termFactory.getDBReplace(terms.get(2),
+                                termFactory.getDBStringConstant("s"),
+                                termFactory.getDBStringConstant("n"));
+                    }
 
                     ImmutableTerm extendedPatternTerm = termFactory.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(
                             termFactory.getDBStringConstant("(?"),
