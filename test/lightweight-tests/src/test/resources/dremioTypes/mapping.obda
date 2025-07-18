@@ -1,0 +1,19 @@
+[PrefixDeclaration]
+xsd:    http://www.w3.org/2001/XMLSchema#
+rdfs:   http://www.w3.org/2000/01/rdf-schema#
+eslo:   http://eia-demo.metaphacts.cloud/ontology/
+
+[MappingDeclaration] @collection [[
+
+mappingId employee
+target eslo:{employee} a eslo:Employee ; rdfs:label {employee} .
+source SELECT "employee" FROM "lenses"."demo"."employee" ;
+
+mappingId worksAtDepartment
+target eslo:{employee} eslo:worksAtDepartment eslo:{department} .
+source SELECT "employee", "department" FROM "lenses"."demo"."department" ;
+
+mappingId department
+target eslo:{department} a eslo:Department ; rdfs:label {department} .
+source SELECT "department" FROM "lenses"."demo"."department" ;
+]]

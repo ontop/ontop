@@ -4,7 +4,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.docker.lightweight.DremioLightweightTest;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -67,19 +70,5 @@ public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
     @Override
     protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
         return ImmutableSet.of("\"215.340000\"^^xsd:decimal");
-    }
-
-    @Test
-    protected void testStringTypesCastSimplification() {
-        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?v WHERE { \n"
-                + "  ?x dc:title ?title .\n"
-                + "  BIND (CONCAT(?title, \" test\"^^xsd:string) AS ?v) .\n"
-                + "}\n" +
-                "ORDER BY ?v";
-
-        String sqlQuery = reformulate(query);
-        // check if there's a cast (e.g. CHARACTER VARYINGToVARCHAR)
-        Assertions.assertFalse(sqlQuery.contains("To"));
     }
 }
