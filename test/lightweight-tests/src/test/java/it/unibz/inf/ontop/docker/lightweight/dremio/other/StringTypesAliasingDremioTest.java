@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.docker.lightweight.dremio.other;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
-import it.unibz.inf.ontop.docker.lightweight.localtest.DremioDatatypeTest;
 import it.unibz.inf.ontop.exception.OntopInvalidKGQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
@@ -15,8 +14,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nullable;
-
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class StringTypesAliasingDremioTest {
     private static final String OBDA_FILE = "/dremioTypes/mapping.obda";
@@ -60,31 +57,29 @@ public class StringTypesAliasingDremioTest {
                                  String propertyFile, @Nullable String lensesFile,
                                  @Nullable String dbMetadataFile) {
 
-        String propertyFilePath = DremioDatatypeTest.class.getResource(propertyFile).getPath();
+        String propertyFilePath = StringTypesAliasingDremioTest.class.getResource(propertyFile).getPath();
 
         OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(DremioDatatypeTest.class.getResource(obdaRelativePath).getPath())
+                .nativeOntopMappingFile(StringTypesAliasingDremioTest.class.getResource(obdaRelativePath).getPath())
                 .propertyFile(propertyFilePath)
                 .enableTestMode();
 
         if (ontologyRelativePath != null)
-            builder.ontologyFile(DremioDatatypeTest.class.getResource(ontologyRelativePath).getPath());
+            builder.ontologyFile(StringTypesAliasingDremioTest.class.getResource(ontologyRelativePath).getPath());
 
-        builder.propertyFile(DremioDatatypeTest.class.getResource(propertyFile).getPath());
+        builder.propertyFile(StringTypesAliasingDremioTest.class.getResource(propertyFile).getPath());
 
         if (lensesFile != null)
-            builder.lensesFile(DremioDatatypeTest.class.getResource(lensesFile).getPath());
+            builder.lensesFile(StringTypesAliasingDremioTest.class.getResource(lensesFile).getPath());
 
         if (dbMetadataFile != null)
-            builder.dbMetadataFile(DremioDatatypeTest.class.getResource(dbMetadataFile).getPath());
+            builder.dbMetadataFile(StringTypesAliasingDremioTest.class.getResource(dbMetadataFile).getPath());
 
         OntopSQLOWLAPIConfiguration config = builder.build();
 
         OntopVirtualRepository repo = OntopRepository.defaultRepository(config);
         repo.init();
-        /*
-         * Prepare the data connection for querying.
-         */
+
         repository = repo;
         kgQueryFactory = config.getKGQueryFactory();
 
