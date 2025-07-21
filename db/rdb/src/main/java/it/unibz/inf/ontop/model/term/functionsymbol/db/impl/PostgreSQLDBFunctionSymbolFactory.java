@@ -395,9 +395,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                     ImmutableTerm flagsTerm;
                     if (terms.get(2) instanceof Constant) {
                         Constant flagsConstant = (Constant) terms.get(2);
-                        flagsTerm = flagsConstant.getValue().contains("s")
-                                ? termFactory.getDBStringConstant(flagsConstant.getValue().replace("s", "n"))
-                                : termFactory.getDBStringConstant(flagsConstant.getValue());
+                        flagsTerm = termFactory.getDBStringConstant(flagsConstant.getValue().replace("s", "n"));
                     } else {
                         flagsTerm = termFactory.getDBReplace(terms.get(2),
                                 termFactory.getDBStringConstant("s"),
