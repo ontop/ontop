@@ -1,19 +1,20 @@
 [PrefixDeclaration]
 xsd:    http://www.w3.org/2001/XMLSchema#
 rdfs:   http://www.w3.org/2000/01/rdf-schema#
-eslo:   http://eia-demo.metaphacts.cloud/ontology/
+voc:    http://vocabulary.example.org/
 
 [MappingDeclaration] @collection [[
 
 mappingId employee
-target eslo:{employee} a eslo:Employee ; rdfs:label {employee} .
-source SELECT "employee" FROM "lenses"."demo"."employee" ;
+target voc:{employee} a voc:Employee ; rdfs:label {employee} .
+source SELECT "employee" FROM "lenses"."employee" ;
 
-mappingId worksAtDepartment
-target eslo:{employee} eslo:worksAtDepartment eslo:{department} .
-source SELECT "employee", "department" FROM "lenses"."demo"."department" ;
+mappingId worksAt
+target voc:{employee} voc:worksAt voc:{department} .
+source SELECT "employee", "department" FROM "lenses"."department" ;
 
 mappingId department
-target eslo:{department} a eslo:Department ; rdfs:label {department} .
-source SELECT "department" FROM "lenses"."demo"."department" ;
+target voc:{department} a voc:Department ; rdfs:label {department} .
+source SELECT "department" FROM "lenses"."department" ;
+
 ]]

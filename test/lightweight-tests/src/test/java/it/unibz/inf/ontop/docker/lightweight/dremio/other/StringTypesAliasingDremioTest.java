@@ -32,12 +32,11 @@ public class StringTypesAliasingDremioTest {
 
     @Test
     public void testStringTypesCastSimplification() {
-        String sparqlQuery = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                "PREFIX eslo: <http://eia-demo.metaphacts.cloud/ontology/>\n" +
+        String sparqlQuery = "PREFIX voc: <http://vocabulary.example.org/>\n" +
                 "SELECT * WHERE {\n" +
-                "   ?emp eslo:worksAtDepartment ?dep .\n" +
+                "   ?emp voc:worksAt ?dep .\n" +
                 " MINUS {\n" +
-                "   ?emp a eslo:Employee .\n" +
+                "   ?emp a voc:Employee .\n" +
                 " }\n" +
                 "} \n";
 

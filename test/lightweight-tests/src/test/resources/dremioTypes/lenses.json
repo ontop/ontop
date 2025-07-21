@@ -1,41 +1,34 @@
 {
   "relations": [
     {
-      "name": ["\"lenses\"", "\"demo\"", "\"employee\""],
+      "name": ["\"lenses\"", "\"employee\""],
       "baseRelation": ["\"employees\""],
-      "filterExpression": null,
-      "columns": { "added": [], "hidden": [] },
       "uniqueConstraints": {
         "added": [
           {
-            "name": "27168c08-8ab0-4b40-9878-f58de8f08fc6",
+            "name": "employee-uc",
             "determinants": ["\"employee\""],
             "isPrimaryKey": false
           }
         ]
       },
-      "otherFunctionalDependencies": { "added": [] },
-      "foreignKeys": { "added": [] },
-      "nonNullConstraints": { "added": [] },
-      "iriSafeConstraints": { "added": [] },
       "type": "BasicLens"
     },
     {
-      "name": ["\"lenses\"", "\"demo\"", "\"department\""],
+      "name": ["\"lenses\"", "\"department\""],
       "baseRelation": ["\"departments\""],
       "uniqueConstraints": {
         "added": [
           {
-            "name": "0c580004-fa57-4096-a49d-2d84b249533a",
+            "name": "department-uc",
             "determinants": ["\"department\""],
             "isPrimaryKey": false
           }
         ]
       },
-      "otherFunctionalDependencies": { "added": [] },
       "foreignKeys": { "added": [
         {
-          "name": "9b6f9e4e-2923-4c6f-ab6a-c9c99f6f1355",
+          "name": "departments-employees-fk",
           "from": ["\"employee\""],
           "to": {
             "relation": ["\"employees\""],
@@ -43,8 +36,6 @@
           }
         }
       ] },
-      "nonNullConstraints": { "added": [] },
-      "iriSafeConstraints": { "added": [] },
       "flattenedColumn": {
         "name": "\"employees\"",
         "datatype": "list"
