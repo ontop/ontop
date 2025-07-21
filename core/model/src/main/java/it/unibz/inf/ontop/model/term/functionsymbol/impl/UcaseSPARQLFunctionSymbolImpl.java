@@ -3,11 +3,11 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.CaseSPARQLFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.CasingSPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 
-public class UcaseSPARQLFunctionSymbolImpl extends AbstractUnaryStringSPARQLFunctionSymbol implements CaseSPARQLFunctionSymbol {
+public class UcaseSPARQLFunctionSymbolImpl extends AbstractUnaryStringSPARQLFunctionSymbol implements CasingSPARQLFunctionSymbol {
 
     protected UcaseSPARQLFunctionSymbolImpl(RDFDatatype xsdStringDatatype) {
         super("SP_UCASE", XPathFunction.UPPER_CASE, xsdStringDatatype);

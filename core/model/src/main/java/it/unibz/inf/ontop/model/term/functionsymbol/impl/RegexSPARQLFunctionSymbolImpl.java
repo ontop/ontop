@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.CaseSPARQLFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.CasingSPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -116,7 +116,7 @@ public class RegexSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLF
 
     private ImmutableTerm simplifyCaseTermIfPresent(ImmutableTerm term) {
         if (term instanceof ImmutableFunctionalTerm
-                && ((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof CaseSPARQLFunctionSymbol) {
+                && ((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof CasingSPARQLFunctionSymbol) {
             return ((ImmutableFunctionalTerm) term).getTerm(0);
         }
         return term;
