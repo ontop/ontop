@@ -1,9 +1,12 @@
-FROM bitnami/minideb:buster
+FROM bitnami/minideb:bookworm
 
 RUN install_packages curl ca-certificates -y
-RUN install_packages wget procps openjdk-11-jdk-headless git python3 -y
+RUN install_packages wget procps git python3 java-common -y
 
 WORKDIR /tmp
+
+RUN wget https://corretto.aws/downloads/latest/amazon-corretto-11-x64-linux-jdk.deb
+RUN dpkg --install amazon-corretto-11-x64-linux-jdk.deb
 
 RUN wget https://archive.apache.org/dist/spark/spark-3.3.1/spark-3.3.1-bin-hadoop3.tgz
 RUN tar xvf spark-*
