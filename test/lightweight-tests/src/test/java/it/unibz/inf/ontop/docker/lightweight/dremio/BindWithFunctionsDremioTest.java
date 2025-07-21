@@ -12,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static org.junit.Assert.assertEquals;
-
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
  *

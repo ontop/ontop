@@ -1,0 +1,52 @@
+{
+  "relations": [
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"employee\"",
+          "datatype": "CHARACTER VARYING(65536)",
+          "isNullable": false
+        },
+        {
+          "name": "\"role\"",
+          "datatype": "CHARACTER VARYING(65536)",
+          "isNullable": true
+        }
+      ],
+      "name": [
+        "\"employees\""
+      ]
+    },
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"department\"",
+          "datatype": "CHARACTER VARYING(65536)",
+          "isNullable": false
+        },
+        {
+          "name": "\"employees\"",
+          "datatype": "ANY",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"departments\""
+      ]
+    }
+  ],
+  "metadata": {
+    "dbmsProductName": "Dremio Server",
+    "dbmsVersion": "24.3.20",
+    "driverName": "Dremio JDBC Driver",
+    "driverVersion": "24.0.0-202302100528110223-3a169b7c",
+    "quotationString": "\"",
+    "extractionTime": "2020-11-12T17:24:30"
+  }
+}
