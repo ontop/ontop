@@ -104,11 +104,11 @@ public class RegexSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLF
 
     private boolean isRegexCaseInsensitive(ImmutableList<? extends ImmutableTerm> lexicalTerms) {
         if (lexicalTerms.size() == 3) {
-            ImmutableTerm flagTerm = lexicalTerms.get(2);
-            if (flagTerm instanceof Constant) {
-                Constant flag = (Constant) flagTerm;
+            ImmutableTerm flagsTerm = lexicalTerms.get(2);
+            if (flagsTerm instanceof Constant) {
+                Constant flags = (Constant) flagsTerm;
 
-                return flag.getValue().equals("i");
+                return flags.getValue().contains("i");
             }
         }
         return false;

@@ -81,4 +81,17 @@ public class RegexCaseOptimizationTest extends AbstractRDF4JTest {
         runQueryAndCompare(sparql, ImmutableSet.of());
     }
 
+    @Test
+    public void testMultipleFlags() {
+        String sparql = "PREFIX ex: <http://employee.example.org/voc#>\n" +
+                "SELECT ?v\n" +
+                "WHERE {\n" +
+                "?v ex:firstName ?name.\n" +
+                "FILTER (REGEX(LCASE(?name), \"ger\", \"is\"))\n" +
+                "}";
+        String sql = reformulateIntoNativeQuery(sparql);
+        assertFalse(sql.contains("LOWER"));
+
+        runQueryAndCompare(sparql, ImmutableSet.of("http://employee.example.org/data/person/1"));
+    }
 }

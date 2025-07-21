@@ -392,22 +392,21 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                      * Normalizes the flag
                      *   - DOT_ALL: s -> n
                      */
-                    ImmutableTerm flagTerm;
+                    ImmutableTerm flagsTerm;
                     if (terms.get(2) instanceof Constant) {
-                        Constant flagConstant = (Constant) terms.get(2);
-                        flagTerm = flagConstant.getValue().equals("s")
-                                ? termFactory.getDBStringConstant("n")
-                                : termFactory.getDBStringConstant(flagConstant.getValue());
+                        Constant flagsConstant = (Constant) terms.get(2);
+                        flagsTerm = flagsConstant.getValue().contains("s")
+                                ? termFactory.getDBStringConstant(flagsConstant.getValue().replace("s", "n"))
+                                : termFactory.getDBStringConstant(flagsConstant.getValue());
                     } else {
-                        // If it is not a constant, we assume it is a variable
-                        flagTerm = termFactory.getDBReplace(terms.get(2),
+                        flagsTerm = termFactory.getDBReplace(terms.get(2),
                                 termFactory.getDBStringConstant("s"),
                                 termFactory.getDBStringConstant("n"));
                     }
 
                     ImmutableTerm extendedPatternTerm = termFactory.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(
                             termFactory.getDBStringConstant("(?"),
-                            flagTerm,
+                            flagsTerm,
                             termFactory.getDBStringConstant(")"),
                             terms.get(1)))
                             .simplify();
