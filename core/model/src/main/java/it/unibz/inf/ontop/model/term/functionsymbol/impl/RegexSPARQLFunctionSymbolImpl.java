@@ -2,10 +2,8 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.CasingSPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -86,5 +84,41 @@ public class RegexSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLF
 
         return termFactory.getConjunction(conditions)
                 .evaluate(variableNullability);
+    }
+
+    @Override
+    public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms,
+                                  TermFactory termFactory, VariableNullability variableNullability) {
+
+        // REGEX(lcase(?x), "pattern", "i") can be simplified to REGEX(?x, "pattern", "i") since it's case-insensitive
+        if (isRegexCaseInsensitive(terms)) {
+            return super.simplify(ImmutableList.of(
+                    simplifyCaseTermIfPresent(terms.get(0)),
+                    simplifyCaseTermIfPresent(terms.get(1)),
+                    terms.get(2)),
+                    termFactory, variableNullability);
+        }
+
+        return super.simplify(terms, termFactory, variableNullability);
+    }
+
+    private boolean isRegexCaseInsensitive(ImmutableList<? extends ImmutableTerm> lexicalTerms) {
+        if (lexicalTerms.size() == 3) {
+            ImmutableTerm flagsTerm = lexicalTerms.get(2);
+            if (flagsTerm instanceof Constant) {
+                Constant flags = (Constant) flagsTerm;
+
+                return flags.getValue().contains("i");
+            }
+        }
+        return false;
+    }
+
+    private ImmutableTerm simplifyCaseTermIfPresent(ImmutableTerm term) {
+        if (term instanceof ImmutableFunctionalTerm
+                && ((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof CasingSPARQLFunctionSymbol) {
+            return ((ImmutableFunctionalTerm) term).getTerm(0);
+        }
+        return term;
     }
 }

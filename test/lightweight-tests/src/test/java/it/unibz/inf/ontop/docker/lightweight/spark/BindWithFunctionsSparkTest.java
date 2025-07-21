@@ -111,6 +111,13 @@ public class BindWithFunctionsSparkTest extends AbstractBindTestWithFunctions {
     @Test
     public void testSecondsBetweenMappingInput() { super.testSecondsBetweenMappingInput(); }
 
+    @Disabled("Spark does not support REGEXP_LIKE with three arguments")
+    @Test
+    @Override
+    public void testCaseInsensitiveREGEX() {
+        super.testCaseInsensitiveREGEX();
+    }
+
     @Override
     protected ImmutableSet<String> getDivisionOutputTypeExpectedResults() {
         return ImmutableSet.of("\"3.3333333333333335\"^^xsd:decimal");
