@@ -2,9 +2,11 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -64,11 +66,21 @@ public class BinaryArithmeticTypeFunctionSymbolImpl extends FunctionSymbolImpl{
                         "Binary arithmetic operations on temporal types are not supported");
             }
             return termFactory.getCommonPropagatedOrSubstitutedNumericType(typeTerms.get(0), typeTerms.get(1));
+        } else if (typeTerms.stream().anyMatch(t -> t instanceof ImmutableFunctionalTerm)) {
+            return typeTerms.stream()
+                    .filter(t -> t instanceof ImmutableFunctionalTerm)
+                    .map(t -> (ImmutableFunctionalTerm)t)
+                    .filter(t -> t.getFunctionSymbol() instanceof DBIfThenFunctionSymbol)
+                    .findAny()
+                    .map(t -> ((DBIfThenFunctionSymbol) t.getFunctionSymbol())
+                            .pushDownRegularFunctionalTerm(
+                                    termFactory.getImmutableFunctionalTerm(this, newTerms),
+                                    newTerms.indexOf(t),
+                                    termFactory))
+                    .map(t -> t.simplify(variableNullability))
+                    .orElseGet(() -> super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability));
+        } else {
+            return termFactory.getCommonPropagatedOrSubstitutedNumericType(typeTerms.get(0), typeTerms.get(1));
         }
-
-        // for now no additional logic
-        return termFactory.getCommonPropagatedOrSubstitutedNumericType(typeTerms.get(0), typeTerms.get(1));
-
-
     }
 }
