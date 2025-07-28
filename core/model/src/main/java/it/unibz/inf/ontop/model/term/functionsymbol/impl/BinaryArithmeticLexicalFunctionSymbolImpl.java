@@ -8,23 +8,19 @@ import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
-import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.MetaRDFTermType;
-import it.unibz.inf.ontop.model.type.RDFTermType;
-import it.unibz.inf.ontop.model.type.TermTypeInference;
+import it.unibz.inf.ontop.model.type.*;
 
 import java.util.Optional;
 
+public class BinaryArithmeticLexicalFunctionSymbolImpl extends FunctionSymbolImpl{
 
-public class BinaryNumericLexicalFunctionSymbolImpl extends FunctionSymbolImpl {
-
-    private final String dbNumericOperationName;
+    private final String dbOperationName;
     private final DBTermType dbStringType;
 
-    protected BinaryNumericLexicalFunctionSymbolImpl(String dbNumericOperationName, DBTermType dbStringType,
-                                                     MetaRDFTermType metaRDFTermType) {
-        super("LATELY_TYPE_" + dbNumericOperationName, ImmutableList.of(dbStringType, dbStringType, metaRDFTermType));
-        this.dbNumericOperationName = dbNumericOperationName;
+    protected BinaryArithmeticLexicalFunctionSymbolImpl(String dbOperationName, DBTermType dbStringType,
+                                                        MetaRDFTermType metaRDFTermType) {
+        super("LATELY_OP_LEX_" + dbOperationName, ImmutableList.of(dbStringType, dbStringType, metaRDFTermType, metaRDFTermType, metaRDFTermType));
+        this.dbOperationName = dbOperationName;
         this.dbStringType = dbStringType;
     }
 
@@ -59,13 +55,18 @@ public class BinaryNumericLexicalFunctionSymbolImpl extends FunctionSymbolImpl {
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability) {
-        ImmutableTerm rdfTypeTerm = newTerms.get(2);
+        ImmutableTerm rdfTypeTerm = newTerms.get(4);
         if (rdfTypeTerm instanceof RDFTermTypeConstant) {
             RDFTermType rdfType = ((RDFTermTypeConstant) rdfTypeTerm).getRDFTermType();
+
+            if (rdfType.isA(termFactory.getTypeFactory().getAbstractOntopTemporalDatatype())) {
+                throw new UnsupportedOperationException("Binary arithmetic operators are only supported for numeric types");
+            }
+
             DBTermType dbType = rdfType.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory());
 
             ImmutableFunctionalTerm numericTerm = termFactory.getDBBinaryNumericFunctionalTerm(
-                    dbNumericOperationName, dbType,
+                    dbOperationName, dbType,
                     termFactory.getConversionFromRDFLexical2DB(dbType, newTerms.get(0), rdfType),
                     termFactory.getConversionFromRDFLexical2DB(dbType, newTerms.get(1), rdfType));
 
@@ -77,11 +78,11 @@ public class BinaryNumericLexicalFunctionSymbolImpl extends FunctionSymbolImpl {
             RDFTermTypeFunctionSymbol termTypeFunctionSymbol = (RDFTermTypeFunctionSymbol) typeFunctionalTerm.getFunctionSymbol();
 
             return termTypeFunctionSymbol.lift(
-                    typeFunctionalTerm.getTerms(),
-                    c -> buildTermAfterEvaluation(
-                            ImmutableList.of(newTerms.get(0), newTerms.get(1), c),
-                            termFactory, variableNullability),
-                    termFactory)
+                            typeFunctionalTerm.getTerms(),
+                            c -> buildTermAfterEvaluation(
+                                    ImmutableList.of(newTerms.get(0), newTerms.get(1), newTerms.get(2), newTerms.get(3), c),
+                                    termFactory, variableNullability),
+                            termFactory)
                     .simplify(variableNullability);
         }
         else
@@ -91,13 +92,11 @@ public class BinaryNumericLexicalFunctionSymbolImpl extends FunctionSymbolImpl {
                     .map(t -> (ImmutableFunctionalTerm)t)
                     .filter(t -> t.getFunctionSymbol() instanceof DBIfThenFunctionSymbol)
                     .map(t -> ((DBIfThenFunctionSymbol) t.getFunctionSymbol())
-                        .pushDownRegularFunctionalTerm(
-                                termFactory.getImmutableFunctionalTerm(this, newTerms),
-                                newTerms.indexOf(t),
-                                termFactory))
+                            .pushDownRegularFunctionalTerm(
+                                    termFactory.getImmutableFunctionalTerm(this, newTerms),
+                                    newTerms.indexOf(t),
+                                    termFactory))
                     .map(t -> t.simplify(variableNullability))
                     .orElseGet(() -> super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability));
     }
-
-
 }

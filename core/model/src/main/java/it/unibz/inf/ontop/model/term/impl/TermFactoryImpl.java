@@ -453,13 +453,19 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getBinaryNumericLexicalFunctionalTerm(String dbNumericOperationName,
-																		 ImmutableTerm lexicalTerm1,
-																		 ImmutableTerm lexicalTerm2,
-																		 ImmutableTerm rdfTypeTerm) {
+	public ImmutableFunctionalTerm getBinaryArithmeticLexicalFunctionalTerm(String dbOperationName, ImmutableTerm lexicalTerm1, ImmutableTerm lexicalTerm2,
+																		  ImmutableTerm inputRDFType1, ImmutableTerm inputRDFType2, ImmutableTerm returnRDFType) {
 		return getImmutableFunctionalTerm(
-				functionSymbolFactory.getBinaryNumericLexicalFunctionSymbol(dbNumericOperationName),
-				lexicalTerm1, lexicalTerm2, rdfTypeTerm);
+				functionSymbolFactory.getBinaryArithmeticLexicalFunctionSymbol(dbOperationName),
+				lexicalTerm1, lexicalTerm2, inputRDFType1, inputRDFType2, returnRDFType);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getBinaryArithmeticTypeFunctionalTerm(String dbOperationName, ImmutableTerm lexicalTerm1,
+			ImmutableTerm lexicalTerm2, ImmutableTerm termType1, ImmutableTerm termType2) {
+		return getImmutableFunctionalTerm(
+				functionSymbolFactory.getBinaryArithmeticTypeFunctionSymbol(dbOperationName),
+				lexicalTerm1, lexicalTerm2, termType1, termType2);
 	}
 
 	@Override

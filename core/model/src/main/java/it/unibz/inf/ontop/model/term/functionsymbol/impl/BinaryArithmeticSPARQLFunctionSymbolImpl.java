@@ -9,33 +9,32 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
 
-
-public class NumericBinarySPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
-
-    protected NumericBinarySPARQLFunctionSymbolImpl(String functionSymbolName, String officialName,
-                                                    RDFDatatype abstractNumericType) {
-        super(functionSymbolName, officialName, ImmutableList.of(abstractNumericType, abstractNumericType));
+public class BinaryArithmeticSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
+    protected BinaryArithmeticSPARQLFunctionSymbolImpl(String functionSymbolName, String officialName, RDFDatatype abstractTemporalOrNumericType) {
+        super(functionSymbolName, officialName,
+                ImmutableList.of(abstractTemporalOrNumericType, abstractTemporalOrNumericType));
     }
 
     @Override
     protected ImmutableTerm computeTypeTerm(ImmutableList<? extends ImmutableTerm> subLexicalTerms,
                                             ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
                                             VariableNullability variableNullability) {
-        return termFactory.getCommonPropagatedOrSubstitutedNumericType(typeTerms.get(0), typeTerms.get(1));
+        return termFactory.getBinaryArithmeticTypeFunctionalTerm(getOfficialName(),
+                subLexicalTerms.get(0), subLexicalTerms.get(1),
+                typeTerms.get(0), typeTerms.get(1));
     }
 
     @Override
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
                                                ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
                                                ImmutableTerm returnedRDFTypeTerm) {
-        return termFactory.getBinaryNumericLexicalFunctionalTerm(getOfficialName(),
-                subLexicalTerms.get(0),
-                subLexicalTerms.get(1),
-                returnedRDFTypeTerm);
+        return termFactory.getBinaryArithmeticLexicalFunctionalTerm(getOfficialName(),
+                subLexicalTerms.get(0), subLexicalTerms.get(1),
+                typeTerms.get(0), typeTerms.get(1), returnedRDFTypeTerm);
     }
 
     @Override
-    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
+    protected boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

@@ -422,10 +422,10 @@ public class RDF4JValueExprTranslator {
 
     private static final ImmutableMap<MathExpr.MathOp, String> NumericalOperations =
             ImmutableMap.<MathExpr.MathOp, String>builder()
-                    .put(MathExpr.MathOp.PLUS, SPARQL.NUMERIC_ADD)
-                    .put(MathExpr.MathOp.MINUS, SPARQL.NUMERIC_SUBTRACT)
-                    .put(MathExpr.MathOp.MULTIPLY, SPARQL.NUMERIC_MULTIPLY)
-                    .put(MathExpr.MathOp.DIVIDE, SPARQL.NUMERIC_DIVIDE)
+                    .put(MathExpr.MathOp.PLUS, SPARQL.ADD)
+                    .put(MathExpr.MathOp.MINUS, SPARQL.SUBTRACT)
+                    .put(MathExpr.MathOp.MULTIPLY, SPARQL.MULTIPLY)
+                    .put(MathExpr.MathOp.DIVIDE, SPARQL.DIVIDE)
                     .build();
 
 

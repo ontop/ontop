@@ -519,10 +519,19 @@ public interface TermFactory {
 	 * TODO: find a better name
 	 *
 	 */
-	ImmutableFunctionalTerm getBinaryNumericLexicalFunctionalTerm(String dbNumericOperationName,
-																  ImmutableTerm lexicalTerm1,
-																  ImmutableTerm lexicalTerm2,
-																  ImmutableTerm rdfTypeTerm);
+
+	ImmutableFunctionalTerm getBinaryArithmeticLexicalFunctionalTerm(String dbOperationName,
+															  ImmutableTerm lexicalTerm1,
+															  ImmutableTerm lexicalTerm2,
+															  ImmutableTerm inputRDFTypeTerm1,
+															  ImmutableTerm inputRDFTypeTerm2,
+															  ImmutableTerm returnedRDFTypeTerm);
+
+	ImmutableFunctionalTerm getBinaryArithmeticTypeFunctionalTerm(String dbOperationName,
+															  ImmutableTerm lexicalTerm1,
+															  ImmutableTerm lexicalTerm2,
+															  ImmutableTerm inputRDFTypeTerm1,
+															  ImmutableTerm inputRDFTypeTerm2);
 
 	ImmutableFunctionalTerm getDBBinaryNumericFunctionalTerm(String dbNumericOperationName, DBTermType dbNumericType,
 															 ImmutableTerm dbTerm1, ImmutableTerm dbTerm2);

@@ -13,12 +13,12 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class DivideSPARQLFunctionSymbolImpl extends NumericBinarySPARQLFunctionSymbolImpl {
+public class DivideSPARQLFunctionSymbolImpl extends BinaryArithmeticSPARQLFunctionSymbolImpl {
 
     private final RDFDatatype xsdDecimalType;
 
     protected DivideSPARQLFunctionSymbolImpl(RDFDatatype abstractNumericType, RDFDatatype xsdDecimalType) {
-        super("SP_DIVIDE", SPARQL.NUMERIC_DIVIDE, abstractNumericType);
+        super("SP_DIVIDE", SPARQL.DIVIDE, abstractNumericType);
         this.xsdDecimalType = xsdDecimalType;
     }
 

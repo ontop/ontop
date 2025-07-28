@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
@@ -141,6 +142,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
         RDFDatatype xsdDate = typeFactory.getXsdDate();
         RDFDatatype abstractNumericType = typeFactory.getAbstractOntopNumericDatatype();
+        RDFDatatype abstractNumericOrTemporalType = typeFactory.getAbstractOntopNumericOrTemporalDatatype();
         RDFDatatype dateOrDatetime = typeFactory.getAbstractOntopDateOrDatetimeDatatype();
 
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
@@ -184,9 +186,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new Sha256SPARQLFunctionSymbolImpl(xsdString),
                 new Sha384SPARQLFunctionSymbolImpl(xsdString),
                 new Sha512SPARQLFunctionSymbolImpl(xsdString),
-                new NumericBinarySPARQLFunctionSymbolImpl("SP_MULTIPLY", SPARQL.NUMERIC_MULTIPLY, abstractNumericType),
-                new NumericBinarySPARQLFunctionSymbolImpl("SP_ADD", SPARQL.NUMERIC_ADD, abstractNumericType),
-                new NumericBinarySPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.NUMERIC_SUBTRACT, abstractNumericType),
+                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_MULTIPLY", SPARQL.MULTIPLY, abstractNumericOrTemporalType),
+                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_ADD", SPARQL.ADD, abstractNumericOrTemporalType),
+                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.SUBTRACT, abstractNumericOrTemporalType),
                 new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal),
                 new NonStrictEqSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
                 new LessThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
@@ -689,8 +691,13 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     @Override
-    public FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName) {
-        return new BinaryNumericLexicalFunctionSymbolImpl(dbNumericOperationName, dbStringType, metaRDFType);
+    public FunctionSymbol getBinaryArithmeticLexicalFunctionSymbol(String dbOperationName) {
+        return new BinaryArithmeticLexicalFunctionSymbolImpl(dbOperationName, dbStringType, metaRDFType);
+    }
+
+    @Override
+    public FunctionSymbol getBinaryArithmeticTypeFunctionSymbol(String dbOperationName) {
+        return new BinaryArithmeticTypeFunctionSymbolImpl(dbOperationName, dbStringType, metaRDFType, typeFactory);
     }
 
     @Override
