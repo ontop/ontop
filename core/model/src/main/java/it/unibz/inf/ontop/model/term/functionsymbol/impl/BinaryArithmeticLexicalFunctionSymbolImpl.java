@@ -16,12 +16,14 @@ public class BinaryArithmeticLexicalFunctionSymbolImpl extends FunctionSymbolImp
 
     private final String dbOperationName;
     private final DBTermType dbStringType;
+    private final TypeFactory typeFactory;
 
     protected BinaryArithmeticLexicalFunctionSymbolImpl(String dbOperationName, DBTermType dbStringType,
-                                                        MetaRDFTermType metaRDFTermType) {
-        super("LATELY_OP_LEX_" + dbOperationName, ImmutableList.of(dbStringType, dbStringType, metaRDFTermType, metaRDFTermType, metaRDFTermType));
+                                                        MetaRDFTermType metaRDFTermType, TypeFactory typeFactory) {
+        super("BINARY_LEXICAL_" + dbOperationName, ImmutableList.of(dbStringType, dbStringType, metaRDFTermType, metaRDFTermType, metaRDFTermType));
         this.dbOperationName = dbOperationName;
         this.dbStringType = dbStringType;
+        this.typeFactory = typeFactory;
     }
 
     @Override
@@ -59,18 +61,13 @@ public class BinaryArithmeticLexicalFunctionSymbolImpl extends FunctionSymbolImp
         if (rdfTypeTerm instanceof RDFTermTypeConstant) {
             RDFTermType rdfType = ((RDFTermTypeConstant) rdfTypeTerm).getRDFTermType();
 
-            if (rdfType.isA(termFactory.getTypeFactory().getAbstractOntopTemporalDatatype())) {
-                throw new UnsupportedOperationException("Binary arithmetic operators are only supported for numeric types");
+            if (rdfType.isA(termFactory.getTypeFactory().getAbstractOntopNumericDatatype())) {
+                return getNumericLexicalTerm(newTerms, termFactory, rdfType);
+            } else if (rdfType.isA(termFactory.getTypeFactory().getAbstractOntopTemporalDatatype())) {
+                throw new UnsupportedOperationException("Binary arithmetic operations on temporal types are not yet supported");
+            } else {
+                return termFactory.getRDFFunctionalTerm(termFactory.getNullConstant(), termFactory.getNullConstant());
             }
-
-            DBTermType dbType = rdfType.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory());
-
-            ImmutableFunctionalTerm numericTerm = termFactory.getDBBinaryNumericFunctionalTerm(
-                    dbOperationName, dbType,
-                    termFactory.getConversionFromRDFLexical2DB(dbType, newTerms.get(0), rdfType),
-                    termFactory.getConversionFromRDFLexical2DB(dbType, newTerms.get(1), rdfType));
-
-            return termFactory.getConversion2RDFLexical(dbType, numericTerm, rdfType);
         }
         else if ((rdfTypeTerm instanceof ImmutableFunctionalTerm)
                 && ((ImmutableFunctionalTerm) rdfTypeTerm).getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol) {
@@ -98,5 +95,17 @@ public class BinaryArithmeticLexicalFunctionSymbolImpl extends FunctionSymbolImp
                                     termFactory))
                     .map(t -> t.simplify(variableNullability))
                     .orElseGet(() -> super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability));
+    }
+
+    private ImmutableTerm getNumericLexicalTerm(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
+                                                RDFTermType rdfType) {
+        DBTermType dbType = rdfType.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory());
+
+        ImmutableFunctionalTerm numericTerm = termFactory.getDBBinaryNumericFunctionalTerm(
+                dbOperationName, dbType,
+                termFactory.getConversionFromRDFLexical2DB(dbType, newTerms.get(0), rdfType),
+                termFactory.getConversionFromRDFLexical2DB(dbType, newTerms.get(1), rdfType));
+
+        return termFactory.getConversion2RDFLexical(dbType, numericTerm, rdfType);
     }
 }

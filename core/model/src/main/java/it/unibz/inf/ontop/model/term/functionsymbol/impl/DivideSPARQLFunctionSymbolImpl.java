@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -17,8 +18,8 @@ public class DivideSPARQLFunctionSymbolImpl extends BinaryArithmeticSPARQLFuncti
 
     private final RDFDatatype xsdDecimalType;
 
-    protected DivideSPARQLFunctionSymbolImpl(RDFDatatype abstractNumericType, RDFDatatype xsdDecimalType) {
-        super("SP_DIVIDE", SPARQL.DIVIDE, abstractNumericType);
+    protected DivideSPARQLFunctionSymbolImpl(RDFDatatype abstractNumericType, RDFDatatype xsdDecimalType, TypeFactory typeFactory) {
+        super("SP_DIVIDE", SPARQL.DIVIDE, abstractNumericType, typeFactory);
         this.xsdDecimalType = xsdDecimalType;
     }
 

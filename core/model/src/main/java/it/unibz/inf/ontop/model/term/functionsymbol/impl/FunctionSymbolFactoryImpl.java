@@ -186,10 +186,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new Sha256SPARQLFunctionSymbolImpl(xsdString),
                 new Sha384SPARQLFunctionSymbolImpl(xsdString),
                 new Sha512SPARQLFunctionSymbolImpl(xsdString),
-                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_MULTIPLY", SPARQL.MULTIPLY, abstractNumericOrTemporalType),
-                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_ADD", SPARQL.ADD, abstractNumericOrTemporalType),
-                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.SUBTRACT, abstractNumericOrTemporalType),
-                new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal),
+                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_MULTIPLY", SPARQL.MULTIPLY, abstractNumericOrTemporalType, typeFactory),
+                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_ADD", SPARQL.ADD, abstractNumericOrTemporalType, typeFactory),
+                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.SUBTRACT, abstractNumericOrTemporalType, typeFactory),
+                new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal, typeFactory),
                 new NonStrictEqSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
                 new LessThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
                 new GreaterThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
@@ -688,16 +688,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public BooleanFunctionSymbol getLexicalLangMatches() {
         return lexicalLangMatchesFunctionSymbol;
-    }
-
-    @Override
-    public FunctionSymbol getBinaryArithmeticLexicalFunctionSymbol(String dbOperationName) {
-        return new BinaryArithmeticLexicalFunctionSymbolImpl(dbOperationName, dbStringType, metaRDFType);
-    }
-
-    @Override
-    public FunctionSymbol getBinaryArithmeticTypeFunctionSymbol(String dbOperationName) {
-        return new BinaryArithmeticTypeFunctionSymbolImpl(dbOperationName, dbStringType, metaRDFType, typeFactory);
     }
 
     @Override

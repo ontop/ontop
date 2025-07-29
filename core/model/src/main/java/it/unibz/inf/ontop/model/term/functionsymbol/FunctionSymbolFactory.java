@@ -122,10 +122,6 @@ public interface FunctionSymbolFactory {
      */
     BooleanFunctionSymbol getLexicalLangMatches();
 
-    FunctionSymbol getBinaryArithmeticLexicalFunctionSymbol(String dbOperationName);
-
-    FunctionSymbol getBinaryArithmeticTypeFunctionSymbol(String dbOperationName);
-
     FunctionSymbol getUnaryLatelyTypedFunctionSymbol(Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct,
                                                      DBTermType targetType);
 

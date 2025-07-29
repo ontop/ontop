@@ -12,14 +12,14 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
-public class BinaryArithmeticTypeFunctionSymbolImpl extends FunctionSymbolImpl{
+public class BinaryArithmeticTermTypeFunctionSymbolImpl extends FunctionSymbolImpl{
 
     private final MetaRDFTermType metaRDFTermType;
     private final TypeFactory typeFactory;
 
-    protected BinaryArithmeticTypeFunctionSymbolImpl(String dbOperationName, DBTermType dbTermType,
-                                                     MetaRDFTermType metaRDFType, TypeFactory typeFactory) {
-        super("LATELY_OP_TYPE_" + dbOperationName, ImmutableList.of(dbTermType, dbTermType, metaRDFType, metaRDFType));
+    protected BinaryArithmeticTermTypeFunctionSymbolImpl(String dbOperationName, DBTermType dbTermType,
+                                                         MetaRDFTermType metaRDFType, TypeFactory typeFactory) {
+        super("BINARY_TYPE_" + dbOperationName, ImmutableList.of(dbTermType, dbTermType, metaRDFType, metaRDFType));
 
         this.metaRDFTermType = metaRDFType;
         this.typeFactory = typeFactory;
@@ -61,11 +61,14 @@ public class BinaryArithmeticTypeFunctionSymbolImpl extends FunctionSymbolImpl{
                     .map(t -> ((RDFTermTypeConstant) t).getRDFTermType())
                     .collect(ImmutableCollectors.toList());
 
-            if (rdfTypeConstants.stream().anyMatch(t -> t.isA(typeFactory.getAbstractOntopTemporalDatatype()))) {
+            if (rdfTypeConstants.stream().allMatch(t -> t.isA(typeFactory.getAbstractOntopNumericDatatype()))) {
+                return termFactory.getCommonPropagatedOrSubstitutedNumericType(typeTerms.get(0), typeTerms.get(1));
+            } else if (rdfTypeConstants.stream().anyMatch(t -> t.isA(typeFactory.getAbstractOntopTemporalDatatype()))) {
                 throw new UnsupportedOperationException(
-                        "Binary arithmetic operations on temporal types are not supported");
+                        "Binary arithmetic operations on temporal types are not yet supported");
+            } else {
+                return termFactory.getRDFFunctionalTerm(termFactory.getNullConstant(), termFactory.getNullConstant());
             }
-            return termFactory.getCommonPropagatedOrSubstitutedNumericType(typeTerms.get(0), typeTerms.get(1));
         } else if (typeTerms.stream().anyMatch(t -> t instanceof ImmutableFunctionalTerm)) {
             return typeTerms.stream()
                     .filter(t -> t instanceof ImmutableFunctionalTerm)
