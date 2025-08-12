@@ -19,7 +19,7 @@ public class BinaryArithmeticTermTypeFunctionSymbolImpl extends FunctionSymbolIm
 
     protected BinaryArithmeticTermTypeFunctionSymbolImpl(String dbOperationName, DBTermType dbTermType,
                                                          MetaRDFTermType metaRDFType, TypeFactory typeFactory) {
-        super("BINARY_TYPE_" + dbOperationName, ImmutableList.of(dbTermType, dbTermType, metaRDFType, metaRDFType));
+        super("TYPE_BINARY_" + dbOperationName, ImmutableList.of(dbTermType, dbTermType, metaRDFType, metaRDFType));
 
         this.metaRDFTermType = metaRDFType;
         this.typeFactory = typeFactory;
@@ -62,28 +62,36 @@ public class BinaryArithmeticTermTypeFunctionSymbolImpl extends FunctionSymbolIm
                     .collect(ImmutableCollectors.toList());
 
             if (rdfTypeConstants.stream().allMatch(t -> t.isA(typeFactory.getAbstractOntopNumericDatatype()))) {
-                return termFactory.getCommonPropagatedOrSubstitutedNumericType(typeTerms.get(0), typeTerms.get(1));
-            } else if (rdfTypeConstants.stream().anyMatch(t -> t.isA(typeFactory.getAbstractOntopTemporalDatatype()))) {
-                throw new UnsupportedOperationException(
-                        "Binary arithmetic operations on temporal types are not yet supported");
+                return termFactory.getCommonPropagatedOrSubstitutedNumericType(typeTerms.get(0), typeTerms.get(1)).simplify(variableNullability);
             } else {
-                return termFactory.getRDFFunctionalTerm(termFactory.getNullConstant(), termFactory.getNullConstant());
+                return termFactory.getNullConstant();
             }
         } else if (typeTerms.stream().anyMatch(t -> t instanceof ImmutableFunctionalTerm)) {
+
             return typeTerms.stream()
                     .filter(t -> t instanceof ImmutableFunctionalTerm)
-                    .map(t -> (ImmutableFunctionalTerm)t)
-                    .filter(t -> t.getFunctionSymbol() instanceof DBIfThenFunctionSymbol)
+                    .map(t -> (ImmutableFunctionalTerm) t)
                     .findAny()
-                    .map(t -> ((DBIfThenFunctionSymbol) t.getFunctionSymbol())
-                            .pushDownRegularFunctionalTerm(
-                                    termFactory.getImmutableFunctionalTerm(this, newTerms),
-                                    newTerms.indexOf(t),
-                                    termFactory))
-                    .map(t -> t.simplify(variableNullability))
+                    .flatMap(functionalTerm ->
+                            // tries to lift the DB case of the rdf type term if there is any
+                            tryPushingDownFunctionalTerm(functionalTerm, newTerms, termFactory, variableNullability))
+                    // tries to lift magic numbers
+                    .or(() ->  super.tryToLiftMagicNumbers(newTerms, termFactory, variableNullability, false))
                     .orElseGet(() -> super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability));
         } else {
-            return termFactory.getCommonPropagatedOrSubstitutedNumericType(typeTerms.get(0), typeTerms.get(1));
+            return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
         }
+    }
+
+    private Optional<ImmutableTerm> tryPushingDownFunctionalTerm(ImmutableFunctionalTerm term, ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
+                                                     VariableNullability variableNullability) {
+        return Optional.of(term)
+                .filter(t -> t.getFunctionSymbol() instanceof DBIfThenFunctionSymbol)
+                .map(t -> ((DBIfThenFunctionSymbol) t.getFunctionSymbol())
+                        .pushDownRegularFunctionalTerm(
+                                termFactory.getImmutableFunctionalTerm(this, newTerms),
+                                newTerms.indexOf(t),
+                                termFactory))
+                .map(t -> t.simplify(variableNullability));
     }
 }

@@ -20,7 +20,7 @@ public class BinaryArithmeticLexicalFunctionSymbolImpl extends FunctionSymbolImp
 
     protected BinaryArithmeticLexicalFunctionSymbolImpl(String dbOperationName, DBTermType dbStringType,
                                                         MetaRDFTermType metaRDFTermType, TypeFactory typeFactory) {
-        super("BINARY_LEXICAL_" + dbOperationName, ImmutableList.of(dbStringType, dbStringType, metaRDFTermType, metaRDFTermType, metaRDFTermType));
+        super("LEXICAL_BINARY_" + dbOperationName, ImmutableList.of(dbStringType, dbStringType, metaRDFTermType, metaRDFTermType, metaRDFTermType));
         this.dbOperationName = dbOperationName;
         this.dbStringType = dbStringType;
         this.typeFactory = typeFactory;
@@ -63,10 +63,8 @@ public class BinaryArithmeticLexicalFunctionSymbolImpl extends FunctionSymbolImp
 
             if (rdfType.isA(termFactory.getTypeFactory().getAbstractOntopNumericDatatype())) {
                 return getNumericLexicalTerm(newTerms, termFactory, rdfType);
-            } else if (rdfType.isA(termFactory.getTypeFactory().getAbstractOntopTemporalDatatype())) {
-                throw new UnsupportedOperationException("Binary arithmetic operations on temporal types are not yet supported");
             } else {
-                return termFactory.getRDFFunctionalTerm(termFactory.getNullConstant(), termFactory.getNullConstant());
+                return termFactory.getNullConstant();
             }
         }
         else if ((rdfTypeTerm instanceof ImmutableFunctionalTerm)
