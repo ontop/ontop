@@ -12,10 +12,36 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.ofn.OfnMultitypedInputBinarySPARQLFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.ofn.OfnSimpleBinarySPARQLFunctionSymbolImpl;
+//TODO
+// Add raster function's import e.g. raster.RasterAverageFunctionSymbolImpl;
+// --------------------------------------------[STEP 02]---------------------------------------------
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterDimensionFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.ProcessRasterArrayCellFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.Date2GridFunctionSymbolImpl;
+//import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterAverageFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterAverageXFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterAverageFinalFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterAverageFieldFunctionSymbolImpl;
+
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMaximumFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMaximumXFunctionSymbolImpl;
+
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMinimumFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterMinimumXFunctionSymbolImpl;
+
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterTemporalAverageFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterTemporalMinimumFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterTemporalMaximumFunctionSymbolImpl;
+
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.ClipRasterFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.ClipRasterAnyGeomFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.GeoTIFFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterSmallArrayTempFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.raster.RasterSmallArraySpatialFunctionSymbolImpl;
+
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.*;
 import org.apache.commons.rdf.api.IRI;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,7 +63,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final Map<Integer, SPARQLFunctionSymbol> coalesceMap;
     private final Map<String, SPARQLAggregationFunctionSymbol> distinctSparqlGroupConcatMap;
     private final Map<String, SPARQLAggregationFunctionSymbol> nonDistinctSparqlGroupConcatMap;
-    // TODO: use a cache with a limited budget
     private final Map<IRI, SPARQLFunctionSymbol> sparqlIRIMap;
     private final Map<RDFTermType, BooleanFunctionSymbol> isAMap;
     private final Map<InequalityLabel, BooleanFunctionSymbol> lexicalInequalityFunctionSymbolMap;
@@ -330,6 +355,57 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new GeofUnionFunctionSymbolImpl(GEOF.UNION, wktLiteral, iriType),
                 new GeofRelateFunctionSymbolImpl(GEOF.RELATE, wktLiteral, xsdString, xsdBoolean),
                 new GeofRelateMFunctionSymbolImpl(GEOF.RELATEM, wktLiteral, xsdString),
+
+                /*
+                 * Raster Functions
+                 */
+
+                //TODO
+                // Add raster function e.g. averageRASTERSpatial()
+                // 1. Vocabulary IRI
+                // 2. RDF Input types
+                // 3. Output types
+                // --------------------------------------------[STEP 02a]---------------------------------------------
+
+                new RasterDimensionFunctionSymbolImpl(RASDB.RAS_GET_DIMENSION, xsdString),
+
+                new ProcessRasterArrayCellFunctionSymbolImpl(RASDB.RAS_PROCESS_RASTER_ARRAY, xsdDatetime, xsdString, xsdDecimal),
+
+                new Date2GridFunctionSymbolImpl(RASDB.RAS_DATE_TO_GRID, xsdDatetime, xsdString),
+
+//                new RasterAverageFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE, xsdInteger, xsdDouble, wktLiteral, xsdString),
+
+                new RasterMaximumFunctionSymbolImpl(RASDB.RAS_SPATIAL_MAXIMUM, xsdDatetime, xsdString, wktLiteral, xsdDouble),
+
+                new RasterMinimumFunctionSymbolImpl(RASDB.RAS_SPATIAL_MINIMUM, xsdDatetime, xsdString, wktLiteral, xsdDouble),
+
+                new RasterMinimumXFunctionSymbolImpl(RASDB.RAS_SPATIAL_MINIMUM_X, xsdInteger, wktLiteral, xsdDouble, xsdString),
+
+                new RasterMaximumXFunctionSymbolImpl(RASDB.RAS_SPATIAL_MAXIMUM_X, xsdInteger, wktLiteral, xsdDouble, xsdString),
+
+                new RasterAverageXFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE_X, xsdInteger, wktLiteral, xsdDouble, xsdString),
+
+                new RasterAverageFinalFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE_FINAL, xsdDatetime, xsdString, wktLiteral, xsdDouble),
+
+                new RasterAverageFieldFunctionSymbolImpl(RASDB.RAS_SPATIAL_AVERAGE_FIELD, xsdDatetime, xsdString, wktLiteral),
+
+                new RasterTemporalAverageFunctionSymbolImpl(RASDB.RAS_TEMPORAL_AVERAGE, xsdDatetime, xsdString, wktLiteral),
+
+                new RasterTemporalMinimumFunctionSymbolImpl(RASDB.RAS_TEMPORAL_MINIMUM, xsdDatetime, xsdString, wktLiteral),
+
+                new RasterTemporalMaximumFunctionSymbolImpl(RASDB.RAS_TEMPORAL_MAXIMUM, xsdDatetime, xsdString, wktLiteral),
+
+                new ClipRasterFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL, xsdDatetime, xsdString, wktLiteral),
+
+                new ClipRasterAnyGeomFunctionSymbolImpl(RASDB.RAS_CLIP_RASTER_SPATIAL_ANY_GEOM, xsdDatetime, xsdString),
+
+                new GeoTIFFunctionSymbolImpl(RASDB.RAS_GEOTIFF, xsdDatetime, wktLiteral, xsdString, xsdDecimal),
+
+                new RasterSmallArrayTempFunctionSymbolImpl(RASDB.RAS_CLIP_SMALL_ARRAY_TEMPORAL, xsdInteger, xsdInteger, xsdString),
+
+                new RasterSmallArraySpatialFunctionSymbolImpl(RASDB.RAS_CLIP_SMALL_ARRAY_SPATIAL, xsdInteger, xsdString),
+
+
 
                 /*
                  * Time extension - duration arithmetic

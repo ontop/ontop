@@ -562,7 +562,107 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBTz(), dbDatetimeTerm);
     }
 
-    @Override
+	//TODO
+	// Add Terms for newly added raster functions -------------------------------------[STEP 05]-------------------------------------------
+
+	@Override
+	public ImmutableFunctionalTerm getRasterDimension(ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterDimension(), ImmutableList.of(dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getProcessRasterArrayCell(ImmutableTerm TimeSnap, ImmutableTerm dbOperator, ImmutableTerm dbValue,  ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getProcessRasterArrayCell(), ImmutableList.of(TimeSnap, dbOperator, dbValue, dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDate2Grid(ImmutableTerm TimeSnap, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDate2Grid(), ImmutableList.of(TimeSnap, dbRasterName));
+	}
+
+//	@Override
+//	public ImmutableFunctionalTerm getRasterSpatialAverage(ImmutableTerm TimeSnap, ImmutableTerm ScaleFactor, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName ){
+//		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialAverage(), ImmutableList.of(TimeSnap, ScaleFactor, dbRegionGeom, dbRasterName));
+//	}
+
+	@Override
+	public ImmutableFunctionalTerm getRasterSpatialMaximum(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName ){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialMaximum(), ImmutableList.of(TimeSnap, dbRegionGeom, dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getRasterSpatialMaximumX(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbMinLon, ImmutableTerm dbMaxLat, ImmutableTerm dbXscale, ImmutableTerm dbYscale, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialMaximumX(), ImmutableList.of(TimeSnap, dbRegionGeom, dbMinLon, dbMaxLat, dbXscale, dbYscale, dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getRasterTemporalMaximum(ImmutableTerm dbStartTime, ImmutableTerm dbEndTime, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterTemporalMaximum(), ImmutableList.of(dbStartTime, dbEndTime, dbRegionGeom, dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getRasterSpatialMinimum(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName ){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialMinimum(), ImmutableList.of(TimeSnap, dbRegionGeom, dbRasterName));
+	}
+
+
+	@Override
+	public ImmutableFunctionalTerm getRasterSpatialMinimumX(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbMinLon, ImmutableTerm dbMaxLat, ImmutableTerm dbXscale, ImmutableTerm dbYscale, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialMinimumX(), ImmutableList.of(TimeSnap, dbRegionGeom, dbMinLon, dbMaxLat, dbXscale, dbYscale, dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getRasterTemporalMinimum(ImmutableTerm dbStartTime, ImmutableTerm dbEndTime, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterTemporalMinimum(), ImmutableList.of(dbStartTime, dbEndTime, dbRegionGeom, dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getRasterSpatialAverageX(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbMinLon, ImmutableTerm dbMaxLat, ImmutableTerm dbXscale, ImmutableTerm dbYscale, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialAverageX(), ImmutableList.of(TimeSnap, dbRegionGeom, dbMinLon, dbMaxLat, dbXscale, dbYscale, dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getRasterSpatialAverageFinal(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialAverageFinal(), ImmutableList.of(TimeSnap, dbRegionGeom, dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getRasterSpatialAverageField(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbFieldName, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSpatialAverageField(), ImmutableList.of(TimeSnap, dbRegionGeom, dbFieldName, dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getRasterTemporalAverage(ImmutableTerm dbStartTime, ImmutableTerm dbEndTime, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterTemporalAverage(), ImmutableList.of(dbStartTime, dbEndTime, dbRegionGeom, dbRasterName));
+	}
+
+
+	@Override
+	public ImmutableFunctionalTerm getRasterSmallArrayTemp(ImmutableTerm StartTime,ImmutableTerm EndTime, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSmallArrayTemp(), ImmutableList.of(StartTime, EndTime, dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getRasterSmallArraySpatial(ImmutableTerm StartTime, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getRasterSmallArraySpatial(), ImmutableList.of(StartTime, dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getClipRaster(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getClipRaster(), ImmutableList.of(TimeSnap, dbRegionGeom, dbRasterName));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getGeoTIF(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName, ImmutableTerm dbRegionName, ImmutableTerm dbFillVal){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getGeoTIF(), ImmutableList.of(TimeSnap, dbRegionGeom, dbRasterName, dbRegionName, dbFillVal));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getClipRasterAnyGeom(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName){
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getClipRasterAnyGeom(), ImmutableList.of(TimeSnap, dbRegionGeom, dbRasterName));
+	}
+
+	@Override
     public ImmutableFunctionalTerm getDBNow() {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBNow());
     }

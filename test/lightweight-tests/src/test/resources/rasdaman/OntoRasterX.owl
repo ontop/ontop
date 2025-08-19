@@ -1,0 +1,561 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="https://github.com/aghoshpro/OntoRaster/"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:lgd="http://linkedgeodata.org/resource/"
+     xmlns:lgdg="http://linkedgeodata.org/geometry/"
+     xmlns:lgdo="http://linkedgeodata.org/ontology/"
+     xmlns:bldg="http://www.opengis.net/citygml/building/2.0/"
+     ontologyIRI="https://github.com/aghoshpro/OntoRaster/">
+    <Prefix name="" IRI="https://github.com/aghoshpro/OntoRaster/"/>
+    <Prefix name="geo" IRI="http://www.opengis.net/ont/geosparql#"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="obda" IRI="https://w3id.org/obda/vocabulary#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Prefix name="rasdb" IRI="https://github.com/aghoshpro/RasterDataCube/"/>
+    <Declaration>
+        <Class abbreviatedIRI="rdfs:Container"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="AxisExtent"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="EnumeratedRange"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="Field"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="GridCoverage"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="IntervalRange"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="NILValue"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="Range"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="RangeType"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="Raster"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="Region"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="District"/>
+    </Declaration>
+        <Declaration>
+        <Class IRI="SubDistrict"/>
+        </Declaration>
+    <SubClassOf>
+        <Class IRI="District"/>
+        <Class IRI="Region"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="SubDistrict"/>
+        <Class IRI="District"/>
+    </SubClassOf>
+    <Declaration>
+        <Class IRI="RegularGridDomain"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="TypedRange"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="UnitOfMeasure-UOM"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="rdfs:member"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="rasdb:hasAxisExtent"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="rasdb:hasDomain"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="rasdb:hasField"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="rasdb:hasNILValue"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="rasdb:hasRange"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="rasdb:hasRangeType"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="rasdb:hasUoM"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rdfs:label"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:SRS"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:axisLabel"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:axisOrder"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:dataType"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:dimensions"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:fieldDefinition"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:fieldDescription"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:fieldId"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:fieldName"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:high"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:isOptional"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:isUpdatable"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:low"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:maxVal"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:minVal"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:numberOfFields"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:origin"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:rasterName"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="lgdo:bldgType"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:reason"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:uomLabel"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:valRange"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:valSIngle"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="rasdb:values"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://purl.org/dc/terms/contributor"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://purl.org/dc/terms/created"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://purl.org/dc/terms/creator"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://purl.org/dc/terms/description"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://purl.org/dc/terms/license"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://purl.org/dc/terms/modified"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://purl.org/dc/terms/publisher"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://purl.org/dc/terms/replaces"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://purl.org/dc/terms/rights"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://purl.org/dc/terms/source"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://purl.org/dc/terms/title"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#example"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#note"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#prefLabel"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#scopeNote"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="https://schema.org/affiliation"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="https://schema.org/email"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="https://schema.org/name"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty IRI="https://schema.org/url"/>
+    </Declaration>
+    <Declaration>
+        <Datatype abbreviatedIRI="xsd:date"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="EnumeratedRange"/>
+        <Class IRI="Range"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="GridCoverage"/>
+        <Class IRI="Raster"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="IntervalRange"/>
+        <Class IRI="Range"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="TypedRange"/>
+        <Class IRI="Range"/>
+    </SubClassOf>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="geo:hasGeometry"/>
+        <Class IRI="Region"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="rasdb:hasAxisExtent"/>
+        <Class IRI="RegularGridDomain"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="rasdb:hasDomain"/>
+        <Class IRI="Raster"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="rasdb:hasField"/>
+        <Class IRI="RangeType"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="rasdb:hasNILValue"/>
+        <Class IRI="Field"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="rasdb:hasRange"/>
+        <Class IRI="Field"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="rasdb:hasRangeType"/>
+        <Class IRI="Raster"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="rasdb:hasUoM"/>
+        <Class IRI="AxisExtent"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="rasdb:hasUoM"/>
+        <Class IRI="Field"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="rasdb:hasAxisExtent"/>
+        <Class IRI="AxisExtent"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="rasdb:hasDomain"/>
+        <Class IRI="RegularGridDomain"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="rasdb:hasField"/>
+        <Class IRI="Field"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="rasdb:hasNILValue"/>
+        <Class IRI="NILValue"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="rasdb:hasRange"/>
+        <Class IRI="Range"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="rasdb:hasRangeType"/>
+        <Class IRI="RangeType"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="rasdb:hasUoM"/>
+        <Class IRI="UnitOfMeasure-UOM"/>
+    </ObjectPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:SRS"/>
+        <Class IRI="RegularGridDomain"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:axisLabel"/>
+        <Class IRI="AxisExtent"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:axisOrder"/>
+        <Class IRI="AxisExtent"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:dataType"/>
+        <Class IRI="TypedRange"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:dimensions"/>
+        <Class IRI="RegularGridDomain"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:fieldDefinition"/>
+        <Class IRI="Field"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:fieldDescription"/>
+        <Class IRI="Field"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:fieldId"/>
+        <Class IRI="Field"/>
+    </DataPropertyDomain>
+<!--     <DataPropertyDomain> -->
+<!--         <DataProperty abbreviatedIRI="rasdb:fieldName"/> -->
+<!--         <Class IRI="Field"/> -->
+<!--     </DataPropertyDomain> -->
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:high"/>
+        <Class IRI="AxisExtent"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:isOptional"/>
+        <Class IRI="Field"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:isUpdatable"/>
+        <Class IRI="Field"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:low"/>
+        <Class IRI="AxisExtent"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:maxVal"/>
+        <Class IRI="IntervalRange"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:minVal"/>
+        <Class IRI="IntervalRange"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:numberOfFields"/>
+        <Class IRI="Field"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:origin"/>
+        <Class IRI="RegularGridDomain"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:rasterName"/>
+        <Class IRI="Raster"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:reason"/>
+        <Class IRI="NILValue"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:uomLabel"/>
+        <Class IRI="UnitOfMeasure-UOM"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:valRange"/>
+        <Class IRI="NILValue"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:valSIngle"/>
+        <Class IRI="NILValue"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="rasdb:values"/>
+        <Class IRI="EnumeratedRange"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:SRS"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:axisLabel"/>
+        <Datatype abbreviatedIRI="rdfs:Literal"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:axisOrder"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:dimensions"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:fieldDefinition"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:fieldDescription"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:fieldId"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+<!--     <DataPropertyRange> -->
+<!--         <DataProperty abbreviatedIRI="rasdb:fieldName"/> -->
+<!--         <Datatype abbreviatedIRI="xsd:string"/> -->
+<!--     </DataPropertyRange> -->
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:high"/>
+        <Datatype abbreviatedIRI="xsd:double"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:isOptional"/>
+        <Datatype abbreviatedIRI="xsd:boolean"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:isUpdatable"/>
+        <Datatype abbreviatedIRI="xsd:boolean"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:low"/>
+        <Datatype abbreviatedIRI="xsd:double"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:maxVal"/>
+        <Datatype abbreviatedIRI="xsd:decimal"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:minVal"/>
+        <Datatype abbreviatedIRI="xsd:decimal"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:rasterName"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="lgdo:bldgType"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:reason"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:uomLabel"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="rasdb:valSIngle"/>
+        <Datatype abbreviatedIRI="xsd:decimal"/>
+    </DataPropertyRange>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>xsd:Name</AbbreviatedIRI>
+        <Literal></Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>rasdb:SRS</AbbreviatedIRI>
+        <Literal>Spatial reference system (SRS) or coordinate reference system (CRS) defines locations on the surface of Earth as coordinates with unit of measurement.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>rasdb:dataType</AbbreviatedIRI>
+        <Literal>Special type of NIL value</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>rasdb:dimensions</AbbreviatedIRI>
+        <Literal>Every grid domain has a number of dimensions such as 2D. 3D or nD</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>rasdb:fieldDescription</AbbreviatedIRI>
+        <Literal>Description of the field of concerned raster dataset.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>rasdb:high</AbbreviatedIRI>
+        <Literal>Upper bound or highest value of respective axis extent</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>rasdb:low</AbbreviatedIRI>
+        <Literal>Lower bound or lowest value of respective axis extent</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>rasdb:numberOfFields</AbbreviatedIRI>
+        <Literal>Determines how many fields exist in a raster dataset.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>rasdb:origin</AbbreviatedIRI>
+        <Literal>A tuple containing coordinates for each dimension showing either center or top-left corner of the respective grid domain of a raster</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>rasdb:rasterName</AbbreviatedIRI>
+        <Literal>Name of the raster dataset</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>rasdb:reason</AbbreviatedIRI>
+        <Literal>Reason for null or fill values in rastrer arrays</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>rasdb:uomLabel</AbbreviatedIRI>
+        <Literal>Name of the repscetive unit of measure for each axis in the axis extent (e.g., degree foe angle)</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>rasdb:valRange</AbbreviatedIRI>
+        <Literal>A set of multiple values to represent noise or no data or fill data of arrays in the raster</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>rasdb:valSIngle</AbbreviatedIRI>
+        <Literal>A single value to represent noise or no data or fill data of arrays in the raster</Literal>
+    </AnnotationAssertion>
+</Ontology>
+
+
+<!-- Generated by the OWL API (version 4.5.25.2024-06-25T15:35:49Z) https://github.com/owlcs/owlapi -->

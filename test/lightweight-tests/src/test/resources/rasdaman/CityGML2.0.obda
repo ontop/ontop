@@ -1,0 +1,189 @@
+[PrefixDeclaration]
+:		https://github.com/D2G2Project/CityGML#
+d2g2:		https://github.com/D2G2Project/CityGML#
+dc:		http://purl.org/dc/elements/1.1/
+sf:		http://www.opengis.net/ont/sf#
+xs:		http://www.w3.org/2001/XMLSchema
+app:		http://www.opengis.net/citygml/appearance/2.0/
+dem:		http://www.opengis.net/citygml/relief/2.0/
+frn:		http://www.opengis.net/citygml/cityfurniture/2.0/
+gen:		http://www.opengis.net/citygml/generics/2.0/
+geo:		http://www.opengis.net/ont/geosparql#
+gml:		http://www.opengis.net/gml/
+grp:		http://www.opengis.net/citygml/cityobjectgroup/2.0/
+lgd:		http://linkedgeodata.org/resource/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+tex:		http://www.opengis.net/citygml/texturedsurface/2.0/
+tun:		http://www.opengis.net/citygml/tunnel/2.0/
+veg:		http://www.opengis.net/citygml/vegetation/2.0/
+voc:		http://vocabulary.example.org/
+wtr:		http://www.opengis.net/citygml/waterbody/2.0/
+www:		http://www.w3.org/2001/
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+bldg:		http://www.opengis.net/citygml/building/2.0/
+brid:		http://www.opengis.net/citygml/bridge/2.0/
+core:		http://www.opengis.net/citygml/2.0/
+data:		http://mydata.example.org/
+lgdg:		http://linkedgeodata.org/geometry/
+lgdo:		http://linkedgeodata.org/ontology/
+luse:		http://www.opengis.net/citygml/landuse/2.0/
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+skos:		http://www.w3.org/2004/02/skos/core#
+tran:		http://www.opengis.net/citygml/transportation/2.0/
+terms:		http://purl.org/dc/terms/
+schema:		https://schema.org/
+clvapit:    https://w3id.org/italia/onto/CLV/
+l0:         https://w3id.org/italia/onto/l0/
+sosa:       http://www.w3.org/ns/sosa/
+qudt:       http://qudt.org/schema/qudt/
+qudt-unit:   	http://qudt.org/vocab/unit/
+
+[MappingDeclaration] @collection [[
+; Construction data - South Tyrol Geoservices
+mappingId	Non-Solid Geometry
+target		:geometry/{"ogc_fid"} a sf:Polygon ; geo:asWKT {"geometry_wkt"}^^geo:wktLiteral ; geo:hasMetricArea {"area_sqm"}^^xsd:double .
+source		SELECT "ogc_fid", ST_ASTEXT(ST_TRANSFORM("ct1a_shape", 4326)) AS "geometry_wkt", ST_AREA("ct1a_shape") AS "area_sqm"
+			FROM "construction_01k"
+			WHERE "ct1a_shape" IS NOT NULL
+
+mappingId	Building
+target		:cityobject/{"ogc_fid"} a bldg:Building ; bldg:function {"cat1_descr_de"}@de, {"cat1_descr_it"}@it ; :xalAdministrativeAreaName {"muni_muni_de"}@de , {"muni_muni_it"}@it ; clvapit:alt {ct1a_alt}^^xsd:double .
+source		SELECT "ogc_fid", "ct1a_alt", "cat1_descr_it", "cat1_descr_de", "muni_muni_it", "muni_muni_de"
+			FROM "construction_01k"
+			WHERE ct1a_alt > 0
+
+mappingId	Building to 2D Geometry
+target		:cityobject/{"ogc_fid"} geo:hasGeometry :geometry/{ogc_fid} ; bldg:lod1Solid  :solidgeometry/{"ogc_fid"} .
+source		SELECT "ogc_fid", "ct1a_alt", "cat1_descr_it", "cat1_descr_de", "muni_muni_it", "muni_muni_de"
+			FROM "construction_01k"
+
+mappingId	LandUse
+target		:cityobject/{"ogc_fid"} a luse:LandUse ; luse:function {"cat1_descr_de"}@de, {"cat1_descr_it"}@it ; :xalAdministrativeAreaName {"muni_muni_de"}@de , {"muni_muni_it"}@it .
+source		SELECT "ogc_fid", "ct1a_alt", "cat1_descr_it", "cat1_descr_de", "muni_muni_it", "muni_muni_de"
+			FROM "construction_01k"
+			WHERE ct1a_alt = 0 OR ct1a_alt IS NULL
+
+;Adminitrative Area Data - Bolzano Geoservices
+mappingId	municipality
+target		<https://w3id.org/italia/controlled-vocabulary/territorial-classifications/cities/{istat_code_controlled}> a clvapit:City ; rdfs:label {name_it}@it , {name_de}@de, {name_ld}@lld-latn ; clvapit:hasIdentifier <https://w3id.org/italia/data/identifiers/cities-identifiers/numeric-istat-code/{istat_code}> .
+source		SELECT istat_code_controlled, istat_code, name_it, name_de, name_ld FROM municipalities
+
+mappingId	municipality_geom
+target		<https://w3id.org/italia/controlled-vocabulary/territorial-classifications/cities/{istat_code_controlled}> geo:asWKT {wkt}^^geo:wktLiteral .
+source		SELECT istat_code_controlled, ST_ASTEXT(ST_TRANSFORM("shape", 4326)) AS wkt FROM municipalities
+
+mappingId	istat_identifier
+target		<https://w3id.org/italia/data/identifiers/cities-identifiers/numeric-istat-code/{istat_code}> a clvapit:Identifier ; l0:identifier {istat_code}^^xsd:integer .
+source		SELECT istat_code_controlled, istat_code FROM municipalities
+
+;Temperature Data - Bolzano ODH API
+mappingId	temperature_measurements
+target		:observation/{id} a sosa:Observation ; sosa:resultTime {timestamp_val}^^xsd:dateTime ; sosa:hasResult :meteo/observation/{id} .
+source		SELECT id, timestamp_val FROM temperature_measurements
+
+mappingId	station_temperature
+target		:observation/{id} sosa:isObservedBy :meteostation/{station_code}  .
+source		SELECT id, station_code FROM temperature_measurements
+
+mappingId	temperature_values
+target		:meteo/observation/{id} a sosa:Result ; qudt:numericValue {temperature}^^xsd:double ; qudt:unit qudt-unit:DegreeCelsius .
+source		SELECT id, temperature, unit FROM temperature_measurements WHERE unit IN ('°C','[°C]')
+
+mappingId	meteo_station
+target		:meteostation/{station_code} a d2g2:Station ; rdfs:label {name}^^xsd:string ; d2g2:hasStationCode {station_code} ; geo:hasGeometry d2g2:meteostation/geometry/{station_code} .
+source		SELECT * FROM meteo_stations
+
+mappingId	meteo_station_geom
+target		:meteostation/geometry/{station_code}  geo:asWKT "POINT ({latitude} {longitude} )"^^geo:wktLiteral .
+source		SELECT * FROM meteo_stations
+
+mappingId	Association_OSM_Class
+target		:osmlink/{id} a :Association_OSM_Class .
+source		SELECT "id"
+			FROM public."association_osm"
+
+mappingId	Association_OSM_Class_Node
+target		:osmlink/{id} :hasosmid lgd:node{osm_id} .
+source		SELECT id, osm_id
+			FROM public."association_osm"
+			WHERE osm_type='N'
+
+mappingId	Association_OSM_Class_Way
+target		:osmlink/{id} :hasosmid lgd:way{osm_id} .
+source		SELECT id, osm_id
+			FROM public."association_osm"
+			WHERE osm_type='W'
+
+mappingId	Association_OSM_Class_Relation
+target		:osmlink/{id} :hasosmid lgd:relation{osm_id} .
+source		SELECT id, osm_id
+			FROM public."association_osm"
+			WHERE osm_type='R'
+
+mappingId	Association_HasOSMClass
+target		:osmlink/{id} :hasosmclassid lgdo:osmclassid/{class_id} .
+source		SELECT *
+			FROM public."association_osm"
+
+mappingId	Association_HasOSMClassName
+target		lgdo:osmclassid/{class_id} a lgdo:{class_name} .
+source		SELECT *
+			FROM public.classes
+
+mappingId	lgd_nodes_properties
+target		lgd:node{osm_id} rdfs:label {name}^^xsd:string , {name_en}@en , {name_de}@de , {name_fr}@fr , {name_it}@it ; lgdo:height {height}^^xsd:string ; lgdo:addr_city {city}^^xsd:string ; lgdo:addr_country {country}^^xsd:string ; lgdo:addr_housenumber {housenumber}^^xsd:string ; lgdo:addr_street {street}^^xsd:string ; lgdo:postCode {postcode}^^xsd:string ; lgdo:addr_place {place}^^xsd:string .
+source		SELECT *
+			FROM public.entities
+			WHERE osm_type='N'
+
+mappingId	lgd_ways_properties
+target		lgd:way{osm_id} rdfs:label {name}^^xsd:string , {name_en}@en , {name_de}@de , {name_fr}@fr , {name_it}@it ; lgdo:height {height}^^xsd:string ; lgdo:addr_city {city}^^xsd:string ; lgdo:addr_country {country}^^xsd:string ; lgdo:addr_housenumber {housenumber}^^xsd:string ; lgdo:addr_street {street}^^xsd:string ; lgdo:postCode {postcode}^^xsd:string ; lgdo:addr_place {place}^^xsd:string .
+source		SELECT *
+			FROM public.entities
+			WHERE osm_type='W'
+
+mappingId	lgd_relations_properties
+target		lgd:relation{osm_id} rdfs:label {name}^^xsd:string , {name_en}@en , {name_de}@de , {name_fr}@fr , {name_it}@it ; lgdo:height {height}^^xsd:string ; lgdo:addr_city {city}^^xsd:string ; lgdo:addr_country {country}^^xsd:string ; lgdo:addr_housenumber {housenumber}^^xsd:string ; lgdo:addr_street {street}^^xsd:string ; lgdo:postCode {postcode}^^xsd:string ; lgdo:addr_place {place}^^xsd:string .
+source		SELECT *
+			FROM public.entities
+			WHERE osm_type='R'
+
+mappingId	lgd_nodes_has_geom
+target		lgd:node{osm_id} geo:hasGeometry lgdg:node{osm_id} .
+source		SELECT osm_id
+			FROM public.entities
+			WHERE osm_type='N'
+
+mappingId	lgd_ways_has_geom
+target		lgd:way{osm_id} geo:hasGeometry lgdg:way{osm_id} .
+source		SELECT osm_id
+			FROM public.entities
+			WHERE osm_type='W'
+
+mappingId	lgd_relations_has_geom
+target		lgd:relation{osm_id} geo:hasGeometry lgdg:relation{osm_id} .
+source		SELECT osm_id
+			FROM public.entities
+			WHERE osm_type='R'
+
+mappingId	lgd_nodes_wkt
+target		lgdg:node{osm_id} a geo:Geometry ; geo:asWKT {wkt}^^geo:wktLiteral .
+source		SELECT osm_id, ST_ASTEXT(geom) AS wkt
+			FROM public.entities
+			WHERE osm_type='N'
+
+mappingId	lgd_ways_wkt
+target		lgdg:way{osm_id} a geo:Geometry ; geo:asWKT {wkt}^^geo:wktLiteral .
+source		SELECT osm_id, ST_ASTEXT(geom) AS wkt
+			FROM public.entities
+			WHERE osm_type='W'
+
+mappingId	lgd_relations_wkt
+target		lgdg:relation{osm_id} a geo:Geometry ; geo:asWKT {wkt}^^geo:wktLiteral .
+source		SELECT osm_id, ST_ASTEXT(geom) AS wkt
+			FROM public.entities
+			WHERE osm_type='R'
+]]

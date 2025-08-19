@@ -163,6 +163,30 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBFunctionSymbol checkAndConvertDateTimeFromStringFunctionSymbol;
     private DBFunctionSymbol checkAndConvertDateFromDateTimeFunctionSymbol;
     private DBFunctionSymbol checkAndConvertDateFromStringFunctionSymbol;
+    //TODO
+    // Add Raster Function DB Symbol (same as separate new java class file)
+    // ------------------------------------[STEP 03]-----------------------------------
+    private DBFunctionSymbol getRasterDimensionFunctionSymbol;
+    private DBFunctionSymbol getProcessRasterArrayCellFunctionSymbol;
+    private DBFunctionSymbol getDate2GridFunctionSymbol;
+    //private DBFunctionSymbol getRasterSpatialAverageFunctionSymbol;
+    private DBFunctionSymbol getRasterSpatialMaximumFunctionSymbol;
+    private DBFunctionSymbol getRasterSpatialMaximumXFunctionSymbol;
+    private DBFunctionSymbol getRasterTemporalMaximumFunctionSymbol;
+
+    private DBFunctionSymbol getRasterSpatialMinimumFunctionSymbol;
+    private DBFunctionSymbol getRasterSpatialMinimumXFunctionSymbol;
+    private DBFunctionSymbol getRasterTemporalMinimumFunctionSymbol;
+
+    private DBFunctionSymbol getRasterSpatialAverageXFunctionSymbol;
+    private DBFunctionSymbol getRasterSpatialAverageFinalFunctionSymbol;
+    private DBFunctionSymbol getRasterSpatialAverageFieldFunctionSymbol;
+    private DBFunctionSymbol getRasterTemporalAverageFunctionSymbol;
+    private DBFunctionSymbol getClipRasterFunctionSymbol;
+    private DBFunctionSymbol getClipRasterAnyGeomFunctionSymbol;
+    private DBFunctionSymbol getGeoTIFFunctionSymbol;
+    private DBFunctionSymbol getRasterSmallArrayTempFunctionSymbol;
+    private DBFunctionSymbol getRasterSmallArraySpatialFunctionSymbol;
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
@@ -484,9 +508,32 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         secondsBetweenFromDateTimeFunctionSymbol = createSecondsBetweenFromDateTimeFunctionSymbol();
         millisBetweenFromDateTimeFunctionSymbol = createMillisBetweenFromDateTimeFunctionSymbol();
 
+        //TODO
+        // Add Raster Function Symbol
+        // ------------------------------------[STEP 03a]-----------------------------------
+        getRasterDimensionFunctionSymbol = createRasterDimensionFunctionSymbol();
+        getProcessRasterArrayCellFunctionSymbol = createProcessRasterArrayCellFunctionSymbol();
+        getDate2GridFunctionSymbol = createDate2GridFunctionSymbol();
+//        getRasterSpatialAverageFunctionSymbol = createRasterSpatialAverageFunctionSymbol();
+        getRasterSpatialMaximumFunctionSymbol = createRasterSpatialMaximumFunctionSymbol();
+        getRasterSpatialMinimumXFunctionSymbol = createRasterSpatialMinimumXFunctionSymbol();
+        getRasterTemporalMaximumFunctionSymbol = createRasterTemporalMaximumFunctionSymbol();
+        getRasterSpatialAverageXFunctionSymbol = createRasterSpatialAverageXFunctionSymbol();
+        getRasterSpatialAverageFinalFunctionSymbol = createRasterSpatialAverageFinalFunctionSymbol();
+        getRasterSpatialAverageFieldFunctionSymbol = createRasterSpatialAverageFieldFunctionSymbol();
+        getRasterTemporalAverageFunctionSymbol = createRasterTemporalAverageFunctionSymbol();
+        getRasterSpatialMinimumFunctionSymbol = createRasterSpatialMinimumFunctionSymbol();
+        getRasterSpatialMaximumXFunctionSymbol = createRasterSpatialMaximumXFunctionSymbol();
+        getRasterTemporalMinimumFunctionSymbol = createRasterTemporalMinimumFunctionSymbol();
+        getClipRasterFunctionSymbol = createClipRasterFunctionSymbol();
+        getClipRasterAnyGeomFunctionSymbol = createClipRasterAnyGeomFunctionSymbol();
+        getGeoTIFFunctionSymbol = createGeoTIFFunctionSymbol();
+        getRasterSmallArrayTempFunctionSymbol = createRasterSmallArrayTempFunctionSymbol();
+        getRasterSmallArraySpatialFunctionSymbol = createRasterSmallArraySpatialFunctionSymbol();
+
+
         nonDistinctGroupConcat = createDBGroupConcat(dbStringType, false);
         distinctGroupConcat = createDBGroupConcat(dbStringType, true);
-
         rowUniqueStrFct = createDBRowUniqueStr();
         rowNumberFct = createDBRowNumber();
         rowNumberWithOrderByFct = createDBRowNumberWithOrderBy();
@@ -1250,7 +1297,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBFunctionSymbol getDBIntIndex(int nbValues) {
-        // TODO: cache it
         return new DBIntIndexFunctionSymbolImpl(dbIntegerType, rootDBType, nbValues);
     }
 
@@ -1336,6 +1382,47 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBFunctionSymbol checkAndConvertDateFromString() { return checkAndConvertDateFromStringFunctionSymbol; }
+
+    //TODO
+    // Add Raster DBFunction Symbol
+    // ------------------------------------[STEP 03b]-------------------------------------
+    public DBFunctionSymbol getRasterDimension(){return getRasterDimensionFunctionSymbol;}
+
+    public DBFunctionSymbol getProcessRasterArrayCell(){return getProcessRasterArrayCellFunctionSymbol;}
+
+    public DBFunctionSymbol getDate2Grid(){return getDate2GridFunctionSymbol;}
+
+//    public DBFunctionSymbol getRasterSpatialAverage(){return getRasterSpatialAverageFunctionSymbol;}
+
+    public DBFunctionSymbol getRasterSpatialMaximum(){return getRasterSpatialMaximumFunctionSymbol;}
+
+    public DBFunctionSymbol getRasterSpatialMinimum(){return getRasterSpatialMinimumFunctionSymbol;}
+
+    public DBFunctionSymbol getRasterSpatialMaximumX(){return getRasterSpatialMaximumXFunctionSymbol;}
+
+    public DBFunctionSymbol getRasterSpatialMinimumX(){return getRasterSpatialMinimumXFunctionSymbol;}
+
+    public DBFunctionSymbol getRasterSpatialAverageX(){return getRasterSpatialAverageXFunctionSymbol;}
+
+    public DBFunctionSymbol getRasterSpatialAverageFinal(){return getRasterSpatialAverageFinalFunctionSymbol;}
+
+    public DBFunctionSymbol getRasterSpatialAverageField(){return getRasterSpatialAverageFieldFunctionSymbol;}
+
+    public DBFunctionSymbol getRasterTemporalAverage(){return getRasterTemporalAverageFunctionSymbol;}
+
+    public DBFunctionSymbol getRasterTemporalMinimum(){return getRasterTemporalMinimumFunctionSymbol;}
+
+    public DBFunctionSymbol getRasterTemporalMaximum(){return getRasterTemporalMaximumFunctionSymbol;}
+
+    public DBFunctionSymbol getClipRaster(){return getClipRasterFunctionSymbol;}
+
+    public DBFunctionSymbol getClipRasterAnyGeom(){return getClipRasterAnyGeomFunctionSymbol;}
+
+    public DBFunctionSymbol getGeoTIF(){return getGeoTIFFunctionSymbol;}
+
+    public DBFunctionSymbol getRasterSmallArrayTemp(){return getRasterSmallArrayTempFunctionSymbol;}
+
+    public DBFunctionSymbol getRasterSmallArraySpatial(){return getRasterSmallArraySpatialFunctionSymbol;}
 
     @Override
     public DBFunctionSymbol getDBArrayAccess() {
@@ -1896,6 +1983,192 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected DBBooleanFunctionSymbol createJsonIsScalar(DBTermType dbType) {
         throw new UnsupportedOperationException("Unsupported JSON-like datatype: " + dbType.getName());
     }
+
+    /**
+     * Raster Function Extension
+     */
+//TODO
+// create RasterSpatialAverage DBFunctionSymbol
+// ---------------------------------------[STEP 03c]-------------------------------------
+
+    protected DBFunctionSymbol createRasterDimensionFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("RAS_GET_DIMENSION", ImmutableList.of(dbStringType), dbStringType, false,
+                this::serializeRAS_GET_DIMENSION);
+    }
+
+    protected DBFunctionSymbol createProcessRasterArrayCellFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("RAS_PROCESS_RASTER_ARRAY", ImmutableList.of(dbDateTimestampType, dbStringType, dbDecimalType, dbStringType), dbStringType, false,
+                this::serializeRAS_PROCESS_RASTER_ARRAY);
+    }
+
+
+    protected DBFunctionSymbol createDate2GridFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("RAS_DATE_TO_GRID", ImmutableList.of(dbDateTimestampType, dbStringType), dbIntegerType, false,
+                this::serializeRAS_DATE_TO_GRID);
+    }
+
+
+//    protected DBFunctionSymbol createRasterSpatialAverageFunctionSymbol() {
+//        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_AVERAGE", ImmutableList.of(dbIntegerType, dbDoubleType, rootDBType, dbStringType), dbDoubleType, false,
+//                this::serializeRAS_SPATIAL_AVERAGE);
+//    }
+
+    protected DBFunctionSymbol createRasterSpatialMaximumFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_MAXIMUM", ImmutableList.of(dbDateTimestampType, rootDBType, dbStringType), dbDoubleType, false,
+                this::serializeRAS_SPATIAL_MAXIMUM);
+    }
+
+    protected DBFunctionSymbol createRasterTemporalMaximumFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_TEMPORAL_MAXIMUM", ImmutableList.of(dbDateTimestampType, dbDateTimestampType, rootDBType, dbStringType), dbDoubleType, false,
+                this::serializeRAS_TEMPORAL_MAXIMUM);
+    }
+
+    protected DBFunctionSymbol createRasterSpatialMaximumXFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_MAXIMUM_X", ImmutableList.of(dbIntegerType, rootDBType, dbDoubleType, dbDoubleType, dbDoubleType, dbDoubleType,  dbStringType), dbIntegerType, false,
+                this::serializeRAS_SPATIAL_MAXIMUM_X);
+    }
+
+    protected DBFunctionSymbol createRasterSpatialMinimumFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_MINIMUM", ImmutableList.of(dbDateTimestampType, rootDBType, dbStringType), dbDoubleType, false,
+                this::serializeRAS_SPATIAL_MINIMUM);
+    }
+
+    protected DBFunctionSymbol createRasterSpatialMinimumXFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_MINIMUM_X", ImmutableList.of(dbIntegerType, rootDBType, dbDoubleType, dbDoubleType, dbDoubleType, dbDoubleType,  dbStringType), dbIntegerType, false,
+                this::serializeRAS_SPATIAL_MINIMUM_X);
+    }
+
+    protected DBFunctionSymbol createRasterTemporalMinimumFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_TEMPORAL_MINIMUM", ImmutableList.of(dbDateTimestampType, dbDateTimestampType, rootDBType, dbStringType), dbDoubleType, false,
+                this::serializeRAS_TEMPORAL_MINIMUM);
+    }
+
+    protected DBFunctionSymbol createRasterSpatialAverageXFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_AVERAGE_X", ImmutableList.of(dbIntegerType, rootDBType, dbDoubleType, dbDoubleType, dbDoubleType, dbDoubleType,  dbStringType), dbDoubleType, false,
+                this::serializeRAS_SPATIAL_AVERAGE_X);
+    }
+
+    protected DBFunctionSymbol createRasterSpatialAverageFinalFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_AVERAGE_FINAL", ImmutableList.of(dbDateTimestampType, rootDBType, dbStringType), dbDoubleType, false,
+                this::serializeRAS_SPATIAL_AVERAGE_FINAL);
+    }
+
+    protected DBFunctionSymbol createRasterSpatialAverageFieldFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SPATIAL_AVERAGE_FIELD", ImmutableList.of(dbDateTimestampType, rootDBType, dbStringType, dbStringType), dbDoubleType, false,
+                this::serializeRAS_SPATIAL_AVERAGE_FIELD);
+    }
+
+    protected DBFunctionSymbol createRasterTemporalAverageFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_TEMPORAL_AVERAGE", ImmutableList.of(dbDateTimestampType, dbDateTimestampType, rootDBType, dbStringType), dbDoubleType, false,
+                this::serializeRAS_TEMPORAL_AVERAGE);
+    }
+
+    protected DBFunctionSymbol createClipRasterFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_CLIP_RASTER_SPATIAL", ImmutableList.of(dbDateTimestampType, rootDBType, dbStringType), dbStringType, false,
+                this::serializeRAS_CLIP_RASTER_SPATIAL);
+    }
+
+    protected DBFunctionSymbol createClipRasterAnyGeomFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("RAS_CLIP_RASTER_SPATIAL_ANY_GEOM", ImmutableList.of(dbDateTimestampType, dbStringType, dbStringType), dbStringType, false,
+                this::serializeRAS_CLIP_RASTER_SPATIAL_ANY_GEOM);
+    }
+
+    protected DBFunctionSymbol createGeoTIFFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RAS_GEOTIFF", ImmutableList.of(dbDateTimestampType, rootDBType, dbStringType, dbStringType, dbDoubleType), dbStringType, false,
+                this::serializeRAS_GEOTIFF);
+    }
+
+    protected DBFunctionSymbol createRasterSmallArrayTempFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SMALL_ARRAY_TEMPORAL", ImmutableList.of(dbIntegerType, dbIntegerType, dbStringType), dbStringType, false,
+                this::serializeRAS_CLIP_SMALL_ARRAY_TEMPORAL);
+    }
+
+    protected DBFunctionSymbol createRasterSmallArraySpatialFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_RASTER_SMALL_ARRAY_SPATIAL", ImmutableList.of(dbIntegerType, dbStringType), dbStringType, false,
+                this::serializeRAS_CLIP_SMALL_ARRAY_SPATIAL);
+    }
+
+
+
+    //TODO
+    // create a custom serializer like serializeRAS_SPATIAL_AVERAGE
+    // ---------------------------------------[STEP 03d]---------------------------------
+
+    protected abstract String serializeRAS_GET_DIMENSION(ImmutableList<? extends ImmutableTerm> terms,
+                                                        Function<ImmutableTerm, String> termConverter,
+                                                        TermFactory termFactory);
+    protected abstract String serializeRAS_PROCESS_RASTER_ARRAY(ImmutableList<? extends ImmutableTerm> terms,
+                                                         Function<ImmutableTerm, String> termConverter,
+                                                         TermFactory termFactory);
+
+    protected abstract String serializeRAS_DATE_TO_GRID(ImmutableList<? extends ImmutableTerm> terms,
+                                                           Function<ImmutableTerm, String> termConverter,
+                                                           TermFactory termFactory);
+
+//    protected abstract String serializeRAS_SPATIAL_AVERAGE(ImmutableList<? extends ImmutableTerm> terms,
+//                                                           Function<ImmutableTerm, String> termConverter,
+//                                                           TermFactory termFactory);
+
+    protected abstract String serializeRAS_SPATIAL_MAXIMUM(ImmutableList<? extends ImmutableTerm> terms,
+                                                           Function<ImmutableTerm, String> termConverter,
+                                                           TermFactory termFactory);
+
+    protected abstract String serializeRAS_SPATIAL_MAXIMUM_X(ImmutableList<? extends ImmutableTerm> terms,
+                                                             Function<ImmutableTerm, String> termConverter,
+                                                             TermFactory termFactory);
+
+    protected abstract String serializeRAS_TEMPORAL_MAXIMUM(ImmutableList<? extends ImmutableTerm> terms,
+                                                            Function<ImmutableTerm, String> termConverter,
+                                                            TermFactory termFactory);
+
+    protected abstract String serializeRAS_SPATIAL_MINIMUM(ImmutableList<? extends ImmutableTerm> terms,
+                                                           Function<ImmutableTerm, String> termConverter,
+                                                           TermFactory termFactory);
+
+    protected abstract String serializeRAS_SPATIAL_MINIMUM_X(ImmutableList<? extends ImmutableTerm> terms,
+                                                           Function<ImmutableTerm, String> termConverter,
+                                                           TermFactory termFactory);
+
+    protected abstract String serializeRAS_TEMPORAL_MINIMUM(ImmutableList<? extends ImmutableTerm> terms,
+                                                           Function<ImmutableTerm, String> termConverter,
+                                                           TermFactory termFactory);
+
+    protected abstract String serializeRAS_SPATIAL_AVERAGE_X(ImmutableList<? extends ImmutableTerm> terms,
+                                                             Function<ImmutableTerm, String> termConverter,
+                                                             TermFactory termFactory);
+
+    protected abstract String serializeRAS_SPATIAL_AVERAGE_FINAL(ImmutableList<? extends ImmutableTerm> terms,
+                                                             Function<ImmutableTerm, String> termConverter,
+                                                             TermFactory termFactory);
+
+    protected abstract String serializeRAS_SPATIAL_AVERAGE_FIELD(ImmutableList<? extends ImmutableTerm> terms,
+                                                                 Function<ImmutableTerm, String> termConverter,
+                                                                 TermFactory termFactory);
+
+    protected abstract String serializeRAS_TEMPORAL_AVERAGE(ImmutableList<? extends ImmutableTerm> terms,
+                                                                 Function<ImmutableTerm, String> termConverter,
+                                                                 TermFactory termFactory);
+
+    protected abstract String serializeRAS_CLIP_RASTER_SPATIAL(ImmutableList<? extends ImmutableTerm> terms,
+                                                           Function<ImmutableTerm, String> termConverter,
+                                                           TermFactory termFactory);
+
+    protected abstract String serializeRAS_CLIP_RASTER_SPATIAL_ANY_GEOM(ImmutableList<? extends ImmutableTerm> terms,
+                                                               Function<ImmutableTerm, String> termConverter,
+                                                               TermFactory termFactory);
+
+    protected abstract String serializeRAS_GEOTIFF(ImmutableList<? extends ImmutableTerm> terms,
+                                                   Function<ImmutableTerm, String> termConverter,
+                                                   TermFactory termFactory);
+
+    protected abstract String serializeRAS_CLIP_SMALL_ARRAY_TEMPORAL(ImmutableList<? extends ImmutableTerm> terms,
+                                                               Function<ImmutableTerm, String> termConverter,
+                                                               TermFactory termFactory);
+
+    protected abstract String serializeRAS_CLIP_SMALL_ARRAY_SPATIAL(ImmutableList<? extends ImmutableTerm> terms,
+                                                                     Function<ImmutableTerm, String> termConverter,
+                                                                     TermFactory termFactory);
+
 
     /**
      * SPARQL XSD cast functions

@@ -251,6 +251,32 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBSeconds();
     DBFunctionSymbol getDBTz();
     DBFunctionSymbol getDBNow();
+    //TODO
+    // Add DBFunctionSymbol
+    // ----------------------------------[STEP 04]--------------------------------------
+    DBFunctionSymbol getRasterDimension();
+    DBFunctionSymbol getProcessRasterArrayCell();
+    DBFunctionSymbol getDate2Grid();
+//    DBFunctionSymbol getRasterSpatialAverage();
+    DBFunctionSymbol getRasterSpatialAverageFinal();
+    DBFunctionSymbol getRasterSpatialAverageField();
+    DBFunctionSymbol getRasterSpatialAverageX();
+    DBFunctionSymbol getRasterTemporalAverage();
+
+    DBFunctionSymbol getRasterSpatialMaximum();
+    DBFunctionSymbol getRasterSpatialMaximumX();
+    DBFunctionSymbol getRasterTemporalMaximum();
+
+    DBFunctionSymbol getRasterSpatialMinimum();
+    DBFunctionSymbol getRasterSpatialMinimumX();
+    DBFunctionSymbol getRasterTemporalMinimum();
+
+    DBFunctionSymbol getClipRaster();
+    DBFunctionSymbol getClipRasterAnyGeom();
+    DBFunctionSymbol getGeoTIF();
+    DBFunctionSymbol getRasterSmallArrayTemp();
+    DBFunctionSymbol getRasterSmallArraySpatial();
+
 
     DBFunctionSymbol getExtractFunctionSymbol(String component);
     DBFunctionSymbol getCurrentDateTimeSymbol(String type);
@@ -331,7 +357,7 @@ public interface DBFunctionSymbolFactory {
      *
      * For instance DB_IDX(1, "roger", "francis", "ernest") returns "francis"
      *
-     * TODO: find a better name
+     *
      *
      */
     DBFunctionSymbol getDBIntIndex(int nbValues);

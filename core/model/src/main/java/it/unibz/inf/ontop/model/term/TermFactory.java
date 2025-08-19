@@ -223,9 +223,6 @@ public interface TermFactory {
 	 */
 	Optional<DBConstant> getDoubleNaN();
 
-	/**
-	 * TODO: explain
-	 */
 	DBConstant getProvenanceSpecialConstant();
 
 	/**
@@ -515,10 +512,6 @@ public interface TermFactory {
 	 */
 	<T extends ImmutableTerm> Substitution<T> getSubstitution(ImmutableMap<Variable, T> map);
 
-	/**
-	 * TODO: find a better name
-	 *
-	 */
 	ImmutableFunctionalTerm getBinaryNumericLexicalFunctionalTerm(String dbNumericOperationName,
 																  ImmutableTerm lexicalTerm1,
 																  ImmutableTerm lexicalTerm2,
@@ -566,7 +559,55 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBMinutes(ImmutableTerm dbDatetimeTerm);
 	ImmutableFunctionalTerm getDBSeconds(ImmutableTerm dbDatetimeTerm);
 	ImmutableFunctionalTerm getDBTz(ImmutableTerm dbDatetimeTerm);
-	ImmutableFunctionalTerm getDBNow();
+
+    ImmutableFunctionalTerm getDBNow();
+//TODO
+// Add ImmutableFunctionalTerm for each new Raster Functions -------------------[STEP 06]--------------------------
+	//-----------------
+	// Raster Functions
+	//-----------------
+
+	ImmutableFunctionalTerm getRasterDimension(ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getProcessRasterArrayCell(ImmutableTerm TimeSnap, ImmutableTerm dbOperator, ImmutableTerm dbValue, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getDate2Grid(ImmutableTerm TimeSnap,ImmutableTerm dbRasterName);
+
+//	ImmutableFunctionalTerm getRasterSpatialAverage(ImmutableTerm TimeSnap, ImmutableTerm ScaleFactor, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getRasterSpatialMaximum(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getRasterSpatialMinimum(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getRasterSpatialMaximumX(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbMinLon, ImmutableTerm dbMaxLat, ImmutableTerm dbXscale, ImmutableTerm dbYscale, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getRasterTemporalMaximum(ImmutableTerm dbStartTime, ImmutableTerm dbEndTime, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getRasterSpatialMinimumX(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbMinLon, ImmutableTerm dbMaxLat, ImmutableTerm dbXscale, ImmutableTerm dbYscale, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getRasterTemporalMinimum(ImmutableTerm dbStartTime, ImmutableTerm dbEndTime, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getRasterSpatialAverageX(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbMinLon, ImmutableTerm dbMaxLat, ImmutableTerm dbXscale, ImmutableTerm dbYscale, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getRasterSpatialAverageFinal(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getRasterSpatialAverageField(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbFieldName, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getRasterTemporalAverage(ImmutableTerm dbStartTime, ImmutableTerm dbEndTime, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getClipRaster(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getGeoTIF(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName, ImmutableTerm dbRegionName, ImmutableTerm dbFillVal);
+
+	ImmutableFunctionalTerm getClipRasterAnyGeom(ImmutableTerm TimeSnap, ImmutableTerm dbRegionGeom, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getRasterSmallArrayTemp(ImmutableTerm StartTime, ImmutableTerm EndTime, ImmutableTerm dbRasterName);
+
+	ImmutableFunctionalTerm getRasterSmallArraySpatial(ImmutableTerm StartTime, ImmutableTerm dbRasterName);
+
+
+
+
 
 	ImmutableFunctionalTerm getDBRowUniqueStr();
 
