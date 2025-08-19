@@ -2,15 +2,14 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 public class BinaryArithmeticLexicalFunctionSymbolImpl extends FunctionSymbolImpl{
 
@@ -57,42 +56,68 @@ public class BinaryArithmeticLexicalFunctionSymbolImpl extends FunctionSymbolImp
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability) {
-        ImmutableTerm rdfTypeTerm = newTerms.get(4);
-        if (rdfTypeTerm instanceof RDFTermTypeConstant) {
-            RDFTermType rdfType = ((RDFTermTypeConstant) rdfTypeTerm).getRDFTermType();
+        ImmutableList<ImmutableTerm> typeTerms = ImmutableList.of(newTerms.get(2), newTerms.get(3), newTerms.get(4));
 
-            if (rdfType.isA(termFactory.getTypeFactory().getAbstractOntopNumericDatatype())) {
-                return getNumericLexicalTerm(newTerms, termFactory, rdfType);
+        if (typeTerms.stream().allMatch(t -> t instanceof RDFTermTypeConstant)) {
+            ImmutableList<RDFTermType> rdfTypeTerms = typeTerms.stream()
+                    .map(t -> ((RDFTermTypeConstant) t).getRDFTermType())
+                    .collect(ImmutableCollectors.toList());
+
+            // for now, only numeric operations are supported
+            if (rdfTypeTerms.stream().allMatch(t -> t.isA(typeFactory.getAbstractOntopNumericDatatype()))) {
+                return getNumericLexicalTerm(newTerms, termFactory, rdfTypeTerms.get(2));
             } else {
                 return termFactory.getNullConstant();
             }
-        }
-        else if ((rdfTypeTerm instanceof ImmutableFunctionalTerm)
-                && ((ImmutableFunctionalTerm) rdfTypeTerm).getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol) {
-            ImmutableFunctionalTerm typeFunctionalTerm = (ImmutableFunctionalTerm) rdfTypeTerm;
-            RDFTermTypeFunctionSymbol termTypeFunctionSymbol = (RDFTermTypeFunctionSymbol) typeFunctionalTerm.getFunctionSymbol();
-
-            return termTypeFunctionSymbol.lift(
-                            typeFunctionalTerm.getTerms(),
-                            c -> buildTermAfterEvaluation(
-                                    ImmutableList.of(newTerms.get(0), newTerms.get(1), newTerms.get(2), newTerms.get(3), c),
-                                    termFactory, variableNullability),
-                            termFactory)
-                    .simplify(variableNullability);
-        }
-        else
-            // Tries to lift the DB case of the rdf type term if there is any
-            return Optional.of(rdfTypeTerm)
+        } else if (typeTerms.stream().anyMatch(t -> t instanceof ImmutableFunctionalTerm)) {
+            ImmutableFunctionalTerm functionalTerm = typeTerms.stream()
                     .filter(t -> t instanceof ImmutableFunctionalTerm)
-                    .map(t -> (ImmutableFunctionalTerm)t)
-                    .filter(t -> t.getFunctionSymbol() instanceof DBIfThenFunctionSymbol)
-                    .map(t -> ((DBIfThenFunctionSymbol) t.getFunctionSymbol())
-                            .pushDownRegularFunctionalTerm(
-                                    termFactory.getImmutableFunctionalTerm(this, newTerms),
-                                    newTerms.indexOf(t),
-                                    termFactory))
-                    .map(t -> t.simplify(variableNullability))
-                    .orElseGet(() -> super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability));
+                    .map(t -> (ImmutableFunctionalTerm) t)
+                    .findAny()
+                    .get();
+
+            Optional<ImmutableTerm> liftedTerm = tryPushingDownFunctionalTerm(functionalTerm, newTerms, termFactory, variableNullability)
+                    .or(() -> liftRDFTypeFunctionSymbol(functionalTerm, newTerms, termFactory, variableNullability));
+
+            return liftedTerm
+                    .orElseGet(() -> super.tryToLiftMagicNumbers(newTerms, termFactory, variableNullability, false)
+                    .orElseGet(() -> super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability)));
+        } else {
+            return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
+        }
+    }
+
+    private Optional<ImmutableTerm> tryPushingDownFunctionalTerm(ImmutableFunctionalTerm term, ImmutableList<ImmutableTerm> newTerms,
+                                                                 TermFactory termFactory, VariableNullability variableNullability) {
+        return Optional.of(term)
+                .filter(t -> t.getFunctionSymbol() instanceof DBIfThenFunctionSymbol)
+                .map(t -> ((DBIfThenFunctionSymbol) t.getFunctionSymbol())
+                        .pushDownRegularFunctionalTerm(
+                                termFactory.getImmutableFunctionalTerm(this, newTerms),
+                                newTerms.indexOf(t),
+                                termFactory))
+                .map(t -> t.simplify(variableNullability));
+    }
+
+    private Optional<ImmutableTerm> liftRDFTypeFunctionSymbol(ImmutableFunctionalTerm term,
+                                                ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
+                                                VariableNullability variableNullability) {
+        if (!(term.getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol)) {
+            return Optional.empty();
+        }
+
+        RDFTermTypeFunctionSymbol termTypeFunctionSymbol = (RDFTermTypeFunctionSymbol) term.getFunctionSymbol();
+        int index = newTerms.indexOf(term);
+        return Optional.of(termTypeFunctionSymbol.lift(
+                term.getTerms(),
+                c -> {
+                        ImmutableList<ImmutableTerm> terms = IntStream.range(0, newTerms.size())
+                            .mapToObj(i -> i == index ? c : newTerms.get(i))
+                        .collect(ImmutableCollectors.toList());
+                        return buildTermAfterEvaluation(terms, termFactory, variableNullability);
+                        },
+                termFactory)
+                .simplify(variableNullability));
     }
 
     private ImmutableTerm getNumericLexicalTerm(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
