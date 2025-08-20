@@ -7,21 +7,16 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
-public abstract class AbstractLJTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
-
-    protected final VariableGenerator variableGenerator;
+public abstract class AbstractLJTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
     protected AbstractLJTransformer(IntermediateQueryFactory iqFactory, VariableGenerator variableGenerator) {
-
-        super(iqFactory, t -> t.normalizeForOptimization(variableGenerator));
-
-        this.variableGenerator = variableGenerator;
+        super(iqFactory, t -> t.normalizeForOptimization(variableGenerator), variableGenerator);
     }
 
     @Override
