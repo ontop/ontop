@@ -22,7 +22,7 @@
     <properties>
         <!-- Dependency versions: additional dependencies (not in root pom.xml) related to protégé modules -->
         <guava-failureaccess.version>1.0.1</guava-failureaccess.version>
-        <icu4j.version>58.2</icu4j.version>
+        <icu4j.version>77.1</icu4j.version>
         <javax-json.version>1.0.4</javax-json.version>
         <osgi.version>6.0.0</osgi.version>
         <thrift.version>[0.12.0,)</thrift.version>
