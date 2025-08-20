@@ -53,6 +53,13 @@ public class BindWithFunctionsSnowflakeTest extends AbstractBindTestWithFunction
         super.testREGEX();
     }
 
+    @Disabled("REGEXP_LIKE implicitly anchors a pattern at both ends")
+    @Test
+    @Override
+    public void testCaseInsensitiveREGEX() {
+        super.testCaseInsensitiveREGEX();
+    }
+
     @Override
     protected ImmutableList<String> getConstantIntegerDivideExpectedResults() {
         return ImmutableList.of("\"0.500000000000\"^^xsd:decimal");

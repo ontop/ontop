@@ -1026,6 +1026,23 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     }
 
     @Test
+    public void testCaseInsensitiveREGEX() {
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (BOUND(?title) AS ?v) WHERE \n"
+                + "{  \n"
+                + "   ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   OPTIONAL{\n"
+                + "     ?x dc:title ?title .\n"
+                + "     FILTER(REGEX(?title, \"semantic\", \"i\" )) \n"
+                + "   } } ORDER BY ?title";
+
+        executeAndCompareValues(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
+                "\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
+    }
+
+    @Test
     public void testREPLACE() {
         String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "SELECT  ?v WHERE \n"

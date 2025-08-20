@@ -1,0 +1,16 @@
+[PrefixDeclaration]
+: http://example.org/ontology#
+data: http://example.org/data/
+rdfs: http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+
+mappingId   t
+target      data:t/{t_id} a :T .
+source      SELECT t_id FROM "lenses"."T"
+
+mappingId   r
+target      data:r/{r_id} :p data:t/{t_id} .
+source      SELECT r_id, t_id FROM "lenses"."R"
+
+]]

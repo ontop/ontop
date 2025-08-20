@@ -24,6 +24,7 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeListContainmentCheck;
+import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -51,6 +52,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
@@ -69,12 +71,14 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final IQTreeTools iqTreeTools;
+    private final TermNullabilityEvaluator termNullabilityEvaluator;
 
     @Inject
 	private TMappingSaturatorImpl(TMappingExclusionConfig tMappingExclusionConfig,
                                   MappingCQCOptimizer mappingCqcOptimizer,
                                   UnionBasedQueryMerger queryMerger,
-                                  CoreSingletons coreSingletons) {
+                                  CoreSingletons coreSingletons,
+                                  TermNullabilityEvaluator termNullabilityEvaluator) {
         this.tMappingExclusionConfig = tMappingExclusionConfig;
 		this.termFactory = coreSingletons.getTermFactory();
         this.mappingCqcOptimizer = mappingCqcOptimizer;
@@ -83,6 +87,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.iqFactory = coreSingletons.getIQFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.termNullabilityEvaluator = termNullabilityEvaluator;
     }
 
     @Override
@@ -133,10 +138,21 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                 original.asMap().entrySet().stream()
                         .filter(e -> !saturated.containsKey(e.getKey()))
                         .map(e -> e.getValue().stream()
-                                        .collect(MappingAssertionUnion.toMappingAssertion(cqc, coreSingletons, queryMerger)))
+                                        .collect(toMappingAssertion(cqc)))
                         .map(Optional::get))
                 .collect(ImmutableCollectors.toList());
     }
+
+    private Collector<MappingAssertion, MappingAssertionUnion, Optional<MappingAssertion>> toMappingAssertion(ExtensionalDataNodeListContainmentCheck cqc) {
+        return Collector.of(
+                () -> new MappingAssertionUnion(cqc, coreSingletons, queryMerger, termNullabilityEvaluator), // Supplier
+                MappingAssertionUnion::add, // Accumulator
+                (b1, b2) -> { throw new MinorOntopInternalBugException("no merge"); }, // Merger
+                MappingAssertionUnion::build, // Finisher
+                Collector.Characteristics.UNORDERED);
+    }
+
+
 
     private MappingAssertion optimize(ExtensionalDataNodeListContainmentCheck cqc, MappingAssertion m) {
         IQ optimizedIQ = m.getQuery().normalizeForOptimization();
@@ -154,7 +170,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                 .flatMap(u -> original.get(u.getFromIndex()).stream()
                         .map(u::updateConstructionNodeIri)
                         .map(m -> u.needOptimization() ? optimize(cqc, m) : m))
-                .collect(MappingAssertionUnion.toMappingAssertion(cqc, coreSingletons, queryMerger));
+                .collect(toMappingAssertion(cqc));
     }
 
     private static <T> Stream<T> getSubsumees(EquivalencesDAG<T> dag, Equivalences<T> node) {
@@ -166,12 +182,14 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
         private final MappingAssertionIndex fromIndex, toIndex;
         private final Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> termTransformer;
         private final boolean needOptimization;
+
         MappingAssertionConstructionNodeTransformer(MappingAssertionIndex fromIndex, MappingAssertionIndex toIndex, Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> termTransformer, boolean needOptimization) {
             this.fromIndex = fromIndex;
             this.toIndex = toIndex;
             this.termTransformer = termTransformer;
             this.needOptimization = needOptimization;
         }
+
         MappingAssertionIndex getFromIndex() { return fromIndex; }
         MappingAssertionIndex getToIndex() { return toIndex; }
 

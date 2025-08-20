@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.constraints.Homomorphism;
 import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeHomomorphismIteratorImpl;
 import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeListContainmentCheck;
+import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -29,15 +30,6 @@ import java.util.stream.Stream;
 
 public class MappingAssertionUnion {
 
-    public static Collector<MappingAssertion, MappingAssertionUnion, Optional<MappingAssertion>> toMappingAssertion(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger) {
-        return Collector.of(
-                () -> new MappingAssertionUnion(cqc, coreSingletons, queryMerger), // Supplier
-                MappingAssertionUnion::add, // Accumulator
-                (b1, b2) -> { throw new MinorOntopInternalBugException("no merge"); }, // Merger
-                MappingAssertionUnion::build, // Finisher
-                Collector.Characteristics.UNORDERED);
-    }
-
     private final List<ConjunctiveIQ> conjunctiveIqs = new ArrayList<>();
     private final List<IQ> otherIqs = new ArrayList<>();
     private final ExtensionalDataNodeListContainmentCheck cqc;
@@ -47,8 +39,9 @@ public class MappingAssertionUnion {
     private final CoreSingletons coreSingletons;
     private final UnionBasedQueryMerger queryMerger;
     private final IQTreeTools iqTreeTools;
+    private final TermNullabilityEvaluator termNullabilityEvaluator;
 
-    public MappingAssertionUnion(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger) {
+    public MappingAssertionUnion(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger, TermNullabilityEvaluator termNullabilityEvaluator) {
         this.cqc = cqc;
         this.termFactory = coreSingletons.getTermFactory();
         this.iqFactory = coreSingletons.getIQFactory();
@@ -56,6 +49,7 @@ public class MappingAssertionUnion {
         this.coreSingletons = coreSingletons;
         this.queryMerger = queryMerger;
         this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.termNullabilityEvaluator = termNullabilityEvaluator;
     }
 
     public MappingAssertionUnion add(MappingAssertion assertion) {
@@ -70,6 +64,7 @@ public class MappingAssertionUnion {
         private final ImmutableList<ExtensionalDataNode> extensionalDataNodes;
         private final Optional<ValuesNode> valuesNode;
         private final DisjunctionOfConjunctions filter;
+        private final ImmutableSet<Variable> nonNullableVariables;
 
         ConjunctiveIQ(DistinctVariableOnlyDataAtom projectionAtom, ConstructionNode constructionNode, ImmutableList<ExtensionalDataNode> extensionalDataNodes, Optional<ValuesNode> valuesNode, DisjunctionOfConjunctions filter) {
 
@@ -149,6 +144,7 @@ public class MappingAssertionUnion {
                             .map(cm -> iqFactory.createValuesNode(cm.keySet(), ImmutableList.of(cm))));
 
             this.filter = filter;
+            this.nonNullableVariables = getNonNullableVariables(filter);
         }
 
         ConjunctiveIQ(ConjunctiveIQ other, DisjunctionOfConjunctions filter, Optional<ValuesNode> valuesNode) {
@@ -157,9 +153,38 @@ public class MappingAssertionUnion {
             this.extensionalDataNodes = other.extensionalDataNodes;
 
             this.filter = filter;
+            this.nonNullableVariables = getNonNullableVariables(filter);
             this.valuesNode = valuesNode;
         }
 
+
+        private ImmutableSet<Variable> getNonNullableVariables(DisjunctionOfConjunctions filter) {
+            class Storage {
+                Set<Variable> vars;
+            };
+
+            return filter.stream()
+                    .map(this::getNonNullableVariables)
+                    .collect(Collector.of(
+                            Storage::new,
+                            (a, c) -> { if (a.vars == null) a.vars = new HashSet<>(c); else a.vars.retainAll(c); },
+                            (c1, c2) -> { throw new MinorOntopInternalBugException("can't happen"); },
+                            a -> { if (a.vars == null) return ImmutableSet.of(); else return ImmutableSet.copyOf(a.vars); }
+                            ));
+        }
+
+
+        private ImmutableSet<Variable> getNonNullableVariables(ImmutableSet<ImmutableExpression> conjunction) {
+            return conjunction.stream()
+                    .flatMap(this::getNonNullableVariables)
+                    .collect(ImmutableCollectors.toSet());
+        }
+
+        private Stream<Variable> getNonNullableVariables(ImmutableExpression a) {
+            return a.getTerms().stream()
+                    .flatMap(ImmutableTerm::getVariableStream)
+                            .filter(v -> termNullabilityEvaluator.isFilteringNullValue(a, v));
+        }
 
         IQ asIQ() {
             return iqTreeTools.createMappingIQ(projectionAtom, substitution, getTree());
@@ -175,6 +200,10 @@ public class MappingAssertionUnion {
 
             return iqTreeTools.createOptionalInnerJoinTree(mergedConditions, children)
                     .orElseGet(iqFactory::createTrueNode);
+        }
+
+        ImmutableSet<Variable> getNonNullableVariables() {
+            return nonNullableVariables;
         }
 
         Optional<ImmutableExpression> translate(DisjunctionOfConjunctions filter) {
@@ -507,7 +536,7 @@ public class MappingAssertionUnion {
         return Optional.of(new ExtensionalDataNodeHomomorphismIteratorImpl(
                 h,
                 from.getDatabaseAtoms(),
-                cqc.chase(to.getDatabaseAtoms())));
+                cqc.chase(to.getDatabaseAtoms(), to.getNonNullableVariables())));
     }
 
     private DisjunctionOfConjunctions applyHomomorphism(Homomorphism h, DisjunctionOfConjunctions f) {

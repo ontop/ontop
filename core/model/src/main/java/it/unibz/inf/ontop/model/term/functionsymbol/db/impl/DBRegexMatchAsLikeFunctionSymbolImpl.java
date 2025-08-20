@@ -182,7 +182,7 @@ public class DBRegexMatchAsLikeFunctionSymbolImpl extends AbstractTypedDBFunctio
         if(terms.size() == 2)
             return String.format("(%s LIKE '%s')", str, newPattern);
         else
-            return String.format("(CASE WHEN %s = 'i' THEN LOWER(%s) ELSE %s END LIKE CASE WHEN %s = 'i' THEN LOWER(%s) ELSE '%s' END)",
+            return String.format("(CASE WHEN %s = 'i' THEN LOWER(%s) ELSE %s END LIKE CASE WHEN %s = 'i' THEN LOWER('%s') ELSE '%s' END)",
                     termConverter.apply(terms.get(2)),
                     str,
                     str,

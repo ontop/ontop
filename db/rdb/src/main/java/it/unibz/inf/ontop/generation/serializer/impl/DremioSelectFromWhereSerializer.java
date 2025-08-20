@@ -132,7 +132,7 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                          * result of flatten with square brackets, the access operation will be ignored.
                          * */
                         builder.append(String.format(
-                                "(SELECT %s CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END AS %s FROM %s LIMIT 99999999999999) %s",
+                                "(SELECT %s CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END AS %s FROM %s LIMIT 999999999) %s",
                                 subProjection,
                                 expression,
                                 allColumnIDs.get(outputVar).getSQLRendering(),

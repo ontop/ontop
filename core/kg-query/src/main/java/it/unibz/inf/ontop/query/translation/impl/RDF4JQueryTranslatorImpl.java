@@ -271,7 +271,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private RDF4JTupleExprTranslator getTranslator(ImmutableMap<Variable, GroundTerm> externalBindings, @Nullable Dataset dataset, boolean treatBNodeAsVariable) {
-        return new RDF4JTupleExprTranslator(externalBindings, dataset, treatBNodeAsVariable, coreSingletons, rdfFactory);
+        return new RDF4JTupleExprTranslator(externalBindings, dataset, treatBNodeAsVariable, coreSingletons, rdfFactory, iqTreeTools);
     }
 
     private RDF4JValueTranslator getValueTranslator() {

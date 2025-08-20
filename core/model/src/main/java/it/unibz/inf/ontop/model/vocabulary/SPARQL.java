@@ -21,10 +21,10 @@ public class SPARQL {
     public static final String SHA256 = "SHA256";
     public static final String SHA384 = "SHA384";
     public static final String SHA512 = "SHA512";
-    public static final String NUMERIC_MULTIPLY = "*";
-    public static final String NUMERIC_DIVIDE = "/";
-    public static final String NUMERIC_ADD = "+";
-    public static final String NUMERIC_SUBTRACT = "-";
+    public static final String MULTIPLY = "*";
+    public static final String DIVIDE = "/";
+    public static final String ADD = "+";
+    public static final String SUBTRACT = "-";
     public static final String EQ = "=";
     public static final String LESS_THAN = "<";
     public static final String GREATER_THAN = ">";
