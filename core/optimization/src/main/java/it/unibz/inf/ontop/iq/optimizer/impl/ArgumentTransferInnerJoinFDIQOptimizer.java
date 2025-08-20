@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.optimizer.InnerJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -27,7 +26,7 @@ import java.util.stream.Stream;
 /**
  * TODO: explain
  */
-public class ArgumentTransferInnerJoinFDIQOptimizer extends AbstractIQOptimizer implements InnerJoinIQOptimizer {
+public class ArgumentTransferInnerJoinFDIQOptimizer extends AbstractIQOptimizer {
 
     private final SelfJoinFDSimplifier simplifier;
 

@@ -8,11 +8,11 @@ public class DefaultCompositeInnerJoinIQOptimizer extends CompositeIQOptimizer i
 
     @Inject
     private DefaultCompositeInnerJoinIQOptimizer(
-            SelfJoinUCIQOptimizer selfJoinUCIQOptimizer,
-            SelfJoinSameTermIQOptimizer selfJoinSameTermIQOptimizer,
+            SelfJoinUCIQOptimizerImpl selfJoinUCIQOptimizer,
+            SelfJoinSameTermIQOptimizerImpl selfJoinSameTermIQOptimizer,
             ArgumentTransferInnerJoinFDIQOptimizer fdIQOptimizer,
-            RedundantJoinFKOptimizer fkOptimizer,
-            BelowDistinctJoinWithClassUnionOptimizer belowDistinctClassUnionOptimizer) {
+            RedundantJoinFKOptimizerImpl fkOptimizer,
+            BelowDistinctJoinWithClassUnionOptimizerImpl belowDistinctClassUnionOptimizer) {
 
         super(selfJoinUCIQOptimizer,
                 fdIQOptimizer,

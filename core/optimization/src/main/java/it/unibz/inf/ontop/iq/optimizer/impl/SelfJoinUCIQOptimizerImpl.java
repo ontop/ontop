@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.optimizer.SelfJoinUCIQOptimizer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -24,7 +23,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Singleton
-public class SelfJoinUCIQOptimizerImpl extends AbstractIQOptimizer implements SelfJoinUCIQOptimizer {
+public class SelfJoinUCIQOptimizerImpl extends AbstractIQOptimizer {
 
     private final SelfJoinUCSimplifier simplifier;
 

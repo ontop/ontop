@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.optimizer.SelfJoinSameTermIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
@@ -15,7 +14,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Singleton
-public class SelfJoinSameTermIQOptimizerImpl extends AbstractIQOptimizer implements SelfJoinSameTermIQOptimizer {
+public class SelfJoinSameTermIQOptimizerImpl extends AbstractIQOptimizer {
 
     private final CoreSingletons coreSingletons;
     private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;

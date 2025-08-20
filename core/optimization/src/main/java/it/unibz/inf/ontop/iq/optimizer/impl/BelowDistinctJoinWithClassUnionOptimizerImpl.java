@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.optimizer.BelowDistinctJoinWithClassUnionOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
@@ -18,7 +17,7 @@ import javax.inject.Inject;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class BelowDistinctJoinWithClassUnionOptimizerImpl extends AbstractIQOptimizer implements BelowDistinctJoinWithClassUnionOptimizer {
+public class BelowDistinctJoinWithClassUnionOptimizerImpl extends AbstractIQOptimizer {
 
     private final IQVisitor<IQTree> lookForDistinctTransformer;
     private final CoreSingletons coreSingletons;

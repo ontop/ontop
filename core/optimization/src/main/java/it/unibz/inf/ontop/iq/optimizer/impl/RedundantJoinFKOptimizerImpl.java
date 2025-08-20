@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.optimizer.RedundantJoinFKOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -26,7 +25,7 @@ import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class RedundantJoinFKOptimizerImpl extends AbstractIQOptimizer implements RedundantJoinFKOptimizer {
+public class RedundantJoinFKOptimizerImpl extends AbstractIQOptimizer {
 
     private final IQTreeTools iqTreeTools;
     private final TermFactory termFactory;

@@ -47,11 +47,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(EmptyRowsValuesNodeTransformer.class);
         bindFromSettings(GeneralStructuralAndSemanticIQOptimizer.class);
         bindFromSettings(QueryPlanner.class);
-        bindFromSettings(SelfJoinSameTermIQOptimizer.class);
         bindFromSettings(RequiredExtensionalDataNodeExtractor.class);
-        bindFromSettings(SelfJoinUCIQOptimizer.class);
-        bindFromSettings(RedundantJoinFKOptimizer.class);
-        bindFromSettings(BelowDistinctJoinWithClassUnionOptimizer.class);
         bindFromSettings(LensUnfolder.class);
         bindFromSettings(AggregationSplitter.class);
         bindFromSettings(FlattenLifter.class);
