@@ -27,12 +27,10 @@ import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeListContainmentChe
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -68,7 +66,6 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
     private final MappingCQCOptimizer mappingCqcOptimizer;
     private final UnionBasedQueryMerger queryMerger;
     private final CoreSingletons coreSingletons;
-    private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final IQTreeTools iqTreeTools;
     private final TermNullabilityEvaluator termNullabilityEvaluator;
@@ -85,7 +82,6 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
         this.queryMerger = queryMerger;
         this.coreSingletons = coreSingletons;
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
-        this.iqFactory = coreSingletons.getIQFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.termNullabilityEvaluator = termNullabilityEvaluator;
     }
