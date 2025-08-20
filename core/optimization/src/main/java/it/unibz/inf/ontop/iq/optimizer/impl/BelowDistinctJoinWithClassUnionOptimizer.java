@@ -17,15 +17,15 @@ import javax.inject.Inject;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class BelowDistinctJoinWithClassUnionOptimizerImpl extends AbstractIQOptimizer {
+public class BelowDistinctJoinWithClassUnionOptimizer extends AbstractIQOptimizer {
 
     private final IQVisitor<IQTree> lookForDistinctTransformer;
     private final CoreSingletons coreSingletons;
     private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
 
     @Inject
-    protected BelowDistinctJoinWithClassUnionOptimizerImpl(CoreSingletons coreSingletons,
-                                                           RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
+    protected BelowDistinctJoinWithClassUnionOptimizer(CoreSingletons coreSingletons,
+                                                       RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
         super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.coreSingletons = coreSingletons;
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
@@ -45,10 +45,10 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl extends AbstractIQOpti
     }
 
 
-    protected class JoinWithClassUnionTransformer extends AbstractBelowDistinctInnerJoinTransformer {
+    private class JoinWithClassUnionTransformer extends AbstractBelowDistinctInnerJoinTransformer {
 
-        protected JoinWithClassUnionTransformer(IQTreeTransformer lookForDistinctTransformer) {
-            super(lookForDistinctTransformer, BelowDistinctJoinWithClassUnionOptimizerImpl.this.coreSingletons);
+        JoinWithClassUnionTransformer(IQTreeTransformer lookForDistinctTransformer) {
+            super(lookForDistinctTransformer, BelowDistinctJoinWithClassUnionOptimizer.this.coreSingletons);
         }
 
         /**

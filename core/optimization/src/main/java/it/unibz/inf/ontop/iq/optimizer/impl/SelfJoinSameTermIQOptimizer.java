@@ -14,15 +14,15 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Singleton
-public class SelfJoinSameTermIQOptimizerImpl extends AbstractIQOptimizer {
+public class SelfJoinSameTermIQOptimizer extends AbstractIQOptimizer {
 
     private final CoreSingletons coreSingletons;
     private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
     private final IQVisitor<IQTree> lookForDistinctTransformer;
 
     @Inject
-    protected SelfJoinSameTermIQOptimizerImpl(CoreSingletons coreSingletons,
-                                              RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
+    protected SelfJoinSameTermIQOptimizer(CoreSingletons coreSingletons,
+                                          RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
         super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.coreSingletons = coreSingletons;
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
@@ -44,9 +44,10 @@ public class SelfJoinSameTermIQOptimizerImpl extends AbstractIQOptimizer {
     /**
      * TODO: explain
      */
-    protected class SameTermSelfJoinTransformer extends AbstractBelowDistinctInnerJoinTransformer {
-        protected SameTermSelfJoinTransformer(IQTreeTransformer lookForDistinctTransformer) {
-            super(lookForDistinctTransformer, SelfJoinSameTermIQOptimizerImpl.this.coreSingletons);
+    private class SameTermSelfJoinTransformer extends AbstractBelowDistinctInnerJoinTransformer {
+
+        SameTermSelfJoinTransformer(IQTreeTransformer lookForDistinctTransformer) {
+            super(lookForDistinctTransformer, SelfJoinSameTermIQOptimizer.this.coreSingletons);
         }
 
         /**

@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -25,14 +24,14 @@ import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class RedundantJoinFKOptimizerImpl extends AbstractIQOptimizer {
+public class RedundantJoinFKOptimizer extends AbstractIQOptimizer {
 
     private final IQTreeTools iqTreeTools;
     private final TermFactory termFactory;
     private final RedundantJoinFKTransformer transformer;
 
     @Inject
-    private RedundantJoinFKOptimizerImpl(CoreSingletons coreSingletons) {
+    private RedundantJoinFKOptimizer(CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.termFactory = coreSingletons.getTermFactory();
@@ -49,7 +48,7 @@ public class RedundantJoinFKOptimizerImpl extends AbstractIQOptimizer {
     private class RedundantJoinFKTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
         RedundantJoinFKTransformer() {
-            super(RedundantJoinFKOptimizerImpl.this.iqFactory);
+            super(RedundantJoinFKOptimizer.this.iqFactory);
         }
 
         @Override

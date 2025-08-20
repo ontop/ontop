@@ -23,13 +23,12 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Singleton
-public class SelfJoinUCIQOptimizerImpl extends AbstractIQOptimizer {
+public class SelfJoinUCIQOptimizer extends AbstractIQOptimizer {
 
     private final SelfJoinUCSimplifier simplifier;
 
     @Inject
-    private SelfJoinUCIQOptimizerImpl(SelfJoinUCSimplifier simplifier,
-                                     CoreSingletons coreSingletons) {
+    private SelfJoinUCIQOptimizer(SelfJoinUCSimplifier simplifier, CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.simplifier = simplifier;
     }
@@ -43,7 +42,7 @@ public class SelfJoinUCIQOptimizerImpl extends AbstractIQOptimizer {
     private class SelfJoinUCTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
         SelfJoinUCTransformer(VariableGenerator variableGenerator) {
-            super(SelfJoinUCIQOptimizerImpl.this.iqFactory,  variableGenerator);
+            super(SelfJoinUCIQOptimizer.this.iqFactory,  variableGenerator);
         }
 
         @Override
