@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 
 
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.model.type.impl.SparkSQLDBTypeFactory.DECIMAL_38_10_STR;
 
@@ -306,7 +305,7 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
     @Override
     protected DBTermType inferOutputTypeMathOperator(String dbMathOperatorName, DBTermType arg1Type, DBTermType arg2Type) {
-        if (dbMathOperatorName.equals(SPARQL.NUMERIC_DIVIDE))
+        if (dbMathOperatorName.equals(SPARQL.DIVIDE))
             return dbDecimalType;
 
         return super.inferOutputTypeMathOperator(dbMathOperatorName, arg1Type, arg2Type);

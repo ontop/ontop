@@ -1397,13 +1397,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected DBMathBinaryOperator createDBBinaryMathOperator(String dbMathOperatorName, DBTermType dbNumericType)
         throws UnsupportedOperationException {
         switch (dbMathOperatorName) {
-            case SPARQL.NUMERIC_MULTIPLY:
+            case SPARQL.MULTIPLY:
                 return createMultiplyOperator(dbNumericType);
-            case SPARQL.NUMERIC_DIVIDE:
+            case SPARQL.DIVIDE:
                 return createDivideOperator(dbNumericType);
-            case SPARQL.NUMERIC_ADD:
+            case SPARQL.ADD:
                 return createAddOperator(dbNumericType);
-            case SPARQL.NUMERIC_SUBTRACT:
+            case SPARQL.SUBTRACT:
                 return createSubtractOperator(dbNumericType);
             default:
                 throw new UnsupportedOperationException("The math operator " + dbMathOperatorName + " is not supported");
@@ -1431,13 +1431,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected DBMathBinaryOperator createUntypedDBBinaryMathOperator(String dbMathOperatorName) throws UnsupportedOperationException {
         switch (dbMathOperatorName) {
-            case SPARQL.NUMERIC_MULTIPLY:
+            case SPARQL.MULTIPLY:
                 return createUntypedMultiplyOperator();
-            case SPARQL.NUMERIC_DIVIDE:
+            case SPARQL.DIVIDE:
                 return createUntypedDivideOperator();
-            case SPARQL.NUMERIC_ADD:
+            case SPARQL.ADD:
                 return createUntypedAddOperator();
-            case SPARQL.NUMERIC_SUBTRACT:
+            case SPARQL.SUBTRACT:
                 return createUntypedSubtractOperator();
             default:
                 throw new UnsupportedOperationException("The untyped math operator " + dbMathOperatorName + " is not supported");

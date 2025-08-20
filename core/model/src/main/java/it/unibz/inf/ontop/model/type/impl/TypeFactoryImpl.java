@@ -41,6 +41,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final ConcreteNumericRDFDatatype xsdUnsignedLongDatatype, xsdUnsignedIntDatatype, xsdUnsignedShortDatatype, xsdUnsignedByteDatatype;
 	private final RDFDatatype defaultUnsupportedDatatype, xsdStringDatatype, xsdBooleanDatatype, xsdBase64Datatype;
 	private final RDFDatatype xsdTimeDatatype, xsdDateDatatype, xsdDatetimeDatatype, xsdDatetimeStampDatatype, xsdGYearDatatype;
+	private final RDFDatatype temporalDatatype, numericOrTemporalDatatype;
 	private final DBTypeFactory dbTypeFactory;
 
 	@Inject
@@ -58,7 +59,10 @@ public class TypeFactoryImpl implements TypeFactory {
 		rdfsLiteralDatatype = createSimpleAbstractRDFDatatype(RDFS.LITERAL, rootRDFTermType.getAncestry());
 		registerDatatype(rdfsLiteralDatatype);
 
-		numericDatatype = createAbstractNumericTermType(OntopInternal.NUMERIC, rdfsLiteralDatatype.getAncestry());
+		numericOrTemporalDatatype = createSimpleAbstractRDFDatatype(OntopInternal.NUMERIC_OR_TEMPORAL, rdfsLiteralDatatype.getAncestry());
+		registerDatatype(numericOrTemporalDatatype);
+
+		numericDatatype = createAbstractNumericTermType(OntopInternal.NUMERIC, numericOrTemporalDatatype.getAncestry());
 		registerDatatype(numericDatatype);
 
 		xsdDoubleDatatype = createTopConcreteNumericTermType(XSD.DOUBLE, numericDatatype,
@@ -160,11 +164,14 @@ public class TypeFactoryImpl implements TypeFactory {
 
 		defaultUnsupportedDatatype = UnsupportedRDFDatatype.createUnsupportedDatatype(rdfsLiteralDatatype.getAncestry());
 
-		xsdTimeDatatype = createSimpleConcreteRDFDatatype(XSD.TIME, rdfsLiteralDatatype.getAncestry(),
+		temporalDatatype = createSimpleAbstractRDFDatatype(OntopInternal.TEMPORAL, numericOrTemporalDatatype.getAncestry());
+		registerDatatype(temporalDatatype);
+
+		xsdTimeDatatype = createSimpleConcreteRDFDatatype(XSD.TIME, temporalDatatype.getAncestry(),
 				DBTypeFactory::getDBTimeType);
 		registerDatatype(xsdTimeDatatype);
 
-		dateOrDatetimeDatatype = createSimpleAbstractRDFDatatype(OntopInternal.DATE_OR_DATETIME, rdfsLiteralDatatype.getAncestry());
+		dateOrDatetimeDatatype = createSimpleAbstractRDFDatatype(OntopInternal.DATE_OR_DATETIME, temporalDatatype.getAncestry());
 		registerDatatype(dateOrDatetimeDatatype);
 
 		xsdDateDatatype = createSimpleConcreteRDFDatatype(XSD.DATE, dateOrDatetimeDatatype.getAncestry(),
@@ -177,7 +184,7 @@ public class TypeFactoryImpl implements TypeFactory {
 		xsdDatetimeStampDatatype = createSimpleConcreteRDFDatatype(XSD.DATETIMESTAMP, xsdDatetimeDatatype.getAncestry(),
 				DBTypeFactory::getDBDateTimestampType);
 		registerDatatype(xsdDatetimeStampDatatype);
-		xsdGYearDatatype = createSimpleConcreteRDFDatatype(XSD.GYEAR, rdfsLiteralDatatype.getAncestry(),
+		xsdGYearDatatype = createSimpleConcreteRDFDatatype(XSD.GYEAR, temporalDatatype.getAncestry(),
 				// TODO: check
 				DBTypeFactory::getDBStringType);
 		registerDatatype(xsdGYearDatatype);
@@ -224,14 +231,20 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	@Override
-	public RDFDatatype getAbstractOntopNumericDatatype() {
-		return numericDatatype;
-	}
+	public RDFDatatype getAbstractOntopNumericDatatype() { return numericDatatype; }
 
 	@Override
 	public RDFDatatype getAbstractOntopDateOrDatetimeDatatype() {
 		return dateOrDatetimeDatatype;
 	}
+
+	@Override
+	public RDFDatatype getAbstractOntopTemporalDatatype() {
+		return temporalDatatype;
+	}
+
+	@Override
+	public RDFDatatype getAbstractOntopNumericOrTemporalDatatype() { return numericOrTemporalDatatype; }
 
 	@Override
 	public RDFDatatype getAbstractRDFSLiteral() {

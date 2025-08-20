@@ -328,7 +328,7 @@ public class RDF4JValueExprTranslator {
             }
         }
         if (expr instanceof MathExpr) {
-            return new ExtendedTerm(getFunctionalTerm(NumericalOperations.get(((MathExpr) expr).getOperator()),
+            return new ExtendedTerm(getFunctionalTerm(ArithmeticOperations.get(((MathExpr) expr).getOperator()),
                     term1, term2), existsMap);
         }
         /*
@@ -420,12 +420,12 @@ public class RDF4JValueExprTranslator {
                     : termFactory.getSPARQLEffectiveBooleanValue(term);
     }
 
-    private static final ImmutableMap<MathExpr.MathOp, String> NumericalOperations =
+    private static final ImmutableMap<MathExpr.MathOp, String> ArithmeticOperations =
             ImmutableMap.<MathExpr.MathOp, String>builder()
-                    .put(MathExpr.MathOp.PLUS, SPARQL.NUMERIC_ADD)
-                    .put(MathExpr.MathOp.MINUS, SPARQL.NUMERIC_SUBTRACT)
-                    .put(MathExpr.MathOp.MULTIPLY, SPARQL.NUMERIC_MULTIPLY)
-                    .put(MathExpr.MathOp.DIVIDE, SPARQL.NUMERIC_DIVIDE)
+                    .put(MathExpr.MathOp.PLUS, SPARQL.ADD)
+                    .put(MathExpr.MathOp.MINUS, SPARQL.SUBTRACT)
+                    .put(MathExpr.MathOp.MULTIPLY, SPARQL.MULTIPLY)
+                    .put(MathExpr.MathOp.DIVIDE, SPARQL.DIVIDE)
                     .build();
 
 

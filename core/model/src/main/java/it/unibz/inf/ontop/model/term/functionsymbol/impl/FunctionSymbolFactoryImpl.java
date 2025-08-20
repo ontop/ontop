@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
@@ -141,6 +142,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
         RDFDatatype xsdDate = typeFactory.getXsdDate();
         RDFDatatype abstractNumericType = typeFactory.getAbstractOntopNumericDatatype();
+        RDFDatatype abstractNumericOrTemporalType = typeFactory.getAbstractOntopNumericOrTemporalDatatype();
         RDFDatatype dateOrDatetime = typeFactory.getAbstractOntopDateOrDatetimeDatatype();
 
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
@@ -184,10 +186,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new Sha256SPARQLFunctionSymbolImpl(xsdString),
                 new Sha384SPARQLFunctionSymbolImpl(xsdString),
                 new Sha512SPARQLFunctionSymbolImpl(xsdString),
-                new NumericBinarySPARQLFunctionSymbolImpl("SP_MULTIPLY", SPARQL.NUMERIC_MULTIPLY, abstractNumericType),
-                new NumericBinarySPARQLFunctionSymbolImpl("SP_ADD", SPARQL.NUMERIC_ADD, abstractNumericType),
-                new NumericBinarySPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.NUMERIC_SUBTRACT, abstractNumericType),
-                new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal),
+                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_MULTIPLY", SPARQL.MULTIPLY, abstractNumericOrTemporalType, typeFactory),
+                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_ADD", SPARQL.ADD, abstractNumericOrTemporalType, typeFactory),
+                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.SUBTRACT, abstractNumericOrTemporalType, typeFactory),
+                new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal, typeFactory),
                 new NonStrictEqSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
                 new LessThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
                 new GreaterThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
@@ -686,11 +688,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public BooleanFunctionSymbol getLexicalLangMatches() {
         return lexicalLangMatchesFunctionSymbol;
-    }
-
-    @Override
-    public FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName) {
-        return new BinaryNumericLexicalFunctionSymbolImpl(dbNumericOperationName, dbStringType, metaRDFType);
     }
 
     @Override
