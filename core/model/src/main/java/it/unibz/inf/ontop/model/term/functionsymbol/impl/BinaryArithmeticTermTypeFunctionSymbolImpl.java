@@ -2,15 +2,13 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class BinaryArithmeticTermTypeFunctionSymbolImpl extends FunctionSymbolImpl{
 
@@ -57,12 +55,14 @@ public class BinaryArithmeticTermTypeFunctionSymbolImpl extends FunctionSymbolIm
         ImmutableList<ImmutableTerm> typeTerms = ImmutableList.of(newTerms.get(2), newTerms.get(3));
 
         if (typeTerms.stream().allMatch(t -> t instanceof RDFTermTypeConstant)) {
-            ImmutableList<RDFTermType> rdfTypeConstants = typeTerms.stream()
-                    .map(t -> ((RDFTermTypeConstant) t).getRDFTermType())
+            ImmutableList<RDFTermTypeConstant> rdfTypeConstants = typeTerms.stream()
+                    .map(t -> (RDFTermTypeConstant) t)
                     .collect(ImmutableCollectors.toList());
 
-            if (rdfTypeConstants.stream().allMatch(t -> t.isA(typeFactory.getAbstractOntopNumericDatatype()))) {
-                return termFactory.getCommonPropagatedOrSubstitutedNumericType(typeTerms.get(0), typeTerms.get(1)).simplify(variableNullability);
+            if (rdfTypeConstants.stream().allMatch(t -> t.getRDFTermType().isA(typeFactory.getAbstractOntopNumericDatatype()))) {
+                return getCommonPropagatedOrSubstitutedType(rdfTypeConstants.stream(), termFactory)
+                        .map(t -> (Constant) t)
+                        .orElseGet(termFactory::getNullConstant);
             } else {
                 return termFactory.getNullConstant();
             }
@@ -93,5 +93,17 @@ public class BinaryArithmeticTermTypeFunctionSymbolImpl extends FunctionSymbolIm
                                 newTerms.indexOf(t),
                                 termFactory))
                 .map(t -> t.simplify(variableNullability));
+    }
+
+    private Optional<RDFTermTypeConstant> getCommonPropagatedOrSubstitutedType(Stream<RDFTermTypeConstant> typeConstantStream, TermFactory termFactory) {
+        Optional<ConcreteNumericRDFDatatype> optionalNumericType = typeConstantStream
+                .map(RDFTermTypeConstant::getRDFTermType)
+                .filter(t -> t instanceof ConcreteNumericRDFDatatype)
+                .map(t -> (ConcreteNumericRDFDatatype) t)
+                .reduce(ConcreteNumericRDFDatatype::getCommonPropagatedOrSubstitutedType)
+                .filter(t -> !t.isAbstract());
+
+        return optionalNumericType
+                .map(termFactory::getRDFTermTypeConstant);
     }
 }
