@@ -35,7 +35,7 @@ public class PreventDistinctOptimizerImpl extends AbstractIQOptimizer implements
 
     private class PreventDistinctTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
-        public PreventDistinctTransformer(VariableGenerator variableGenerator) {
+        PreventDistinctTransformer(VariableGenerator variableGenerator) {
             super(PreventDistinctOptimizerImpl.this.iqFactory, variableGenerator);
         }
 
