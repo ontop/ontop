@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -28,10 +27,10 @@ import java.util.stream.Stream;
 public class OrderBySimplifierImpl extends AbstractIQOptimizer implements OrderBySimplifier {
 
     private final OptimizationSingletons optimizationSingletons;
-    protected final IQTreeTools iqTreeTools;
-    protected final TermFactory termFactory;
-    protected final TypeFactory typeFactory;
-    protected final ImmutableSet<RDFDatatype> nonLexicallyOrderedDatatypes;
+    private final IQTreeTools iqTreeTools;
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
+    private final ImmutableSet<RDFDatatype> nonLexicallyOrderedDatatypes;
 
     @Inject
     protected OrderBySimplifierImpl(OptimizationSingletons optimizationSingletons) {
@@ -52,9 +51,9 @@ public class OrderBySimplifierImpl extends AbstractIQOptimizer implements OrderB
         return tree.acceptVisitor(transformer);
     }
 
-    protected class OrderBySimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
+    private class OrderBySimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
 
-        protected OrderBySimplifyingTransformer(VariableGenerator variableGenerator) {
+        OrderBySimplifyingTransformer(VariableGenerator variableGenerator) {
             super(optimizationSingletons, variableGenerator);
         }
 
@@ -84,7 +83,7 @@ public class OrderBySimplifierImpl extends AbstractIQOptimizer implements OrderB
                     .build(transformChild(pushDownChildTree));
         }
 
-        protected Stream<ComparatorSimplification> simplifyComparator(OrderByNode.OrderComparator comparator,
+        private Stream<ComparatorSimplification> simplifyComparator(OrderByNode.OrderComparator comparator,
                                                                          IQTree child) {
             ImmutableTerm term = comparator.getTerm().simplify();
             if (term instanceof Constant)
@@ -106,7 +105,7 @@ public class OrderBySimplifierImpl extends AbstractIQOptimizer implements OrderB
                 return Stream.of(new ComparatorSimplification(comparator));
         }
 
-        protected Stream<ComparatorSimplification> simplifyRDFTerm(ImmutableTerm lexicalTerm, ImmutableTerm rdfTypeTerm,
+        private Stream<ComparatorSimplification> simplifyRDFTerm(ImmutableTerm lexicalTerm, ImmutableTerm rdfTypeTerm,
                                                                    IQTree childTree, boolean isAscending) {
 
 
@@ -144,7 +143,7 @@ public class OrderBySimplifierImpl extends AbstractIQOptimizer implements OrderB
                                     isAscending))));
         }
 
-        protected Optional<NonGroundTerm> computeDBTerm(ImmutableTerm lexicalTerm, RDFTermType rdfType, IQTree childTree) {
+        private Optional<NonGroundTerm> computeDBTerm(ImmutableTerm lexicalTerm, RDFTermType rdfType, IQTree childTree) {
             ImmutableTerm orderTerm = termFactory.getConversionFromRDFLexical2DB(lexicalTerm, rdfType)
                     .simplify(childTree.getVariableNullability());
 

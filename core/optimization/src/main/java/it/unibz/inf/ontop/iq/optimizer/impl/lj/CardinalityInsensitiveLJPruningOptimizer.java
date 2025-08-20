@@ -60,7 +60,7 @@ public class CardinalityInsensitiveLJPruningOptimizer extends AbstractIQOptimize
         private final IQTreeTransformer lookForDistinctTransformer;
         private final ImmutableSet<Variable> variablesUsedByAncestors;
 
-        protected CardinalityInsensitiveLJPruningTransformer(IQTreeTransformer lookForDistinctTransformer,
+        CardinalityInsensitiveLJPruningTransformer(IQTreeTransformer lookForDistinctTransformer,
                                                              ImmutableSet<Variable> variablesUsedByAncestors) {
             this.lookForDistinctTransformer = lookForDistinctTransformer;
             this.variablesUsedByAncestors = variablesUsedByAncestors;

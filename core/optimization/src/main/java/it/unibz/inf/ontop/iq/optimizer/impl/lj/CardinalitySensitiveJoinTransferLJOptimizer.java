@@ -50,9 +50,9 @@ public class CardinalitySensitiveJoinTransferLJOptimizer extends AbstractIQOptim
 
 
 
-    protected class Transformer extends AbstractJoinTransferLJTransformer {
+    private class Transformer extends AbstractJoinTransferLJTransformer {
 
-        protected Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
+        Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
                               VariableGenerator variableGenerator) {
             super(variableNullabilitySupplier,
                     variableGenerator,

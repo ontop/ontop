@@ -67,11 +67,11 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer extends AbstractIQOpt
     }
 
 
-    protected class CardinalityInsensitiveTransformer extends AbstractJoinTransferLJTransformer {
+    private class CardinalityInsensitiveTransformer extends AbstractJoinTransferLJTransformer {
 
         private final IQTreeTransformer lookForDistinctTransformer;
 
-        protected CardinalityInsensitiveTransformer(IQTreeTransformer lookForDistinctTransformer,
+        CardinalityInsensitiveTransformer(IQTreeTransformer lookForDistinctTransformer,
                                                     Supplier<VariableNullability> variableNullabilitySupplier,
                                                     VariableGenerator variableGenerator) {
             super(variableNullabilitySupplier,
@@ -130,7 +130,7 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer extends AbstractIQOpt
             return lookForDistinctTransformer.transform(tree);
         }
 
-        protected final IQTree transformBySearchingFromScratchFromDistinctTree(IQTree tree, Supplier<VariableNullability> variableNullabilitySupplier) {
+        private IQTree transformBySearchingFromScratchFromDistinctTree(IQTree tree, Supplier<VariableNullability> variableNullabilitySupplier) {
             CardinalityInsensitiveTransformer newTransformer = new CardinalityInsensitiveTransformer(lookForDistinctTransformer,
                     variableNullabilitySupplier, variableGenerator);
             return tree.acceptVisitor(newTransformer);
@@ -168,6 +168,4 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer extends AbstractIQOpt
                     t -> transformBySearchingFromScratchFromDistinctTree(t, t::getVariableNullability));
         }
     }
-
-
 }

@@ -80,11 +80,11 @@ public class NullableFDSelfLJOptimizer extends AbstractIQOptimizer implements Le
     }
 
 
-    protected class CardinalityInsensitiveTransformer extends AbstractLJTransformer {
+    private class CardinalityInsensitiveTransformer extends AbstractLJTransformer {
 
         private final IQTreeTransformer lookForDistinctTransformer;
 
-        protected CardinalityInsensitiveTransformer(IQTreeTransformer lookForDistinctTransformer,
+        CardinalityInsensitiveTransformer(IQTreeTransformer lookForDistinctTransformer,
                                                     VariableGenerator variableGenerator) {
             super(NullableFDSelfLJOptimizer.this.iqFactory, variableGenerator);
             this.lookForDistinctTransformer = lookForDistinctTransformer;

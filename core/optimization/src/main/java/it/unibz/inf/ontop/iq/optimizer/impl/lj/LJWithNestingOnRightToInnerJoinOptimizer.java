@@ -74,9 +74,9 @@ public class LJWithNestingOnRightToInnerJoinOptimizer extends AbstractIQOptimize
 
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    protected class Transformer extends AbstractLJTransformerWithVariableNullability {
+    private class Transformer extends AbstractLJTransformerWithVariableNullability {
 
-        protected Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
+        Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
                               VariableGenerator variableGenerator) {
             super(variableNullabilitySupplier,
                     variableGenerator,

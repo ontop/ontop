@@ -17,7 +17,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 public class LensUnfolderImpl extends AbstractIQOptimizer implements LensUnfolder {
 
-    protected final CoreSingletons coreSingletons;
+    private final CoreSingletons coreSingletons;
 
     @Inject
     protected LensUnfolderImpl(CoreSingletons coreSingletons) {
@@ -26,7 +26,7 @@ public class LensUnfolderImpl extends AbstractIQOptimizer implements LensUnfolde
     }
 
     @Override
-    public IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
         int maxLevel = Lens.getMaxLevel(tree);
         if (maxLevel < 1)
             return tree;
@@ -57,7 +57,7 @@ public class LensUnfolderImpl extends AbstractIQOptimizer implements LensUnfolde
                 return dataNode;
         }
 
-        protected IQTree merge(ExtensionalDataNode dataNode, IQ definition) {
+        private IQTree merge(ExtensionalDataNode dataNode, IQ definition) {
             return ExtensionalDataNodeImpl.merge(dataNode, definition, variableGenerator,
                     coreSingletons.getSubstitutionFactory(),
                     coreSingletons.getQueryTransformerFactory(),

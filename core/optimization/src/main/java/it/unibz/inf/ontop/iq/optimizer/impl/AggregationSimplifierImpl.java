@@ -53,9 +53,9 @@ public class AggregationSimplifierImpl extends AbstractIQOptimizer implements Ag
     /**
      * Recursive
      */
-    protected class AggregationSimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
+    private class AggregationSimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
 
-        protected AggregationSimplifyingTransformer(VariableGenerator variableGenerator) {
+        AggregationSimplifyingTransformer(VariableGenerator variableGenerator) {
             super(optimizationSingletons,  variableGenerator);
         }
 
@@ -100,7 +100,7 @@ public class AggregationSimplifierImpl extends AbstractIQOptimizer implements Ag
                     .build(pushDownChildTree);
         }
 
-        protected Optional<AggregationSimplification> simplifyAggregationFunctionalTerm(ImmutableFunctionalTerm aggregationFunctionalTerm,
+        private Optional<AggregationSimplification> simplifyAggregationFunctionalTerm(ImmutableFunctionalTerm aggregationFunctionalTerm,
                                                                                         IQTree child, boolean hasGroupBy) {
             FunctionSymbol functionSymbol = aggregationFunctionalTerm.getFunctionSymbol();
 
@@ -146,12 +146,12 @@ public class AggregationSimplifierImpl extends AbstractIQOptimizer implements Ag
             return Optional.empty();
         }
 
-        protected boolean isRDFFunctionalTerm(ImmutableTerm term) {
+        private boolean isRDFFunctionalTerm(ImmutableTerm term) {
             return (term instanceof ImmutableFunctionalTerm)
                     && (((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof RDFTermFunctionSymbol);
         }
 
-        protected ImmutableTerm extractRDFTermTypeTerm(ImmutableTerm rdfTerm) {
+        private ImmutableTerm extractRDFTermTypeTerm(ImmutableTerm rdfTerm) {
             if (isRDFFunctionalTerm(rdfTerm))
                 return ((ImmutableFunctionalTerm)rdfTerm).getTerm(1);
             else if (rdfTerm instanceof RDFConstant)

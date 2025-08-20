@@ -317,7 +317,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
      *   (i.e., a simple projection), and lift the projection if needed
      * - Distinct or slice nodes: does not apply
      */
-    class ConstructionNodeLifter extends DefaultRecursiveIQTreeVisitingTransformer {
+    private class ConstructionNodeLifter extends DefaultRecursiveIQTreeVisitingTransformer {
 
         ConstructionNodeLifter() {
             super(ExplicitEqualityTransformerImpl.this.iqFactory);
