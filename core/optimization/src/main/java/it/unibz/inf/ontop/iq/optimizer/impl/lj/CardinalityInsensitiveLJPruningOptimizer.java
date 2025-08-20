@@ -10,9 +10,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.AggregationSimplifierImpl;
 import it.unibz.inf.ontop.iq.optimizer.impl.CaseInsensitiveIQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
@@ -30,7 +28,7 @@ import java.util.Set;
  * in a cardinality-insensitive context
  */
 @Singleton
-public class CardinalityInsensitiveLJPruningOptimizer extends AbstractIQOptimizer implements LeftJoinIQOptimizer {
+public class CardinalityInsensitiveLJPruningOptimizer extends AbstractIQOptimizer {
 
     private final IQVisitor<IQTree> transformer;
 
