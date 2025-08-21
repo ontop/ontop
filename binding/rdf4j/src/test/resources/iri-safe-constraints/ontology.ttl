@@ -1,0 +1,6 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix ex: <http://example.org/ontology#> .
+
+ex:Address a owl:Class .
+ex:Building a owl:Class .
+ex:hasAddress a owl:ObjectProperty .

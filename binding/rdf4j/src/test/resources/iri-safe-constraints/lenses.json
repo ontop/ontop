@@ -1,0 +1,12 @@
+{
+    "relations": [
+      {
+        "name": ["\"lenses\"", "\"address\""],
+        "baseRelation": ["\"address\""],
+        "iriSafeConstraints": {
+            "added": ["\"municipality\"", "\"street\"", "\"housenumber\"", "\"building_id\""]
+        },
+        "type": "BasicLens"
+      }
+    ]
+}

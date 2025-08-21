@@ -1,0 +1,11 @@
+[PrefixDeclaration]
+ex: http://example.org/ontology#
+:   http://example.org/data/
+
+[MappingDeclaration] @collection [[
+
+mappingId   address
+target      :address/{"municipality"}/{"street"}/{"housenumber"} a ex:Address. :building/{"municipality"}/{"building_id"} a ex:Building; ex:hasAddress :address/{"municipality"}/{"street"}/{"housenumber"}.
+source      SELECT "municipality", "street", "housenumber", "building_id" FROM "lenses"."address"
+
+]]
