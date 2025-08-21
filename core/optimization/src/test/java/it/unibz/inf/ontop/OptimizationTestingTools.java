@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
+import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -41,6 +42,7 @@ public class OptimizationTestingTools {
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final QueryTransformerFactory TRANSFORMER_FACTORY;
     public static final OptimizerFactory OPTIMIZER_FACTORY;
+    public static final ExplicitEqualityTransformer EXPLICIT_EQUALITY_TRANSFORMER;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
     public static final BooleanExpressionPushDownTransformer PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER;
     public static final DBConstant TRUE, FALSE;
@@ -123,6 +125,7 @@ public class OptimizationTestingTools {
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
         UNION_AND_BINDING_LIFT_OPTIMIZER = injector.getInstance(UnionAndBindingLiftOptimizer.class);
+        EXPLICIT_EQUALITY_TRANSFORMER = injector.getInstance(ExplicitEqualityTransformer.class);
         PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER = injector.getInstance(BooleanExpressionPushDownTransformer.class);
         TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
         OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);

@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -421,10 +420,9 @@ public class PullOutVariableOptimizerTest {
     private void optimizeAndCheck(IQ initialQuery, IQ expectedQuery) {
         System.out.println("\nBefore optimization: \n" +  initialQuery);
 
-        ExplicitEqualityTransformer eet = OPTIMIZER_FACTORY.createEETransformer(initialQuery.getVariableGenerator());
         IQ optimizedIQ = IQ_FACTORY.createIQ(
                         initialQuery.getProjectionAtom(),
-                        eet.transform(initialQuery.getTree()));
+                EXPLICIT_EQUALITY_TRANSFORMER.transform(initialQuery.getTree(), initialQuery.getVariableGenerator()));
         System.out.println("\nAfter optimization: \n" +  optimizedIQ);
 
         System.out.println("\nExpected: \n" +  expectedQuery);

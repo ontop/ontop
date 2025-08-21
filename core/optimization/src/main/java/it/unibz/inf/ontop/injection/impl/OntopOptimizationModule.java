@@ -59,11 +59,11 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(AuthorizationFunctionEvaluator.class);
         bindFromSettings(AllQueryContextFunctionSymbolEvaluator.class);
         bindFromSettings(NodeInGraphOptimizer.class);
+        bindFromSettings(ExplicitEqualityTransformer.class);
 
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
 
         Module optimizerModule = buildFactory(ImmutableList.of(
-                ExplicitEqualityTransformer.class,
                 TermTypeTermLiftTransformer.class,
                 DefinitionPushDownTransformer.class),
                 OptimizerFactory.class);

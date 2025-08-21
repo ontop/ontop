@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.iq.optimizer.PostProcessableFunctionLifter;
 import it.unibz.inf.ontop.iq.optimizer.TermTypeTermLifter;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 import it.unibz.inf.ontop.iq.transformer.EmptyRowsValuesNodeTransformer;
+import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     private final DialectExtraNormalizer extraNormalizer;
     private final BooleanExpressionPushDownTransformer pushDownTransformer;
     private final EmptyRowsValuesNodeTransformer valuesNodeTransformer;
+    private final ExplicitEqualityTransformer equalityTransformer;
     private final IQTreeTools iqTreeTools;
 
     @AssistedInject
@@ -62,7 +64,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
                              IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator,
                              DialectExtraNormalizer extraNormalizer, BooleanExpressionPushDownTransformer pushDownTransformer,
                              EmptyRowsValuesNodeTransformer valuesNodeTransformer,
-                             OntopReformulationSQLSettings settings, IQTreeTools iqTreeTools)
+                             OntopReformulationSQLSettings settings, ExplicitEqualityTransformer equalityTransformer, IQTreeTools iqTreeTools)
     {
         this.functionLifter = functionLifter;
         this.extraNormalizer = extraNormalizer;
@@ -76,6 +78,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         this.rdfTypeLifter = rdfTypeLifter;
         this.defaultIQTree2NativeNodeGenerator = defaultIQTree2NativeNodeGenerator;
         this.settings = settings;
+        this.equalityTransformer = equalityTransformer;
         this.iqTreeTools = iqTreeTools;
     }
 
@@ -136,7 +139,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         IQTree pushedDownSubTree = pushDownTransformer.transform(flattenSubTree);
         LOGGER.debug("New query after pushing down:\n{}\n", pushedDownSubTree);
 
-        IQTree treeAfterPullOut = optimizerFactory.createEETransformer(variableGenerator).transform(pushedDownSubTree);
+        IQTree treeAfterPullOut = equalityTransformer.transform(pushedDownSubTree, variableGenerator);
         LOGGER.debug("Query tree after pulling out equalities:\n{}\n", treeAfterPullOut);
 
         // Top construction elimination when it causes problems

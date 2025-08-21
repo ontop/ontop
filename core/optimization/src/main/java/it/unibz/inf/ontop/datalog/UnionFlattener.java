@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.datalog;
 
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.utils.VariableGenerator;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 
-public interface UnionFlattener {
-
-    IQTree transform(IQTree tree, VariableGenerator variableGenerator);
+public interface UnionFlattener extends IQTreeVariableGeneratorTransformer {
 }

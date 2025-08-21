@@ -1,8 +1,7 @@
 package it.unibz.inf.ontop.iq.transformer.impl;
 
 import com.google.common.collect.*;
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -16,6 +15,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -39,14 +39,11 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
     private final IntermediateQueryFactory iqFactory;
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
-    private final VariableGenerator variableGenerator;
     private final SubstitutionFactory substitutionFactory;
     private final IQTreeTools iqTreeTools;
-    private final ImmutableList<IQVisitor<IQTree>> visitors;
 
-    @AssistedInject
-    public ExplicitEqualityTransformerImpl(@Assisted VariableGenerator variableGenerator,
-                                           IntermediateQueryFactory iqFactory,
+    @Inject
+    private ExplicitEqualityTransformerImpl(IntermediateQueryFactory iqFactory,
                                            AtomFactory atomFactory,
                                            TermFactory termFactory,
                                            SubstitutionFactory substitutionFactory,
@@ -54,17 +51,16 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         this.iqFactory = iqFactory;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
-        this.variableGenerator = variableGenerator;
         this.substitutionFactory = substitutionFactory;
         this.iqTreeTools = iqTreeTools;
-        this.visitors = ImmutableList.of(
-                new LocalExplicitEqualityEnforcer(),
-                new ConstructionNodeLifter(),
-                new FilterChildNormalizer());
     }
 
     @Override
-    public IQTree transform(IQTree tree) {
+    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
+        ImmutableList<IQVisitor<IQTree>> visitors = ImmutableList.of(
+                new LocalExplicitEqualityEnforcer(variableGenerator),
+                new ConstructionNodeLifter(),
+                new FilterChildNormalizer());
         // non-final
         IQTree current = tree;
         for (IQVisitor<IQTree> visitor : visitors) {
@@ -87,10 +83,10 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
      *
      * If needed, create a root projection to ensure that the transformed query has the same signature as the input one.
      */
-    private class LocalExplicitEqualityEnforcer extends DefaultRecursiveIQTreeVisitingTransformer {
+    private class LocalExplicitEqualityEnforcer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
-        LocalExplicitEqualityEnforcer() {
-            super(ExplicitEqualityTransformerImpl.this.iqFactory);
+        LocalExplicitEqualityEnforcer(VariableGenerator variableGenerator) {
+            super(ExplicitEqualityTransformerImpl.this.iqFactory, variableGenerator);
         }
 
         @Override
