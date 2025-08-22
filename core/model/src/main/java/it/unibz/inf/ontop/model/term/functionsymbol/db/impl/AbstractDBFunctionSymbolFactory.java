@@ -490,7 +490,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         rowUniqueStrFct = createDBRowUniqueStr();
         rowNumberFct = createDBRowNumber();
         rowNumberWithOrderByFct = createDBRowNumberWithOrderBy();
-        iriSafenessDeclarationFunctionSymbol = new IRISafenessDeclarationFunctionSymbolImpl(rootDBType);
+        iriSafenessDeclarationFunctionSymbol = new IRISafenessDeclarationFunctionSymbolImpl(rootDBType, dbStringType);
 
         checkAndConvertDateFromDateTimeFunctionSymbol = createCheckAndConvertDateFromDateTimeFunctionSymbol();
         checkAndConvertDateFromStringFunctionSymbol = createCheckAndConvertDateFromStringFunctionSymbol();

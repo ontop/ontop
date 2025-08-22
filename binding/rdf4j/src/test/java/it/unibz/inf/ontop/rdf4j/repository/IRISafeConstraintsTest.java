@@ -32,6 +32,7 @@ public class IRISafeConstraintsTest extends AbstractRDF4JTest {
                 "    OPTIONAL { ?building ex:hasAddress ?v }\n" +
                 "}";
 
-        runQueryAndCompare(query, ImmutableSet.of("http://example.org/data/address/Bolzano/Via%20Verdi/1"));
+        runQueryAndCompare(query, ImmutableSet.of("http://example.org/data/address/Bolzano/Via%20Verdi/1",
+                "http://example.org/data/address/Bolzano/Via%20Roma/2"));
     }
 }

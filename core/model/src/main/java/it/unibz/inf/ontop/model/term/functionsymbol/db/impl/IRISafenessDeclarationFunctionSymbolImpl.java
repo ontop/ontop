@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRISafenessDeclarationFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolImpl;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 
@@ -12,13 +13,17 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class IRISafenessDeclarationFunctionSymbolImpl extends FunctionSymbolImpl implements IRISafenessDeclarationFunctionSymbol {
-    protected IRISafenessDeclarationFunctionSymbolImpl(TermType rootDBTermType) {
+    private final DBTermType dbStringTyoe;
+
+    protected IRISafenessDeclarationFunctionSymbolImpl(TermType rootDBTermType, DBTermType dbStringType) {
         super("DECLARE_IRI_SAFE", ImmutableList.of(rootDBTermType));
+
+        this.dbStringTyoe = dbStringType;
     }
 
     @Override
     public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
-        return terms.get(0).inferType();
+        return Optional.of(TermTypeInference.declareTermType(dbStringTyoe));
     }
 
     @Override
