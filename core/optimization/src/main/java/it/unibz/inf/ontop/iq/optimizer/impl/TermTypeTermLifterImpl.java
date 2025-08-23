@@ -38,6 +38,10 @@ public class TermTypeTermLifterImpl extends AbstractIQOptimizer implements TermT
 
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
+    private final TypeConstantDictionary dictionary;
+    private final SubstitutionFactory substitutionFactory;
+    private final FunctionSymbolFactory functionSymbolFactory;
+
     private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
@@ -50,14 +54,20 @@ public class TermTypeTermLifterImpl extends AbstractIQOptimizer implements TermT
         super(iqFactory, NO_ACTION);
         this.termFactory = termFactory;
         this.iqTreeTools = iqTreeTools;
-        this.transformer = new TermTypeTermLiftTransformer(typeConstantDictionary, substitutionFactory, functionSymbolFactory);
+        this.dictionary = typeConstantDictionary;
+        this.substitutionFactory = substitutionFactory;
+        this.functionSymbolFactory = functionSymbolFactory;
+        this.transformer = new TermTypeTermLiftTransformer();
     }
 
     @Override
     protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQTree transformedTree = transformer.transform(tree, variableGenerator);
+        // Makes sure the tree is already normalized before transforming it
+        IQTree normalizedTree = tree.normalizeForOptimization(variableGenerator);
+        IQTree transformedTree = transformer.transform(normalizedTree, variableGenerator);
 
-        return makeRDFTermTypeFunctionSymbolsSimplifiable(transformedTree, variableGenerator);
+        return makeRDFTermTypeFunctionSymbolsSimplifiable(transformedTree)
+                .normalizeForOptimization(variableGenerator);
     }
 
     /**
@@ -68,24 +78,10 @@ public class TermTypeTermLifterImpl extends AbstractIQOptimizer implements TermT
      */
     private class TermTypeTermLiftTransformer implements IQTreeVariableGeneratorTransformer {
 
-        private final TypeConstantDictionary dictionary;
-        private final SubstitutionFactory substitutionFactory;
-        private final FunctionSymbolFactory functionSymbolFactory;
-
-        TermTypeTermLiftTransformer(TypeConstantDictionary typeConstantDictionary,
-                    SubstitutionFactory substitutionFactory,
-                    FunctionSymbolFactory functionSymbolFactory) {
-            this.dictionary = typeConstantDictionary;
-            this.substitutionFactory = substitutionFactory;
-            this.functionSymbolFactory = functionSymbolFactory;
-        }
-
         @Override
         public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
             Transformer transformer = new Transformer(variableGenerator);
-            // Makes sure the tree is already normalized before transforming it
-            return tree.normalizeForOptimization(variableGenerator)
-                    .acceptVisitor(transformer);
+            return tree.acceptVisitor(transformer);
         }
 
         private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
@@ -385,15 +381,14 @@ public class TermTypeTermLifterImpl extends AbstractIQOptimizer implements TermT
      * (they cannot be processed by the DB engine).
      *
      */
-    private IQTree makeRDFTermTypeFunctionSymbolsSimplifiable(IQTree tree, VariableGenerator variableGenerator) {
+    private IQTree makeRDFTermTypeFunctionSymbolsSimplifiable(IQTree tree) {
         var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
         return iqTreeTools.unaryIQTreeBuilder()
                 .append(construction.getOptionalNode()
                         .map(cn -> iqTreeTools.replaceSubstitution(
                                 cn,
                                 s -> s.transform(this::makeRDFTermTypeFunctionSymbolsSimplifiable))))
-                .build(construction.getTail())
-                .normalizeForOptimization(variableGenerator);
+                .build(construction.getTail());
     }
 
     /**
