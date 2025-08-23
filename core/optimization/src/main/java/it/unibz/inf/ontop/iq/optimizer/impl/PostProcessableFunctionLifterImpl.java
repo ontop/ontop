@@ -65,93 +65,44 @@ public class PostProcessableFunctionLifterImpl extends AbstractIQOptimizer imple
 
 
     private class Context {
-
         private final VariableGenerator variableGenerator;
+        private final Transformer transformer;
 
         Context(VariableGenerator variableGenerator) {
             this.variableGenerator = variableGenerator;
+            this.transformer = new Transformer();
         }
 
         IQTree lift(IQTree tree) {
+            return tree.acceptVisitor(transformer);
+        }
 
-            return tree.acceptVisitor(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
-                @Override
-                public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-                    IQTree normalizedTree = super.transformUnion(tree, rootNode, children)
-                            .normalizeForOptimization(variableGenerator);
+        private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
+            Transformer() {
+                super(PostProcessableFunctionLifterImpl.this.iqFactory,
+                        t -> t.normalizeForOptimization(variableGenerator));
+            }
 
-                    // Fix-point before pursing (recursive, potentially dangerous!)
-                    if (!normalizedTree.equals(tree)) {
-                        return transformChild(normalizedTree);
-                    }
+            @Override
+            public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+                IQTree normalizedTree = super.transformUnion(tree, rootNode, children);
 
-                    return IQStateOptionalTransformer.reachFinalState(
-                                    new State(
-                                            UnaryOperatorSequence.of(),
-                                            rootNode.getVariables(),
-                                            children,
-                                            Optional.empty()),
-                                    State::liftAnyVariable,
-                                    LOOPING_BOUND)
-                            .asIQTree()
-                            .normalizeForOptimization(variableGenerator);
+                // Fix-point before pursing (recursive, potentially dangerous!)
+                if (!normalizedTree.equals(tree)) {
+                    return lift(normalizedTree);
                 }
 
-                @Override
-                public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-                    return super.transformInnerJoin(tree, rootNode, children)
-                            .normalizeForOptimization(variableGenerator);
-                }
-
-                @Override
-                public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode,
-                                                IQTree leftChild, IQTree rightChild) {
-                    return super.transformLeftJoin(tree, rootNode, leftChild, rightChild)
-                            .normalizeForOptimization(variableGenerator);
-                }
-
-                @Override
-                public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-                    return super.transformOrderBy(tree, rootNode, child)
-                            .normalizeForOptimization(variableGenerator);
-                }
-
-                @Override
-                public IQTree transformSlice(UnaryIQTree tree, SliceNode rootNode, IQTree child) {
-                    return super.transformSlice(tree, rootNode, child)
-                            .normalizeForOptimization(variableGenerator);
-                }
-
-                @Override
-                public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-                    return super.transformDistinct(tree, rootNode, child)
-                            .normalizeForOptimization(variableGenerator);
-                }
-
-                @Override
-                public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-                    return super.transformFilter(tree, rootNode, child)
-                            .normalizeForOptimization(variableGenerator);
-                }
-
-                @Override
-                public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
-                    return super.transformFlatten(tree, rootNode, child)
-                            .normalizeForOptimization(variableGenerator);
-                }
-
-                @Override
-                public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
-                    return super.transformAggregation(tree, rootNode, child)
-                            .normalizeForOptimization(variableGenerator);
-                }
-
-                @Override
-                public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-                    return super.transformConstruction(tree, rootNode, child)
-                            .normalizeForOptimization(variableGenerator);
-                }
-            });
+                return IQStateOptionalTransformer.reachFinalState(
+                                new State(
+                                        UnaryOperatorSequence.of(),
+                                        rootNode.getVariables(),
+                                        children,
+                                        Optional.empty()),
+                                Context.State::liftAnyVariable,
+                                LOOPING_BOUND)
+                        .asIQTree()
+                        .normalizeForOptimization(variableGenerator);
+            }
         }
 
         /**

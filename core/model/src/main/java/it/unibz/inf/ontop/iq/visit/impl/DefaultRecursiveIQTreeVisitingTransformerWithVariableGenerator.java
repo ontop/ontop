@@ -16,7 +16,7 @@ public class DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator exte
     }
 
     protected DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator(IntermediateQueryFactory iqFactory, Function<IQTree, IQTree> postTransformer, VariableGenerator variableGenerator) {
-        super(iqFactory);
+        super(iqFactory, postTransformer);
         this.variableGenerator = variableGenerator;
     }
 }
