@@ -64,7 +64,6 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
 
         Module optimizerModule = buildFactory(ImmutableList.of(
-                TermTypeTermLiftTransformer.class,
                 DefinitionPushDownTransformer.class),
                 OptimizerFactory.class);
         install(optimizerModule);
