@@ -966,7 +966,7 @@ public class ExpressionParserTest {
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
         Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
-                DB_FS_FACTORY.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_MULTIPLY),
+                DB_FS_FACTORY.getUntypedDBMathBinaryOperator(SPARQL.MULTIPLY),
                 TERM_FACTORY.getDBConstant("-1", DB_TYPE_FACTORY.getDBLargeIntegerType()),
                 v), translation);
     }

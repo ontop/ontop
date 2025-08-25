@@ -221,6 +221,31 @@ public class NativeMappingParserTest {
     }
 
     @Test
+    public void testLoadMultilineWithMultilineTargetNoSpace() throws Exception {
+        var mapping = mappingParser.parse(new File(ROOT2 + "mapping-northwind-multiline-m.obda"));
+        assertEquals(7, mapping.getTripleMaps().get(0).getTargetAtoms().size());
+    }
+
+    @Test
+    public void testLoadMultilineWithMultilineTarget() throws Exception {
+        var mapping = mappingParser.parse(new File(ROOT2 + "mapping-northwind-multiline-m2.obda"));
+        assertEquals(7, mapping.getTripleMaps().get(0).getTargetAtoms().size());
+    }
+
+    @Test
+    public void testLoadMultilineWithMultilineTargetNotLast() throws Exception {
+        var mapping = mappingParser.parse(new File(ROOT2 + "mapping-northwind-multiline-m3.obda"));
+        assertEquals(7, mapping.getTripleMaps().get(0).getTargetAtoms().size());
+    }
+
+    @Test
+    public void testLoadMultilineWithMultilineTargetNotLastNpSpace() throws Exception {
+        var ex = assertThrows(MappingIOException.class, () -> mappingParser.parse(new File(ROOT2 + "mapping-northwind-multiline-m4.obda")));
+        assertEquals("java.io.IOException: ERROR reading mapping-northwind-multiline-m4.obda at line: 11\n" +
+                "MESSAGE: Unknown parameter name \"NORTHWIND.EMPLOYEES\" at line: 11.", ex.getMessage());
+    }
+
+    @Test
     public void testSpaceBeforeEndCollectionSymbol() throws Exception {
         mappingParser.parse(new File(ROOT2 + "unusualCollectionEnding.obda"));
     }

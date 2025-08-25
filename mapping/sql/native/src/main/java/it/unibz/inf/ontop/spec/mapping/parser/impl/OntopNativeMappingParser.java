@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
@@ -185,8 +186,8 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         private String mappingId = "";
         private final ImmutableList.Builder<String> source = ImmutableList.builder();
         private final ImmutableList.Builder<String> target = ImmutableList.builder();
-        private ImmutableList<TargetAtom> targetQuery = null;
         boolean isMappingValid = true;
+        boolean hasTarget = false;
 
         MappingBuilder(List<String> invalidMappingIndicators, Supplier<Integer> line) {
             this.invalidMappingIndicators = invalidMappingIndicators;
@@ -205,6 +206,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                 return Optional.empty();
 
             String targetString = String.join(" ", target.build());
+            ImmutableList<TargetAtom> targetQuery = null;
             if (!targetString.isEmpty()) {
                 try {
                     targetQuery = parser.parse(targetString);
@@ -235,18 +237,28 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                 fail(String.format("Line %d: Mapping ID is missing\n", line.get()));
         }
 
-        void setTarget(String value) {
-            if (!value.isEmpty())
+        void addToTarget(String value) {
+            if (!value.isEmpty()) {
                 target.add(value);
+                hasTarget = true;
+            }
             else
                 fail(String.format("Line %d: Target query is missing\n", line.get()));
         }
 
-        void setSource(String value) {
+        void addToSource(String value) {
             if (!value.isEmpty())
                 source.add(value);
             else
                 fail(String.format("Line %d: Source query is missing\n", line.get()));
+        }
+
+        boolean hasId() {
+            return !mappingId.isEmpty();
+        }
+
+        boolean hasTarget() {
+            return hasTarget;
         }
     }
 
@@ -264,7 +276,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         ImmutableList.Builder<SQLPPTriplesMap> mappings = ImmutableList.builder();
         MappingBuilder current = new MappingBuilder(invalidMappingIndicators, reader::getLineNumber);
 
-        String currentLabel = ""; // the reader is working on which label
+        String currentLabel = "";
         String line;
         while ((line = reader.readLine()) != null) {
             String trimmedLine = line.trim();
@@ -276,27 +288,35 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                 current.build(parser).ifPresent(mappings::add);
                 current = new MappingBuilder(invalidMappingIndicators, reader::getLineNumber);
             }
-            // skip the comment lines (which have ; as their first non-space symbol)
+            // skip the comment lines (which have a semicolon as their first non-space symbol)
             //      and invalid mappings
             else if (trimmedLine.indexOf(COMMENT_SYMBOL) != 0 && current.isValid()) {
                 String[] tokens = line.split("[\t| ]+", 2);
                 String label = tokens[0].trim();
-                if (!label.isEmpty())
+                String value;
+                // backward compatibility: the source query can go over any number of lines,
+                // which do not have to start with a space or a tab
+                // (provided that the mapping already has ID and target -
+                //     that is, the source is the last component)
+                // in contrast, target queries have to have a lead space in all lines except first
+                if (!label.isEmpty() &&
+                        !(currentLabel.equals(SOURCE_LABEL) && current.hasId() && current.hasTarget())) {
                     currentLabel = label;
-
-                String value = (tokens.length > 1)
-                    ? value = tokens[1].trim()
-                    : "";
+                    value = tokens.length > 1 ? tokens[1].trim() : "";
+                }
+                else {
+                    value = trimmedLine;
+                }
 
                 switch (currentLabel) {
                     case MAPPING_ID_LABEL:
                         current.setMappingId(value);
                         break;
                     case TARGET_LABEL:
-                        current.setTarget(value);
+                        current.addToTarget(value);
                         break;
                     case SOURCE_LABEL:
-                        current.setSource(value);
+                        current.addToSource(value);
                         break;
                     default:
                         throw new IOException(String.format("Unknown parameter name \"%s\" at line: %d.", tokens[0], reader.getLineNumber()));

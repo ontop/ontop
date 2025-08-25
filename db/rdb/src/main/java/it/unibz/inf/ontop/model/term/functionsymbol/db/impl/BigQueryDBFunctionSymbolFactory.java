@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.utils.Interval;
 
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Function;
 
 public class BigQueryDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
@@ -278,7 +277,7 @@ public class BigQueryDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
     @Override
     protected DBTermType inferOutputTypeMathOperator(String dbMathOperatorName, DBTermType arg1Type, DBTermType arg2Type) {
-        if (dbMathOperatorName.equals(SPARQL.NUMERIC_DIVIDE))
+        if (dbMathOperatorName.equals(SPARQL.DIVIDE))
             return dbDecimalType;
 
         return super.inferOutputTypeMathOperator(dbMathOperatorName, arg1Type, arg2Type);

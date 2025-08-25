@@ -115,7 +115,8 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         insertForeignKeys(relation, metadataLookupForFK,
                 (foreignKeys != null) ? foreignKeys.added : ImmutableList.of(),
-                baseRelations);
+                baseRelations,
+                coreSingletons);
     }
 
     private IQ createIQ(RelationID relationId, ImmutableList<ParentDefinition> parentDefinitions, DBParameters dbParameters)

@@ -59,7 +59,7 @@ public class TypeFactoryImpl implements TypeFactory {
 		rdfsLiteralDatatype = createSimpleAbstractRDFDatatype(RDFS.LITERAL, rootRDFTermType.getAncestry());
 		registerDatatype(rdfsLiteralDatatype);
 
-		numericOrTemporalDatatype = createSimpleAbstractRDFDatatype(OntopInternal.TEMPORAL_OR_NUMERIC, rdfsLiteralDatatype.getAncestry());
+		numericOrTemporalDatatype = createSimpleAbstractRDFDatatype(OntopInternal.NUMERIC_OR_TEMPORAL, rdfsLiteralDatatype.getAncestry());
 		registerDatatype(numericOrTemporalDatatype);
 
 		numericDatatype = createAbstractNumericTermType(OntopInternal.NUMERIC, numericOrTemporalDatatype.getAncestry());
@@ -237,8 +237,8 @@ public class TypeFactoryImpl implements TypeFactory {
 
 	@Override
 	public RDFDatatype getAbstractOntopNumericDatatype() {
-		return numericDatatype;
-	}
+        return numericDatatype;
+    }
 
 	@Override
 	public RDFDatatype getAbstractOntopDateOrDatetimeDatatype() {
@@ -246,14 +246,14 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	@Override
-	public RDFDatatype getAbstractOntopNumericOrTemporalDatatype() {
-		return numericOrTemporalDatatype;
-	}
-
-	@Override
 	public RDFDatatype getAbstractOntopTemporalDatatype() {
 		return temporalDatatype;
 	}
+
+	@Override
+	public RDFDatatype getAbstractOntopNumericOrTemporalDatatype() {
+        return numericOrTemporalDatatype;
+    }
 
 	@Override
 	public RDFDatatype getAbstractRDFSLiteral() {

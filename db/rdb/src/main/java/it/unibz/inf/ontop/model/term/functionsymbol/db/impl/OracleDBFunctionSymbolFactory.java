@@ -587,7 +587,7 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     protected DBTermType inferOutputTypeMathOperator(String dbMathOperatorName, DBTermType arg1Type, DBTermType arg2Type) {
-        if (dbMathOperatorName.equals(SPARQL.NUMERIC_DIVIDE))
+        if (dbMathOperatorName.equals(SPARQL.DIVIDE))
             return dbDecimalType;
 
         return super.inferOutputTypeMathOperator(dbMathOperatorName, arg1Type, arg2Type);

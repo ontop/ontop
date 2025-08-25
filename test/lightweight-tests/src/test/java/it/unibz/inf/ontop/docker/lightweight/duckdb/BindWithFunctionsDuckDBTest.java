@@ -115,4 +115,11 @@ public class BindWithFunctionsDuckDBTest extends AbstractBindTestWithFunctions {
         super.testHashSHA512();
     }
 
+    @Disabled("Regex function with flags is not supported with DuckDB")
+    @Test
+    @Override
+    public void testCaseInsensitiveREGEX() {
+        super.testCaseInsensitiveREGEX();
+    }
+
 }

@@ -328,8 +328,8 @@ public class RDF4JValueExprTranslator {
             }
         }
         if (expr instanceof MathExpr) {
-            var operator = ((MathExpr) expr).getOperator();
-            return new ExtendedTerm(getFunctionalTerm(NumericalOperations.get(operator), term1, term2), existsMap);
+            return new ExtendedTerm(getFunctionalTerm(ArithmeticOperations.get(((MathExpr) expr).getOperator()),
+                    term1, term2), existsMap);
         }
         /*
          * Restriction: the first argument must be LANG(...) and the second  a constant
@@ -420,12 +420,12 @@ public class RDF4JValueExprTranslator {
                     : termFactory.getSPARQLEffectiveBooleanValue(term);
     }
 
-    private static final ImmutableMap<MathExpr.MathOp, String> NumericalOperations =
+    private static final ImmutableMap<MathExpr.MathOp, String> ArithmeticOperations =
             ImmutableMap.<MathExpr.MathOp, String>builder()
-                    .put(MathExpr.MathOp.PLUS, SPARQL.NUMERIC_ADD)
-                    .put(MathExpr.MathOp.MINUS, SPARQL.NUMERIC_SUBTRACT)
-                    .put(MathExpr.MathOp.MULTIPLY, SPARQL.NUMERIC_MULTIPLY)
-                    .put(MathExpr.MathOp.DIVIDE, SPARQL.NUMERIC_DIVIDE)
+                    .put(MathExpr.MathOp.PLUS, SPARQL.ADD)
+                    .put(MathExpr.MathOp.MINUS, SPARQL.SUBTRACT)
+                    .put(MathExpr.MathOp.MULTIPLY, SPARQL.MULTIPLY)
+                    .put(MathExpr.MathOp.DIVIDE, SPARQL.DIVIDE)
                     .build();
 
 
@@ -452,6 +452,7 @@ public class RDF4JValueExprTranslator {
         else
             return uri;
     }
+
 
     /**
      * Translates a RDF4J "Var" (which can be a variable or a constant) into a Ontop term.

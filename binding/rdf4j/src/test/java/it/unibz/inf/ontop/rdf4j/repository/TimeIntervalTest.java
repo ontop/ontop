@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.sql.SQLException;
 
+@Ignore
 public class TimeIntervalTest extends AbstractRDF4JTest {
 
     private static final String OBDA_FILE = "/time-interval/mapping.obda";

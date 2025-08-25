@@ -24,7 +24,7 @@ public class SumSPARQLFunctionSymbolImpl extends SumLikeSPARQLAggregationFunctio
     @Override
     protected ImmutableTerm combineAggregates(ImmutableTerm aggregate1, ImmutableTerm aggregate2, TermFactory termFactory) {
         DBTermType dbDecimalType = termFactory.getTypeFactory().getDBTypeFactory().getDBDecimalType();
-        return termFactory.getDBBinaryNumericFunctionalTerm(SPARQL.NUMERIC_ADD, dbDecimalType, aggregate1, aggregate2);
+        return termFactory.getDBBinaryNumericFunctionalTerm(SPARQL.ADD, dbDecimalType, aggregate1, aggregate2);
     }
 
     @Override

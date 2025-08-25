@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
@@ -56,9 +57,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
     private final FunctionSymbol identityFunctionSymbol;
     private final SPARQLFunctionSymbol bnodeTolerantSPARQLStrFunctionSymbol;
-
-    private final FunctionSymbol dateTimeDurationAddFunctionSymbol;
-    private final FunctionSymbol dateDurationAddFunctionSymbol;
 
     /**
      * Created in init()
@@ -117,12 +115,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.identityFunctionSymbol = new IdentityFunctionSymbol(dbTypeFactory.getAbstractRootDBType());
 
         this.bnodeTolerantSPARQLStrFunctionSymbol = new BNodeTolerantStrSPARQLFunctionSymbolImpl(abstractRDFType, xsdStringType);
-
-        this.dateTimeDurationAddFunctionSymbol = new DurationAdditionFunctionSymbolImpl(typeFactory.getXsdDatetimeDatatype(),
-                typeFactory.getXsdDurationDatatype(), typeFactory);
-
-        this.dateDurationAddFunctionSymbol = new DurationAdditionFunctionSymbolImpl(typeFactory.getXsdDate(),
-                typeFactory.getXsdDurationDatatype(), typeFactory);
     }
 
     @Inject
@@ -150,8 +142,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
         RDFDatatype xsdDate = typeFactory.getXsdDate();
         RDFDatatype abstractNumericType = typeFactory.getAbstractOntopNumericDatatype();
+        RDFDatatype abstractNumericOrTemporalType = typeFactory.getAbstractOntopNumericOrTemporalDatatype();
         RDFDatatype dateOrDatetime = typeFactory.getAbstractOntopDateOrDatetimeDatatype();
-        RDFDatatype temporalOrNumeric = typeFactory.getAbstractOntopNumericOrTemporalDatatype();
 
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType dbBoolean = dbTypeFactory.getDBBooleanType();
@@ -194,10 +186,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new Sha256SPARQLFunctionSymbolImpl(xsdString),
                 new Sha384SPARQLFunctionSymbolImpl(xsdString),
                 new Sha512SPARQLFunctionSymbolImpl(xsdString),
-                new NumericBinarySPARQLFunctionSymbolImpl("SP_MULTIPLY", SPARQL.NUMERIC_MULTIPLY, abstractNumericType),
-                new NumericBinarySPARQLFunctionSymbolImpl("SP_ADD", SPARQL.NUMERIC_ADD, temporalOrNumeric),
-                new NumericBinarySPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.NUMERIC_SUBTRACT, temporalOrNumeric),
-                new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal),
+                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_MULTIPLY", SPARQL.MULTIPLY, abstractNumericOrTemporalType, typeFactory),
+                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_ADD", SPARQL.ADD, abstractNumericOrTemporalType, typeFactory),
+                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.SUBTRACT, abstractNumericOrTemporalType, typeFactory),
+                new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal, typeFactory),
                 new NonStrictEqSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
                 new LessThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
                 new GreaterThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
@@ -699,11 +691,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     @Override
-    public FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName) {
-        return new BinaryNumericLexicalFunctionSymbolImpl(dbNumericOperationName, dbStringType, metaRDFType);
-    }
-
-    @Override
     public FunctionSymbol getUnaryLatelyTypedFunctionSymbol(Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct,
                                                             DBTermType targetType) {
         return new UnaryLatelyTypedFunctionSymbolImpl(dbStringType, metaRDFType, targetType, dbFunctionSymbolFct);
@@ -734,15 +721,5 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public SPARQLFunctionSymbol getBNodeTolerantSPARQLStrFunctionSymbol() {
         return bnodeTolerantSPARQLStrFunctionSymbol;
-    }
-
-    @Override
-    public FunctionSymbol getDateTimeDurationAddFunctionSymbol() {
-        return dateTimeDurationAddFunctionSymbol;
-    }
-
-    @Override
-    public FunctionSymbol getDateDurationAddFunctionSymbol() {
-        return dateDurationAddFunctionSymbol;
     }
 }

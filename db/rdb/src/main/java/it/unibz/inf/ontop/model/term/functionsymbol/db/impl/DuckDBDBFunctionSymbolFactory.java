@@ -20,6 +20,7 @@ import static it.unibz.inf.ontop.model.type.impl.DuckDBDBTypeFactory.*;
 public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
     private static final String UUID_STRING_STR = "UUID";
+    private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for DuckDB";
 
     private DBFunctionSymbol charLengthFunctionSymbol;
     private DBFunctionSymbol regexpLikeFunctionSymbol;
@@ -131,13 +132,6 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return String.format("(LPAD(EXTRACT(TIMEZONE_HOUR FROM %s)::text,2,'0') || ':' || LPAD(EXTRACT(TIMEZONE_MINUTE FROM %s)::text,2,'0'))", str, str);
     }
 
-
-
-
-
-
-
-
     @Override
     protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
         return createDBConcatOperator(arity);
@@ -162,6 +156,11 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches2() {
         return (DBBooleanFunctionSymbol) this.regexpLikeFunctionSymbol;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
+        throw new UnsupportedOperationException(REGEXP_LIKE_STR + "3: " + NOT_YET_SUPPORTED_MSG);
     }
 
     @Override
@@ -202,9 +201,6 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
         };
     }
-
-
-
 
     @Override
     protected String serializeWeeksBetween(ImmutableList<? extends ImmutableTerm> terms,

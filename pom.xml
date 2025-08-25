@@ -79,33 +79,6 @@
         <url>git@github.com:ontop/ontop.git</url>
     </scm>
 
-    <repositories>
-        <repository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sonatype Nexus Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sonatype Nexus Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>sonatype-nexus-staging</id>
-            <name>Nexus Release Repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
-
     <properties>
         <!-- Build-related properties (overridden in child modules) -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -131,11 +104,11 @@
         <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-dependency-plugin.version>3.5.0</maven-dependency-plugin.version>
-        <maven-deploy-plugin.version>3.1.0</maven-deploy-plugin.version>
         <maven-enforcer-plugin.version>3.2.1</maven-enforcer-plugin.version>
         <maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
         <maven-install-plugin.version>3.1.0</maven-install-plugin.version>
         <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+        <central-publishing-maven-plugin.version>0.8.0</central-publishing-maven-plugin.version>
         <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
         <maven-jxr-plugin.version>3.3.0</maven-jxr-plugin.version>
         <maven-project-info-reports-plugin.version>3.4.2</maven-project-info-reports-plugin.version>
@@ -168,8 +141,8 @@
         <hikari-cp.version>3.4.5</hikari-cp.version>
         <httpclient.version>4.5.13</httpclient.version>
         <httpcore.version>4.4.14</httpcore.version>
-        <jackson.version>2.13.2</jackson.version>
-        <jackson-databind.version>2.13.4.2</jackson-databind.version>
+        <jackson.version>2.15.4</jackson.version>
+        <jackson-databind.version>2.15.4</jackson-databind.version>
         <javax-inject.version>1</javax-inject.version>
         <jgrapht.version>0.9.3</jgrapht.version>
         <jsqlparser.version>4.4</jsqlparser.version>
@@ -184,7 +157,7 @@
         <proj4j.version>1.1.1</proj4j.version>
         <protege-xmlcatalog.version>1.0.5</protege-xmlcatalog.version>
         <r2rml-api.version>0.9.1</r2rml-api.version>
-        <rdf4j.version>5.1.0</rdf4j.version>
+        <rdf4j.version>5.1.4</rdf4j.version>
         <servlet2-api.version>2.5</servlet2-api.version>
         <servlet4-api.version>4.0.1</servlet4-api.version>
         <slf4j.version>1.7.36</slf4j.version>
@@ -202,7 +175,7 @@
         <semargl-sesame.version>0.6.1</semargl-sesame.version>
         <semargl.version>0.7</semargl.version>
         <thymeleaf.version>3.0.15.RELEASE</thymeleaf.version>
-        <tomcat-embed-core.version>9.0.99</tomcat-embed-core.version>
+        <tomcat-embed-core.version>9.0.106</tomcat-embed-core.version>
         <log4j2.version>2.19.0</log4j2.version>
 
         <!-- JDK version -->
@@ -1277,11 +1250,6 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                    <version>${maven-deploy-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>${maven-enforcer-plugin.version}</version>
                 </plugin>
@@ -1461,18 +1429,13 @@
                 <version>${maven-jar-plugin.version}</version>
             </plugin>
             <plugin>
-                <!-- explicitly define maven-deploy-plugin after to force exec order -->
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>${maven-deploy-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>deploy</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>${central-publishing-maven-plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                </configuration>
             </plugin>
         </plugins>
     </build>
