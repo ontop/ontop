@@ -23,7 +23,7 @@ public class IRISafenessDeclarationFunctionSymbolImpl extends FunctionSymbolImpl
 
     @Override
     public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
-        return Optional.of(TermTypeInference.declareTermType(dbStringTyoe));
+        return terms.get(0).inferType();
     }
 
     @Override

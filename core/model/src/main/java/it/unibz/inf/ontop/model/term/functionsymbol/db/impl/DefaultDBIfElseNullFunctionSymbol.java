@@ -35,6 +35,11 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
     }
 
     @Override
+    public boolean canDeriveTypeFromInputTypes() {
+        return true;
+    }
+
+    @Override
     public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm firstTerm = terms.get(0);
         ImmutableTerm newPossibleValue = terms.get(1).simplify(variableNullability);
