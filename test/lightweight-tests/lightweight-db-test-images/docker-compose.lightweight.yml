@@ -54,7 +54,7 @@ services:
     build:
       context: ./mysql
       args:
-        MYSQL_VERSION: 8.0.29
+        MYSQL_VERSION: 8.4.0
     env_file: .env
     ports:
       - "3694:3306"
