@@ -14,7 +14,7 @@ CREATE TABLE `books` (
   -- DATETIME should be used outside of this range
   `publication_date` timestamp,
   PRIMARY KEY (`id`)
-);
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 -- We cannot add timezones when working with the datetime datatype in MySQL
 -- Timezones can be added for TIMESTAMP MySQL v8.*, however MySQL always accounts for Daylight Savings Time, so consistency would be difficult

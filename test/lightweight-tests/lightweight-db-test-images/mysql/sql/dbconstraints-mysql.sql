@@ -14,7 +14,7 @@ CREATE TABLE `Writer` (
                           `wr_code` int(11) NOT NULL,
                           `wr_name` varchar(100) DEFAULT NULL,
                           PRIMARY KEY (`wr_code`)
-);
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 DROP TABLE IF EXISTS `BookWriter`;
 CREATE TABLE `BookWriter` (
@@ -24,7 +24,7 @@ CREATE TABLE `BookWriter` (
   KEY `FK_BOOK_WRITER_idx` (`bk_code`),
   CONSTRAINT `FK_BOOK_WRITER` FOREIGN KEY (`bk_code`) REFERENCES `Book` (`bk_code`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_WRITER_BOOK` FOREIGN KEY (`wr_code`) REFERENCES `Writer` (`wr_code`) ON DELETE CASCADE ON UPDATE CASCADE
-);
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 DROP TABLE IF EXISTS `Edition`;
 CREATE TABLE `Edition` (
@@ -34,7 +34,7 @@ CREATE TABLE `Edition` (
   PRIMARY KEY (`ed_code`),
   KEY `FK_BOOK_EDITION_idx` (`bk_code`),
   CONSTRAINT `FK_BOOK_EDITION` FOREIGN KEY (`bk_code`) REFERENCES `Book` (`bk_code`) ON DELETE CASCADE ON UPDATE CASCADE
-);
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 
 

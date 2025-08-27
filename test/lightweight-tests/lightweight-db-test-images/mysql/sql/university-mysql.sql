@@ -7,7 +7,7 @@ CREATE TABLE professors (
 	first_name varchar(100) NOT NULL,
 	last_name varchar(100) NOT NULL,
     nickname varchar(100)
-);
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 INSERT INTO professors (prof_id, first_name, last_name, nickname) VALUES (1, 'Roger', 'Smith', 'Rog');
 INSERT INTO professors (prof_id, first_name, last_name, nickname) VALUES (2, 'Frank', 'Pitt', 'Frankie');
@@ -22,7 +22,7 @@ CREATE TABLE course (
 	course_id varchar(100) PRIMARY KEY,
 	nb_students int NOT NULL,
 	duration decimal(10, 3) NOT NULL
-);
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 INSERT INTO course (course_id, nb_students, duration) VALUES ('LinearAlgebra', 10, 24.5);
 INSERT INTO course (course_id, nb_students, duration) VALUES ('DiscreteMathematics', 11, 30);
@@ -36,7 +36,7 @@ create table teaching (
 	PRIMARY KEY (course_id, prof_id),
 	FOREIGN KEY (prof_id) REFERENCES professors(prof_id),
 	FOREIGN KEY (course_id) REFERENCES course(course_id)
-);
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 INSERT INTO teaching (course_id, prof_id) VALUES ('LinearAlgebra', 1);
 INSERT INTO teaching (course_id, prof_id) VALUES ('DiscreteMathematics', 1);
