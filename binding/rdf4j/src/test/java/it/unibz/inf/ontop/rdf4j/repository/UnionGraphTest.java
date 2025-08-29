@@ -12,10 +12,11 @@ public class UnionGraphTest extends AbstractRDF4JTest {
     private static final String OBDA_FILE = "/person/person.obda";
     private static final String SQL_SCRIPT = "/person/person.sql";
     private static final String ONTOLOGY_FILE = null;
+    private static final String VIEW_FILE = "/person/views/mirror_views.json";
 
     @BeforeClass
     public static void before() throws IOException, SQLException {
-        initOBDA(SQL_SCRIPT, OBDA_FILE, ONTOLOGY_FILE);
+        initOBDA(SQL_SCRIPT, OBDA_FILE, ONTOLOGY_FILE, null, VIEW_FILE);
     }
 
     @AfterClass
