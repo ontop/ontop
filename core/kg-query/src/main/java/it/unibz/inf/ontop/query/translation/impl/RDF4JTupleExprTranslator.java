@@ -36,6 +36,8 @@ import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -43,6 +45,10 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class RDF4JTupleExprTranslator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RDF4JTupleExprTranslator.class);
+    
+    public static final String UNION_GRAPH_URI = "urn:x-arq:UnionGraph";
 
     private final ImmutableMap<Variable, GroundTerm> externalBindings;
     private final @Nullable Dataset dataset;
@@ -759,6 +765,8 @@ public class RDF4JTupleExprTranslator {
 
     private TranslationResult translate(StatementPattern pattern) {
 
+        LOGGER.debug("translate(StatementPattern) called with scope: {}", pattern.getScope());
+        
         RDF4JValueExprTranslator translator = getValueTranslator(ImmutableSet.of());
         VariableOrGroundTerm subject = translator.translateRDF4JVar(pattern.getSubjectVar(), true);
         VariableOrGroundTerm predicate = translator.translateRDF4JVar(pattern.getPredicateVar(), true);
@@ -767,9 +775,11 @@ public class RDF4JTupleExprTranslator {
         IQTree subTree;
         if (pattern.getScope().equals(StatementPattern.Scope.NAMED_CONTEXTS))  {
             VariableOrGroundTerm graph = translator.translateRDF4JVar(pattern.getContextVar(), true);
+            LOGGER.debug("Named context detected, context var: {}, translated graph: {}", pattern.getContextVar(), graph);
             subTree = translateQuadPattern(subject, predicate, object, graph);
         }
         else  {
+            LOGGER.debug("Default graph scope - using triple pattern");
             subTree = translateTriplePattern(subject, predicate, object);
         }
 
@@ -823,12 +833,79 @@ public class RDF4JTupleExprTranslator {
 
     private IQTree translateQuadPattern(VariableOrGroundTerm subject, VariableOrGroundTerm predicate, VariableOrGroundTerm object, VariableOrGroundTerm graph) {
 
+        LOGGER.debug("translateQuadPattern called with graph: {}", graph);
+        LOGGER.debug("Graph class: {}", graph.getClass().getSimpleName());
+        
+        // Check if this is the special UnionGraph URI
+        if (graph instanceof IRIConstant) {
+            IRIConstant iriGraph = (IRIConstant) graph;
+            String graphUri = iriGraph.getIRI().getIRIString();
+            LOGGER.debug("Graph is IRIConstant with URI: '{}'", graphUri);
+            LOGGER.debug("Comparing with UNION_GRAPH_URI: '{}'", UNION_GRAPH_URI);
+            LOGGER.debug("URI equals check: {}", UNION_GRAPH_URI.equals(graphUri));
+            
+            if (UNION_GRAPH_URI.equals(graphUri)) {
+                LOGGER.info("Detected UnionGraph URI - translating to union query");
+                return translateUnionGraph(subject, predicate, object);
+            }
+        } else {
+            LOGGER.debug("Graph is not an IRIConstant, it's a {}", graph.getClass().getName());
+        }
+
         IntensionalDataNode dataNode = iqFactory.createIntensionalDataNode(
                 atomFactory.getIntensionalQuadAtom(subject, predicate, object, graph));
 
         return (dataset == null || dataset.getNamedGraphs().isEmpty())
             ? dataNode
             : iqFactory.createUnaryIQTree(getGraphFilter(graph, dataset.getNamedGraphs()), dataNode);
+    }
+
+    private IQTree translateUnionGraph(VariableOrGroundTerm subject, VariableOrGroundTerm predicate, VariableOrGroundTerm object) {
+        LOGGER.info("translateUnionGraph called");
+        LOGGER.debug("Dataset: {}", dataset);
+        
+        // For UnionGraph, we want to query all available named graphs, regardless of dataset
+        // If there's a dataset with named graphs, use those. Otherwise, query all graphs without filtering.
+        if (dataset != null && !dataset.getNamedGraphs().isEmpty()) {
+            Set<IRI> namedGraphs = dataset.getNamedGraphs();
+            int namedGraphCount = namedGraphs.size();
+            LOGGER.info("Dataset has {} named graphs: {}", namedGraphCount, namedGraphs);
+            
+            if (namedGraphCount == 1) {
+                // Single named graph - create quad with that graph
+                IRIConstant graph = termFactory.getConstantIRI(namedGraphs.iterator().next().stringValue());
+                LOGGER.info("Single named graph - creating quad with graph: {}", graph);
+                return iqFactory.createIntensionalDataNode(
+                        atomFactory.getIntensionalQuadAtom(subject, predicate, object, graph));
+            } else {
+                // Multiple named graphs - create union with filtering
+                LOGGER.info("Multiple named graphs - creating union with filtering");
+                Variable graph = termFactory.getVariable("g" + UUID.randomUUID());
+                
+                IntensionalDataNode quadNode = iqFactory.createIntensionalDataNode(
+                        atomFactory.getIntensionalQuadAtom(subject, predicate, object, graph));
+                
+                FilterNode filterNode = getGraphFilter(graph, namedGraphs);
+                
+                ImmutableSet<Variable> projectedVariables = Sets.difference(quadNode.getVariables(), ImmutableSet.of(graph)).immutableCopy();
+                
+                // Create union over all named graphs with distinct to remove duplicates
+                return iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
+                        iqFactory.createUnaryIQTree(
+                                iqFactory.createConstructionNode(projectedVariables),
+                                iqFactory.createUnaryIQTree(filterNode, quadNode)));
+            }
+        } else {
+            // No explicit dataset - query all available named graphs exactly like GRAPH ?g
+            LOGGER.info("No dataset specified - creating unrestricted quad pattern for all graphs (like GRAPH ?g)");
+            Variable graph = termFactory.getVariable("g" + UUID.randomUUID());
+            
+            // Create the same pattern as regular graph variables - no filtering, no projection changes
+            IntensionalDataNode quadNode = iqFactory.createIntensionalDataNode(
+                    atomFactory.getIntensionalQuadAtom(subject, predicate, object, graph));
+            
+            return quadNode;
+        }
     }
 
     private FilterNode getGraphFilter(VariableOrGroundTerm graph, Set<IRI> graphIris) {

@@ -1,0 +1,20 @@
+[PrefixDeclaration]
+:		http://example.org/
+foaf:		http://xmlns.com/foaf/0.1/
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+xsd:		http://www.w3.org/2001/XMLSchema#
+
+[MappingDeclaration] @collection [[
+mappingId	persons-corp
+target		GRAPH <http://example.org/graph/corp> { :person/{"id"} a foaf:Person ; foaf:name {"name"} ; :hasRole {"role"} . }
+source		SELECT "id", "name", "role" FROM "persons_corp"
+
+mappingId	persons-academic
+target		GRAPH <http://example.org/graph/academic> { :person/{"id"} a foaf:Person ; foaf:name {"name"} ; :hasRole {"role"} . }
+source		SELECT "id", "name", "role" FROM "persons_academic"
+
+mappingId	persons-research
+target		GRAPH <http://example.org/graph/research> { :person/{"id"} a foaf:Person ; foaf:name {"name"} ; :hasRole {"role"} . }
+source		SELECT "id", "name", "role" FROM "persons_research"
+]]

@@ -11,7 +11,7 @@ quest:		http://obda.org/quest#
 [MappingDeclaration] @collection [[
 mappingId	MAPID-person
 target		:person/{"id"} a :Person ; :fullName {"fullName"} ; :country {"country"} ; :locality {"locality"} .
-source		SELECT "id", "fullName", "status", "country", "locality" FROM "hr"."persons";
+source		SELECT "id", "fullName", "status", "country", "locality" FROM "person";
 
 ]]
 
