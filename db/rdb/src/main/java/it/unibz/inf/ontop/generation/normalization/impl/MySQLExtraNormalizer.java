@@ -13,9 +13,8 @@ public class MySQLExtraNormalizer extends CompositeIQTreeVariableGeneratorTransf
     private MySQLExtraNormalizer(OnlyInPresenceOfDistinctProjectOrderByTermsNormalizer orderByNormalizer,
                                  ReplaceProvenanceConstantByNonGroundTermNormalizer provenanceNormalizer,
                                  ConvertValuesToUnionNormalizer toUnionNormalizer) {
-        super(ImmutableList.of(
-                orderByNormalizer,
+        super(orderByNormalizer,
                 provenanceNormalizer,
-                toUnionNormalizer));
+                toUnionNormalizer);
     }
 }

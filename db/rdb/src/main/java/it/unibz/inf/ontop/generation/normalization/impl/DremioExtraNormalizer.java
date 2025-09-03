@@ -13,9 +13,8 @@ public class DremioExtraNormalizer extends CompositeIQTreeVariableGeneratorTrans
     protected DremioExtraNormalizer(TypingNullsInUnionDialectExtraNormalizer typingNullInUnionNormalizer,
                                     TypingNullsInConstructionNodeDialectExtraNormalizer typingNullInConstructionNormalizer,
                                     SubQueryFromComplexJoinExtraNormalizer complexJoinNormalizer) {
-        super(ImmutableList.of(
-                typingNullInUnionNormalizer,
+        super(typingNullInUnionNormalizer,
                 typingNullInConstructionNormalizer,
-                complexJoinNormalizer));
+                complexJoinNormalizer);
     }
 }

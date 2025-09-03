@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transform.impl.IQTreeVisitingNodeTransformer;
 
 public class DefaultQueryNodeTransformer implements QueryNodeTransformer {
@@ -17,8 +16,8 @@ public class DefaultQueryNodeTransformer implements QueryNodeTransformer {
     }
 
     public IQTreeTransformer treeTransformer() {
-        return new IQTreeTransformerAdapter(
-                new IQTreeVisitingNodeTransformer(this, iqFactory));
+        var treeTransformer = new IQTreeVisitingNodeTransformer(this, iqFactory);
+        return t -> t.acceptVisitor(treeTransformer);
     }
 
     @Override

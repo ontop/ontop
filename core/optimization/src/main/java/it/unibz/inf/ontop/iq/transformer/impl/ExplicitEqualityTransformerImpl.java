@@ -12,6 +12,8 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.CompositeIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -57,16 +59,12 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        ImmutableList<IQVisitor<IQTree>> visitors = ImmutableList.of(
-                new LocalExplicitEqualityEnforcer(variableGenerator),
-                new ConstructionNodeLifter(),
-                new FilterChildNormalizer());
-        // non-final
-        IQTree current = tree;
-        for (IQVisitor<IQTree> visitor : visitors) {
-            current = current.acceptVisitor(visitor);
-        }
-        return current;
+        IQTreeVariableGeneratorTransformer transformer = new CompositeIQTreeVariableGeneratorTransformer(
+                IQTreeVariableGeneratorTransformer.of(new LocalExplicitEqualityEnforcer(variableGenerator)),
+                IQTreeVariableGeneratorTransformer.of(new ConstructionNodeLifter()),
+                IQTreeVariableGeneratorTransformer.of(new FilterChildNormalizer()));
+
+        return transformer.transform(tree, variableGenerator);
     }
 
 

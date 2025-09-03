@@ -15,11 +15,10 @@ public class OracleExtraNormalizer extends CompositeIQTreeVariableGeneratorTrans
                                     ConvertValuesToUnionNormalizer toUnionNormalizer,
                                     UnquoteFlattenResultsNormalizer unquoteFlattenResultsNormalizer,
                                     AvoidEqualsBoolNormalizer avoidEqualsBoolNormalizer) {
-        super(ImmutableList.of(
-                expressionWrapper,
+        super(expressionWrapper,
                 orderByNormalizer,
                 toUnionNormalizer,
                 unquoteFlattenResultsNormalizer,
-                avoidEqualsBoolNormalizer));
+                avoidEqualsBoolNormalizer);
     }
 }

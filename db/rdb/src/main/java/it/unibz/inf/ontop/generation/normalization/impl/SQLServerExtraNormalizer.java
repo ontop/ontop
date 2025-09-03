@@ -15,11 +15,10 @@ public class SQLServerExtraNormalizer extends CompositeIQTreeVariableGeneratorTr
                                        SQLServerLimitOffsetOldVersionNormalizer limitOffsetOldVersionNormalizer,
                                        SQLServerInsertOrderByInSliceNormalizer insertOrderByInSlizeNormalizer,
                                        AvoidEqualsBoolNormalizer avoidEqualsBoolNormalizer) {
-        super(ImmutableList.of(
-                projectionWrapper,
+        super(projectionWrapper,
                 projectOrderByTermsNormalizer,
                 limitOffsetOldVersionNormalizer,
                 insertOrderByInSlizeNormalizer,
-                avoidEqualsBoolNormalizer));
+                avoidEqualsBoolNormalizer);
     }
 }

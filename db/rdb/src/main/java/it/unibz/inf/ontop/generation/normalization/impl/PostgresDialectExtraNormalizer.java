@@ -12,8 +12,7 @@ public class PostgresDialectExtraNormalizer extends CompositeIQTreeVariableGener
     @Inject
     protected PostgresDialectExtraNormalizer(TypingNullsInUnionDialectExtraNormalizer typingNullNormalizer,
                                              OnlyInPresenceOfDistinctProjectOrderByTermsNormalizer projectionNormalizer) {
-        super(ImmutableList.of(
-                typingNullNormalizer,
-                projectionNormalizer));
+        super(typingNullNormalizer,
+                projectionNormalizer);
     }
 }

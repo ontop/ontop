@@ -15,12 +15,11 @@ public class DenodoExtraNormalizer extends CompositeIQTreeVariableGeneratorTrans
                                     AlwaysPushProjectedOrderByTermsNormalizer pushProjectedOrderByTermsNormalizer,
                                     SplitIsNullOverConjunctionDisjunctionNormalizer splitIsNullOverConjunctionDisjunctionNormalizer,
                                     EliminateLimitsFromSubQueriesNormalizer eliminateLimitsFromSubQueriesNormalizer) {
-        super(ImmutableList.of(
-                alwaysProjectOrderByTermsNormalizer,
+        super(alwaysProjectOrderByTermsNormalizer,
                 toUnionNormalizer,
                 pushProjectedOrderByTermsNormalizer,
                 splitIsNullOverConjunctionDisjunctionNormalizer,
-                eliminateLimitsFromSubQueriesNormalizer));
+                eliminateLimitsFromSubQueriesNormalizer);
     }
 }
 

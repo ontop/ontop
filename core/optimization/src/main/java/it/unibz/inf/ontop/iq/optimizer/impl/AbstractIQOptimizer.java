@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -35,7 +34,7 @@ public abstract class AbstractIQOptimizer implements IQOptimizer {
     }
 
     protected static IQTreeTransformer transformerOf(IQVisitor<IQTree> visitor) {
-        return new IQTreeTransformerAdapter(visitor);
+        return t -> t.acceptVisitor(visitor);
     }
 
     protected abstract IQTree transformTree(IQTree tree, VariableGenerator variableGenerator);

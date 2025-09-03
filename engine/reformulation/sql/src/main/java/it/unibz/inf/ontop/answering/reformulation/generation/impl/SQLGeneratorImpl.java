@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -42,7 +41,6 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     private final DBParameters dbParameters;
     private final IntermediateQueryFactory iqFactory;
     private final UnionFlattener unionFlattener;
-    private final OptimizerFactory optimizerFactory;
     private final PostProcessingProjectionSplitter projectionSplitter;
     private final TermTypeTermLifter rdfTypeLifter;
     private final PostProcessableFunctionLifter functionLifter;
@@ -58,7 +56,6 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     private SQLGeneratorImpl(@Assisted DBParameters dbParameters,
                              IntermediateQueryFactory iqFactory,
                              UnionFlattener unionFlattener,
-                             OptimizerFactory optimizerFactory,
                              PostProcessingProjectionSplitter projectionSplitter,
                              TermTypeTermLifter rdfTypeLifter, PostProcessableFunctionLifter functionLifter,
                              IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator,
@@ -73,7 +70,6 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         this.dbParameters = dbParameters;
         this.iqFactory = iqFactory;
         this.unionFlattener = unionFlattener;
-        this.optimizerFactory = optimizerFactory;
         this.projectionSplitter = projectionSplitter;
         this.rdfTypeLifter = rdfTypeLifter;
         this.defaultIQTree2NativeNodeGenerator = defaultIQTree2NativeNodeGenerator;

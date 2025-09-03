@@ -3,9 +3,7 @@ package it.unibz.inf.ontop.iq.type.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.IQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transform.impl.IQTreeVisitingNodeTransformer;
 import it.unibz.inf.ontop.iq.type.TermTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -24,9 +22,9 @@ public abstract class AbstractTermTransformer implements TermTransformer {
     }
 
     public IQTreeTransformer treeTransformer() {
-        return new IQTreeTransformerAdapter(
-                new IQTreeVisitingNodeTransformer(
-                        new QueryNodeTransformerAdapter(iqFactory, this), iqFactory));
+        var treeTransformer = new IQTreeVisitingNodeTransformer(
+                new QueryNodeTransformerAdapter(iqFactory, this), iqFactory);
+        return t -> t.acceptVisitor(treeTransformer);
     }
 
     @Override

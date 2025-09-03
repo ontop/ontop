@@ -1,9 +1,24 @@
 package it.unibz.inf.ontop.iq.transform;
 
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 
 @FunctionalInterface
 public interface IQTreeTransformer {
-
     IQTree transform(IQTree tree);
+
+    static IQTreeTransformer of(IQVisitor<IQTree> visitor) {
+        return t -> t.acceptVisitor(visitor);
+    }
+
+    static IQTreeTransformer fixpoint(IQTreeTransformer transformer) {
+        return t -> {
+            IQTree prev, tree = t;
+            do {
+                prev = tree;
+                tree = transformer.transform(tree);
+            } while (!prev.equals(tree));
+            return prev;
+        };
+    }
 }

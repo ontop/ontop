@@ -11,6 +11,6 @@ public class CDataDynamoDBExtraNormalizer extends CompositeIQTreeVariableGenerat
 
     @Inject
     protected CDataDynamoDBExtraNormalizer(ReformulateConjunctionDisjunctionNormalizer reformulateConjunctionDisjunctionNormalizer) {
-        super(ImmutableList.of(reformulateConjunctionDisjunctionNormalizer));
+        super(reformulateConjunctionDisjunctionNormalizer);
     }
 }

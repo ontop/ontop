@@ -13,9 +13,8 @@ public class BigQueryExtraNormalizer extends CompositeIQTreeVariableGeneratorTra
     protected BigQueryExtraNormalizer(AlwaysProjectOrderByTermsNormalizer alwaysProjectOrderByTermsNormalizer,
                                       OnlyInPresenceOfDistinctPushProjectedOrderByTermsNormalizer pushProjectedOrderByTermsNormalizer,
                                       ConvertValuesToUnionNormalizer convertValuesToUnionNormalizer) {
-        super(ImmutableList.of(
-                convertValuesToUnionNormalizer,
+        super(convertValuesToUnionNormalizer,
                 alwaysProjectOrderByTermsNormalizer,
-                pushProjectedOrderByTermsNormalizer));
+                pushProjectedOrderByTermsNormalizer);
     }
 }

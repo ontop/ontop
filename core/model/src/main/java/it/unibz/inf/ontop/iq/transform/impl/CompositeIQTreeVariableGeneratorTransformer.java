@@ -8,8 +8,8 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 public class CompositeIQTreeVariableGeneratorTransformer implements IQTreeVariableGeneratorTransformer {
     private final ImmutableList<IQTreeVariableGeneratorTransformer> transformers;
 
-    protected CompositeIQTreeVariableGeneratorTransformer(ImmutableList<IQTreeVariableGeneratorTransformer> transformers) {
-        this.transformers = transformers;
+    public CompositeIQTreeVariableGeneratorTransformer(IQTreeVariableGeneratorTransformer... transformers) {
+        this.transformers = ImmutableList.copyOf(transformers);
     }
 
     @Override

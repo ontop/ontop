@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -41,13 +42,10 @@ public class UnionFlattenerImpl implements UnionFlattener {
      */
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        Transformer transformer = new Transformer(variableGenerator);
-        IQTree prev;
-        do {
-            prev = tree;
-            tree = tree.acceptVisitor(transformer);
-        } while (!prev.equals(tree));
-        return prev;
+        IQTreeTransformer transformer = IQTreeTransformer.fixpoint(
+                IQTreeTransformer.of(new Transformer(variableGenerator)));
+
+        return transformer.transform(tree);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {

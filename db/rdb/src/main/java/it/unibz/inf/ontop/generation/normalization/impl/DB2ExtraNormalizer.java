@@ -12,8 +12,7 @@ public class DB2ExtraNormalizer extends CompositeIQTreeVariableGeneratorTransfor
     @Inject
     protected DB2ExtraNormalizer(EnforceNullOrderNormalizer enforceNullOrderNormalizer,
                                  OnlyInPresenceOfDistinctProjectOrderByTermsNormalizer projectOrderByNormalizer) {
-        super(ImmutableList.of(
-                enforceNullOrderNormalizer,
-                projectOrderByNormalizer));
+        super(enforceNullOrderNormalizer,
+                projectOrderByNormalizer);
     }
 }
