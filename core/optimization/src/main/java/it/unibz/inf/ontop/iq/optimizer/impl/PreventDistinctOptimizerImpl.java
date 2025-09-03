@@ -71,7 +71,7 @@ public class PreventDistinctOptimizerImpl extends AbstractIQOptimizer implements
             return super.transformConstruction(tree, rootNode, child);
         }
 
-        private boolean validatePushedVariables(ImmutableSet<Variable> pushedVariables, ImmutableSet<Variable> keptVariables, IQTree child) {
+        boolean validatePushedVariables(ImmutableSet<Variable> pushedVariables, ImmutableSet<Variable> keptVariables, IQTree child) {
             var functionalDependencies = child.inferFunctionalDependencies();
             return pushedVariables.stream()
                     .allMatch(v -> functionalDependencies.getDeterminantsOf(v).stream()
@@ -80,7 +80,7 @@ public class PreventDistinctOptimizerImpl extends AbstractIQOptimizer implements
                                             && Sets.intersection(determinants, pushedVariables).isEmpty()));
         }
 
-        private boolean isDeterministic(ImmutableTerm term) {
+        boolean isDeterministic(ImmutableTerm term) {
             if (term instanceof ImmutableFunctionalTerm) {
                 var f = (ImmutableFunctionalTerm) term;
                 if (!f.getFunctionSymbol().isDeterministic())

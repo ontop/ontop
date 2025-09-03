@@ -27,21 +27,20 @@ public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOpti
     private static final int MAX_ARITY = 8;
 
     private final CoreSingletons coreSingletons;
-    private final IQTreeTransformer inCreatingTransformer;
-    private final IQTreeTransformer inMergingTransformer;
+    private final IQTreeTransformer transformer;
 
     @Inject
     protected DisjunctionOfEqualitiesMergingSimplifierImpl(CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.coreSingletons = coreSingletons;
-        this.inCreatingTransformer = new InCreatingTermTransformer().treeTransformer();
-        this.inMergingTransformer = new InMergingTermTransformer().treeTransformer();
+        this.transformer = IQTreeTransformer.of(
+                new InCreatingTermTransformer().treeTransformer(),
+                new InMergingTermTransformer().treeTransformer());
     }
 
     @Override
     public IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQTree newTree = inCreatingTransformer.transform(tree);
-        return inMergingTransformer.transform(newTree);
+        return transformer.transform(tree);
     }
 
 

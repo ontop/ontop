@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.AggregationSplitter;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
@@ -51,9 +52,10 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
 
     @Override
     protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQVisitor<IQTree> transformer = new AggregationUnionLifterTransformer(variableGenerator);
-        return tree.normalizeForOptimization(variableGenerator)
-                .acceptVisitor(transformer);
+        IQTreeVariableGeneratorTransformer transformer = IQTreeVariableGeneratorTransformer.of(
+                IQTree::normalizeForOptimization,
+                IQTreeVariableGeneratorTransformer.of(AggregationUnionLifterTransformer::new));
+        return transformer.transform(tree, variableGenerator);
     }
 
 

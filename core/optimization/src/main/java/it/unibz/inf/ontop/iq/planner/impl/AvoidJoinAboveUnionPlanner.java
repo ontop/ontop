@@ -13,10 +13,12 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,12 +61,11 @@ import java.util.stream.Stream;
  * TODO: shall we consider also the joining condition for pushing more siblings?
  */
 @Singleton
-public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
+public class AvoidJoinAboveUnionPlanner extends AbstractIQOptimizer implements QueryPlanner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AvoidJoinAboveUnionPlanner.class);
     
     private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
-    private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
 
     private final AvoidJoinAboveUnionTransformer transformer;
@@ -72,8 +73,8 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
     @Inject
     protected AvoidJoinAboveUnionPlanner(GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
                                          IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
+        super(iqFactory, NO_ACTION);
         this.generalOptimizer = generalOptimizer;
-        this.iqFactory = iqFactory;
         this.iqTreeTools = iqTreeTools;
         this.transformer = new AvoidJoinAboveUnionTransformer();
     }
@@ -84,7 +85,7 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
      */
     @Override
     public IQ optimize(IQ query) {
-        IQ liftedQuery = lift(query);
+        IQ liftedQuery = super.optimize(query);
         LOGGER.debug("Planned IQ:\n{}\n", liftedQuery);
         return liftedQuery.equals(query)
                 ? query
@@ -92,13 +93,9 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
                 : generalOptimizer.optimize(liftedQuery, null);
     }
 
-    protected IQ lift(IQ query) {
-        IQTree tree = query.getTree();
-        IQTree newTree = tree.acceptVisitor(transformer);
-
-        return newTree.equals(tree)
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree);
+    @Override
+    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+        return tree.acceptVisitor(transformer);
     }
 
     private class AvoidJoinAboveUnionTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -137,7 +134,7 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
         /**
          * Criteria for selecting siblings: must be leaf and must naturally join (i.e. share a variable) with the union
          */
-        protected Optional<ImmutableList<IQTree>> pushLeafIQTreeSiblingsIntoUnion(NaryIQTreeTools.UnionDecomposition union, ImmutableList<IQTree> siblings) {
+        Optional<ImmutableList<IQTree>> pushLeafIQTreeSiblingsIntoUnion(NaryIQTreeTools.UnionDecomposition union, ImmutableList<IQTree> siblings) {
 
             ImmutableSet<Variable> unionVariables = union.getNode().getVariables();
             ImmutableList<Integer> pushableSiblingIndexes = IntStream.range(0, siblings.size())
