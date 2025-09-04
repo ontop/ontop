@@ -19,8 +19,11 @@ public interface IQTreeVariableGeneratorTransformer {
         return (t, vg) -> t.acceptVisitor(visitor);
     }
 
+    static IQTreeVariableGeneratorTransformer of2(IQTreeTransformer transformer) {
+        return (t, vg) -> transformer.transform(t);
+    }
+
     static IQTreeVariableGeneratorTransformer of(IQTreeVariableGeneratorTransformer... transformers) {
         return new CompositeIQTreeVariableGeneratorTransformer(transformers);
     }
-
 }
