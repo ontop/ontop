@@ -1,4 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
-public interface BasicFlattenLifter extends IQOptimizer {
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+
+public interface BasicFlattenLifter extends IQTreeTransformer {
 }

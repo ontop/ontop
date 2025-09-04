@@ -51,8 +51,8 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(LensUnfolder.class);
         bindFromSettings(AggregationSplitter.class);
         bindFromSettings(FlattenLifter.class);
+        bindFromSettings(BasicFlattenLifter.class);
         bindFromSettings(FilterLifter.class);
-        bindFromSettings(BooleanExpressionPushDownOptimizer.class);
         bindFromSettings(PreventDistinctOptimizer.class);
         bindFromSettings(PreventDistinctProjectionSplitter.class);
         bindFromSettings(DisjunctionOfEqualitiesMergingSimplifier.class);
