@@ -58,8 +58,8 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        IQTreeVariableGeneratorTransformer transformer = new CompositeIQTreeVariableGeneratorTransformer(
-                IQTreeVariableGeneratorTransformer.of(new LocalExplicitEqualityEnforcer(variableGenerator)),
+        IQTreeVariableGeneratorTransformer transformer = IQTreeVariableGeneratorTransformer.of(
+                IQTreeVariableGeneratorTransformer.of(LocalExplicitEqualityEnforcer::new),
                 IQTreeVariableGeneratorTransformer.of(new ConstructionNodeLifter()),
                 IQTreeVariableGeneratorTransformer.of(new FilterChildNormalizer()));
 

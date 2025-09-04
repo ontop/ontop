@@ -7,7 +7,7 @@ public class CompositeFlattenLifter extends CompositeIQOptimizer implements Flat
 
     @Inject
     private CompositeFlattenLifter(FilterLifter filterLifter,
-                                   BasicFlattenLifter flattenLifter,
+                                   BasicFlattenLifterImpl flattenLifter,
                                    BooleanExpressionPushDownOptimizer pushDownOptimizer) {
         super(filterLifter, flattenLifter, pushDownOptimizer);
     }

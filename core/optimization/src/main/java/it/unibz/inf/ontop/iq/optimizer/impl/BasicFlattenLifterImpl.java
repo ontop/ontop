@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.impl.UnaryIQTreeBuilder;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.optimizer.FlattenLifter;
+import it.unibz.inf.ontop.iq.optimizer.BasicFlattenLifter;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -20,12 +20,12 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
-public class BasicFlattenLifter extends AbstractExtendedIQOptimizer implements FlattenLifter {
+public class BasicFlattenLifterImpl extends AbstractExtendedIQOptimizer implements BasicFlattenLifter {
 
     private final IQTreeTools iqTreeTools;
 
     @Inject
-    private BasicFlattenLifter(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
+    private BasicFlattenLifterImpl(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
         // no equality check
         super(iqFactory, NO_ACTION);
         this.iqTreeTools = iqTreeTools;
@@ -41,7 +41,7 @@ public class BasicFlattenLifter extends AbstractExtendedIQOptimizer implements F
         private final IQTree topRoot;
 
         Transformer(IQTree topRoot) {
-            super(BasicFlattenLifter.this.iqFactory);
+            super(BasicFlattenLifterImpl.this.iqFactory);
             this.topRoot = topRoot;
         }
 
