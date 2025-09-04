@@ -33,9 +33,5 @@ public abstract class AbstractIQOptimizer implements IQOptimizer {
                 : postTransformerAction.apply(iqFactory.createIQ(query.getProjectionAtom(), newTree));
     }
 
-    protected static IQTreeTransformer transformerOf(IQVisitor<IQTree> visitor) {
-        return t -> t.acceptVisitor(visitor);
-    }
-
     protected abstract IQTree transformTree(IQTree tree, VariableGenerator variableGenerator);
 }

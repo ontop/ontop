@@ -10,15 +10,15 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractExtendedIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.CaseInsensitiveIQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.Set;
@@ -28,27 +28,27 @@ import java.util.Set;
  * in a cardinality-insensitive context
  */
 @Singleton
-public class CardinalityInsensitiveLJPruningOptimizer extends AbstractIQOptimizer {
+public class CardinalityInsensitiveLJPruningOptimizer extends AbstractExtendedIQOptimizer {
 
-    private final IQVisitor<IQTree> transformer;
+    private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
     protected CardinalityInsensitiveLJPruningOptimizer(CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory(), NO_ACTION);
-        this.transformer = new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
+        this.transformer = IQTreeVariableGeneratorTransformer.of(new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
             @Override
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
                 IQVisitor<IQTree> transformer = new CardinalityInsensitiveLJPruningTransformer(
-                        transformerOf(this),
+                        IQTreeTransformer.of(this),
                         tree.getVariables());
                 return tree.acceptVisitor(transformer);
             }
-        };
+        });
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(transformer);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
 
 

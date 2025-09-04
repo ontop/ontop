@@ -13,37 +13,37 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class RedundantJoinFKOptimizer extends AbstractIQOptimizer {
+public class RedundantJoinFKOptimizer extends AbstractExtendedIQOptimizer {
 
     private final IQTreeTools iqTreeTools;
     private final TermFactory termFactory;
-    private final RedundantJoinFKTransformer transformer;
+    private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
     private RedundantJoinFKOptimizer(CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.termFactory = coreSingletons.getTermFactory();
-        this.transformer = new RedundantJoinFKTransformer();
+        this.transformer = IQTreeVariableGeneratorTransformer.of(
+                IQTree::normalizeForOptimization,
+                IQTreeVariableGeneratorTransformer.of(new RedundantJoinFKTransformer()));
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.normalizeForOptimization(variableGenerator)
-                .acceptVisitor(transformer);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
-
 
     private class RedundantJoinFKTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 

@@ -14,9 +14,10 @@ import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractExtendedIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.CaseInsensitiveIQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -39,7 +40,7 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
  *
  */
 @Singleton
-public class NullableFDSelfLJOptimizer extends AbstractIQOptimizer {
+public class NullableFDSelfLJOptimizer extends AbstractExtendedIQOptimizer {
 
     private final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
     private final DBConstant provenanceConstant;
@@ -62,17 +63,17 @@ public class NullableFDSelfLJOptimizer extends AbstractIQOptimizer {
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQVisitor<IQTree> transformer = new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
-            @Override
-            protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
-                IQVisitor<IQTree> transformer = new CardinalityInsensitiveTransformer(
-                        transformerOf(this),
-                        variableGenerator);
-                return tree.acceptVisitor(transformer);
-            }
-        };
-        return tree.acceptVisitor(transformer);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return IQTreeVariableGeneratorTransformer.of(vg ->
+                new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
+                    @Override
+                    protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
+                        IQVisitor<IQTree> transformer = new CardinalityInsensitiveTransformer(
+                                IQTreeTransformer.of(this),
+                                vg);
+                        return tree.acceptVisitor(transformer);
+                    }
+                });
     }
 
 
@@ -263,7 +264,7 @@ public class NullableFDSelfLJOptimizer extends AbstractIQOptimizer {
             if (leftNode.equals(newLeftNode))
                 return leftChild;
 
-            var replacer = new DataNodeOnLeftReplacer(iqFactory, leftNode, newLeftNode);
+            var replacer = new DataNodeOnLeftReplacer(leftNode, newLeftNode);
             var newLeft = leftChild.acceptVisitor(replacer);
 
             if (!replacer.hasBeenReplaced())
@@ -294,7 +295,7 @@ public class NullableFDSelfLJOptimizer extends AbstractIQOptimizer {
         private final ImmutableSet<Variable> determinantVariables;
         private final ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentsToTransfer;
 
-        protected Transfer(ExtensionalDataNode leftNode, ImmutableSet<Variable> determinantVariables,
+        Transfer(ExtensionalDataNode leftNode, ImmutableSet<Variable> determinantVariables,
                            ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentsToTransfer) {
             this.leftNode = leftNode;
             this.determinantVariables = determinantVariables;
@@ -304,7 +305,7 @@ public class NullableFDSelfLJOptimizer extends AbstractIQOptimizer {
         /**
          * Adds fresh variables for columns that will be "transferred" but are not already used by the left
          */
-        public ExtensionalDataNode generateNewLeftNode(VariableGenerator variableGenerator, IntermediateQueryFactory iqFactory) {
+        ExtensionalDataNode generateNewLeftNode(VariableGenerator variableGenerator, IntermediateQueryFactory iqFactory) {
             var leftArgumentMap = leftNode.getArgumentMap();
 
             var newArgumentMap = Sets.union(leftArgumentMap.keySet(), argumentsToTransfer.keySet()).stream()
@@ -328,10 +329,11 @@ public class NullableFDSelfLJOptimizer extends AbstractIQOptimizer {
 
         private final ExtensionalDataNode nodeToBeReplaced;
         private final ExtensionalDataNode replacingNode;
+        // mutable
         private boolean found;
 
-        protected DataNodeOnLeftReplacer(IntermediateQueryFactory iqFactory, ExtensionalDataNode nodeToBeReplaced,
-                                         ExtensionalDataNode replacingNode) {
+        DataNodeOnLeftReplacer(ExtensionalDataNode nodeToBeReplaced,
+                               ExtensionalDataNode replacingNode) {
             this.nodeToBeReplaced = nodeToBeReplaced;
             this.replacingNode = replacingNode;
             this.found = false;

@@ -7,17 +7,17 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class BelowDistinctJoinWithClassUnionOptimizer extends AbstractIQOptimizer {
+public class BelowDistinctJoinWithClassUnionOptimizer extends AbstractExtendedIQOptimizer {
 
     private final IQVisitor<IQTree> lookForDistinctTransformer;
     private final CoreSingletons coreSingletons;
@@ -30,7 +30,7 @@ public class BelowDistinctJoinWithClassUnionOptimizer extends AbstractIQOptimize
         this.coreSingletons = coreSingletons;
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         this.lookForDistinctTransformer = new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
-            private final IQVisitor<IQTree> transformer = new JoinWithClassUnionTransformer(transformerOf(this));
+            private final IQVisitor<IQTree> transformer = new JoinWithClassUnionTransformer(IQTreeTransformer.of(this));
 
             @Override
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
@@ -40,8 +40,8 @@ public class BelowDistinctJoinWithClassUnionOptimizer extends AbstractIQOptimize
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(lookForDistinctTransformer);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return IQTreeVariableGeneratorTransformer.of(lookForDistinctTransformer);
     }
 
 

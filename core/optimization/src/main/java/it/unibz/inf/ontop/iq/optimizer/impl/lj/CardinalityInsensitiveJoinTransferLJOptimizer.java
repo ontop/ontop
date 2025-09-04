@@ -15,9 +15,11 @@ import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractExtendedIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.CaseInsensitiveIQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -31,7 +33,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Singleton
-public class CardinalityInsensitiveJoinTransferLJOptimizer extends AbstractIQOptimizer {
+public class CardinalityInsensitiveJoinTransferLJOptimizer extends AbstractExtendedIQOptimizer {
 
     private final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
@@ -51,18 +53,18 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer extends AbstractIQOpt
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQVisitor<IQTree> transformer = new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
-            @Override
-            protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
-                IQVisitor<IQTree> transformer = new CardinalityInsensitiveTransformer(
-                        transformerOf(this),
-                        tree::getVariableNullability,
-                        variableGenerator);
-                return tree.acceptVisitor(transformer);
-            }
-        };
-        return tree.acceptVisitor(transformer);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return IQTreeVariableGeneratorTransformer.of(vg ->
+                new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
+                    @Override
+                    protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
+                        IQVisitor<IQTree> transformer = new CardinalityInsensitiveTransformer(
+                                IQTreeTransformer.of(this),
+                                tree::getVariableNullability,
+                                vg);
+                        return tree.acceptVisitor(transformer);
+                    }
+                });
     }
 
 

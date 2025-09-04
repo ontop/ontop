@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -26,7 +27,7 @@ import java.util.stream.Stream;
 /**
  * TODO: explain
  */
-public class ArgumentTransferInnerJoinFDIQOptimizer extends AbstractIQOptimizer {
+public class ArgumentTransferInnerJoinFDIQOptimizer extends AbstractExtendedIQOptimizer {
 
     private final SelfJoinFDSimplifier simplifier;
 
@@ -37,8 +38,8 @@ public class ArgumentTransferInnerJoinFDIQOptimizer extends AbstractIQOptimizer 
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(new ArgumentTransferJoinTransformer(variableGenerator));
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return IQTreeVariableGeneratorTransformer.of(ArgumentTransferJoinTransformer::new);
     }
 
     private class ArgumentTransferJoinTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {

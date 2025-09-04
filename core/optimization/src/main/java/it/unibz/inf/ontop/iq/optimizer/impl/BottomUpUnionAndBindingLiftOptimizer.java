@@ -61,7 +61,7 @@ public class BottomUpUnionAndBindingLiftOptimizer extends AbstractIQOptimizer im
 
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode node, ImmutableList<IQTree> children) {
-            NaryIQTree newTree = (NaryIQTree) super.transformInnerJoin(tree, node, children);
+            NaryIQTree newTree = (NaryIQTree)super.transformInnerJoin(tree, node, children);
 
             return extractCandidateVariables(tree, node.getOptionalFilterCondition(), newTree.getChildren())
                     .map(variable -> newTree.liftIncompatibleDefinitions(variable, variableGenerator))

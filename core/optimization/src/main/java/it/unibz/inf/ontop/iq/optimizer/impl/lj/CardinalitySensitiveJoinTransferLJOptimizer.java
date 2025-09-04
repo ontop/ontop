@@ -13,8 +13,8 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractExtendedIQOptimizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @Singleton
-public class CardinalitySensitiveJoinTransferLJOptimizer extends AbstractIQOptimizer {
+public class CardinalitySensitiveJoinTransferLJOptimizer extends AbstractExtendedIQOptimizer {
 
     private final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
@@ -42,12 +42,10 @@ public class CardinalitySensitiveJoinTransferLJOptimizer extends AbstractIQOptim
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQVisitor<IQTree> transformer = new Transformer(tree::getVariableNullability, variableGenerator);
-        return tree.acceptVisitor(transformer);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return (tree, vg) ->
+                tree.acceptVisitor(new Transformer(tree::getVariableNullability, vg));
     }
-
-
 
     private class Transformer extends AbstractJoinTransferLJTransformer {
 

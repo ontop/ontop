@@ -4,9 +4,9 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Singleton
-public class SelfJoinSameTermIQOptimizer extends AbstractIQOptimizer {
+public class SelfJoinSameTermIQOptimizer extends AbstractExtendedIQOptimizer {
 
     private final CoreSingletons coreSingletons;
     private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
@@ -27,7 +27,7 @@ public class SelfJoinSameTermIQOptimizer extends AbstractIQOptimizer {
         this.coreSingletons = coreSingletons;
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         this.lookForDistinctTransformer = new CaseInsensitiveIQTreeTransformerAdapter(coreSingletons.getIQFactory()) {
-            private final IQVisitor<IQTree> transformer = new SameTermSelfJoinTransformer(transformerOf(this));
+            private final IQVisitor<IQTree> transformer = new SameTermSelfJoinTransformer(IQTreeTransformer.of(this));
 
             @Override
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
@@ -37,8 +37,8 @@ public class SelfJoinSameTermIQOptimizer extends AbstractIQOptimizer {
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(lookForDistinctTransformer);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return IQTreeVariableGeneratorTransformer.of(lookForDistinctTransformer);
     }
 
     /**

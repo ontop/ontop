@@ -13,7 +13,8 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractExtendedIQOptimizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -34,7 +35,7 @@ import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.LeftJoi
  */
 @Singleton
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class MergeLJOptimizer extends AbstractIQOptimizer {
+public class MergeLJOptimizer extends AbstractExtendedIQOptimizer {
 
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
     private final CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer;
@@ -64,8 +65,8 @@ public class MergeLJOptimizer extends AbstractIQOptimizer {
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(new Transformer(variableGenerator));
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return IQTreeVariableGeneratorTransformer.of(Transformer::new);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
@@ -114,7 +115,7 @@ public class MergeLJOptimizer extends AbstractIQOptimizer {
 
             private final LeftJoinDecomposition topLJ;
 
-            private SimplificationContext(LeftJoinDecomposition topLJ) {
+            SimplificationContext(LeftJoinDecomposition topLJ) {
                 this.topLJ = topLJ;
             }
 

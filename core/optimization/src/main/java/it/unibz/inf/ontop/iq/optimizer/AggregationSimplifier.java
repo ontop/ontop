@@ -6,5 +6,4 @@ package it.unibz.inf.ontop.iq.optimizer;
  * by DB ones
  */
 public interface AggregationSimplifier extends IQOptimizer {
-
 }

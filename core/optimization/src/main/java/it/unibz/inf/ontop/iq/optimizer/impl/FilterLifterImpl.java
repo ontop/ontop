@@ -9,19 +9,19 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.FilterLifter;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
-public class FilterLifterImpl extends AbstractIQOptimizer implements FilterLifter {
+public class FilterLifterImpl extends AbstractExtendedIQOptimizer implements FilterLifter {
 
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
-    private final Transformer transformer;
+    private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
     private FilterLifterImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory, IQTreeTools iqTreeTools) {
@@ -29,12 +29,12 @@ public class FilterLifterImpl extends AbstractIQOptimizer implements FilterLifte
         super(iqFactory, NO_ACTION);
         this.termFactory = termFactory;
         this.iqTreeTools = iqTreeTools;
-        this.transformer = new Transformer();
+        this.transformer = IQTreeVariableGeneratorTransformer.of(new Transformer());
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(transformer);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

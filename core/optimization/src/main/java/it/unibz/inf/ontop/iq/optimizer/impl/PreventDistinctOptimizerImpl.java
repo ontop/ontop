@@ -1,13 +1,14 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.optimizer.splitter.PreventDistinctProjectionSplitter;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.PreventDistinctOptimizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -17,19 +18,19 @@ import javax.inject.Inject;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 
-public class PreventDistinctOptimizerImpl extends AbstractIQOptimizer implements PreventDistinctOptimizer {
+public class PreventDistinctOptimizerImpl extends AbstractExtendedIQOptimizer implements PreventDistinctOptimizer {
 
     private final PreventDistinctProjectionSplitter preventDistinctProjectionSplitter;
 
     @Inject
-    private PreventDistinctOptimizerImpl(OptimizationSingletons optimizationSingletons, PreventDistinctProjectionSplitter preventDistinctProjectionSplitter) {
-        super(optimizationSingletons.getCoreSingletons().getIQFactory(), NO_ACTION);
+    private PreventDistinctOptimizerImpl(CoreSingletons coreSingletons, PreventDistinctProjectionSplitter preventDistinctProjectionSplitter) {
+        super(coreSingletons.getIQFactory(), NO_ACTION);
         this.preventDistinctProjectionSplitter = preventDistinctProjectionSplitter;
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(new PreventDistinctTransformer(variableGenerator));
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return IQTreeVariableGeneratorTransformer.of(PreventDistinctTransformer::new);
     }
 
 
@@ -71,7 +72,7 @@ public class PreventDistinctOptimizerImpl extends AbstractIQOptimizer implements
             return super.transformConstruction(tree, rootNode, child);
         }
 
-        boolean validatePushedVariables(ImmutableSet<Variable> pushedVariables, ImmutableSet<Variable> keptVariables, IQTree child) {
+        private boolean validatePushedVariables(ImmutableSet<Variable> pushedVariables, ImmutableSet<Variable> keptVariables, IQTree child) {
             var functionalDependencies = child.inferFunctionalDependencies();
             return pushedVariables.stream()
                     .allMatch(v -> functionalDependencies.getDeterminantsOf(v).stream()
@@ -80,7 +81,7 @@ public class PreventDistinctOptimizerImpl extends AbstractIQOptimizer implements
                                             && Sets.intersection(determinants, pushedVariables).isEmpty()));
         }
 
-        boolean isDeterministic(ImmutableTerm term) {
+        private boolean isDeterministic(ImmutableTerm term) {
             if (term instanceof ImmutableFunctionalTerm) {
                 var f = (ImmutableFunctionalTerm) term;
                 if (!f.getFunctionSymbol().isDeterministic())

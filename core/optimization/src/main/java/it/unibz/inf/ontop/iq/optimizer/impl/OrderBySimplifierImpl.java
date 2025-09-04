@@ -11,8 +11,8 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.optimizer.OrderBySimplifier;
 import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transformer.impl.RDFTypeDependentSimplifyingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -24,7 +24,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class OrderBySimplifierImpl extends AbstractIQOptimizer implements OrderBySimplifier {
+public class OrderBySimplifierImpl extends AbstractExtendedIQOptimizer implements OrderBySimplifier {
 
     private final OptimizationSingletons optimizationSingletons;
     private final IQTreeTools iqTreeTools;
@@ -46,9 +46,8 @@ public class OrderBySimplifierImpl extends AbstractIQOptimizer implements OrderB
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQVisitor<IQTree> transformer = new OrderBySimplifyingTransformer(variableGenerator);
-        return tree.acceptVisitor(transformer);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return IQTreeVariableGeneratorTransformer.of(OrderBySimplifyingTransformer::new);
     }
 
     private class OrderBySimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
@@ -107,7 +106,6 @@ public class OrderBySimplifierImpl extends AbstractIQOptimizer implements OrderB
 
         private Stream<ComparatorSimplification> simplifyRDFTerm(ImmutableTerm lexicalTerm, ImmutableTerm rdfTypeTerm,
                                                                    IQTree childTree, boolean isAscending) {
-
 
             Optional<ImmutableSet<RDFTermType>> possibleTypes = extractPossibleTypes(rdfTypeTerm, childTree);
 
@@ -229,19 +227,18 @@ public class OrderBySimplifierImpl extends AbstractIQOptimizer implements OrderB
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    protected static class ComparatorSimplification {
-        protected final OrderByNode.OrderComparator newComparator;
-        protected final Optional<DefinitionPushDownRequest> request;
+    private static class ComparatorSimplification {
+        private final OrderByNode.OrderComparator newComparator;
+        private final Optional<DefinitionPushDownRequest> request;
 
-        protected ComparatorSimplification(OrderByNode.OrderComparator newComparator, DefinitionPushDownRequest request) {
+        ComparatorSimplification(OrderByNode.OrderComparator newComparator, DefinitionPushDownRequest request) {
             this.newComparator = newComparator;
             this.request = Optional.of(request);
         }
 
-        protected ComparatorSimplification(OrderByNode.OrderComparator newComparator) {
+        ComparatorSimplification(OrderByNode.OrderComparator newComparator) {
             this.newComparator = newComparator;
             this.request = Optional.empty();
         }
     }
-
 }

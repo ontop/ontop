@@ -10,12 +10,12 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.NodeInGraphOptimizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
 import java.util.Objects;
@@ -30,12 +30,12 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
  *    - the node is a variable
  *    - all arguments are ground
  */
-public class NodeInGraphOptimizerImpl extends AbstractIQOptimizer implements NodeInGraphOptimizer {
+public class NodeInGraphOptimizerImpl extends AbstractExtendedIQOptimizer implements NodeInGraphOptimizer {
 
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
     private final IQTreeTools iqTreeTools;
-    private final Transformer transformer;
+    private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
     protected NodeInGraphOptimizerImpl(CoreSingletons coreSingletons) {
@@ -43,14 +43,13 @@ public class NodeInGraphOptimizerImpl extends AbstractIQOptimizer implements Nod
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
-        this.transformer = new Transformer();
+        this.transformer = IQTreeVariableGeneratorTransformer.of(new Transformer());
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(transformer);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
-
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
@@ -317,5 +316,4 @@ public class NodeInGraphOptimizerImpl extends AbstractIQOptimizer implements Nod
             return graphArguments.isEmpty();
         }
     }
-
 }

@@ -14,8 +14,8 @@ import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractExtendedIQOptimizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -39,7 +39,7 @@ import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.LeftJoi
  *
  */
 @Singleton
-public class LJWithNestingOnRightToInnerJoinOptimizer extends AbstractIQOptimizer {
+public class LJWithNestingOnRightToInnerJoinOptimizer extends AbstractExtendedIQOptimizer {
 
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
     private final CoreSingletons coreSingletons;
@@ -66,9 +66,9 @@ public class LJWithNestingOnRightToInnerJoinOptimizer extends AbstractIQOptimize
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQVisitor<IQTree> transformer = new Transformer(tree::getVariableNullability, variableGenerator);
-        return tree.acceptVisitor(transformer);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return (tree, vg) ->
+                tree.acceptVisitor(new Transformer(tree::getVariableNullability, vg));
     }
 
 

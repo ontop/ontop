@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -23,19 +24,19 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Singleton
-public class SelfJoinUCIQOptimizer extends AbstractIQOptimizer {
+public class SelfJoinUCIQOptimizer extends AbstractExtendedIQOptimizer {
 
     private final SelfJoinUCSimplifier simplifier;
 
     @Inject
-    private SelfJoinUCIQOptimizer(SelfJoinUCSimplifier simplifier, CoreSingletons coreSingletons) {
+    private SelfJoinUCIQOptimizer(CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
-        this.simplifier = simplifier;
+        this.simplifier = new SelfJoinUCSimplifier(coreSingletons);
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(new SelfJoinUCTransformer(variableGenerator));
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return IQTreeVariableGeneratorTransformer.of(SelfJoinUCTransformer::new);
     }
 
 
@@ -57,8 +58,7 @@ public class SelfJoinUCIQOptimizer extends AbstractIQOptimizer {
 
     private static class SelfJoinUCSimplifier extends AbstractSelfJoinSimplifier<UniqueConstraint> {
 
-        @Inject
-        protected SelfJoinUCSimplifier(CoreSingletons coreSingletons) {
+        SelfJoinUCSimplifier(CoreSingletons coreSingletons) {
             super(coreSingletons);
         }
 

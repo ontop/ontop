@@ -9,7 +9,6 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -17,8 +16,6 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.AggregationSplitter;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -34,7 +31,7 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
 
-public class AggregationSplitterImpl extends AbstractIQOptimizer implements AggregationSplitter {
+public class AggregationSplitterImpl extends AbstractExtendedIQOptimizer implements AggregationSplitter {
 
     private final IQTreeTools iqTreeTools;
     private final SubstitutionFactory substitutionFactory;
@@ -51,11 +48,10 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQTreeVariableGeneratorTransformer transformer = IQTreeVariableGeneratorTransformer.of(
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return IQTreeVariableGeneratorTransformer.of(
                 IQTree::normalizeForOptimization,
                 IQTreeVariableGeneratorTransformer.of(AggregationUnionLifterTransformer::new));
-        return transformer.transform(tree, variableGenerator);
     }
 
 
@@ -303,5 +299,4 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
         }
 
     }
-
 }
