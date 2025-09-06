@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 @FunctionalInterface
 public interface IQTreeVariableGeneratorTransformer {

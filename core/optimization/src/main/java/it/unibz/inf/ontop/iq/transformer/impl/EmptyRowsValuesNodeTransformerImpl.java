@@ -5,6 +5,8 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ValuesNode;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transformer.EmptyRowsValuesNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.Constant;
@@ -16,20 +18,24 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import javax.inject.Inject;
 import java.util.stream.IntStream;
 
-public class EmptyRowsValuesNodeTransformerImpl implements EmptyRowsValuesNodeTransformer {
+public class EmptyRowsValuesNodeTransformerImpl extends DelegatingIQTreeVariableGeneratorTransformer implements EmptyRowsValuesNodeTransformer {
 
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
+
+    private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
     protected EmptyRowsValuesNodeTransformerImpl(CoreSingletons coreSingletons) {
         this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
+
+        this.transformer = IQTreeVariableGeneratorTransformer.of(Transformer::new);
     }
 
     @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(new Transformer(variableGenerator));
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
 
     /**

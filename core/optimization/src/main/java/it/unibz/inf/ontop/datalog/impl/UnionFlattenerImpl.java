@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.datalog.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
@@ -12,6 +13,7 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -26,7 +28,7 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
  * <p>
  * This normalization may be needed for datalog-based mapping optimizers.
  */
-public class UnionFlattenerImpl implements UnionFlattener {
+public class UnionFlattenerImpl extends DelegatingIQTreeVariableGeneratorTransformer implements UnionFlattener {
 
     private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
@@ -34,9 +36,9 @@ public class UnionFlattenerImpl implements UnionFlattener {
     private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
-    private UnionFlattenerImpl(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
-        this.iqFactory = iqFactory;
-        this.iqTreeTools = iqTreeTools;
+    private UnionFlattenerImpl(CoreSingletons coreSingletons) {
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
 
         // TODO: why a fix point?
         this.transformer = IQTreeVariableGeneratorTransformer.of(Transformer::new)
@@ -44,8 +46,8 @@ public class UnionFlattenerImpl implements UnionFlattener {
     }
 
     @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transformer.transform(tree, variableGenerator);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {

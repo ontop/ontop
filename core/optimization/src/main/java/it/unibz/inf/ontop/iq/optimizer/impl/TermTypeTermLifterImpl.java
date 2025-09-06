@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -16,6 +17,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.TermTypeTermLifter;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -34,7 +36,7 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 @Singleton
-public class TermTypeTermLifterImpl implements TermTypeTermLifter {
+public class TermTypeTermLifterImpl extends DelegatingIQTreeVariableGeneratorTransformer implements TermTypeTermLifter {
 
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
@@ -46,18 +48,14 @@ public class TermTypeTermLifterImpl implements TermTypeTermLifter {
     private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
-    private TermTypeTermLifterImpl(IntermediateQueryFactory iqFactory,
-                                   TermFactory termFactory,
-                                   IQTreeTools iqTreeTools,
-                                   TypeConstantDictionary typeConstantDictionary,
-                                   SubstitutionFactory substitutionFactory,
-                                   FunctionSymbolFactory functionSymbolFactory) {
-        this.iqFactory = iqFactory;
-        this.termFactory = termFactory;
-        this.iqTreeTools = iqTreeTools;
+    private TermTypeTermLifterImpl(CoreSingletons coreSingletons,
+                                   TypeConstantDictionary typeConstantDictionary) {
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.functionSymbolFactory = coreSingletons.getFunctionSymbolFactory();
         this.dictionary = typeConstantDictionary;
-        this.substitutionFactory = substitutionFactory;
-        this.functionSymbolFactory = functionSymbolFactory;
 
         this.transformer = IQTreeVariableGeneratorTransformer.of(
                 // Makes sure the tree is already normalized before transforming it
@@ -68,8 +66,8 @@ public class TermTypeTermLifterImpl implements TermTypeTermLifter {
     }
 
     @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transformer.transform(tree, variableGenerator);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
 
     /**

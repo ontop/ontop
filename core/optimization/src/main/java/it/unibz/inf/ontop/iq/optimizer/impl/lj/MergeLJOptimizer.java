@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -35,14 +36,14 @@ import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.LeftJoi
  */
 @Singleton
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class MergeLJOptimizer implements IQTreeVariableGeneratorTransformer {
+public class MergeLJOptimizer extends DelegatingIQTreeVariableGeneratorTransformer implements IQTreeVariableGeneratorTransformer {
 
-    private final IntermediateQueryFactory iqFactory;
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
     private final CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer;
     private final LJWithNestingOnRightToInnerJoinOptimizer ljReductionOptimizer;
     private final ComplexStrictEqualityLeftJoinExpliciter ljConditionExpliciter;
     private final LeftJoinTools leftJoinTools;
+    private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
@@ -71,10 +72,9 @@ public class MergeLJOptimizer implements IQTreeVariableGeneratorTransformer {
     }
 
     @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transformer.transform(tree, variableGenerator);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
-
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 

@@ -30,8 +30,6 @@ import java.util.function.Supplier;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.LeftJoinDecomposition;
 
-
-
 /**
  * Restricted to LJs on the right to limit overlap with existing techniques.
  * Typical case optimized: self-left-join with LJ nesting on the right (and possibly on the left)

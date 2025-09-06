@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.CaseInsensitiveIQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -31,7 +32,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Singleton
-public class CardinalityInsensitiveJoinTransferLJOptimizer implements IQTreeVariableGeneratorTransformer {
+public class CardinalityInsensitiveJoinTransferLJOptimizer extends DelegatingIQTreeVariableGeneratorTransformer implements IQTreeVariableGeneratorTransformer {
 
     private final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
@@ -64,8 +65,8 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements IQTreeVari
     }
 
     @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transformer.transform(tree, variableGenerator);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
 
     private class CardinalityInsensitiveTransformer extends AbstractJoinTransferLJTransformer {
@@ -73,8 +74,8 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements IQTreeVari
         private final IQTreeTransformer lookForDistinctTransformer;
 
         CardinalityInsensitiveTransformer(IQTreeTransformer lookForDistinctTransformer,
-                                                    Supplier<VariableNullability> variableNullabilitySupplier,
-                                                    VariableGenerator variableGenerator) {
+                                          Supplier<VariableNullability> variableNullabilitySupplier,
+                                          VariableGenerator variableGenerator) {
             super(variableNullabilitySupplier,
                     variableGenerator,
                     CardinalityInsensitiveJoinTransferLJOptimizer.this.requiredDataNodeExtractor,
