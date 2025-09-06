@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.transform;
 
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.transform.impl.CompositeIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -26,5 +27,29 @@ public interface IQTreeVariableGeneratorTransformer {
 
     static IQTreeVariableGeneratorTransformer of(IQTreeVariableGeneratorTransformer... transformers) {
         return new CompositeIQTreeVariableGeneratorTransformer(transformers);
+    }
+
+    default IQTreeVariableGeneratorTransformer fixpoint() {
+        return (t, vg) -> {
+            IQTree prev, tree = t;
+            do {
+                prev = tree;
+                tree = transform(tree, vg);
+            } while (!prev.equals(tree));
+            return prev;
+        };
+    }
+
+    default IQTreeVariableGeneratorTransformer fixpoint(int max) {
+        return (t, vg) -> {
+            IQTree tree = t;
+            for (int i = 0; i < max; i++) {
+                IQTree prev = tree;
+                tree = transform(tree, vg);
+                if (prev.equals(tree))
+                    return tree;
+            }
+            throw new MinorOntopInternalBugException("MAX_LOOP reached");
+        };
     }
 }

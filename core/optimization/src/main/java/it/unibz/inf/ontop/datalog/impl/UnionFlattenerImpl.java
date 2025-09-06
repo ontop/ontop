@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
-import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -31,21 +31,21 @@ public class UnionFlattenerImpl implements UnionFlattener {
     private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
 
+    private final IQTreeVariableGeneratorTransformer transformer;
+
     @Inject
     private UnionFlattenerImpl(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
         this.iqTreeTools = iqTreeTools;
+
+        // TODO: why a fix point?
+        this.transformer = IQTreeVariableGeneratorTransformer.of(Transformer::new)
+                .fixpoint();
     }
 
-    /**
-     * TODO: why a fix point?
-     */
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        IQTreeTransformer transformer = IQTreeTransformer.fixpoint(
-                IQTreeTransformer.of(new Transformer(variableGenerator)));
-
-        return transformer.transform(tree);
+        return transformer.transform(tree, variableGenerator);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {

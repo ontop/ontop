@@ -1,14 +1,10 @@
 package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractExtendedIQOptimizer;
-import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.CompositeIQTreeVariableGeneratorTransformer;
 
-public class DefaultCompositeLeftJoinIQOptimizer extends AbstractExtendedIQOptimizer implements LeftJoinIQOptimizer {
-
-    private final IQTreeVariableGeneratorTransformer transformer;
+public class DefaultCompositeLeftJoinIQOptimizer extends CompositeIQTreeVariableGeneratorTransformer implements LeftJoinIQOptimizer {
 
     @Inject
     private DefaultCompositeLeftJoinIQOptimizer(
@@ -17,20 +13,13 @@ public class DefaultCompositeLeftJoinIQOptimizer extends AbstractExtendedIQOptim
             LJWithNestingOnRightToInnerJoinOptimizer ljWithNestingOnRightToInnerJoinOptimizer,
             MergeLJOptimizer mergeLJOptimizer,
             CardinalityInsensitiveLJPruningOptimizer cardinalityInsensitiveLJPruningOptimizer,
-            NullableFDSelfLJOptimizer nullableFDOptimizer,
-            IntermediateQueryFactory iqFactory) {
-        super(iqFactory, NO_ACTION);
+            NullableFDSelfLJOptimizer nullableFDOptimizer) {
 
-        this.transformer = IQTreeVariableGeneratorTransformer.of(cardinalitySensitiveJoinTransferLJOptimizer,
+        super(cardinalitySensitiveJoinTransferLJOptimizer,
                 cardinalityInsensitiveJoinTransferLJOptimizer,
                 ljWithNestingOnRightToInnerJoinOptimizer,
                 mergeLJOptimizer,
                 cardinalityInsensitiveLJPruningOptimizer,
                 nullableFDOptimizer);
-    }
-
-    @Override
-    protected IQTreeVariableGeneratorTransformer getTransformer() {
-        return transformer;
     }
 }

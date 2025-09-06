@@ -1,4 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
-public interface LeftJoinIQOptimizer extends IQOptimizer {
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+
+public interface LeftJoinIQOptimizer extends IQTreeVariableGeneratorTransformer {
 }

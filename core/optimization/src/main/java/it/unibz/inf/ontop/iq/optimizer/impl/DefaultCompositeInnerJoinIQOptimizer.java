@@ -1,15 +1,12 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.*;
-import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.CompositeIQTreeVariableGeneratorTransformer;
 
 import javax.inject.Inject;
 
-public class DefaultCompositeInnerJoinIQOptimizer extends AbstractExtendedIQOptimizer implements InnerJoinIQOptimizer {
-
-    private final IQTreeVariableGeneratorTransformer transformer;
+public class DefaultCompositeInnerJoinIQOptimizer extends CompositeIQTreeVariableGeneratorTransformer implements InnerJoinIQOptimizer {
 
     @Inject
     private DefaultCompositeInnerJoinIQOptimizer(
@@ -17,12 +14,9 @@ public class DefaultCompositeInnerJoinIQOptimizer extends AbstractExtendedIQOpti
             SelfJoinSameTermIQOptimizer selfJoinSameTermIQOptimizer,
             ArgumentTransferInnerJoinFDIQOptimizer fdIQOptimizer,
             RedundantJoinFKOptimizer fkOptimizer,
-            BelowDistinctJoinWithClassUnionOptimizer belowDistinctClassUnionOptimizer,
-            IntermediateQueryFactory iqFactory) {
-        super(iqFactory, NO_ACTION);
+            BelowDistinctJoinWithClassUnionOptimizer belowDistinctClassUnionOptimizer) {
 
-        this.transformer = IQTreeVariableGeneratorTransformer.of(
-                selfJoinUCIQOptimizer,
+        super(selfJoinUCIQOptimizer,
                 IQTree::normalizeForOptimization,
                 fdIQOptimizer,
                 IQTree::normalizeForOptimization,
@@ -32,10 +26,5 @@ public class DefaultCompositeInnerJoinIQOptimizer extends AbstractExtendedIQOpti
                 IQTree::normalizeForOptimization,
                 belowDistinctClassUnionOptimizer,
                 IQTree::normalizeForOptimization);
-    }
-
-    @Override
-    protected IQTreeVariableGeneratorTransformer getTransformer() {
-        return transformer;
     }
 }

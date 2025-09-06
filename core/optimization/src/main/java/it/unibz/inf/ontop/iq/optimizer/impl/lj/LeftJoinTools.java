@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -15,6 +16,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -26,18 +28,22 @@ public class LeftJoinTools {
     private final IQTreeTools iqTreeTools;
     private final IntermediateQueryFactory iqFactory;
     private final AtomFactory atomFactory;
+    private final CoreUtilsFactory coreUtilsFactory;
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
 
     @Inject
-    public LeftJoinTools(CoreSingletons coreSingletons, RightProvenanceNormalizer rightProvenanceNormalizer) {
+    public LeftJoinTools(CoreSingletons coreSingletons, CoreUtilsFactory coreUtilsFactory, RightProvenanceNormalizer rightProvenanceNormalizer) {
         this.termFactory = coreSingletons.getTermFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.iqFactory = coreSingletons.getIQFactory();
         this.atomFactory = coreSingletons.getAtomFactory();
+        this.coreUtilsFactory = coreUtilsFactory;
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
     }
 
-    public IQ constructMinusIQ(IQTree tree, IQTree otherTree, Predicate<Variable> isPossiblyNullable, VariableGenerator variableGenerator) {
+    public IQ constructMinusIQ(IQTree tree, IQTree otherTree, Predicate<Variable> isPossiblyNullable) {
+        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
+                Sets.union(otherTree.getKnownVariables(), tree.getKnownVariables()).immutableCopy());
         RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(
                 otherTree, tree.getVariables(), Optional.empty(), variableGenerator);
 

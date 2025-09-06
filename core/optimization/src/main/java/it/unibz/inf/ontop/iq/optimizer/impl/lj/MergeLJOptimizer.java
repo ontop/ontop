@@ -244,14 +244,15 @@ public class MergeLJOptimizer implements IQTreeVariableGeneratorTransformer {
         }
 
         private boolean isTreeIncluded(IQTree tree, IQTree otherTree, ImmutableSet<Variable> leftVariables) {
-            IQ minusIQ = leftJoinTools.constructMinusIQ(tree, otherTree, v -> !leftVariables.contains(v), variableGenerator)
-                    .normalizeForOptimization();
+            IQ minusIQ = leftJoinTools.constructMinusIQ(tree, otherTree, v -> !leftVariables.contains(v));
 
-            IQTree optimizedTree = ljReductionOptimizer.transform(
-                            otherLJOptimizer.transform(minusIQ.getTree(), minusIQ.getVariableGenerator()), minusIQ.getVariableGenerator())
-                    .normalizeForOptimization(minusIQ.getVariableGenerator());
-
-            return optimizedTree.isDeclaredAsEmpty();
+            return IQTreeVariableGeneratorTransformer.of(
+                            IQTree::normalizeForOptimization,
+                            ljReductionOptimizer,
+                            otherLJOptimizer,
+                            IQTree::normalizeForOptimization)
+                    .transform(minusIQ.getTree(), minusIQ.getVariableGenerator())
+                    .isDeclaredAsEmpty();
         }
     }
 }

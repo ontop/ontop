@@ -133,10 +133,12 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements IQTreeVariableG
         private boolean canLJBeReduced(IQTree leftChild, IQTree safeLeftOfRightDescendant) {
             VariableNullability inheritedVariableNullability = getInheritedVariableNullability();
 
-            IQ minusIQ = leftJoinTools.constructMinusIQ(leftChild, safeLeftOfRightDescendant, inheritedVariableNullability::isPossiblyNullable, variableGenerator);
+            IQ minusIQ = leftJoinTools.constructMinusIQ(leftChild, safeLeftOfRightDescendant, inheritedVariableNullability::isPossiblyNullable);
 
-            return otherLJOptimizer.transform(minusIQ.getTree(), minusIQ.getVariableGenerator())
-                    .normalizeForOptimization(minusIQ.getVariableGenerator())
+            return IQTreeVariableGeneratorTransformer.of(
+                            otherLJOptimizer,
+                            IQTree::normalizeForOptimization)
+                    .transform(minusIQ.getTree(), minusIQ.getVariableGenerator())
                     .isDeclaredAsEmpty();
         }
 

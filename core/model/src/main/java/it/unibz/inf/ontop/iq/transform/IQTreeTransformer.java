@@ -19,15 +19,4 @@ public interface IQTreeTransformer {
             return tree;
         };
     }
-
-        static IQTreeTransformer fixpoint(IQTreeTransformer transformer) {
-        return t -> {
-            IQTree prev, tree = t;
-            do {
-                prev = tree;
-                tree = transformer.transform(tree);
-            } while (!prev.equals(tree));
-            return prev;
-        };
-    }
 }

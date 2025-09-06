@@ -2,39 +2,35 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.InnerJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 
 
 @Singleton
-public class FixedPointJoinLikeOptimizer implements JoinLikeOptimizer {
+public class FixedPointJoinLikeOptimizer extends AbstractExtendedIQOptimizer implements JoinLikeOptimizer {
 
     private static final int MAX_LOOP = 100;
-    private final InnerJoinIQOptimizer innerJoinIQOptimizer;
-    private final LeftJoinIQOptimizer leftJoinIQOptimizer;
+
+    private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
-    private FixedPointJoinLikeOptimizer(InnerJoinIQOptimizer innerJoinIQOptimizer, LeftJoinIQOptimizer leftJoinIQOptimizer){
-        this.innerJoinIQOptimizer = innerJoinIQOptimizer;
-        this.leftJoinIQOptimizer = leftJoinIQOptimizer;
+    private FixedPointJoinLikeOptimizer(IntermediateQueryFactory iqFactory,
+                                        InnerJoinIQOptimizer innerJoinIQOptimizer,
+                                        LeftJoinIQOptimizer leftJoinIQOptimizer) {
+        super(iqFactory, NO_ACTION);
+        this.transformer = IQTreeVariableGeneratorTransformer.of(
+                        innerJoinIQOptimizer,
+                        leftJoinIQOptimizer,
+                        IQTree::normalizeForOptimization)
+                .fixpoint(MAX_LOOP);
     }
 
     @Override
-    public IQ optimize(IQ initialIQ) {
-        // Non-final
-        IQ currentIQ = initialIQ;
-        for (int i = 0; i < MAX_LOOP; i++) {
-            IQ innerJoinOptimizedIQ = innerJoinIQOptimizer.optimize(currentIQ);
-            IQ leftJoinOptimizedIQ = leftJoinIQOptimizer.optimize(innerJoinOptimizedIQ);
-            IQ optimizedIQ = leftJoinOptimizedIQ.normalizeForOptimization();
-            if (optimizedIQ.equals(currentIQ))
-                return optimizedIQ;
-            else
-                currentIQ = optimizedIQ;
-        }
-        throw new MinorOntopInternalBugException("MAX_LOOP reached");
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
 }
