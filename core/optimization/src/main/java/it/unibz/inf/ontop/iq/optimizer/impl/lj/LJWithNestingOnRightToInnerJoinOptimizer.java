@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractExtendedIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -39,13 +38,14 @@ import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.LeftJoi
  *
  */
 @Singleton
-public class LJWithNestingOnRightToInnerJoinOptimizer extends AbstractExtendedIQOptimizer {
+public class LJWithNestingOnRightToInnerJoinOptimizer implements IQTreeVariableGeneratorTransformer {
 
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
-    private final CoreSingletons coreSingletons;
     private final CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer;
     private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
     private final LeftJoinTools leftJoinTools;
+
+    private final CoreSingletons coreSingletons;
     private final IQTreeTools iqTreeTools;
     private final SubstitutionFactory substitutionFactory;
 
@@ -55,22 +55,20 @@ public class LJWithNestingOnRightToInnerJoinOptimizer extends AbstractExtendedIQ
                                                        CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer,
                                                        JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                                        LeftJoinTools leftJoinTools) {
-        super(coreSingletons.getIQFactory(), NO_ACTION);
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
-        this.coreSingletons = coreSingletons;
         this.otherLJOptimizer = otherLJOptimizer;
         this.variableNullabilityTools = variableNullabilityTools;
         this.leftJoinTools = leftJoinTools;
+
+        this.coreSingletons = coreSingletons;
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
     }
 
     @Override
-    protected IQTreeVariableGeneratorTransformer getTransformer() {
-        return (tree, vg) ->
-                tree.acceptVisitor(new Transformer(tree::getVariableNullability, vg));
+    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
+        return tree.acceptVisitor(new Transformer(tree::getVariableNullability, variableGenerator));
     }
-
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private class Transformer extends AbstractLJTransformerWithVariableNullability {
@@ -137,8 +135,8 @@ public class LJWithNestingOnRightToInnerJoinOptimizer extends AbstractExtendedIQ
 
             IQ minusIQ = leftJoinTools.constructMinusIQ(leftChild, safeLeftOfRightDescendant, inheritedVariableNullability::isPossiblyNullable, variableGenerator);
 
-            return otherLJOptimizer.optimize(minusIQ)
-                    .normalizeForOptimization().getTree()
+            return otherLJOptimizer.transform(minusIQ.getTree(), minusIQ.getVariableGenerator())
+                    .normalizeForOptimization(minusIQ.getVariableGenerator())
                     .isDeclaredAsEmpty();
         }
 

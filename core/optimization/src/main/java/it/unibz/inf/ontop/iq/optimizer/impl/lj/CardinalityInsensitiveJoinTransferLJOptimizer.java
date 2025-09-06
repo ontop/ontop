@@ -15,8 +15,6 @@ import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractExtendedIQOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.CaseInsensitiveIQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
@@ -33,29 +31,27 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Singleton
-public class CardinalityInsensitiveJoinTransferLJOptimizer extends AbstractExtendedIQOptimizer {
+public class CardinalityInsensitiveJoinTransferLJOptimizer implements IQTreeVariableGeneratorTransformer {
 
     private final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
     private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
     private final CoreSingletons coreSingletons;
 
+    private final IQTreeVariableGeneratorTransformer transformer;
+
     @Inject
     protected CardinalityInsensitiveJoinTransferLJOptimizer(RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
                                                             RightProvenanceNormalizer rightProvenanceNormalizer,
                                                             JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                                             CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory(), NO_ACTION);
         this.requiredDataNodeExtractor = requiredDataNodeExtractor;
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
         this.variableNullabilityTools = variableNullabilityTools;
         this.coreSingletons = coreSingletons;
-    }
 
-    @Override
-    protected IQTreeVariableGeneratorTransformer getTransformer() {
-        return IQTreeVariableGeneratorTransformer.of(vg ->
-                new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
+        this.transformer = IQTreeVariableGeneratorTransformer.of(vg ->
+                new CaseInsensitiveIQTreeTransformerAdapter(coreSingletons.getIQFactory()) {
                     @Override
                     protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
                         IQVisitor<IQTree> transformer = new CardinalityInsensitiveTransformer(
@@ -67,6 +63,10 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer extends AbstractExten
                 });
     }
 
+    @Override
+    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
+        return transformer.transform(tree, variableGenerator);
+    }
 
     private class CardinalityInsensitiveTransformer extends AbstractJoinTransferLJTransformer {
 

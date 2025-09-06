@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.CompositeIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
@@ -42,6 +41,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
     private final IQTreeTools iqTreeTools;
+    private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
     private ExplicitEqualityTransformerImpl(IntermediateQueryFactory iqFactory,
@@ -54,15 +54,14 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         this.iqTreeTools = iqTreeTools;
+        this.transformer = IQTreeVariableGeneratorTransformer.of(
+                IQTreeVariableGeneratorTransformer.of(LocalExplicitEqualityEnforcer::new),
+                IQTreeVariableGeneratorTransformer.of(new ConstructionNodeLifter()),
+                IQTreeVariableGeneratorTransformer.of(new FilterChildNormalizer()));
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        IQTreeVariableGeneratorTransformer transformer = IQTreeVariableGeneratorTransformer.of(
-                IQTreeVariableGeneratorTransformer.of(LocalExplicitEqualityEnforcer::new),
-                IQTreeVariableGeneratorTransformer.of(new ConstructionNodeLifter()),
-                IQTreeVariableGeneratorTransformer.of(new FilterChildNormalizer()));
-
         return transformer.transform(tree, variableGenerator);
     }
 

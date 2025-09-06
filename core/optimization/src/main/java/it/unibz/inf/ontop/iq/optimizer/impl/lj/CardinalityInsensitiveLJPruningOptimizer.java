@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
@@ -19,6 +20,7 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.Set;
@@ -28,13 +30,16 @@ import java.util.Set;
  * in a cardinality-insensitive context
  */
 @Singleton
-public class CardinalityInsensitiveLJPruningOptimizer extends AbstractExtendedIQOptimizer {
+public class CardinalityInsensitiveLJPruningOptimizer implements IQTreeVariableGeneratorTransformer {
+
+    private final IntermediateQueryFactory iqFactory;
 
     private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
     protected CardinalityInsensitiveLJPruningOptimizer(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory(), NO_ACTION);
+        this.iqFactory = coreSingletons.getIQFactory();
+
         this.transformer = IQTreeVariableGeneratorTransformer.of(new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
             @Override
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
@@ -47,8 +52,8 @@ public class CardinalityInsensitiveLJPruningOptimizer extends AbstractExtendedIQ
     }
 
     @Override
-    protected IQTreeVariableGeneratorTransformer getTransformer() {
-        return transformer;
+    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
+        return transformer.transform(tree, variableGenerator);
     }
 
 

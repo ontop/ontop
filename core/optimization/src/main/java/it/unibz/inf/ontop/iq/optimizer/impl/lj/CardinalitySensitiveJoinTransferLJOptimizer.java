@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractExtendedIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -22,7 +21,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @Singleton
-public class CardinalitySensitiveJoinTransferLJOptimizer extends AbstractExtendedIQOptimizer {
+public class CardinalitySensitiveJoinTransferLJOptimizer implements IQTreeVariableGeneratorTransformer {
 
     private final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
@@ -34,7 +33,6 @@ public class CardinalitySensitiveJoinTransferLJOptimizer extends AbstractExtende
                                                           RightProvenanceNormalizer rightProvenanceNormalizer,
                                                           JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                                           CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory(), NO_ACTION);
         this.requiredDataNodeExtractor = requiredDataNodeExtractor;
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
         this.coreSingletons = coreSingletons;
@@ -42,9 +40,8 @@ public class CardinalitySensitiveJoinTransferLJOptimizer extends AbstractExtende
     }
 
     @Override
-    protected IQTreeVariableGeneratorTransformer getTransformer() {
-        return (tree, vg) ->
-                tree.acceptVisitor(new Transformer(tree::getVariableNullability, vg));
+    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
+        return tree.acceptVisitor(new Transformer(tree::getVariableNullability, variableGenerator));
     }
 
     private class Transformer extends AbstractJoinTransferLJTransformer {

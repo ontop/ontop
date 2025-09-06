@@ -40,7 +40,7 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
  *
  */
 @Singleton
-public class NullableFDSelfLJOptimizer extends AbstractExtendedIQOptimizer {
+public class NullableFDSelfLJOptimizer implements IQTreeVariableGeneratorTransformer {
 
     private final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
     private final DBConstant provenanceConstant;
@@ -50,21 +50,19 @@ public class NullableFDSelfLJOptimizer extends AbstractExtendedIQOptimizer {
     private final TermFactory termFactory;
     private final IntermediateQueryFactory iqFactory;
 
+    private final IQTreeVariableGeneratorTransformer transformer;
+
     @Inject
     protected NullableFDSelfLJOptimizer(RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
                                         CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory(), NO_ACTION);
         this.requiredDataNodeExtractor = requiredDataNodeExtractor;
         this.provenanceConstant = coreSingletons.getTermFactory().getProvenanceSpecialConstant();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.iqFactory = coreSingletons.getIQFactory();
-    }
 
-    @Override
-    protected IQTreeVariableGeneratorTransformer getTransformer() {
-        return IQTreeVariableGeneratorTransformer.of(vg ->
+        this.transformer = IQTreeVariableGeneratorTransformer.of(vg ->
                 new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
                     @Override
                     protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
@@ -76,6 +74,10 @@ public class NullableFDSelfLJOptimizer extends AbstractExtendedIQOptimizer {
                 });
     }
 
+    @Override
+    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
+        return transformer.transform(tree, variableGenerator);
+    }
 
     private class CardinalityInsensitiveTransformer extends AbstractLJTransformer {
 
