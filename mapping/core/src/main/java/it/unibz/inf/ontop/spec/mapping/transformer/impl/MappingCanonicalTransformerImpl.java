@@ -159,7 +159,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         private class QueryMergingTransformer extends AbstractQueryMergingTransformer {
 
             QueryMergingTransformer(VariableGenerator variableGenerator) {
-                super(variableGenerator, MappingCanonicalTransformerImpl.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
+                super(variableGenerator, MappingCanonicalTransformerImpl.this.iqFactory, MappingCanonicalTransformerImpl.this.substitutionFactory, MappingCanonicalTransformerImpl.this.transformerFactory);
             }
 
             @Override

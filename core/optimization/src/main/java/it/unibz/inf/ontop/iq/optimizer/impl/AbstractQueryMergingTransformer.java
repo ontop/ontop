@@ -28,26 +28,23 @@ import java.util.Optional;
  */
 public abstract class AbstractQueryMergingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-    private final VariableGenerator variableGenerator;
-    private final SubstitutionFactory substitutionFactory;
-    private final QueryTransformerFactory transformerFactory;
-    private final AtomFactory atomFactory;
+    protected final VariableGenerator variableGenerator;
+    protected final SubstitutionFactory substitutionFactory;
+    protected final QueryTransformerFactory transformerFactory;
 
     protected AbstractQueryMergingTransformer(VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
         this(variableGenerator, coreSingletons.getIQFactory(), coreSingletons.getSubstitutionFactory(),
-                coreSingletons.getAtomFactory(), coreSingletons.getQueryTransformerFactory());
+                coreSingletons.getQueryTransformerFactory());
     }
 
     protected AbstractQueryMergingTransformer(VariableGenerator variableGenerator,
                                               IntermediateQueryFactory iqFactory,
                                               SubstitutionFactory substitutionFactory,
-                                              AtomFactory atomFactory,
                                               QueryTransformerFactory transformerFactory) {
         super(iqFactory);
         this.variableGenerator = variableGenerator;
         this.substitutionFactory = substitutionFactory;
         this.transformerFactory = transformerFactory;
-        this.atomFactory = atomFactory;
     }
 
     @Override

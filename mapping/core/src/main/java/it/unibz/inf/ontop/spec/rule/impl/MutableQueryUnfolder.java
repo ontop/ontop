@@ -33,7 +33,6 @@ public class MutableQueryUnfolder extends AbstractIntensionalQueryMerger {
     private final Map<MappingAssertionIndex, MappingAssertion> mutableMapping;
     private final SubstitutionFactory substitutionFactory;
     private final QueryTransformerFactory transformerFactory;
-    private final AtomFactory atomFactory;
 
     public MutableQueryUnfolder(Map<MappingAssertionIndex, MappingAssertion> mutableMapping,
                                 IntermediateQueryFactory iqFactory,
@@ -43,7 +42,6 @@ public class MutableQueryUnfolder extends AbstractIntensionalQueryMerger {
         this.mutableMapping = mutableMapping;
         this.substitutionFactory = substitutionFactory;
         this.transformerFactory = transformerFactory;
-        this.atomFactory = atomFactory;
     }
 
     @Override
@@ -55,7 +53,7 @@ public class MutableQueryUnfolder extends AbstractIntensionalQueryMerger {
     private class MutableQueryUnfoldingTransformer extends AbstractQueryMergingTransformer {
 
         MutableQueryUnfoldingTransformer(VariableGenerator variableGenerator) {
-            super(variableGenerator, MutableQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
+            super(variableGenerator, MutableQueryUnfolder.this.iqFactory, MutableQueryUnfolder.this.substitutionFactory, MutableQueryUnfolder.this.transformerFactory);
         }
 
         @Override

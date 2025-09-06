@@ -2,11 +2,12 @@ package it.unibz.inf.ontop.query.unfolding.impl;
 
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryRuntimeException;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractExtendedIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -14,13 +15,11 @@ import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -29,7 +28,7 @@ import java.util.Optional;
 /**
  * See {@link QueryUnfolder.Factory} for creating a new instance.
  */
-public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implements QueryUnfolder {
+public class BasicQueryUnfolder extends AbstractExtendedIQOptimizer implements QueryUnfolder {
 
     private final Mapping mapping;
     private final SubstitutionFactory substitutionFactory;
@@ -37,12 +36,16 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
     private final AtomFactory atomFactory;
     private final UnionBasedQueryMerger queryMerger;
 
+    private final IQTreeVariableGeneratorTransformer transformer;
+
     /**
      * See {@link QueryUnfolder.Factory#create(Mapping)}
      */
     @AssistedInject
-    private BasicQueryUnfolder(@Assisted Mapping mapping, IntermediateQueryFactory iqFactory,
-                               SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
+    private BasicQueryUnfolder(@Assisted Mapping mapping,
+                               IntermediateQueryFactory iqFactory,
+                               SubstitutionFactory substitutionFactory,
+                               QueryTransformerFactory transformerFactory,
                                UnionBasedQueryMerger queryMerger,
                                AtomFactory atomFactory) {
         super(iqFactory);
@@ -51,18 +54,20 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
         this.transformerFactory = transformerFactory;
         this.queryMerger = queryMerger;
         this.atomFactory = atomFactory;
+
+        this.transformer = IQTreeVariableGeneratorTransformer.of(BasicQueryUnfoldingTransformer::new);
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(new BasicQueryUnfoldingTransformer(variableGenerator));
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
 
 
     private class BasicQueryUnfoldingTransformer extends AbstractQueryMergingTransformer {
 
         BasicQueryUnfoldingTransformer(VariableGenerator variableGenerator) {
-            super(variableGenerator, BasicQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
+            super(variableGenerator, BasicQueryUnfolder.this.iqFactory, BasicQueryUnfolder.this.substitutionFactory, BasicQueryUnfolder.this.transformerFactory);
         }
 
         @Override
