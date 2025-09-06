@@ -4,6 +4,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 public abstract class AbstractIQOptimizer implements IQOptimizer {
@@ -17,12 +18,14 @@ public abstract class AbstractIQOptimizer implements IQOptimizer {
     @Override
     public IQ optimize(IQ query) {
         IQTree initialTree = query.getTree();
-        IQTree newTree = transformTree(initialTree, query.getVariableGenerator());
+        VariableGenerator variableGenerator = query.getVariableGenerator();
+        IQTreeVariableGeneratorTransformer transformer = getTransformer();
+        IQTree newTree = transformer.transform(initialTree, variableGenerator);
 
         return newTree.equals(initialTree)
                 ? query
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree);
     }
 
-    protected abstract IQTree transformTree(IQTree tree, VariableGenerator variableGenerator);
+    abstract protected IQTreeVariableGeneratorTransformer getTransformer();
 }

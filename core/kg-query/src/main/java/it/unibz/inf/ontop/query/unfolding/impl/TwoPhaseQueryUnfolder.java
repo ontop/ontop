@@ -1,19 +1,13 @@
 package it.unibz.inf.ontop.query.unfolding.impl;
 
-import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
-import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +35,11 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return this::transformTree;
+    }
+
+    private IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
         long before = System.currentTimeMillis();
         FirstPhaseQueryMergingTransformer firstPhaseTransformer = new FirstPhaseQueryMergingTransformer(mapping, variableGenerator, coreSingletons);
 
@@ -56,13 +54,11 @@ public class TwoPhaseQueryUnfolder extends AbstractIntensionalQueryMerger implem
         return executeSecondPhaseUnfolding(partiallyUnfoldedIQ, variableGenerator);
     }
 
-
-    protected IQTree executeSecondPhaseUnfolding(IQTree partiallyUnfoldedIQ, VariableGenerator variableGenerator){
+    private IQTree executeSecondPhaseUnfolding(IQTree partiallyUnfoldedIQ, VariableGenerator variableGenerator){
         long before = System.currentTimeMillis();
         IQTree unfoldedIQ = partiallyUnfoldedIQ.acceptVisitor(new SecondPhaseQueryMergingTransformer(
                 partiallyUnfoldedIQ.getPossibleVariableDefinitions(), mapping, variableGenerator, coreSingletons));
         LOGGER.debug("Second phase query unfolding time: {}", System.currentTimeMillis() - before);
         return unfoldedIQ;
     }
-
 }

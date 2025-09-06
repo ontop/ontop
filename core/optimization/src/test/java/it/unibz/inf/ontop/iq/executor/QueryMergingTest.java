@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.template.Template;
@@ -807,16 +808,18 @@ public class QueryMergingTest {
 
         private final ImmutableMap<AtomPredicate, IQ> map;
 
+        private final IQTreeVariableGeneratorTransformer transformer;
+
         protected BasicIntensionalQueryMerger(ImmutableMap<AtomPredicate, IQ> map) {
             super(IQ_FACTORY);
             this.map = map;
+            this.transformer = IQTreeVariableGeneratorTransformer.of(BasicQueryMergingTransformer::new);
         }
 
         @Override
-        protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-            return tree.acceptVisitor(new BasicQueryMergingTransformer(variableGenerator));
+        protected IQTreeVariableGeneratorTransformer getTransformer() {
+            return transformer;
         }
-
 
         private class BasicQueryMergingTransformer extends AbstractQueryMergingTransformer {
 
@@ -834,9 +837,7 @@ public class QueryMergingTest {
                 return dataNode;
             }
         }
-
     }
-
 }
 
 

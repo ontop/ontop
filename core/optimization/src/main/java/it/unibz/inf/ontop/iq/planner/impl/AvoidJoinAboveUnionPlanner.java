@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -68,7 +69,7 @@ public class AvoidJoinAboveUnionPlanner extends AbstractIQOptimizer implements Q
     private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
     private final IQTreeTools iqTreeTools;
 
-    private final AvoidJoinAboveUnionTransformer transformer;
+    private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
     protected AvoidJoinAboveUnionPlanner(GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
@@ -77,7 +78,8 @@ public class AvoidJoinAboveUnionPlanner extends AbstractIQOptimizer implements Q
         super(iqFactory);
         this.generalOptimizer = generalOptimizer;
         this.iqTreeTools = iqTreeTools;
-        this.transformer = new AvoidJoinAboveUnionTransformer();
+
+        this.transformer = IQTreeVariableGeneratorTransformer.of(new AvoidJoinAboveUnionTransformer());
     }
 
     /**
@@ -95,8 +97,8 @@ public class AvoidJoinAboveUnionPlanner extends AbstractIQOptimizer implements Q
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(transformer);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
 
     private class AvoidJoinAboveUnionTransformer extends DefaultRecursiveIQTreeVisitingTransformer {

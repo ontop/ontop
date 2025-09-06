@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.impl.ExtensionalDataNodeImpl;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -26,7 +26,11 @@ public class LensUnfolderImpl extends AbstractIQOptimizer implements LensUnfolde
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return this::transformTree;
+    }
+
+    private IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
         int maxLevel = Lens.getMaxLevel(tree);
         if (maxLevel < 1)
             return tree;

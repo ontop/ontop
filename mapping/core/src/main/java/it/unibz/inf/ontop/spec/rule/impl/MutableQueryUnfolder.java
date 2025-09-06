@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.IRI;
 
@@ -34,26 +33,32 @@ public class MutableQueryUnfolder extends AbstractIntensionalQueryMerger {
     private final SubstitutionFactory substitutionFactory;
     private final QueryTransformerFactory transformerFactory;
 
+    private final IQTreeVariableGeneratorTransformer transformer;
+
     public MutableQueryUnfolder(Map<MappingAssertionIndex, MappingAssertion> mutableMapping,
                                 IntermediateQueryFactory iqFactory,
-                                SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
-                                CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
+                                SubstitutionFactory substitutionFactory,
+                                QueryTransformerFactory transformerFactory) {
         super(iqFactory);
         this.mutableMapping = mutableMapping;
         this.substitutionFactory = substitutionFactory;
         this.transformerFactory = transformerFactory;
+
+        this.transformer = IQTreeVariableGeneratorTransformer.of(MutableQueryUnfoldingTransformer::new);
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(new MutableQueryUnfoldingTransformer(variableGenerator));
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
-
 
     private class MutableQueryUnfoldingTransformer extends AbstractQueryMergingTransformer {
 
         MutableQueryUnfoldingTransformer(VariableGenerator variableGenerator) {
-            super(variableGenerator, MutableQueryUnfolder.this.iqFactory, MutableQueryUnfolder.this.substitutionFactory, MutableQueryUnfolder.this.transformerFactory);
+            super(variableGenerator,
+                    MutableQueryUnfolder.this.iqFactory,
+                    MutableQueryUnfolder.this.substitutionFactory,
+                    MutableQueryUnfolder.this.transformerFactory);
         }
 
         @Override
@@ -109,6 +114,4 @@ public class MutableQueryUnfolder extends AbstractIntensionalQueryMerger {
             return iqFactory.createEmptyNode(dataNode.getVariables());
         }
     }
-
-
 }
