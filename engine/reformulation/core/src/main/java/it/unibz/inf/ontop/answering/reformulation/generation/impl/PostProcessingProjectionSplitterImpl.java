@@ -51,10 +51,10 @@ public class PostProcessingProjectionSplitterImpl extends ProjectionSplitterImpl
     }
 
     @Override
-    public ProjectionSplit split(IQ initialIQ, boolean avoidPostProcessing) {
-        return split(initialIQ, avoidPostProcessing ? avoidPostProcessingDecomposer : proPostProcessingDecomposer);
+    public ProjectionSplit split(IQTree tree, VariableGenerator variableGenerator, boolean avoidPostProcessing) {
+        ProjectionDecomposer decomposer = avoidPostProcessing ? avoidPostProcessingDecomposer : proPostProcessingDecomposer;
+        return split(tree, variableGenerator, decomposer);
     }
-
 
     @Override
     public ProjectionSplit split(IQTree tree, VariableGenerator variableGenerator) {

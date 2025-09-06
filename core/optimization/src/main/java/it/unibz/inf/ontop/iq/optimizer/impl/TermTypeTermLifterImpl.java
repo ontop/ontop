@@ -34,13 +34,16 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 @Singleton
-public class TermTypeTermLifterImpl extends AbstractIQOptimizer implements TermTypeTermLifter {
+public class TermTypeTermLifterImpl implements TermTypeTermLifter {
 
+    private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
     private final TypeConstantDictionary dictionary;
     private final SubstitutionFactory substitutionFactory;
     private final FunctionSymbolFactory functionSymbolFactory;
+
+    private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
     private TermTypeTermLifterImpl(IntermediateQueryFactory iqFactory,
@@ -49,23 +52,23 @@ public class TermTypeTermLifterImpl extends AbstractIQOptimizer implements TermT
                                    TypeConstantDictionary typeConstantDictionary,
                                    SubstitutionFactory substitutionFactory,
                                    FunctionSymbolFactory functionSymbolFactory) {
-        super(iqFactory, NO_ACTION);
+        this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.iqTreeTools = iqTreeTools;
         this.dictionary = typeConstantDictionary;
         this.substitutionFactory = substitutionFactory;
         this.functionSymbolFactory = functionSymbolFactory;
-    }
 
-    @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        IQTreeVariableGeneratorTransformer transformer = IQTreeVariableGeneratorTransformer.of(
+        this.transformer = IQTreeVariableGeneratorTransformer.of(
                 // Makes sure the tree is already normalized before transforming it
                 IQTree::normalizeForOptimization,
                 IQTreeVariableGeneratorTransformer.of(TermTypeTermLifter::new),
                 (t,  vg) -> makeRDFTermTypeFunctionSymbolsSimplifiable(t),
                 IQTree::normalizeForOptimization);
+    }
 
+    @Override
+    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
         return transformer.transform(tree, variableGenerator);
     }
 

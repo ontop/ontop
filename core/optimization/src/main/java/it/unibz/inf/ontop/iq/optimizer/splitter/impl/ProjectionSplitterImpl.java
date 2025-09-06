@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer.ProjectionDecomposition;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -33,15 +32,6 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
         this.distinctNormalizer = distinctNormalizer;
     }
 
-    @Override
-    public ProjectionSplit split(IQ initialIQ) {
-        return split(initialIQ.getTree(), initialIQ.getVariableGenerator());
-    }
-
-    protected ProjectionSplit split(IQ initialIQ, ProjectionDecomposer decomposer) {
-        return split(initialIQ.getTree(), initialIQ.getVariableGenerator(), decomposer);
-    }
-
     protected ProjectionSplit split(IQTree topTree, VariableGenerator variableGenerator, ProjectionDecomposer decomposer) {
 
         var construction = UnaryIQTreeDecomposition.of(topTree, ConstructionNode.class);
@@ -50,7 +40,6 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
                 // "Useless" construction node --> no post-processing
                 iqFactory.createConstructionNode(topTree.getVariables()),
                 topTree,
-                variableGenerator,
                 ImmutableSet.of(),
                 ImmutableSet.of());
 
@@ -81,7 +70,6 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
 
         return new ProjectionSplitImpl(postProcessingNode,
                 normalizeNewSubTree(newSubTree, variableGenerator),
-                variableGenerator,
                 subSubstitution.getRangeVariables(),
                 subSubstitution.getRangeSet());
     }
@@ -144,16 +132,15 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
 
         private final ConstructionNode constructionNode;
         private final IQTree subTree;
-        private final VariableGenerator variableGenerator;
         private final ImmutableSet<Variable> pushedVariables;
         private final ImmutableSet<ImmutableTerm> pushedTerms;
 
-        ProjectionSplitImpl(ConstructionNode constructionNode, IQTree subTree,
-                                VariableGenerator variableGenerator, ImmutableSet<Variable> pushedVariables,
+        ProjectionSplitImpl(ConstructionNode constructionNode,
+                            IQTree subTree,
+                            ImmutableSet<Variable> pushedVariables,
                             ImmutableSet<ImmutableTerm> pushedTerms) {
             this.constructionNode = constructionNode;
             this.subTree = subTree;
-            this.variableGenerator = variableGenerator;
             this.pushedVariables = pushedVariables;
             this.pushedTerms = pushedTerms;
         }
@@ -166,11 +153,6 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
         @Override
         public IQTree getSubTree() {
             return subTree;
-        }
-
-        @Override
-        public VariableGenerator getVariableGenerator() {
-            return variableGenerator;
         }
 
         @Override

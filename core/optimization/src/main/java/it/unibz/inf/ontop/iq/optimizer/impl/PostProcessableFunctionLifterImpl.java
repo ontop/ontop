@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -32,8 +33,9 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
 
 @Singleton
-public class PostProcessableFunctionLifterImpl extends AbstractIQOptimizer implements PostProcessableFunctionLifter {
+public class PostProcessableFunctionLifterImpl implements PostProcessableFunctionLifter {
 
+    private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
@@ -46,8 +48,8 @@ public class PostProcessableFunctionLifterImpl extends AbstractIQOptimizer imple
     @Inject
     protected PostProcessableFunctionLifterImpl(OptimizationSingletons optimizationSingletons) {
         // no equality check
-        super(optimizationSingletons.getCoreSingletons().getIQFactory(), NO_ACTION);
         CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
+        this.iqFactory = coreSingletons.getIQFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.termFactory = coreSingletons.getTermFactory();
@@ -58,7 +60,7 @@ public class PostProcessableFunctionLifterImpl extends AbstractIQOptimizer imple
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
         Context context = new Context(variableGenerator);
         return context.lift(tree);
     }

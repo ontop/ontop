@@ -90,18 +90,21 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
     @Override
     public IQ generateSourceQuery(IQ query, boolean avoidPostProcessing, boolean tolerateUnknownTypes) {
-        if (query.getTree().isDeclaredAsEmpty())
+        IQTree initialTree = query.getTree();
+        if (initialTree.isDeclaredAsEmpty())
             return query;
 
-        IQ rdfTypeLiftedIQ = rdfTypeLifter.optimize(query);
-        LOGGER.debug("After lifting the RDF types:\n{}\n", rdfTypeLiftedIQ);
+        VariableGenerator variableGenerator = query.getVariableGenerator();
 
-        IQ liftedIQ = functionLifter.optimize(rdfTypeLiftedIQ);
-        LOGGER.debug("After lifting the post-processable function symbols:\n{}\n", liftedIQ);
+        IQTree rdfTypeLiftedTree = rdfTypeLifter.transform(initialTree, variableGenerator);
+        LOGGER.debug("After lifting the RDF types:\n{}\n", rdfTypeLiftedTree);
 
-        ProjectionSplitter.ProjectionSplit split = projectionSplitter.split(liftedIQ, avoidPostProcessing);
+        IQTree liftedTree = functionLifter.transform(rdfTypeLiftedTree, variableGenerator);
+        LOGGER.debug("After lifting the post-processable function symbols:\n{}\n", liftedTree);
 
-        IQTree normalizedSubTree = normalizeSubTree(split.getSubTree(), split.getVariableGenerator());
+        ProjectionSplitter.ProjectionSplit split = projectionSplitter.split(liftedTree, variableGenerator, avoidPostProcessing);
+
+        IQTree normalizedSubTree = normalizeSubTree(split.getSubTree(), variableGenerator);
         // Late detection of emptiness
         if (normalizedSubTree.isDeclaredAsEmpty())
             return iqFactory.createIQ(query.getProjectionAtom(),
