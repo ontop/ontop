@@ -12,36 +12,36 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class BelowDistinctJoinWithClassUnionOptimizer extends AbstractExtendedIQOptimizer {
+public class BelowDistinctJoinWithClassUnionOptimizer implements IQTreeVariableGeneratorTransformer {
 
-    private final IQVisitor<IQTree> lookForDistinctTransformer;
+    private final IQTreeVariableGeneratorTransformer lookForDistinctTransformer;
     private final CoreSingletons coreSingletons;
     private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
 
     @Inject
     protected BelowDistinctJoinWithClassUnionOptimizer(CoreSingletons coreSingletons,
                                                        RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
-        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
         this.coreSingletons = coreSingletons;
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
-        this.lookForDistinctTransformer = new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
+        this.lookForDistinctTransformer = IQTreeVariableGeneratorTransformer.of(new CaseInsensitiveIQTreeTransformerAdapter(coreSingletons.getIQFactory()) {
             private final IQVisitor<IQTree> transformer = new JoinWithClassUnionTransformer(IQTreeTransformer.of(this));
 
             @Override
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
                 return tree.acceptVisitor(transformer);
             }
-        };
+        });
     }
 
     @Override
-    protected IQTreeVariableGeneratorTransformer getTransformer() {
-        return IQTreeVariableGeneratorTransformer.of(lookForDistinctTransformer);
+    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
+        return lookForDistinctTransformer.transform(tree, variableGenerator);
     }
 
 

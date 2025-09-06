@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.UniqueConstraint;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
@@ -24,21 +25,23 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Singleton
-public class SelfJoinUCIQOptimizer extends AbstractExtendedIQOptimizer {
+public class SelfJoinUCIQOptimizer implements IQTreeVariableGeneratorTransformer {
 
+    private final IntermediateQueryFactory iqFactory;
     private final SelfJoinUCSimplifier simplifier;
+    private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
     private SelfJoinUCIQOptimizer(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
+        this.iqFactory = coreSingletons.getIQFactory();
         this.simplifier = new SelfJoinUCSimplifier(coreSingletons);
+        this.transformer = IQTreeVariableGeneratorTransformer.of(SelfJoinUCTransformer::new);
     }
 
     @Override
-    protected IQTreeVariableGeneratorTransformer getTransformer() {
-        return IQTreeVariableGeneratorTransformer.of(SelfJoinUCTransformer::new);
+    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
+        return transformer.transform(tree, variableGenerator);
     }
-
 
     private class SelfJoinUCTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 

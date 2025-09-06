@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -19,30 +20,30 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class RedundantJoinFKOptimizer extends AbstractExtendedIQOptimizer {
+public class RedundantJoinFKOptimizer implements IQTreeVariableGeneratorTransformer {
 
     private final IQTreeTools iqTreeTools;
     private final TermFactory termFactory;
+    private final IntermediateQueryFactory iqFactory;
     private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
     private RedundantJoinFKOptimizer(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
+        this.iqFactory = coreSingletons.getIQFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.termFactory = coreSingletons.getTermFactory();
-        this.transformer = IQTreeVariableGeneratorTransformer.of(
-                IQTree::normalizeForOptimization,
-                IQTreeVariableGeneratorTransformer.of(new RedundantJoinFKTransformer()));
+        this.transformer = IQTreeVariableGeneratorTransformer.of(new RedundantJoinFKTransformer());
     }
 
     @Override
-    protected IQTreeVariableGeneratorTransformer getTransformer() {
-        return transformer;
+    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
+        return transformer.transform(tree, variableGenerator);
     }
 
     private class RedundantJoinFKTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
