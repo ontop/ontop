@@ -151,7 +151,7 @@ public class OptimizationTestingTools {
         Z = TERM_FACTORY.getVariable("z");
         A = TERM_FACTORY.getVariable("a");
         AGGV = TERM_FACTORY.getVariable("aggv");
-        AGGVF0 = TERM_FACTORY.getVariable("aggvf0");
+        AGGVF0 = TERM_FACTORY.getVariable("aggvf2");
         AF0 = TERM_FACTORY.getVariable("af0");
         AF1 = TERM_FACTORY.getVariable("af1");
         B = TERM_FACTORY.getVariable("b");

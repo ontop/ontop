@@ -5,6 +5,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 public abstract class AbstractIntensionalQueryMerger extends AbstractIQOptimizer {
 
     protected AbstractIntensionalQueryMerger(IntermediateQueryFactory iqFactory) {
-        super(iqFactory, NO_ACTION);
+        super(iqFactory);
     }
 }

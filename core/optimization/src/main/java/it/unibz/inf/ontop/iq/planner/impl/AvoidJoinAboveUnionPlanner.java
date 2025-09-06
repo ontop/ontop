@@ -72,8 +72,9 @@ public class AvoidJoinAboveUnionPlanner extends AbstractIQOptimizer implements Q
 
     @Inject
     protected AvoidJoinAboveUnionPlanner(GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
-                                         IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
-        super(iqFactory, NO_ACTION);
+                                         IntermediateQueryFactory iqFactory,
+                                         IQTreeTools iqTreeTools) {
+        super(iqFactory);
         this.generalOptimizer = generalOptimizer;
         this.iqTreeTools = iqTreeTools;
         this.transformer = new AvoidJoinAboveUnionTransformer();

@@ -6,15 +6,10 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.function.Function;
-
 public abstract class AbstractExtendedIQOptimizer extends AbstractIQOptimizer {
-    protected AbstractExtendedIQOptimizer(IntermediateQueryFactory iqFactory, Function<IQ, IQ> postTransformerAction) {
-        super(iqFactory, postTransformerAction);
-    }
 
     protected AbstractExtendedIQOptimizer(IntermediateQueryFactory iqFactory) {
-        super(iqFactory, NO_ACTION);
+        super(iqFactory);
     }
 
     @Override

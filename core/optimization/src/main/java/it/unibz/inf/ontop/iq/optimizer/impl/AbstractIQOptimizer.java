@@ -4,22 +4,13 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
-import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-
-import java.util.function.Function;
 
 public abstract class AbstractIQOptimizer implements IQOptimizer {
     protected final IntermediateQueryFactory iqFactory;
-    private final Function<IQ, IQ> postTransformerAction;
 
-    protected static final Function<IQ, IQ> NO_ACTION = q -> q;
-    protected static final Function<IQ, IQ> NORMALIZE_FOR_OPTIMIZATION = IQ::normalizeForOptimization;
-
-    public AbstractIQOptimizer(IntermediateQueryFactory iqFactory, Function<IQ, IQ> postTransformerAction) {
+    public AbstractIQOptimizer(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
-        this.postTransformerAction = postTransformerAction;
     }
 
 
@@ -30,7 +21,7 @@ public abstract class AbstractIQOptimizer implements IQOptimizer {
 
         return newTree.equals(initialTree)
                 ? query
-                : postTransformerAction.apply(iqFactory.createIQ(query.getProjectionAtom(), newTree));
+                : iqFactory.createIQ(query.getProjectionAtom(), newTree);
     }
 
     protected abstract IQTree transformTree(IQTree tree, VariableGenerator variableGenerator);

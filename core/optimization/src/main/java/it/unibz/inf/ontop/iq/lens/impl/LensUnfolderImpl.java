@@ -21,7 +21,7 @@ public class LensUnfolderImpl extends AbstractIQOptimizer implements LensUnfolde
 
     @Inject
     protected LensUnfolderImpl(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory(), NO_ACTION);
+        super(coreSingletons.getIQFactory());
         this.coreSingletons = coreSingletons;
     }
 

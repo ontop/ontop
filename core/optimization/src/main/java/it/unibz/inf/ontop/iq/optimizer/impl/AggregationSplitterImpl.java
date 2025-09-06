@@ -42,7 +42,7 @@ public class AggregationSplitterImpl extends AbstractExtendedIQOptimizer impleme
 
     @Inject
     protected AggregationSplitterImpl(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
+        super(coreSingletons.getIQFactory());
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.termFactory = coreSingletons.getTermFactory();
@@ -50,7 +50,8 @@ public class AggregationSplitterImpl extends AbstractExtendedIQOptimizer impleme
 
         this.transformer = IQTreeVariableGeneratorTransformer.of(
                 IQTree::normalizeForOptimization,
-                IQTreeVariableGeneratorTransformer.of(AggregationUnionLifterTransformer::new));
+                IQTreeVariableGeneratorTransformer.of(AggregationUnionLifterTransformer::new),
+                IQTree::normalizeForOptimization);
     }
 
     @Override

@@ -35,15 +35,19 @@ public class NodeInGraphOptimizerImpl extends AbstractExtendedIQOptimizer implem
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
     private final IQTreeTools iqTreeTools;
+
     private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
     protected NodeInGraphOptimizerImpl(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
+        super(coreSingletons.getIQFactory());
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
-        this.transformer = IQTreeVariableGeneratorTransformer.of(new Transformer());
+
+        this.transformer = IQTreeVariableGeneratorTransformer.of(
+                IQTreeVariableGeneratorTransformer.of(new Transformer()),
+                IQTree::normalizeForOptimization);
     }
 
     @Override

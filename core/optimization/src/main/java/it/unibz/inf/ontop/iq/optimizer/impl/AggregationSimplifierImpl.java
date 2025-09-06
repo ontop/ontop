@@ -38,13 +38,15 @@ public class AggregationSimplifierImpl extends AbstractExtendedIQOptimizer imple
     @Inject
     private AggregationSimplifierImpl(OptimizationSingletons optimizationSingletons) {
         // no equality check
-        super(optimizationSingletons.getCoreSingletons().getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
+        super(optimizationSingletons.getCoreSingletons().getIQFactory());
         this.optimizationSingletons = optimizationSingletons;
         CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
         this.termFactory = coreSingletons.getTermFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
 
-        this.transformer = IQTreeVariableGeneratorTransformer.of(AggregationSimplifyingTransformer::new);
+        this.transformer = IQTreeVariableGeneratorTransformer.of(
+                IQTreeVariableGeneratorTransformer.of(AggregationSimplifyingTransformer::new),
+                IQTree::normalizeForOptimization);
     }
 
     @Override
