@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 
-public class CompositeFlattenLifter extends AbstractExtendedIQOptimizer implements FlattenLifter {
+public class CompositeFlattenLifter extends AbstractIQOptimizer implements FlattenLifter {
 
     private final IQTreeVariableGeneratorTransformer transformer;
 

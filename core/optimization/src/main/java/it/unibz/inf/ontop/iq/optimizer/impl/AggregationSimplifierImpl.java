@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import javax.inject.Inject;
 import java.util.Optional;
 
-public class AggregationSimplifierImpl extends AbstractExtendedIQOptimizer implements AggregationSimplifier {
+public class AggregationSimplifierImpl extends AbstractIQOptimizer implements AggregationSimplifier {
 
     private final OptimizationSingletons optimizationSingletons;
     private final TermFactory termFactory;

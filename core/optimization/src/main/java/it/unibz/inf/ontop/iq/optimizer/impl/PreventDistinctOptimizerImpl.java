@@ -18,7 +18,7 @@ import javax.inject.Inject;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 
-public class PreventDistinctOptimizerImpl extends AbstractExtendedIQOptimizer implements PreventDistinctOptimizer {
+public class PreventDistinctOptimizerImpl extends AbstractIQOptimizer implements PreventDistinctOptimizer {
 
     private final PreventDistinctProjectionSplitter preventDistinctProjectionSplitter;
 

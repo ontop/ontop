@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.DisjunctionOfEqualitiesMergingSimplifier;
-import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -17,13 +16,12 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBInFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBOrFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractExtendedIQOptimizer implements DisjunctionOfEqualitiesMergingSimplifier {
+public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOptimizer implements DisjunctionOfEqualitiesMergingSimplifier {
 
     private static final int MAX_ARITY = 8;
 

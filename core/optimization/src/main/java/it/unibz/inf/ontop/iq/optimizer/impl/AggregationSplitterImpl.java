@@ -31,7 +31,7 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
 
-public class AggregationSplitterImpl extends AbstractExtendedIQOptimizer implements AggregationSplitter {
+public class AggregationSplitterImpl extends AbstractIQOptimizer implements AggregationSplitter {
 
     private final IQTreeTools iqTreeTools;
     private final SubstitutionFactory substitutionFactory;

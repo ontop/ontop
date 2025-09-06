@@ -24,7 +24,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class OrderBySimplifierImpl extends AbstractExtendedIQOptimizer implements OrderBySimplifier {
+public class OrderBySimplifierImpl extends AbstractIQOptimizer implements OrderBySimplifier {
 
     private final OptimizationSingletons optimizationSingletons;
     private final IQTreeTools iqTreeTools;

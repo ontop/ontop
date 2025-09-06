@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryRuntimeException;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractExtendedIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.atom.*;
@@ -28,7 +28,7 @@ import java.util.Optional;
 /**
  * See {@link QueryUnfolder.Factory} for creating a new instance.
  */
-public class BasicQueryUnfolder extends AbstractExtendedIQOptimizer implements QueryUnfolder {
+public class BasicQueryUnfolder extends AbstractIQOptimizer implements QueryUnfolder {
 
     private final Mapping mapping;
     private final SubstitutionFactory substitutionFactory;

@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 
 
 @Singleton
-public class FixedPointJoinLikeOptimizer extends AbstractExtendedIQOptimizer implements JoinLikeOptimizer {
+public class FixedPointJoinLikeOptimizer extends AbstractIQOptimizer implements JoinLikeOptimizer {
 
     private static final int MAX_LOOP = 100;
 

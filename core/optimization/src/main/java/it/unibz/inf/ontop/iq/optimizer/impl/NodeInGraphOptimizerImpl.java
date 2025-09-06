@@ -30,7 +30,7 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
  *    - the node is a variable
  *    - all arguments are ground
  */
-public class NodeInGraphOptimizerImpl extends AbstractExtendedIQOptimizer implements NodeInGraphOptimizer {
+public class NodeInGraphOptimizerImpl extends AbstractIQOptimizer implements NodeInGraphOptimizer {
 
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;

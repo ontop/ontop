@@ -23,7 +23,7 @@ import java.util.stream.Stream;
  * TODO: explicit assumptions
  */
 @Singleton
-public class BottomUpUnionAndBindingLiftOptimizer extends AbstractExtendedIQOptimizer implements UnionAndBindingLiftOptimizer {
+public class BottomUpUnionAndBindingLiftOptimizer extends AbstractIQOptimizer implements UnionAndBindingLiftOptimizer {
 
     private static final int ITERATION_BOUND = 10000;
 
