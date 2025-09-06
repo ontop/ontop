@@ -22,17 +22,20 @@ public class PreventDistinctOptimizerImpl extends AbstractExtendedIQOptimizer im
 
     private final PreventDistinctProjectionSplitter preventDistinctProjectionSplitter;
 
+    private final IQTreeVariableGeneratorTransformer transformer;
+
     @Inject
     private PreventDistinctOptimizerImpl(CoreSingletons coreSingletons, PreventDistinctProjectionSplitter preventDistinctProjectionSplitter) {
-        super(coreSingletons.getIQFactory(), NO_ACTION);
+        super(coreSingletons.getIQFactory());
         this.preventDistinctProjectionSplitter = preventDistinctProjectionSplitter;
+
+        this.transformer = IQTreeVariableGeneratorTransformer.of(PreventDistinctTransformer::new);
     }
 
     @Override
     protected IQTreeVariableGeneratorTransformer getTransformer() {
-        return IQTreeVariableGeneratorTransformer.of(PreventDistinctTransformer::new);
+        return transformer;
     }
-
 
     private class PreventDistinctTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 

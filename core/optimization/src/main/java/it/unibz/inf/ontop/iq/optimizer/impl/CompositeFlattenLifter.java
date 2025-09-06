@@ -15,7 +15,7 @@ public class CompositeFlattenLifter extends AbstractExtendedIQOptimizer implemen
                                    FilterLifter filterLifter,
                                    BasicFlattenLifter flattenLifter,
                                    BooleanExpressionPushDownTransformer pushDownOptimizer) {
-        super(iqFactory, NO_ACTION);
+        super(iqFactory);
         this.transformer = IQTreeVariableGeneratorTransformer.of(
                 IQTreeVariableGeneratorTransformer.of2(filterLifter),
                 IQTreeVariableGeneratorTransformer.of2(flattenLifter),

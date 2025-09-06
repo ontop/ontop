@@ -33,6 +33,8 @@ public class AggregationSimplifierImpl extends AbstractExtendedIQOptimizer imple
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
 
+    private final IQTreeVariableGeneratorTransformer transformer;
+
     @Inject
     private AggregationSimplifierImpl(OptimizationSingletons optimizationSingletons) {
         // no equality check
@@ -41,11 +43,13 @@ public class AggregationSimplifierImpl extends AbstractExtendedIQOptimizer imple
         CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
         this.termFactory = coreSingletons.getTermFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
+
+        this.transformer = IQTreeVariableGeneratorTransformer.of(AggregationSimplifyingTransformer::new);
     }
 
     @Override
     protected IQTreeVariableGeneratorTransformer getTransformer() {
-        return IQTreeVariableGeneratorTransformer.of(AggregationSimplifyingTransformer::new);
+        return transformer;
     }
 
     /**
@@ -54,7 +58,7 @@ public class AggregationSimplifierImpl extends AbstractExtendedIQOptimizer imple
     private class AggregationSimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
 
         AggregationSimplifyingTransformer(VariableGenerator variableGenerator) {
-            super(optimizationSingletons,  variableGenerator);
+            super(optimizationSingletons, variableGenerator);
         }
 
         @Override

@@ -7,7 +7,6 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
@@ -26,10 +25,7 @@ import java.util.stream.IntStream;
 
 public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTransformer {
 
-    private final DefinitionPushDownRequest request;
-
     private final IntermediateQueryFactory iqFactory;
-    private final OptimizerFactory optimizerFactory;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
@@ -39,18 +35,14 @@ public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTran
     @AssistedInject
     protected DefinitionPushDownTransformerImpl(@Assisted DefinitionPushDownRequest request,
                                                 IntermediateQueryFactory iqFactory,
-                                                OptimizerFactory optimizerFactory,
                                                 SubstitutionFactory substitutionFactory,
                                                 TermFactory termFactory,
                                                 IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
-        this.optimizerFactory = optimizerFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.iqTreeTools = iqTreeTools;
-        this.transformer = new Transformer();
-
-        this.request = request;
+        this.transformer = new Transformer(request);
     }
 
     @Override
@@ -60,8 +52,11 @@ public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTran
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        Transformer() {
+        private final DefinitionPushDownRequest request;
+
+        Transformer(DefinitionPushDownRequest request) {
             super(DefinitionPushDownTransformerImpl.this.iqFactory);
+            this.request = request;
         }
 
         @Override
@@ -101,7 +96,7 @@ public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTran
                     .orElseGet(() -> iqFactory.createUnaryIQTree(
                             iqFactory.createConstructionNode(newProjectedVariables, initialSubstitution),
                             // "Recursive"
-                            optimizerFactory.createDefinitionPushDownTransformer(newRequest).transform(child)));
+                            child.acceptVisitor(new Transformer(newRequest))));
         }
 
         /**
@@ -197,11 +192,9 @@ public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTran
         }
 
         private IQTree blockDefinition(IQTree tree) {
-            Variable newVariable = request.getNewVariable();
-
             ConstructionNode constructionNode = iqTreeTools.createExtendingConstructionNode(
                     tree.getVariables(),
-                    substitutionFactory.getSubstitution(newVariable,
+                    substitutionFactory.getSubstitution(request.getNewVariable(),
                             termFactory.getIfElseNull(
                                     request.getCondition(),
                                     request.getDefinitionWhenConditionSatisfied())));

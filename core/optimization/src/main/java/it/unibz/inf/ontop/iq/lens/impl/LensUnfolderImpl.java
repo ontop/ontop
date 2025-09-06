@@ -21,7 +21,7 @@ public class LensUnfolderImpl extends AbstractIQOptimizer implements LensUnfolde
 
     @Inject
     protected LensUnfolderImpl(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
+        super(coreSingletons.getIQFactory(), NO_ACTION);
         this.coreSingletons = coreSingletons;
     }
 
@@ -32,7 +32,8 @@ public class LensUnfolderImpl extends AbstractIQOptimizer implements LensUnfolde
             return tree;
 
         IQVisitor<IQTree> transformer = new MaxLevelLensUnfoldingTransformer(maxLevel, variableGenerator);
-        return tree.acceptVisitor(transformer);
+        return tree.acceptVisitor(transformer)
+                .normalizeForOptimization(variableGenerator);
     }
 
     private class MaxLevelLensUnfoldingTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {

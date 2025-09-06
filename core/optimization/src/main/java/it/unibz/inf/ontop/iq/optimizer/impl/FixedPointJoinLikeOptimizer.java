@@ -21,7 +21,7 @@ public class FixedPointJoinLikeOptimizer extends AbstractExtendedIQOptimizer imp
     private FixedPointJoinLikeOptimizer(IntermediateQueryFactory iqFactory,
                                         InnerJoinIQOptimizer innerJoinIQOptimizer,
                                         LeftJoinIQOptimizer leftJoinIQOptimizer) {
-        super(iqFactory, NO_ACTION);
+        super(iqFactory);
         this.transformer = IQTreeVariableGeneratorTransformer.of(
                         innerJoinIQOptimizer,
                         leftJoinIQOptimizer,

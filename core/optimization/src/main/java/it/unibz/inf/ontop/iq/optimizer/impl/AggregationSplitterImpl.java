@@ -38,6 +38,8 @@ public class AggregationSplitterImpl extends AbstractExtendedIQOptimizer impleme
     private final TermFactory termFactory;
     private final QueryTransformerFactory queryTransformerFactory;
 
+    private final IQTreeVariableGeneratorTransformer transformer;
+
     @Inject
     protected AggregationSplitterImpl(CoreSingletons coreSingletons) {
         super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
@@ -45,13 +47,15 @@ public class AggregationSplitterImpl extends AbstractExtendedIQOptimizer impleme
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.queryTransformerFactory = coreSingletons.getQueryTransformerFactory();
+
+        this.transformer = IQTreeVariableGeneratorTransformer.of(
+                IQTree::normalizeForOptimization,
+                IQTreeVariableGeneratorTransformer.of(AggregationUnionLifterTransformer::new));
     }
 
     @Override
     protected IQTreeVariableGeneratorTransformer getTransformer() {
-        return IQTreeVariableGeneratorTransformer.of(
-                IQTree::normalizeForOptimization,
-                IQTreeVariableGeneratorTransformer.of(AggregationUnionLifterTransformer::new));
+        return transformer;
     }
 
 

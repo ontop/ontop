@@ -4,12 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.UnionAndBindingLiftOptimizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -23,34 +23,27 @@ import java.util.stream.Stream;
  * TODO: explicit assumptions
  */
 @Singleton
-public class BottomUpUnionAndBindingLiftOptimizer extends AbstractIQOptimizer implements UnionAndBindingLiftOptimizer {
+public class BottomUpUnionAndBindingLiftOptimizer extends AbstractExtendedIQOptimizer implements UnionAndBindingLiftOptimizer {
 
     private static final int ITERATION_BOUND = 10000;
 
+    private final IQTreeVariableGeneratorTransformer transformer;
+
     @Inject
     private BottomUpUnionAndBindingLiftOptimizer(IntermediateQueryFactory iqFactory) {
-        super(iqFactory, NO_ACTION);
+        super(iqFactory);
+
+        this.transformer = IQTreeVariableGeneratorTransformer.of(
+                IQTree::normalizeForOptimization,
+                IQTreeVariableGeneratorTransformer.of(
+                                IQTreeVariableGeneratorTransformer.of(Lifter::new),
+                                IQTree::normalizeForOptimization)
+                        .fixpoint(ITERATION_BOUND));
     }
 
     @Override
-    protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        Lifter lifter = new Lifter(variableGenerator);
-
-        // Non-final
-        IQTree previousTree;
-        IQTree newTree = tree.normalizeForOptimization(variableGenerator);
-        int i=0;
-        do {
-            previousTree = newTree;
-            newTree = previousTree.acceptVisitor(lifter)
-                    .normalizeForOptimization(variableGenerator);
-
-        } while (!newTree.equals(previousTree) && (++i < ITERATION_BOUND));
-
-        if (i >= ITERATION_BOUND)
-            throw new MinorOntopInternalBugException(getClass().getName() + " did not converge after "
-                    + ITERATION_BOUND + " iterations");
-        return newTree;
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
 
     private class Lifter extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {

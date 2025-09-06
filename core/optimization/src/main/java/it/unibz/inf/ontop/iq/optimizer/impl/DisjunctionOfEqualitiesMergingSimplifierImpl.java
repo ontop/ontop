@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.DisjunctionOfEqualitiesMergingSimplifier;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
@@ -22,25 +23,27 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractIQOptimizer implements DisjunctionOfEqualitiesMergingSimplifier {
+public class DisjunctionOfEqualitiesMergingSimplifierImpl extends AbstractExtendedIQOptimizer implements DisjunctionOfEqualitiesMergingSimplifier {
 
     private static final int MAX_ARITY = 8;
 
     private final CoreSingletons coreSingletons;
-    private final IQTreeTransformer transformer;
+
+    private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
     protected DisjunctionOfEqualitiesMergingSimplifierImpl(CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory(), NORMALIZE_FOR_OPTIMIZATION);
+        super(coreSingletons.getIQFactory());
         this.coreSingletons = coreSingletons;
-        this.transformer = IQTreeTransformer.of(
-                new InCreatingTermTransformer().treeTransformer(),
-                new InMergingTermTransformer().treeTransformer());
+        this.transformer = IQTreeVariableGeneratorTransformer.of(
+                IQTreeVariableGeneratorTransformer.of2(new InCreatingTermTransformer().treeTransformer()),
+                IQTreeVariableGeneratorTransformer.of2(new InMergingTermTransformer().treeTransformer()),
+                IQTree::normalizeForOptimization);
     }
 
     @Override
-    public IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        return transformer.transform(tree);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
 
 

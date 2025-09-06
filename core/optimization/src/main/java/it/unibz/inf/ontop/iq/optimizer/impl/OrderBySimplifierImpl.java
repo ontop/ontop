@@ -32,10 +32,12 @@ public class OrderBySimplifierImpl extends AbstractExtendedIQOptimizer implement
     private final TypeFactory typeFactory;
     private final ImmutableSet<RDFDatatype> nonLexicallyOrderedDatatypes;
 
+    private final IQTreeVariableGeneratorTransformer transformer;
+
     @Inject
     protected OrderBySimplifierImpl(OptimizationSingletons optimizationSingletons) {
         // no equality check
-        super(optimizationSingletons.getCoreSingletons().getIQFactory(), NO_ACTION);
+        super(optimizationSingletons.getCoreSingletons().getIQFactory());
         this.optimizationSingletons = optimizationSingletons;
         CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
         this.termFactory = coreSingletons.getTermFactory();
@@ -43,11 +45,13 @@ public class OrderBySimplifierImpl extends AbstractExtendedIQOptimizer implement
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.nonLexicallyOrderedDatatypes = ImmutableSet.of(typeFactory.getAbstractOntopNumericDatatype(),
                 typeFactory.getXsdBooleanDatatype(), typeFactory.getXsdDatetimeDatatype());
+
+        this.transformer = IQTreeVariableGeneratorTransformer.of(OrderBySimplifyingTransformer::new);
     }
 
     @Override
     protected IQTreeVariableGeneratorTransformer getTransformer() {
-        return IQTreeVariableGeneratorTransformer.of(OrderBySimplifyingTransformer::new);
+        return transformer;
     }
 
     private class OrderBySimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {

@@ -13,6 +13,10 @@ public abstract class AbstractExtendedIQOptimizer extends AbstractIQOptimizer {
         super(iqFactory, postTransformerAction);
     }
 
+    protected AbstractExtendedIQOptimizer(IntermediateQueryFactory iqFactory) {
+        super(iqFactory, NO_ACTION);
+    }
+
     @Override
     protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
         IQTreeVariableGeneratorTransformer transformer = getTransformer();
