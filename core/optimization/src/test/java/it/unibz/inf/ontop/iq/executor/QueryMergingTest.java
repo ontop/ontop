@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -804,7 +804,7 @@ public class QueryMergingTest {
     /**
      * Basic implementation
      */
-    private static class BasicIntensionalQueryMerger extends AbstractIntensionalQueryMerger {
+    private static class BasicIntensionalQueryMerger extends AbstractIQOptimizer {
 
         private final ImmutableMap<AtomPredicate, IQ> map;
 

@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
@@ -138,7 +138,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                         ImmutableList.of(assertion.getTree(), intensionalDataNode)));
     }
 
-    private class IntensionalQueryMerger extends AbstractIntensionalQueryMerger {
+    private class IntensionalQueryMerger extends AbstractIQOptimizer {
 
         private final IQ definition;
 

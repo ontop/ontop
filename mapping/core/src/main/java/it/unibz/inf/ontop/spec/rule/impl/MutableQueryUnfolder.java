@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -27,7 +27,7 @@ import java.util.Optional;
 /**
  * Operates over a mutable mapping. Does not modify itself.
  */
-public class MutableQueryUnfolder extends AbstractIntensionalQueryMerger {
+public class MutableQueryUnfolder extends AbstractIQOptimizer {
 
     private final Map<MappingAssertionIndex, MappingAssertion> mutableMapping;
     private final SubstitutionFactory substitutionFactory;

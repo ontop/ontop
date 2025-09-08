@@ -33,7 +33,6 @@ public class BasicQueryUnfolder extends AbstractIQOptimizer implements QueryUnfo
     private final Mapping mapping;
     private final SubstitutionFactory substitutionFactory;
     private final QueryTransformerFactory transformerFactory;
-    private final AtomFactory atomFactory;
     private final UnionBasedQueryMerger queryMerger;
 
     private final IQTreeVariableGeneratorTransformer transformer;
@@ -46,14 +45,12 @@ public class BasicQueryUnfolder extends AbstractIQOptimizer implements QueryUnfo
                                IntermediateQueryFactory iqFactory,
                                SubstitutionFactory substitutionFactory,
                                QueryTransformerFactory transformerFactory,
-                               UnionBasedQueryMerger queryMerger,
-                               AtomFactory atomFactory) {
+                               UnionBasedQueryMerger queryMerger) {
         super(iqFactory);
         this.mapping = mapping;
         this.substitutionFactory = substitutionFactory;
         this.transformerFactory = transformerFactory;
         this.queryMerger = queryMerger;
-        this.atomFactory = atomFactory;
 
         this.transformer = IQTreeVariableGeneratorTransformer.of(BasicQueryUnfoldingTransformer::new);
     }
@@ -67,7 +64,10 @@ public class BasicQueryUnfolder extends AbstractIQOptimizer implements QueryUnfo
     private class BasicQueryUnfoldingTransformer extends AbstractQueryMergingTransformer {
 
         BasicQueryUnfoldingTransformer(VariableGenerator variableGenerator) {
-            super(variableGenerator, BasicQueryUnfolder.this.iqFactory, BasicQueryUnfolder.this.substitutionFactory, BasicQueryUnfolder.this.transformerFactory);
+            super(variableGenerator,
+                    BasicQueryUnfolder.this.iqFactory,
+                    BasicQueryUnfolder.this.substitutionFactory,
+                    BasicQueryUnfolder.this.transformerFactory);
         }
 
         @Override
