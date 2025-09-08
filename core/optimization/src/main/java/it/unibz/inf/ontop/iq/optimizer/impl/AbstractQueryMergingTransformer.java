@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -21,9 +21,8 @@ import java.util.Optional;
  * <p>
  * Does NOT look for intensional data nodes inside the definitions
  */
-public abstract class AbstractQueryMergingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+public abstract class AbstractQueryMergingTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
-    protected final VariableGenerator variableGenerator;
     protected final SubstitutionFactory substitutionFactory;
     protected final QueryTransformerFactory transformerFactory;
 
@@ -36,8 +35,7 @@ public abstract class AbstractQueryMergingTransformer extends DefaultRecursiveIQ
                                               IntermediateQueryFactory iqFactory,
                                               SubstitutionFactory substitutionFactory,
                                               QueryTransformerFactory transformerFactory) {
-        super(iqFactory);
-        this.variableGenerator = variableGenerator;
+        super(iqFactory, variableGenerator);
         this.substitutionFactory = substitutionFactory;
         this.transformerFactory = transformerFactory;
     }
