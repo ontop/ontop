@@ -28,7 +28,7 @@ public class RequiredExtensionalDataNodeExtractor {
      * (but won't fail if it is not the case)
      *
      */
-    public Stream<ExtensionalDataNode> extractSomeRequiredNodes(IQTree tree, boolean fromLeft) {
+    public Stream<ExtensionalDataNode> extractSomeRequiredNodesFromLeft(IQTree tree) {
 
         if (tree instanceof ExtensionalDataNode)
             return Stream.of((ExtensionalDataNode) tree);
@@ -36,23 +36,35 @@ public class RequiredExtensionalDataNodeExtractor {
         var join = InnerJoinDecomposition.of(tree);
         if (join.isPresent())
             return join.getChildren().stream()
-                    .flatMap(t -> extractSomeRequiredNodes(t, fromLeft));
+                    .flatMap(this::extractSomeRequiredNodesFromLeft);
+
+        var leftJoin = LeftJoinDecomposition.of(tree);
+        if (leftJoin.isPresent())
+            return extractSomeRequiredNodesFromLeft(leftJoin.leftChild());
+
+        return extractOtherType(tree);
+    }
+
+    public Stream<ExtensionalDataNode> extractSomeRequiredNodesFromRight(IQTree tree) {
+
+        if (tree instanceof ExtensionalDataNode)
+            return Stream.of((ExtensionalDataNode) tree);
+
+        var join = InnerJoinDecomposition.of(tree);
+        if (join.isPresent())
+            return join.getChildren().stream()
+                    .flatMap(this::extractSomeRequiredNodesFromRight);
 
         /*
          * TODO: see how to safely extract data nodes in the fromRight case
          */
-        var leftJoin = LeftJoinDecomposition.of(tree);
-        if (fromLeft && leftJoin.isPresent())
-            return extractSomeRequiredNodes(leftJoin.leftChild(), true);
-
         // Usually at the top of the right child of a LJ, with a substitution with ground terms (normally provenance constants)
-        if (!fromLeft) {
-            var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
-            if (construction.isPresent()
+        var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+        if (construction.isPresent()
                 && construction.getNode().getSubstitution()
-                    .rangeAllMatch(ImmutableTerm::isGround))
-                return extractSomeRequiredNodes(construction.getChild(), false);
-        }
+                .rangeAllMatch(ImmutableTerm::isGround))
+            return extractSomeRequiredNodesFromRight(construction.getChild());
+
         return extractOtherType(tree);
     }
 

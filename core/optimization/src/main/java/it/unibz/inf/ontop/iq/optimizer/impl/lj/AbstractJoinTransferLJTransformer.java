@@ -53,7 +53,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
      */
     protected Optional<IQTree> furtherTransformLeftJoin(LeftJoinNode rootNode, IQTree leftChild,
                                                         IQTree rightChild) {
-        ImmutableSet<ExtensionalDataNode> leftDataNodes = requiredDataNodeExtractor.extractSomeRequiredNodes(leftChild, true)
+        ImmutableSet<ExtensionalDataNode> leftDataNodes = requiredDataNodeExtractor.extractSomeRequiredNodesFromLeft(leftChild)
                 .collect(ImmutableCollectors.toSet());
 
         if (leftDataNodes.isEmpty())
@@ -195,7 +195,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
      * Can be overridden to put restrictions
      */
     protected Stream<ExtensionalDataNode> extractRightDataNodes(IQTree rightChild) {
-        return requiredDataNodeExtractor.extractSomeRequiredNodes(rightChild, false);
+        return requiredDataNodeExtractor.extractSomeRequiredNodesFromRight(rightChild);
     }
 
     /**

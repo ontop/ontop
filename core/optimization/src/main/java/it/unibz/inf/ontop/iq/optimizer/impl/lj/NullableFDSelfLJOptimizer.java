@@ -110,7 +110,7 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
                             .containsAll(rightArgumentMap.keySet()))
                     .collect(ImmutableCollectors.toList());
 
-            var transfer = requiredDataNodeExtractor.extractSomeRequiredNodes(leftChild, true)
+            var transfer = requiredDataNodeExtractor.extractSomeRequiredNodesFromLeft(leftChild)
                     .flatMap(left -> tryToTransfer(left, rightNode, nullableCoveringFDs).stream())
                     .findAny();
 
