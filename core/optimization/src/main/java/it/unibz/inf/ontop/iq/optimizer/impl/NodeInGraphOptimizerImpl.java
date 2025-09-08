@@ -20,7 +20,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
@@ -109,10 +108,9 @@ public class NodeInGraphOptimizerImpl extends AbstractIQOptimizer implements Nod
             var construction = UnaryIQTreeDecomposition.of(childOfUnion, ConstructionNode.class);
             return construction.isPresent()
                     ? extractNodeInGraphAtomWithVariable(construction.getChild())
-                        .map(a -> extractContext(a, construction.getNode()))
+                        .map(a -> new NodeInGraphContext(getNodes(getFirstNode(a), construction.getNode()), a))
                     : extractNodeInGraphAtomWithVariable(childOfUnion)
-                        .map(a -> new NodeInGraphContext(
-                            ImmutableSet.of((Variable) a.getPredicate().getNode(a.getArguments())), a));
+                        .map(a -> new NodeInGraphContext(ImmutableSet.of(getFirstNode(a)), a));
         }
 
         private Optional<DataAtom<NodeInGraphPredicate>> extractNodeInGraphAtomWithVariable(IQTree tree) {
@@ -127,17 +125,15 @@ public class NodeInGraphOptimizerImpl extends AbstractIQOptimizer implements Nod
                     .map(a -> (DataAtom<NodeInGraphPredicate>)(DataAtom<?>) a);
         }
 
-        private NodeInGraphContext extractContext(DataAtom<NodeInGraphPredicate> nodeInGraphAtom,
-                                                  ConstructionNode constructionNode) {
-            var firstNode = (Variable) nodeInGraphAtom.getPredicate().getNode(nodeInGraphAtom.getArguments());
-            var nodes = Stream.concat(
-                    Stream.of(firstNode),
-                    constructionNode.getSubstitution().stream()
-                            .filter(e -> e.getValue().equals(firstNode))
-                            .map(Map.Entry::getKey))
-                    .collect(ImmutableSet.toImmutableSet());
+        private Variable getFirstNode(DataAtom<NodeInGraphPredicate> nodeInGraphAtom) {
+            return (Variable) nodeInGraphAtom.getPredicate().getNode(nodeInGraphAtom.getArguments());
+        }
 
-            return new NodeInGraphContext(nodes, nodeInGraphAtom);
+        private ImmutableSet<Variable> getNodes(Variable firstNode, ConstructionNode constructionNode) {
+            return Sets.union(
+                            ImmutableSet.of(firstNode),
+                            constructionNode.getSubstitution().getPreImage(v -> v.equals(firstNode)))
+                    .immutableCopy();
         }
 
         private ImmutableMap<NodeInGraphContext, DataAtom<RDFAtomPredicate>> selectRemovableNodeInGraphAtoms(ImmutableSet<NodeInGraphContext> nodeInGraphContexts, ImmutableList<IQTree> updatedChildren) {
@@ -262,8 +258,7 @@ public class NodeInGraphOptimizerImpl extends AbstractIQOptimizer implements Nod
             var treeVariables = tree.getVariables();
             if (intensionalVariables.containsAll(treeVariables)) {
                 var optionalFilter = iqTreeTools.createOptionalFilterNode(termFactory.getConjunction(
-                        rootNode.getSubstitution().stream()
-                                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()))));
+                        rootNode.getSubstitution().builder().toStream(termFactory::getStrictEquality)));
                 return iqTreeTools.unaryIQTreeBuilder()
                         .append(optionalFilter)
                         .build(pushedIntensionalNode);
