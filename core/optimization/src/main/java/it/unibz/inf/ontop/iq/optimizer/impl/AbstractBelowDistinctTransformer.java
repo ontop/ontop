@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -49,7 +47,7 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultRecursiveI
         return transformUnaryNode(tree, node, child, this::transformBySearchingFromScratch);
     }
 
-    protected IQTree transformBySearchingFromScratch(IQTree tree) {
+    private IQTree transformBySearchingFromScratch(IQTree tree) {
         return lookForDistinctOrLimit1Transformer.transform(tree);
     }
 }
