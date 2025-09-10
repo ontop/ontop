@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
-import it.unibz.inf.ontop.iq.visit.impl.AbstractIQVisitor;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -55,23 +55,16 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
      * {@code ---> } Not called for trees not having any variable to remove.
      *
      */
-    private class VariableRemoverTransformer extends AbstractIQVisitor<IQTree> {
+    private class VariableRemoverTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
         protected final ImmutableSet<Variable> variablesToRemove;
-        protected final VariableGenerator variableGenerator;
 
-        private VariableRemoverTransformer(ImmutableSet<Variable> variablesToRemove,
-                                          VariableGenerator variableGenerator) {
+        private VariableRemoverTransformer(ImmutableSet<Variable> variablesToRemove, VariableGenerator variableGenerator) {
+            super(NotRequiredVariableRemoverImpl.this.iqFactory, variableGenerator);
             this.variablesToRemove = variablesToRemove;
-            this.variableGenerator = variableGenerator;
         }
 
         private ImmutableSet<Variable> getVariablesToKeep(IQTree tree) {
             return Sets.difference(tree.getVariables(), variablesToRemove).immutableCopy();
-        }
-
-        @Override
-        public IQTree transformIntensionalData(IntensionalDataNode rootNode) {
-            return rootNode;
         }
 
         @Override
@@ -86,11 +79,6 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         @Override
         public IQTree transformEmpty(EmptyNode rootNode) {
             return iqFactory.createEmptyNode(getVariablesToKeep(rootNode));
-        }
-
-        @Override
-        public IQTree transformTrue(TrueNode rootNode) {
-            return rootNode;
         }
 
         @Override
@@ -147,31 +135,6 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         }
 
         @Override
-        public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-            return iqFactory.createUnaryIQTree(rootNode, transformChild(child));
-        }
-
-        @Override
-        public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
-            return iqFactory.createUnaryIQTree(rootNode, transformChild(child));
-        }
-
-        @Override
-        public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-            return iqFactory.createUnaryIQTree(rootNode, transformChild(child));
-        }
-
-        @Override
-        public IQTree transformSlice(UnaryIQTree tree, SliceNode rootNode, IQTree child) {
-            return iqFactory.createUnaryIQTree(rootNode, transformChild(child));
-        }
-
-        @Override
-        public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-            return iqFactory.createUnaryIQTree(rootNode, transformChild(child));
-        }
-
-        @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             /*
              * If filter condition involves a variable to remove, we are in the special case
@@ -220,11 +183,6 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
             // New removal opportunities may appear in the subtree ("RECURSIVE")
             return unionTree.normalizeForOptimization(variableGenerator);
-        }
-
-        @Override
-        public IQTree transformNative(NativeNode nativeNode) {
-            throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
         }
     }
 }
