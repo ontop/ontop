@@ -61,6 +61,6 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
             newTree = distinctTree;
         }
 
-        return assertion.copyOf(iqFactory.createIQ(assertion.getProjectionAtom(), newTree));
+        return assertion.copyOf(newTree, iqFactory);
     }
 }

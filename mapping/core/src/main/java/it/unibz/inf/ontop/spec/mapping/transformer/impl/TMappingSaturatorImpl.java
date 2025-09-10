@@ -198,7 +198,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
             ImmutableList<Variable> variables = query.getProjectionAtom().getArguments();
             ImmutableList<ImmutableTerm> args = constructionNode.getSubstitution().apply(variables);
             Substitution<ImmutableTerm> updatedSubstitution = substitutionFactory.getSubstitution(variables, termTransformer.apply(args));
-            IQ updatedQuery = iqTreeTools.createMappingIQ(query.getProjectionAtom(),updatedSubstitution, construction.getChild());
+            IQ updatedQuery = iqTreeTools.createMappingIQ(query.getProjectionAtom(), updatedSubstitution, construction.getChild());
             return assertion.copyOf(updatedQuery);
         }
 

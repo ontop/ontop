@@ -144,7 +144,7 @@ public class MappingValuesWrapperImpl implements MappingValuesWrapper {
 
             return newTree.equals(initialTree)
                     ? mappingAssertion
-                    : mappingAssertion.copyOf(iqFactory.createIQ(mappingAssertion.getProjectionAtom(), newTree));
+                    : mappingAssertion.copyOf(newTree, iqFactory);
         }
     }
 

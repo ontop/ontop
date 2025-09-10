@@ -4,11 +4,9 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
@@ -31,7 +29,6 @@ import java.util.Optional;
 public class TermTypeMappingCaster implements MappingCaster {
 
     private final FunctionSymbolFactory functionSymbolFactory;
-    private final IntermediateQueryFactory iqFactory;
     private final SingleTermTypeExtractor typeExtractor;
     private final TermFactory termFactory;
     private final DBTermType dBStringType;
@@ -42,7 +39,6 @@ public class TermTypeMappingCaster implements MappingCaster {
                                   CoreSingletons coreSingletons,
                                   SingleTermTypeExtractor typeExtractor) {
         this.functionSymbolFactory = functionSymbolFactory;
-        this.iqFactory = coreSingletons.getIQFactory();
         this.typeExtractor = typeExtractor;
         this.termFactory = coreSingletons.getTermFactory();
         this.dBStringType = coreSingletons.getTypeFactory().getDBTypeFactory().getDBStringType();

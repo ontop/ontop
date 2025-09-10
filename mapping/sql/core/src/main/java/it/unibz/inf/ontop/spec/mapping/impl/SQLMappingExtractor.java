@@ -165,7 +165,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             if (noNullTree.isDeclaredAsEmpty())
                 continue;
 
-            MappingAssertion noNullAssertion = assertion.copyOf(iqFactory.createIQ(assertion.getProjectionAtom(), noNullTree));
+            MappingAssertion noNullAssertion = assertion.copyOf(noNullTree, iqFactory);
             MappingAssertion filledProvAssertion = mappingDatatypeFiller.transform(noNullAssertion);
             MappingAssertion castAssertion = mappingCaster.transform(filledProvAssertion);
             builder.add(castAssertion);

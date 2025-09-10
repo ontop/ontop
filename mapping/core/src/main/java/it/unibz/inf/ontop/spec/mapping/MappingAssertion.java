@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -52,6 +53,10 @@ public class MappingAssertion {
 
     public MappingAssertion copyOf(IQ query) {
         return new MappingAssertion(query, provenance);
+    }
+
+    public MappingAssertion copyOf(IQTree tree, IntermediateQueryFactory iqFactory) {
+        return new MappingAssertion(iqFactory.createIQ(query.getProjectionAtom(), tree), provenance);
     }
 
     public ImmutableSet<Variable> getProjectedVariables() {

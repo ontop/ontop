@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -27,7 +26,6 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
     private final OntopMappingSettings settings;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
-    private final IntermediateQueryFactory iqFactory;
     private final SingleTermTypeExtractor typeExtractor;
     private final IQTreeTools iqTreeTools;
 
@@ -38,7 +36,6 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
         this.settings = settings;
         this.termFactory = coreSingletons.getTermFactory();
         this.typeFactory = coreSingletons.getTypeFactory();
-        this.iqFactory = coreSingletons.getIQFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.typeExtractor = typeExtractor;
     }
