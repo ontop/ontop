@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -23,7 +24,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.*;
 import java.util.stream.Stream;
 
-public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency> {
+public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency> implements InnerJoinTransformer {
 
     protected final IntermediateQueryFactory iqFactory;
     protected final TermFactory termFactory;
@@ -31,23 +32,24 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
     protected final IQTreeTools iqTreeTools;
 
     private final ConstructionSubstitutionNormalizer substitutionNormalizer;
-    private final OptimizationState noSolutionState;
 
-    public AbstractSelfJoinSimplifier(CoreSingletons coreSingletons) {
+    protected final VariableGenerator variableGenerator;
+
+    public AbstractSelfJoinSimplifier(CoreSingletons coreSingletons, VariableGenerator variableGenerator) {
         this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
-        this.noSolutionState = new OptimizationState(ImmutableSet.of(), ImmutableList.of(), substitutionFactory.getSubstitution());
+        this.variableGenerator = variableGenerator;
     }
 
     /**
      * Returns an empty result to indicate that no optimization has been applied
      */
-    public Optional<IQTree> transformInnerJoin(InnerJoinNode rootNode, ImmutableList<IQTree> children,
-                                     ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator) {
-        ImmutableMap<Boolean, ImmutableList<IQTree>> childPartitions = children.stream()
+    @Override
+    public Optional<IQTree> transformInnerJoin(NaryIQTree tree, InnerJoinNode innerJoinNode, ImmutableList<IQTree> transformedChildren) {
+        ImmutableMap<Boolean, ImmutableList<IQTree>> childPartitions = transformedChildren.stream()
                 .collect(ImmutableCollectors.partitioningBy(n -> (n instanceof ExtensionalDataNode)
                         && hasConstraint((ExtensionalDataNode) n)));
 
@@ -73,10 +75,10 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
          * First empty case: no solution for one relation
          */
         if (optimizationStates.stream().anyMatch(s -> s.extensionalDataNodes.isEmpty())) {
-            return Optional.of(iqFactory.createEmptyNode(projectedVariables));
+            return Optional.of(iqFactory.createEmptyNode(tree.getVariables()));
         }
 
-        // NB: may return an unifier with no entry
+        // NB: may return a unifier with no entry
         Optional<Substitution<VariableOrGroundTerm>> optionalUnifier = optimizationStates.stream()
                         .map(s -> s.substitution)
                         .collect(substitutionFactory.onVariableOrGroundTerms().toUnifier());
@@ -85,7 +87,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
          * Second empty case: incompatible unifications between relations
          */
         if (!optionalUnifier.isPresent()) {
-            return Optional.of(iqFactory.createEmptyNode(projectedVariables));
+            return Optional.of(iqFactory.createEmptyNode(tree.getVariables()));
         }
         Substitution<VariableOrGroundTerm> unifier = optionalUnifier.get();
 
@@ -105,50 +107,43 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                         nonExtensionalChildrenWithConstraint.stream())
                 .collect(ImmutableCollectors.toList());
 
+        DownPropagation dc = new DownPropagation(unifier, ImmutableSet.of());
+        ImmutableList<IQTree> newChildrenPropagated = dc.propagate(newChildren, variableGenerator);
+
         Optional<ImmutableExpression> newExpression = termFactory.getConjunction(
-                rootNode.getOptionalFilterCondition(),
+                innerJoinNode.getOptionalFilterCondition(),
                 optimizationStates.stream()
                         .flatMap(s -> s.newExpressions.stream()));
 
-        return Optional.of(buildNewTree(newChildren, newExpression, unifier, projectedVariables, variableGenerator));
+        Optional<ImmutableExpression> newExpressionWithUnifier = newExpression.map(unifier::apply);
+
+        IQTree newTree = iqTreeTools.createOptionalInnerJoinTree(newExpressionWithUnifier, newChildrenPropagated)
+                .orElseThrow(() -> new MinorOntopInternalBugException("Should have been detected before"));
+
+        ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
+                substitutionNormalizer.normalizeSubstitution(unifier, tree.getVariables());
+        IQTree normalizedNewTree = normalization.updateChild(newTree, variableGenerator);
+
+        Substitution<ImmutableTerm> normalizedTopSubstitution = normalization.getNormalizedSubstitution();
+
+        return Optional.of(iqTreeTools.unaryIQTreeBuilder()
+                .append(iqTreeTools.createOptionalConstructionNode(tree.getVariables(), normalizedTopSubstitution, normalizedNewTree))
+                .build(normalizedNewTree));
     }
 
     protected abstract boolean canEliminateNodes();
 
     protected abstract boolean hasConstraint(ExtensionalDataNode node);
 
-    private IQTree buildNewTree(ImmutableList<IQTree> children, Optional<ImmutableExpression> expression,
-                                Substitution<VariableOrGroundTerm> unifier,
-                                ImmutableSet<Variable> projectedVariables,
-                                VariableGenerator variableGenerator) {
-
-        DownPropagation dc = new DownPropagation(unifier, ImmutableSet.of());
-        ImmutableList<IQTree> newChildren = dc.propagate(children, variableGenerator);
-
-        Optional<ImmutableExpression> newExpression = expression.map(unifier::apply);
-
-        IQTree newTree = iqTreeTools.createOptionalInnerJoinTree(newExpression, newChildren)
-                .orElseThrow(() -> new MinorOntopInternalBugException("Should have been detected before"));
-
-        ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
-                substitutionNormalizer.normalizeSubstitution(unifier, projectedVariables);
-        IQTree normalizedNewTree = normalization.updateChild(newTree, variableGenerator);
-
-        Substitution<ImmutableTerm> normalizedTopSubstitution = normalization.getNormalizedSubstitution();
-
-        return iqTreeTools.unaryIQTreeBuilder()
-                .append(iqTreeTools.createOptionalConstructionNode(projectedVariables, normalizedTopSubstitution, normalizedNewTree))
-                .build(normalizedNewTree);
-    }
+    protected abstract Stream<C> extractConstraints(RelationDefinition relationDefinition);
 
 
-    protected OptimizationState optimizeExtensionalDataNodes(RelationDefinition relationDefinition,
+    private OptimizationState optimizeExtensionalDataNodes(RelationDefinition relationDefinition,
                                                              Collection<ExtensionalDataNode> dataNodes) {
 
-        OptimizationState initialState = new OptimizationState(ImmutableSet.of(), dataNodes,
-                substitutionFactory.getSubstitution());
+        OptimizationState initialState = new OptimizationState(ImmutableSet.of(), dataNodes, substitutionFactory.getSubstitution());
 
-        if ((dataNodes.size() < 2))
+        if (dataNodes.size() < 2)
             return initialState;
 
         return extractConstraints(relationDefinition)
@@ -159,10 +154,8 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                         });
     }
 
-    protected abstract Stream<C> extractConstraints(RelationDefinition relationDefinition);
-
     private OptimizationState simplifyUsingConstraint(C constraint, OptimizationState state) {
-        if ((state.extensionalDataNodes.size() < 2))
+        if (state.extensionalDataNodes.size() < 2)
             return state;
 
         ImmutableList<Integer> ucIndexes = constraint.getDeterminants().stream()
@@ -191,7 +184,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
          * No solution --> return no data nodes
          */
         if (simplifications.stream().anyMatch(s -> !s.isPresent()))
-            return noSolutionState;
+            return new OptimizationState(ImmutableSet.of(), ImmutableList.of(), substitutionFactory.getSubstitution());
 
         Optional<Substitution<VariableOrGroundTerm>> optionalUnifier = Stream.concat(
                         simplifications.stream()
@@ -200,9 +193,9 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                         Stream.of(state.substitution))
                 .collect(substitutionFactory.onVariableOrGroundTerms().toUnifier());
 
-        if (!optionalUnifier.isPresent()) {
-            return noSolutionState;
-        }
+        if (!optionalUnifier.isPresent())
+            return new OptimizationState(ImmutableSet.of(), ImmutableList.of(), substitutionFactory.getSubstitution());
+
         Substitution<VariableOrGroundTerm> unifier = optionalUnifier.get();
 
         ImmutableSet<ImmutableExpression> newExpressions = Stream.concat(
@@ -242,25 +235,24 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 .filter(t -> t instanceof GroundFunctionalTerm)
                 .map(t -> (GroundFunctionalTerm)t)
                 .collect(ImmutableCollectors.toSet());
+
         if (groundFunctionalTerms.isEmpty())
             return new NormalizationBeforeUnification(dataNodes, ImmutableSet.of());
-        else {
-            ImmutableMap<GroundFunctionalTerm, Variable> groundFunctionalTermMap = groundFunctionalTerms.stream()
-                    .collect(ImmutableCollectors.toMap(
-                            t -> t,
-                            t -> termFactory.getVariable("v" + UUID.randomUUID())
-                    ));
 
-            ImmutableList<ExtensionalDataNode> newDataNodes = dataNodes.stream()
-                    .map(d -> normalizeDataNode(d, groundFunctionalTermMap))
-                    .collect(ImmutableCollectors.toList());
+        ImmutableMap<GroundFunctionalTerm, Variable> groundFunctionalTermMap = groundFunctionalTerms.stream()
+                .collect(ImmutableCollectors.toMap(
+                        t -> t,
+                        t -> termFactory.getVariable("v" + UUID.randomUUID())));
 
-            ImmutableSet<ImmutableExpression> equalities = groundFunctionalTermMap.entrySet().stream()
-                    .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()))
-                    .collect(ImmutableCollectors.toSet());
+        ImmutableList<ExtensionalDataNode> newDataNodes = dataNodes.stream()
+                .map(d -> normalizeDataNode(d, groundFunctionalTermMap))
+                .collect(ImmutableCollectors.toList());
 
-            return new NormalizationBeforeUnification(newDataNodes, equalities);
-        }
+        ImmutableSet<ImmutableExpression> equalities = groundFunctionalTermMap.entrySet().stream()
+                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()))
+                .collect(ImmutableCollectors.toSet());
+
+        return new NormalizationBeforeUnification(newDataNodes, equalities);
     }
 
     /**

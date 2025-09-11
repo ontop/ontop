@@ -9,11 +9,11 @@ import it.unibz.inf.ontop.iq.optimizer.QueryContextEvaluator;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.QueryContextSimplifiableFunctionSymbol;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -30,8 +30,7 @@ public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
 
     @Override
     public IQ optimize(IQ iq, @Nonnull QueryContext queryContext) {
-        if (queryContext == null)
-            throw new IllegalArgumentException("The query context must not be null");
+        Objects.requireNonNull(queryContext, "The query context must not be null");
 
         var transformer = new TermTransformer(queryContext).treeTransformer();
 

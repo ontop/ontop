@@ -7,15 +7,12 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -30,16 +27,16 @@ public class RedundantJoinFKOptimizer extends DelegatingIQTreeVariableGeneratorT
 
     private final IQTreeTools iqTreeTools;
     private final TermFactory termFactory;
-    private final IntermediateQueryFactory iqFactory;
     private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
     private RedundantJoinFKOptimizer(CoreSingletons coreSingletons) {
-        this.iqFactory = coreSingletons.getIQFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.termFactory = coreSingletons.getTermFactory();
 
-        this.transformer = IQTreeVariableGeneratorTransformer.of(new RedundantJoinFKTransformer());
+        this.transformer = IQTreeVariableGeneratorTransformer.of(new DefaultRecursiveIQTreeVisitingInnerJoinTransformer(
+                coreSingletons.getIQFactory(),
+                new RedundantJoinFKTransformer()));
     }
 
     @Override
@@ -47,16 +44,10 @@ public class RedundantJoinFKOptimizer extends DelegatingIQTreeVariableGeneratorT
         return transformer;
     }
 
-    private class RedundantJoinFKTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
-
-        RedundantJoinFKTransformer() {
-            super(RedundantJoinFKOptimizer.this.iqFactory);
-        }
+    private class RedundantJoinFKTransformer implements InnerJoinTransformer {
 
         @Override
-        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> initialChildren) {
-            ImmutableList<IQTree> liftedChildren = NaryIQTreeTools.transformChildren(initialChildren, this::transformChild);
-
+        public Optional<IQTree> transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> liftedChildren) {
             ImmutableMap<Boolean, ImmutableList<IQTree>> childPartitions = liftedChildren.stream()
                     .collect(ImmutableCollectors.partitioningBy(n -> (n instanceof ExtensionalDataNode)));
 
@@ -66,16 +57,15 @@ public class RedundantJoinFKOptimizer extends DelegatingIQTreeVariableGeneratorT
             assert otherChildren != null;
 
             var optimisedExtensionalChildren = optimizeExtensionalChildren(extensionalChildren);
-            if (optimisedExtensionalChildren.isEmpty()) {
-                return withTransformedChildren(tree, liftedChildren);
-            }
+            if (optimisedExtensionalChildren.isEmpty())
+                return Optional.empty();
 
             // The returned tree may not be normalized (to be done at the IQOptimizer level)
-            return iqTreeTools.createOptionalInnerJoinTree(
+            return Optional.of(iqTreeTools.createOptionalInnerJoinTree(
                             rootNode.getOptionalFilterCondition(),
                             Stream.concat(optimisedExtensionalChildren.stream(), otherChildren.stream())
                                     .collect(ImmutableCollectors.toList()))
-                    .orElseThrow(() -> new IllegalStateException("The optimization should not eliminate all the children"));
+                    .orElseThrow(() -> new IllegalStateException("The optimization should not eliminate all the children")));
         }
 
         private Optional<IQTree> optimizeExtensionalChildren(ImmutableList<ExtensionalDataNode> extensionalChildren) {

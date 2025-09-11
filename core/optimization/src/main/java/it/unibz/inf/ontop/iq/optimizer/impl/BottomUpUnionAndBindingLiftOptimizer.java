@@ -61,7 +61,7 @@ public class BottomUpUnionAndBindingLiftOptimizer extends AbstractIQOptimizer im
                     .filter(t -> !t.equals(tree))
                     .findFirst()
                     .orElse(newTree)
-                    .normalizeForOptimization(variableGenerator);
+                    .normalizeForOptimization(variableGenerator); // TODO: is it needed? It's in the fixpoint loop
         }
 
         @Override
@@ -75,7 +75,7 @@ public class BottomUpUnionAndBindingLiftOptimizer extends AbstractIQOptimizer im
                     .filter(t -> !t.equals(tree))
                     .findFirst()
                     .orElse(newTree)
-                    .normalizeForOptimization(variableGenerator);
+                    .normalizeForOptimization(variableGenerator);  // TODO: is it needed? It's in the fixpoint loop
         }
     }
 

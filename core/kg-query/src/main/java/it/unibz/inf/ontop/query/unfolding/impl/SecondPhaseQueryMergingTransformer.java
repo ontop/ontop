@@ -44,7 +44,8 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
     private final CoreSingletons coreSingletons;
 
     protected SecondPhaseQueryMergingTransformer(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> localVariableDefinitions,
-                                                 Mapping mapping, VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
+                                                 Mapping mapping, VariableGenerator variableGenerator,
+                                                 CoreSingletons coreSingletons) {
         super(mapping, variableGenerator, coreSingletons);
         this.functionSymbolFactory = coreSingletons.getFunctionSymbolFactory();
         this.queryMerger = coreSingletons.getUnionBasedQueryMerger();
@@ -188,15 +189,15 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
         return withTransformedChild(tree, transformChildWithNewTransformer(child));
     }
 
+    @Override
+    public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
+        return withTransformedChild(tree, transformChildWithNewTransformer(child));
+    }
+
     private IQTree transformChildWithNewTransformer(IQTree child) {
         return child.acceptVisitor(new SecondPhaseQueryMergingTransformer(
                 child.getPossibleVariableDefinitions(),
                 mapping, variableGenerator, constraintMap, coreSingletons));
-    }
-
-    @Override
-    public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
-        return withTransformedChild(tree, transformChildWithNewTransformer(child));
     }
 
     @Override
@@ -334,28 +335,24 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
 
     private IQ filterDefinitionWithPrefix(IQ definition, ObjectStringTemplateFunctionSymbol template,
                                                     Mapping.RDFAtomIndexPattern indexPattern) {
-        Variable var = definition.getProjectionAtom().getArguments().get(indexPattern.getPosition());
+        DistinctVariableOnlyDataAtom projectionAtom = definition.getProjectionAtom();
+        Variable indexVariable = projectionAtom.getArguments().get(indexPattern.getPosition());
 
         String templatePrefix = template.getTemplateComponents().get(0).getComponent();
-        return iqFactory.createIQ(definition.getProjectionAtom(),
-                        filteredTreeToPreventInsecureUnion(definition.getTree(), var, templatePrefix));
-    }
 
-    /**
-     * Filters using the prefix of the template
-     */
-    private IQTree filteredTreeToPreventInsecureUnion(IQTree currentIQTree, ImmutableTerm var, String prefix) {
         ImmutableFunctionalTerm sparqlSTRSTARTSFunctionWithParameters = termFactory.getImmutableFunctionalTerm(
                 functionSymbolFactory.getSPARQLFunctionSymbol(XPathFunction.STARTS_WITH.getIRIString(), 2)
                         .orElseThrow(() -> new MinorOntopInternalBugException("SPARQL STARTS_WITH function missing")),
-                termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getBNodeTolerantSPARQLStrFunctionSymbol(), var),
+                termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getBNodeTolerantSPARQLStrFunctionSymbol(), indexVariable),
                 termFactory.getRDFLiteralConstant(
-                        prefix,
+                        templatePrefix,
                         termFactory.getTypeFactory().getXsdStringDatatype()));
 
-        return iqFactory.createUnaryIQTree(
+        IQTree tree = iqFactory.createUnaryIQTree(
                 iqFactory.createFilterNode(termFactory.getRDF2DBBooleanFunctionalTerm(sparqlSTRSTARTSFunctionWithParameters)),
-                currentIQTree);
+                definition.getTree());
+
+        return iqFactory.createIQ(projectionAtom, tree);
     }
 
     private IQ filterDefinitionWithConstant(IQ definition, ObjectConstant objectConstant,
@@ -366,6 +363,7 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
         IQTree filteredTree = iqFactory.createUnaryIQTree(
                 iqFactory.createFilterNode(termFactory.getStrictEquality(indexVariable, objectConstant)),
                 definition.getTree());
+
         return iqFactory.createIQ(projectionAtom, filteredTree.normalizeForOptimization(variableGenerator));
     }
 

@@ -25,6 +25,7 @@ public abstract class AbstractMultiPhaseQueryMergingTransformer extends Abstract
 
     protected final TermFactory termFactory;
     protected final Mapping mapping;
+
     private final ImmutableSet<ObjectStringTemplateFunctionSymbol> iriTemplates;
     private final ImmutableSet<ObjectStringTemplateFunctionSymbol> bnodeTemplates;
 

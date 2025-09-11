@@ -53,17 +53,15 @@ public class PreventDistinctOptimizerImpl extends AbstractIQOptimizer implements
             var distinct = UnaryIQTreeDecomposition.of(slice, DistinctNode.class);
             if (distinct.isPresent()) {
                 var split = preventDistinctProjectionSplitter.split(tree, variableGenerator);
-                var newTree = iqFactory.createUnaryIQTree(split.getConstructionNode(),
-                        split.getSubTree());
+                var newTree = iqFactory.createUnaryIQTree(split.getConstructionNode(), split.getSubTree());
                 if (newTree.equals(tree))
                     return tree;
-                var descendantTree = distinct.getTail();
                 if (!validatePushedVariables(
                         split.getPushedVariables(),
                         Sets.difference(
                                 rootNode.getChildVariables(),
                                 split.getPushedVariables()).immutableCopy(),
-                        descendantTree))
+                        distinct.getTail()))
                     throw new MinorOntopInternalBugException("Unable to push down substitution terms that are not supported with DISTINCT without a functional dependency.");
 
                 if (!split.getPushedTerms().stream()
@@ -90,6 +88,7 @@ public class PreventDistinctOptimizerImpl extends AbstractIQOptimizer implements
                 if (!f.getFunctionSymbol().isDeterministic())
                     return false;
                 return f.getTerms().stream()
+                        // recursive
                         .allMatch(this::isDeterministic);
             }
             return true;

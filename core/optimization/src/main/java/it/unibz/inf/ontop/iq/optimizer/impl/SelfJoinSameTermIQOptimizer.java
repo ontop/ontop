@@ -28,7 +28,7 @@ public class SelfJoinSameTermIQOptimizer extends DelegatingIQTreeVariableGenerat
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
 
         this.lookForDistinctTransformer = IQTreeVariableGeneratorTransformer.of(new CaseInsensitiveIQTreeTransformerAdapter(coreSingletons.getIQFactory()) {
-            private final IQVisitor<IQTree> transformer = new SameTermSelfJoinTransformer(IQTreeTransformer.of(this));
+            private final IQVisitor<IQTree> transformer = new BelowDistinctTransformer(IQTreeTransformer.of(this), iqFactory, new SameTermSelfJoinTransformer());
 
             @Override
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
@@ -47,8 +47,8 @@ public class SelfJoinSameTermIQOptimizer extends DelegatingIQTreeVariableGenerat
      */
     private class SameTermSelfJoinTransformer extends AbstractBelowDistinctInnerJoinTransformer {
 
-        SameTermSelfJoinTransformer(IQTreeTransformer lookForDistinctTransformer) {
-            super(lookForDistinctTransformer, SelfJoinSameTermIQOptimizer.this.coreSingletons);
+        SameTermSelfJoinTransformer() {
+            super(SelfJoinSameTermIQOptimizer.this.coreSingletons);
         }
 
         /**

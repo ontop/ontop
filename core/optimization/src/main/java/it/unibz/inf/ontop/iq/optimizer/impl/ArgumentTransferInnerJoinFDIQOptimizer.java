@@ -7,14 +7,9 @@ import it.unibz.inf.ontop.dbschema.FunctionalDependency;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
-import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -31,16 +26,14 @@ import java.util.stream.Stream;
  */
 public class ArgumentTransferInnerJoinFDIQOptimizer extends DelegatingIQTreeVariableGeneratorTransformer implements IQTreeVariableGeneratorTransformer {
 
-    private final SelfJoinFDSimplifier simplifier;
-    private final IntermediateQueryFactory iqFactory;
     private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
     protected ArgumentTransferInnerJoinFDIQOptimizer(CoreSingletons coreSingletons) {
-        this.iqFactory = coreSingletons.getIQFactory();
-        this.simplifier = new SelfJoinFDSimplifier(coreSingletons);
-
-        this.transformer = IQTreeVariableGeneratorTransformer.of(ArgumentTransferJoinTransformer::new);
+        this.transformer = IQTreeVariableGeneratorTransformer.of(
+                vg -> new DefaultRecursiveIQTreeVisitingInnerJoinTransformer(
+                        coreSingletons.getIQFactory(),
+                        new SelfJoinFDSimplifier(coreSingletons, vg)));
     }
 
     @Override
@@ -48,23 +41,10 @@ public class ArgumentTransferInnerJoinFDIQOptimizer extends DelegatingIQTreeVari
         return transformer;
     }
 
-    private class ArgumentTransferJoinTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
-
-        ArgumentTransferJoinTransformer(VariableGenerator variableGenerator) {
-            super(ArgumentTransferInnerJoinFDIQOptimizer.this.iqFactory, variableGenerator);
-        }
-
-        @Override
-        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            return simplifier.transformInnerJoin(rootNode, children, tree.getVariables(), variableGenerator)
-                    .orElse(tree);
-        }
-    }
-
     private static class SelfJoinFDSimplifier extends AbstractSelfJoinSimplifier<FunctionalDependency> {
 
-        SelfJoinFDSimplifier(CoreSingletons coreSingletons) {
-            super(coreSingletons);
+        SelfJoinFDSimplifier(CoreSingletons coreSingletons, VariableGenerator variableGenerator) {
+            super(coreSingletons, variableGenerator);
         }
 
         @Override

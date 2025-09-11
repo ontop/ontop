@@ -40,25 +40,22 @@ public class TwoPhaseQueryUnfolder extends AbstractIQOptimizer implements QueryU
     }
 
     private IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
-        long before = System.currentTimeMillis();
+        long before1 = System.currentTimeMillis();
         FirstPhaseQueryMergingTransformer firstPhaseTransformer = new FirstPhaseQueryMergingTransformer(mapping, variableGenerator, coreSingletons);
 
         // NB: no normalization at that point, because of limitations of getPossibleVariableDefinitions implementation
         // (Problem with join strict equality and condition)
         IQTree partiallyUnfoldedIQ = tree.acceptVisitor(firstPhaseTransformer);
-        LOGGER.debug("First phase query unfolding time: {}", System.currentTimeMillis() - before);
+        LOGGER.debug("First phase query unfolding time: {}", System.currentTimeMillis() - before1);
 
         if (!firstPhaseTransformer.areSomeIntensionalNodesRemaining())
             return partiallyUnfoldedIQ;
 
-        return executeSecondPhaseUnfolding(partiallyUnfoldedIQ, variableGenerator);
-    }
-
-    private IQTree executeSecondPhaseUnfolding(IQTree partiallyUnfoldedIQ, VariableGenerator variableGenerator){
-        long before = System.currentTimeMillis();
-        IQTree unfoldedIQ = partiallyUnfoldedIQ.acceptVisitor(new SecondPhaseQueryMergingTransformer(
-                partiallyUnfoldedIQ.getPossibleVariableDefinitions(), mapping, variableGenerator, coreSingletons));
-        LOGGER.debug("Second phase query unfolding time: {}", System.currentTimeMillis() - before);
+        long before2 = System.currentTimeMillis();
+        SecondPhaseQueryMergingTransformer secondPhaseTransformer = new SecondPhaseQueryMergingTransformer(
+                partiallyUnfoldedIQ.getPossibleVariableDefinitions(), mapping, variableGenerator, coreSingletons);
+        IQTree unfoldedIQ = partiallyUnfoldedIQ.acceptVisitor(secondPhaseTransformer);
+        LOGGER.debug("Second phase query unfolding time: {}", System.currentTimeMillis() - before2);
         return unfoldedIQ;
     }
 }

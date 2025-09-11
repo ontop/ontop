@@ -30,7 +30,7 @@ public class BelowDistinctJoinWithClassUnionOptimizer extends DelegatingIQTreeVa
         this.coreSingletons = coreSingletons;
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         this.lookForDistinctTransformer = IQTreeVariableGeneratorTransformer.of(new CaseInsensitiveIQTreeTransformerAdapter(coreSingletons.getIQFactory()) {
-            private final IQVisitor<IQTree> transformer = new JoinWithClassUnionTransformer(IQTreeTransformer.of(this));
+            private final IQVisitor<IQTree> transformer = new BelowDistinctTransformer(IQTreeTransformer.of(this), iqFactory, new JoinWithClassUnionTransformer());
 
             @Override
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
@@ -46,8 +46,8 @@ public class BelowDistinctJoinWithClassUnionOptimizer extends DelegatingIQTreeVa
 
     private class JoinWithClassUnionTransformer extends AbstractBelowDistinctInnerJoinTransformer {
 
-        JoinWithClassUnionTransformer(IQTreeTransformer lookForDistinctTransformer) {
-            super(lookForDistinctTransformer, BelowDistinctJoinWithClassUnionOptimizer.this.coreSingletons);
+        JoinWithClassUnionTransformer() {
+            super(BelowDistinctJoinWithClassUnionOptimizer.this.coreSingletons);
         }
 
         /**
