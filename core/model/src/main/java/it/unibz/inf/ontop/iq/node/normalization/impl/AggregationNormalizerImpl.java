@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.AggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -32,7 +31,6 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
     private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
     private final NotRequiredVariableRemover notRequiredVariableRemover;
     private final IQTreeTools iqTreeTools;
 
@@ -42,7 +40,6 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
-        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.notRequiredVariableRemover = notRequiredVariableRemover;
     }
@@ -90,7 +87,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     normalizedTreeCache);
         }
 
-        return new Context(variableGenerator, coreSingletons, normalizedTreeCache)
+        return new Context(variableGenerator, normalizedTreeCache)
                 .normalize(shrunkChild, aggregationNode);
     }
 
@@ -102,13 +99,13 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         throw new MinorOntopInternalBugException("Was expecting an AggregationFunctionSymbol");
     }
 
-    class Context extends InjectiveBindingLiftContext {
+    private class Context extends InjectiveBindingLiftContext {
 
         private static final int MAX_ITERATIONS = 1000;
 
         private final IQTreeCache normalizedTreeCache;
 
-        public Context(VariableGenerator variableGenerator, CoreSingletons coreSingletons, IQTreeCache normalizedTreeCache) {
+        public Context(VariableGenerator variableGenerator, IQTreeCache normalizedTreeCache) {
             super(variableGenerator, coreSingletons);
             this.normalizedTreeCache = normalizedTreeCache;
         }
