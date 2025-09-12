@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -79,6 +80,7 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
         return transformer;
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private class CardinalityInsensitiveTransformer extends AbstractLJTransformer {
 
         CardinalityInsensitiveTransformer(IQTreeTransformer searchingFromScratchTransformer,
@@ -101,14 +103,13 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
             var nullableCoveringFDs = rightNode.getRelationDefinition().getOtherFunctionalDependencies().stream()
                     .filter(fd -> fd.getDeterminants().stream().anyMatch(Attribute::isNullable))
                     // Make sure all the terms are involved in the functional dependency
-                    .filter(fd -> Sets.union(fd.getDeterminants(), fd.getDependents()).stream()
-                            .map(a -> a.getIndex() - 1)
-                            .collect(ImmutableCollectors.toSet())
+                    .filter(fd -> Sets.union(getIndexes(fd.getDeterminants()), getIndexes(fd.getDependents()))
                             .containsAll(rightArgumentMap.keySet()))
                     .collect(ImmutableCollectors.toList());
 
             var transfer = requiredDataNodeExtractor.extractSomeRequiredNodesFromLeft(leftChild)
-                    .flatMap(left -> tryToTransfer(left, rightNode, nullableCoveringFDs).stream())
+                    .map(left -> tryToTransfer(left, rightNode, nullableCoveringFDs))
+                    .flatMap(Optional::stream)
                     .findAny();
 
             return transfer
@@ -147,35 +148,21 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
                 return Optional.empty();
 
             var selectedFD = coveringFDs.stream()
-                    .filter(fd -> fd.getDeterminants().stream().allMatch(a -> commonArgumentMap.containsKey(a.getIndex() - 1)))
+                    .filter(fd -> commonArgumentMap.keySet().containsAll(getIndexes(fd.getDeterminants())))
                     .findAny();
 
-            var fdTransfer = selectedFD.map(fd -> {
-                var dependentIndexes = fd.getDependents().stream()
-                        .map(a -> a.getIndex() - 1)
-                        .collect(ImmutableCollectors.toSet());
-
-                var determinantVariables = fd.getDeterminants().stream()
-                        .map(a -> commonArgumentMap.get(a.getIndex() - 1))
-                        .filter(t -> t instanceof Variable)
-                        .map(v -> (Variable) v)
-                        .collect(ImmutableCollectors.toSet());
-
-                return new Transfer(leftNode, determinantVariables, rightArgumentMap.entrySet().stream()
-                        .filter(e -> dependentIndexes.contains(e.getKey()))
-                        .collect(ImmutableCollectors.toMap()));
-            });
-
-            if (fdTransfer.isPresent())
-                return fdTransfer;
+            if (selectedFD.isPresent()) {
+                FunctionalDependency fd = selectedFD.get();
+                var determinantVariables = getVariableSet(
+                        getIndexes(fd.getDeterminants()).stream().map(commonArgumentMap::get));
+                var dependentIndexes = getIndexes(fd.getDependents());
+                return Optional.of(new Transfer(leftNode, determinantVariables,
+                        ExtensionalDataNode.restrictTo(rightArgumentMap, dependentIndexes::contains)));
+            }
 
             // Trivial FD case (same dependents as determinants)
             if (rightArgumentMap.equals(commonArgumentMap)) {
-                var determinantVariables = commonArgumentMap.values().stream()
-                        .filter(t -> t instanceof Variable)
-                        .map(t -> (Variable) t)
-                        .collect(ImmutableCollectors.toSet());
-
+                var determinantVariables = getVariableSet(commonArgumentMap.values().stream());
                 return Optional.of(new Transfer(leftNode, determinantVariables, ImmutableMap.of()));
             }
             return Optional.empty();
@@ -183,7 +170,7 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
 
         private IQTree updateLeftTree(Transfer transfer, IQTree leftChild, Optional<ImmutableExpression> optionalFilterCondition,
                                       ImmutableSet<Variable> provenanceVariables) {
-            var newLeftNode = transfer.generateNewLeftNode(variableGenerator, iqFactory);
+            var newLeftNode = transfer.generateNewLeftNode();
             var leftVariables = leftChild.getVariables();
             var condition = computeRightTermCondition(newLeftNode, leftVariables,
                     transfer.determinantVariables, transfer.argumentsToTransfer, optionalFilterCondition);
@@ -192,6 +179,15 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
             return iqFactory.createUnaryIQTree(
                     iqTreeTools.createExtendingConstructionNode(leftVariables, substitution),
                     newLeftTree);
+        }
+
+        private ImmutableMap<Variable, Collection<Integer>> inverseVariableMap(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentsToTransfer) {
+            return argumentsToTransfer.entrySet().stream()
+                    .filter(e -> e.getValue() instanceof Variable)
+                    .collect(ImmutableCollectors.toMultimap(
+                            e -> (Variable)e.getValue(),
+                            Map.Entry::getKey))
+                    .asMap();
         }
 
         private ImmutableExpression computeRightTermCondition(ExtensionalDataNode newLeftNode,
@@ -206,15 +202,7 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
                     .filter(e -> e.getValue().isGround() || leftVariables.contains((Variable)e.getValue()))
                     .map(e -> termFactory.getStrictEquality(leftArgumentMap.get(e.getKey()), e.getValue()));
 
-            var inverseVariableMap = argumentsToTransfer.entrySet().stream()
-                    .filter(e -> e.getValue() instanceof Variable)
-                    .collect(ImmutableCollectors.toMultimap(
-                            e -> (Variable)e.getValue(),
-                            Map.Entry::getKey))
-                    .asMap();
-
-
-            var coOccurrenceEqualities = inverseVariableMap.values().stream()
+            var coOccurrenceEqualities = inverseVariableMap(argumentsToTransfer).values().stream()
                     .flatMap(indexes -> {
                         var firstTerm = leftArgumentMap.get(indexes.iterator().next());
                         return indexes.stream().skip(1)
@@ -236,16 +224,14 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
                                                                           ExtensionalDataNode newLeftNode, ImmutableSet<Variable> provenanceVariables) {
             var leftArgumentMap = newLeftNode.getArgumentMap();
 
-            var argSubstitution = argumentsToTransfer.asMultimap().inverse().asMap().entrySet().stream()
-                    .filter(e -> e.getKey() instanceof Variable)
-                    .filter(e -> !leftVariables.contains((Variable)e.getKey()))
+            var argSubstitution = inverseVariableMap(argumentsToTransfer).entrySet().stream()
+                    .filter(e -> !leftVariables.contains(e.getKey()))
                     .collect(substitutionFactory.toSubstitution(
-                            e -> (Variable) e.getKey(),
+                            Map.Entry::getKey,
                             e -> termFactory.getIfElseNull(
                                     condition,
                                     // Picking the first index
-                                    leftArgumentMap.get(e.getValue().iterator().next())
-                            )));
+                                    leftArgumentMap.get(e.getValue().iterator().next()))));
 
             if (provenanceVariables.isEmpty())
                 return argSubstitution;
@@ -280,39 +266,50 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
                                                   ImmutableSet<Variable> leftVariables) {
             return transformChild(rightChild);
         }
+
+        private class Transfer {
+            private final ExtensionalDataNode leftNode;
+            private final ImmutableSet<Variable> determinantVariables;
+            private final ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentsToTransfer;
+
+            Transfer(ExtensionalDataNode leftNode, ImmutableSet<Variable> determinantVariables,
+                     ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentsToTransfer) {
+                this.leftNode = leftNode;
+                this.determinantVariables = determinantVariables;
+                this.argumentsToTransfer = argumentsToTransfer;
+            }
+
+            /**
+             * Adds fresh variables for columns that will be "transferred" but are not already used by the left
+             */
+            ExtensionalDataNode generateNewLeftNode() {
+                var leftArgumentMap = leftNode.getArgumentMap();
+
+                var newArgumentMap = Sets.union(leftArgumentMap.keySet(), argumentsToTransfer.keySet()).stream()
+                        .collect(ImmutableCollectors.toMap(
+                                i -> i,
+                                i -> Optional.<VariableOrGroundTerm>ofNullable(leftArgumentMap.get(i))
+                                        .or(() -> Optional.ofNullable(argumentsToTransfer.get(i))
+                                                .filter(t -> t instanceof Variable)
+                                                .map(v -> variableGenerator.generateNewVariableFromVar((Variable) v)))
+                                        .orElseGet(variableGenerator::generateNewVariable)));
+
+                return iqFactory.createExtensionalDataNode(leftNode.getRelationDefinition(), newArgumentMap);
+            }
+        }
     }
 
-
-    private static class Transfer {
-        private final ExtensionalDataNode leftNode;
-        private final ImmutableSet<Variable> determinantVariables;
-        private final ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentsToTransfer;
-
-        Transfer(ExtensionalDataNode leftNode, ImmutableSet<Variable> determinantVariables,
-                           ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentsToTransfer) {
-            this.leftNode = leftNode;
-            this.determinantVariables = determinantVariables;
-            this.argumentsToTransfer = argumentsToTransfer;
-        }
-
-        /**
-         * Adds fresh variables for columns that will be "transferred" but are not already used by the left
-         */
-        ExtensionalDataNode generateNewLeftNode(VariableGenerator variableGenerator, IntermediateQueryFactory iqFactory) {
-            var leftArgumentMap = leftNode.getArgumentMap();
-
-            var newArgumentMap = Sets.union(leftArgumentMap.keySet(), argumentsToTransfer.keySet()).stream()
-                    .collect(ImmutableCollectors.toMap(
-                            i -> i,
-                            i -> Optional.<VariableOrGroundTerm>ofNullable(leftArgumentMap.get(i))
-                            .orElseGet(() -> Optional.ofNullable(argumentsToTransfer.get(i))
-                                    .filter(t -> t instanceof Variable)
-                                    .map(v -> variableGenerator.generateNewVariableFromVar((Variable) v))
-                                    .orElseGet(variableGenerator::generateNewVariable))));
-
-            return iqFactory.createExtensionalDataNode(leftNode.getRelationDefinition(), newArgumentMap);
-        }
+    private static ImmutableSet<Integer> getIndexes(ImmutableSet<Attribute> attributes) {
+        return attributes.stream().map(a -> a.getIndex() - 1).collect(ImmutableCollectors.toSet());
     }
+
+    private static ImmutableSet<Variable> getVariableSet(Stream<? extends ImmutableTerm> stream) {
+        return stream
+                .filter(v -> v instanceof Variable)
+                .map(v -> (Variable)v)
+                .collect(ImmutableCollectors.toSet());
+    }
+
 
     /**
      * To be kept in sync with RequiredExtensionalDataNodeExtractor.
