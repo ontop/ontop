@@ -98,19 +98,16 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements IQTreeVariab
          */
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-            var childVariableNullabilitySupplier = computeChildVariableNullabilityFromConstructionParent(tree, rootNode, child);
-
             return transformUnaryNode(tree, rootNode, child,
-                    t -> transform(t, childVariableNullabilitySupplier, variableGenerator));
+                    t -> transform(t,
+                            () -> computeChildVariableNullabilityFromConstructionParent(tree, rootNode, child), variableGenerator));
         }
 
 
         @Override
         protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition, ImmutableSet<Variable> leftVariables) {
-            Supplier<VariableNullability> variableNullabilitySupplier =
-                    () -> computeRightChildVariableNullability(rightChild, ljCondition);
-
-            return transform(rightChild, variableNullabilitySupplier, variableGenerator);
+            return transform(rightChild,
+                    () -> computeRightChildVariableNullability(rightChild, ljCondition), variableGenerator);
         }
     }
 }

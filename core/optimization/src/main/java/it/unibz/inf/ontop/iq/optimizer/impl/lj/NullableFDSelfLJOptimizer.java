@@ -64,11 +64,11 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
 
         this.transformer = IQTreeVariableGeneratorTransformer.of(vg ->
                 new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
+                    private final IQVisitor<IQTree> transformer = new CardinalityInsensitiveTransformer(
+                            IQTreeTransformer.of(this),
+                            vg);
                     @Override
                     protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
-                        IQVisitor<IQTree> transformer = new CardinalityInsensitiveTransformer(
-                                IQTreeTransformer.of(this),
-                                vg);
                         return tree.acceptVisitor(transformer);
                     }
                 });

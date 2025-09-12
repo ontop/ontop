@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -104,8 +103,7 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer extends DelegatingIQT
             if (!functionalDependencies.isEmpty()) {
                 Optional<ImmutableList<Integer>> matchingIndexes = functionalDependencies.stream()
                         .map(fd -> matchFunctionalDependency(fd, sameRelationLeftNodes, rightArgumentMap))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
+                        .flatMap(Optional::stream)
                         .findAny();
 
                 if (matchingIndexes.isPresent())
@@ -140,23 +138,16 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer extends DelegatingIQT
 
             var condition = termFactory.getConjunction(Stream.concat(ljCondition.stream(), isNotNullFromImplicitEqualities));
 
-            Supplier<VariableNullability> variableNullabilitySupplier = () -> condition
-                    .map(c -> variableNullabilityTools.updateWithFilter(
-                            c,
-                            rightChild.getVariableNullability().getNullableGroups(),
-                            rightChild.getVariables()))
-                    .orElseGet(rightChild::getVariableNullability);
-
-            return searchingFromScratchFromDistinctTreeTransformer(variableNullabilitySupplier)
+            return searchingFromScratchFromDistinctTreeTransformer(
+                    () -> getVariableNullability(condition, rightChild.getVariableNullability(), rightChild.getVariables()))
                     .transform(rightChild);
         }
 
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-            var childVariableNullabilitySupplier = computeChildVariableNullabilityFromConstructionParent(tree, rootNode, child);
-
             return transformUnaryNode(tree, rootNode, child,
-                    searchingFromScratchFromDistinctTreeTransformer(childVariableNullabilitySupplier)::transform);
+                    searchingFromScratchFromDistinctTreeTransformer(
+                            () -> computeChildVariableNullabilityFromConstructionParent(tree, rootNode, child))::transform);
         }
 
         @Override

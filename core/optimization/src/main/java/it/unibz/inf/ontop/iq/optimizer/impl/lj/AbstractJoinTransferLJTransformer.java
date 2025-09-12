@@ -53,6 +53,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
     /**
      * Returns empty if no optimization has been applied
      */
+    @Override
     protected Optional<IQTree> furtherTransformLeftJoin(LeftJoinNode rootNode, IQTree leftChild,
                                                         IQTree rightChild) {
         ImmutableSet<ExtensionalDataNode> leftDataNodes = requiredDataNodeExtractor.extractSomeRequiredNodesFromLeft(leftChild)

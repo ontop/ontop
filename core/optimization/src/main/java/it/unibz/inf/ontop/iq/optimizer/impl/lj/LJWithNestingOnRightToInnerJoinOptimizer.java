@@ -7,7 +7,6 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
@@ -77,7 +76,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements IQTreeVariableG
 
         Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
                               VariableGenerator variableGenerator) {
-            super(t -> transform(t, variableGenerator),
+            super(t -> transform(t, t::getVariableNullability, variableGenerator),
                     variableNullabilitySupplier,
                     variableGenerator,
                     LJWithNestingOnRightToInnerJoinOptimizer.this.rightProvenanceNormalizer,
@@ -89,7 +88,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements IQTreeVariableG
         protected Optional<IQTree> furtherTransformLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             var construction = UnaryIQTreeDecomposition.of(rightChild, ConstructionNode.class);
 
-            var leftJoinOnTheRight = BinaryNonCommutativeIQTreeTools.LeftJoinDecomposition.of(construction.getTail());
+            var leftJoinOnTheRight = LeftJoinDecomposition.of(construction.getTail());
             if (!leftJoinOnTheRight.isPresent())
                 return Optional.empty();
 

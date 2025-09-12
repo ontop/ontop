@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
@@ -50,9 +51,8 @@ public abstract class AbstractLJTransformerWithVariableNullability extends  Abst
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     protected VariableNullability computeRightChildVariableNullability(IQTree rightChild, Optional<ImmutableExpression> ljCondition) {
-        VariableNullability bottomUpNullability = rightChild.getVariableNullability();
 
-        VariableNullability nullabilityWithLJCondition = getVariableNullability(ljCondition, bottomUpNullability, rightChild.getVariables());
+        VariableNullability nullabilityWithLJCondition = getVariableNullability(ljCondition, rightChild.getVariableNullability(), rightChild.getVariables());
 
         ImmutableSet<Variable> nullableVariablesAfterLJCondition = nullabilityWithLJCondition.getNullableVariables();
 
@@ -69,7 +69,7 @@ public abstract class AbstractLJTransformerWithVariableNullability extends  Abst
         return getVariableNullability(additionalFilter, nullabilityWithLJCondition, rightChild.getVariables());
     }
 
-    protected Supplier<VariableNullability> computeChildVariableNullabilityFromConstructionParent(IQTree tree,
+    protected VariableNullability computeChildVariableNullabilityFromConstructionParent(UnaryIQTree tree,
                                                                                                   ConstructionNode rootNode, IQTree child) {
         var childVariables = child.getVariables();
         var inheritedVariableNullability = getInheritedVariableNullability();
@@ -81,11 +81,11 @@ public abstract class AbstractLJTransformerWithVariableNullability extends  Abst
                 .filter(v -> !inheritedVariableNullability.isPossiblyNullable(v))
                 .map(termFactory::getDBIsNotNull));
 
-        return () -> getVariableNullability(isNotNullConditions, child.getVariableNullability(), childVariables);
+        return getVariableNullability(isNotNullConditions, child.getVariableNullability(), childVariables);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private VariableNullability getVariableNullability(Optional<ImmutableExpression> condition, VariableNullability variableNullability, ImmutableSet<Variable> variables) {
+    protected VariableNullability getVariableNullability(Optional<ImmutableExpression> condition, VariableNullability variableNullability, ImmutableSet<Variable> variables) {
         return condition
                 .map(c -> variableNullabilityTools.updateWithFilter(
                         c,
