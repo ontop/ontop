@@ -17,8 +17,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,15 +27,12 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
     private final ConcreteIQTreeCache treeCache;
     private static final String TAB_STR = "   ";
 
-    /*
-     * LAZY
-     */
+
+    // LAZY
     @Nullable
     private ImmutableSet<Variable> knownVariables;
 
-    /*
-     * LAZY
-     */
+    // LAZY
     @Nullable
     private String string;
 
@@ -45,7 +40,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
     private boolean hasBeenSuccessfullyValidate;
 
     private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
 
     protected AbstractCompositeIQTree(N rootNode, ImmutableList<IQTree> children,
                                       IQTreeCache treeCache, IQTreeTools iqTreeTools,
@@ -53,7 +47,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
                                       SubstitutionFactory substitutionFactory) {
         super(iqTreeTools, iqFactory);
         this.termFactory = termFactory;
-        this.substitutionFactory = substitutionFactory;
         if (children.isEmpty())
             throw new IllegalArgumentException("A composite IQ must have at least one child");
         this.rootNode = rootNode;
@@ -249,22 +242,12 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
 
     @Override
     public boolean isDistinct() {
-        // why not synchronized?
+        // TODO: why not synchronized?
         return getCachedValue(treeCache::isDistinct, this::computeIsDistinct, treeCache::setIsDistinct);
     }
 
     protected abstract boolean computeIsDistinct();
 
-
-    private <T> T getCachedValue(Supplier<T> supplier, Supplier<T> constructor, Consumer<T> storer) {
-        // Non-final
-        T value = supplier.get();
-        if (value == null) {
-            value = constructor.get();
-            storer.accept(value);
-        }
-        return value;
-    }
 
     @Override
     public IQTree removeDistincts() {

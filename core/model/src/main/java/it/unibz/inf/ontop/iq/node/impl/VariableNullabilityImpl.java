@@ -240,11 +240,8 @@ public class VariableNullabilityImpl implements VariableNullability {
                         .map(SplitImmutableFunctionalTerm::getSubstitution)
                         .reduce(substitutionFactory.getSubstitution(), substitutionFactory::union);
 
-        Stream<Substitution<NonFunctionalTerm>> nonFunctionalSubstitution = Optional.of(substitution.restrictRangeTo(NonFunctionalTerm.class))
-                .filter(s -> !s.isEmpty())
-                .stream();
-
-
+        Stream<Substitution<NonFunctionalTerm>> nonFunctionalSubstitution = Stream.of(substitution.restrictRangeTo(NonFunctionalTerm.class))
+                .filter(s -> !s.isEmpty());
 
         return Stream.concat(
                 // Recursive

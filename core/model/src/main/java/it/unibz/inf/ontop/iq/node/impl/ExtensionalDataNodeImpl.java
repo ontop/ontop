@@ -115,11 +115,13 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
     @Override
     public synchronized boolean isDistinct() {
-        if (isDistinct == null)
-            isDistinct = relationDefinition.getUniqueConstraints().stream()
+        return getCachedValue(() -> isDistinct, this::computeIsDistinct, v -> isDistinct = v);
+    }
+
+    private boolean computeIsDistinct() {
+        return relationDefinition.getUniqueConstraints().stream()
                 .map(UniqueConstraint::getDeterminants)
                 .anyMatch(this::areDeterminantsPresentAndNotNull);
-        return isDistinct;
     }
 
     private boolean areDeterminantsPresentAndNotNull(ImmutableSet<Attribute> determinants) {
@@ -147,30 +149,29 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
         return (variableNullability == null)
                 ? iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap)
                 : iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap,
-                variableNullability.applyFreshRenaming(freshRenamingSubstitution));
+                        variableNullability.applyFreshRenaming(freshRenamingSubstitution));
     }
 
     @Override
     public synchronized VariableNullability getVariableNullability() {
-        if (variableNullability == null) {
+        return getCachedValue(() -> variableNullability, this::computeVariableNullability, v -> variableNullability = v);
+    }
 
-            ImmutableMultiset<? extends VariableOrGroundTerm> argMultiset = ImmutableMultiset.copyOf(argumentMap.values());
+    private VariableNullability computeVariableNullability() {
+        ImmutableMultiset<? extends VariableOrGroundTerm> argMultiset = ImmutableMultiset.copyOf(argumentMap.values());
 
-            // NB: DB column indexes start at 1.
-            ImmutableSet<ImmutableSet<Variable>> nullableGroups = argumentMap.entrySet().stream()
-                    .filter(e -> e.getValue() instanceof Variable)
-                    .filter(e -> relationDefinition.getAttribute(e.getKey() + 1).isNullable())
-                    .map(Map.Entry::getValue)
-                    .map(a -> (Variable) a)
-                    // An implicit filter condition makes them non-nullable
-                    .filter(a -> argMultiset.count(a) < 2)
-                    .map(ImmutableSet::of)
-                    .collect(ImmutableCollectors.toSet());
+        // NB: DB column indexes start at 1.
+        ImmutableSet<ImmutableSet<Variable>> nullableGroups = argumentMap.entrySet().stream()
+                .filter(e -> relationDefinition.getAttribute(e.getKey() + 1).isNullable())
+                .map(Map.Entry::getValue)
+                .filter(v -> v instanceof Variable)
+                .map(v -> (Variable) v)
+                // An implicit filter condition makes them non-nullable
+                .filter(v -> argMultiset.count(v) < 2)
+                .map(ImmutableSet::of)
+                .collect(ImmutableCollectors.toSet());
 
-            variableNullability = coreUtilsFactory.createVariableNullability(nullableGroups, getVariables());
-        }
-
-        return variableNullability;
+        return coreUtilsFactory.createVariableNullability(nullableGroups, getVariables());
     }
 
     @Override
@@ -179,13 +180,14 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
     @Override
     public synchronized ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
-        if (uniqueConstraints == null) {
-            uniqueConstraints = relationDefinition.getUniqueConstraints().stream()
-                    .map(this::convertUniqueConstraint)
-                    .flatMap(Optional::stream)
-                    .collect(ImmutableCollectors.toSet());
-        }
-        return uniqueConstraints;
+        return getCachedValue(() -> uniqueConstraints, this::computeUniqueConstraints, v -> uniqueConstraints = v);
+    }
+
+    private ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints() {
+        return relationDefinition.getUniqueConstraints().stream()
+                .map(this::convertUniqueConstraint)
+                .flatMap(Optional::stream)
+                .collect(ImmutableCollectors.toSet());
     }
 
     private Optional<ImmutableSet<Variable>> convertUniqueConstraint(UniqueConstraint uniqueConstraint) {
@@ -239,20 +241,22 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
      */
     @Override
     public synchronized VariableNonRequirement getVariableNonRequirement() {
-        if (variableNonRequirement == null) {
-            ImmutableMultiset<Variable> multiset = argumentMap.values().stream()
-                    .filter(t -> t instanceof Variable)
-                    .map(t -> (Variable)t)
-                    .collect(ImmutableCollectors.toMultiset());
-
-            variableNonRequirement = VariableNonRequirement.of(
-                    multiset.entrySet().stream()
-                            .filter(e -> e.getCount() == 1)
-                            .map(Multiset.Entry::getElement)
-                            .collect(ImmutableCollectors.toSet()));
-        }
-        return variableNonRequirement;
+        return getCachedValue(() -> variableNonRequirement, this::computeVariableNonRequirement, v -> variableNonRequirement = v);
     }
+
+    private VariableNonRequirement computeVariableNonRequirement() {
+        ImmutableMultiset<Variable> multiset = argumentMap.values().stream()
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable)t)
+                .collect(ImmutableCollectors.toMultiset());
+
+        return VariableNonRequirement.of(
+                multiset.entrySet().stream()
+                        .filter(e -> e.getCount() == 1)
+                        .map(Multiset.Entry::getElement)
+                        .collect(ImmutableCollectors.toSet()));
+    }
+
 
     @Override
     public boolean equals(Object o) {
@@ -281,18 +285,19 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
     @Override
     public ImmutableSet<Variable> getVariables() {
-        return getLocalVariables();
+        return getCachedValue(() -> variables, this::computeVariables, v -> variables = v);
+    }
+
+    private ImmutableSet<Variable> computeVariables() {
+        return argumentMap.values().stream()
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable)t)
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override
     public synchronized ImmutableSet<Variable> getLocalVariables() {
-        if (variables == null) {
-            variables = argumentMap.values().stream()
-                    .filter(t -> t instanceof Variable)
-                    .map(t -> (Variable)t)
-                    .collect(ImmutableCollectors.toSet());
-        }
-        return variables;
+        return getVariables();
     }
 
     @Override
@@ -302,12 +307,12 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
     @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return getLocalVariables();
+        return getVariables();
     }
 
     @Override
     public ImmutableSet<Variable> getKnownVariables() {
-        return getLocalVariables();
+        return getVariables();
     }
 
     @Override

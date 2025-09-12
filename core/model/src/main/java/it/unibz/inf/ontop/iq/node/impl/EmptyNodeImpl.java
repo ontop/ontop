@@ -38,7 +38,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        return projectedVariables;
+        return getVariables();
     }
 
     @Override
@@ -69,7 +69,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     @Override
     public ImmutableSet<Variable> getKnownVariables() {
-        return projectedVariables;
+        return getVariables();
     }
 
     @Override

@@ -131,19 +131,20 @@ public class IntensionalDataNodeImpl extends LeafIQTreeImpl implements Intension
 
     @Override
     public ImmutableSet<Variable> getVariables() {
-        return getLocalVariables();
+        return getCachedValue(() -> variables, this::computeVariables, v -> variables = v);
+    }
+
+    private ImmutableSet<Variable> computeVariables() {
+        return atom.getArguments()
+                .stream()
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable)t)
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override
     public synchronized ImmutableSet<Variable> getLocalVariables() {
-        if (variables == null) {
-            variables = atom.getArguments()
-                    .stream()
-                    .filter(t -> t instanceof Variable)
-                    .map(t -> (Variable)t)
-                    .collect(ImmutableCollectors.toSet());
-        }
-        return variables;
+        return getVariables();
     }
 
     @Override
@@ -153,12 +154,12 @@ public class IntensionalDataNodeImpl extends LeafIQTreeImpl implements Intension
 
     @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return getLocalVariables();
+        return getVariables();
     }
 
     @Override
     public ImmutableSet<Variable> getKnownVariables() {
-        return getLocalVariables();
+        return getVariables();
     }
 
     @Override

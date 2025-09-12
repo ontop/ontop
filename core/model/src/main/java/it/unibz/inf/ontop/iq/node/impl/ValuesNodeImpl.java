@@ -491,16 +491,17 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions() {
-        if (possibleVariableDefinitions == null) {
-            Stream<ImmutableMap<Variable, Constant>> distinctValuesStream = ((isDistinct != null) && isDistinct)
-                    ? valueMaps.stream()
-                    : valueMaps.stream().distinct();
+        return getCachedValue(() -> possibleVariableDefinitions, this::computePossibleVariableDefinitions, v -> possibleVariableDefinitions = v);
+    }
 
-            possibleVariableDefinitions = distinctValuesStream
-                    .map(tuple -> tuple.entrySet().stream().collect(substitutionFactory.<NonVariableTerm>toSubstitution()))
-                    .collect(ImmutableCollectors.toSet());
-        }
-        return possibleVariableDefinitions;
+    private ImmutableSet<Substitution<NonVariableTerm>> computePossibleVariableDefinitions() {
+        Stream<ImmutableMap<Variable, Constant>> distinctValuesStream = ((isDistinct != null) && isDistinct)
+                ? valueMaps.stream()
+                : valueMaps.stream().distinct();
+
+        return distinctValuesStream
+                .map(tuple -> tuple.entrySet().stream().collect(substitutionFactory.<NonVariableTerm>toSubstitution()))
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -510,13 +511,16 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public boolean isDistinct() {
-        if (isDistinct == null) {
-            isDistinct = (valueMaps.size() == valueMaps.stream()
-                                                .unordered()
-                                                .distinct()
-                                                .count()); }
-        return isDistinct;
+        return getCachedValue(() -> isDistinct, this::computeIsDistinct, v -> isDistinct = v);
     }
+
+    private boolean computeIsDistinct() {
+        return (valueMaps.size() == valueMaps.stream()
+                .unordered()
+                .distinct()
+                .count());
+    }
+
 
     @Override
     public boolean isDeclaredAsEmpty() {
@@ -525,17 +529,18 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public synchronized VariableNullability getVariableNullability() {
+        return getCachedValue(() -> variableNullability, this::computeVariableNullability, v -> variableNullability = v);
+    }
+
+    private VariableNullability computeVariableNullability() {
         // Implemented by looking through the values, if one of them contains a null
         // the corresponding variable is seen as nullable.
-        if (variableNullability == null) {
-            ImmutableSet<ImmutableSet<Variable>> nullableGroups = orderedVariables.stream()
-                    .filter(v -> getValueStream(v)
-                            .anyMatch(ImmutableTerm::isNull))
-                    .map(ImmutableSet::of)
-                    .collect(ImmutableCollectors.toSet());
-            variableNullability = coreUtilsFactory.createVariableNullability(nullableGroups, projectedVariables);
-        }
-        return variableNullability;
+        ImmutableSet<ImmutableSet<Variable>> nullableGroups = orderedVariables.stream()
+                .filter(v -> getValueStream(v)
+                        .anyMatch(ImmutableTerm::isNull))
+                .map(ImmutableSet::of)
+                .collect(ImmutableCollectors.toSet());
+        return coreUtilsFactory.createVariableNullability(nullableGroups, projectedVariables);
     }
 
     @Override
@@ -548,10 +553,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public synchronized ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
-        if (uniqueConstraints == null) {
-            uniqueConstraints = computeUniqueConstraints();
-        }
-        return uniqueConstraints;
+        return getCachedValue(() -> uniqueConstraints, this::computeUniqueConstraints, v -> uniqueConstraints = v);
     }
 
     /**
