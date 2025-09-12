@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -15,8 +16,11 @@ import java.util.Optional;
 
 public abstract class AbstractLJTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
-    protected AbstractLJTransformer(IntermediateQueryFactory iqFactory, VariableGenerator variableGenerator) {
+    protected final IQTreeTransformer searchingFromScratchTransformer;
+
+    protected AbstractLJTransformer(IntermediateQueryFactory iqFactory, VariableGenerator variableGenerator, IQTreeTransformer searchingFromScratchTransformer) {
         super(iqFactory, t -> t.normalizeForOptimization(variableGenerator), variableGenerator);
+        this.searchingFromScratchTransformer = searchingFromScratchTransformer;
     }
 
     @Override
@@ -50,25 +54,23 @@ public abstract class AbstractLJTransformer extends DefaultRecursiveIQTreeVisiti
 
     @Override
     public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-        return transformUnaryNode(tree, rootNode, child, this::transformBySearchingFromScratch);
+        return transformUnaryNode(tree, rootNode, child, searchingFromScratchTransformer::transform);
     }
 
     @Override
     public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
-        return transformUnaryNode(tree, rootNode, child, this::transformBySearchingFromScratch);
+        return transformUnaryNode(tree, rootNode, child, searchingFromScratchTransformer::transform);
     }
 
     @Override
     public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
-        return transformUnaryNode(tree, rootNode, child, this::transformBySearchingFromScratch);
+        return transformUnaryNode(tree, rootNode, child, searchingFromScratchTransformer::transform);
     }
 
     @Override
     public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        return transformNaryCommutativeNode(tree, rootNode, children, this::transformBySearchingFromScratch);
+        return transformNaryCommutativeNode(tree, rootNode, children, searchingFromScratchTransformer::transform);
     }
-
-    protected abstract IQTree transformBySearchingFromScratch(IQTree tree);
 
     /**
      * Can be overridden

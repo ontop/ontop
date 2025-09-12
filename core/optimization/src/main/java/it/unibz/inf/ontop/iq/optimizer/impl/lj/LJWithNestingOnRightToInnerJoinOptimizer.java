@@ -65,7 +65,11 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements IQTreeVariableG
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(new Transformer(tree::getVariableNullability, variableGenerator));
+        return transform(tree, tree::getVariableNullability, variableGenerator);
+    }
+
+    private IQTree transform(IQTree tree, Supplier<VariableNullability> variableNullabilitySupplier, VariableGenerator variableGenerator) {
+        return tree.acceptVisitor(new Transformer(variableNullabilitySupplier, variableGenerator));
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -73,7 +77,8 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements IQTreeVariableG
 
         Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
                               VariableGenerator variableGenerator) {
-            super(variableNullabilitySupplier,
+            super(t -> transform(t, variableGenerator),
+                    variableNullabilitySupplier,
                     variableGenerator,
                     LJWithNestingOnRightToInnerJoinOptimizer.this.rightProvenanceNormalizer,
                     LJWithNestingOnRightToInnerJoinOptimizer.this.variableNullabilityTools,
@@ -114,18 +119,11 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements IQTreeVariableG
         }
 
         @Override
-        protected IQTree transformBySearchingFromScratch(IQTree tree) {
-            Transformer newTransformer = new Transformer(tree::getVariableNullability, variableGenerator);
-            return tree.acceptVisitor(newTransformer);
-        }
-
-        @Override
         protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition, ImmutableSet<Variable> leftVariables) {
             Supplier<VariableNullability> variableNullabilitySupplier =
                     () -> computeRightChildVariableNullability(rightChild, ljCondition);
 
-            Transformer newTransformer = new Transformer(variableNullabilitySupplier, variableGenerator);
-            return rightChild.acceptVisitor(newTransformer);
+            return transform(rightChild, variableNullabilitySupplier, variableGenerator);
         }
 
         private boolean canLJBeReduced(IQTree leftChild, IQTree safeLeftOfRightDescendant) {

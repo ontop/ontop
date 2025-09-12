@@ -41,14 +41,19 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements IQTreeVariab
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(new Transformer(tree::getVariableNullability, variableGenerator));
+        return transform(tree, tree::getVariableNullability, variableGenerator);
+    }
+
+    private IQTree transform(IQTree tree, Supplier<VariableNullability> variableNullabilitySupplier, VariableGenerator variableGenerator) {
+        return tree.acceptVisitor(new Transformer(variableNullabilitySupplier, variableGenerator));
     }
 
     private class Transformer extends AbstractJoinTransferLJTransformer {
 
         Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
                               VariableGenerator variableGenerator) {
-            super(variableNullabilitySupplier,
+            super(t -> transform(t, t::getVariableNullability, variableGenerator),
+                    variableNullabilitySupplier,
                     variableGenerator,
                     CardinalitySensitiveJoinTransferLJOptimizer.this.requiredDataNodeExtractor,
                     CardinalitySensitiveJoinTransferLJOptimizer.this.rightProvenanceNormalizer,
@@ -96,25 +101,16 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements IQTreeVariab
             var childVariableNullabilitySupplier = computeChildVariableNullabilityFromConstructionParent(tree, rootNode, child);
 
             return transformUnaryNode(tree, rootNode, child,
-                    t -> transformBySearchingWithNewVariableNullabilitySupplier(t, childVariableNullabilitySupplier));
+                    t -> transform(t, childVariableNullabilitySupplier, variableGenerator));
         }
 
-        @Override
-        protected IQTree transformBySearchingFromScratch(IQTree tree) {
-            return transformBySearchingWithNewVariableNullabilitySupplier(tree, tree::getVariableNullability);
-        }
-
-        protected IQTree transformBySearchingWithNewVariableNullabilitySupplier(IQTree tree,
-                                                                                Supplier<VariableNullability> variableNullabilitySupplier) {
-            return tree.acceptVisitor(new Transformer(variableNullabilitySupplier, variableGenerator));
-        }
 
         @Override
         protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition, ImmutableSet<Variable> leftVariables) {
             Supplier<VariableNullability> variableNullabilitySupplier =
                     () -> computeRightChildVariableNullability(rightChild, ljCondition);
 
-            return rightChild.acceptVisitor(new Transformer(variableNullabilitySupplier, variableGenerator));
+            return transform(rightChild, variableNullabilitySupplier, variableGenerator);
         }
     }
 }

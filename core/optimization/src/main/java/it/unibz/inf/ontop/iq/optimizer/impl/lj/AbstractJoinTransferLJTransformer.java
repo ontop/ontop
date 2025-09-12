@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ArgumentSubstitution;
@@ -35,13 +36,14 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
     protected final IQTreeTools iqTreeTools;
     protected final SubstitutionFactory substitutionFactory;
 
-    protected AbstractJoinTransferLJTransformer(Supplier<VariableNullability> variableNullabilitySupplier,
+    protected AbstractJoinTransferLJTransformer(IQTreeTransformer searchingFromScratchTransformer,
+                                                Supplier<VariableNullability> variableNullabilitySupplier,
                                                 VariableGenerator variableGenerator,
                                                 RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
                                                 RightProvenanceNormalizer rightProvenanceNormalizer,
                                                 JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                                 CoreSingletons coreSingletons) {
-        super(variableNullabilitySupplier, variableGenerator, rightProvenanceNormalizer, variableNullabilityTools,
+        super(searchingFromScratchTransformer, variableNullabilitySupplier, variableGenerator, rightProvenanceNormalizer, variableNullabilityTools,
                 coreSingletons);
         this.requiredDataNodeExtractor = requiredDataNodeExtractor;
         this.iqTreeTools = coreSingletons.getIQTreeTools();

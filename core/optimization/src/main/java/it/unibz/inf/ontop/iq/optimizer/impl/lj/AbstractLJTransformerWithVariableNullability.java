@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -25,12 +26,13 @@ public abstract class AbstractLJTransformerWithVariableNullability extends  Abst
 
     protected final TermFactory termFactory;
 
-    protected AbstractLJTransformerWithVariableNullability(Supplier<VariableNullability> variableNullabilitySupplier,
+    protected AbstractLJTransformerWithVariableNullability(IQTreeTransformer transformBySearchingFromScratch,
+                                                           Supplier<VariableNullability> variableNullabilitySupplier,
                                                            VariableGenerator variableGenerator,
                                                            RightProvenanceNormalizer rightProvenanceNormalizer,
                                                            JoinOrFilterVariableNullabilityTools variableNullabilityTools,
                                                            CoreSingletons coreSingletons) {
-        super(coreSingletons.getIQFactory(), variableGenerator);
+        super(coreSingletons.getIQFactory(), variableGenerator, transformBySearchingFromScratch);
 
         this.termFactory = coreSingletons.getTermFactory();
 

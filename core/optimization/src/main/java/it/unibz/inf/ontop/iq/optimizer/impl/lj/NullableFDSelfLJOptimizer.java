@@ -85,7 +85,7 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
 
         CardinalityInsensitiveTransformer(IQTreeTransformer lookForDistinctTransformer,
                                                     VariableGenerator variableGenerator) {
-            super(NullableFDSelfLJOptimizer.this.iqFactory, variableGenerator);
+            super(NullableFDSelfLJOptimizer.this.iqFactory, variableGenerator, lookForDistinctTransformer);
             this.lookForDistinctTransformer = lookForDistinctTransformer;
         }
 
@@ -273,11 +273,6 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
                 throw new MinorOntopInternalBugException(String.format("Could not replace %s on the left", leftNode));
 
             return newLeft;
-        }
-
-        @Override
-        protected IQTree transformBySearchingFromScratch(IQTree tree) {
-            return lookForDistinctTransformer.transform(tree);
         }
 
         /**

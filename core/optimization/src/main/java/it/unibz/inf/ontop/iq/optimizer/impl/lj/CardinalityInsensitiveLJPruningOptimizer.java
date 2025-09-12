@@ -55,7 +55,6 @@ public class CardinalityInsensitiveLJPruningOptimizer extends DelegatingIQTreeVa
         return transformer;
     }
 
-    // TODO: unclear why it's called non-recursive
     private class CardinalityInsensitiveLJPruningTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
         private final IQTreeTransformer lookForDistinctTransformer;

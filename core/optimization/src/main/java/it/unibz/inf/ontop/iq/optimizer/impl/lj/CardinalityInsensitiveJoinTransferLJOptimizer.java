@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -71,18 +72,16 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer extends DelegatingIQT
 
     private class CardinalityInsensitiveTransformer extends AbstractJoinTransferLJTransformer {
 
-        private final IQTreeTransformer lookForDistinctTransformer;
-
-        CardinalityInsensitiveTransformer(IQTreeTransformer lookForDistinctTransformer,
+        CardinalityInsensitiveTransformer(IQTreeTransformer searchingFromScratchTransformer,
                                           Supplier<VariableNullability> variableNullabilitySupplier,
                                           VariableGenerator variableGenerator) {
-            super(variableNullabilitySupplier,
+            super(searchingFromScratchTransformer,
+                    variableNullabilitySupplier,
                     variableGenerator,
                     CardinalityInsensitiveJoinTransferLJOptimizer.this.requiredDataNodeExtractor,
                     CardinalityInsensitiveJoinTransferLJOptimizer.this.rightProvenanceNormalizer,
                     CardinalityInsensitiveJoinTransferLJOptimizer.this.variableNullabilityTools,
                     CardinalityInsensitiveJoinTransferLJOptimizer.this.coreSingletons);
-            this.lookForDistinctTransformer = lookForDistinctTransformer;
         }
 
 
@@ -127,15 +126,9 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer extends DelegatingIQT
             return true;
         }
 
-        @Override
-        protected IQTree transformBySearchingFromScratch(IQTree tree) {
-            return lookForDistinctTransformer.transform(tree);
-        }
 
-        private IQTree transformBySearchingFromScratchFromDistinctTree(IQTree tree, Supplier<VariableNullability> variableNullabilitySupplier) {
-            CardinalityInsensitiveTransformer newTransformer = new CardinalityInsensitiveTransformer(lookForDistinctTransformer,
-                    variableNullabilitySupplier, variableGenerator);
-            return tree.acceptVisitor(newTransformer);
+        private IQTreeTransformer searchingFromScratchFromDistinctTreeTransformer(Supplier<VariableNullability> variableNullabilitySupplier) {
+            return IQTreeTransformer.of(new CardinalityInsensitiveTransformer(searchingFromScratchTransformer, variableNullabilitySupplier, variableGenerator));
         }
 
         @Override
@@ -147,13 +140,15 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer extends DelegatingIQT
 
             var condition = termFactory.getConjunction(Stream.concat(ljCondition.stream(), isNotNullFromImplicitEqualities));
 
-            return transformBySearchingFromScratchFromDistinctTree(rightChild,
-                    () -> condition
-                            .map(c -> variableNullabilityTools.updateWithFilter(
-                                            c,
-                                            rightChild.getVariableNullability().getNullableGroups(),
-                                            rightChild.getVariables()))
-                            .orElseGet(rightChild::getVariableNullability));
+            Supplier<VariableNullability> variableNullabilitySupplier = () -> condition
+                    .map(c -> variableNullabilityTools.updateWithFilter(
+                            c,
+                            rightChild.getVariableNullability().getNullableGroups(),
+                            rightChild.getVariables()))
+                    .orElseGet(rightChild::getVariableNullability);
+
+            return searchingFromScratchFromDistinctTreeTransformer(variableNullabilitySupplier)
+                    .transform(rightChild);
         }
 
         @Override
@@ -161,13 +156,12 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer extends DelegatingIQT
             var childVariableNullabilitySupplier = computeChildVariableNullabilityFromConstructionParent(tree, rootNode, child);
 
             return transformUnaryNode(tree, rootNode, child,
-                    t -> transformBySearchingFromScratchFromDistinctTree(t, childVariableNullabilitySupplier));
+                    searchingFromScratchFromDistinctTreeTransformer(childVariableNullabilitySupplier)::transform);
         }
 
         @Override
         public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            return transformNaryCommutativeNode(tree, rootNode, children,
-                    t -> transformBySearchingFromScratchFromDistinctTree(t, t::getVariableNullability));
+            return transformNaryCommutativeNode(tree, rootNode, children, searchingFromScratchFromDistinctTreeTransformer(tree::getVariableNullability)::transform);
         }
     }
 }
