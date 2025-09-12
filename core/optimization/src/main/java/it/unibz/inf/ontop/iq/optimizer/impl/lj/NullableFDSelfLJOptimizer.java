@@ -81,12 +81,9 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
 
     private class CardinalityInsensitiveTransformer extends AbstractLJTransformer {
 
-        private final IQTreeTransformer lookForDistinctTransformer;
-
-        CardinalityInsensitiveTransformer(IQTreeTransformer lookForDistinctTransformer,
+        CardinalityInsensitiveTransformer(IQTreeTransformer searchingFromScratchTransformer,
                                                     VariableGenerator variableGenerator) {
-            super(NullableFDSelfLJOptimizer.this.iqFactory, variableGenerator, lookForDistinctTransformer);
-            this.lookForDistinctTransformer = lookForDistinctTransformer;
+            super(NullableFDSelfLJOptimizer.this.iqFactory, variableGenerator, searchingFromScratchTransformer);
         }
 
         @Override
@@ -281,8 +278,7 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
         @Override
         protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition,
                                                   ImmutableSet<Variable> leftVariables) {
-            var newTransformer = new CardinalityInsensitiveTransformer(lookForDistinctTransformer, variableGenerator);
-            return rightChild.acceptVisitor(newTransformer);
+            return transformChild(rightChild);
         }
     }
 
