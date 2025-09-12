@@ -87,13 +87,11 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements IQTreeVariableG
         @Override
         protected Optional<IQTree> furtherTransformLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             var construction = UnaryIQTreeDecomposition.of(rightChild, ConstructionNode.class);
-
             var leftJoinOnTheRight = LeftJoinDecomposition.of(construction.getTail());
             if (!leftJoinOnTheRight.isPresent())
                 return Optional.empty();
 
             LeftJoinDecomposition leftJoin = LeftJoinDecomposition.of(rootNode, leftChild, rightChild);
-
             Set<Variable> commonVariables = leftJoin.commonVariables();
 
             // If some variables defined by the construction node are common with the left --> no optimization
@@ -103,18 +101,36 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements IQTreeVariableG
             // In the presence of a LJ condition, a unique constraint must be present on the right child
             // and be joined over
             if (leftJoin.joinCondition().isPresent()
-                    && leftJoin.rightChild().inferUniqueConstraints().stream()
-                    .noneMatch(commonVariables::containsAll))
+                    && leftJoin.rightChild().inferUniqueConstraints().stream().noneMatch(commonVariables::containsAll))
                 return Optional.empty();
 
             Optional<IQTree> safeLeftOfRightDescendant = extractSafeLeftOfRightDescendantTree(
                     leftJoinOnTheRight.leftChild(), commonVariables);
 
-            return safeLeftOfRightDescendant
-                    .filter(r -> canLJBeReduced(leftJoin.leftChild(), r))
-                    // Reduces the LJ to an inner join
-                    .map(r -> buildInnerJoin(leftJoin))
-                    .map(t -> t.normalizeForOptimization(variableGenerator));
+            if (safeLeftOfRightDescendant.isEmpty()
+                    || !canLJBeReduced(leftJoin.leftChild(), safeLeftOfRightDescendant.get()))
+                return Optional.empty();
+
+            // Reduces the LJ to an inner join
+            IQTree joinTree = iqTreeTools.createInnerJoinTree(ImmutableList.of(leftJoin.leftChild(), leftJoin.rightChild()));
+
+            if (leftJoin.joinCondition().isEmpty()) {
+                return Optional.of(joinTree.normalizeForOptimization(variableGenerator));
+            }
+
+            InjectiveSubstitution<Variable> renaming = leftJoin.rightSpecificVariables().stream()
+                    .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
+
+            ImmutableExpression renamedCondition = renaming.apply(leftJoin.joinCondition().get());
+            Substitution<ImmutableFunctionalTerm> newSubstitution = renaming.builder()
+                    .transform(t -> termFactory.getIfElseNull(renamedCondition, t))
+                    .build();
+
+            IQTree result = iqFactory.createUnaryIQTree(
+                    iqFactory.createConstructionNode(joinTree.getVariables(), newSubstitution),
+                    joinTree.applyFreshRenaming(renaming));
+
+            return Optional.of(result.normalizeForOptimization(variableGenerator));
         }
 
         @Override
@@ -152,27 +168,6 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements IQTreeVariableG
                 return extractSafeLeftOfRightDescendantTree(leftJoin.leftChild(), rightVariablesInteractingWithLeft);
             else
                 return Optional.of(leftChild);
-        }
-
-        private IQTree buildInnerJoin(LeftJoinDecomposition leftJoin) {
-            IQTree joinTree = iqTreeTools.createInnerJoinTree(ImmutableList.of(leftJoin.leftChild(), leftJoin.rightChild()));
-
-            if (leftJoin.joinCondition().isEmpty())
-                return joinTree;
-
-            InjectiveSubstitution<Variable> renaming = leftJoin.rightSpecificVariables().stream()
-                    .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
-
-            ImmutableExpression renamedCondition = renaming.apply(leftJoin.joinCondition().get());
-
-            Substitution<ImmutableFunctionalTerm> newSubstitution = renaming.builder()
-                    .transform(t -> termFactory.getIfElseNull(renamedCondition, t))
-                    .build();
-
-            return iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(joinTree.getVariables(),
-                            newSubstitution),
-                    joinTree.applyFreshRenaming(renaming));
         }
     }
 }
