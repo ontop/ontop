@@ -106,21 +106,18 @@ public class CardinalityInsensitiveLJPruningOptimizer extends DelegatingIQTreeVa
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
             var newTransformer = getTransformer(rootNode.getLocallyRequiredVariables());
-            IQTree newChild = newTransformer.transformChild(child);
-            return withTransformedChild(tree, newChild);
+            return transformUnaryNode(tree, rootNode, child, newTransformer::transformChild);
         }
 
         @Override
         public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
             var newTransformer = getTransformer(getVariables(rootNode.getOptionalFilterCondition()));
-            IQTree newChild = newTransformer.transformChild(child);
-            return withTransformedChild(tree, newChild);
+            return transformUnaryNode(tree, rootNode, child, newTransformer::transformChild);
         }
 
         @Override
         public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-            IQTree newChild = transformChild(child);
-            return withTransformedChild(tree, newChild);
+            return transformUnaryNode(tree, rootNode, child, this::transformChild);
         }
 
         @Override
@@ -135,23 +132,18 @@ public class CardinalityInsensitiveLJPruningOptimizer extends DelegatingIQTreeVa
             var newTransformer = getTransformer(Sets.union(commonVariables,
                     getVariables(rootNode.getOptionalFilterCondition())));
 
-            var newLeft = newTransformer.transformChild(leftChild);
-            var newRight = newTransformer.transformChild(rightChild);
-
-            return withTransformedChildren(tree, newLeft, newRight);
+            return transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild, newTransformer::transformChild);
         }
 
         @Override
         public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
-            return withTransformedChildren(tree, newChildren);
+            return transformNaryCommutativeNode(tree, rootNode, children, this::transformChild);
         }
 
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             var newTransformer = getTransformer(getVariables(rootNode.getOptionalFilterCondition()));
-            ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, newTransformer::transformChild);
-            return withTransformedChildren(tree, newChildren);
+            return transformNaryCommutativeNode(tree, rootNode, children, newTransformer::transformChild);
         }
     }
 }
