@@ -151,17 +151,17 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
         IQTree normalize(IQTree shrunkChild, AggregationNode aggregationNode) {
             var construction = UnaryIQTreeDecomposition.of(shrunkChild, ConstructionNode.class);
-            NormalizationState2<ConstructionNode, AggregationSubTree> stateAfterLiftingBindings;
+            State<ConstructionNode, AggregationSubTree> stateAfterLiftingBindings;
             if (construction.isPresent()) {
                 stateAfterLiftingBindings = liftGroupingBindings(
                         propagateNonGroupingBindingsIntoToAggregationSubstitution(
-                                new NormalizationState2<>(new AggregationSubTree(aggregationNode, construction.getOptionalNode(), construction.getChild()))));
+                                new State<>(new AggregationSubTree(aggregationNode, construction.getOptionalNode(), construction.getChild()))));
             }
             else {
-                stateAfterLiftingBindings = new NormalizationState2<>(new AggregationSubTree(aggregationNode, Optional.empty(), shrunkChild));
+                stateAfterLiftingBindings = new State<>(new AggregationSubTree(aggregationNode, Optional.empty(), shrunkChild));
             }
 
-            NormalizationState2<ConstructionNode, AggregationSubTree> finalState = simplifyAggregationSubstitution(stateAfterLiftingBindings);
+            State<ConstructionNode, AggregationSubTree> finalState = simplifyAggregationSubstitution(stateAfterLiftingBindings);
             // TODO: consider filters
 
             return asIQTree(finalState);
@@ -172,7 +172,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
          * All the bindings of non-grouping variables in the child construction node are propagated to
          * the aggregation substitution
          */
-        NormalizationState2<ConstructionNode, AggregationSubTree> propagateNonGroupingBindingsIntoToAggregationSubstitution(NormalizationState2<ConstructionNode, AggregationSubTree> state) {
+        State<ConstructionNode, AggregationSubTree> propagateNonGroupingBindingsIntoToAggregationSubstitution(State<ConstructionNode, AggregationSubTree> state) {
             if (state.getSubTree().childConstructionNode.isEmpty())
                 return state;
 
@@ -206,7 +206,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
          * <p>
          * propagateNonGroupingBindingsIntoToAggregationSubstitution() is expected to have been called before
          */
-        NormalizationState2<ConstructionNode, AggregationSubTree> liftGroupingBindings(NormalizationState2<ConstructionNode, AggregationSubTree> state) {
+        State<ConstructionNode, AggregationSubTree> liftGroupingBindings(State<ConstructionNode, AggregationSubTree> state) {
             if (state.getSubTree().childConstructionNode.isEmpty())
                 return state;
 
@@ -221,8 +221,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             // (mimicking the special case when GROUP BY reduces itself to a DISTINCT and a projection)
             ConstructionNode groupingConstructionNode = iqFactory.createConstructionNode(state.getSubTree().groupingVariables, substitution);
 
-            NormalizationState2<ConstructionNode, ConstructionSubTree> subState = IQStateOptionalTransformer.reachFinalState(
-                    new NormalizationState2<>(new ConstructionSubTree(groupingConstructionNode, state.getSubTree().grandChild)),
+            State<ConstructionNode, ConstructionSubTree> subState = IQStateOptionalTransformer.reachFinalState(
+                    new State<>(new ConstructionSubTree(groupingConstructionNode, state.getSubTree().grandChild)),
                     this::liftBindings,
                     MAX_ITERATIONS);
 
@@ -278,7 +278,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             // Creates a filter over the sample variable so that only rows that have a non-null value in it are kept.
             Optional<FilterNode> newFilter = iqTreeTools.createOptionalFilterNode(sampleVariable.map(termFactory::getDBIsNotNull));
 
-            return new NormalizationState2<>(newAncestors, new AggregationSubTree(newFilter, newGroupingVariables,
+            return new State<>(newAncestors, new AggregationSubTree(newFilter, newGroupingVariables,
                     finalAggregationSubstitution, newChildConstructionNode, subState.getSubTree().getChild()));
         }
 
@@ -287,7 +287,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
          * so as to guarantee that all the values of the substitution are functional terms using
          * an aggregation function symbol.
          */
-        NormalizationState2<ConstructionNode, AggregationSubTree> simplifyAggregationSubstitution(NormalizationState2<ConstructionNode, AggregationSubTree> state) {
+        State<ConstructionNode, AggregationSubTree> simplifyAggregationSubstitution(State<ConstructionNode, AggregationSubTree> state) {
             // NB: use ImmutableSubstitution.simplifyValues()
             // NB: look at FunctionSymbol.isAggregation()
 
@@ -336,7 +336,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     newAggregationSubstitution, state.getSubTree().childConstructionNode, state.getSubTree().grandChild));
         }
 
-        protected IQTree asIQTree(NormalizationState2<ConstructionNode, AggregationSubTree> state) {
+        protected IQTree asIQTree(State<ConstructionNode, AggregationSubTree> state) {
             return iqTreeTools.unaryIQTreeBuilder()
                     .append(state.getAncestors())
                     .append(state.getSubTree().sampleFilter)

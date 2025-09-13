@@ -20,9 +20,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
-
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
-
 /**
  * Out of a child construction node and a grand child tree, tries to lift injective definitions above
  * (that is inside ancestor construction nodes).
@@ -85,7 +82,7 @@ public class InjectiveBindingLiftContext extends NormalizationContext {
     }
 
 
-    protected Optional<NormalizationState2<ConstructionNode, ConstructionSubTree>> liftBindings(NormalizationState2<ConstructionNode, ConstructionSubTree> state) {
+    protected Optional<State<ConstructionNode, ConstructionSubTree>> liftBindings(State<ConstructionNode, ConstructionSubTree> state) {
         if (state.getSubTree().optionalConstructionNode.isEmpty())
             return Optional.empty();
 
