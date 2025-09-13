@@ -38,12 +38,12 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
         return context.normalize();
     }
 
-    protected class Context extends NormalizationContext {
+    private class Context extends NormalizationContext {
         private final OrderByNode initialOrderByNode;
         private final IQTree initialChild;
         private final IQTreeCache treeCache;
 
-        protected Context(OrderByNode initialOrderByNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        Context(OrderByNode initialOrderByNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
             super(variableGenerator);
             this.initialOrderByNode = initialOrderByNode;
             this.initialChild = initialChild;
@@ -51,108 +51,153 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
         }
 
         IQTree normalize() {
-            State initial = new State(UnaryOperatorSequence.of(), Optional.of(initialOrderByNode), initialChild);
-            State simplified = initial.simplifyOrderByNode().normalizeChild();
-            if (simplified.optionalOrderByNode.isEmpty())
-                return simplified.asIQTree();
+            State initial = new State(
+                    new OptionalOrderBySubTree(Optional.of(initialOrderByNode), initialChild)
+                            .simplify().normalizeChild());
+            if (initial.subTree.getOptionalOrderByNode().isEmpty())
+                return initial.asIQTree();
 
             // NB: the loop is due to the lifting of both distinct and construction nodes
             State state = reachFixedPoint(
-                    simplified,
-                    s -> IQStateOptionalTransformer.reachFinalState(s, State::liftThroughOrderBy)
-                            .normalizeChild(),
+                    initial,
+                    s -> normalizeChild(IQStateOptionalTransformer.reachFinalState(s, this::liftThroughOrderBy)),
                     MAX_NORMALIZATION_ITERATIONS);
             return state.asIQTree();
+        }
+
+        Optional<State> liftThroughOrderBy(State state) {
+            if (state.subTree.getOptionalOrderByNode().isEmpty())
+                return Optional.empty();
+
+            OrderByNode orderByNode = state.subTree.getOptionalOrderByNode().get();
+            return state.subTree.getChild().acceptVisitor(new IQStateOptionalTransformer<>() {
+
+                @Override
+                public Optional<State> transformConstruction(UnaryIQTree tree, ConstructionNode node, IQTree newChild) {
+                    return Optional.of(state.of(node,
+                            new OptionalOrderBySubTree(orderByNode.applySubstitution(node.getSubstitution()), newChild)
+                                    .simplify()));
+                }
+
+                @Override
+                public Optional<State> transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree newChild) {
+                    return Optional.of(state.of(node,
+                            new OptionalOrderBySubTree(state.subTree.getOptionalOrderByNode(), newChild)));
+                }
+
+                @Override
+                public Optional<State> transformEmpty(EmptyNode tree) {
+                    return Optional.of(state.of(
+                            new OptionalOrderBySubTree(Optional.empty(), tree)));
+                }
+            });
+        }
+
+        State normalizeChild(State state) {
+            return state.of(state.subTree.normalizeChild());
+        }
+
+        IQTree asIQTree0(State state) {
+            IQTree orderByLevelTree = iqTreeTools.unaryIQTreeBuilder()
+                    .append(state.subTree.getOptionalOrderByNode(), treeCache::declareAsNormalizedForOptimizationWithEffect)
+                    .build(state.subTree.getChild());
+
+            if (state.getAncestors().isEmpty())
+                return orderByLevelTree;
+
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(state.getAncestors())
+                    .build(orderByLevelTree)
+                    // Normalizes the ancestors (recursive)
+                    .normalizeForOptimization(variableGenerator);
         }
 
         /**
          * A sequence of ConstructionNode and DistinctNode,
          * followed by an optional OrderByNode, followed by a child tree.
          */
-        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         protected class State extends NormalizationState<UnaryOperatorNode> {
-            private final Optional<OrderByNode> optionalOrderByNode;
-            private final IQTree child;
+            private final OptionalOrderBySubTree subTree;
 
-            private State(UnaryOperatorSequence<UnaryOperatorNode> ancestors, Optional<OrderByNode> optionalOrderByNode, IQTree child) {
+            private State(UnaryOperatorSequence<UnaryOperatorNode> ancestors, OptionalOrderBySubTree subTree) {
                 super(ancestors);
-                this.optionalOrderByNode = optionalOrderByNode;
-                this.child = child;
+                this.subTree = subTree;
             }
 
-            protected State simplifyOrderByNode() {
-                var variableNullability = child.getVariableNullability();
-                var optionalNewComparators = optionalOrderByNode
-                        .map(o -> o.getComparators().stream()
-                        .flatMap(c -> Stream.of(c.getTerm())
-                                .map(t -> t.simplify(variableNullability))
-                                .filter(t -> t instanceof NonGroundTerm)
-                                .map(t -> (NonGroundTerm) t)
-                                .map(t -> iqFactory.createOrderComparator(t, c.isAscending())))
-                        .collect(ImmutableCollectors.toList()));
-
-                return new State(getAncestors(),
-                        optionalNewComparators
-                                .filter(cs -> !cs.isEmpty())
-                                .map(iqFactory::createOrderByNode),
-                        child);
+            public State(OptionalOrderBySubTree subTree) {
+                this(UnaryOperatorSequence.of(), subTree);
             }
 
-
-            protected Optional<State> liftThroughOrderBy() {
-                return child.acceptVisitor(new IQStateOptionalTransformer<>() {
-
-                    @Override
-                    public Optional<State> transformConstruction(UnaryIQTree tree, ConstructionNode node, IQTree newChild) {
-                        return optionalOrderByNode
-                                .map(o -> new State(
-                                        getAncestors().append(node),
-                                        o.applySubstitution(node.getSubstitution()),
-                                        newChild)
-                                        .simplifyOrderByNode());
-                    }
-
-                    @Override
-                    public Optional<State> transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree newChild) {
-                        return optionalOrderByNode
-                                .map(o -> new State(getAncestors().append(node), optionalOrderByNode, newChild));
-                    }
-
-                    @Override
-                    public Optional<State> transformEmpty(EmptyNode tree) {
-                        return optionalOrderByNode
-                                .map(o -> new State(getAncestors(), Optional.empty(), child));
-                    }
-                });
+            public State of(OptionalOrderBySubTree subTree) {
+                return new State(getAncestors(), subTree);
             }
 
-            private State normalizeChild() {
-                return new State(getAncestors(), optionalOrderByNode, child.normalizeForOptimization(variableGenerator));
+            public State of(UnaryOperatorNode node, OptionalOrderBySubTree subTree) {
+                return new State(getAncestors().append(node), subTree);
             }
 
             @Override
             public IQTree asIQTree() {
-                IQTree orderByLevelTree = iqTreeTools.unaryIQTreeBuilder()
-                        .append(optionalOrderByNode, treeCache::declareAsNormalizedForOptimizationWithEffect)
-                        .build(child);
-
-                if (getAncestors().isEmpty())
-                    return orderByLevelTree;
-
-                return iqTreeTools.unaryIQTreeBuilder()
-                        .append(getAncestors())
-                        .build(orderByLevelTree)
-                        // Normalizes the ancestors (recursive)
-                        .normalizeForOptimization(variableGenerator);
+                return asIQTree0(this);
             }
 
             @Override
             public boolean equals(Object o) {
                 if (o instanceof State) {
                     State other = (State) o;
-                    return optionalOrderByNode.equals(other.optionalOrderByNode)
-                            && child.equals(other.child)
+                    return subTree.equals(other.subTree)
                             && getAncestors().equals(other.getAncestors());
+                }
+                return false;
+            }
+        }
+
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        public class OptionalOrderBySubTree {
+            private final Optional<OrderByNode> optionalOrderByNode;
+            private final IQTree child;
+
+            private OptionalOrderBySubTree(Optional<OrderByNode> optionalOrderByNode, IQTree child) {
+                this.optionalOrderByNode = optionalOrderByNode;
+                this.child = child;
+            }
+
+            IQTree getChild() {
+                return child;
+            }
+
+            Optional<OrderByNode> getOptionalOrderByNode() {
+                return optionalOrderByNode;
+            }
+
+            OptionalOrderBySubTree normalizeChild() {
+                return new OptionalOrderBySubTree(optionalOrderByNode, child.normalizeForOptimization(variableGenerator));
+            }
+
+            OptionalOrderBySubTree simplify() {
+                var variableNullability = child.getVariableNullability();
+                var optionalNewComparators = optionalOrderByNode
+                        .map(o -> o.getComparators().stream()
+                                .flatMap(c -> Stream.of(c.getTerm())
+                                        .map(t -> t.simplify(variableNullability))
+                                        .filter(t -> t instanceof NonGroundTerm)
+                                        .map(t -> (NonGroundTerm) t)
+                                        .map(t -> iqFactory.createOrderComparator(t, c.isAscending())))
+                                .collect(ImmutableCollectors.toList()));
+
+                return new OptionalOrderBySubTree(
+                        optionalNewComparators
+                                .filter(cs -> !cs.isEmpty())
+                                .map(iqFactory::createOrderByNode),
+                        child);
+            }
+            
+            @Override
+            public boolean equals(Object o) {
+                if (o instanceof OptionalOrderBySubTree) {
+                    OptionalOrderBySubTree other = (OptionalOrderBySubTree) o;
+                    return optionalOrderByNode.equals(other.optionalOrderByNode)
+                            && child.equals(other.child);
                 }
                 return false;
             }
