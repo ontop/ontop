@@ -99,12 +99,38 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
 
         IQTree liftBindingConstructionChild(ConstructionNode constructionNode, IQTree grandChild) {
 
-            InjectiveBindingLiftState finalState = IQStateOptionalTransformer.reachFinalState(
-                    new InjectiveBindingLiftState(constructionNode, grandChild),
-                    InjectiveBindingLiftState::liftBindings,
+            NormalizationContext.NormalizationState2<ConstructionNode, InjectiveBindingLiftContext.ConstructionSubTree> finalState = IQStateOptionalTransformer.reachFinalState(
+                    new NormalizationContext.NormalizationState2<>(new ConstructionSubTree(constructionNode, grandChild)),
+                    this::liftBindings,
                     MAX_ITERATIONS);
 
-            return finalState.asIQTree();
+            return asIQTree(finalState);
+        }
+
+        protected IQTree asIQTree(NormalizationContext.NormalizationState2<ConstructionNode, InjectiveBindingLiftContext.ConstructionSubTree> state) {
+
+            IQTree grandChildTree = state.getSubTree().getChild();
+            // No need to have a DISTINCT as a grand child
+            IQTree newGrandChildTree = IQTreeTools.UnaryIQTreeDecomposition.of(grandChildTree, DistinctNode.class)
+                    .getTail();
+
+            IQTreeCache childTreeCache = iqFactory.createIQTreeCache(newGrandChildTree == grandChildTree);
+
+            IQTree newChildTree = state.getSubTree().getOptionalConstructionNode()
+                    .map(c -> iqFactory.createUnaryIQTree(c, newGrandChildTree, childTreeCache))
+                    // To be normalized again in case a DISTINCT was present as a grand child.
+                    // NB: does nothing if it is not the case
+                    .map(t -> t.normalizeForOptimization(variableGenerator))
+                    .orElse(newGrandChildTree);
+
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(state.getAncestors())
+                    .append(
+                            iqTreeTools.createOptionalDistinctNode(!newChildTree.isDistinct()),
+                            treeCache::declareAsNormalizedForOptimizationWithEffect)
+                    .build(newChildTree)
+                    // Recursive (for merging top construction nodes)
+                    .normalizeForOptimization(variableGenerator);
         }
     }
 
