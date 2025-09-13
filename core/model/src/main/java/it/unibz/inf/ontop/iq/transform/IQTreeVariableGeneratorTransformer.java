@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.transform;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.transform.impl.CompositeIQTreeVariableGeneratorTransformer;
@@ -25,7 +26,15 @@ public interface IQTreeVariableGeneratorTransformer {
     }
 
     static IQTreeVariableGeneratorTransformer of(IQTreeVariableGeneratorTransformer... transformers) {
-        return new CompositeIQTreeVariableGeneratorTransformer(transformers);
+        ImmutableList<IQTreeVariableGeneratorTransformer> list = ImmutableList.copyOf(transformers);
+        return (t, vg) -> {
+            // non-final
+            IQTree tree = t;
+            for (IQTreeVariableGeneratorTransformer transformer : list) {
+                tree = transformer.transform(tree, vg);
+            }
+            return tree;
+        };
     }
 
     default IQTreeVariableGeneratorTransformer fixpoint() {
