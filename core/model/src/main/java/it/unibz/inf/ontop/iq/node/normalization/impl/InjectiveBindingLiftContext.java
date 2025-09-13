@@ -6,8 +6,10 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -17,8 +19,6 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 
@@ -32,107 +32,132 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
  * Also used for the normalization of AggregationNodes.
  *
  */
-public class InjectiveBindingLiftContext {
+public class InjectiveBindingLiftContext extends NormalizationContext {
 
     protected final IQTreeTools iqTreeTools;
+    protected final IntermediateQueryFactory iqFactory;
     protected final SubstitutionFactory substitutionFactory;
 
-    protected final VariableGenerator variableGenerator;
+    protected final IQTreeCache treeCache;
 
-    public InjectiveBindingLiftContext(VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
+    public InjectiveBindingLiftContext(VariableGenerator variableGenerator, CoreSingletons coreSingletons, IQTreeCache treeCache) {
+        super(variableGenerator);
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
-        this.variableGenerator = variableGenerator;
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.treeCache = treeCache;
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    protected class InjectiveBindingLiftState {
+    protected class InjectiveBindingLiftState extends NormalizationState<ConstructionNode> {
 
-        private final UnaryOperatorSequence<ConstructionNode> ancestors;
-        private final Optional<ConstructionNode> optionalChildConstructionNode;
+        private final Optional<ConstructionNode> optionalConstructionNode;
         // First descendent tree not starting with a construction node
-        private final IQTree grandChildTree;
+        private final IQTree child;
 
         /**
          * Initial state
          */
-        protected InjectiveBindingLiftState(ConstructionNode childConstructionNode, IQTree grandChildTree) {
-            this(UnaryOperatorSequence.of(), Optional.of(childConstructionNode), grandChildTree);
+        protected InjectiveBindingLiftState(ConstructionNode constructionNode, IQTree child) {
+            this(UnaryOperatorSequence.of(), Optional.of(constructionNode), child);
         }
 
         private InjectiveBindingLiftState(UnaryOperatorSequence<ConstructionNode> ancestors,
-                                          Optional<ConstructionNode> optionalChildConstructionNode, IQTree grandChildTree) {
-            this.ancestors = ancestors;
-            this.grandChildTree = grandChildTree;
-            this.optionalChildConstructionNode = optionalChildConstructionNode;
+                                          Optional<ConstructionNode> optionalConstructionNode, IQTree child) {
+            super(ancestors);
+            this.optionalConstructionNode = optionalConstructionNode;
+            this.child = child;
         }
 
-        protected IQTree getGrandChildTree() {
-            return grandChildTree;
+        protected IQTree getChild() {
+            return child;
         }
 
-        protected Optional<ConstructionNode> getChildConstructionNode() {
-            return optionalChildConstructionNode;
-        }
-
-        protected UnaryOperatorSequence<ConstructionNode> getAncestors() {
-            return ancestors;
+        protected Optional<ConstructionNode> getOptionalConstructionNode() {
+            return optionalConstructionNode;
         }
 
         protected Optional<InjectiveBindingLiftState> liftBindings() {
-            if (optionalChildConstructionNode.isEmpty())
+            if (optionalConstructionNode.isEmpty())
                 return Optional.empty();
 
-            ConstructionNode childConstructionNode = optionalChildConstructionNode.get();
+            ConstructionNode constructionNode = optionalConstructionNode.get();
 
-            Substitution<ImmutableTerm> childSubstitution = childConstructionNode.getSubstitution();
-            if (childSubstitution.isEmpty())
+            Substitution<ImmutableTerm> substitution = constructionNode.getSubstitution();
+            if (substitution.isEmpty())
                 return Optional.empty();
 
-            VariableNullability grandChildVariableNullability = grandChildTree.getVariableNullability();
-            ImmutableSet<Variable> nonFreeVariables = childConstructionNode.getVariables();
+            VariableNullability grandChildVariableNullability = child.getVariableNullability();
+            ImmutableSet<Variable> nonFreeVariables = constructionNode.getVariables();
 
             ImmutableMap<Variable, ImmutableFunctionalTerm.FunctionalTermDecomposition> injectivityDecompositionMap =
-                    childSubstitution.builder()
+                    substitution.builder()
                             .restrictRangeTo(ImmutableFunctionalTerm.class)
                             .toMapIgnoreOptional((v, t) -> t.analyzeInjectivity(nonFreeVariables, grandChildVariableNullability, variableGenerator));
 
             Substitution<ImmutableTerm> liftedSubstitution = substitutionFactory.union(
                     // All variables and constants
-                    childSubstitution.restrictRangeTo(NonFunctionalTerm.class),
+                    substitution.restrictRangeTo(NonFunctionalTerm.class),
                     // (Possibly decomposed) injective functional terms
-                    childSubstitution.builder()
+                    substitution.builder()
                             .<ImmutableTerm>restrictRangeTo(ImmutableFunctionalTerm.class)
                             .transformOrRemove(injectivityDecompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getLiftableTerm)
                             .build());
 
             Optional<ConstructionNode> liftedConstructionNode = iqTreeTools.createOptionalConstructionNode(
-                    childConstructionNode::getVariables, liftedSubstitution);
+                    constructionNode::getVariables, liftedSubstitution);
 
             ImmutableSet<Variable> newChildVariables = liftedConstructionNode
                     .map(ConstructionNode::getChildVariables)
-                    .orElseGet(childConstructionNode::getVariables);
+                    .orElseGet(constructionNode::getVariables);
 
-            Substitution<ImmutableFunctionalTerm> newChildSubstitution = childSubstitution.builder()
+            Substitution<ImmutableFunctionalTerm> newChildSubstitution = substitution.builder()
                     .restrictRangeTo(ImmutableFunctionalTerm.class)
                     .flatTransform(injectivityDecompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubstitution)
                     .build();
 
-            var newChildConstructionNode =
-                    iqTreeTools.createOptionalConstructionNode(newChildVariables, newChildSubstitution, grandChildTree);
+            var newOptionalConstructionNode =
+                    iqTreeTools.createOptionalConstructionNode(newChildVariables, newChildSubstitution, child);
 
             // Nothing lifted
-            if (newChildConstructionNode.equals(optionalChildConstructionNode)) {
+            if (newOptionalConstructionNode.equals(optionalConstructionNode)) {
                 if (liftedConstructionNode.isPresent())
                     throw new MinorOntopInternalBugException("Unexpected lifted construction node");
                 return Optional.empty();
             }
 
             return Optional.of(new InjectiveBindingLiftState(
-                    ancestors.append(liftedConstructionNode
+                    getAncestors().append(liftedConstructionNode
                             .orElseThrow(() -> new MinorOntopInternalBugException("A lifted construction node was expected"))),
-                    newChildConstructionNode,
-                    grandChildTree));
+                    newOptionalConstructionNode,
+                    child));
+        }
+
+        @Override
+        protected IQTree asIQTree() {
+
+            IQTree grandChildTree = getChild();
+            // No need to have a DISTINCT as a grand child
+            IQTree newGrandChildTree = IQTreeTools.UnaryIQTreeDecomposition.of(grandChildTree, DistinctNode.class)
+                    .getTail();
+
+            IQTreeCache childTreeCache = iqFactory.createIQTreeCache(newGrandChildTree == grandChildTree);
+
+            IQTree newChildTree = getOptionalConstructionNode()
+                    .map(c -> iqFactory.createUnaryIQTree(c, newGrandChildTree, childTreeCache))
+                    // To be normalized again in case a DISTINCT was present as a grand child.
+                    // NB: does nothing if it is not the case
+                    .map(t -> t.normalizeForOptimization(variableGenerator))
+                    .orElse(newGrandChildTree);
+
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(getAncestors())
+                    .append(
+                            iqTreeTools.createOptionalDistinctNode(!newChildTree.isDistinct()),
+                            treeCache::declareAsNormalizedForOptimizationWithEffect)
+                    .build(newChildTree)
+                    // Recursive (for merging top construction nodes)
+                    .normalizeForOptimization(variableGenerator);
         }
     }
 }

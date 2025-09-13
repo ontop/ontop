@@ -68,19 +68,18 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         return context.normalize();
     }
 
-    private class Context {
+    private class Context extends NormalizationContext {
 
         private final InnerJoinNode innerJoinNode;
         private final ImmutableList<IQTree> initialChildren;
-        private final VariableGenerator variableGenerator;
         private final IQTreeCache treeCache;
 
         private final ImmutableSet<Variable> projectedVariables;
 
         private Context(InnerJoinNode innerJoinNode, ImmutableList<IQTree> initialChildren, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+            super(variableGenerator);
             this.innerJoinNode = innerJoinNode;
             this.initialChildren = initialChildren;
-            this.variableGenerator = variableGenerator;
             this.treeCache = treeCache;
             this.projectedVariables = NaryIQTreeTools.projectedVariables(initialChildren);
         }
@@ -100,23 +99,22 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
          */
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        private class State {
-            private final UnaryOperatorSequence<UnaryOperatorNode> ancestors;
+        private class State extends NormalizationState<UnaryOperatorNode> {
             private final Optional<ImmutableExpression> joiningCondition;
             private final ImmutableList<IQTree> children;
 
             private State(UnaryOperatorSequence<UnaryOperatorNode> ancestors, Optional<ImmutableExpression> joiningCondition, ImmutableList<IQTree> children) {
-                this.ancestors = ancestors;
+                super(ancestors);
                 this.joiningCondition = joiningCondition;
                 this.children = children;
             }
 
             State update(Optional<ImmutableExpression> newCondition, ImmutableList<IQTree> newChildren) {
-                return new State(ancestors, newCondition, newChildren);
+                return new State(getAncestors(), newCondition, newChildren);
             }
 
             State update(Optional<? extends UnaryOperatorNode> newParent, Optional<ImmutableExpression> newCondition, ImmutableList<IQTree> newChildren) {
-                return new State(ancestors.append(newParent), newCondition, newChildren);
+                return new State(getAncestors().append(newParent), newCondition, newChildren);
             }
 
             /**
@@ -134,7 +132,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     State that = (State) o;
                     return joiningCondition.equals(that.joiningCondition)
                             && children.equals(that.children)
-                            && ancestors.equals(that.ancestors);
+                            && getAncestors().equals(that.getAncestors());
                 }
                 return false;
             }
@@ -226,15 +224,15 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             }
 
 
-            IQTree asIQTree() {
+            @Override
+            protected IQTree asIQTree() {
 
                 IQTree joinLevelTree = createJoinOrFilterOrEmptyOrLiftLeft(treeCache.declareAsNormalizedForOptimizationWithEffect());
-
                 if (joinLevelTree.isDeclaredAsEmpty())
                     return joinLevelTree;
 
                 IQTree nonNormalizedTree = iqTreeTools.unaryIQTreeBuilder(projectedVariables)
-                        .append(ancestors)
+                        .append(getAncestors())
                         .build(joinLevelTree);
 
                 // Normalizes the ancestors (recursive)
@@ -242,7 +240,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             }
 
 
-            IQTree createJoinOrFilterOrEmptyOrLiftLeft(IQTreeCache normalizedTreeCache) {
+            private IQTree createJoinOrFilterOrEmptyOrLiftLeft(IQTreeCache normalizedTreeCache) {
                 switch (children.size()) {
                     case 0:
                         return iqFactory.createTrueNode();

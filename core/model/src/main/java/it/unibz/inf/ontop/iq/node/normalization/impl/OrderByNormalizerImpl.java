@@ -38,24 +38,23 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
         return context.normalize();
     }
 
-    protected class Context {
+    protected class Context extends NormalizationContext {
         private final OrderByNode initialOrderByNode;
         private final IQTree initialChild;
-        private final VariableGenerator variableGenerator;
         private final IQTreeCache treeCache;
 
         protected Context(OrderByNode initialOrderByNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+            super(variableGenerator);
             this.initialOrderByNode = initialOrderByNode;
             this.initialChild = initialChild;
-            this.variableGenerator = variableGenerator;
             this.treeCache = treeCache;
         }
 
         IQTree normalize() {
-            State initial =  new State(UnaryOperatorSequence.of(), Optional.of(initialOrderByNode), initialChild);
+            State initial = new State(UnaryOperatorSequence.of(), Optional.of(initialOrderByNode), initialChild);
             State simplified = initial.simplifyOrderByNode().normalizeChild();
             if (simplified.optionalOrderByNode.isEmpty())
-                return simplified.toIQTree();
+                return simplified.asIQTree();
 
             // NB: the loop is due to the lifting of both distinct and construction nodes
             State state = reachFixedPoint(
@@ -63,7 +62,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
                     s -> IQStateOptionalTransformer.reachFinalState(s, State::liftThroughOrderBy)
                             .normalizeChild(),
                     MAX_NORMALIZATION_ITERATIONS);
-            return state.toIQTree();
+            return state.asIQTree();
         }
 
         /**
@@ -71,13 +70,12 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
          * followed by an optional OrderByNode, followed by a child tree.
          */
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        protected class State {
-            private final UnaryOperatorSequence<UnaryOperatorNode> ancestors;
+        protected class State extends NormalizationState<UnaryOperatorNode> {
             private final Optional<OrderByNode> optionalOrderByNode;
             private final IQTree child;
 
             private State(UnaryOperatorSequence<UnaryOperatorNode> ancestors, Optional<OrderByNode> optionalOrderByNode, IQTree child) {
-                this.ancestors = ancestors;
+                super(ancestors);
                 this.optionalOrderByNode = optionalOrderByNode;
                 this.child = child;
             }
@@ -93,7 +91,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
                                 .map(t -> iqFactory.createOrderComparator(t, c.isAscending())))
                         .collect(ImmutableCollectors.toList()));
 
-                return new State(ancestors,
+                return new State(getAncestors(),
                         optionalNewComparators
                                 .filter(cs -> !cs.isEmpty())
                                 .map(iqFactory::createOrderByNode),
@@ -108,7 +106,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
                     public Optional<State> transformConstruction(UnaryIQTree tree, ConstructionNode node, IQTree newChild) {
                         return optionalOrderByNode
                                 .map(o -> new State(
-                                        ancestors.append(node),
+                                        getAncestors().append(node),
                                         o.applySubstitution(node.getSubstitution()),
                                         newChild)
                                         .simplifyOrderByNode());
@@ -117,31 +115,32 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
                     @Override
                     public Optional<State> transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree newChild) {
                         return optionalOrderByNode
-                                .map(o -> new State(ancestors.append(node), optionalOrderByNode, newChild));
+                                .map(o -> new State(getAncestors().append(node), optionalOrderByNode, newChild));
                     }
 
                     @Override
                     public Optional<State> transformEmpty(EmptyNode tree) {
                         return optionalOrderByNode
-                                .map(o -> new State(ancestors, Optional.empty(), child));
+                                .map(o -> new State(getAncestors(), Optional.empty(), child));
                     }
                 });
             }
 
             private State normalizeChild() {
-                return new State(ancestors, optionalOrderByNode, child.normalizeForOptimization(variableGenerator));
+                return new State(getAncestors(), optionalOrderByNode, child.normalizeForOptimization(variableGenerator));
             }
 
-            public IQTree toIQTree() {
+            @Override
+            public IQTree asIQTree() {
                 IQTree orderByLevelTree = iqTreeTools.unaryIQTreeBuilder()
                         .append(optionalOrderByNode, treeCache::declareAsNormalizedForOptimizationWithEffect)
                         .build(child);
 
-                if (ancestors.isEmpty())
+                if (getAncestors().isEmpty())
                     return orderByLevelTree;
 
                 return iqTreeTools.unaryIQTreeBuilder()
-                        .append(ancestors)
+                        .append(getAncestors())
                         .build(orderByLevelTree)
                         // Normalizes the ancestors (recursive)
                         .normalizeForOptimization(variableGenerator);
@@ -151,9 +150,9 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
             public boolean equals(Object o) {
                 if (o instanceof State) {
                     State other = (State) o;
-                    return ancestors.equals(other.ancestors)
-                            && optionalOrderByNode.equals(other.optionalOrderByNode)
-                            && child.equals(other.child);
+                    return optionalOrderByNode.equals(other.optionalOrderByNode)
+                            && child.equals(other.child)
+                            && getAncestors().equals(other.getAncestors());
                 }
                 return false;
             }

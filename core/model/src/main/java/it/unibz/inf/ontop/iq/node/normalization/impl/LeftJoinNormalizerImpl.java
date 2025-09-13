@@ -29,7 +29,6 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.*;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
-
 @Singleton
 public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
@@ -73,20 +72,19 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         return context.normalize();
     }
 
-    private class Context {
+    private class Context extends NormalizationContext {
         private final LeftJoinNode ljNode;
         private final IQTree initialLeftChild;
         private final IQTree initialRightChild;
-        private final VariableGenerator variableGenerator;
         private final IQTreeCache treeCache;
 
         private final ImmutableSet<Variable> projectedVariables;
 
         private Context(LeftJoinNode ljNode, IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+            super(variableGenerator);
             this.ljNode = ljNode;
             this.initialLeftChild = initialLeftChild;
             this.initialRightChild = initialRightChild;
-            this.variableGenerator = variableGenerator;
             this.treeCache = treeCache;
 
             this.projectedVariables = Stream.of(initialLeftChild, initialRightChild)
@@ -135,8 +133,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
          */
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        private class LJNormalizationState {
-            private final UnaryOperatorSequence<UnaryOperatorNode> ancestors;
+        private class LJNormalizationState extends NormalizationState<UnaryOperatorNode> {
             private final Optional<ImmutableExpression> ljCondition;
             private final IQTree leftChild;
             private final IQTree rightChild;
@@ -144,7 +141,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             LJNormalizationState(UnaryOperatorSequence<UnaryOperatorNode> ancestors,
                                  Optional<ImmutableExpression> ljCondition,
                                  IQTree leftChild, IQTree rightChild) {
-                this.ancestors = ancestors;
+                super(ancestors);
                 this.ljCondition = ljCondition;
                 this.leftChild = leftChild;
                 this.rightChild = rightChild;
@@ -160,11 +157,11 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             }
 
             LJNormalizationState update(UnaryOperatorNode node, Optional<ImmutableExpression> newLJCondition, IQTree newLeftChild, IQTree newRightChild) {
-                return new LJNormalizationState(ancestors.append(node), newLJCondition, newLeftChild, newRightChild);
+                return new LJNormalizationState(getAncestors().append(node), newLJCondition, newLeftChild, newRightChild);
             }
 
             LJNormalizationState update(Optional<ImmutableExpression> newLJCondition, IQTree newLeftChild, IQTree newRightChild) {
-                return new LJNormalizationState(ancestors, newLJCondition, newLeftChild, newRightChild);
+                return new LJNormalizationState(getAncestors(), newLJCondition, newLeftChild, newRightChild);
             }
 
             LJNormalizationState normalizeLeftChild() {
@@ -273,7 +270,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             private class LiftRightChildStep extends IQStateOptionalTransformer<LJNormalizationState> {
 
                 Optional<LJNormalizationState> rightLift(Optional<? extends UnaryOperatorNode> parent, Optional<ImmutableExpression> newLJCondition, IQTree newRightChild) {
-                    return Optional.of(new LJNormalizationState(ancestors.append(parent), newLJCondition, leftChild, newRightChild));
+                    return Optional.of(new LJNormalizationState(getAncestors().append(parent), newLJCondition, leftChild, newRightChild));
                 }
 
                 Optional<LJNormalizationState> rightLift(UnaryOperatorNode parent, Optional<ImmutableExpression> newLJCondition, IQTree newRightChild) {
@@ -429,7 +426,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     return leftChild.equals(that.leftChild)
                             && rightChild.equals(that.rightChild)
                             && ljCondition.equals(that.ljCondition)
-                            && ancestors.equals(that.ancestors);
+                            && getAncestors().equals(that.getAncestors());
                 }
                 return false;
             }
@@ -484,7 +481,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 return leftChild.isDeclaredAsEmpty();
             }
 
-            public IQTree asIQTree() {
+            @Override
+            protected IQTree asIQTree() {
                 if (isEmpty())
                     return iqFactory.createEmptyNode(projectedVariables);
 
@@ -509,7 +507,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 }
 
                 IQTree nonNormalizedTree = iqTreeTools.unaryIQTreeBuilder(projectedVariables)
-                        .append(ancestors)
+                        .append(getAncestors())
                         .build(ljLevelTree);
 
                 // Normalizes the ancestors (recursive)

@@ -17,7 +17,7 @@ public abstract class AbstractIQTree implements IQTree {
         this.iqFactory = iqFactory;
     }
 
-    protected <T> @Nonnull T getCachedValue(Supplier<T> supplier, Supplier<T> constructor, Consumer<T> storer) {
+    protected <T> @Nonnull T getCachedValue(Supplier<T> supplier, Supplier<@Nonnull T> constructor, Consumer<@Nonnull T> storer) {
         // Non-final
         T value = supplier.get();
         if (value == null) {
