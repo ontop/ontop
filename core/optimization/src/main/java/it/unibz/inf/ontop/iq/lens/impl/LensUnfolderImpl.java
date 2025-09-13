@@ -58,8 +58,8 @@ public class LensUnfolderImpl extends AbstractIQOptimizer implements LensUnfolde
                         ? dataNode
                         : merge(dataNode, lens.getIQ());
             }
-            else
-                return dataNode;
+
+            return dataNode;
         }
 
         private IQTree merge(ExtensionalDataNode dataNode, IQ definition) {
