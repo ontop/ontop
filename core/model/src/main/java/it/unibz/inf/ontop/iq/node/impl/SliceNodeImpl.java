@@ -110,12 +110,12 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
         if (newChild instanceof ValuesNode) {
             ValuesNode valuesNode = (ValuesNode) newChild;
-            ImmutableList<ImmutableList<Constant>> values = valuesNode.getValues();
+            ImmutableList<ImmutableMap<Variable, Constant>> values = valuesNode.getValueMaps();
             if (values.size() <= offset)
                 return iqFactory.createEmptyNode(valuesNode.getVariables());
 
             return iqFactory.createValuesNode(
-                    valuesNode.getOrderedVariables(),
+                    valuesNode.getVariables(),
                     // TODO: complain if the offset or the limit are too big to be casted as integers
                     values.subList((int)offset,
                             Integer.min(getLimit().map(l -> l + offset).orElse(offset).intValue(), values.size())))
@@ -216,7 +216,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         if (tree instanceof TrueNode)
             return Optional.of(1);
         if (tree instanceof ValuesNode)
-            return Optional.of(((ValuesNode) tree).getValues().size());
+            return Optional.of(((ValuesNode) tree).getValueMaps().size());
 
         var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
         if (construction.isPresent())

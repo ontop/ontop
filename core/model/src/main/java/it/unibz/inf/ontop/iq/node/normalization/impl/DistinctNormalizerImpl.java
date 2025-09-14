@@ -136,8 +136,8 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
 
 
     private IQTree simplifyValuesNode(ValuesNode valuesNode) {
-        return iqFactory.createValuesNode(valuesNode.getOrderedVariables(),
-                valuesNode.getValues().stream()
+        return iqFactory.createValuesNode(valuesNode.getVariables(),
+                valuesNode.getValueMaps().stream()
                         .distinct()
                         .collect(ImmutableCollectors.toList()));
     }

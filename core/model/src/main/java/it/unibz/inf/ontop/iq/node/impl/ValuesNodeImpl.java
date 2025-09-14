@@ -165,10 +165,10 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     private LeafIQTree furtherNormalize(ValuesNode valuesNode) {
-        if (valuesNode.getValues().isEmpty()) {
+        if (valuesNode.getValueMaps().isEmpty()) {
             return iqFactory.createEmptyNode(valuesNode.getVariables());
         }
-        if ((valuesNode.getVariables().isEmpty()) && (valuesNode.getValues().size() == 1)) {
+        if ((valuesNode.getVariables().isEmpty()) && (valuesNode.getValueMaps().size() == 1)) {
             return iqFactory.createTrueNode();
         }
         return valuesNode;
