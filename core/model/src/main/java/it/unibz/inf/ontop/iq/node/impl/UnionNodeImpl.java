@@ -787,15 +787,15 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             return tree;
 
         // Tries to reuse the ordered value list of a values node
-        ImmutableList<Variable> valuesVariables = children.stream()
+        ImmutableSet<Variable> valuesVariables = children.stream()
                 .filter(n -> n instanceof ValuesNode)
                 .map(n -> (ValuesNode) n)
-                .map(ValuesNode::getOrderedVariables)
+                .map(ValuesNode::getVariables)
                 .findAny()
                 // Otherwise creates an arbitrary order
-                .orElseGet(() -> ImmutableList.copyOf(unionNode.getVariables()));
+                .orElseGet(unionNode::getVariables);
 
-        ImmutableList<ImmutableList<Constant>> values = children.stream()
+        ImmutableList<ImmutableMap<Variable, Constant>> values = children.stream()
                 .filter(this::isMergeableInValuesNode)
                 .flatMap(c -> extractValues(c, valuesVariables))
                 .collect(ImmutableCollectors.toList());
@@ -838,63 +838,42 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         return false;
     }
 
-    private Stream<ImmutableList<Constant>> extractValues(IQTree tree, ImmutableList<Variable> outputOrderedVariables) {
-        if (tree instanceof ValuesNode)
-            return extractValuesFromValuesNode((ValuesNode) tree, outputOrderedVariables);
+    private Stream<ImmutableMap<Variable, Constant>> extractValues(IQTree tree, ImmutableSet<Variable> outputVariables) {
+        if (tree instanceof ValuesNode) {
+            ValuesNode valuesNode = (ValuesNode) tree;
+            if (valuesNode.getVariables().equals(outputVariables))
+                return valuesNode.getValueMaps().stream();
 
-        if (tree instanceof TrueNode)
-            return Stream.of(ImmutableList.of());
+            return valuesNode.getValueMaps().stream()
+                .map(m -> m.entrySet().stream()
+                        .filter(e -> outputVariables.contains(e.getKey()))
+                        .collect(ImmutableCollectors.toMap()));
+        }
+
+        if (tree instanceof TrueNode) // This can be allowed only if UNION has no variables!
+            return Stream.of(ImmutableMap.of());
 
         var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
         if (construction.isPresent()) {
             Substitution<ImmutableTerm> substitution = construction.getNode().getSubstitution();
             IQTree child = construction.getChild();
 
-            if (child instanceof ValuesNode)
-                return extractValuesFromValuesNode((ValuesNode) child, outputOrderedVariables, substitution);
+            if (child instanceof ValuesNode) {
+                return ((ValuesNode) child).getValueMaps().stream()
+                        .map(m -> outputVariables.stream()
+                                .collect(ImmutableCollectors.toMap(
+                                        v -> v,
+                                        v -> Optional.ofNullable(m.get(v)).orElseGet(() -> (Constant) substitution.get(v)))));
+            }
 
-            if (child instanceof TrueNode)
+            if (child instanceof TrueNode) {
                 return Stream.of(
-                        outputOrderedVariables.stream()
-                                .map(substitution::get)
-                                .map(t -> (Constant) t)
-                                .collect(ImmutableCollectors.toList()));
+                        outputVariables.stream()
+                                .collect(ImmutableCollectors.toMap(
+                                        v -> v,
+                                        v -> (Constant) substitution.get(v))));
+            }
         }
         throw new MinorOntopInternalBugException("Unexpected tree: " + tree);
-    }
-
-    private Stream<ImmutableList<Constant>> extractValuesFromValuesNode(ValuesNode valuesNode, ImmutableList<Variable> outputOrderedVariables) {
-        ImmutableList<Variable> nodeOrderedVariables = valuesNode.getOrderedVariables();
-        if (nodeOrderedVariables.equals(outputOrderedVariables))
-            return valuesNode.getValues().stream();
-
-        ImmutableList<Integer> indexes = outputOrderedVariables.stream()
-                .map(nodeOrderedVariables::indexOf)
-                .collect(ImmutableCollectors.toList());
-
-        return valuesNode.getValues().stream()
-                .map(vs -> indexes.stream()
-                        .map(vs::get)
-                        .collect(ImmutableCollectors.toList()));
-    }
-
-    private Stream<ImmutableList<Constant>> extractValuesFromValuesNode(ValuesNode valuesNode,
-                                                                        ImmutableList<Variable> outputOrderedVariables,
-                                                                        Substitution<ImmutableTerm> substitution) {
-        ImmutableList<Variable> nodeOrderedVariables = valuesNode.getOrderedVariables();
-        ImmutableMap<Variable, Integer> indexMap = outputOrderedVariables.stream()
-                .collect(ImmutableCollectors.toMap(
-                        v -> v,
-                        nodeOrderedVariables::indexOf));
-
-        return valuesNode.getValues().stream()
-                .map(vs -> outputOrderedVariables.stream()
-                        .map(v -> {
-                            int index = indexMap.get(v);
-                            return index == -1
-                                    ? (Constant) substitution.get(v)
-                                    : vs.get(index);
-                        })
-                        .collect(ImmutableCollectors.toList()));
     }
 }
