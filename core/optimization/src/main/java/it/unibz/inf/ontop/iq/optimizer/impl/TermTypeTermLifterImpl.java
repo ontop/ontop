@@ -250,7 +250,7 @@ public class TermTypeTermLifterImpl extends DelegatingIQTreeVariableGeneratorTra
                     valuesNode.getValueMaps().stream()
                             .map(m -> m.entrySet().stream()
                                     .collect(ImmutableCollectors.toMap(
-                                            e -> substitutionFactory.onVariables().apply(renaming, e.getKey()),
+                                            e -> substitutionFactory.apply(renaming, e.getKey()),
                                             e -> replaceTypeTermConstantWithFunctionalTerm(e.getValue()))))
                             .collect(ImmutableCollectors.toList()));
 
