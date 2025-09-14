@@ -246,11 +246,12 @@ public class TermTypeTermLifterImpl extends DelegatingIQTreeVariableGeneratorTra
                     .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
             ValuesNode newValuesNode = iqFactory.createValuesNode(
-                    substitutionFactory.apply(renaming, valuesNode.getOrderedVariables()),
-                    valuesNode.getValues().stream()
-                            .map(tuple -> tuple.stream()
-                                    .map(this::replaceTypeTermConstantWithFunctionalTerm)
-                                    .collect(ImmutableCollectors.toList()))
+                    substitutionFactory.apply(renaming, valuesNode.getVariables()),
+                    valuesNode.getValueMaps().stream()
+                            .map(m -> m.entrySet().stream()
+                                    .collect(ImmutableCollectors.toMap(
+                                            e -> substitutionFactory.onVariables().apply(renaming, e.getKey()),
+                                            e -> replaceTypeTermConstantWithFunctionalTerm(e.getValue()))))
                             .collect(ImmutableCollectors.toList()));
 
             ConstructionNode newConstructionNode = iqFactory.createConstructionNode(

@@ -83,28 +83,13 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
         @Override
         public IQTree transformValues(ValuesNode valuesNode) {
-
-            ImmutableList<Variable> orderedVariables = valuesNode.getOrderedVariables();
-            int arity = orderedVariables.size();
-
-            ImmutableList<Integer> indexesToRemove = IntStream.range(0, arity)
-                    .filter(i -> variablesToRemove.contains(orderedVariables.get(i)))
-                    .boxed()
-                    .collect(ImmutableCollectors.toList());
-
-            ImmutableList<Variable> newOrderedVariables = IntStream.range(0, arity)
-                    .filter(i -> !indexesToRemove.contains(i))
-                    .mapToObj(orderedVariables::get)
-                    .collect(ImmutableCollectors.toList());
-
-            ImmutableList<ImmutableList<Constant>> newValues = valuesNode.getValues().stream()
-                    .map(t -> IntStream.range(0, arity)
-                            .filter(i -> !indexesToRemove.contains(i))
-                            .mapToObj(t::get)
-                            .collect(ImmutableCollectors.toList()))
-                    .collect(ImmutableCollectors.toList());
-
-            return iqFactory.createValuesNode(newOrderedVariables, newValues);
+            return iqFactory.createValuesNode(
+                    Sets.difference(valuesNode.getVariables(), variablesToRemove).immutableCopy(),
+                    valuesNode.getValueMaps().stream()
+                            .map(m -> m.entrySet().stream()
+                                    .filter(e -> !variablesToRemove.contains(e.getKey()))
+                                    .collect(ImmutableCollectors.toMap()))
+                            .collect(ImmutableCollectors.toList()));
         }
 
         @Override
