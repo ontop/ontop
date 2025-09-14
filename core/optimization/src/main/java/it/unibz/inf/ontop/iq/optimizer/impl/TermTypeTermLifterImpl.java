@@ -228,7 +228,7 @@ public class TermTypeTermLifterImpl extends DelegatingIQTreeVariableGeneratorTra
         @Override
         public IQTree transformValues(ValuesNode valuesNode) {
             // TODO: Currently we walk through all values three times in calling the below three methods. Is there a better way?
-            ImmutableSet<Variable> metaTermTypeVariables = valuesNode.getOrderedVariables().stream()
+            ImmutableSet<Variable> metaTermTypeVariables = valuesNode.getVariables().stream()
                     .filter(v -> valuesNode.getValueStream(v)
                             .anyMatch(c1 -> c1 instanceof RDFTermTypeConstant))
                     .collect(ImmutableCollectors.toSet());
@@ -255,7 +255,7 @@ public class TermTypeTermLifterImpl extends DelegatingIQTreeVariableGeneratorTra
                             .collect(ImmutableCollectors.toList()));
 
             ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
-                    ImmutableSet.copyOf(valuesNode.getOrderedVariables()),
+                    valuesNode.getVariables(),
                     renaming.transform(t -> termFactory.getRDFTermTypeFunctionalTerm(t, dictionary, possibleConstants, false)));
 
             return iqFactory.createUnaryIQTree(newConstructionNode, newValuesNode);
