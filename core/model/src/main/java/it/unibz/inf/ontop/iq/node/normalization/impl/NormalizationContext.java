@@ -29,6 +29,41 @@ public class NormalizationContext {
                 .normalizeForOptimization(variableGenerator);
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    public static class UnarySubTree<T extends UnaryOperatorNode> {
+        private final Optional<T> optionalNode;
+        private final IQTree child;
+
+        private UnarySubTree(Optional<T> optionalNode, IQTree child) {
+            this.optionalNode = optionalNode;
+            this.child = child;
+        }
+
+        public static <T extends UnaryOperatorNode> UnarySubTree<T> of(Optional<T> optionalNode, IQTree child) {
+            return new UnarySubTree<>(optionalNode, child);
+        }
+
+        IQTree getChild() {
+            return child;
+        }
+
+        Optional<T> getOptionalNode() {
+            return optionalNode;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof UnarySubTree) {
+                UnarySubTree<?> other = (UnarySubTree<?>) o;
+                return optionalNode.equals(other.optionalNode)
+                        && child.equals(other.child);
+            }
+            return false;
+        }
+    }
+
+
+
     protected static class State<T extends UnaryOperatorNode, S> {
         private final UnaryOperatorSequence<T> ancestors;
         private final S subTree;
@@ -38,20 +73,20 @@ public class NormalizationContext {
             this.subTree = subTree;
         }
 
-        public State(S subTree) {
-            this(UnaryOperatorSequence.of(), subTree);
+        public static <T extends UnaryOperatorNode, S> State<T, S> initial(S subTree) {
+            return new State<>(UnaryOperatorSequence.of(), subTree);
         }
 
-        public State<T, S> of(S subTree) {
-            return new State<>(getAncestors(), subTree);
+        public State<T, S> replace(S subTree) {
+            return new State<>(ancestors, subTree);
         }
 
-        public State<T, S> of(T node, S subTree) {
-            return new State<>(getAncestors().append(node), subTree);
+        public State<T, S> lift(T node, S subTree) {
+            return new State<>(ancestors.append(node), subTree);
         }
 
-        public State<T, S> of(Optional<? extends T> node, S subTree) {
-            return new State<>(getAncestors().append(node), subTree);
+        public State<T, S> lift(Optional<? extends T> node, S subTree) {
+            return new State<>(ancestors.append(node), subTree);
         }
 
         protected UnaryOperatorSequence<T> getAncestors() {
@@ -66,13 +101,13 @@ public class NormalizationContext {
         public boolean equals(Object o) {
             if (o instanceof State) {
                 State<?, ?> other = (State<?, ?>) o;
-                return subTree.equals(other.subTree)
-                        && ancestors.equals(other.ancestors);
+                return ancestors.equals(other.ancestors)
+                        && subTree.equals(other.subTree);
             }
             return false;
         }
 
-        public State<T, S> reachFinalState(Function<State<T, S>, Optional<State<T, S>>> transformer) {
+        public State<T, S> reachFinal(Function<State<T, S>, Optional<State<T, S>>> transformer) {
             //Non-final
             State<T, S> state = this;
             while (true) {
@@ -94,9 +129,5 @@ public class NormalizationContext {
             }
             throw new MinorOntopInternalBugException(String.format("Has not converged in %d iterations", maxIterations));
         }
-
-
-
     }
-
 }

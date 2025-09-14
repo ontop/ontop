@@ -131,7 +131,7 @@ public class InjectiveBindingLiftContext extends NormalizationContext {
             return Optional.empty();
         }
 
-        return Optional.of(state.of(liftedConstructionNode
+        return Optional.of(state.lift(liftedConstructionNode
                         .orElseThrow(() -> new MinorOntopInternalBugException("A lifted construction node was expected")),
                 new ConstructionSubTree(newOptionalConstructionNode, state.getSubTree().child)));
     }

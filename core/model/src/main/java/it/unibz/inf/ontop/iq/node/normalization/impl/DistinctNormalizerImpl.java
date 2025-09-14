@@ -100,7 +100,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
         IQTree liftBindingConstructionChild(ConstructionNode constructionNode, IQTree grandChild) {
 
             State<ConstructionNode, ConstructionSubTree> finalState = IQStateOptionalTransformer.reachFinalState(
-                    new State<>(new ConstructionSubTree(constructionNode, grandChild)),
+                    State.initial(new ConstructionSubTree(constructionNode, grandChild)),
                     this::liftBindings,
                     MAX_ITERATIONS);
 

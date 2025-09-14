@@ -155,10 +155,10 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             if (construction.isPresent()) {
                 stateAfterLiftingBindings = liftGroupingBindings(
                         propagateNonGroupingBindingsIntoToAggregationSubstitution(
-                                new State<>(new AggregationSubTree(aggregationNode, construction.getOptionalNode(), construction.getChild()))));
+                                State.initial(new AggregationSubTree(aggregationNode, construction.getOptionalNode(), construction.getChild()))));
             }
             else {
-                stateAfterLiftingBindings = new State<>(new AggregationSubTree(aggregationNode, Optional.empty(), shrunkChild));
+                stateAfterLiftingBindings = State.initial(new AggregationSubTree(aggregationNode, Optional.empty(), shrunkChild));
             }
 
             State<ConstructionNode, AggregationSubTree> finalState = simplifyAggregationSubstitution(stateAfterLiftingBindings);
@@ -197,7 +197,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             Optional<ConstructionNode> newChildConstructionNode = iqTreeTools.createOptionalConstructionNode(
                     newAggregationNode::getChildVariables, substitution.restrictDomainTo(state.getSubTree().groupingVariables));
 
-            return state.of(new AggregationSubTree(state.getSubTree().sampleFilter, state.getSubTree().groupingVariables,
+            return state.replace(new AggregationSubTree(state.getSubTree().sampleFilter, state.getSubTree().groupingVariables,
                     newAggregationSubstitution, newChildConstructionNode, state.getSubTree().grandChild));
         }
 
@@ -222,7 +222,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             ConstructionNode groupingConstructionNode = iqFactory.createConstructionNode(state.getSubTree().groupingVariables, substitution);
 
             State<ConstructionNode, ConstructionSubTree> subState = IQStateOptionalTransformer.reachFinalState(
-                    new State<>(new ConstructionSubTree(groupingConstructionNode, state.getSubTree().grandChild)),
+                    State.initial(new ConstructionSubTree(groupingConstructionNode, state.getSubTree().grandChild)),
                     this::liftBindings,
                     MAX_ITERATIONS);
 
@@ -322,7 +322,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     .build();
 
             if (liftedSubstitution.isEmpty())
-                return state.of(new AggregationSubTree(state.getSubTree().sampleFilter, state.getSubTree().groupingVariables,
+                return state.replace(new AggregationSubTree(state.getSubTree().sampleFilter, state.getSubTree().groupingVariables,
                         newAggregationSubstitution, state.getSubTree().childConstructionNode, state.getSubTree().grandChild));
 
             ConstructionNode liftedConstructionNode = iqFactory.createConstructionNode(
@@ -332,7 +332,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             ImmutableSet<Variable> newGroupingVariables = Sets.difference(liftedConstructionNode.getChildVariables(),
                     newAggregationSubstitution.getDomain()).immutableCopy();
 
-            return state.of(liftedConstructionNode, new AggregationSubTree(state.getSubTree().sampleFilter, newGroupingVariables,
+            return state.lift(liftedConstructionNode, new AggregationSubTree(state.getSubTree().sampleFilter, newGroupingVariables,
                     newAggregationSubstitution, state.getSubTree().childConstructionNode, state.getSubTree().grandChild));
         }
 

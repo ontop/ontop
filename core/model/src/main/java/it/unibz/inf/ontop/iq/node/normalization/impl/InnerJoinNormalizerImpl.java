@@ -110,7 +110,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
         IQTree normalize() {
             return asIQTree(IQStateOptionalTransformer.reachFixedPoint(
-                            new State<>(new InnerJoinSubTree(innerJoinNode.getOptionalFilterCondition(), initialChildren)),
+                            State.initial(new InnerJoinSubTree(innerJoinNode.getOptionalFilterCondition(), initialChildren)),
                             s ->
                                     liftFilterInnerJoinProjectingConstruction(
                                         liftBindingsAndDistincts(s)),
@@ -123,7 +123,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
              */
             State<UnaryOperatorNode, InnerJoinSubTree> declareAsEmpty() {
                 EmptyNode emptyChild = iqFactory.createEmptyNode(projectedVariables);
-                return new State<>(new InnerJoinSubTree(Optional.empty(), ImmutableList.of(emptyChild)));
+                return State.initial(new InnerJoinSubTree(Optional.empty(), ImmutableList.of(emptyChild)));
             }
 
 
@@ -153,7 +153,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                         .anyMatch(IQTree::isDeclaredAsEmpty))
                     return declareAsEmpty();
 
-                return state.of(new InnerJoinSubTree(state.getSubTree().joiningCondition, liftedChildren));
+                return state.replace(new InnerJoinSubTree(state.getSubTree().joiningCondition, liftedChildren));
             }
 
             Optional<State<UnaryOperatorNode, InnerJoinSubTree>> liftOneChildBinding(State<UnaryOperatorNode, InnerJoinSubTree> state) {
@@ -205,7 +205,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     Optional<ConstructionNode> newParent =
                             iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, normalization.getNormalizedSubstitution());
 
-                    return Optional.of(state.of(newParent, new InnerJoinSubTree(newCondition, newChildren)));
+                    return Optional.of(state.lift(newParent, new InnerJoinSubTree(newCondition, newChildren)));
                 }
                 catch (UnsatisfiableConditionException e) {
                     return Optional.of(declareAsEmpty());
@@ -310,7 +310,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                             () -> NaryIQTreeTools.projectedVariables(state.getSubTree().children),
                             simplifiedJoinCondition.getSubstitution());
 
-                    return state.of(newParent, new InnerJoinSubTree(newJoiningCondition, newChildren));
+                    return state.lift(newParent, new InnerJoinSubTree(newJoiningCondition, newChildren));
                 }
                 catch (UnsatisfiableConditionException e) {
                     return declareAsEmpty();
@@ -327,7 +327,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                                             .map(IQTree::removeDistincts)
                                             .collect(ImmutableCollectors.toList());
 
-                                    return Optional.of(state.of(node, new InnerJoinSubTree(state.getSubTree().joiningCondition, newChildren)));
+                                    return Optional.of(state.lift(node, new InnerJoinSubTree(state.getSubTree().joiningCondition, newChildren)));
                                 }
                                 return Optional.empty();
                             }
@@ -361,7 +361,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 if (state.getSubTree().children.equals(newChildren))
                     return state;
 
-                return state.of(
+                return state.lift(
                         iqFactory.createConstructionNode(
                             NaryIQTreeTools.projectedVariables(state.getSubTree().children)),
                         new InnerJoinSubTree(newJoiningCondition, newChildren));
