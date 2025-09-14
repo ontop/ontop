@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.iq.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -12,6 +14,7 @@ import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransforme
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -49,14 +52,16 @@ public class EmptyRowsValuesNodeTransformerImpl extends DelegatingIQTreeVariable
 
         @Override
         public IQTree transformValues(ValuesNode valuesNode) {
-            if (valuesNode.getValues().stream().allMatch(ImmutableList::isEmpty)) {
-                DBConstant placeholder = termFactory.getDBStringConstant("placeholder");
+            if (valuesNode.getValueMaps().stream().allMatch(ImmutableMap::isEmpty)) {
+                ImmutableMap<Variable, Constant> map = ImmutableMap.of(
+                        variableGenerator.generateNewVariable(),
+                        termFactory.getDBStringConstant("placeholder"));
 
-                ImmutableList<ImmutableList<Constant>> newValues = IntStream.range(0, valuesNode.getValues().size())
-                        .mapToObj(i -> ImmutableList.<Constant>of(placeholder))
+                var newValues = IntStream.range(0, valuesNode.getValueMaps().size())
+                        .mapToObj(i -> map)
                         .collect(ImmutableCollectors.toList());
 
-                return iqFactory.createValuesNode(ImmutableList.of(variableGenerator.generateNewVariable()), newValues);
+                return iqFactory.createValuesNode(map.keySet(), newValues);
             }
 
             return valuesNode;

@@ -50,10 +50,10 @@ public class ConvertValuesToUnionNormalizer implements DialectExtraNormalizer {
 
         @Override
         public IQTree transformValues(ValuesNode node) {
-            ImmutableList<Variable> orderedVariables = node.getOrderedVariables();
             ImmutableList<Substitution<ImmutableTerm>> substitutionList =
-                    node.getValues().stream()
-                            .map(tuple -> substitutionFactory.<ImmutableTerm>getSubstitution(orderedVariables, tuple))
+                    node.getValueMaps().stream()
+                            .map(m -> m.entrySet().stream()
+                                    .collect(substitutionFactory.<ImmutableTerm>toSubstitution()))
                             .collect(ImmutableCollectors.toList());
 
             return iqTreeTools.createUnionTree(node.getVariables(),

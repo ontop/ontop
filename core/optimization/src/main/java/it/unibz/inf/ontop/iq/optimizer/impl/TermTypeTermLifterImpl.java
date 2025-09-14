@@ -236,12 +236,10 @@ public class TermTypeTermLifterImpl extends DelegatingIQTreeVariableGeneratorTra
             if (metaTermTypeVariables.isEmpty())
                 return transformLeaf(valuesNode);
 
-            ImmutableSet<RDFTermTypeConstant> possibleConstants = valuesNode.getValues().stream()
-                    .map(tuple -> tuple.stream()
-                            .filter(c -> c instanceof RDFTermTypeConstant)
-                            .map(c -> (RDFTermTypeConstant) c)
-                            .collect(ImmutableCollectors.toSet()))
-                    .flatMap(Collection::stream)
+            ImmutableSet<RDFTermTypeConstant> possibleConstants = valuesNode.getValueMaps().stream()
+                    .flatMap(m -> m.values().stream())
+                    .filter(c -> c instanceof RDFTermTypeConstant)
+                    .map(c -> (RDFTermTypeConstant) c)
                     .collect(ImmutableCollectors.toSet());
 
             InjectiveSubstitution<Variable> renaming = metaTermTypeVariables.stream()
