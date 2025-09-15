@@ -9,7 +9,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.sql.SQLException;
 
-@Ignore
+
 public class TimeIntervalTest extends AbstractRDF4JTest {
 
     private static final String OBDA_FILE = "/time-interval/mapping.obda";
@@ -30,7 +30,7 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
         String sparql = "SELECT * WHERE {\n" +
                 "    BIND(\"2025-02-17T09:50:00\"^^xsd:dateTime + \"P1Y2M3DT4H5M6.5S\"^^xsd:duration as ?v) \n" +
                 "}";
-        runQueryAndCompare(sparql, ImmutableSet.of( "2026-04-20T13:55:06.500+02:00"));
+        runQueryAndCompare(sparql, ImmutableSet.of( "2026-04-20 13:55:06.5"));
     }
 
     @Test
@@ -40,7 +40,7 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
                 "    ?p :birthInstant ?birth .\n" +
                 "    BIND(?birth + \"PT15M\"^^xsd:duration as ?v) \n" +
                 "}";
-        runQueryAndCompare(sparql, ImmutableSet.of("1993-01-01T13:30:00.000+01:00", "1998-02-02T14:35:00.000+01:00"));
+        runQueryAndCompare(sparql, ImmutableSet.of("1993-01-01 13:30:00", "1998-02-02 14:35:00"));
     }
 
     @Test
@@ -48,7 +48,15 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
         String sparql = "SELECT * WHERE {\n" +
                 "    BIND(\"2025-02-17T09:50:00+01:00\"^^xsd:dateTime - \"PT15M\"^^xsd:duration as ?v) \n" +
                 "}";
-        runQueryAndCompare(sparql, ImmutableSet.of("2025-02-17T09:35:00.000+01:00"));
+        runQueryAndCompare(sparql, ImmutableSet.of("2025-02-17 09:35:00"));
+    }
+
+    @Test
+    public void intervalDifferenceTest1() {
+        String sparql = "SELECT * WHERE {\n" +
+                "    BIND(\"2025-02-17T09:50:00+01:00\"^^xsd:dateTime + \"-PT15M\"^^xsd:duration as ?v) \n" +
+                "}";
+        runQueryAndCompare(sparql, ImmutableSet.of("2025-02-17 09:35:00"));
     }
 
     @Test
@@ -56,7 +64,7 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
         String sparql = "SELECT * WHERE {\n" +
                 "    BIND(\"P1Y2M3DT4H5M6.5S\"^^xsd:duration + \"2025-02-17T09:50:00+01:00\"^^xsd:dateTime as ?v) \n" +
                 "}";
-        runQueryAndCompare(sparql, ImmutableSet.of("2026-04-20T13:55:06.500+02:00"));
+        runQueryAndCompare(sparql, ImmutableSet.of("2026-04-20 13:55:06.5"));
     }
 
     @Test
@@ -82,6 +90,6 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
         String sparql = "SELECT * WHERE {\n" +
                 "    BIND(\"2025-02-17T09:50:00+01:00\"^^xsd:dateTime + \"P1Y2M3DT4H5M6.5S\"^^xsd:duration + \"PT15M\"^^xsd:duration as ?v) \n" +
                 "}";
-        runQueryAndCompare(sparql, ImmutableSet.of("2026-04-20T14:10:06.500+02:00"));
+        runQueryAndCompare(sparql, ImmutableSet.of("2026-04-20 14:10:06.5"));
     }
 }

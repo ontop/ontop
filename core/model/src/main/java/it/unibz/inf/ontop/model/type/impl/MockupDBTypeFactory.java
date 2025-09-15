@@ -72,6 +72,11 @@ public class MockupDBTypeFactory implements DBTypeFactory {
     }
 
     @Override
+    public DBTermType getDBIntervalType() {
+        return getDBTermType("INTERVAL");
+    }
+
+    @Override
     public boolean supportsDBGeometryType() {
         return false;
     }

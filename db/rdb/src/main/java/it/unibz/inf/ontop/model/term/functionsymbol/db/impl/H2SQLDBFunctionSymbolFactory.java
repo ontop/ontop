@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
-import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
@@ -11,9 +10,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.utils.Interval;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -337,18 +334,5 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
                 .forEach(part -> serializationBuilder.append(String.format(template, part, part)));
         serializationBuilder.append(" ELSE NULL END");
         return serializationBuilder.toString();
-    }
-
-    protected String serializeDurationAdd(ImmutableList<? extends ImmutableTerm> terms,
-                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        Interval interval = new Interval(((DBConstant)terms.get(1)).getValue());
-        String intervalYearMonth = String.format("%d-%d",
-                interval.getYears(), interval.getMonths());
-        String intervalDayTime = String.format("%d %d:%d:%f",
-                interval.getDays(), interval.getHours(), interval.getMinutes(),
-                interval.getTotalSeconds());
-        String sign = interval.isNegative() ? "-" : "+";
-        return String.format("CAST(%s AS TIMESTAMP) %s INTERVAL '%s' YEAR TO MONTH %s INTERVAL '%s' DAY TO SECOND",
-                termConverter.apply(terms.get(0)), sign, intervalYearMonth, sign, intervalDayTime);
     }
 }

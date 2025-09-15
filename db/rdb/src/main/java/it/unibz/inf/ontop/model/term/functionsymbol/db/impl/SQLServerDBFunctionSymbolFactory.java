@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.SQLServerDBTypeFactory;
-import it.unibz.inf.ontop.utils.Interval;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;

@@ -230,6 +230,7 @@ public interface DBFunctionSymbolFactory {
 
     DBMathBinaryOperator getDBMathBinaryOperator(String dbMathOperatorName, DBTermType arg1Type, DBTermType arg2Type);
 
+    DBFunctionSymbol getDBBinaryTemporalOperationFunctionSymbol(String operator, DBTermType argType1, DBTermType argType2, DBTermType DBResultType);
     /**
      * Please use getDBMathBinaryOperator(...) if you know the type
      */
@@ -372,8 +373,6 @@ public interface DBFunctionSymbolFactory {
     FunctionSymbol getDBGetSRID();
 
     // Time extension - duration arithmetic
-    DBFunctionSymbol getDBDurationAddFromDateTime();
-    DBFunctionSymbol getDBDurationAddFromDate();
     DBFunctionSymbol getDBWeeksBetweenFromDateTime();
     DBFunctionSymbol getDBWeeksBetweenFromDate();
     DBFunctionSymbol getDBDaysBetweenFromDateTime();

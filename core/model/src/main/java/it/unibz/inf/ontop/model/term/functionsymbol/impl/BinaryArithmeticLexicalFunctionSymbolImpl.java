@@ -63,9 +63,10 @@ public class BinaryArithmeticLexicalFunctionSymbolImpl extends FunctionSymbolImp
                     .map(t -> ((RDFTermTypeConstant) t).getRDFTermType())
                     .collect(ImmutableCollectors.toList());
 
-            // for now, only numeric operations are supported
             if (rdfTypeTerms.stream().allMatch(t -> t.isA(typeFactory.getAbstractOntopNumericDatatype()))) {
                 return getNumericLexicalTerm(newTerms, termFactory, rdfTypeTerms.get(2));
+            } else if (rdfTypeTerms.stream().anyMatch(t -> t.isA(typeFactory.getAbstractOntopTemporalDatatype()))) {
+                return getTemporalLexicalTerm(newTerms.subList(0,2), rdfTypeTerms, termFactory);
             } else {
                 return termFactory.getNullConstant();
             }
@@ -130,5 +131,24 @@ public class BinaryArithmeticLexicalFunctionSymbolImpl extends FunctionSymbolImp
                 termFactory.getConversionFromRDFLexical2DB(dbType, newTerms.get(1), rdfType));
 
         return termFactory.getConversion2RDFLexical(dbType, numericTerm, rdfType);
+    }
+
+    private ImmutableTerm getTemporalLexicalTerm(ImmutableList<ImmutableTerm> lexicalTerms, ImmutableList<RDFTermType> typeTerms,
+        TermFactory termFactory) {
+            ImmutableList<Integer> durationArgumentsIdx = IntStream.range(0, typeTerms.size() -1 )
+                    .filter(i -> typeTerms.get(i).isA(typeFactory.getXsdDurationDatatype()))
+                    .boxed()
+                    .collect(ImmutableCollectors.toList());
+
+            if (!(durationArgumentsIdx.stream().allMatch(i -> lexicalTerms.get(i) instanceof Constant))) {
+                return termFactory.getNullConstant();
+            }
+            
+            ImmutableList<DBTermType> dbTypes = typeTerms.stream()
+                    .map(t -> t.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory()))
+                    .collect(ImmutableCollectors.toList());
+
+            return termFactory.getDBBinaryTemporalOperationFunctionalTerm(dbOperationName, lexicalTerms.get(0), lexicalTerms.get(1),
+                    dbTypes.get(0), dbTypes.get(1),dbTypes.get(2));
     }
 }

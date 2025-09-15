@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Table;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
@@ -14,11 +16,13 @@ public class BinaryArithmeticTermTypeFunctionSymbolImpl extends FunctionSymbolIm
 
     private final MetaRDFTermType metaRDFTermType;
     private final TypeFactory typeFactory;
+    private final String dbOperationName;
 
     protected BinaryArithmeticTermTypeFunctionSymbolImpl(String dbOperationName, DBTermType dbTermType,
                                                          MetaRDFTermType metaRDFType, TypeFactory typeFactory) {
         super("TYPE_BINARY_" + dbOperationName, ImmutableList.of(dbTermType, dbTermType, metaRDFType, metaRDFType));
 
+        this.dbOperationName = dbOperationName;
         this.metaRDFTermType = metaRDFType;
         this.typeFactory = typeFactory;
     }
@@ -59,12 +63,17 @@ public class BinaryArithmeticTermTypeFunctionSymbolImpl extends FunctionSymbolIm
                     .map(t -> (RDFTermTypeConstant) t)
                     .collect(ImmutableCollectors.toList());
 
+            ImmutableList<RDFTermType> rdfTypes = rdfTypeConstants.stream()
+                    .map(RDFTermTypeConstant::getRDFTermType)
+                    .collect(ImmutableCollectors.toList());
+
             if (rdfTypeConstants.stream().allMatch(t -> t.getRDFTermType().isA(typeFactory.getAbstractOntopNumericDatatype()))) {
                 return getCommonPropagatedOrSubstitutedType(rdfTypeConstants.stream(), termFactory)
                         .map(t -> (Constant) t)
                         .orElseGet(termFactory::getNullConstant);
             } else {
-                return termFactory.getNullConstant();
+                return new AllowedOperandTypesCombinations(termFactory, typeFactory).getResultType(dbOperationName, rdfTypes)
+                        .orElseGet(termFactory::getNullConstant);
             }
         } else if (typeTerms.stream().anyMatch(t -> t instanceof ImmutableFunctionalTerm)) {
 
@@ -105,5 +114,116 @@ public class BinaryArithmeticTermTypeFunctionSymbolImpl extends FunctionSymbolIm
 
         return optionalNumericType
                 .map(termFactory::getRDFTermTypeConstant);
+    }
+
+    protected static class AllowedOperandTypesCombinations {
+        private final Table<RDFTermType,RDFTermType, RDFTermType> additionMap;
+        private final Table<RDFTermType,RDFTermType, RDFTermType> subtractionMap;
+        private final Table<RDFTermType,RDFTermType, RDFTermType> multiplicationMap;
+        private final TermFactory termFactory;
+
+        public AllowedOperandTypesCombinations(TermFactory termFactory, TypeFactory typeFactory) {
+            this.termFactory = termFactory;
+            this.additionMap = createAdditionMap(typeFactory);
+            this.subtractionMap = createSubtractionMap(typeFactory);
+            this.multiplicationMap = createMultiplicationMap(typeFactory);
+        }
+
+        public Optional<ImmutableTerm> getResultType(String operand, ImmutableList<RDFTermType> argumentsTypes) {
+            RDFTermType firstType = argumentsTypes.get(0);
+            RDFTermType secondType = argumentsTypes.get(1);
+
+            switch (operand) {
+                case "+": {
+                    return Optional.ofNullable(additionMap.get(firstType, secondType))
+                            .map(termFactory::getRDFTermTypeConstant);
+                }
+                case "-": {
+                    return Optional.ofNullable(subtractionMap.get(firstType, secondType))
+                            .map(termFactory::getRDFTermTypeConstant);
+                }
+                case "*": {
+                    return Optional.ofNullable(multiplicationMap.get(firstType, secondType))
+                            .map(termFactory::getRDFTermTypeConstant);
+                }
+                default:
+                    throw new IllegalArgumentException("Unsupported operand: " + operand);
+            }
+        }
+
+        private static ImmutableTable<RDFTermType, RDFTermType, RDFTermType> createAdditionMap(TypeFactory typeFactory) {
+            return new ImmutableTable.Builder<RDFTermType, RDFTermType, RDFTermType>()
+                    // numeric + numeric -> numeric
+                    .put(typeFactory.getAbstractOntopNumericDatatype(), typeFactory.getAbstractOntopNumericDatatype(),
+                            typeFactory.getAbstractOntopNumericDatatype())
+                    // dateTime + duration -> dateTime
+                    .put(typeFactory.getXsdDatetimeDatatype(), typeFactory.getXsdDurationDatatype(),
+                            typeFactory.getXsdDatetimeDatatype())
+                    // duration + dateTime -> dateTime
+                    .put(typeFactory.getXsdDurationDatatype(), typeFactory.getXsdDatetimeDatatype(),
+                            typeFactory.getXsdDatetimeDatatype())
+                    // date + duration -> date
+                    .put(typeFactory.getXsdDate(), typeFactory.getXsdDurationDatatype(),
+                            typeFactory.getXsdDate())
+                    // duration + date -> date
+                    .put(typeFactory.getXsdDurationDatatype(), typeFactory.getXsdDate(),
+                            typeFactory.getXsdDate())
+                    // time + dayTimeDuration -> time
+                    .put(typeFactory.getXsdTime(), typeFactory.getXsdDayTimeDurationDatatype(),
+                            typeFactory.getXsdTime())
+                    // dayTimeDuration + time -> time
+                    .put(typeFactory.getXsdDayTimeDurationDatatype(), typeFactory.getXsdTime(),
+                            typeFactory.getXsdTime())
+                    // duration + duration -> duration
+                    .put(typeFactory.getXsdDurationDatatype(), typeFactory.getXsdDurationDatatype(),
+                            typeFactory.getXsdDurationDatatype())
+                    // dayTimeDuration + dayTimeDuration -> dayTimeDuration
+                    .put(typeFactory.getXsdDayTimeDurationDatatype(), typeFactory.getXsdDayTimeDurationDatatype(),
+                            typeFactory.getXsdDayTimeDurationDatatype())
+                    // yearMonthDuration + yearMonthDuration -> yearMonthDuration
+                    .put(typeFactory.getXsdYearMonthDurationDatatype(), typeFactory.getXsdYearMonthDurationDatatype(),
+                            typeFactory.getXsdYearMonthDurationDatatype())
+                    .build();
+        }
+
+        private static Table<RDFTermType, RDFTermType, RDFTermType> createSubtractionMap(TypeFactory typeFactory) {
+            return new ImmutableTable.Builder<RDFTermType, RDFTermType, RDFTermType>()
+                    // numeric - numeric -> numeric
+                    .put(typeFactory.getAbstractOntopNumericDatatype(), typeFactory.getAbstractOntopNumericDatatype(),
+                            typeFactory.getAbstractOntopNumericDatatype())
+                    // dateTime - duration -> dateTime
+                    .put(typeFactory.getXsdDatetimeDatatype(), typeFactory.getXsdDurationDatatype(),
+                            typeFactory.getXsdDatetimeDatatype())
+                    // date - duration -> date
+                    .put(typeFactory.getXsdDate(), typeFactory.getXsdDurationDatatype(),
+                            typeFactory.getXsdDate())
+                    // time - dayTimeDuration -> time
+                    .put(typeFactory.getXsdTime(), typeFactory.getXsdDayTimeDurationDatatype(),
+                            typeFactory.getXsdTime())
+                    // dateTime - dateTime -> duration
+                    .put(typeFactory.getXsdDatetimeDatatype(), typeFactory.getXsdDatetimeDatatype(),
+                            typeFactory.getXsdDurationDatatype())
+                    // date - date -> duration
+                    .put(typeFactory.getXsdDate(), typeFactory.getXsdDate(),
+                            typeFactory.getXsdDurationDatatype())
+                    // time - time -> dayTimeDuration
+                    .put(typeFactory.getXsdTime(), typeFactory.getXsdTime(),
+                            typeFactory.getXsdDayTimeDurationDatatype())
+                    .build();
+        }
+
+        private static Table<RDFTermType, RDFTermType, RDFTermType> createMultiplicationMap(TypeFactory typeFactory) {
+            return new ImmutableTable.Builder<RDFTermType, RDFTermType, RDFTermType>()
+                    // numeric * numeric -> numeric
+                    .put(typeFactory.getAbstractOntopNumericDatatype(), typeFactory.getAbstractOntopNumericDatatype(),
+                            typeFactory.getAbstractOntopNumericDatatype())
+                    // duration * numeric -> duration
+                    .put(typeFactory.getXsdDurationDatatype(), typeFactory.getAbstractOntopNumericDatatype(),
+                            typeFactory.getXsdDurationDatatype())
+                    // numeric * duration -> duration
+                    .put(typeFactory.getAbstractOntopNumericDatatype(), typeFactory.getXsdDurationDatatype(),
+                            typeFactory.getXsdDurationDatatype())
+                    .build();
+        }
     }
 }

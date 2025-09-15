@@ -190,8 +190,7 @@ public class TypeFactoryImpl implements TypeFactory {
 		registerDatatype(xsdGYearDatatype);
 
 		xsdDurationDatatype = createSimpleConcreteRDFDatatype(XSD.DURATION, temporalDatatype.getAncestry(),
-				// TODO: not all systems necessarily support INTERVAL as a type so we use a string
-				DBTypeFactory::getDBStringType);
+				DBTypeFactory::getDBIntervalType);
 		registerDatatype(xsdDurationDatatype);
 
 		xsdBase64Datatype = createSimpleConcreteRDFDatatype(XSD.BASE64BINARY, rdfsLiteralDatatype.getAncestry(),

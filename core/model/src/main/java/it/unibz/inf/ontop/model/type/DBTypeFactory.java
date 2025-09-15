@@ -28,6 +28,8 @@ public interface DBTypeFactory {
 
     DBTermType getDBGeographyType();
 
+    DBTermType getDBIntervalType();
+
     boolean supportsDBGeometryType();
 
     boolean supportsDBGeographyType();

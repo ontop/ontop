@@ -468,6 +468,14 @@ public class TermFactoryImpl implements TermFactory {
 				dbTerm1, dbTerm2);
 	}
 
+    @Override
+    public ImmutableFunctionalTerm getDBBinaryTemporalOperationFunctionalTerm(String dbArithmeticOperationName, ImmutableTerm dbTerm1, ImmutableTerm dbTerm2,
+                                                                              DBTermType argumentType1, DBTermType argumentType2, DBTermType returnType) {
+        return getImmutableFunctionalTerm(
+                dbFunctionSymbolFactory.getDBBinaryTemporalOperationFunctionSymbol(dbArithmeticOperationName, argumentType1, argumentType2, returnType),
+                dbTerm1, dbTerm2);
+    }
+
 	@Override
 	public ImmutableFunctionalTerm getUnaryLatelyTypedFunctionalTerm(ImmutableTerm lexicalTerm,
 																	 ImmutableTerm inputRDFTypeTerm, DBTermType targetType,
@@ -783,16 +791,6 @@ public class TermFactoryImpl implements TermFactory {
 	/**
 	 * Time extension - duration arithmetic
 	 */
-
-	@Override
-	public ImmutableFunctionalTerm getDBDurationAddFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDurationAddFromDateTime(), arg1, arg2);
-	}
-
-    @Override
-	public ImmutableFunctionalTerm getDBDurationAddFromDate(ImmutableTerm date, ImmutableTerm durationTerm) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDurationAddFromDate(), date, durationTerm);
-	}
 
 	@Override
 	public ImmutableFunctionalTerm getDBWeeksBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2) {

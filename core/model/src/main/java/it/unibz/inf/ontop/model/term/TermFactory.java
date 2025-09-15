@@ -527,6 +527,9 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBBinaryNumericFunctionalTerm(String dbNumericOperationName, DBTermType argumentType1, DBTermType argumentType2,
 															 ImmutableTerm dbTerm1, ImmutableTerm dbTerm2);
 
+    ImmutableFunctionalTerm getDBBinaryTemporalOperationFunctionalTerm(String dbOperation, ImmutableTerm dbTerm1, ImmutableTerm dbTerm2,
+                                                                       DBTermType argumentType1, DBTermType argumentType2, DBTermType returnType);
+
 	ImmutableFunctionalTerm getUnaryLatelyTypedFunctionalTerm(
 			ImmutableTerm lexicalTerm, ImmutableTerm inputRDFTypeTerm, DBTermType targetType,
 			java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct);
@@ -628,8 +631,6 @@ public interface TermFactory {
 	/**
 	 * Time extension - duration arithmetic
 	 */
-	ImmutableFunctionalTerm getDBDurationAddFromDateTime(ImmutableTerm dateTime, ImmutableTerm durationTerm);
-	ImmutableFunctionalTerm getDBDurationAddFromDate(ImmutableTerm date, ImmutableTerm durationTerm);
 	ImmutableFunctionalTerm getDBWeeksBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableFunctionalTerm getDBWeeksBetweenFromDate(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableFunctionalTerm getDBDaysBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
