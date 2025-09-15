@@ -73,7 +73,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
 
         IQTree normalize() {
             State<UnaryOperatorNode, UnarySubTree<OrderByNode>> initial = State.initial(
-                    simplify(UnarySubTree.of(Optional.of(initialOrderByNode), initialChild.normalizeForOptimization(variableGenerator))));
+                    simplify(UnarySubTree.of(Optional.of(initialOrderByNode), normalizeChild(initialChild))));
 
             // NB: the loop is due to the lifting of both distinct and construction nodes
             State<UnaryOperatorNode, UnarySubTree<OrderByNode>> state = initial.reachFixedPoint(
@@ -89,22 +89,22 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
                 return Optional.empty();
 
             OrderByNode orderByNode = subTree.getOptionalNode().get();
-            return state.getSubTree().getChild().acceptVisitor(new IQStateOptionalTransformer<>() {
+            return subTree.getChild().acceptVisitor(new IQStateOptionalTransformer<>() {
 
                 @Override
                 public Optional<State<UnaryOperatorNode, UnarySubTree<OrderByNode>>> transformConstruction(UnaryIQTree tree, ConstructionNode node, IQTree newChild) {
                     return Optional.of(state.lift(node,
-                            simplify(UnarySubTree.of(
+                            simplify(normalizedUnarySubTreeOf(
                                     orderByNode.applySubstitution(node.getSubstitution()),
-                                    newChild.normalizeForOptimization(variableGenerator)))));
+                                    newChild))));
                 }
 
                 @Override
                 public Optional<State<UnaryOperatorNode, UnarySubTree<OrderByNode>>> transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree newChild) {
                     return Optional.of(state.lift(node,
-                            UnarySubTree.of(
+                            normalizedUnarySubTreeOf(
                                     subTree.getOptionalNode(),
-                                    newChild.normalizeForOptimization(variableGenerator))));
+                                    newChild)));
                 }
 
                 @Override
@@ -116,9 +116,10 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
         }
 
         IQTree asIQTree(State<UnaryOperatorNode, UnarySubTree<OrderByNode>> state) {
+            UnarySubTree<OrderByNode> subTree = state.getSubTree();
             IQTree orderByLevelTree = iqTreeTools.unaryIQTreeBuilder()
-                    .append(state.getSubTree().getOptionalNode(), treeCache::declareAsNormalizedForOptimizationWithEffect)
-                    .build(state.getSubTree().getChild());
+                    .append(subTree.getOptionalNode(), treeCache::declareAsNormalizedForOptimizationWithEffect)
+                    .build(subTree.getChild());
 
             return asIQTree(state.getAncestors(), orderByLevelTree, iqTreeTools);
         }

@@ -18,6 +18,10 @@ public class NormalizationContext {
         this.variableGenerator = variableGenerator;
     }
 
+    protected IQTree normalizeChild(IQTree child) {
+        return child.normalizeForOptimization(variableGenerator);
+    }
+
     protected <T extends UnaryOperatorNode> IQTree asIQTree(UnaryOperatorSequence<T> ancestors, IQTree childTree, IQTreeTools iqTreeTools) {
         if (ancestors.isEmpty())
             return childTree;
@@ -28,6 +32,15 @@ public class NormalizationContext {
                 // Normalizes the ancestors (recursive)
                 .normalizeForOptimization(variableGenerator);
     }
+
+    protected <T extends UnaryOperatorNode> UnarySubTree<T> normalizeChild(UnarySubTree<T> subTree) {
+        return normalizedUnarySubTreeOf(subTree.getOptionalNode(), subTree.getChild());
+    }
+
+    protected <T extends UnaryOperatorNode> UnarySubTree<T> normalizedUnarySubTreeOf(Optional<T> optionalNode, IQTree child) {
+        return UnarySubTree.of(optionalNode, normalizeChild(child));
+    }
+
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public static class UnarySubTree<T extends UnaryOperatorNode> {
@@ -62,8 +75,6 @@ public class NormalizationContext {
         }
     }
 
-
-
     protected static class State<T extends UnaryOperatorNode, S> {
         private final UnaryOperatorSequence<T> ancestors;
         private final S subTree;
@@ -89,11 +100,11 @@ public class NormalizationContext {
             return new State<>(ancestors.append(node), subTree);
         }
 
-        protected UnaryOperatorSequence<T> getAncestors() {
+        public UnaryOperatorSequence<T> getAncestors() {
             return ancestors;
         }
 
-        protected S getSubTree() {
+        public S getSubTree() {
             return subTree;
         }
 
