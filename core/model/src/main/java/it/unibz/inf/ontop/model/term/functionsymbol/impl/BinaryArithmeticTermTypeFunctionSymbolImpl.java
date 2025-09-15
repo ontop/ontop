@@ -121,9 +121,11 @@ public class BinaryArithmeticTermTypeFunctionSymbolImpl extends FunctionSymbolIm
         private final Table<RDFTermType,RDFTermType, RDFTermType> subtractionMap;
         private final Table<RDFTermType,RDFTermType, RDFTermType> multiplicationMap;
         private final TermFactory termFactory;
+        private final TypeFactory typeFactory;
 
         public AllowedOperandTypesCombinations(TermFactory termFactory, TypeFactory typeFactory) {
             this.termFactory = termFactory;
+            this.typeFactory = typeFactory;
             this.additionMap = createAdditionMap(typeFactory);
             this.subtractionMap = createSubtractionMap(typeFactory);
             this.multiplicationMap = createMultiplicationMap(typeFactory);
@@ -133,6 +135,13 @@ public class BinaryArithmeticTermTypeFunctionSymbolImpl extends FunctionSymbolIm
             RDFTermType firstType = argumentsTypes.get(0);
             RDFTermType secondType = argumentsTypes.get(1);
 
+            // generalize all numeric types to the abstract numeric type
+            if (firstType.isA(typeFactory.getAbstractOntopNumericDatatype())) {
+                firstType = typeFactory.getAbstractOntopNumericDatatype();
+            }
+            if (secondType.isA(typeFactory.getAbstractOntopNumericDatatype())) {
+                secondType = typeFactory.getAbstractOntopNumericDatatype();
+            }
             switch (operand) {
                 case "+": {
                     return Optional.ofNullable(additionMap.get(firstType, secondType))

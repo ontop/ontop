@@ -50,15 +50,22 @@ public class DefaultDBBinaryTemporalOperationFunctionSymbol extends AbstractDBBi
 
     @Override
     protected String serializeInterval(Interval interval) {
-        String intervalYearMonth = String.format("INTERVAL '%d-%d' YEAR TO MONTH",
-                interval.getYears(), interval.getMonths());
-        String intervalDayTime = String.format("INTERVAL '%d %d:%d:%f' DAY TO SECOND",
-                interval.getDays(), interval.getHours(), interval.getMinutes(), interval.getTotalSeconds());
+        String intervalYearMonth = interval.getMonths() == 0 && interval.getYears() == 0 ? ""
+                : String.format("INTERVAL '%d-%d' YEAR TO MONTH", interval.getYears(), interval.getMonths());
+
+        String intervalDayTime = interval.getDays() == 0 && interval.getHours() == 0
+                && interval.getMinutes() == 0 && interval.getTotalSeconds() == 0 ? ""
+                : String.format("INTERVAL '%d %d:%d:%f' DAY TO SECOND", interval.getDays(), interval.getHours(),
+                interval.getMinutes(), interval.getTotalSeconds());
 
         if (interval.isNegative()) {
-            return String.format("(-%s) %s (-%s)", intervalYearMonth, operatorString, intervalDayTime);
+            return intervalYearMonth.isEmpty() || intervalDayTime.isEmpty()
+                    ? String.format("-%s%s", intervalYearMonth, intervalDayTime)
+                    : String.format("(-%s) %s (-%s)", intervalYearMonth, operatorString, intervalDayTime);
         } else {
-            return String.format("%s %s %s", intervalYearMonth, operatorString, intervalDayTime);
+            return intervalYearMonth.isEmpty() || intervalDayTime.isEmpty()
+                    ? String.format("%s%s", intervalYearMonth, intervalDayTime)
+                    : String.format("%s %s %s", intervalYearMonth, operatorString, intervalDayTime);
         }
     }
 

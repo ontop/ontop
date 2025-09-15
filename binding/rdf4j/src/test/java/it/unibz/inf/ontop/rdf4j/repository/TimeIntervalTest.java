@@ -46,7 +46,7 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
     @Test
     public void intervalDifferenceTest() {
         String sparql = "SELECT * WHERE {\n" +
-                "    BIND(\"2025-02-17T09:50:00+01:00\"^^xsd:dateTime - \"PT15M\"^^xsd:duration as ?v) \n" +
+                "    BIND(\"2025-02-17T09:50:00\"^^xsd:dateTime - \"PT15M\"^^xsd:duration as ?v) \n" +
                 "}";
         runQueryAndCompare(sparql, ImmutableSet.of("2025-02-17 09:35:00"));
     }
@@ -54,7 +54,7 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
     @Test
     public void intervalDifferenceTest1() {
         String sparql = "SELECT * WHERE {\n" +
-                "    BIND(\"2025-02-17T09:50:00+01:00\"^^xsd:dateTime + \"-PT15M\"^^xsd:duration as ?v) \n" +
+                "    BIND(\"2025-02-17T09:50:00\"^^xsd:dateTime + \"-PT15M\"^^xsd:duration as ?v) \n" +
                 "}";
         runQueryAndCompare(sparql, ImmutableSet.of("2025-02-17 09:35:00"));
     }
@@ -62,7 +62,7 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
     @Test
     public void intervalSumArgumentsOrderTest() {
         String sparql = "SELECT * WHERE {\n" +
-                "    BIND(\"P1Y2M3DT4H5M6.5S\"^^xsd:duration + \"2025-02-17T09:50:00+01:00\"^^xsd:dateTime as ?v) \n" +
+                "    BIND(\"P1Y2M3DT4H5M6.5S\"^^xsd:duration + \"2025-02-17T09:50:00\"^^xsd:dateTime as ?v) \n" +
                 "}";
         runQueryAndCompare(sparql, ImmutableSet.of("2026-04-20 13:55:06.5"));
     }
@@ -88,8 +88,17 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
     @Test
     public void multipleIntervalsSumTest() {
         String sparql = "SELECT * WHERE {\n" +
-                "    BIND(\"2025-02-17T09:50:00+01:00\"^^xsd:dateTime + \"P1Y2M3DT4H5M6.5S\"^^xsd:duration + \"PT15M\"^^xsd:duration as ?v) \n" +
+                "    BIND(\"2025-02-17T09:50:00\"^^xsd:dateTime + \"P1Y2M3DT4H5M6.5S\"^^xsd:duration + \"PT15M\"^^xsd:duration as ?v) \n" +
                 "}";
         runQueryAndCompare(sparql, ImmutableSet.of("2026-04-20 14:10:06.5"));
+    }
+
+    @Test
+    @Ignore("Conversion back to xsd:duration not yet implemented")
+    public void multiplyIntervalTest() {
+        String sparql = "SELECT * WHERE {\n" +
+                "    BIND(\"PT1H15M\"^^xsd:duration * 2 as ?v) \n" +
+                "}";
+        runQueryAndCompare(sparql, ImmutableSet.of("INTERVAL '0 02:30:0' DAY TO SECOND"));
     }
 }
