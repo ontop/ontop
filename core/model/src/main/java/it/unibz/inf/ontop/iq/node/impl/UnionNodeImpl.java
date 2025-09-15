@@ -787,13 +787,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             return tree;
 
         // Tries to reuse the ordered value list of a values node
-        ImmutableSet<Variable> valuesVariables = children.stream()
-                .filter(n -> n instanceof ValuesNode)
-                .map(n -> (ValuesNode) n)
-                .map(ValuesNode::getVariables)
-                .findAny()
-                // Otherwise creates an arbitrary order
-                .orElseGet(unionNode::getVariables);
+        ImmutableSet<Variable> valuesVariables = unionNode.getVariables();
 
         ImmutableList<ImmutableMap<Variable, Constant>> values = children.stream()
                 .filter(this::isMergeableInValuesNode)
@@ -867,11 +861,10 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             }
 
             if (child instanceof TrueNode) {
-                return Stream.of(
-                        outputVariables.stream()
-                                .collect(ImmutableCollectors.toMap(
-                                        v -> v,
-                                        v -> (Constant) substitution.get(v))));
+                return Stream.of(outputVariables.stream()
+                        .collect(ImmutableCollectors.toMap(
+                                v -> v,
+                                v -> (Constant) substitution.get(v))));
             }
         }
         throw new MinorOntopInternalBugException("Unexpected tree: " + tree);

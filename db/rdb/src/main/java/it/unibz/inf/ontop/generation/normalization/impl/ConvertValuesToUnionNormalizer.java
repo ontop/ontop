@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
@@ -10,8 +9,6 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ValuesNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -50,14 +47,10 @@ public class ConvertValuesToUnionNormalizer implements DialectExtraNormalizer {
 
         @Override
         public IQTree transformValues(ValuesNode node) {
-            ImmutableList<Substitution<ImmutableTerm>> substitutionList =
+            return iqTreeTools.createUnionTree(node.getVariables(),
                     node.getValueMaps().stream()
                             .map(m -> m.entrySet().stream()
                                     .collect(substitutionFactory.<ImmutableTerm>toSubstitution()))
-                            .collect(ImmutableCollectors.toList());
-
-            return iqTreeTools.createUnionTree(node.getVariables(),
-                    substitutionList.stream()
                             .map(substitution -> iqFactory.createUnaryIQTree(
                                     iqTreeTools.createExtendingConstructionNode(ImmutableSet.of(), substitution),
                                     iqFactory.createTrueNode()))

@@ -237,7 +237,8 @@ public class TermTypeTermLifterImpl extends DelegatingIQTreeVariableGeneratorTra
                 return transformLeaf(valuesNode);
 
             ImmutableSet<RDFTermTypeConstant> possibleConstants = valuesNode.getValueMaps().stream()
-                    .flatMap(m -> m.values().stream())
+                    .map(ImmutableMap::values)
+                    .flatMap(Collection::stream)
                     .filter(c -> c instanceof RDFTermTypeConstant)
                     .map(c -> (RDFTermTypeConstant) c)
                     .collect(ImmutableCollectors.toSet());

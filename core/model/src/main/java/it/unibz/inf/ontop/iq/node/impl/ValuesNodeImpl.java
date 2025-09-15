@@ -41,6 +41,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     private final ImmutableList<Variable> orderedVariables;
     // The variables consistent with all interfaces, as unordered set.
     private final ImmutableSet<Variable> projectedVariables;
+    // Each map's domain is projectedVariables
     private final ImmutableList<ImmutableMap<Variable, Constant>> valueMaps;
 
     private final TermFactory termFactory;
@@ -165,7 +166,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     private LeafIQTree furtherNormalize(ValuesNode valuesNode) {
-        if (valuesNode.getValueMaps().isEmpty()) {
+        if (valuesNode.isDeclaredAsEmpty()) {
             return iqFactory.createEmptyNode(valuesNode.getVariables());
         }
         if ((valuesNode.getVariables().isEmpty()) && (valuesNode.getValueMaps().size() == 1)) {
@@ -546,8 +547,12 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     @Override
     public void validate() throws InvalidIntermediateQueryException {
         // TODO: Lukas, Add type checking of value/variable
-        if (orderedVariables.size() != projectedVariables.size()) {
+        if (!projectedVariables.equals(ImmutableSet.copyOf(orderedVariables))) {
             throw new InvalidIntermediateQueryException("Variables must be unique");
+        }
+        if (valueMaps.stream()
+                .anyMatch(m -> !projectedVariables.equals(m.keySet()))) {
+            throw new InvalidIntermediateQueryException("Maps must be defined on all projected variables");
         }
     }
 

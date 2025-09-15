@@ -52,7 +52,7 @@ public class EmptyRowsValuesNodeTransformerImpl extends DelegatingIQTreeVariable
 
         @Override
         public IQTree transformValues(ValuesNode valuesNode) {
-            if (valuesNode.getValueMaps().stream().allMatch(ImmutableMap::isEmpty)) {
+            if (valuesNode.getVariables().isEmpty()) {
                 ImmutableMap<Variable, Constant> map = ImmutableMap.of(
                         variableGenerator.generateNewVariable(),
                         termFactory.getDBStringConstant("placeholder"));
