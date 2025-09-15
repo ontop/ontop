@@ -92,6 +92,10 @@ public class NormalizationContext {
             return new State<>(ancestors, subTree);
         }
 
+        public State<T, S> replace(Function<S, S> subTreeTransformer) {
+            return new State<>(ancestors, subTreeTransformer.apply(subTree));
+        }
+
         public State<T, S> lift(T node, S subTree) {
             return new State<>(ancestors.append(node), subTree);
         }
