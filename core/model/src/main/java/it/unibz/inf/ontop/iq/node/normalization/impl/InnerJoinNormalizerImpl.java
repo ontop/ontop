@@ -17,7 +17,6 @@ import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormaliz
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
 import it.unibz.inf.ontop.iq.visit.impl.IQStateDefaultTransformer;
-import it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -25,11 +24,13 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.rightSpecificVariables;
 import static it.unibz.inf.ontop.iq.impl.NaryIQTreeTools.replaceChild;
+import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.LeftJoinDecomposition;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 
 public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
@@ -81,6 +82,14 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             this.children = children;
         }
 
+        Optional<ImmutableExpression> joiningCondition() {
+            return joiningCondition;
+        }
+
+        ImmutableList<IQTree> children() {
+            return children;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (o instanceof InnerJoinSubTree) {
@@ -91,6 +100,22 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             return false;
         }
     }
+
+    private interface Lifter<P, S, D extends IQTreeTools.IQTreeDecomposition<?, ?>> {
+        Optional<P> lift(S state, int i, D decomposition);
+
+        static <P, S, D extends IQTreeTools.IQTreeDecomposition<?, ?>> Optional<P> liftFirst(S s, InnerJoinSubTree subTree, Lifter<P, S, D> lifter, Function<IQTree, D> decomposer) {
+            var children = subTree.children();
+            return IntStream.range(0, children.size())
+                    .mapToObj(i ->
+                            Optional.of(decomposer.apply(children.get(i)))
+                                    .filter(d -> d.isPresent())
+                                    .flatMap(d -> lifter.lift(s, i, d)))
+                    .flatMap(Optional::stream)
+                    .findFirst();
+        }
+    }
+
 
     private class Context extends NormalizationContext {
 
@@ -109,309 +134,279 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         }
 
         IQTree normalize() {
-            return asIQTree(IQStateOptionalTransformer.reachFixedPoint(
-                            State.initial(new InnerJoinSubTree(innerJoinNode.getOptionalFilterCondition(), initialChildren)),
+            return asIQTree(State.initial(new InnerJoinSubTree(innerJoinNode.getOptionalFilterCondition(), initialChildren))
+                    .reachFixedPoint(
                             s ->
                                     liftFilterInnerJoinProjectingConstruction(
-                                        liftBindingsAndDistincts(s)),
+                                            liftBindingsAndDistincts(s)),
                             MAX_ITERATIONS));
         }
 
-
-            /**
-             * No child is interpreted as EMPTY
-             */
-            State<UnaryOperatorNode, InnerJoinSubTree> declareAsEmpty() {
-                EmptyNode emptyChild = iqFactory.createEmptyNode(projectedVariables);
-                return State.initial(new InnerJoinSubTree(Optional.empty(), ImmutableList.of(emptyChild)));
-            }
-
-
-            /**
-             * Lifts bindings but children still project away irrelevant variables
-             * (needed for limiting as much as possible the number of variables on which DISTINCT is applied)
-             * <p>
-             * NB: Note that this number is not guaranteed to be minimal. However, it is guaranteed to be sound.
-             */
-            State<UnaryOperatorNode, InnerJoinSubTree> liftBindingsAndDistincts(State<UnaryOperatorNode, InnerJoinSubTree> state) {
-                return IQStateOptionalTransformer.reachFinalState(
-                        state, s -> liftBindings(propagateDownCondition(s)), this::liftDistinct);
-            }
+        /**
+         * Lifts bindings but children still project away irrelevant variables
+         * (needed for limiting as much as possible the number of variables on which DISTINCT is applied)
+         * <p>
+         * NB: Note that this number is not guaranteed to be minimal. However, it is guaranteed to be sound.
+         */
+        State<UnaryOperatorNode, InnerJoinSubTree> liftBindingsAndDistincts(State<UnaryOperatorNode, InnerJoinSubTree> state) {
+            return state.reachFinal(
+                    this::liftBindings,
+                    s -> Lifter.liftFirst(s, s.getSubTree(), this::liftDistinct, c -> UnaryIQTreeDecomposition.of(c, DistinctNode.class)));
+        }
 
         State<UnaryOperatorNode, InnerJoinSubTree> liftBindings(State<UnaryOperatorNode, InnerJoinSubTree> state) {
-                return IQStateOptionalTransformer.reachFinalState(
-                        state, this::normalizeChildren, this::liftOneChildBinding);
-            }
+            return propagateDownCondition(state).reachFinal(
+                    this::normalizeChildren,
+                    s -> Lifter.liftFirst(s, s.getSubTree(), this::liftBinding, c -> UnaryIQTreeDecomposition.of(c, ConstructionNode.class)));
+        }
 
         State<UnaryOperatorNode, InnerJoinSubTree> normalizeChildren(State<UnaryOperatorNode, InnerJoinSubTree> state) {
-                ImmutableList<IQTree> liftedChildren = state.getSubTree().children.stream()
-                        .map(c -> c.normalizeForOptimization(variableGenerator))
-                        .filter(c -> !(c.getRootNode() instanceof TrueNode))
+            InnerJoinSubTree subTree = state.getSubTree();
+            ImmutableList<IQTree> liftedChildren = subTree.children().stream()
+                    .map(this::normalizeChild)
+                    .filter(c -> !(c.getRootNode() instanceof TrueNode))
+                    .collect(ImmutableCollectors.toList());
+
+            if (liftedChildren.stream()
+                    .anyMatch(IQTree::isDeclaredAsEmpty))
+                return declareAsEmpty();
+
+            return state.replace(new InnerJoinSubTree(subTree.joiningCondition(), liftedChildren));
+        }
+
+        /**
+         * No child is interpreted as EMPTY
+         */
+        State<UnaryOperatorNode, InnerJoinSubTree> declareAsEmpty() {
+            EmptyNode emptyChild = iqFactory.createEmptyNode(projectedVariables);
+            return State.initial(new InnerJoinSubTree(Optional.empty(), ImmutableList.of(emptyChild)));
+        }
+
+
+        Optional<State<UnaryOperatorNode, InnerJoinSubTree>> liftBinding(State<UnaryOperatorNode, InnerJoinSubTree> state, int position, UnaryIQTreeDecomposition<ConstructionNode> construction) {
+            if (construction.getNode().getSubstitution().isEmpty())
+                return Optional.empty();
+
+            try {
+                IQTree selectedGrandChildWithLimitedProjection =
+                        iqTreeTools.unaryIQTreeBuilder(construction.getNode().getChildVariables())
+                                .build(construction.getChild());
+
+                InnerJoinSubTree subTree = state.getSubTree();
+                var provisionalNewChildren = replaceChild(subTree.children(), position, selectedGrandChildWithLimitedProjection);
+
+                var bindingLift = bindingLifter.liftRegularChildBinding(
+                        construction.getNode(),
+                        position,
+                        subTree.children(),
+                        ImmutableSet.of(),
+                        subTree.joiningCondition(),
+                        variableGenerator,
+                        variableNullabilityTools.getChildrenVariableNullability(provisionalNewChildren));
+
+                var projectedVariables = NaryIQTreeTools.projectedVariables(subTree.children());
+
+                ConstructionSubstitutionNormalization normalization = substitutionNormalizer
+                        .normalizeSubstitution(bindingLift.getAscendingSubstitution(), projectedVariables);
+
+                Optional<ImmutableExpression> newCondition = bindingLift.getCondition()
+                        .map(normalization::updateExpression);
+
+                Substitution<? extends VariableOrGroundTerm> descendingSubstitution = bindingLift.getDescendingSubstitution();
+                ImmutableList<IQTree> newChildren = provisionalNewChildren.stream()
+                        .map(c -> c.applyDescendingSubstitution(descendingSubstitution, newCondition, variableGenerator))
+                        .map(c -> normalization.updateChild(c, variableGenerator))
                         .collect(ImmutableCollectors.toList());
 
-                if (liftedChildren.stream()
-                        .anyMatch(IQTree::isDeclaredAsEmpty))
-                    return declareAsEmpty();
+                Optional<ConstructionNode> newParent =
+                        iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, normalization.getNormalizedSubstitution());
 
-                return state.replace(new InnerJoinSubTree(state.getSubTree().joiningCondition, liftedChildren));
+                return Optional.of(state.lift(newParent, new InnerJoinSubTree(newCondition, newChildren)));
             }
-
-            Optional<State<UnaryOperatorNode, InnerJoinSubTree>> liftOneChildBinding(State<UnaryOperatorNode, InnerJoinSubTree> state) {
-                return IntStream.range(0, state.getSubTree().children.size())
-                        .mapToObj(i -> state.getSubTree().children.get(i).acceptVisitor(new IQStateOptionalTransformer<State<UnaryOperatorNode, InnerJoinSubTree>>() {
-                            @Override
-                            public Optional<State<UnaryOperatorNode, InnerJoinSubTree>> transformConstruction(UnaryIQTree tree, ConstructionNode constructionNode, IQTree grandChild) {
-                                return liftBinding(state, i, constructionNode, grandChild);
-                            }
-                        }))
-                        .flatMap(Optional::stream)
-                        .findFirst();
+            catch (UnsatisfiableConditionException e) {
+                return Optional.of(declareAsEmpty());
             }
+        }
 
-            Optional<State<UnaryOperatorNode, InnerJoinSubTree>> liftBinding(State<UnaryOperatorNode, InnerJoinSubTree> state, int position, ConstructionNode constructionNode, IQTree grandChild) {
-                if (constructionNode.getSubstitution().isEmpty())
-                    return Optional.empty();
 
-                try {
-                    IQTree selectedGrandChildWithLimitedProjection =
-                            iqTreeTools.unaryIQTreeBuilder(constructionNode.getChildVariables())
-                                    .build(grandChild);
 
-                    var provisionalNewChildren = replaceChild(state.getSubTree().children, position, selectedGrandChildWithLimitedProjection);
+        /**
+         * TODO: collect the constraint
+         */
+        State<UnaryOperatorNode, InnerJoinSubTree> propagateDownCondition(State<UnaryOperatorNode, InnerJoinSubTree> state) {
+            InnerJoinSubTree subTree = state.getSubTree();
+            // TODO: consider that case as well
+            if (subTree.joiningCondition().isEmpty())
+                return state;
 
-                    var bindingLift = bindingLifter.liftRegularChildBinding(
-                            constructionNode,
-                            position,
-                            state.getSubTree().children,
-                            ImmutableSet.of(),
-                            state.getSubTree().joiningCondition,
-                            variableGenerator,
-                            variableNullabilityTools.getChildrenVariableNullability(provisionalNewChildren));
+            try {
+                // cache in the state?
+                var childrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(subTree.children());
 
-                    var projectedVariables = NaryIQTreeTools.projectedVariables(state.getSubTree().children);
+                var simplifiedJoinCondition = conditionSimplifier.simplifyCondition(
+                        subTree.joiningCondition(), ImmutableSet.of(), subTree.children(), childrenVariableNullability);
 
-                    ConstructionSubstitutionNormalization normalization = substitutionNormalizer
-                            .normalizeSubstitution(bindingLift.getAscendingSubstitution(), projectedVariables);
+                var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
+                        new DownPropagation(projectedVariables), simplifiedJoinCondition, childrenVariableNullability);
 
-                    Optional<ImmutableExpression> newCondition = bindingLift.getCondition()
-                            .map(normalization::updateExpression);
+                ImmutableList<IQTree> newChildren = extendedDownConstraint.propagate(
+                        subTree.children(), variableGenerator);
 
-                    Substitution<? extends VariableOrGroundTerm> descendingSubstitution = bindingLift.getDescendingSubstitution();
-                    ImmutableList<IQTree> newChildren = provisionalNewChildren.stream()
-                            .map(c -> c.applyDescendingSubstitution(descendingSubstitution, newCondition, variableGenerator))
-                            .map(c -> normalization.updateChild(c, variableGenerator))
-                            .collect(ImmutableCollectors.toList());
+                Optional<ImmutableExpression> newJoiningCondition = simplifiedJoinCondition.getOptionalExpression();
 
-                    Optional<ConstructionNode> newParent =
-                            iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, normalization.getNormalizedSubstitution());
+                Optional<ConstructionNode> newParent = iqTreeTools.createOptionalConstructionNode(
+                        () -> NaryIQTreeTools.projectedVariables(subTree.children()),
+                        simplifiedJoinCondition.getSubstitution());
 
-                    return Optional.of(state.lift(newParent, new InnerJoinSubTree(newCondition, newChildren)));
-                }
-                catch (UnsatisfiableConditionException e) {
-                    return Optional.of(declareAsEmpty());
-                }
+                return state.lift(newParent, new InnerJoinSubTree(newJoiningCondition, newChildren));
             }
-
-
-            protected IQTree asIQTree(State<UnaryOperatorNode, InnerJoinSubTree> state) {
-
-                IQTree joinLevelTree = createJoinOrFilterOrEmptyOrLiftLeft(state, treeCache.declareAsNormalizedForOptimizationWithEffect());
-                if (joinLevelTree.isDeclaredAsEmpty())
-                    return joinLevelTree;
-
-                IQTree nonNormalizedTree = iqTreeTools.unaryIQTreeBuilder(projectedVariables)
-                        .append(state.getAncestors())
-                        .build(joinLevelTree);
-
-                // Normalizes the ancestors (recursive)
-                return nonNormalizedTree.normalizeForOptimization(variableGenerator);
+            catch (UnsatisfiableConditionException e) {
+                return declareAsEmpty();
             }
+        }
 
-
-            private IQTree createJoinOrFilterOrEmptyOrLiftLeft(State<UnaryOperatorNode, InnerJoinSubTree> state, IQTreeCache normalizedTreeCache) {
-                switch (state.getSubTree().children.size()) {
-                    case 0:
-                        return iqFactory.createTrueNode();
-                    case 1:
-                        return iqTreeTools.unaryIQTreeBuilder()
-                                .append(iqTreeTools.createOptionalFilterNode(state.getSubTree().joiningCondition))
-                                .build(state.getSubTree().children.get(0));
-                    default:
-                        return liftOneLeftJoin(state)
-                                .orElseGet(() -> iqFactory.createNaryIQTree(
-                                        iqFactory.createInnerJoinNode(state.getSubTree().joiningCondition),
-                                        state.getSubTree().children, normalizedTreeCache));
-                }
+        Optional<State<UnaryOperatorNode, InnerJoinSubTree>> liftDistinct(State<UnaryOperatorNode, InnerJoinSubTree> state, int position, UnaryIQTreeDecomposition<DistinctNode> distinct) {
+            InnerJoinSubTree subTree = state.getSubTree();
+            // this is just a shortcut - the check is also done below by isDistinct
+            if (subTree.children().stream().allMatch(IQTree::isDistinct)
+                    || iqTreeTools.createInnerJoinTree(subTree.joiningCondition(), subTree.children()).isDistinct()) {
+                return Optional.of(state.lift(distinct.getNode(),
+                        new InnerJoinSubTree(
+                                subTree.joiningCondition(),
+                                NaryIQTreeTools.transformChildren(subTree.children(), IQTree::removeDistincts))));
             }
+            return Optional.empty();
+        }
 
-            /**
-             * Puts the LJ above the inner join if possible
-             */
-            Optional<IQTree> liftOneLeftJoin(State<UnaryOperatorNode, InnerJoinSubTree> state) {
-                return IntStream.range(0, state.getSubTree().children.size())
-                        .mapToObj(i -> state.getSubTree().children.get(i).acceptVisitor(new IQStateOptionalTransformer<IQTree>() {
-                            @Override
-                            public Optional<IQTree> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode node, IQTree leftChild, IQTree rightChild) {
-                                return liftLeftJoin(state, i, node, leftChild, rightChild);
-                            }
-                        }))
-                        .flatMap(Optional::stream)
-                        .findFirst();
+        protected IQTree asIQTree(State<UnaryOperatorNode, InnerJoinSubTree> state) {
+
+            IQTree joinLevelTree = createJoinOrFilterOrEmptyOrLiftLeft(state.getSubTree(), treeCache.declareAsNormalizedForOptimizationWithEffect());
+            if (joinLevelTree.isDeclaredAsEmpty())
+                return joinLevelTree;
+
+            IQTree nonNormalizedTree = iqTreeTools.unaryIQTreeBuilder(projectedVariables)
+                    .append(state.getAncestors())
+                    .build(joinLevelTree);
+
+            // Normalizes the ancestors (recursive)
+            return nonNormalizedTree.normalizeForOptimization(variableGenerator);
+        }
+
+
+        private IQTree createJoinOrFilterOrEmptyOrLiftLeft(InnerJoinSubTree subTree, IQTreeCache normalizedTreeCache) {
+            switch (subTree.children().size()) {
+                case 0:
+                    return iqFactory.createTrueNode();
+                case 1:
+                    return iqTreeTools.unaryIQTreeBuilder()
+                            .append(iqTreeTools.createOptionalFilterNode(subTree.joiningCondition()))
+                            .build(subTree.children().get(0));
+                default:
+                    return Lifter.liftFirst(subTree, subTree, this::liftLeftJoin, LeftJoinDecomposition::of)
+                            .orElseGet(() -> iqFactory.createNaryIQTree(
+                                    iqFactory.createInnerJoinNode(subTree.joiningCondition()),
+                                    subTree.children(), normalizedTreeCache));
             }
+        }
 
-            Optional<IQTree> liftLeftJoin(State<UnaryOperatorNode, InnerJoinSubTree> state, int index, LeftJoinNode node, IQTree leftChild, IQTree rightChild) {
+        /**
+         * Puts the LJ above the inner join if possible
+         */
+        Optional<IQTree> liftLeftJoin(InnerJoinSubTree subTree, int position, LeftJoinDecomposition leftJoin) {
+            // For safety (although conflicts are unlikely to appear)
+            Set<Variable> rightSpecificVariables = leftJoin.rightSpecificVariables();
 
-                // For safety (although conflicts are unlikely to appear)
-                Set<Variable> rightSpecificVariables = rightSpecificVariables(leftChild, rightChild);
+            var children = subTree.children();
 
-                if (!IntStream.range(0, state.getSubTree().children.size())
-                        .filter(i -> i != index)
-                        .mapToObj(state.getSubTree().children::get)
-                        .map(IQTree::getVariables)
-                        .allMatch(v -> Sets.intersection(v, rightSpecificVariables).isEmpty()))
-                    return Optional.empty();
+            if (!IntStream.range(0, children.size())
+                    .filter(i -> i != position)
+                    .mapToObj(children::get)
+                    .map(IQTree::getVariables)
+                    .allMatch(v -> Sets.intersection(v, rightSpecificVariables).isEmpty()))
+                return Optional.empty();
 
-                NaryIQTree newJoinOnLeft = iqTreeTools.createInnerJoinTree(
-                        Stream.concat(Stream.of(leftChild),
-                                        IntStream.range(0, state.getSubTree().children.size())
-                                                .filter(i -> i != index)
-                                                .mapToObj(state.getSubTree().children::get))
-                                .collect(ImmutableCollectors.toList()));
+            NaryIQTree newJoinOnLeft = iqTreeTools.createInnerJoinTree(
+                    Stream.concat(Stream.of(leftJoin.leftChild()),
+                                    IntStream.range(0, children.size())
+                                            .filter(i -> i != position)
+                                            .mapToObj(children::get))
+                            .collect(ImmutableCollectors.toList()));
 
-                return Optional.of(iqTreeTools.unaryIQTreeBuilder()
-                        .append(iqTreeTools.createOptionalFilterNode(state.getSubTree().joiningCondition))
-                        .build(iqFactory.createBinaryNonCommutativeIQTree(node, newJoinOnLeft, rightChild)));
-            }
-
-            /**
-             * TODO: collect the constraint
-             */
-            State<UnaryOperatorNode, InnerJoinSubTree> propagateDownCondition(State<UnaryOperatorNode, InnerJoinSubTree> state) {
-                // TODO: consider that case as well
-                if (state.getSubTree().joiningCondition.isEmpty())
-                    return state;
-
-                try {
-                    // cache in the state?
-                    var childrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(state.getSubTree().children);
-
-                    var simplifiedJoinCondition = conditionSimplifier.simplifyCondition(
-                            state.getSubTree().joiningCondition, ImmutableSet.of(), state.getSubTree().children, childrenVariableNullability);
-
-                    var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
-                            new DownPropagation(projectedVariables), simplifiedJoinCondition, childrenVariableNullability);
-
-                    ImmutableList<IQTree> newChildren = extendedDownConstraint.propagate(
-                            state.getSubTree().children, variableGenerator);
-
-                    Optional<ImmutableExpression> newJoiningCondition = simplifiedJoinCondition.getOptionalExpression();
-
-                    Optional<ConstructionNode> newParent = iqTreeTools.createOptionalConstructionNode(
-                            () -> NaryIQTreeTools.projectedVariables(state.getSubTree().children),
-                            simplifiedJoinCondition.getSubstitution());
-
-                    return state.lift(newParent, new InnerJoinSubTree(newJoiningCondition, newChildren));
-                }
-                catch (UnsatisfiableConditionException e) {
-                    return declareAsEmpty();
-                }
-            }
-
-            Optional<State<UnaryOperatorNode, InnerJoinSubTree>> liftDistinct(State<UnaryOperatorNode, InnerJoinSubTree> state) {
-                return state.getSubTree().children.stream()
-                        .map(c -> c.acceptVisitor(new IQStateOptionalTransformer<State<UnaryOperatorNode, InnerJoinSubTree>>() {
-                            @Override
-                            public Optional<State<UnaryOperatorNode, InnerJoinSubTree>> transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree distinctChild) {
-                                if (isDistinct(state)) {
-                                    ImmutableList<IQTree> newChildren = state.getSubTree().children.stream()
-                                            .map(IQTree::removeDistincts)
-                                            .collect(ImmutableCollectors.toList());
-
-                                    return Optional.of(state.lift(node, new InnerJoinSubTree(state.getSubTree().joiningCondition, newChildren)));
-                                }
-                                return Optional.empty();
-                            }
-                        }))
-                        .flatMap(Optional::stream)
-                        .findFirst();
-            }
-
-            boolean isDistinct(State<UnaryOperatorNode, InnerJoinSubTree> state) {
-                if (state.getSubTree().children.stream().allMatch(IQTree::isDistinct))
-                    return true;
-
-                IQTree tree = iqTreeTools.createInnerJoinTree(state.getSubTree().joiningCondition, state.getSubTree().children);
-                return tree.isDistinct();
-            }
-
+            return Optional.of(iqTreeTools.unaryIQTreeBuilder()
+                    .append(iqTreeTools.createOptionalFilterNode(subTree.joiningCondition()))
+                    .build(iqFactory.createBinaryNonCommutativeIQTree(leftJoin.getNode(), newJoinOnLeft, leftJoin.rightChild())));
+        }
 
         State<UnaryOperatorNode, InnerJoinSubTree> liftFilterInnerJoinProjectingConstruction(State<UnaryOperatorNode, InnerJoinSubTree> state) {
-                var childLifts = state.getSubTree().children.stream()
-                        .map(this::getChildLift)
-                        .collect(ImmutableCollectors.toList());
+            InnerJoinSubTree subTree = state.getSubTree();
+            var childLifts = subTree.children().stream()
+                    .map(this::getChildLift)
+                    .collect(ImmutableCollectors.toList());
 
-                var newJoiningCondition = termFactory.getConjunction(
-                        state.getSubTree().joiningCondition,
-                        childLifts.stream().flatMap(ChildLift::expressionStream));
+            var newChildren = childLifts.stream()
+                    .map(ChildLift::children)
+                    .flatMap(ImmutableList::stream)
+                    .collect(ImmutableCollectors.toList());
 
-                var newChildren = childLifts.stream()
-                        .flatMap(ChildLift::childrenStream)
-                        .collect(ImmutableCollectors.toList());
+            if (subTree.children().equals(newChildren))
+                return state;
 
-                if (state.getSubTree().children.equals(newChildren))
-                    return state;
+            var newJoiningCondition = termFactory.getConjunction(
+                    subTree.joiningCondition(),
+                    childLifts.stream().map(ChildLift::optionalExpression).flatMap(Optional::stream));
 
-                return state.lift(
-                        iqFactory.createConstructionNode(
-                            NaryIQTreeTools.projectedVariables(state.getSubTree().children)),
-                        new InnerJoinSubTree(newJoiningCondition, newChildren));
-            }
+            return state.lift(
+                    iqFactory.createConstructionNode(
+                            NaryIQTreeTools.projectedVariables(subTree.children())),
+                    new InnerJoinSubTree(newJoiningCondition, newChildren));
+        }
 
-            ChildLift getChildLift(IQTree tree) {
-                return tree.acceptVisitor(new IQStateDefaultTransformer<>() {
-                    @Override
-                    protected ChildLift done() {
-                        return new ChildLift(Stream.empty(), Stream.of(tree));
-                    }
+        ChildLift getChildLift(IQTree tree) {
+            return tree.acceptVisitor(new IQStateDefaultTransformer<>() {
+                @Override
+                protected ChildLift done() {
+                    return new ChildLift(Optional.empty(), ImmutableList.of(tree));
+                }
 
-                    @Override
-                    public ChildLift transformFilter(UnaryIQTree tree, FilterNode filterNode, IQTree child) {
-                        return new ChildLift(Stream.of(filterNode.getFilterCondition()), Stream.of(child));
-                    }
+                @Override
+                public ChildLift transformFilter(UnaryIQTree tree, FilterNode filterNode, IQTree child) {
+                    return new ChildLift(Optional.of(filterNode.getFilterCondition()), ImmutableList.of(child));
+                }
 
-                    @Override
-                    public ChildLift transformConstruction(UnaryIQTree tree, ConstructionNode constructionNode, IQTree child) {
-                        if (constructionNode.getSubstitution().isEmpty())
-                            // TODO: check whether projected away variables need to be renamed
-                            //  (in case they occur in other children)
-                            return new ChildLift(Stream.of(), Stream.of(child));
+                @Override
+                public ChildLift transformConstruction(UnaryIQTree tree, ConstructionNode constructionNode, IQTree child) {
+                    if (constructionNode.getSubstitution().isEmpty())
+                        // TODO: check whether projected away variables need to be renamed
+                        //  (in case they occur in other children)
+                        return new ChildLift(Optional.empty(), ImmutableList.of(child));
 
-                        return done();
-                    }
+                    return done();
+                }
 
-                    @Override
-                    public ChildLift transformInnerJoin(NaryIQTree tree, InnerJoinNode joinNode, ImmutableList<IQTree> children) {
-                        return new ChildLift(joinNode.getOptionalFilterCondition().stream(), children.stream());
-                    }
-                });
-            }
+                @Override
+                public ChildLift transformInnerJoin(NaryIQTree tree, InnerJoinNode joinNode, ImmutableList<IQTree> children) {
+                    return new ChildLift(joinNode.getOptionalFilterCondition(), children);
+                }
+            });
+        }
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static final class ChildLift {
-        private final Stream<ImmutableExpression> expressionStream;
-        private final Stream<IQTree> childrenStream;
+        private final Optional<ImmutableExpression> optionalExpression;
+        private final ImmutableList<IQTree> children;
 
-        ChildLift(Stream<ImmutableExpression> expressionStream, Stream<IQTree> childrenStream) {
-            this.expressionStream = expressionStream;
-            this.childrenStream = childrenStream;
+        ChildLift(Optional<ImmutableExpression> optionalExpression, ImmutableList<IQTree> children) {
+            this.optionalExpression = optionalExpression;
+            this.children = children;
         }
 
-        Stream<ImmutableExpression> expressionStream() {
-            return expressionStream;
+        Optional<ImmutableExpression> optionalExpression() {
+            return optionalExpression;
         }
 
-        Stream<IQTree> childrenStream() {
-            return childrenStream;
+        ImmutableList<IQTree> children() {
+            return children;
         }
     }
 }

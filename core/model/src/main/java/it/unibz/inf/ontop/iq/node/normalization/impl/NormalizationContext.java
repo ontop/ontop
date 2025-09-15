@@ -118,6 +118,19 @@ public class NormalizationContext {
             return false;
         }
 
+
+        public State<T, S> reachFinal(Function<State<T, S> , State<T, S>> preparator, Function<State<T, S>, Optional<State<T, S>>> transformer) {
+            //Non-final
+            State<T, S> state = this;
+            while (true) {
+                State<T, S>  prepared = preparator.apply(state);
+                Optional<State<T, S>> next = transformer.apply(prepared);
+                if (next.isEmpty())
+                    return prepared;
+                state = next.get();
+            }
+        }
+
         public State<T, S> reachFinal(Function<State<T, S>, Optional<State<T, S>>> transformer) {
             //Non-final
             State<T, S> state = this;
