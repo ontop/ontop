@@ -305,7 +305,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     return Lifter.liftFirst(subTree, subTree, this::liftLeftJoin, LeftJoinDecomposition::of)
                             .orElseGet(() -> iqFactory.createNaryIQTree(
                                     iqFactory.createInnerJoinNode(subTree.joiningCondition()),
-                                    subTree.children(), normalizedTreeCache));
+                                    subTree.children(), 
+                                    normalizedTreeCache));
             }
         }
 
@@ -315,21 +316,16 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         Optional<IQTree> liftLeftJoin(InnerJoinSubTree subTree, int position, LeftJoinDecomposition leftJoin) {
             // For safety (although conflicts are unlikely to appear)
             Set<Variable> rightSpecificVariables = leftJoin.rightSpecificVariables();
+            ImmutableList<IQTree> children = subTree.children();
 
-            var children = subTree.children();
-
-            if (!IntStream.range(0, children.size())
-                    .filter(i -> i != position)
-                    .mapToObj(children::get)
+            if (!allChildrenExcept(children, position)
                     .map(IQTree::getVariables)
                     .allMatch(v -> Sets.intersection(v, rightSpecificVariables).isEmpty()))
                 return Optional.empty();
 
             NaryIQTree newJoinOnLeft = iqTreeTools.createInnerJoinTree(
                     Stream.concat(Stream.of(leftJoin.leftChild()),
-                                    IntStream.range(0, children.size())
-                                            .filter(i -> i != position)
-                                            .mapToObj(children::get))
+                                    allChildrenExcept(children, position))
                             .collect(ImmutableCollectors.toList()));
 
             return Optional.of(iqTreeTools.unaryIQTreeBuilder()
@@ -337,76 +333,61 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     .build(iqFactory.createBinaryNonCommutativeIQTree(leftJoin.getNode(), newJoinOnLeft, leftJoin.rightChild())));
         }
 
+        Stream<IQTree> allChildrenExcept(ImmutableList<IQTree> children, int position) {
+            return IntStream.range(0, children.size())
+                    .filter(i -> i != position)
+                    .mapToObj(children::get);
+        }
+
         State<UnaryOperatorNode, InnerJoinSubTree> liftFilterInnerJoinProjectingConstruction(State<UnaryOperatorNode, InnerJoinSubTree> state) {
             InnerJoinSubTree subTree = state.getSubTree();
-            var childLifts = subTree.children().stream()
-                    .map(this::getChildLift)
-                    .collect(ImmutableCollectors.toList());
+            var children = subTree.children();
+            var childLifts = NaryIQTreeTools.transformChildren(children, this::getChildLift);
 
             var newChildren = childLifts.stream()
-                    .map(ChildLift::children)
+                    .map(InnerJoinSubTree::children)
                     .flatMap(ImmutableList::stream)
                     .collect(ImmutableCollectors.toList());
 
-            if (subTree.children().equals(newChildren))
+            if (children.equals(newChildren))
                 return state;
 
             var newJoiningCondition = termFactory.getConjunction(
                     subTree.joiningCondition(),
-                    childLifts.stream().map(ChildLift::optionalExpression).flatMap(Optional::stream));
+                    childLifts.stream().map(InnerJoinSubTree::joiningCondition).flatMap(Optional::stream));
 
             return state.lift(
-                    iqFactory.createConstructionNode(
-                            NaryIQTreeTools.projectedVariables(subTree.children())),
+                    iqFactory.createConstructionNode(NaryIQTreeTools.projectedVariables(children)),
                     new InnerJoinSubTree(newJoiningCondition, newChildren));
         }
 
-        ChildLift getChildLift(IQTree tree) {
+        InnerJoinSubTree getChildLift(IQTree tree) {
             return tree.acceptVisitor(new IQStateDefaultTransformer<>() {
                 @Override
-                protected ChildLift done() {
-                    return new ChildLift(Optional.empty(), ImmutableList.of(tree));
+                protected InnerJoinSubTree done() {
+                    return new InnerJoinSubTree(Optional.empty(), ImmutableList.of(tree));
                 }
 
                 @Override
-                public ChildLift transformFilter(UnaryIQTree tree, FilterNode filterNode, IQTree child) {
-                    return new ChildLift(Optional.of(filterNode.getFilterCondition()), ImmutableList.of(child));
+                public InnerJoinSubTree transformFilter(UnaryIQTree tree, FilterNode filterNode, IQTree child) {
+                    return new InnerJoinSubTree(Optional.of(filterNode.getFilterCondition()), ImmutableList.of(child));
                 }
 
                 @Override
-                public ChildLift transformConstruction(UnaryIQTree tree, ConstructionNode constructionNode, IQTree child) {
+                public InnerJoinSubTree transformConstruction(UnaryIQTree tree, ConstructionNode constructionNode, IQTree child) {
                     if (constructionNode.getSubstitution().isEmpty())
                         // TODO: check whether projected away variables need to be renamed
                         //  (in case they occur in other children)
-                        return new ChildLift(Optional.empty(), ImmutableList.of(child));
+                        return new InnerJoinSubTree(Optional.empty(), ImmutableList.of(child));
 
                     return done();
                 }
 
                 @Override
-                public ChildLift transformInnerJoin(NaryIQTree tree, InnerJoinNode joinNode, ImmutableList<IQTree> children) {
-                    return new ChildLift(joinNode.getOptionalFilterCondition(), children);
+                public InnerJoinSubTree transformInnerJoin(NaryIQTree tree, InnerJoinNode joinNode, ImmutableList<IQTree> children) {
+                    return new InnerJoinSubTree(joinNode.getOptionalFilterCondition(), children);
                 }
             });
-        }
-    }
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static final class ChildLift {
-        private final Optional<ImmutableExpression> optionalExpression;
-        private final ImmutableList<IQTree> children;
-
-        ChildLift(Optional<ImmutableExpression> optionalExpression, ImmutableList<IQTree> children) {
-            this.optionalExpression = optionalExpression;
-            this.children = children;
-        }
-
-        Optional<ImmutableExpression> optionalExpression() {
-            return optionalExpression;
-        }
-
-        ImmutableList<IQTree> children() {
-            return children;
         }
     }
 }
