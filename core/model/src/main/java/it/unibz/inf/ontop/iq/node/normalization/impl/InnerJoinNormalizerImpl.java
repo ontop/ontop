@@ -134,12 +134,11 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         }
 
         IQTree normalize() {
-            return asIQTree(State.initial(new InnerJoinSubTree(innerJoinNode.getOptionalFilterCondition(), initialChildren))
-                    .reachFixedPoint(
-                            s ->
-                                    liftFilterInnerJoinProjectingConstruction(
-                                            liftBindingsAndDistincts(s)),
-                            MAX_ITERATIONS));
+            var initial = State.initial(new InnerJoinSubTree(innerJoinNode.getOptionalFilterCondition(), initialChildren));
+            var state = initial.reachFixedPoint(MAX_ITERATIONS,
+                            this::liftBindingsAndDistincts,
+                            this::liftFilterInnerJoinProjectingConstruction);
+            return asIQTree(state);
         }
 
         /**
@@ -305,7 +304,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     return Lifter.liftFirst(subTree, subTree, this::liftLeftJoin, LeftJoinDecomposition::of)
                             .orElseGet(() -> iqFactory.createNaryIQTree(
                                     iqFactory.createInnerJoinNode(subTree.joiningCondition()),
-                                    subTree.children(), 
+                                    subTree.children(),
                                     normalizedTreeCache));
             }
         }

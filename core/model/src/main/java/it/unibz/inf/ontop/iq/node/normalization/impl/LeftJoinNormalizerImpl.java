@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.UnaryOperator;
 
 import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.*;
 
@@ -163,7 +162,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
         IQTree normalize() {
             // Non-final
-            State<UnaryOperatorNode, LeftJoinSubTree> state = State.initial(initialSubTree);
+            var state = State.initial(initialSubTree);
 
             // The left child cannot be made empty because of the LJ. Therefore this step is enough to detect emptiness.
             state = liftLeftChild(state);
@@ -175,15 +174,14 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             // TODO: see if it deserves to be in the loop.
             state = propagateDownLJCondition(state);
 
-            return asIQTree(state.reachFixedPoint(
+            state =  state.reachFixedPoint(MAX_ITERATIONS,
                     // A DISTINCT on the left might have been waiting because of a not-yet distinct right child
-                    ((UnaryOperator<State<UnaryOperatorNode, LeftJoinSubTree>>)
-                            this::checkRightChildContribution)
-                            .andThen(this::optimizeLeftJoinCondition)
-                            .andThen(this::normalizeRightChild)
-                            .andThen(this::liftRightChild)
-                            .andThen(this::liftLeftChild),
-                    MAX_ITERATIONS));
+                    this::checkRightChildContribution,
+                    this::optimizeLeftJoinCondition,
+                    this::liftRightChild,
+                    this::liftLeftChild);
+
+            return asIQTree(state);
         }
 
         ConstructionNode createConstructionNode(LeftJoinSubTree subTree, Substitution<? extends ImmutableTerm> substitution) {
@@ -194,17 +192,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             return iqFactory.createEmptyNode(subTree.rightChild().getVariables());
         }
 
-        State<UnaryOperatorNode, LeftJoinSubTree> normalizeLeftChild(State<UnaryOperatorNode, LeftJoinSubTree> state) {
-            return state.replace(t -> t.replaceLeft(normalizeChild(t.leftChild())));
-        }
-
-        private State<UnaryOperatorNode, LeftJoinSubTree> normalizeRightChild(State<UnaryOperatorNode, LeftJoinSubTree> state) {
-            return state.replace(t -> t.replaceRight(normalizeChild(t.rightChild())));
-        }
-
-
         State<UnaryOperatorNode, LeftJoinSubTree> liftLeftChild(State<UnaryOperatorNode, LeftJoinSubTree> state) {
-            return normalizeLeftChild(state)
+            return state.replace(t -> t.replaceLeft(normalizeChild(t.leftChild())))
                     .reachFinal(this::liftLeftChildStep);
         }
 
@@ -213,89 +202,80 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             if (subTree.isRightChildEmpty())
                 return Optional.empty();
 
-            return subTree.leftChild().acceptVisitor(new LiftLeftChildStep(state))
-                    .map(this::normalizeLeftChild);
+            return subTree.leftChild().acceptVisitor(new IQStateOptionalTransformer<>() {
+
+                @Override
+                public Optional<State<UnaryOperatorNode, LeftJoinSubTree>> transformConstruction(UnaryIQTree liftedLeftChild, ConstructionNode constructionNode, IQTree leftGrandChild) {
+                    try {
+                        var bindingLift = bindingLifter.liftRegularChildBinding(
+                                constructionNode,
+                                0,
+                                subTree.children(),
+                                leftGrandChild.getVariables(),
+                                subTree.ljCondition(),
+                                variableGenerator,
+                                variableNullabilityTools.getChildrenVariableNullability(
+                                        ImmutableList.of(leftGrandChild, subTree.rightChild())));
+
+                        IQTree rightSubTree = subTree.rightChild().applyDescendingSubstitution(bindingLift.getDescendingSubstitution(), bindingLift.getCondition(), variableGenerator);
+
+                        ImmutableSet<Variable> leftVariables = projectedVariables(subTree.leftChild(), leftGrandChild).immutableCopy();
+
+                        Substitution<ImmutableTerm> naiveAscendingSubstitution = bindingLift.getAscendingSubstitution();
+                        OptionalRightProvenance rightProvenance = new OptionalRightProvenance(rightSubTree, naiveAscendingSubstitution, leftVariables);
+
+                        Optional<Variable> defaultProvenanceVariable = rightProvenance.getProvenanceVariable();
+                        Substitution<ImmutableTerm> ascendingSubstitution =
+                                naiveAscendingSubstitution.builder()
+                                        .transformOrRetain(v -> !leftVariables.contains(v) ? v : null,
+                                                (t, v) -> transformRightSubstitutionValue(t, leftVariables, defaultProvenanceVariable))
+                                        .build();
+
+                        return Optional.of(state.lift(
+                                createConstructionNode(subTree, ascendingSubstitution),
+                                new LeftJoinSubTree(bindingLift.getCondition(), leftGrandChild, rightProvenance.getRightTree())));
+                    }
+                    catch (UnsatisfiableConditionException e) {
+                        // Replaces the LJ by the left child and stops recursion!
+                        return Optional.of(state.lift(
+                                createConstructionNode(subTree, constructionNode.getSubstitution()),
+                                new LeftJoinSubTree(Optional.empty(), leftGrandChild, createEmptyRightChild(subTree))));
+                    }
+                }
+
+                @Override
+                public Optional<State<UnaryOperatorNode, LeftJoinSubTree>> transformDistinct(UnaryIQTree liftedLeftChild, DistinctNode distinctNode, IQTree leftGrandChild) {
+                    // When the left is distinct, isDistinct() behaves like for inner joins
+                    if (subTree.rightChild().isDistinct()
+                            || iqTreeTools.createInnerJoinTree(subTree.ljCondition(), subTree.children()).isDistinct()) {
+                        return Optional.of(state.lift(
+                                distinctNode,
+                                subTree.replaceChildren(leftGrandChild, subTree.rightChild().removeDistincts())));
+                    }
+                    return done();
+                }
+
+                @Override
+                public Optional<State<UnaryOperatorNode, LeftJoinSubTree>> transformFilter(UnaryIQTree liftedLeftChild, FilterNode filterNode, IQTree leftGrandChild) {
+                    return Optional.of(state.lift(filterNode, subTree.replaceLeft(leftGrandChild)));
+                }
+
+                @Override
+                public Optional<State<UnaryOperatorNode, LeftJoinSubTree>> transformInnerJoin(NaryIQTree liftedLeftChild, InnerJoinNode joinNode, ImmutableList<IQTree> leftGrandChildren) {
+                    Optional<ImmutableExpression> joinCondition = joinNode.getOptionalFilterCondition();
+                    if (joinCondition.isPresent()) {
+                        // lifts the filter from the join, but stops recursion on the next iteration
+                        return Optional.of(state.lift(
+                                iqFactory.createFilterNode(joinCondition.get()),
+                                subTree.replaceLeft(iqTreeTools.createInnerJoinTree(leftGrandChildren).normalizeForOptimization(variableGenerator))));
+                    }
+                    return done();
+                }
+            });
         }
 
-        private class LiftLeftChildStep extends IQStateOptionalTransformer<State<UnaryOperatorNode, LeftJoinSubTree>> {
-            private final State<UnaryOperatorNode, LeftJoinSubTree> state;
-            private final LeftJoinSubTree subTree;
-
-            LiftLeftChildStep(State<UnaryOperatorNode, LeftJoinSubTree> state) {
-                this.state = state;
-                this.subTree = state.getSubTree();
-            }
-
-            @Override
-            public Optional<State<UnaryOperatorNode, LeftJoinSubTree>> transformConstruction(UnaryIQTree liftedLeftChild, ConstructionNode constructionNode, IQTree leftGrandChild) {
-                try {
-                    var bindingLift = bindingLifter.liftRegularChildBinding(
-                            constructionNode,
-                            0,
-                            subTree.children(),
-                            leftGrandChild.getVariables(),
-                            subTree.ljCondition(),
-                            variableGenerator,
-                            variableNullabilityTools.getChildrenVariableNullability(
-                                    ImmutableList.of(leftGrandChild, subTree.rightChild())));
-
-                    IQTree rightSubTree = subTree.rightChild().applyDescendingSubstitution(bindingLift.getDescendingSubstitution(), bindingLift.getCondition(), variableGenerator);
-
-                    ImmutableSet<Variable> leftVariables = projectedVariables(subTree.leftChild(), leftGrandChild).immutableCopy();
-
-                    Substitution<ImmutableTerm> naiveAscendingSubstitution = bindingLift.getAscendingSubstitution();
-                    OptionalRightProvenance rightProvenance = new OptionalRightProvenance(rightSubTree, naiveAscendingSubstitution, leftVariables);
-
-                    Optional<Variable> defaultProvenanceVariable = rightProvenance.getProvenanceVariable();
-                    Substitution<ImmutableTerm> ascendingSubstitution =
-                            naiveAscendingSubstitution.builder()
-                                    .transformOrRetain(v -> !leftVariables.contains(v) ? v : null,
-                                            (t, v) -> transformRightSubstitutionValue(t, leftVariables, defaultProvenanceVariable))
-                                    .build();
-
-                    return Optional.of(state.lift(
-                            createConstructionNode(subTree, ascendingSubstitution),
-                            new LeftJoinSubTree(bindingLift.getCondition(), leftGrandChild, rightProvenance.getRightTree())));
-                }
-                catch (UnsatisfiableConditionException e) {
-                    // Replaces the LJ by the left child and stops recursion!
-                    return Optional.of(state.lift(
-                            createConstructionNode(subTree, constructionNode.getSubstitution()),
-                            new LeftJoinSubTree(Optional.empty(), leftGrandChild, createEmptyRightChild(subTree))));
-                }
-            }
-
-            @Override
-            public Optional<State<UnaryOperatorNode, LeftJoinSubTree>> transformDistinct(UnaryIQTree liftedLeftChild, DistinctNode distinctNode, IQTree leftGrandChild) {
-                // When the left is distinct, isDistinct() behaves like for inner joins
-                if (subTree.rightChild().isDistinct()
-                        || iqTreeTools.createInnerJoinTree(subTree.ljCondition(), subTree.children()).isDistinct()) {
-                    return Optional.of(state.lift(
-                            distinctNode,
-                            subTree.replaceChildren(leftGrandChild, subTree.rightChild().removeDistincts())));
-                }
-                return done();
-            }
-
-            @Override
-            public Optional<State<UnaryOperatorNode, LeftJoinSubTree>> transformFilter(UnaryIQTree liftedLeftChild, FilterNode filterNode, IQTree leftGrandChild) {
-                return Optional.of(state.lift(filterNode, subTree.replaceLeft(leftGrandChild)));
-            }
-
-            @Override
-            public Optional<State<UnaryOperatorNode, LeftJoinSubTree>> transformInnerJoin(NaryIQTree liftedLeftChild, InnerJoinNode joinNode, ImmutableList<IQTree> leftGrandChildren) {
-                Optional<ImmutableExpression> joinCondition = joinNode.getOptionalFilterCondition();
-                if (joinCondition.isPresent()) {
-                    // lifts the filter from the join, but stops recursion on the next iteration
-                    return Optional.of(state.lift(
-                            iqFactory.createFilterNode(joinCondition.get()),
-                            subTree.replaceLeft(iqTreeTools.createInnerJoinTree(leftGrandChildren))));
-                }
-                return done();
-            }
-        }
-
-        private State<UnaryOperatorNode, LeftJoinSubTree> liftRightChild(State<UnaryOperatorNode, LeftJoinSubTree> state) {
+        State<UnaryOperatorNode, LeftJoinSubTree> liftRightChild(State<UnaryOperatorNode, LeftJoinSubTree> s0) {
+            var state = s0.replace(t -> t.replaceRight(normalizeChild(t.rightChild())));
             return state.getSubTree().rightChild().acceptVisitor(new LiftRightChildStep(state))
                     .orElse(state);
         }

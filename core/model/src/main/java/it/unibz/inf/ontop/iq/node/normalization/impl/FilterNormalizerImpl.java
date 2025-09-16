@@ -74,20 +74,15 @@ public class FilterNormalizerImpl implements FilterNormalizer {
          */
 
         IQTree normalize() {
-            State<UnaryOperatorNode, UnarySubTree<FilterNode>> initial = State.initial(UnarySubTree.of(Optional.of(initialFilterNode), initialChild));
-
-            State<UnaryOperatorNode, UnarySubTree<FilterNode>> state = initial.reachFixedPoint(
-                    s ->
-                            simplifyAndPropagateDownConstraint(
-                                    normalizeAndLiftConstructionDistinctFilterInnerJoin(s)),
-                    MAX_NORMALIZATION_ITERATIONS);
-
+            var initial = State.initial(UnarySubTree.of(Optional.of(initialFilterNode), initialChild));
+            var state = initial.reachFixedPoint(MAX_NORMALIZATION_ITERATIONS,
+                    this::normalizeAndLiftConstructionDistinctFilterInnerJoin,
+                    this::simplifyAndPropagateDownConstraint);
             return asIQTree(state);
         }
 
         State<UnaryOperatorNode, UnarySubTree<FilterNode>> normalizeAndLiftConstructionDistinctFilterInnerJoin(State<UnaryOperatorNode, UnarySubTree<FilterNode>> state) {
-            return state.replace(normalizeChild(state.getSubTree()))
-                    .reachFinal(this::liftThroughFilter);
+            return state.replace(normalizeChild(state.getSubTree())).reachFinal(this::liftThroughFilter);
         }
 
         /**

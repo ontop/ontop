@@ -143,11 +143,14 @@ public class NormalizationContext {
             }
         }
 
-        public State<T, S> reachFixedPoint(Function<State<T, S>, State<T, S>> transformer, int maxIterations) {
+        @SafeVarargs
+        public final State<T, S> reachFixedPoint(int maxIterations, Function<State<T, S>, State<T, S>>... transformers) {
             //Non-final
             State<T, S> state = this;
             for(int i = 0; i < maxIterations; i++) {
-                State<T, S> next = transformer.apply(state);
+                State<T, S> next = state;
+                for (Function<State<T, S>, State<T, S>> transformer : transformers)
+                    next = transformer.apply(next);
                 if (next.equals(state))
                     return state;
                 state = next;
