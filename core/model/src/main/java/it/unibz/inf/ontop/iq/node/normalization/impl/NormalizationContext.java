@@ -34,8 +34,7 @@ public class NormalizationContext {
     }
 
     protected <T extends UnaryOperatorNode> UnarySubTree<T> normalizeChild(UnarySubTree<T> subTree) {
-        Optional<T> optionalNode = subTree.getOptionalNode();
-        return UnarySubTree.of(optionalNode, normalizeChild(subTree.getChild()));
+        return UnarySubTree.of(subTree.getOptionalNode(), normalizeChild(subTree.getChild()));
     }
 
 
@@ -51,6 +50,10 @@ public class NormalizationContext {
 
         public static <T extends UnaryOperatorNode> UnarySubTree<T> of(Optional<T> optionalNode, IQTree child) {
             return new UnarySubTree<>(optionalNode, child);
+        }
+
+        public static <T extends UnaryOperatorNode> UnarySubTree<T> of(T node, IQTree child) {
+            return new UnarySubTree<>(Optional.of(node), child);
         }
 
         IQTree getChild() {

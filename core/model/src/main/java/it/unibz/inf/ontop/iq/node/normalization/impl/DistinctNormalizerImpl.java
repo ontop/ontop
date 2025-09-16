@@ -17,8 +17,6 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Optional;
-
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 
@@ -103,7 +101,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
 
         IQTree liftBindingConstructionChild(ConstructionNode constructionNode, IQTree grandChild) {
             var initial = State.<ConstructionNode, UnarySubTree<ConstructionNode>>initial(
-                    UnarySubTree.of(Optional.of(constructionNode), grandChild));
+                    UnarySubTree.of(constructionNode, grandChild));
 
             var state = initial.reachFinal(MAX_ITERATIONS, this::liftBindings);
 
@@ -165,7 +163,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                 && constructionNode.getSubstitution()
                         .rangeAllMatch(this::isConstantOrDeterministic);
     }
-    
+
     private boolean isConstantOrDeterministic(ImmutableTerm term) {
         if (term instanceof Constant)
             return true;

@@ -56,7 +56,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
         Context(FilterNode initialFilterNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
             super(variableGenerator);
-            this.initialSubTree = UnarySubTree.of(Optional.of(initialFilterNode), initialChild);
+            this.initialSubTree = UnarySubTree.of(initialFilterNode, initialChild);
             this.projectedVariables = initialChild.getVariables();
             this.treeCache = treeCache;
         }
@@ -101,19 +101,19 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 public Optional<State<UnaryOperatorNode, UnarySubTree<FilterNode>>> transformConstruction(UnaryIQTree tree, ConstructionNode node, IQTree  newChild) {
                     var newFilterNode = iqFactory.createFilterNode(
                             node.getSubstitution().apply(filterNode.getFilterCondition()));
-                    return Optional.of(state.lift(node, UnarySubTree.of(Optional.of(newFilterNode), newChild)));
+                    return Optional.of(state.lift(node, UnarySubTree.of(newFilterNode, newChild)));
                 }
 
                 @Override
                 public Optional<State<UnaryOperatorNode, UnarySubTree<FilterNode>>> transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree newChild) {
-                    return Optional.of(state.lift(node, UnarySubTree.of(optionalFilterNode, newChild)));
+                    return Optional.of(state.lift(node, UnarySubTree.of(filterNode, newChild)));
                 }
 
                 @Override
                 public Optional<State<UnaryOperatorNode, UnarySubTree<FilterNode>>> transformFilter(UnaryIQTree tree, FilterNode node, IQTree newChild) {
                     var newFilterNode = iqFactory.createFilterNode(
                             iqTreeTools.getConjunction(filterNode.getFilterCondition(), node.getFilterCondition()));
-                    return Optional.of(state.replace(UnarySubTree.of(Optional.of(newFilterNode), newChild)));
+                    return Optional.of(state.replace(UnarySubTree.of(newFilterNode, newChild)));
                 }
 
                 @Override

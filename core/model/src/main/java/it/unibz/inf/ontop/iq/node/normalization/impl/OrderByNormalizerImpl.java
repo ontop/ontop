@@ -43,7 +43,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
 
         Context(OrderByNode initialOrderByNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
             super(variableGenerator);
-            this.initialSubTree = UnarySubTree.of(Optional.of(initialOrderByNode), initialChild);
+            this.initialSubTree = UnarySubTree.of(initialOrderByNode, initialChild);
             this.treeCache = treeCache;
         }
 
@@ -98,17 +98,18 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
             if (optionalOrderBy.isEmpty())
                 return Optional.empty();
 
+            OrderByNode orderByNode = optionalOrderBy.get();
             return subTree.getChild().acceptVisitor(new IQStateOptionalTransformer<>() {
                 @Override
                 public Optional<State<UnaryOperatorNode, UnarySubTree<OrderByNode>>> transformConstruction(UnaryIQTree tree, ConstructionNode node, IQTree newChild) {
-                    Optional<OrderByNode> newOptionalOrderBy = optionalOrderBy.get().applySubstitution(node.getSubstitution());
+                    Optional<OrderByNode> newOptionalOrderBy = orderByNode.applySubstitution(node.getSubstitution());
                     // will be final on the next iteration if the OrderBy node is absent
                     return Optional.of(state.lift(node, simplify(UnarySubTree.of(newOptionalOrderBy, newChild))));
                 }
 
                 @Override
                 public Optional<State<UnaryOperatorNode, UnarySubTree<OrderByNode>>> transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree newChild) {
-                    return Optional.of(state.lift(node, UnarySubTree.of(optionalOrderBy, newChild)));
+                    return Optional.of(state.lift(node, UnarySubTree.of(orderByNode, newChild)));
                 }
             });
         }

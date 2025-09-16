@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
@@ -19,6 +18,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Out of a child construction node and a grand child tree, tries to lift injective definitions above
@@ -58,34 +58,22 @@ public class InjectiveBindingLiftContext extends NormalizationContext {
         VariableNullability grandChildVariableNullability = subTree.getChild().getVariableNullability();
         ImmutableSet<Variable> nonFreeVariables = constructionNode.getVariables();
 
-        ImmutableMap<Variable, ImmutableFunctionalTerm.FunctionalTermDecomposition> injectivityDecompositionMap =
-                substitution.builder()
-                        .restrictRangeTo(ImmutableFunctionalTerm.class)
-                        .toMapIgnoreOptional((v, t) -> t.analyzeInjectivity(nonFreeVariables, grandChildVariableNullability, variableGenerator));
-
-        Substitution<ImmutableTerm> liftedSubstitution = substitutionFactory.union(
-                // All variables and constants
-                substitution.restrictRangeTo(NonFunctionalTerm.class),
-                // (Possibly decomposed) injective functional terms
-                substitution.builder()
-                        .<ImmutableTerm>restrictRangeTo(ImmutableFunctionalTerm.class)
-                        .transformOrRemove(injectivityDecompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getLiftableTerm)
-                        .build());
+        SubstitutionSplitter injectivityDecomposition = new SubstitutionSplitter(substitution,
+                t -> t.analyzeInjectivity(nonFreeVariables, grandChildVariableNullability, variableGenerator));
 
         Optional<ConstructionNode> liftedConstructionNode = iqTreeTools.createOptionalConstructionNode(
-                constructionNode::getVariables, liftedSubstitution);
+                constructionNode::getVariables,
+                injectivityDecomposition.getLiftedSubstitution());
 
         ImmutableSet<Variable> newChildVariables = liftedConstructionNode
                 .map(ConstructionNode::getChildVariables)
                 .orElseGet(constructionNode::getVariables);
 
-        Substitution<ImmutableFunctionalTerm> newChildSubstitution = substitution.builder()
-                .restrictRangeTo(ImmutableFunctionalTerm.class)
-                .flatTransform(injectivityDecompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubstitution)
-                .build();
-
         var newOptionalConstructionNode =
-                iqTreeTools.createOptionalConstructionNode(newChildVariables, newChildSubstitution, subTree.getChild());
+                iqTreeTools.createOptionalConstructionNode(
+                        newChildVariables,
+                        injectivityDecomposition.getNonLiftedSubstitution(),
+                        subTree.getChild());
 
         // Nothing lifted
         if (newOptionalConstructionNode.equals(subTree.getOptionalNode())) {
@@ -98,5 +86,35 @@ public class InjectiveBindingLiftContext extends NormalizationContext {
                 liftedConstructionNode
                         .orElseThrow(() -> new MinorOntopInternalBugException("A lifted construction node was expected")),
                 UnarySubTree.of(newOptionalConstructionNode, subTree.getChild())));
+    }
+
+    protected final class SubstitutionSplitter {
+        private final Substitution<ImmutableTerm> substitution;
+        private final ImmutableMap<Variable, ImmutableFunctionalTerm.FunctionalTermDecomposition> decompositionMap;
+
+        protected SubstitutionSplitter(Substitution<ImmutableTerm> substitution, Function<ImmutableFunctionalTerm, Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition>> decompositionFunction) {
+            this.substitution = substitution;
+            this.decompositionMap = substitution.builder()
+                    .restrictRangeTo(ImmutableFunctionalTerm.class)
+                    .toMapIgnoreOptional((v, t) -> decompositionFunction.apply(t));
+        }
+
+        protected Substitution<ImmutableTerm> getLiftedSubstitution() {
+            return substitutionFactory.union(
+                    // All variables and constants
+                    substitution.<ImmutableTerm>restrictRangeTo(NonFunctionalTerm.class),
+                    // (Possibly decomposed) functional terms
+                    substitution.builder()
+                            .<ImmutableTerm>restrictRangeTo(ImmutableFunctionalTerm.class)
+                            .transformOrRemove(decompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getLiftableTerm)
+                            .build());
+        }
+
+        protected Substitution<ImmutableFunctionalTerm> getNonLiftedSubstitution() {
+            return substitution.builder()
+                    .restrictRangeTo(ImmutableFunctionalTerm.class)
+                    .flatTransform(decompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubstitution)
+                    .build();
+        }
     }
 }
