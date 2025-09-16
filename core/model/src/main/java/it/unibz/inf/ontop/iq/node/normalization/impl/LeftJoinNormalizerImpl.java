@@ -104,11 +104,11 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             return new LeftJoinSubTree(this.ljCondition, leftChild, rightChild);
         }
 
-        Sets.SetView<Variable> projectedVariables() {
-            return BinaryNonCommutativeIQTreeTools.projectedVariables(leftChild, rightChild);
+        ImmutableSet<Variable> projectedVariables() {
+            return BinaryNonCommutativeIQTreeTools.projectedVariables(leftChild, rightChild).immutableCopy();
         }
 
-        Sets.SetView<Variable> rightSpecificVariables() {
+        Set<Variable> rightSpecificVariables() {
             return BinaryNonCommutativeIQTreeTools.rightSpecificVariables(leftChild, rightChild);
         }
 
@@ -156,7 +156,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         private Context(LeftJoinNode ljNode, IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
             super(variableGenerator);
             this.initialSubTree = new LeftJoinSubTree(ljNode.getOptionalFilterCondition(), initialLeftChild, initialRightChild);
-            this.projectedVariables = initialSubTree.projectedVariables().immutableCopy();
+            this.projectedVariables = initialSubTree.projectedVariables();
             this.treeCache = treeCache;
         }
 
@@ -185,7 +185,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         }
 
         ConstructionNode createConstructionNode(LeftJoinSubTree subTree, Substitution<? extends ImmutableTerm> substitution) {
-            return iqFactory.createConstructionNode(subTree.projectedVariables().immutableCopy(), substitution);
+            return iqFactory.createConstructionNode(subTree.projectedVariables(), substitution);
         }
 
         EmptyNode createEmptyRightChild(LeftJoinSubTree subTree) {
@@ -197,9 +197,17 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .reachFinal(this::liftLeftChildStep);
         }
 
+        /**
+         * One-step lifting of CONSTRUCT, DISTINCT and FILTER form the left child of LEFT JOIN.
+         * The joining condition of INNER JOIN is also lifted, which terminates lifting
+         * (on the next iteration).
+         * The child is assumed to be normalized, so repeated applications are possible
+         * (without the need to normalize the child again).
+         */
+
         Optional<State<UnaryOperatorNode, LeftJoinSubTree>> liftLeftChildStep(State<UnaryOperatorNode, LeftJoinSubTree> state) {
             LeftJoinSubTree subTree = state.getSubTree();
-            if (subTree.isRightChildEmpty())
+            if (subTree.isRightChildEmpty()) // can result from lifting a CONSTRUCT
                 return Optional.empty();
 
             return subTree.leftChild().acceptVisitor(new IQStateOptionalTransformer<>() {
@@ -267,7 +275,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         // lifts the filter from the join, but stops recursion on the next iteration
                         return Optional.of(state.lift(
                                 iqFactory.createFilterNode(joinCondition.get()),
-                                subTree.replaceLeft(iqTreeTools.createInnerJoinTree(leftGrandChildren).normalizeForOptimization(variableGenerator))));
+                                subTree.replaceLeft(iqTreeTools.createInnerJoinTree(leftGrandChildren)
+                                        .normalizeForOptimization(variableGenerator))));
                     }
                     return done();
                 }
@@ -458,9 +467,6 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
                 var optionalCondition = simplificationResults.getOptionalExpression();
                 if (downSubstitution.isEmpty()) {
-                    if (subTree.ljCondition().equals(optionalCondition))
-                        return state;
-
                     return state.replace(
                             subTree.replaceRight(optionalCondition, subTree.rightChild()));
                 }
@@ -568,6 +574,18 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         .orElse(rightTree);
             }
 
+            OptionalRightProvenance(Variable provenanceVariable,
+                                    IQTree tree,
+                                    Substitution<? extends ImmutableTerm> selectedSubstitution,
+                                    ImmutableSet<Variable> leftVariables,
+                                    ImmutableSet<Variable> treeVariablesToProject) {
+                this.selectedSubstitution = selectedSubstitution;
+                this.leftVariables = leftVariables;
+                this.rightTree = createSubTreeWithProvenance(provenanceVariable, tree, treeVariablesToProject);
+                this.rightProvenance = Optional.of(new RightProvenance(provenanceVariable, rightTree));
+            }
+
+
             private Optional<RightProvenance> getRightProvenance(IQTree rightTree,
                                                                  Substitution<? extends ImmutableTerm> selectedSubstitution,
                                                                  ImmutableSet<Variable> leftVariables,
@@ -579,17 +597,6 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                             rightTree, leftVariables, rightRequiredVariables, variableGenerator));
                 }
                 return Optional.empty();
-            }
-
-            OptionalRightProvenance(Variable provenanceVariable,
-                                    IQTree tree,
-                                    Substitution<? extends ImmutableTerm> selectedSubstitution,
-                                    ImmutableSet<Variable> leftVariables,
-                                    ImmutableSet<Variable> treeVariablesToProject) {
-                this.selectedSubstitution = selectedSubstitution;
-                this.leftVariables = leftVariables;
-                this.rightTree = createSubTreeWithProvenance(provenanceVariable, tree, treeVariablesToProject);
-                this.rightProvenance = Optional.of(new RightProvenance(provenanceVariable, rightTree));
             }
 
             Optional<Variable> getProvenanceVariable() {

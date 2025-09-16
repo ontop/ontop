@@ -87,7 +87,8 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
         /**
          * One-step lifting of CONSTRUCT, DISTINCT and FILTER nodes through the FILTER.
-         * An INNER JOIN child node absorbs the FILTER.
+         * An INNER JOIN child node absorbs the FILTER, which terminates lifting
+         * (on the next iteration).
          * The child is assumed to be normalized, so repeated applications are possible
          * (without the need to normalize the child again).
          */
