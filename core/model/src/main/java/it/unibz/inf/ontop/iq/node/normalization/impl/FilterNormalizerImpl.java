@@ -50,19 +50,15 @@ public class FilterNormalizerImpl implements FilterNormalizer {
     }
 
     private class Context extends NormalizationContext {
-
-        private final FilterNode initialFilterNode;
-        private final IQTree initialChild;
-        private final IQTreeCache treeCache;
-
+        private final UnarySubTree<FilterNode> initialSubTree;
         private final ImmutableSet<Variable> projectedVariables;
+        private final IQTreeCache treeCache;
 
         Context(FilterNode initialFilterNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
             super(variableGenerator);
-            this.initialFilterNode = initialFilterNode;
-            this.initialChild = initialChild;
-            this.treeCache = treeCache;
+            this.initialSubTree = UnarySubTree.of(Optional.of(initialFilterNode), initialChild);
             this.projectedVariables = initialChild.getVariables();
+            this.treeCache = treeCache;
         }
 
         /**
@@ -74,7 +70,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
          */
 
         IQTree normalize() {
-            var initial = State.initial(UnarySubTree.of(Optional.of(initialFilterNode), initialChild));
+            var initial = State.initial(initialSubTree);
             var state = initial.reachFixedPoint(MAX_NORMALIZATION_ITERATIONS,
                     this::normalizeAndLiftConstructionDistinctFilterInnerJoin,
                     this::simplifyAndPropagateDownConstraint);
@@ -82,7 +78,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
         }
 
         State<UnaryOperatorNode, UnarySubTree<FilterNode>> normalizeAndLiftConstructionDistinctFilterInnerJoin(State<UnaryOperatorNode, UnarySubTree<FilterNode>> state) {
-            return state.replace(normalizeChild(state.getSubTree())).reachFinal(this::liftThroughFilter);
+            return state.replace(this::normalizeChild).reachFinal(this::liftThroughFilter);
         }
 
         /**

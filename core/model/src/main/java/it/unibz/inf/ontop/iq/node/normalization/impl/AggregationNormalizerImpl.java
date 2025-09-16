@@ -221,10 +221,10 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             // (mimicking the special case when GROUP BY reduces itself to a DISTINCT and a projection)
             ConstructionNode groupingConstructionNode = iqFactory.createConstructionNode(state.getSubTree().groupingVariables, substitution);
 
-            State<ConstructionNode, ConstructionSubTree> subState = IQStateOptionalTransformer.reachFinalState(
-                    State.initial(new ConstructionSubTree(groupingConstructionNode, state.getSubTree().grandChild)),
-                    this::liftBindings,
-                    MAX_ITERATIONS);
+            State<ConstructionNode, UnarySubTree<ConstructionNode>> subState =
+                    State.<ConstructionNode, UnarySubTree<ConstructionNode>>initial(
+                            UnarySubTree.of(Optional.of(groupingConstructionNode), state.getSubTree().grandChild))
+                            .reachFinal(MAX_ITERATIONS, this::liftBindings);
 
             UnaryOperatorSequence<ConstructionNode> subStateAncestors = subState.getAncestors();
 
@@ -269,7 +269,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             ).orElse(newAggregationSubstitution);
 
             // Is created if, either, the node includes a substitution, or a sample variable is required.
-            Optional<ConstructionNode> newChildConstructionNode = subState.getSubTree().getOptionalConstructionNode()
+            Optional<ConstructionNode> newChildConstructionNode = subState.getSubTree().getOptionalNode()
                     // Only keeps the child construction node if it has a substitution
                     .flatMap(n -> iqTreeTools.createOptionalConstructionNode(
                             () -> iqTreeTools.extractChildVariables(newGroupingVariables, finalAggregationSubstitution),

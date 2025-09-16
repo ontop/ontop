@@ -44,55 +44,18 @@ public class InjectiveBindingLiftContext extends NormalizationContext {
         this.treeCache = treeCache;
     }
 
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    public static class ConstructionSubTree {
-        private final Optional<ConstructionNode> optionalConstructionNode;
-        // First descendent tree not starting with a construction node
-        private final IQTree child;
-
-        public ConstructionSubTree(Optional<ConstructionNode> optionalConstructionNode, IQTree child) {
-            this.optionalConstructionNode = optionalConstructionNode;
-            this.child = child;
-        }
-
-        /**
-         * Initial state
-         */
-        public ConstructionSubTree(ConstructionNode constructionNode, IQTree child) {
-            this(Optional.of(constructionNode), child);
-        }
-
-        public Optional<ConstructionNode> getOptionalConstructionNode() {
-            return optionalConstructionNode;
-        }
-
-        public IQTree getChild() {
-            return child;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o instanceof ConstructionSubTree) {
-                ConstructionSubTree other = (ConstructionSubTree)o;
-                return optionalConstructionNode.equals(other.optionalConstructionNode)
-                        && child.equals(other.child);
-            }
-            return false;
-        }
-    }
-
-
-    protected Optional<State<ConstructionNode, ConstructionSubTree>> liftBindings(State<ConstructionNode, ConstructionSubTree> state) {
-        if (state.getSubTree().optionalConstructionNode.isEmpty())
+    protected Optional<State<ConstructionNode, UnarySubTree<ConstructionNode>>> liftBindings(State<ConstructionNode, UnarySubTree<ConstructionNode>> state) {
+        UnarySubTree<ConstructionNode> subTree = state.getSubTree();
+        if (subTree.getOptionalNode().isEmpty())
             return Optional.empty();
 
-        ConstructionNode constructionNode = state.getSubTree().optionalConstructionNode.get();
+        ConstructionNode constructionNode = subTree.getOptionalNode().get();
 
         Substitution<ImmutableTerm> substitution = constructionNode.getSubstitution();
         if (substitution.isEmpty())
             return Optional.empty();
 
-        VariableNullability grandChildVariableNullability = state.getSubTree().child.getVariableNullability();
+        VariableNullability grandChildVariableNullability = subTree.getChild().getVariableNullability();
         ImmutableSet<Variable> nonFreeVariables = constructionNode.getVariables();
 
         ImmutableMap<Variable, ImmutableFunctionalTerm.FunctionalTermDecomposition> injectivityDecompositionMap =
@@ -122,17 +85,18 @@ public class InjectiveBindingLiftContext extends NormalizationContext {
                 .build();
 
         var newOptionalConstructionNode =
-                iqTreeTools.createOptionalConstructionNode(newChildVariables, newChildSubstitution, state.getSubTree().child);
+                iqTreeTools.createOptionalConstructionNode(newChildVariables, newChildSubstitution, subTree.getChild());
 
         // Nothing lifted
-        if (newOptionalConstructionNode.equals(state.getSubTree().optionalConstructionNode)) {
+        if (newOptionalConstructionNode.equals(subTree.getOptionalNode())) {
             if (liftedConstructionNode.isPresent())
                 throw new MinorOntopInternalBugException("Unexpected lifted construction node");
             return Optional.empty();
         }
 
-        return Optional.of(state.lift(liftedConstructionNode
+        return Optional.of(state.lift(
+                liftedConstructionNode
                         .orElseThrow(() -> new MinorOntopInternalBugException("A lifted construction node was expected")),
-                new ConstructionSubTree(newOptionalConstructionNode, state.getSubTree().child)));
+                UnarySubTree.of(newOptionalConstructionNode, subTree.getChild())));
     }
 }

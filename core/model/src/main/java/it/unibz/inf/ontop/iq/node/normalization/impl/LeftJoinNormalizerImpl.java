@@ -66,7 +66,6 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
     @Override
     public IQTree normalizeForOptimization(LeftJoinNode ljNode, IQTree initialLeftChild, IQTree initialRightChild,
                                            VariableGenerator variableGenerator, IQTreeCache treeCache) {
-
         Context context = new Context(ljNode, initialLeftChild, initialRightChild, variableGenerator, treeCache);
         return context.normalize();
     }
@@ -467,8 +466,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
                 var optionalCondition = simplificationResults.getOptionalExpression();
                 if (downSubstitution.isEmpty()) {
-                    return state.replace(
-                            subTree.replaceRight(optionalCondition, subTree.rightChild()));
+                    return state.replace(t -> t.replaceRight(optionalCondition, t.rightChild()));
                 }
 
                 IQTree updatedRightChild = subTree.rightChild().applyDescendingSubstitution(
@@ -482,8 +480,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         subTree.replaceRight(optionalCondition, rightProvenance.getRightTree()));
             }
             catch (UnsatisfiableConditionException e) {
-                return state.replace(
-                        subTree.replaceRight(Optional.empty(), createEmptyRightChild(subTree)));
+                return state.replace(t -> t.replaceRight(Optional.empty(), createEmptyRightChild(t)));
             }
         }
 

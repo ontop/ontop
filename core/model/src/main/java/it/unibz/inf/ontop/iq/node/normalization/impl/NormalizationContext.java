@@ -119,7 +119,6 @@ public class NormalizationContext {
             return false;
         }
 
-
         public State<T, S> reachFinal(Function<State<T, S> , State<T, S>> preparator, Function<State<T, S>, Optional<State<T, S>>> transformer) {
             //Non-final
             State<T, S> state = this;
@@ -142,6 +141,19 @@ public class NormalizationContext {
                 state = next.get();
             }
         }
+
+        public State<T, S> reachFinal(int maxIterations, Function<State<T, S>, Optional<State<T, S>>> transformer) {
+            //Non-final
+            State<T, S> state = this;
+            for (int i = 0; i < maxIterations; i++) {
+                Optional<State<T, S>> next = transformer.apply(state);
+                if (next.isEmpty())
+                    return state;
+                state = next.get();
+            }
+            throw new MinorOntopInternalBugException(String.format("Has not converged in %d iterations", maxIterations));
+        }
+
 
         @SafeVarargs
         public final State<T, S> reachFixedPoint(int maxIterations, Function<State<T, S>, State<T, S>>... transformers) {

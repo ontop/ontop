@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -10,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.OrderByNormalizer;
 import it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -36,14 +38,12 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
     }
 
     private class Context extends NormalizationContext {
-        private final OrderByNode initialOrderByNode;
-        private final IQTree initialChild;
+        private final UnarySubTree<OrderByNode> initialSubTree;
         private final IQTreeCache treeCache;
 
         Context(OrderByNode initialOrderByNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
             super(variableGenerator);
-            this.initialOrderByNode = initialOrderByNode;
-            this.initialChild = initialChild;
+            this.initialSubTree = UnarySubTree.of(Optional.of(initialOrderByNode), initialChild);
             this.treeCache = treeCache;
         }
 
@@ -71,12 +71,12 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
          */
 
         IQTree normalize() {
-            State<UnaryOperatorNode, UnarySubTree<OrderByNode>> initial = State.initial(
-                    simplify(UnarySubTree.of(Optional.of(initialOrderByNode), normalizeChild(initialChild))));
+            State<UnaryOperatorNode, UnarySubTree<OrderByNode>> initial =
+                    State.initial(simplify(normalizeChild(initialSubTree)));
 
             // NB: the loop is due to the lifting of both distinct and construction nodes
             State<UnaryOperatorNode, UnarySubTree<OrderByNode>> state =
-                    initial.replace(normalizeChild(initial.getSubTree()))
+                    initial.replace(this::normalizeChild)
                                     .reachFinal(this::liftThroughOrderBy);
                     /*initial.reachFixedPoint(
                     s ->
@@ -116,7 +116,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
         IQTree asIQTree(State<UnaryOperatorNode, UnarySubTree<OrderByNode>> state) {
             UnarySubTree<OrderByNode> subTree = state.getSubTree();
             if (subTree.getChild().isDeclaredAsEmpty())
-                return iqFactory.createEmptyNode(initialChild.getVariables());
+                return iqFactory.createEmptyNode(initialSubTree.getChild().getVariables());
 
             IQTree orderByLevelTree = iqTreeTools.unaryIQTreeBuilder()
                     .append(subTree.getOptionalNode(), treeCache::declareAsNormalizedForOptimizationWithEffect)
