@@ -184,6 +184,10 @@ public class IQTreeTools {
         }
     }
 
+    public ImmutableExpression getConjunction(ImmutableExpression expression1, ImmutableExpression expression2) {
+        return termFactory.getConjunction(expression1, expression2);
+    }
+
     public ImmutableExpression getConjunction(Optional<ImmutableExpression> optionalExpression, ImmutableExpression expression) {
         return optionalExpression
                 .map(c -> termFactory.getConjunction(c, expression))

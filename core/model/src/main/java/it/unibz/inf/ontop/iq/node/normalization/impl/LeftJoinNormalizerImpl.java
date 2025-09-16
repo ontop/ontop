@@ -204,7 +204,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
 
         State<UnaryOperatorNode, LeftJoinSubTree> liftLeftChild(State<UnaryOperatorNode, LeftJoinSubTree> state) {
-            return normalizeLeftChild(state).reachFinal(this::liftLeftChildStep);
+            return normalizeLeftChild(state)
+                    .reachFinal(this::liftLeftChildStep);
         }
 
         Optional<State<UnaryOperatorNode, LeftJoinSubTree>> liftLeftChildStep(State<UnaryOperatorNode, LeftJoinSubTree> state) {
