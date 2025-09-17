@@ -89,11 +89,6 @@ public class IQTreeTools {
         return f ? Optional.of(iqFactory.createDistinctNode()) : Optional.empty();
     }
 
-    public ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> groupingVariables,
-                                                               Substitution<ImmutableFunctionalTerm> substitution) {
-        return Sets.union(groupingVariables, substitution.getRangeVariables()).immutableCopy();
-    }
-
     public IQTree createUnionTree(ImmutableSet<Variable> variables, ImmutableList<IQTree> children) {
         return iqFactory.createNaryIQTree(iqFactory.createUnionNode(variables), children);
     }

@@ -38,7 +38,8 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     @AssistedInject
     protected AggregationNodeImpl(@Assisted ImmutableSet<Variable> groupingVariables,
                                   @Assisted Substitution<ImmutableFunctionalTerm> substitution,
-                                  SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
+                                  SubstitutionFactory substitutionFactory,
+                                  IntermediateQueryFactory iqFactory,
                                   AggregationNormalizer aggregationNormalizer,
                                   IQTreeTools iqTreeTools,
                                   TermFactory termFactory,
@@ -48,7 +49,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         this.substitution = substitution;
         this.aggregationNormalizer = aggregationNormalizer;
         this.projectedVariables = Sets.union(groupingVariables, substitution.getDomain()).immutableCopy();
-        this.childVariables = iqTreeTools.extractChildVariables(groupingVariables, substitution);
+        this.childVariables = Sets.union(groupingVariables, substitution.getRangeVariables()).immutableCopy();
 
         if (settings.isTestModeEnabled())
             validateNode();
