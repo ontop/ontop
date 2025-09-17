@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
+import com.google.common.collect.ImmutableSet;
 import org.eclipse.rdf4j.query.*;
 import org.junit.*;
 
@@ -31,7 +32,7 @@ public class UnionGraphTest extends AbstractRDF4JTest {
         
         // The query should execute without throwing an exception
         // The count may be 0 if no data exists, but no exception should occur
-        assertTrue("UnionGraph query should execute successfully", count >= 0);
+        assertEquals("UnionGraph query should execute successfully", 0, count);
     }
 
     @Test
@@ -44,7 +45,7 @@ public class UnionGraphTest extends AbstractRDF4JTest {
         
         // This test verifies that the query doesn't throw an exception
         // Even if no named graphs exist in the test data, the query should execute successfully
-        assertTrue("Query executed successfully", count >= 0);
+        assertEquals("Query executed successfully", 0, count);
     }
 
     @Test
@@ -57,7 +58,7 @@ public class UnionGraphTest extends AbstractRDF4JTest {
 
         // This test verifies that the query doesn't throw an exception
         // Even if no named graphs exist in the test data, the query should execute successfully
-        assertTrue("Query executed successfully", count >= 0);
+        assertEquals("Query executed successfully", 0, count);
     }
 
     @Test  
@@ -72,21 +73,20 @@ public class UnionGraphTest extends AbstractRDF4JTest {
         
         // In this test setup, UnionGraph should return similar data to the regular query
         // since we're querying the default graph
-        assertTrue("UnionGraph should return results", unionGraphCount >= 0);
-        assertTrue("Regular query should return results", regularCount >= 0);
+        assertEquals("UnionGraph should return results", 0, unionGraphCount);
+        assertTrue("Regular query should return results", regularCount > 0);
     }
 
     @Test
     public void testUnionGraphConstantDetection() {
         // This test verifies that the UnionGraph URI is correctly recognized
-        String sparqlQuery = "SELECT (COUNT(*) as ?count) WHERE { GRAPH <urn:x-arq:UnionGraph> { ?s ?p ?o } }";
+        String sparqlQuery = "SELECT (COUNT(*) as ?v) WHERE { GRAPH <urn:x-arq:UnionGraph> { ?s ?p ?o } }";
         
         try {
-            int count = runQueryAndCount(sparqlQuery);
+            runQueryAndCompare(sparqlQuery, ImmutableSet.of("0"));
             
             // The query should execute without throwing an exception
             // The result depends on available data, but the important thing is no exception occurs
-            assertTrue("Query executed without error", count >= 0);
         } catch (Exception e) {
             fail("UnionGraph query should not throw exception: " + e.getMessage());
         }

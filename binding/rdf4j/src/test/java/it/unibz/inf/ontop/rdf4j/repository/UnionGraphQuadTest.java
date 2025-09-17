@@ -1,15 +1,11 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.eclipse.rdf4j.query.*;
 import org.junit.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -41,7 +37,7 @@ public class UnionGraphQuadTest extends AbstractRDF4JTest {
         int unionCount = runQueryAndCount(unionGraphQuery);
         
         // Should return all persons from all named graphs (5 persons total)
-        assertTrue("UnionGraph should return all persons from all graphs", unionCount >= 5);
+        assertEquals("UnionGraph should return all persons from all graphs", 5, unionCount);
     }
 
     @Test 
@@ -68,9 +64,9 @@ public class UnionGraphQuadTest extends AbstractRDF4JTest {
         int unionGraphCount = runQueryAndCount(unionGraphQuery);
         
         // Both should return the same number of results
-        assertEquals("UnionGraph and GRAPH ?g should return same number of results", 
-                     graphVarCount, unionGraphCount);
-        assertTrue("Should have found some persons", unionGraphCount > 0);
+        assertEquals("UnionGraph and GRAPH ?g should return same number of results",
+                graphVarCount, unionGraphCount);
+        assertEquals("Should have found some persons", 5, unionGraphCount);
     }
 
     @Test
@@ -86,7 +82,7 @@ public class UnionGraphQuadTest extends AbstractRDF4JTest {
             "} ORDER BY ?name";
         
         int count = runQueryAndCount(unionGraphQuery);
-        assertTrue("Should find people across all graphs", count >= 3);
+        assertEquals("Should find people across all graphs", 5, count);
     }
 
     @Test
@@ -112,8 +108,8 @@ public class UnionGraphQuadTest extends AbstractRDF4JTest {
             "} ORDER BY ?name";
             
         int unionCount = runQueryAndCount(unionGraphQuery);
-        
-        assertTrue("Specific graph should have some results", specificCount > 0);
+
+        assertEquals("Specific graph should have some results", 2, specificCount);
         assertTrue("UnionGraph should have more results than any single graph", 
                    unionCount > specificCount);
     }
@@ -123,27 +119,14 @@ public class UnionGraphQuadTest extends AbstractRDF4JTest {
         // Test that we actually get the expected content
         String unionGraphQuery = 
             "PREFIX foaf: <http://xmlns.com/foaf/0.1/> " +
-            "SELECT ?name WHERE { " +
+            "SELECT ?v WHERE { " +
             "  GRAPH <urn:x-arq:UnionGraph> { " +
-            "    ?person a foaf:Person ; foaf:name ?name " +
+            "    ?person a foaf:Person ; foaf:name ?v " +
             "  } " +
             "} ORDER BY ?name";
-        
-        ImmutableList<ImmutableMap<String, String>> results = executeQuery(unionGraphQuery);
-        
-        Set<String> names = new HashSet<>();
-        for (ImmutableMap<String, String> row : results) {
-            String name = row.get("name");
-            if (name != null) {
-                names.add(name);
-            }
-        }
-        
-        // Verify we got names from different graphs
-        assertTrue("Should contain John Smith from corp graph", names.contains("John Smith"));
-        assertTrue("Should contain Prof. Wilson from academic graph", names.contains("Prof. Wilson"));
-        assertTrue("Should contain Dr. Brown from research graph", names.contains("Dr. Brown"));
-        assertTrue("Should have found at least 3 different names", names.size() >= 3);
+
+        runQueryAndCompare(unionGraphQuery, ImmutableSet.of("Dr. Brown", "John Smith", "Prof. Wilson",
+                "Alice Johnson", "Jane Doe"));
     }
 
     @Test
@@ -151,18 +134,14 @@ public class UnionGraphQuadTest extends AbstractRDF4JTest {
         // Test finding a specific person in the union of all graphs
         String findPersonQuery = 
             "PREFIX foaf: <http://xmlns.com/foaf/0.1/> " +
-            "SELECT ?name WHERE { " +
+            "SELECT ?v WHERE { " +
             "  GRAPH <urn:x-arq:UnionGraph> { " +
-            "    ?person a foaf:Person ; foaf:name ?name " +
-            "    FILTER(?name = \"Dr. Brown\") " +
+            "    ?person a foaf:Person ; foaf:name ?v " +
+            "    FILTER(?v = \"Dr. Brown\") " +
             "  } " +
             "}";
-        
-        ImmutableList<ImmutableMap<String, String>> results = executeQuery(findPersonQuery);
-        
-        assertFalse("Should find Dr. Brown in the union of all graphs", results.isEmpty());
-        assertEquals("Should find exactly one Dr. Brown", 1, results.size());
-        assertEquals("Dr. Brown", results.get(0).get("name"));
+
+        runQueryAndCompare(findPersonQuery, ImmutableList.of("Dr. Brown"));
     }
 
     @Test
@@ -170,20 +149,13 @@ public class UnionGraphQuadTest extends AbstractRDF4JTest {
         // Test aggregate functions with UnionGraph
         String countQuery = 
             "PREFIX foaf: <http://xmlns.com/foaf/0.1/> " +
-            "SELECT (COUNT(*) AS ?count) WHERE { " +
+            "SELECT (COUNT(*) AS ?v) WHERE { " +
             "  GRAPH <urn:x-arq:UnionGraph> { " +
             "    ?person a foaf:Person " +
             "  } " +
             "}";
-        
-        ImmutableList<ImmutableMap<String, String>> results = executeQuery(countQuery);
-        
-        assertFalse("Should have a count result", results.isEmpty());
-        String countStr = results.get(0).get("count");
-        assertNotNull("Count should not be null", countStr);
-        int count = Integer.parseInt(countStr);
-        
-        assertTrue("Should count all persons across all graphs", count >= 5);
+
+        runQueryAndCompare(countQuery, ImmutableSet.of("5"));
     }
 
     @Test
@@ -194,11 +166,11 @@ public class UnionGraphQuadTest extends AbstractRDF4JTest {
                         "FROM NAMED <http://example.org/graph/corp> " +
                         "FROM NAMED <http://example.org/graph/academic> " +
                         "WHERE { " +
-                        "  GRAPH <urn:x-arq:UnionGraph> { ?s ?p ?o }" +
+                        "  GRAPH <urn:x-arq:UnionGraph> { ?person a foaf:Person}" +
                         "}";
 
         int count = runQueryAndCount(unionWithDatasetQuery);
-        assertTrue("UnionGraph with FROM NAMED should return results", count > 0);
+        assertEquals("UnionGraph with FROM NAMED should return results", 4, count);
     }
 
     @Test
