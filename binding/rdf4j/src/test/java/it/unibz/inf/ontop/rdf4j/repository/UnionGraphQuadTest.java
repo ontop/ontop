@@ -185,4 +185,20 @@ public class UnionGraphQuadTest extends AbstractRDF4JTest {
         
         assertTrue("Should count all persons across all graphs", count >= 5);
     }
+
+    @Test
+    public void testUnionGraphWithFromNamed() {
+        String unionWithDatasetQuery =
+                "PREFIX foaf: <http://xmlns.com/foaf/0.1/> " +
+                        "SELECT * " +
+                        "FROM NAMED <http://example.org/graph/corp> " +
+                        "FROM NAMED <http://example.org/graph/academic> " +
+                        "WHERE { " +
+                        "  GRAPH <urn:x-arq:UnionGraph> { ?s ?p ?o }" +
+                        "}";
+
+        int count = runQueryAndCount(unionWithDatasetQuery);
+        assertTrue("UnionGraph with FROM NAMED should return results", count > 0);
+    }
+    
 }
