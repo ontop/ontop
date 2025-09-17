@@ -11,12 +11,11 @@ import static org.junit.Assert.*;
 public class UnionGraphTest extends AbstractRDF4JTest {
     private static final String OBDA_FILE = "/person/person.obda";
     private static final String SQL_SCRIPT = "/person/person.sql";
-    private static final String ONTOLOGY_FILE = null;
     private static final String VIEW_FILE = "/person/views/mirror_views.json";
 
     @BeforeClass
     public static void before() throws IOException, SQLException {
-        initOBDA(SQL_SCRIPT, OBDA_FILE, ONTOLOGY_FILE, null, VIEW_FILE);
+        initOBDA(SQL_SCRIPT, OBDA_FILE, null, null, VIEW_FILE);
     }
 
     @AfterClass
@@ -36,13 +35,26 @@ public class UnionGraphTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void testUnionGraphWithNamedDataset() {
+    public void testUnionGraphWithFromNamed() {
         String sparqlQuery = 
             "SELECT * FROM NAMED <http://example.org/graph1> FROM NAMED <http://example.org/graph2> " +
             "WHERE { GRAPH <urn:x-arq:UnionGraph> { ?s ?p ?o } } LIMIT 5";
         
         int count = runQueryAndCount(sparqlQuery);
         
+        // This test verifies that the query doesn't throw an exception
+        // Even if no named graphs exist in the test data, the query should execute successfully
+        assertTrue("Query executed successfully", count >= 0);
+    }
+
+    @Test
+    public void testUnionGraphWithFrom() {
+        String sparqlQuery =
+                "SELECT * FROM <http://example.org/graph1> FROM <http://example.org/graph2> " +
+                        "WHERE { GRAPH <urn:x-arq:UnionGraph> { ?s ?p ?o } } LIMIT 5";
+
+        int count = runQueryAndCount(sparqlQuery);
+
         // This test verifies that the query doesn't throw an exception
         // Even if no named graphs exist in the test data, the query should execute successfully
         assertTrue("Query executed successfully", count >= 0);

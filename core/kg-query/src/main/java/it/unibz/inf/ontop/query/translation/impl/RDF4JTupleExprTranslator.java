@@ -895,16 +895,24 @@ public class RDF4JTupleExprTranslator {
                                 iqFactory.createConstructionNode(projectedVariables),
                                 iqFactory.createUnaryIQTree(filterNode, quadNode)));
             }
-        } else {
+        } else if (dataset == null) {
             // No explicit dataset - query all available named graphs exactly like GRAPH ?g
             LOGGER.info("No dataset specified - creating unrestricted quad pattern for all graphs (like GRAPH ?g)");
             Variable graph = termFactory.getVariable("g" + UUID.randomUUID());
-            
-            // Create the same pattern as regular graph variables - no filtering, no projection changes
-            IntensionalDataNode quadNode = iqFactory.createIntensionalDataNode(
+            return iqFactory.createIntensionalDataNode(
                     atomFactory.getIntensionalQuadAtom(subject, predicate, object, graph));
-            
-            return quadNode;
+        } else if (dataset.getNamedGraphs().isEmpty()) {
+            // Dataset specified but no named graphs - return empty result
+            LOGGER.info("Dataset specified but no named graphs - creating empty node");
+            return iqFactory.createEmptyNode(
+                    Stream.of(subject, predicate, object)
+                            .filter(t -> t instanceof Variable)
+                            .map(t -> (Variable) t)
+                            .collect(ImmutableCollectors.toSet()));
+        } else {
+            // This should never happen
+            LOGGER.error("Unexpected dataset state: {}", dataset);
+            throw new IllegalStateException("Unexpected state: dataset has no named graphs but is not empty");
         }
     }
 
