@@ -86,8 +86,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     normalizedTreeCache);
         }
 
-        return new Context(variableGenerator, normalizedTreeCache)
-                .normalize(aggregationNode, shrunkChild);
+        Context context = new Context(aggregationNode, shrunkChild, variableGenerator, normalizedTreeCache);
+        return context.normalize();
     }
 
     private ImmutableTerm simplifyEmptyAggregate(ImmutableFunctionalTerm aggregateTerm) {
@@ -124,10 +124,6 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             return aggregationNode.getSubstitution();
         }
 
-        ImmutableSet<Variable> aggregationSubstitutionDomain() {
-            return aggregationNode.getSubstitution().getDomain();
-        }
-
         /**
          * Initial state
          */
@@ -158,27 +154,28 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
     private class Context extends InjectiveBindingLiftContext {
 
+        private final AggregationNode aggregationNode;
+        private final IQTree shrunkChild;
+
         private static final int MAX_ITERATIONS = 1000;
 
-        public Context(VariableGenerator variableGenerator, IQTreeCache normalizedTreeCache) {
+        Context(AggregationNode aggregationNode, IQTree shrunkChild, VariableGenerator variableGenerator, IQTreeCache normalizedTreeCache) {
             super(variableGenerator, coreSingletons, normalizedTreeCache);
+            this.aggregationNode = aggregationNode;
+            this.shrunkChild = shrunkChild;
         }
 
-        IQTree normalize(AggregationNode aggregationNode, IQTree shrunkChild) {
+        IQTree normalize() {
             var construction = UnaryIQTreeDecomposition.of(shrunkChild, ConstructionNode.class);
-            State<ConstructionNode, AggregationSubTree> stateAfterLiftingBindings;
-            if (construction.isPresent()) {
-                stateAfterLiftingBindings = liftGroupingBindings(
-                        propagateNonGroupingBindingsIntoToAggregationSubstitution(
-                                State.initial(AggregationSubTree.of(aggregationNode, construction.getOptionalNode(), construction.getChild()))));
-            }
-            else {
-                stateAfterLiftingBindings = State.initial(AggregationSubTree.of(aggregationNode, Optional.empty(), shrunkChild));
-            }
+            var initial = State.<ConstructionNode, AggregationSubTree>initial(AggregationSubTree.of(aggregationNode, construction.getOptionalNode(), construction.getTail()));
 
-            var finalState = simplifyAggregationSubstitution(stateAfterLiftingBindings);
+            var finalState =
+                    simplifyAggregationSubstitution(
+                            liftGroupingBindings(
+                                    propagateNonGroupingBindingsIntoAggregationSubstitution(
+                                            initial)));
+
             // TODO: consider filters
-
             return asIQTree(finalState);
         }
 
@@ -187,7 +184,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
          * All the bindings of non-grouping variables in the child construction node are propagated to
          * the aggregation substitution
          */
-        State<ConstructionNode, AggregationSubTree> propagateNonGroupingBindingsIntoToAggregationSubstitution(State<ConstructionNode, AggregationSubTree> state) {
+        State<ConstructionNode, AggregationSubTree> propagateNonGroupingBindingsIntoAggregationSubstitution(State<ConstructionNode, AggregationSubTree> state) {
             AggregationSubTree subTree = state.getSubTree();
             if (subTree.childConstructionNode.isEmpty())
                 return state;
@@ -249,7 +246,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     // Ancestors of the sub-state modified so as to project the aggregation variables
                     subState.getAncestors().stream()
                             .map(a -> iqFactory.createConstructionNode(
-                                    Sets.union(a.getVariables(), subTree.aggregationSubstitutionDomain()).immutableCopy(),
+                                    Sets.union(a.getVariables(), subTree.aggregationSubstitution().getDomain()).immutableCopy(),
                                     a.getSubstitution())));
 
             // Applies all the substitutions of the ancestors to the substitution of the aggregation node
@@ -330,7 +327,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                 return state.replace(subTree.replace(iqFactory.createAggregationNode(subTree.groupingVariables(), newAggregationSubstitution)));
 
             ConstructionNode liftedConstructionNode = iqFactory.createConstructionNode(
-                    Sets.union(subTree.groupingVariables(), subTree.aggregationSubstitutionDomain()).immutableCopy(),
+                    subTree.aggregationNode.getVariables(),
                     liftedSubstitution);
 
             ImmutableSet<Variable> newGroupingVariables = Sets.difference(liftedConstructionNode.getChildVariables(),
