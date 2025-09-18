@@ -31,6 +31,26 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         super(substitutionFactory, termFactory, iqFactory, iqTreeTools);
     }
 
+
+    @Override
+    public ImmutableSet<Variable> getLocallyRequiredVariables() {
+        return getChildVariables();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyDefinedVariables() {
+        return getSubstitution().getDomain();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocalVariables() {
+        return Sets.union(getChildVariables(), getLocallyDefinedVariables()).immutableCopy();
+    }
+
+
+
+
+
     @Override
     public IQTree applyDescendingSubstitution(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,

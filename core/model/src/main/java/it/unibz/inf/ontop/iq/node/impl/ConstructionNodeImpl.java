@@ -116,6 +116,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
      * Validates the node independently of its child
      */
     private void validateNode() throws InvalidIntermediateQueryException {
+
         if (!projectedVariables.containsAll(substitution.getDomain())) {
             throw new InvalidIntermediateQueryException("ConstructionNode: all the domain variables " +
                     "of the substitution must be projected.\n" + this);
@@ -152,11 +153,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     @Override
     public ImmutableSet<Variable> getChildVariables() {
         return childVariables;
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocalVariables() {
-        return Sets.union(projectedVariables, substitution.getRangeVariables()).immutableCopy();
     }
 
     @Override
@@ -203,10 +199,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
 
         if (!(child instanceof TrueNode)
-                && !child.getVariables().containsAll(getChildVariables())) {
+                && !child.getVariables().containsAll(getLocallyRequiredVariables())) {
             throw new InvalidIntermediateQueryException("This child " + child
                     + " does not project all the variables " +
-                    "required by the CONSTRUCTION node (" + getChildVariables() + ")\n" + this);
+                    "required by the CONSTRUCTION node (" + getLocallyRequiredVariables() + ")\n" + this);
         }
     }
 
@@ -477,16 +473,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         }
 
         return IQTreeTools.computeStrictDependentsFromFunctionalDependencies(tree);
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return getChildVariables();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return substitution.getDomain();
     }
 
     @Override

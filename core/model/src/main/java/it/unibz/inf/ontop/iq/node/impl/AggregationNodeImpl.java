@@ -181,22 +181,6 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     }
 
     @Override
-    public ImmutableSet<Variable> getLocalVariables() {
-        return Sets.union(getChildVariables(), substitution.getDomain()).immutableCopy();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return getChildVariables();
-    }
-
-
-    @Override
-    public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return substitution.getDomain();
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o instanceof AggregationNodeImpl) {
@@ -218,16 +202,15 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
     @Override
     public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
-        validateNode();
-
-        Set<Variable> missingVariables = Sets.difference(getLocallyRequiredVariables(), child.getVariables());
-        if (!missingVariables.isEmpty()) {
+        if (!(child instanceof TrueNode)
+                && !child.getVariables().containsAll(getLocallyRequiredVariables())) {
             throw new InvalidIntermediateQueryException("The child of the aggregation node is missing some variables: "
-                    + missingVariables);
+                    + Sets.difference(child.getVariables(), getLocallyRequiredVariables()));
         }
     }
 
-    protected void validateNode() throws InvalidIntermediateQueryException {
+    private void validateNode() throws InvalidIntermediateQueryException {
+
         if (!Sets.intersection(substitution.getDomain(), substitution.getRangeVariables()).isEmpty()) {
             throw new InvalidIntermediateQueryException("AggregationNode: substitution redefines variables it is using: " + this);
         }

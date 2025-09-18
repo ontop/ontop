@@ -330,7 +330,9 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     subTree.aggregationNode.getVariables(),
                     liftedSubstitution);
 
-            ImmutableSet<Variable> newGroupingVariables = Sets.difference(liftedConstructionNode.getChildVariables(),
+            // so that newAggregationNode.getVariables() coincides with liftedConstructionNode.getChildVariables()
+            ImmutableSet<Variable> newGroupingVariables = Sets.difference(
+                    liftedConstructionNode.getChildVariables(),
                     newAggregationSubstitution.getDomain()).immutableCopy();
 
             AggregationNode newAggregationNode = iqFactory.createAggregationNode(newGroupingVariables, newAggregationSubstitution);

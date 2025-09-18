@@ -45,7 +45,7 @@ public class QueryMergingTest {
     private static final Variable U = TERM_FACTORY.getVariable("u");
     private static final Variable A = TERM_FACTORY.getVariable("a");
     private static final Variable B = TERM_FACTORY.getVariable("b");
-    private static final Variable BF3F7 = TERM_FACTORY.getVariable("bf3f7");
+    private static final Variable BF3F7 = TERM_FACTORY.getVariable("bf0f7");
     private static final Variable C = TERM_FACTORY.getVariable("c");
     private static final Variable D = TERM_FACTORY.getVariable("d");
     private static final Variable DF6 = TERM_FACTORY.getVariable("df6");
