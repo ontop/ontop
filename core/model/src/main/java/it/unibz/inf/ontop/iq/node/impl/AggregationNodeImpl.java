@@ -228,6 +228,10 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     }
 
     protected void validateNode() throws InvalidIntermediateQueryException {
+        if (!Sets.intersection(substitution.getDomain(), substitution.getRangeVariables()).isEmpty()) {
+            throw new InvalidIntermediateQueryException("AggregationNode: substitution redefines variables it is using: " + this);
+        }
+
         if (!Sets.intersection(groupingVariables, substitution.getDomain()).isEmpty()) {
             throw new InvalidIntermediateQueryException(String.format(
                     "AggregationNode: the grouping variables (%s) and the substitution domain (%s) must be disjoint",

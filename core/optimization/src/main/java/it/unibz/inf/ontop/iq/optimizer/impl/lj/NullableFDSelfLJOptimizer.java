@@ -202,6 +202,8 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
                     .filter(e -> e.getValue().isGround() || leftVariables.contains((Variable)e.getValue()))
                     .map(e -> termFactory.getStrictEquality(leftArgumentMap.get(e.getKey()), e.getValue()));
 
+            ImmutableMap<Variable, Collection<Integer>> inverseVariableMap = inverseVariableMap(argumentsToTransfer);
+
             var coOccurrenceEqualities = inverseVariableMap(argumentsToTransfer).values().stream()
                     .flatMap(indexes -> {
                         var firstTerm = leftArgumentMap.get(indexes.iterator().next());
@@ -209,7 +211,12 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
                                 .map(i -> termFactory.getStrictEquality(firstTerm, leftArgumentMap.get(i)));
                     });
 
-            return termFactory.getConjunction(optionalFilterCondition,
+            Substitution<VariableOrGroundTerm> renaming =
+                    inverseVariableMap.entrySet().stream()
+                            .map(e -> Maps.immutableEntry(e.getKey(), leftArgumentMap.get(e.getValue().iterator().next())))
+                            .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries());
+
+            return termFactory.getConjunction(optionalFilterCondition.map(renaming::apply),
                         Stream.concat(
                                 Stream.concat(
                                     determinantVariables.stream()

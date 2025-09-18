@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
@@ -48,7 +47,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                                  @Assisted Substitution<? extends ImmutableTerm> substitution,
                                  SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
-                                 OntopModelSettings settings, IQTreeTools iqTreeTools,
+                                 OntopModelSettings settings,
+                                 IQTreeTools iqTreeTools,
                                  ConstructionSubstitutionNormalizer substitutionNormalizer,
                                  NotRequiredVariableRemover notRequiredVariableRemover) {
         super(substitutionFactory, iqFactory, iqTreeTools, termFactory);
@@ -82,27 +82,60 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 substitutionFactory, termFactory, iqFactory, settings, iqTreeTools,substitutionNormalizer, notRequiredVariableRemover);
     }
 
+    /**
+     * For native queries - has its own validation.
+     */
+    @AssistedInject
+    private ConstructionNodeImpl(@Assisted Substitution<? extends ImmutableTerm> substitution,
+                                 IQTreeTools iqTreeTools,
+                                 SubstitutionFactory substitutionFactory,
+                                 TermFactory termFactory, IntermediateQueryFactory iqFactory,
+                                 ConstructionSubstitutionNormalizer substitutionNormalizer,
+                                 NotRequiredVariableRemover notRequiredVariableRemover) {
+        super(substitutionFactory, iqFactory, iqTreeTools, termFactory);
+        this.projectedVariables = substitution.getDomain();
+        this.substitution = substitutionFactory.covariantCast(substitution);
+        this.substitutionNormalizer = substitutionNormalizer;
+        this.notRequiredVariableRemover = notRequiredVariableRemover;
+
+        // only the variables that are also used in the bindings for the child of the construction node
+        this.childVariables = projectedVariables;
+
+        for (Variable v : projectedVariables) {
+            ImmutableTerm term = substitution.get(v);
+            if (!term.getVariableStream()
+                    .collect(ImmutableCollectors.toSet())
+                    .equals(ImmutableSet.of(v))) {
+                throw new InvalidIntermediateQueryException("Construction node for native queries: unexpected term " + term + " for " + v);
+            }
+        }
+    }
+
 
     /**
      * Validates the node independently of its child
      */
-    private void validateNode() throws InvalidQueryNodeException {
-        ImmutableSet<Variable> substitutionDomain = substitution.getDomain();
-
-        if (!projectedVariables.containsAll(substitutionDomain)) {
-            throw new InvalidQueryNodeException("ConstructionNode: all the domain variables " +
+    private void validateNode() throws InvalidIntermediateQueryException {
+        if (!projectedVariables.containsAll(substitution.getDomain())) {
+            throw new InvalidIntermediateQueryException("ConstructionNode: all the domain variables " +
                     "of the substitution must be projected.\n" + this);
         }
 
-        if (!Sets.intersection(substitutionDomain, childVariables).isEmpty()) {
-            throw new InvalidQueryNodeException("ConstructionNode: variables defined by the substitution cannot " +
+        // TODO: this check is redundant (ensured by the constructor)
+        if (!Sets.intersection(substitution.getDomain(), childVariables).isEmpty()) {
+            throw new InvalidIntermediateQueryException("ConstructionNode: variables defined by the substitution cannot " +
                     "be used for defining other variables.\n" + this);
         }
 
         if (!Sets.difference(substitution.restrictRangeTo(Variable.class).getRangeSet(), projectedVariables).isEmpty()) {
-            throw new InvalidQueryNodeException(
+            throw new InvalidIntermediateQueryException(
                     "ConstructionNode: substituting a variable " +
                             "by a non-projected variable is incorrect.\n" + this);
+        }
+
+        if (!Sets.intersection(substitution.getRangeVariables(), substitution.getDomain()).isEmpty()) {
+            throw new InvalidIntermediateQueryException("ConstructionNode: substitution redefines " +
+                    "a variable it is using.\n" + this);
         }
     }
 
@@ -167,15 +200,13 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
 
     @Override
-    public void validateNode(IQTree child) throws InvalidQueryNodeException, InvalidIntermediateQueryException {
-        validateNode();
+    public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
 
-        ImmutableSet<Variable> requiredChildVariables = getChildVariables();
-
-        if (!child.getVariables().containsAll(requiredChildVariables)) {
+        if (!(child instanceof TrueNode)
+                && !child.getVariables().containsAll(getChildVariables())) {
             throw new InvalidIntermediateQueryException("This child " + child
                     + " does not project all the variables " +
-                    "required by the CONSTRUCTION node (" + requiredChildVariables + ")\n" + this);
+                    "required by the CONSTRUCTION node (" + getChildVariables() + ")\n" + this);
         }
     }
 

@@ -612,7 +612,7 @@ public class ValuesNodeOptimizationTest {
                 SUBSTITUTION_FACTORY.getSubstitution(X, TWO_STR));
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(
-                        X, TERM_FACTORY.getDBIsNotNull(X)));
+                        X, TERM_FACTORY.getDBIsNotNull(Y)));
 
         IQTree tree0 = IQ_FACTORY.createUnaryIQTree(constructionNode0, IQ_FACTORY.createTrueNode());
         IQTree tree1 = IQ_FACTORY.createUnaryIQTree(constructionNode1, IQ_FACTORY.createTrueNode());

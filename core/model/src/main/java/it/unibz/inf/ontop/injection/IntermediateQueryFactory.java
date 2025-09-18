@@ -35,6 +35,8 @@ public interface IntermediateQueryFactory {
     ConstructionNode createConstructionNode(ImmutableSet<Variable> projectedVariables,
                                             Substitution<? extends ImmutableTerm> substitution);
 
+    ConstructionNode createConstructionNodeForNativeQuery(Substitution<? extends ImmutableTerm> substitution);
+
     UnionNode createUnionNode(ImmutableSet<Variable> projectedVariables);
 
     InnerJoinNode createInnerJoinNode();

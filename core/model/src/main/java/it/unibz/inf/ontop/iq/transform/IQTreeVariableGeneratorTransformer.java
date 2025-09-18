@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.transform;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.transform.impl.CompositeIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 

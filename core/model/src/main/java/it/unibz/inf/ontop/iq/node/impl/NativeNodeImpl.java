@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -55,7 +54,7 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
         if (settings.isTestModeEnabled()) {
             if (!variables.equals(variableTypeMap.keySet()))
-                throw new InvalidQueryNodeException("The variableTypeMap must contain " +
+                throw new InvalidIntermediateQueryException("The variableTypeMap must contain " +
                         "all the projected variables and only them");
         }
     }

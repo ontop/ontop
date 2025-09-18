@@ -116,8 +116,8 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
          * TODO: find an alternative to that hack while preserving good variable names in the native query.
          *
          */
-        ConstructionNode postProcessingToRDFNode = iqFactory.createConstructionNode(
-                nativeTree.getVariables(),
+
+        ConstructionNode postProcessingToRDFNode = iqFactory.createConstructionNodeForNativeQuery(
                 nativeTree.getVariables().stream()
                         .collect(substitutionFactory.toSubstitution(
                                 v -> termFactory.getRDFFunctionalTerm(
