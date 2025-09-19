@@ -111,11 +111,5 @@ public interface IntermediateQueryFactory {
      * Temporary. IQTreeCache are normally not created from scratch but derived from existing IQTreeCache-s
      */
     @Deprecated
-    IQTreeCache createIQTreeCache();
-
-    /**
-     * Temporary. IQTreeCache are normally not created from scratch but derived from existing IQTreeCache-s
-     */
-    @Deprecated
     IQTreeCache createIQTreeCache(boolean isNormalizedForOptimization);
 }

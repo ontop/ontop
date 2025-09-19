@@ -119,33 +119,19 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
         if (isNormalized)
             return this;
-        Optional<IQTree> lift = liftSingleValueVariables();
-        if (lift.isPresent()) {
-            return lift.get();
-        }
-        IQTree result = furtherNormalize(this);
-        isNormalized = true;
-        return result;
-    }
-
-
-    private Optional<IQTree> liftSingleValueVariables() {
 
         ImmutableSet<Variable> singleValueVariables = projectedVariables.stream()
-                .filter(v -> 1 == getValueStream(v)
-                        .unordered()
-                        .distinct()
-                        .count())
+                .filter(v -> 1 == countDistinctValues(v))
                 .collect(ImmutableCollectors.toSet());
 
         if (!singleValueVariables.isEmpty()) {
             // Can be normalized into a construction/child node pair.
-            Substitution<ImmutableTerm> substitutions = singleValueVariables.stream()
+            Substitution<ImmutableTerm> substitution = singleValueVariables.stream()
                     .collect(substitutionFactory.toSubstitution(
                             v -> v,
                             v -> valueMaps.get(0).get(v)));
 
-            ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, substitutions);
+            ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, substitution);
 
             ImmutableList<ImmutableMap<Variable, Constant>> newValuesNodeValues = valueMaps.stream()
                     .map(tuple -> tuple.entrySet().stream()
@@ -157,21 +143,23 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                     Sets.difference(projectedVariables, singleValueVariables).immutableCopy(),
                     newValuesNodeValues);
 
-            return Optional.of(iqFactory.createUnaryIQTree(
+            return iqFactory.createUnaryIQTree(
                     constructionNode,
-                    furtherNormalize(valuesNode),
-                    iqFactory.createIQTreeCache(true)));
+                    furtherNormalize((ValuesNodeImpl)valuesNode),
+                    iqFactory.createIQTreeCache(true));
         }
-        return Optional.empty();
+        return furtherNormalize(this);
     }
 
-    private LeafIQTree furtherNormalize(ValuesNode valuesNode) {
+
+    private LeafIQTree furtherNormalize(ValuesNodeImpl valuesNode) {
         if (valuesNode.isDeclaredAsEmpty()) {
             return iqFactory.createEmptyNode(valuesNode.getVariables());
         }
-        if ((valuesNode.getVariables().isEmpty()) && (valuesNode.getValueMaps().size() == 1)) {
+        if (valuesNode.getVariables().isEmpty() && (valuesNode.getValueMaps().size() == 1)) {
             return iqFactory.createTrueNode();
         }
+        valuesNode.isNormalized = true;
         return valuesNode;
     }
 
@@ -497,10 +485,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     private boolean computeIsDistinct() {
-        return (valueMaps.size() == valueMaps.stream()
-                .unordered()
-                .distinct()
-                .count());
+        return valueMaps.size() == valueMaps.stream().unordered().distinct().count();
     }
 
 
@@ -549,7 +534,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     private ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints() {
         int count = valueMaps.size();
         var atomicConstraints = getVariables().stream()
-                .filter(v -> getValueStream(v).distinct().count() == count)
+                .filter(v -> countDistinctValues(v) == count)
                 .map(ImmutableSet::of)
                 .collect(ImmutableCollectors.toSet());
 
@@ -559,6 +544,10 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
             return ImmutableSet.of(getVariables());
         else
             return ImmutableSet.of();
+    }
+
+    private long countDistinctValues(Variable v) {
+        return getValueStream(v).unordered().distinct().count();
     }
 
     @Override

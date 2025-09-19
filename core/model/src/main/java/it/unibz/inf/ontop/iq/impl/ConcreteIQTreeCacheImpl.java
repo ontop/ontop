@@ -53,7 +53,6 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     private Boolean isDistinct;
 
     @Inject
-    @AssistedInject
     private ConcreteIQTreeCacheImpl(CoreSingletons coreSingletons) {
         this(false, coreSingletons);
     }

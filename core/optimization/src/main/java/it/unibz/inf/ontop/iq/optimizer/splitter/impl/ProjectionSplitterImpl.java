@@ -119,7 +119,7 @@ public abstract class ProjectionSplitterImpl implements ProjectionSplitter {
             UnaryIQTree possibleChildTree = iqFactory.createUnaryIQTree(constructionNode, distinct.getChild());
 
             IQTree liftedTree = distinctNormalizer.normalizeForOptimization(distinct.getNode(), possibleChildTree, variableGenerator,
-                    iqFactory.createIQTreeCache());
+                    iqFactory.createIQTreeCache(false));
 
             return liftedTree.getRootNode().equals(constructionNode)
                     ? iqFactory.createUnaryIQTree(distinct.getNode(), possibleChildTree)
