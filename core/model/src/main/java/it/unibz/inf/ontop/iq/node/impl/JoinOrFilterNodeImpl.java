@@ -55,12 +55,6 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
                 .orElse("");
     }
 
-    @Override
-    public ImmutableSet<Variable> getLocalVariables() {
-        return getOptionalFilterCondition()
-                .map(ImmutableFunctionalTerm::getVariables)
-                .orElse(ImmutableSet.of());
-    }
 
     protected boolean isFilteringNullValue(Variable variable) {
         return getOptionalFilterCondition()
@@ -70,7 +64,9 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
 
     @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return getLocalVariables();
+        return getOptionalFilterCondition()
+                .map(ImmutableFunctionalTerm::getVariables)
+                .orElseGet(ImmutableSet::of);
     }
 
     @Override

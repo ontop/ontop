@@ -37,18 +37,23 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
 
     @Override
-    public ImmutableSet<Variable> getLocalVariables() {
+    public ImmutableSet<Variable> getVariables() {
+        return projectedVariables;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyRequiredVariables() {
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return getVariables();
     }
 
     @Override
     public String toString() {
         return PREFIX + projectedVariables;
-    }
-
-    @Override
-    public ImmutableSet<Variable> getVariables() {
-        return projectedVariables;
     }
 
     @Override
@@ -104,16 +109,6 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     @Override
     public VariableNonRequirement getVariableNonRequirement() {
         return VariableNonRequirement.of(getVariables());
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return ImmutableSet.of();
     }
 
     @Override

@@ -21,7 +21,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
 
     private static final String PREFIX = "TRUE";
-    private static final ImmutableSet<Variable> EMPTY_VARIABLE_SET = ImmutableSet.of();
 
     @AssistedInject
     private TrueNodeImpl(IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory) {
@@ -29,14 +28,8 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getLocalVariables() {
+    public ImmutableSet<Variable> getVariables() {
         return ImmutableSet.of();
-    }
-
-
-    @Override
-    public String toString() {
-        return PREFIX;
     }
 
     @Override
@@ -50,6 +43,11 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
+    public String toString() {
+        return PREFIX;
+    }
+
+    @Override
     public int hashCode() {
         return 12398;
     }
@@ -59,12 +57,6 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
         if (this == o) return true;
         return o instanceof TrueNodeImpl;
     }
-
-    @Override
-    public ImmutableSet<Variable> getVariables() {
-        return EMPTY_VARIABLE_SET;
-    }
-
 
     @Override
     public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {

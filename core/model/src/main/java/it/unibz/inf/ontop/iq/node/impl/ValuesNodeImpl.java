@@ -186,11 +186,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getLocalVariables() {
-        return projectedVariables;
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return ImmutableSet.of();
     }

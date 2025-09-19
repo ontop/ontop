@@ -100,14 +100,19 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     @Override
     public ImmutableSet<Variable> getVariables(ImmutableSet<Variable> childVariables) {
         return Sets.union(
-                        Sets.difference(childVariables, getLocalVariables()),
+                        Sets.difference(childVariables, ImmutableSet.of(flattenedVariable)),
                         getLocallyDefinedVariables())
                 .immutableCopy();
     }
 
     @Override
-    public ImmutableSet<Variable> getLocalVariables() {
+    public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return ImmutableSet.of(flattenedVariable);
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyDefinedVariables() {
+        return extendWithIndexVariable(ImmutableSet.of(outputVariable));
     }
 
     @Override
@@ -116,11 +121,6 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 outputVariable + "/flatten(" + flattenedVariable + ")" +
                 indexVariable.map(v -> ", " + v + "/indexIn(" + flattenedVariable + ")").orElse("") +
                 "]";
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return ImmutableSet.of(flattenedVariable);
     }
 
     @Override
@@ -278,11 +278,6 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
         return iqFactory.createUnaryIQTree(this, child.propagateDownConstraint(constraint, variableGenerator));
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return extendWithIndexVariable(ImmutableSet.of(outputVariable));
     }
 
     @Override

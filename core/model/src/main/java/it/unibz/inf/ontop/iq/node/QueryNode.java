@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.model.term.Variable;
 
 /**
@@ -17,7 +18,9 @@ public interface QueryNode {
      * returned by the QueryNode.
      *
      */
-    ImmutableSet<Variable> getLocalVariables();
+    default ImmutableSet<Variable> getLocalVariables() {
+        return Sets.union(getLocallyDefinedVariables(), getLocallyRequiredVariables()).immutableCopy();
+    }
 
 
     /**

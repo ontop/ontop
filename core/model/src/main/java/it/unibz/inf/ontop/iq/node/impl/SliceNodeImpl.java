@@ -425,11 +425,6 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getLocalVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
     public long getOffset() {
         return offset;
     }

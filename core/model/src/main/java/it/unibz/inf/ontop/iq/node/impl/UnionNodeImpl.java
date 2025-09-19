@@ -406,18 +406,13 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
-        return projectedVariables;
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocalVariables() {
-        return projectedVariables;
-    }
-
-    @Override
     public String toString() {
         return UNION_NODE_STR + " " + projectedVariables;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getVariables() {
+        return projectedVariables;
     }
 
     @Override

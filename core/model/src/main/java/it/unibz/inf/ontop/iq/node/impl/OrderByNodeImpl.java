@@ -152,15 +152,11 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public ImmutableSet<Variable> getLocalVariables() {
-        return comparators.stream()
-                .flatMap(c -> c.getTerm().getVariableStream())
-                .collect(ImmutableCollectors.toSet());
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return getLocalVariables();
+        return comparators.stream()
+                .map(OrderComparator::getTerm)
+                .flatMap(ImmutableTerm::getVariableStream)
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override

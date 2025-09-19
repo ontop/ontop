@@ -39,7 +39,7 @@ public class MappingAssertionMergeWithCQCTest {
     private static final Variable A = TERM_FACTORY.getVariable("a");
     private static final Variable B = TERM_FACTORY.getVariable("b");
     private static final Variable C = TERM_FACTORY.getVariable("c");
-    private static final Variable C0 = TERM_FACTORY.getVariable("c1");
+    private static final Variable C0 = TERM_FACTORY.getVariable("c0");
     private static final Variable S = TERM_FACTORY.getVariable("s");
     private static final Variable P = TERM_FACTORY.getVariable("p");
     private static final Variable O = TERM_FACTORY.getVariable("o");

@@ -69,10 +69,6 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
         return nativeQueryString;
     }
 
-    @Override
-    public ImmutableSet<Variable> getLocalVariables() {
-        return variables;
-    }
 
     @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
@@ -81,7 +77,7 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
     @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return getLocalVariables();
+        return variables;
     }
 
     @Override

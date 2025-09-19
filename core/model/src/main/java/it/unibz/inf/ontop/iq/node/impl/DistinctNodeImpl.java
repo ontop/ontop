@@ -127,11 +127,6 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
-    public ImmutableSet<Variable> getLocalVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return ImmutableSet.of();
     }

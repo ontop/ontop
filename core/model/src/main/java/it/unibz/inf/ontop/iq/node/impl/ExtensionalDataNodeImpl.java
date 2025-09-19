@@ -296,11 +296,6 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     @Override
-    public synchronized ImmutableSet<Variable> getLocalVariables() {
-        return getVariables();
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return ImmutableSet.of();
     }
