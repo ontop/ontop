@@ -108,7 +108,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
             return asIQTree(state);
         }
 
-        protected IQTree asIQTree(State<ConstructionNode, UnarySubTree<ConstructionNode>> state) {
+        IQTree asIQTree(State<ConstructionNode, UnarySubTree<ConstructionNode>> state) {
 
             IQTree grandChildTree = state.getSubTree().getChild();
             // No need to have a DISTINCT as a grand child
@@ -130,7 +130,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                             iqTreeTools.createOptionalDistinctNode(!newChildTree.isDistinct()),
                             treeCache::declareAsNormalizedForOptimizationWithEffect)
                     .build(newChildTree)
-                    // Recursive (for merging top construction nodes)
+                    // Recursive (for merging ancestor CONSTRUCTION nodes)
                     .normalizeForOptimization(variableGenerator);
         }
 
