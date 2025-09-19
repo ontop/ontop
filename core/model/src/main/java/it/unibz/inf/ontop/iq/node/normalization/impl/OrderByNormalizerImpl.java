@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -10,20 +9,14 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.OrderByNormalizer;
 import it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer;
-import it.unibz.inf.ontop.model.term.NonGroundTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class OrderByNormalizerImpl implements OrderByNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
-
-    private static final int MAX_NORMALIZATION_ITERATIONS = 10000;
 
     @Inject
     private OrderByNormalizerImpl(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
@@ -50,18 +43,12 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
         UnarySubTree<OrderByNode> simplify(UnarySubTree<OrderByNode> tree) {
             var variableNullability = tree.getChild().getVariableNullability();
             var optionalNewComparators = tree.getOptionalNode()
-                    .map(o -> o.getComparators().stream()
-                            .flatMap(c -> Stream.of(c.getTerm())
-                                    .map(t -> t.simplify(variableNullability))
-                                    .filter(t -> t instanceof NonGroundTerm)
-                                    .map(t -> (NonGroundTerm) t)
-                                    .map(t -> iqFactory.createOrderComparator(t, c.isAscending())))
-                            .collect(ImmutableCollectors.toList()));
+                    .map(o -> iqTreeTools.transformComparators(
+                            o.getComparators(),
+                            t -> t.simplify(variableNullability)));
 
             return UnarySubTree.of(
-                    optionalNewComparators
-                            .filter(cs -> !cs.isEmpty())
-                            .map(iqFactory::createOrderByNode),
+                    iqTreeTools.createOptionalOrderByNode(optionalNewComparators),
                     tree.getChild());
         }
 
@@ -71,18 +58,9 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
          */
 
         IQTree normalize() {
-            State<UnaryOperatorNode, UnarySubTree<OrderByNode>> initial =
-                    State.initial(simplify(normalizeChild(initialSubTree)));
+            var initial = State.initial(simplify(normalizeChild(initialSubTree)));
 
-            // NB: the loop is due to the lifting of both distinct and construction nodes
-            State<UnaryOperatorNode, UnarySubTree<OrderByNode>> state =
-                    initial.replace(this::normalizeChild)
-                                    .reachFinal(this::liftThroughOrderBy);
-                    /*initial.reachFixedPoint(
-                    s ->
-                            s.replace(normalizeChild(s.getSubTree()))
-                                    .reachFinal(this::liftThroughOrderBy),
-                    MAX_NORMALIZATION_ITERATIONS);*/
+            var state = initial.reachFinal(this::liftThroughOrderBy);
 
             return asIQTree(state);
         }

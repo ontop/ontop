@@ -61,6 +61,22 @@ public class IQTreeTools {
         return expression.map(iqFactory::createFilterNode);
     }
 
+    public Optional<OrderByNode> createOptionalOrderByNode(Optional<ImmutableList<OrderByNode.OrderComparator>> comparators) {
+        return comparators
+                .filter(cs -> !cs.isEmpty())
+                .map(iqFactory::createOrderByNode);
+    }
+
+    public ImmutableList<OrderByNode.OrderComparator> transformComparators(ImmutableList<OrderByNode.OrderComparator> comparators, Function<? super NonGroundTerm, ImmutableTerm> transformer) {
+        return comparators.stream()
+                .flatMap(c -> Stream.of(c.getTerm())
+                        .map(transformer)
+                        .filter(t -> t instanceof NonGroundTerm)
+                        .map(t -> (NonGroundTerm) t)
+                        .map(t -> iqFactory.createOrderComparator(t, c.isAscending())))
+                .collect(ImmutableCollectors.toList());
+    }
+
     public ConstructionNode createExtendingConstructionNode(Set<Variable> subTreeVariables, Substitution<?> extendingSubstitution) {
         return iqFactory.createConstructionNode(
                 Sets.union(subTreeVariables, extendingSubstitution.getDomain()).immutableCopy(),

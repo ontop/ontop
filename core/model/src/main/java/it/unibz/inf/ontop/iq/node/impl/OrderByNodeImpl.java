@@ -50,15 +50,8 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
 
     @Override
     public Optional<OrderByNode> applySubstitution(Substitution<? extends ImmutableTerm> substitution) {
-        ImmutableList<OrderComparator> newComparators = comparators.stream()
-                .flatMap(c -> Stream.of(substitution.applyToTerm(c.getTerm()))
-                        .filter(t -> t instanceof NonGroundTerm)
-                        .map(t -> iqFactory.createOrderComparator((NonGroundTerm) t, c.isAscending())))
-                .collect(ImmutableCollectors.toList());
-
-        return Optional.of(newComparators)
-                .filter(cs -> !cs.isEmpty())
-                .map(iqFactory::createOrderByNode);
+        ImmutableList<OrderComparator> newComparators = iqTreeTools.transformComparators(comparators, substitution::applyToTerm);
+        return iqTreeTools.createOptionalOrderByNode(Optional.of(newComparators));
     }
 
     @Override
