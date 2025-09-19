@@ -37,21 +37,6 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
-        return projectedVariables;
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return getVariables();
-    }
-
-    @Override
     public String toString() {
         return PREFIX + projectedVariables;
     }
@@ -68,13 +53,13 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
-        DownPropagation ds = new DownPropagation(descendingSubstitution, getVariables());
+        DownPropagation ds = new DownPropagation(descendingSubstitution, projectedVariables);
         return iqTreeTools.createEmptyNode(ds);
     }
 
     @Override
-    public ImmutableSet<Variable> getKnownVariables() {
-        return getVariables();
+    public ImmutableSet<Variable> getVariables() {
+        return projectedVariables;
     }
 
     @Override
@@ -108,7 +93,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     @Override
     public VariableNonRequirement getVariableNonRequirement() {
-        return VariableNonRequirement.of(getVariables());
+        return VariableNonRequirement.of(projectedVariables);
     }
 
     @Override

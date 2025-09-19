@@ -33,6 +33,8 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     private final ImmutableMap<Variable, DBTermType> variableTypeMap;
     private final String nativeQueryString;
     private final VariableNullability variableNullability;
+    // TODO: does sorted really here help?
+    //  (ImmutableSet would preserve the insertion order anyway)
     private final ImmutableSortedSet<Variable> variables;
     private final ImmutableMap<Variable, QuotedID> columnNames;
 
@@ -71,12 +73,7 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
 
     @Override
-    public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyDefinedVariables() {
+    public ImmutableSortedSet<Variable> getVariables() {
         return variables;
     }
 
@@ -96,11 +93,6 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     }
 
     @Override
-    public ImmutableSortedSet<Variable> getVariables() {
-        return variables;
-    }
-
-    @Override
     public ImmutableMap<Variable, QuotedID> getColumnNames() {
         return columnNames;
     }
@@ -115,11 +107,6 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             VariableGenerator variableGenerator) {
         throw new UnsupportedOperationException("NativeNode does not support descending substitutions (too late)");
-    }
-
-    @Override
-    public ImmutableSet<Variable> getKnownVariables() {
-        return getVariables();
     }
 
     /**

@@ -39,7 +39,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     private static final String VALUES_NODE_STR = "VALUES";
     // The variables as used in this node, we need to keep order.
     private final ImmutableList<Variable> orderedVariables;
-    // The variables consistent with all interfaces, as unordered set.
+    // for compatibility with other nodes
     private final ImmutableSet<Variable> projectedVariables;
     // Each map's domain is projectedVariables
     private final ImmutableList<ImmutableMap<Variable, Constant>> valueMaps;
@@ -186,21 +186,12 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return projectedVariables;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o instanceof ValuesNodeImpl) {
             ValuesNodeImpl that = (ValuesNodeImpl) o;
-            return projectedVariables.equals(that.projectedVariables) && valueMaps.equals(that.valueMaps);
+            return projectedVariables.equals(that.projectedVariables)
+                    && valueMaps.equals(that.valueMaps);
         }
         return false;
     }
@@ -213,11 +204,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     @Override
     public int hashCode() {
         return Objects.hash(projectedVariables, valueMaps);
-    }
-
-    @Override
-    public ImmutableSet<Variable> getVariables() {
-        return projectedVariables;
     }
 
     @Override
@@ -501,7 +487,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getKnownVariables() {
+    public ImmutableSet<Variable> getVariables() {
         return projectedVariables;
     }
 

@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.impl.AbstractIQTree;
 import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -16,7 +17,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
-public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTree {
+public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTree, QueryNode {
 
     protected final SubstitutionFactory substitutionFactory;
     protected final CoreUtilsFactory coreUtilsFactory;
@@ -25,6 +26,21 @@ public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTre
         super(iqTreeTools, iqFactory);
         this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyRequiredVariables() {
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyDefinedVariables() {
+        return getVariables();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getKnownVariables() {
+        return getVariables();
     }
 
     @Override

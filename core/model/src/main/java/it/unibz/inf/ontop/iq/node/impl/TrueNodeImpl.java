@@ -33,16 +33,6 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
     public String toString() {
         return PREFIX;
     }
@@ -67,11 +57,6 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
         return this;
-    }
-
-    @Override
-    public ImmutableSet<Variable> getKnownVariables() {
-        return ImmutableSet.of();
     }
 
     @Override

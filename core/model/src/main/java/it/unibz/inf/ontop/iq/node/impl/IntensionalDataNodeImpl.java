@@ -143,21 +143,6 @@ public class IntensionalDataNodeImpl extends LeafIQTreeImpl implements Intension
     }
 
     @Override
-    public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return getVariables();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getKnownVariables() {
-        return getVariables();
-    }
-
-    @Override
     public boolean isDeclaredAsEmpty() {
         return false;
     }

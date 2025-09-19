@@ -296,21 +296,6 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     @Override
-    public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return getVariables();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getKnownVariables() {
-        return getVariables();
-    }
-
-    @Override
     public boolean isDeclaredAsEmpty() {
         return false;
     }
