@@ -41,7 +41,7 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
             if (sliceNode.getOffset() != 0 || sliceNode.getLimit().isEmpty())
                 return super.transformSlice(tree, sliceNode, child);
 
-            var subLimitTransformer = new SubLimitTransformer(sliceNode.getLimit().get());
+            var subLimitTransformer = new SubLimitTransformer(sliceNode.getLimit().getAsLong());
             return iqFactory.createUnaryIQTree(sliceNode, child.acceptVisitor(subLimitTransformer));
         }
     }
@@ -70,7 +70,7 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
          * */
         @Override
         public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
-            if (sliceNode.getOffset() != 0 || sliceNode.getLimit().isEmpty() || sliceNode.getLimit().get() < currentBounds)
+            if (sliceNode.getOffset() != 0 || sliceNode.getLimit().isEmpty() || sliceNode.getLimit().getAsLong() < currentBounds)
                 return defaultToParentTransformer(tree);
 
             return transformChild(tree.getChildren().get(0));

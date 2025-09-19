@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.AbstractCollection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.function.BooleanSupplier;
 
 @Singleton
@@ -59,8 +60,8 @@ public class SliceNormalizerImpl implements SliceNormalizer {
         }
 
         public IQTree normalize() {
-            Optional<Long> limit = sliceNode.getLimit();
-            if (limit.isPresent() && limit.get() == 0)
+            OptionalLong limit = sliceNode.getLimit();
+            if (limit.isPresent() && limit.getAsLong() == 0)
                 return iqFactory.createEmptyNode(initialChild.getVariables());
 
             IQTree newChild = initialChild.normalizeForOptimization(variableGenerator);
@@ -100,9 +101,11 @@ public class SliceNormalizerImpl implements SliceNormalizer {
 
                 return iqFactory.createValuesNode(
                                 valuesNode.getVariables(),
-                                // TODO: complain if the offset or the limit are too big to be casted as integers
+                                // TODO: complain if the offset or the limit are too big to be cast as integers
                                 values.subList((int)sliceNode.getOffset(),
-                                        Integer.min(sliceNode.getLimit().map(l -> l + sliceNode.getOffset()).orElse(sliceNode.getOffset()).intValue(), values.size())))
+                                        Integer.min(convert(sliceNode.getLimit())
+                                                .map(l -> l + sliceNode.getOffset())
+                                                .orElse(sliceNode.getOffset()).intValue(), values.size())))
                         .normalizeForOptimization(variableGenerator);
             }
 
@@ -111,7 +114,7 @@ public class SliceNormalizerImpl implements SliceNormalizer {
             // Rule 2: Limit optimizations are not disabled
             // Rule 3: Limit must not be null
             if ((sliceNode.getOffset() == 0) && sliceNode.getLimit().isPresent() && !settings.isLimitOptimizationDisabled())
-                return normalizeLimitNoOffset(sliceNode.getLimit().get().intValue(), newChild, variableGenerator, treeCache, hasChildChanged);
+                return normalizeLimitNoOffset((int)sliceNode.getLimit().getAsLong(), newChild, variableGenerator, treeCache, hasChildChanged);
 
             return iqFactory.createUnaryIQTree(sliceNode, newChild,
                     hasChildChanged.getAsBoolean()
@@ -127,14 +130,18 @@ public class SliceNormalizerImpl implements SliceNormalizer {
                     iqFactory.createIQTreeCache(true));
         }
 
+        private Optional<Long> convert(OptionalLong optionalLong) {
+            return Optional.of(optionalLong).filter(OptionalLong::isPresent).map(OptionalLong::getAsLong);
+        }
+
         private IQTree mergeWithSliceChild(SliceNode newChildRoot, IQTree child, IQTreeCache treeCache) {
             long newOffset = sliceNode.getOffset() + newChildRoot.getOffset();
-            Optional<Long> newLimit = newChildRoot.getLimit()
+            Optional<Long> newLimit = convert(newChildRoot.getLimit())
                     .map(cl -> Math.max(cl - sliceNode.getOffset(), 0L))
-                    .map(cl -> sliceNode.getLimit()
+                    .map(cl -> convert(sliceNode.getLimit())
                             .map(l -> Math.min(cl, l))
                             .orElse(cl))
-                    .or(sliceNode::getLimit);
+                    .or(() -> convert(sliceNode.getLimit()));
 
             SliceNode newSliceNode = newLimit
                     .map(l -> iqFactory.createSliceNode(newOffset, l))

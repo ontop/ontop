@@ -36,8 +36,8 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
     private final long offset;
 
-    @Nullable
-    private final Long limit;
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private final OptionalLong limit;
 
     private final SliceNormalizer sliceNormalizer;
 
@@ -50,7 +50,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         if (limit < 0)
             throw new IllegalArgumentException("The limit must not be negative");
         this.offset = offset;
-        this.limit = limit;
+        this.limit = OptionalLong.of(limit);
         this.sliceNormalizer = sliceNormalizer;
     }
 
@@ -60,7 +60,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         if (offset < 0)
             throw new IllegalArgumentException("The offset must not be negative");
         this.offset = offset;
-        this.limit = null;
+        this.limit = OptionalLong.empty();
         this.sliceNormalizer = sliceNormalizer;
     }
 
@@ -100,7 +100,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
     @Override
     public boolean isDistinct(IQTree tree, IQTree child) {
-        if (limit != null && limit <= 1)
+        if (limit.isPresent() && limit.getAsLong() <= 1)
             return true;
         return child.isDistinct();
     }
@@ -151,7 +151,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         if (this == o) return true;
         if (o instanceof SliceNodeImpl) {
             SliceNodeImpl that = (SliceNodeImpl) o;
-            return offset == that.offset && Objects.equals(limit, that.limit);
+            return offset == that.offset && limit.equals(that.limit);
         }
         return false;
     }
@@ -167,15 +167,15 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
-    public Optional<Long> getLimit() {
-        return Optional.ofNullable(limit);
+    public OptionalLong getLimit() {
+        return limit;
     }
 
     @Override
     public String toString() {
         return SLICE_STR
                 + (offset > 0 ? " offset=" + offset : "")
-                + (limit == null ? "" : " limit=" + limit);
+                + (limit.isEmpty() ? "" : " limit=" + limit);
     }
 
     /**

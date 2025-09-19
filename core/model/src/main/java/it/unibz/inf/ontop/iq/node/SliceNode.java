@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 
-import java.util.Optional;
+import java.util.OptionalLong;
 
 /**
  * See {@link IntermediateQueryFactory#createSliceNode} for creating a new instance.
@@ -20,7 +20,7 @@ public interface SliceNode extends QueryModifierNode {
     /**
      * Length of the slice
      */
-    Optional<Long> getLimit();
+    OptionalLong getLimit();
 
     @Override
     default <T> T acceptVisitor(UnaryIQTree tree, IQVisitor<T> visitor, IQTree child) {

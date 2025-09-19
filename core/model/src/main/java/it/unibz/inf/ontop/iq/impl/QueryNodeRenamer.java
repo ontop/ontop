@@ -126,9 +126,9 @@ public class QueryNodeRenamer extends DefaultQueryNodeTransformer {
 
     @Override
     public SliceNode transform(SliceNode sliceNode, UnaryIQTree tree) {
-        return sliceNode.getLimit()
-                .map(l -> iqFactory.createSliceNode(sliceNode.getOffset(), l))
-                .orElseGet(() -> iqFactory.createSliceNode(sliceNode.getOffset()));
+        return sliceNode.getLimit().isPresent()
+                ? iqFactory.createSliceNode(sliceNode.getOffset(), sliceNode.getLimit().getAsLong())
+                : iqFactory.createSliceNode(sliceNode.getOffset());
     }
 
     @Override

@@ -126,7 +126,7 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
                         termFactory.getDBDefaultInequality(InequalityLabel.LTE,
                                 freshVariable,
                                 termFactory.getDBIntegerConstant((int) sliceNode.getOffset() +
-                                        sliceNode.getLimit().get().intValue())));
+                                        (int)sliceNode.getLimit().getAsLong())));
             }
             else if (!sliceNode.getLimit().isPresent()) {
                 // CASE 2: Only limit
@@ -138,7 +138,7 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
                 // CASE 3: Only offset
                 return termFactory.getDBDefaultInequality(InequalityLabel.LTE,
                         freshVariable,
-                        termFactory.getDBIntegerConstant(sliceNode.getLimit().get().intValue()));
+                        termFactory.getDBIntegerConstant((int)sliceNode.getLimit().getAsLong()));
             }
         }
     }

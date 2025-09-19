@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
@@ -88,7 +89,9 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                         .orElseGet(ImmutableSet::of),
                 distinct.getOptionalNode().isPresent(),
                 sliceNode
-                        .flatMap(SliceNode::getLimit),
+                        .map(SliceNode::getLimit)
+                        .filter(OptionalLong::isPresent)
+                        .map(OptionalLong::getAsLong),
                 sliceNode
                         .map(SliceNode::getOffset)
                         .filter(o -> o > 0),

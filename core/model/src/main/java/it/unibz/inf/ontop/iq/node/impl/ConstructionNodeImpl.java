@@ -171,7 +171,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
         return UnaryIQTreeDecomposition.of(child, SliceNode.class)
                 .getOptionalNode()
-                .flatMap(SliceNode::getLimit)
+                .map(SliceNode::getLimit)
+                .filter(OptionalLong::isPresent)
+                .map(OptionalLong::getAsLong)
                 .filter(l -> l == 1)
                 .isPresent();
     }
