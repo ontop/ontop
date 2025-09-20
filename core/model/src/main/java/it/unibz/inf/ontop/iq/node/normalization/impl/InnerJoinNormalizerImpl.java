@@ -168,7 +168,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         State<UnaryOperatorNode, InnerJoinSubTree> normalizeChildren(State<UnaryOperatorNode, InnerJoinSubTree> state) {
             InnerJoinSubTree subTree = state.getSubTree();
             ImmutableList<IQTree> liftedChildren = subTree.children().stream()
-                    .map(this::normalizeChild)
+                    .map(this::normalizeSubTreeRecursively)
                     .filter(c -> !(c.getRootNode() instanceof TrueNode))
                     .collect(ImmutableCollectors.toList());
 
@@ -289,12 +289,11 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             if (joinLevelTree.isDeclaredAsEmpty())
                 return joinLevelTree;
 
-            IQTree nonNormalizedTree = iqTreeTools.unaryIQTreeBuilder(projectedVariables)
-                    .append(state.getAncestors())
-                    .build(joinLevelTree);
-
-            // Normalizes the ancestors (recursive)
-            return nonNormalizedTree.normalizeForOptimization(variableGenerator);
+            // normalize ancestors recursively
+            return normalizeSubTreeRecursively(
+                    iqTreeTools.unaryIQTreeBuilder(projectedVariables)
+                            .append(state.getAncestors())
+                            .build(joinLevelTree));
         }
 
 

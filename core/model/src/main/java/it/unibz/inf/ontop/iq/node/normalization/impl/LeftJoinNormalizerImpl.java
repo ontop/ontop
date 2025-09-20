@@ -192,7 +192,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         }
 
         State<UnaryOperatorNode, LeftJoinSubTree> liftLeftChild(State<UnaryOperatorNode, LeftJoinSubTree> state) {
-            return state.replace(t -> t.replaceLeft(normalizeChild(t.leftChild())))
+            return state.replace(t -> t.replaceLeft(normalizeSubTreeRecursively(t.leftChild())))
                     .reachFinal(this::liftLeftChildStep);
         }
 
@@ -283,7 +283,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         }
 
         State<UnaryOperatorNode, LeftJoinSubTree> liftRightChild(State<UnaryOperatorNode, LeftJoinSubTree> s0) {
-            var state = s0.replace(t -> t.replaceRight(normalizeChild(t.rightChild())));
+            var state = s0.replace(t -> t.replaceRight(normalizeSubTreeRecursively(t.rightChild())));
             return state.getSubTree().rightChild().acceptVisitor(new LiftRightChildStep(state))
                     .orElse(state);
         }
@@ -508,12 +508,11 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         iqFactory.createLeftJoinNode(subTree.ljCondition()), subTree.leftChild(), subTree.rightChild(), normalizedProperties);
             }
 
-            IQTree nonNormalizedTree = iqTreeTools.unaryIQTreeBuilder(projectedVariables)
-                    .append(state.getAncestors())
-                    .build(ljLevelTree);
-
-            // Normalizes the ancestors (recursive)
-            return nonNormalizedTree.normalizeForOptimization(variableGenerator);
+            // Normalizes the ancestors
+            return normalizeSubTreeRecursively(
+                    iqTreeTools.unaryIQTreeBuilder(projectedVariables)
+                            .append(state.getAncestors())
+                            .build(ljLevelTree));
         }
 
 

@@ -4,10 +4,8 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.AggregationNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
@@ -28,18 +26,14 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 public class AggregationNormalizerImpl implements AggregationNormalizer {
 
     private final CoreSingletons coreSingletons;
-    private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final NotRequiredVariableRemover notRequiredVariableRemover;
-    private final IQTreeTools iqTreeTools;
 
     @Inject
     protected AggregationNormalizerImpl(CoreSingletons coreSingletons,
                                         NotRequiredVariableRemover notRequiredVariableRemover) {
         this.coreSingletons = coreSingletons;
-        this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
-        this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.notRequiredVariableRemover = notRequiredVariableRemover;
     }
 
@@ -53,51 +47,9 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
     public IQTree normalizeForOptimization(AggregationNode aggregationNode, IQTree child,
                                            VariableGenerator variableGenerator, IQTreeCache treeCache) {
 
-        if (aggregationNode.getSubstitution().isEmpty()) {
-            if (aggregationNode.getGroupingVariables().isEmpty()) {
-                return iqFactory.createTrueNode();
-            }
-            else {
-                IQTree newTree = iqTreeTools.unaryIQTreeBuilder()
-                        .append(iqFactory.createDistinctNode())
-                        .append(iqFactory.createConstructionNode(aggregationNode.getGroupingVariables()))
-                        .build(child);
-
-                return newTree.normalizeForOptimization(variableGenerator);
-            }
-        }
-
-        IQTreeCache normalizedTreeCache = treeCache.declareAsNormalizedForOptimizationWithEffect();
-
-        IQTree shrunkChild = notRequiredVariableRemover.optimize(
-                child.normalizeForOptimization(variableGenerator),
-                aggregationNode.getLocallyRequiredVariables(), variableGenerator);
-
-        if (shrunkChild.isDeclaredAsEmpty()) {
-            if (!aggregationNode.getGroupingVariables().isEmpty())
-                return iqFactory.createEmptyNode(aggregationNode.getVariables());
-
-            Substitution<ImmutableTerm> newSubstitution = aggregationNode.getSubstitution()
-                    .transform(this::simplifyEmptyAggregate);
-
-            return iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(aggregationNode.getVariables(), newSubstitution),
-                    iqFactory.createTrueNode(),
-                    normalizedTreeCache);
-        }
-
-        Context context = new Context(aggregationNode, shrunkChild, variableGenerator, normalizedTreeCache);
+        Context context = new Context(aggregationNode, child, variableGenerator, treeCache);
         return context.normalize();
     }
-
-    private ImmutableTerm simplifyEmptyAggregate(ImmutableFunctionalTerm aggregateTerm) {
-        FunctionSymbol functionSymbol = aggregateTerm.getFunctionSymbol();
-        if (functionSymbol instanceof AggregationFunctionSymbol) {
-            return ((AggregationFunctionSymbol) functionSymbol).evaluateEmptyBag(termFactory);
-        }
-        throw new MinorOntopInternalBugException("Was expecting an AggregationFunctionSymbol");
-    }
-
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static class AggregationSubTree {
@@ -155,17 +107,47 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
     private class Context extends InjectiveBindingLiftContext {
 
         private final AggregationNode aggregationNode;
-        private final IQTree shrunkChild;
+        private final IQTree child;
 
         private static final int MAX_ITERATIONS = 1000;
 
-        Context(AggregationNode aggregationNode, IQTree shrunkChild, VariableGenerator variableGenerator, IQTreeCache normalizedTreeCache) {
-            super(variableGenerator, coreSingletons, normalizedTreeCache);
+        Context(AggregationNode aggregationNode, IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+            super(variableGenerator, coreSingletons, treeCache);
             this.aggregationNode = aggregationNode;
-            this.shrunkChild = shrunkChild;
+            this.child = child;
         }
 
         IQTree normalize() {
+            if (aggregationNode.getSubstitution().isEmpty()) {
+                if (aggregationNode.getGroupingVariables().isEmpty()) {
+                    return iqFactory.createTrueNode();
+                }
+                else {
+                    return normalizeSubTreeRecursively(
+                            iqTreeTools.unaryIQTreeBuilder()
+                                    .append(iqFactory.createDistinctNode())
+                                    .append(iqFactory.createConstructionNode(aggregationNode.getGroupingVariables()))
+                                    .build(child));
+                }
+            }
+
+            IQTree shrunkChild = notRequiredVariableRemover.optimize(
+                    normalizeSubTreeRecursively(child),
+                    aggregationNode.getLocallyRequiredVariables(), variableGenerator);
+
+            if (shrunkChild.isDeclaredAsEmpty()) {
+                if (!aggregationNode.getGroupingVariables().isEmpty())
+                    return iqFactory.createEmptyNode(aggregationNode.getVariables());
+
+                Substitution<ImmutableTerm> newSubstitution = aggregationNode.getSubstitution()
+                        .transform(this::simplifyEmptyAggregate);
+
+                return iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(aggregationNode.getVariables(), newSubstitution),
+                        iqFactory.createTrueNode(),
+                        treeCache.declareAsNormalizedForOptimizationWithEffect());
+            }
+
             var construction = UnaryIQTreeDecomposition.of(shrunkChild, ConstructionNode.class);
             var initial = State.<ConstructionNode, AggregationSubTree>initial(AggregationSubTree.of(aggregationNode, construction.getOptionalNode(), construction.getTail()));
 
@@ -179,6 +161,13 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             return asIQTree(finalState);
         }
 
+        private ImmutableTerm simplifyEmptyAggregate(ImmutableFunctionalTerm aggregateTerm) {
+            FunctionSymbol functionSymbol = aggregateTerm.getFunctionSymbol();
+            if (functionSymbol instanceof AggregationFunctionSymbol) {
+                return ((AggregationFunctionSymbol) functionSymbol).evaluateEmptyBag(termFactory);
+            }
+            throw new MinorOntopInternalBugException("Was expecting an AggregationFunctionSymbol");
+        }
 
         /**
          * All the bindings of non-grouping variables in the child construction node are propagated to
@@ -341,14 +330,14 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
         protected IQTree asIQTree(State<ConstructionNode, AggregationSubTree> state) {
             AggregationSubTree subTree = state.getSubTree();
-            return iqTreeTools.unaryIQTreeBuilder()
-                    .append(state.getAncestors())
-                    .append(subTree.sampleFilter)
-                    .append(subTree.aggregationNode, treeCache)
-                    .append(subTree.childConstructionNode)
-                    .build(subTree.grandChild)
-                    // Recursive (for merging top construction nodes)
-                    .normalizeForOptimization(variableGenerator);
+            // Recursive (for merging top construction nodes)
+            return normalizeSubTreeRecursively(
+                    iqTreeTools.unaryIQTreeBuilder()
+                            .append(state.getAncestors())
+                            .append(subTree.sampleFilter)
+                            .append(subTree.aggregationNode, treeCache.declareAsNormalizedForOptimizationWithEffect())
+                            .append(subTree.childConstructionNode)
+                            .build(subTree.grandChild));
         }
 
 

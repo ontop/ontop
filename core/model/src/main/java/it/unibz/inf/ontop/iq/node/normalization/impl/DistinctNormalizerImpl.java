@@ -51,7 +51,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
         }
 
         IQTree normalize() {
-            IQTree child = initialChild.normalizeForOptimization(variableGenerator);
+            IQTree child = normalizeSubTreeRecursively(initialChild);
             if (child.isDistinct())
                 return child;
 
@@ -77,12 +77,12 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                 ImmutableList<IQTree> newUnionChildren = union.transformChildren(this::simplifyUnionChild);
 
                 if (!union.getChildren().equals(newUnionChildren))
-                    return iqTreeTools.unaryIQTreeBuilder()
-                            .append(distinctNode)
-                            .append(orderBy.getOptionalNode())
-                            .append(filter.getOptionalNode())
-                            .build(iqFactory.createNaryIQTree(union.getNode(), newUnionChildren))
-                            .normalizeForOptimization(variableGenerator);
+                    return normalizeSubTreeRecursively(
+                            iqTreeTools.unaryIQTreeBuilder()
+                                    .append(distinctNode)
+                                    .append(orderBy.getOptionalNode())
+                                    .append(filter.getOptionalNode())
+                                    .build(iqFactory.createNaryIQTree(union.getNode(), newUnionChildren)));
             }
 
             return iqTreeTools.unaryIQTreeBuilder()
@@ -95,8 +95,8 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
 
         IQTree createLimit1(IQTree child) {
             // Replaces the DISTINCT by a LIMIT 1
-            return iqFactory.createUnaryIQTree(iqFactory.createSliceNode(0, 1), child)
-                    .normalizeForOptimization(variableGenerator);
+            return normalizeSubTreeRecursively(
+                    iqFactory.createUnaryIQTree(iqFactory.createSliceNode(0, 1), child));
         }
 
         IQTree liftBindingConstructionChild(ConstructionNode constructionNode, IQTree grandChild) {
@@ -120,18 +120,17 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
             IQTree newChildTree = state.getSubTree().getOptionalNode()
                     .map(c -> iqFactory.createUnaryIQTree(c, newGrandChildTree, childTreeCache))
                     // To be normalized again in case a DISTINCT was present as a grand child.
-                    // NB: does nothing if it is not the case
-                    .map(t -> t.normalizeForOptimization(variableGenerator))
+                    .map(this::normalizeSubTreeRecursively)
                     .orElse(newGrandChildTree);
 
-            return iqTreeTools.unaryIQTreeBuilder()
-                    .append(state.getAncestors())
-                    .append(
-                            iqTreeTools.createOptionalDistinctNode(!newChildTree.isDistinct()),
-                            treeCache::declareAsNormalizedForOptimizationWithEffect)
-                    .build(newChildTree)
-                    // Recursive (for merging ancestor CONSTRUCTION nodes)
-                    .normalizeForOptimization(variableGenerator);
+            // Recursive (for merging ancestor CONSTRUCTION nodes)
+            return normalizeSubTreeRecursively(
+                    iqTreeTools.unaryIQTreeBuilder()
+                            .append(state.getAncestors())
+                            .append(
+                                    iqTreeTools.createOptionalDistinctNode(!newChildTree.isDistinct()),
+                                    treeCache::declareAsNormalizedForOptimizationWithEffect)
+                            .build(newChildTree));
         }
 
         IQTree simplifyValuesNode(ValuesNode valuesNode) {

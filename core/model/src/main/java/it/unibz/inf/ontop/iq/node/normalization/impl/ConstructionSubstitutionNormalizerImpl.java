@@ -49,7 +49,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
     }
 
 
-    public class ConstructionSubstitutionNormalizationImpl implements ConstructionSubstitutionNormalization {
+    private static class ConstructionSubstitutionNormalizationImpl implements ConstructionSubstitutionNormalization {
 
         private final Substitution<ImmutableTerm> normalizedSubstitution;
         private final InjectiveSubstitution<Variable> downRenamingSubstitution;

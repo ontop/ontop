@@ -18,7 +18,7 @@ public class NormalizationContext {
         this.variableGenerator = variableGenerator;
     }
 
-    protected IQTree normalizeChild(IQTree child) {
+    protected IQTree normalizeSubTreeRecursively(IQTree child) {
         return child.normalizeForOptimization(variableGenerator);
     }
 
@@ -34,7 +34,7 @@ public class NormalizationContext {
     }
 
     protected <T extends UnaryOperatorNode> UnarySubTree<T> normalizeChild(UnarySubTree<T> subTree) {
-        return UnarySubTree.of(subTree.getOptionalNode(), normalizeChild(subTree.getChild()));
+        return UnarySubTree.of(subTree.getOptionalNode(), normalizeSubTreeRecursively(subTree.getChild()));
     }
 
 
