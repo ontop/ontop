@@ -164,6 +164,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                         .rangeAllMatch(this::isConstantOrDeterministic);
     }
 
+    // TODO: the same as isDeterministic in ConstructionNodeImpl (provided that the terms are ground, i.e., the substitution has no child variables)
     private boolean isConstantOrDeterministic(ImmutableTerm term) {
         if (term instanceof Constant)
             return true;

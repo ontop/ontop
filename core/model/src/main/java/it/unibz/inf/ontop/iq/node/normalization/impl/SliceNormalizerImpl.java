@@ -52,14 +52,14 @@ public class SliceNormalizerImpl implements SliceNormalizer {
         private final IQTree initialChild;
         private final IQTreeCache treeCache;
 
-        public Context(SliceNode sliceNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        Context(SliceNode sliceNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
             super(variableGenerator);
             this.sliceNode = sliceNode;
             this.initialChild = initialChild;
             this.treeCache = treeCache;
         }
 
-        public IQTree normalize() {
+        IQTree normalize() {
             OptionalLong limit = sliceNode.getLimit();
             if (limit.isPresent() && limit.getAsLong() == 0)
                 return iqFactory.createEmptyNode(initialChild.getVariables());
@@ -69,7 +69,7 @@ public class SliceNormalizerImpl implements SliceNormalizer {
             return normalizeForOptimization(newChild, () -> !newChild.equals(initialChild));
         }
 
-        protected IQTree normalizeForOptimization(IQTree newChild, BooleanSupplier hasChildChanged) {
+        private IQTree normalizeForOptimization(IQTree newChild, BooleanSupplier hasChildChanged) {
 
             var construction = IQTreeTools.UnaryIQTreeDecomposition.of(newChild, ConstructionNode.class);
             if (construction.isPresent())
@@ -265,11 +265,13 @@ public class SliceNormalizerImpl implements SliceNormalizer {
             IQTree newUnionTree = iqFactory.createNaryIQTree(childRoot, newChildren)
                     .normalizeForOptimization(variableGenerator);
 
-            return (numberOfChildrenWithUnknownCardinality == 1)
-                    ? Optional.of(newUnionTree)
-                    : newUnionTree.equals(childTree)
-                    ? Optional.empty()
-                    : Optional.of(iqFactory.createUnaryIQTree(sliceNode, newUnionTree)
+            if (numberOfChildrenWithUnknownCardinality == 1)
+                return Optional.of(newUnionTree);
+
+            if (newUnionTree.equals(childTree))
+                return Optional.empty();
+
+            return Optional.of(iqFactory.createUnaryIQTree(sliceNode, newUnionTree)
                     .normalizeForOptimization(variableGenerator));
         }
 
@@ -278,9 +280,10 @@ public class SliceNormalizerImpl implements SliceNormalizer {
                     c -> iqFactory.createUnaryIQTree(sliceNode, c)
                             .normalizeForOptimization(variableGenerator));
 
-            return children.equals(newUnionChildren)
-                    ? Optional.empty()
-                    : Optional.of(iqFactory.createUnaryIQTree(
+            if (children.equals(newUnionChildren))
+                return Optional.empty();
+
+            return Optional.of(iqFactory.createUnaryIQTree(
                     sliceNode,
                     iqFactory.createNaryIQTree(unionNode, newUnionChildren)));
         }
@@ -307,9 +310,10 @@ public class SliceNormalizerImpl implements SliceNormalizer {
                     .map(c -> c.normalizeForOptimization(variableGenerator))
                     .collect(ImmutableCollectors.toList());
 
-            return newUnionChildren.equals(unionChildren)
-                    ? Optional.empty()
-                    : Optional.of(iqTreeTools.unaryIQTreeBuilder()
+            if (newUnionChildren.equals(unionChildren))
+                    return Optional.empty();
+
+            return Optional.of(iqTreeTools.unaryIQTreeBuilder()
                     .append(sliceNode)
                     .append(iqFactory.createDistinctNode())
                     .build(iqFactory.createNaryIQTree(union, newUnionChildren))
