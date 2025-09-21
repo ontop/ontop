@@ -4746,6 +4746,102 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, JOIN_LIKE_OPTIMIZER.optimize(expectedIQ));
     }
 
+    /**
+     *    CONSTRUCT [project, action,objective_name,axis]
+     *       FILTER IS_NOT_NULL(action)
+     *          LJ IS_NOT_NULL(objective)
+     *             EXTENSIONAL classification(0:project, 1:action)
+     *             LJ
+     *                LJ
+     *                   EXTENSIONAL classification(0:project, 1:action, 2:objective)
+     *                   DISTINCT
+     *                      FILTER AND2(IS_NOT_NULL(objective),IS_NOT_NULL(objective_name))
+     *                         EXTENSIONAL classification(2:objective,3:objective_name)
+     *                DISTINCT
+     *                   FILTER AND2(IS_NOT_NULL(objective),IS_NOT_NULL(axis))
+     *                      EXTENSIONAL classification(2:objective,4:axis)
+     *
+     *   TABLE_CLASSIFICATION(0:project, 1:action,2:objective,3:objective_name,4:axis)
+     *   PK: 0, 1
+     *   FD: 2 -> 3,4 (nullable)
+     */
+    @Test
+    public void testFDSimplification() {
+
+        Variable project = TERM_FACTORY.getVariable("project");
+        Variable action = TERM_FACTORY.getVariable("action");
+        Variable objective = TERM_FACTORY.getVariable("objective");
+        Variable objectiveName = TERM_FACTORY.getVariable("objective_name");
+        Variable axis = TERM_FACTORY.getVariable("axis");
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(4), ImmutableList.of(project, action, objectiveName, axis));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE_CLASSIFICATION, ImmutableMap.of(0, project, 1, action));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE_CLASSIFICATION, ImmutableMap.of(0, project, 1, action, 2, objective));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE_CLASSIFICATION, ImmutableMap.of(2, objective, 3, objectiveName));
+        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(TABLE_CLASSIFICATION, ImmutableMap.of(2, objective, 4, axis));
+
+        var isNotNullObjective = TERM_FACTORY.getDBIsNotNull(objective);
+
+
+        var lj1 = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(),
+                dataNode2,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createDistinctNode(),
+                        IQ_FACTORY.createUnaryIQTree(
+                                IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(isNotNullObjective, TERM_FACTORY.getDBIsNotNull(objectiveName))),
+                                dataNode3)));
+
+        var lj2 = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(),
+                lj1,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createDistinctNode(),
+                        IQ_FACTORY.createUnaryIQTree(
+                                IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(isNotNullObjective, TERM_FACTORY.getDBIsNotNull(axis))),
+                                dataNode4)));
+
+        var topLJ = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(isNotNullObjective),
+                dataNode1,
+                lj2);
+
+        var topFilterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(action));
+
+        var topFilterTree = IQ_FACTORY.createUnaryIQTree(topFilterNode, topLJ);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, topFilterTree));
+
+        Variable objectiveNameF0 = TERM_FACTORY.getVariable("objective_namef1f0");
+        Variable axisF0 = TERM_FACTORY.getVariable("axisf2f0");
+
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE_CLASSIFICATION, ImmutableMap.of(0, project, 1, action,
+                2, objective, 3, objectiveNameF0, 4, axisF0));
+
+        var objectiveNotNullCondition = TERM_FACTORY.getDBIsNotNull(objective);
+
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
+                projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        objectiveName, TERM_FACTORY.getIfElseNull(
+                                TERM_FACTORY.getConjunction(
+                                        TERM_FACTORY.getDBIsNotNull(objectiveNameF0),
+                                        objectiveNotNullCondition), objectiveNameF0),
+                        axis, TERM_FACTORY.getIfElseNull(
+                                TERM_FACTORY.getConjunction(
+                                        TERM_FACTORY.getDBIsNotNull(axisF0),
+                                objectiveNotNullCondition), axisF0)));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        newConstructionNode,
+                        IQ_FACTORY.createUnaryIQTree(topFilterNode, newDataNode1)));
+
+        optimizeAndCompare(initialIQ, JOIN_LIKE_OPTIMIZER.optimize(expectedIQ));
+    }
+
     @Test
     public void testPartialProjectionAway1() {
 
