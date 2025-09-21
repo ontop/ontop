@@ -98,6 +98,11 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
         }
 
         @Override
+        public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+            return transformUnaryNode(tree, rootNode, child, this::transform);
+        }
+
+        @Override
         protected Optional<IQTree> furtherTransformLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             var dataNodeAndProvenanceVariables = extractDataNodeAndProvenance(rightChild);
 
