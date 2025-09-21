@@ -371,7 +371,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public VariableNonRequirement computeVariableNonRequirement(ImmutableList<IQTree> children) {
-        return super.computeVariableNonRequirement(children);
+        var nonRequirementBeforeFilter = computeVariableNonRequirementForChildren(children);
+        return nonRequirementBeforeFilter.withRequiredVariables(getLocallyRequiredVariables());
     }
 
     @Override

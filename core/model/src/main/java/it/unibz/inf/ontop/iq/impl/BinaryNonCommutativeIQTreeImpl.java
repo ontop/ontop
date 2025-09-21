@@ -154,7 +154,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     @Override
     protected VariableNonRequirement computeVariableNonRequirement() {
-        return getRootNode().computeNotInternallyRequiredVariables(getLeftChild(), getRightChild());
+        return getRootNode().computeVariableNonRequirement(getLeftChild(), getRightChild());
     }
 
     @Override

@@ -15,10 +15,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -45,9 +42,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         children.forEach(c -> allVariables.addAll(c.getVariables()));
 
         for (IQTree child : children) {
-            ImmutableSet<Variable> childProjectedVariables = child.getVariables();
-
-            Set<Variable> childNonProjectedVariables = Sets.difference(child.getKnownVariables(), childProjectedVariables);
+            Set<Variable> childNonProjectedVariables = Sets.difference(child.getKnownVariables(), child.getVariables());
 
             Set<Variable> conflictingVariables = Sets.intersection(childNonProjectedVariables, allVariables);
             if (!conflictingVariables.isEmpty()) {
@@ -62,12 +57,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         }
     }
 
-    protected VariableNonRequirement applyFilterToVariableNonRequirement(VariableNonRequirement nonRequirementBeforeFilter,
-                                                                         ImmutableList<IQTree> children) {
-        return nonRequirementBeforeFilter.withRequiredVariables(getLocallyRequiredVariables());
-    }
-
-    protected VariableNonRequirement computeVariableNonRequirement(ImmutableList<IQTree> children) {
+    protected VariableNonRequirement computeVariableNonRequirementForChildren(ImmutableList<IQTree> children) {
         ImmutableMultimap<Variable, ImmutableSet<Variable>> childRequirementMultimap = children.stream()
                 .map(IQTree::getVariableNonRequirement)
                 .flatMap(r -> r.getNotRequiredVariables().stream()
@@ -85,17 +75,11 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
             return VariableNonRequirement.empty();
 
         ImmutableSet<Variable> notSharedVariables = NaryIQTreeTools.singleOccurrenceVariables(
-                children.stream()
-                        .flatMap(c -> c.getVariables().stream()));
+                children.stream().map(IQTree::getVariables).flatMap(Collection::stream));
 
-
-        VariableNonRequirement nonRequirementBeforeFilter = VariableNonRequirement.of(
+        return VariableNonRequirement.of(
                 candidates.entrySet().stream()
                         .filter(e -> notSharedVariables.contains(e.getKey()))
                         .collect(ImmutableCollectors.toMap()));
-
-        return getOptionalFilterCondition()
-                .map(f -> applyFilterToVariableNonRequirement(nonRequirementBeforeFilter, children))
-                .orElse(nonRequirementBeforeFilter);
     }
 }

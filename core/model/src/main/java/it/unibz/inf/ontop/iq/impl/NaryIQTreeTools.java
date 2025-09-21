@@ -118,15 +118,15 @@ public class NaryIQTreeTools {
                                         anyMatch(v1::equals))));
          */
 
-        // grouping should be more efficient - n log n
-        Map<Variable, Long> variableOccurrencesCount = children.stream()
+        // multiset should be more efficient - n log n
+        ImmutableMultiset<Variable> childVariableMultiset = children.stream()
                 .map(IQTree::getVariables)
                 .flatMap(Collection::stream)
-                .collect(Collectors.groupingBy(v -> v, Collectors.counting()));
+                .collect(ImmutableCollectors.toMultiset());
 
-        return variableOccurrencesCount.entrySet().stream()
-                .filter(e -> e.getValue() > 1)
-                .map(Map.Entry::getKey);
+        return childVariableMultiset.entrySet().stream()
+                .filter(e -> e.getCount() > 1)
+                .map(Multiset.Entry::getElement);
     }
 
     public static ImmutableSet<Variable> singleOccurrenceVariables(Stream<Variable> variablesStream) {
@@ -134,7 +134,6 @@ public class NaryIQTreeTools {
                 .collect(ImmutableCollectors.toMultiset());
 
         return childVariableMultiset.entrySet().stream()
-                // Only coming from one child
                 .filter(e -> e.getCount() == 1)
                 .map(Multiset.Entry::getElement)
                 .collect(ImmutableCollectors.toSet());

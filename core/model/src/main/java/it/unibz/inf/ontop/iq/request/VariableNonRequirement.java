@@ -22,7 +22,7 @@ public interface VariableNonRequirement {
     VariableNonRequirement filter(BiPredicate<Variable, ImmutableSet<Variable>> predicate);
 
     default VariableNonRequirement withRequiredVariables(ImmutableSet<Variable> requiredVariables) {
-        if (requiredVariables.isEmpty())
+        if (isEmpty() || requiredVariables.isEmpty())
             return this;
 
         return filter((v, conds) -> !requiredVariables.contains(v));

@@ -68,5 +68,5 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     ImmutableSet<Variable> inferStrictDependents(BinaryNonCommutativeIQTree tree, IQTree leftChild, IQTree rightChild);
 
-    VariableNonRequirement computeNotInternallyRequiredVariables(IQTree leftChild, IQTree rightChild);
+    VariableNonRequirement computeVariableNonRequirement(IQTree leftChild, IQTree rightChild);
 }

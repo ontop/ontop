@@ -299,9 +299,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             return true;
 
         Optional<ImmutableExpression> optionalFilterCondition = getOptionalFilterCondition();
-
         Set<Variable> commonVariables = commonVariables(leftChild, rightChild);
-
         if ((!optionalFilterCondition.isPresent()) && commonVariables.isEmpty())
             return false;
 
@@ -403,11 +401,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public ImmutableSet<Variable> inferStrictDependents(BinaryNonCommutativeIQTree tree, IQTree leftChild, IQTree rightChild) {
         return IQTreeTools.computeStrictDependentsFromFunctionalDependencies(tree);
-    }
-
-    @Override
-    public VariableNonRequirement computeNotInternallyRequiredVariables(IQTree leftChild, IQTree rightChild) {
-        return computeVariableNonRequirement(ImmutableList.of(leftChild, rightChild));
     }
 
     private ExpressionAndSubstitution applyDescendingSubstitutionToExpression(
@@ -521,19 +514,15 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    protected VariableNonRequirement applyFilterToVariableNonRequirement(VariableNonRequirement nonRequirementBeforeFilter,
-                                                                         ImmutableList<IQTree> children) {
+    public VariableNonRequirement computeVariableNonRequirement(IQTree leftChild, IQTree rightChild) {
 
+        var nonRequirementBeforeFilter = computeVariableNonRequirementForChildren(ImmutableList.of(leftChild, rightChild));
         if (nonRequirementBeforeFilter.isEmpty())
             return nonRequirementBeforeFilter;
-
-        IQTree leftChild = children.get(0);
-        IQTree rightChild = children.get(1);
 
         Set<Variable> rightSpecificVariables = rightSpecificVariables(leftChild, rightChild);
         if (rightSpecificVariables.isEmpty())
             return nonRequirementBeforeFilter;
-
 
         /*
          * If the right child has no impact on cardinality (i.e. at most one match per row on the left),
@@ -558,6 +547,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                             : conditions);
         }
         else
-            return super.applyFilterToVariableNonRequirement(nonRequirementBeforeFilter, children);
+            return nonRequirementBeforeFilter.withRequiredVariables(getLocallyRequiredVariables());
     }
 }
