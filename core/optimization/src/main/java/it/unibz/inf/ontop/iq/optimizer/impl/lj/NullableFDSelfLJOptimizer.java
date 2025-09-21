@@ -98,6 +98,11 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
         }
 
         @Override
+        public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+            return transformUnaryNode(tree, rootNode, child, this::transform);
+        }
+
+        @Override
         protected Optional<IQTree> furtherTransformLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             var dataNodeAndProvenanceVariables = extractDataNodeAndProvenance(rightChild);
 
@@ -197,9 +202,10 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
                                       ImmutableSet<Variable> provenanceVariables) {
             var newLeftNode = transfer.generateNewLeftNode(variableGenerator, iqFactory);
             var leftVariables = leftChild.getVariables();
-            var condition = computeRightTermCondition(newLeftNode, leftVariables,
-                    transfer.determinantVariables, transfer.argumentsToTransfer, optionalFilterCondition);
-            var substitution = computeSubstitution(condition, leftVariables, transfer.argumentsToTransfer, newLeftNode, provenanceVariables);
+            var rightCondition = computeRightTermCondition(newLeftNode, leftVariables,
+                    transfer.determinantVariables, transfer.argumentsToTransfer);
+            var substitution = computeSubstitution(rightCondition, leftVariables, transfer.argumentsToTransfer, newLeftNode, provenanceVariables,
+                    optionalFilterCondition);
             var newLeftTree = replaceNodeOnLeft(leftChild, transfer.leftNode, newLeftNode);
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(
@@ -211,8 +217,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
         private ImmutableExpression computeRightTermCondition(ExtensionalDataNode newLeftNode,
                                                               ImmutableSet<Variable> leftVariables,
                                                               ImmutableSet<Variable> determinantVariables,
-                                                              ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentsToTransfer,
-                                                              Optional<ImmutableExpression> optionalFilterCondition) {
+                                                              ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentsToTransfer) {
 
             var leftArgumentMap = newLeftNode.getArgumentMap();
 
@@ -235,7 +240,7 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
                                 .map(i -> termFactory.getStrictEquality(firstTerm, leftArgumentMap.get(i)));
                     });
 
-            return termFactory.getConjunction(optionalFilterCondition,
+            return termFactory.getConjunction(
                         Stream.concat(
                                 Stream.concat(
                                     determinantVariables.stream()
@@ -245,21 +250,29 @@ public class NullableFDSelfLJOptimizer implements LeftJoinIQOptimizer {
                     .orElseThrow(() -> new MinorOntopInternalBugException("At least one determinant was expected"));
         }
 
-        private Substitution<? extends ImmutableTerm> computeSubstitution(ImmutableExpression condition, ImmutableSet<Variable> leftVariables,
+        private Substitution<? extends ImmutableTerm> computeSubstitution(ImmutableExpression rightCondition, ImmutableSet<Variable> originalLeftVariables,
                                                                           ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentsToTransfer,
-                                                                          ExtensionalDataNode newLeftNode, ImmutableSet<Variable> provenanceVariables) {
+                                                                          ExtensionalDataNode newLeftNode, ImmutableSet<Variable> provenanceVariables,
+                                                                          Optional<ImmutableExpression> optionalOriginalFilterCondition) {
             var leftArgumentMap = newLeftNode.getArgumentMap();
 
-            var argSubstitution = argumentsToTransfer.asMultimap().inverse().asMap().entrySet().stream()
+            var renaming = argumentsToTransfer.asMultimap().inverse().asMap().entrySet().stream()
                     .filter(e -> e.getKey() instanceof Variable)
-                    .filter(e -> !leftVariables.contains((Variable)e.getKey()))
+                    .filter(e -> !originalLeftVariables.contains((Variable)e.getKey()))
                     .collect(substitutionFactory.toSubstitution(
                             e -> (Variable) e.getKey(),
-                            e -> termFactory.getIfElseNull(
-                                    condition,
+                            e ->
                                     // Picking the first index
                                     leftArgumentMap.get(e.getValue().iterator().next())
-                            )));
+                            ));
+
+            var condition = optionalOriginalFilterCondition
+                    .map(renaming::apply)
+                    .map(c -> termFactory.getConjunction(c, rightCondition))
+                    .orElse(rightCondition);
+
+            var argSubstitution = renaming.transform(
+                    t -> termFactory.getIfElseNull(condition, t));
 
             if (provenanceVariables.isEmpty())
                 return argSubstitution;
