@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
@@ -86,6 +87,12 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
         CardinalityInsensitiveTransformer(IQTreeTransformer searchingFromScratchTransformer,
                                                     VariableGenerator variableGenerator) {
             super(NullableFDSelfLJOptimizer.this.iqFactory, variableGenerator, searchingFromScratchTransformer);
+        }
+
+
+        @Override
+        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
+            return transformUnaryNode(tree, rootNode, child, this::transformChild);
         }
 
         @Override
@@ -172,73 +179,59 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
                                       ImmutableSet<Variable> provenanceVariables) {
             var newLeftNode = transfer.generateNewLeftNode();
             var leftVariables = leftChild.getVariables();
-            var condition = computeRightTermCondition(newLeftNode, leftVariables,
-                    transfer.determinantVariables, transfer.argumentsToTransfer, optionalFilterCondition);
-            var substitution = computeSubstitution(condition, leftVariables, transfer.argumentsToTransfer, newLeftNode, provenanceVariables);
+            var rightCondition = computeRightTermCondition(newLeftNode, leftVariables, transfer);
+            var substitution = computeSubstitution(rightCondition, leftVariables, transfer,
+                    newLeftNode, provenanceVariables, optionalFilterCondition);
             var newLeftTree = replaceNodeOnLeft(leftChild, transfer.leftNode, newLeftNode);
             return iqFactory.createUnaryIQTree(
                     iqTreeTools.createExtendingConstructionNode(leftVariables, substitution),
                     newLeftTree);
         }
 
-        private ImmutableMap<Variable, Collection<Integer>> inverseVariableMap(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentsToTransfer) {
-            return argumentsToTransfer.entrySet().stream()
-                    .filter(e -> e.getValue() instanceof Variable)
-                    .collect(ImmutableCollectors.toMultimap(
-                            e -> (Variable)e.getValue(),
-                            Map.Entry::getKey))
-                    .asMap();
-        }
-
         private ImmutableExpression computeRightTermCondition(ExtensionalDataNode newLeftNode,
                                                               ImmutableSet<Variable> leftVariables,
-                                                              ImmutableSet<Variable> determinantVariables,
-                                                              ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentsToTransfer,
-                                                              Optional<ImmutableExpression> optionalFilterCondition) {
+                                                              Transfer transfer) {
 
             var leftArgumentMap = newLeftNode.getArgumentMap();
 
-            var groundTermsAndImplicitEqualitiesWithLeft = argumentsToTransfer.entrySet().stream()
+            var groundTermsAndImplicitEqualitiesWithLeft = transfer.argumentsToTransfer.entrySet().stream()
                     .filter(e -> e.getValue().isGround() || leftVariables.contains((Variable)e.getValue()))
                     .map(e -> termFactory.getStrictEquality(leftArgumentMap.get(e.getKey()), e.getValue()));
 
-            ImmutableMap<Variable, Collection<Integer>> inverseVariableMap = inverseVariableMap(argumentsToTransfer);
-
-            var coOccurrenceEqualities = inverseVariableMap(argumentsToTransfer).values().stream()
+            var coOccurrenceEqualities = transfer.inverseVariableMap().values().stream()
                     .flatMap(indexes -> {
                         var firstTerm = leftArgumentMap.get(indexes.iterator().next());
                         return indexes.stream().skip(1)
                                 .map(i -> termFactory.getStrictEquality(firstTerm, leftArgumentMap.get(i)));
                     });
 
-            Substitution<VariableOrGroundTerm> renaming =
-                    inverseVariableMap.entrySet().stream()
-                            .map(e -> Maps.immutableEntry(e.getKey(), leftArgumentMap.get(e.getValue().iterator().next())))
-                            .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries());
-
-            return termFactory.getConjunction(optionalFilterCondition.map(renaming::apply),
+            return termFactory.getConjunction(
                         Stream.concat(
                                 Stream.concat(
-                                    determinantVariables.stream()
+                                    transfer.determinantVariables.stream()
                                         .map(termFactory::getDBIsNotNull),
                                     groundTermsAndImplicitEqualitiesWithLeft),
                                 coOccurrenceEqualities))
                     .orElseThrow(() -> new MinorOntopInternalBugException("At least one determinant was expected"));
         }
 
-        private Substitution<? extends ImmutableTerm> computeSubstitution(ImmutableExpression condition, ImmutableSet<Variable> leftVariables,
-                                                                          ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentsToTransfer,
-                                                                          ExtensionalDataNode newLeftNode, ImmutableSet<Variable> provenanceVariables) {
+        private Substitution<? extends ImmutableTerm> computeSubstitution(ImmutableExpression rightCondition, ImmutableSet<Variable> originalLeftVariables,
+                                                                          Transfer transfer,
+                                                                          ExtensionalDataNode newLeftNode, ImmutableSet<Variable> provenanceVariables,
+                                                                          Optional<ImmutableExpression> optionalOriginalFilterCondition) {
             var leftArgumentMap = newLeftNode.getArgumentMap();
 
-            var argSubstitution = inverseVariableMap(argumentsToTransfer).entrySet().stream()
-                    .filter(e -> !leftVariables.contains(e.getKey()))
+            var renaming = transfer.inverseVariableMap().entrySet().stream()
+                    .filter(e -> !originalLeftVariables.contains(e.getKey()))
                     .collect(substitutionFactory.toSubstitution(
                             Map.Entry::getKey,
-                            e -> termFactory.getIfElseNull(
-                                    condition,
-                                    // Picking the first index
-                                    leftArgumentMap.get(e.getValue().iterator().next()))));
+                            e -> leftArgumentMap.get(e.getValue().iterator().next())));
+
+            var condition = iqTreeTools.getConjunction(
+                    optionalOriginalFilterCondition.map(renaming::apply),
+                    rightCondition);
+
+            var argSubstitution = renaming.transform(t -> termFactory.getIfElseNull(condition, t));
 
             if (provenanceVariables.isEmpty())
                 return argSubstitution;
@@ -303,6 +296,16 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
 
                 return iqFactory.createExtensionalDataNode(leftNode.getRelationDefinition(), newArgumentMap);
             }
+
+            ImmutableMap<Variable, Collection<Integer>> inverseVariableMap() {
+                return argumentsToTransfer.entrySet().stream()
+                        .filter(e -> e.getValue() instanceof Variable)
+                        .collect(ImmutableCollectors.toMultimap(
+                                e -> (Variable)e.getValue(),
+                                Map.Entry::getKey))
+                        .asMap();
+            }
+
         }
     }
 
