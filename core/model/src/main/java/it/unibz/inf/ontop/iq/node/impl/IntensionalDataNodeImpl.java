@@ -121,7 +121,7 @@ public class IntensionalDataNodeImpl extends LeafIQTreeImpl implements Intension
      * All the variables are required, because an intensional data node cannot be sparse.
      */
     @Override
-    public synchronized VariableNonRequirement getVariableNonRequirement() {
+    public VariableNonRequirement getVariableNonRequirement() {
         return VariableNonRequirement.empty();
     }
 

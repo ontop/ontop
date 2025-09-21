@@ -531,11 +531,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         IQTree rightChild = children.get(1);
 
         Set<Variable> rightSpecificVariables = rightSpecificVariables(leftChild, rightChild);
-
         if (rightSpecificVariables.isEmpty())
             return nonRequirementBeforeFilter;
 
-        Set<Variable> commonVariables = commonVariables(leftChild, rightChild);
 
         /*
          * If the right child has no impact on cardinality (i.e. at most one match per row on the left),
@@ -544,6 +542,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          * Not required variables (before the LJ condition) that are involved in the LJ condition can be eliminated
          *   if all the right-specific variables are removed too.
          */
+        Set<Variable> commonVariables = commonVariables(leftChild, rightChild);
         if ((!commonVariables.isEmpty())
                 && rightChild.inferUniqueConstraints().stream()
                     .anyMatch(commonVariables::containsAll)) {
@@ -551,7 +550,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             Set<Variable> rightSpecificNonRequiredVariables = Sets.intersection(
                     rightSpecificVariables, nonRequirementBeforeFilter.getNotRequiredVariables());
 
-            ImmutableSet<Variable> filterVariables = getLocalVariables();
+            ImmutableSet<Variable> filterVariables = getLocallyRequiredVariables();
 
             return nonRequirementBeforeFilter.transformConditions(
                     (v, conditions) -> filterVariables.contains(v)
@@ -561,5 +560,4 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         else
             return super.applyFilterToVariableNonRequirement(nonRequirementBeforeFilter, children);
     }
-
 }

@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -17,11 +16,7 @@ import java.util.function.BiPredicate;
 
 public class VariableNonRequirementImpl implements VariableNonRequirement {
 
-    // LAZY
-    @Nullable
-    private ImmutableSet<Variable> nonRequiredVariables;
     private final ImmutableMap<Variable, ImmutableSet<Variable>> conditions;
-
 
     public VariableNonRequirementImpl(ImmutableMap<Variable, ImmutableSet<Variable>> conditions) {
         this.conditions = conditions;
@@ -35,11 +30,8 @@ public class VariableNonRequirementImpl implements VariableNonRequirement {
     }
 
     @Override
-    public synchronized ImmutableSet<Variable> getNotRequiredVariables() {
-        if (nonRequiredVariables == null) {
-            nonRequiredVariables = conditions.keySet();
-        }
-        return nonRequiredVariables;
+    public ImmutableSet<Variable> getNotRequiredVariables() {
+        return conditions.keySet();
     }
 
     @Override
@@ -98,5 +90,4 @@ public class VariableNonRequirementImpl implements VariableNonRequirement {
                                 Map.Entry::getKey,
                                 e -> fct.apply(e.getKey(), e.getValue()))));
     }
-
 }
