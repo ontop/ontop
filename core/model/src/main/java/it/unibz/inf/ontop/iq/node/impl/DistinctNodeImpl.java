@@ -109,16 +109,10 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     @Override
     public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
         var childVariableNonRequirement = child.getVariableNonRequirement();
-
         if (childVariableNonRequirement.isEmpty())
             return childVariableNonRequirement;
 
-        ImmutableSet<Variable> requiredByDistinct = inferNewUC(child);
-        if (requiredByDistinct.isEmpty())
-            return childVariableNonRequirement;
-
-        return childVariableNonRequirement
-                .filter((v, conds) -> !requiredByDistinct.contains(v));
+        return childVariableNonRequirement.withRequiredVariables(inferNewUC(child));
     }
 
     @Override

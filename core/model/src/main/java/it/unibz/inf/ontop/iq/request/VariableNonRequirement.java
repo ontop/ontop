@@ -21,6 +21,13 @@ public interface VariableNonRequirement {
 
     VariableNonRequirement filter(BiPredicate<Variable, ImmutableSet<Variable>> predicate);
 
+    default VariableNonRequirement withRequiredVariables(ImmutableSet<Variable> requiredVariables) {
+        if (requiredVariables.isEmpty())
+            return this;
+
+        return filter((v, conds) -> !requiredVariables.contains(v));
+    }
+
     VariableNonRequirement rename(InjectiveSubstitution<Variable> renamingSubstitution, SubstitutionFactory substitutionFactory);
 
     ImmutableSet<Variable> computeVariablesToRemove(ImmutableSet<Variable> projectedVariables,

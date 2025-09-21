@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multiset;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
@@ -125,6 +127,17 @@ public class NaryIQTreeTools {
         return variableOccurrencesCount.entrySet().stream()
                 .filter(e -> e.getValue() > 1)
                 .map(Map.Entry::getKey);
+    }
+
+    public static ImmutableSet<Variable> singleOccurrenceVariables(Stream<Variable> variablesStream) {
+        ImmutableMultiset<Variable> childVariableMultiset = variablesStream
+                .collect(ImmutableCollectors.toMultiset());
+
+        return childVariableMultiset.entrySet().stream()
+                // Only coming from one child
+                .filter(e -> e.getCount() == 1)
+                .map(Multiset.Entry::getElement)
+                .collect(ImmutableCollectors.toSet());
     }
 
     public static <T> ImmutableList<T> transformChildren(ImmutableList<IQTree> children, Function<IQTree, T> transformer) {

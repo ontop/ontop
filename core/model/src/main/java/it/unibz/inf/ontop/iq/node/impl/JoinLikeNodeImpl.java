@@ -6,9 +6,9 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.request.impl.VariableNonRequirementImpl;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.node.JoinLikeNode;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -62,6 +62,11 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         }
     }
 
+    protected VariableNonRequirement applyFilterToVariableNonRequirement(VariableNonRequirement nonRequirementBeforeFilter,
+                                                                         ImmutableList<IQTree> children) {
+        return nonRequirementBeforeFilter.withRequiredVariables(getLocallyRequiredVariables());
+    }
+
     protected VariableNonRequirement computeVariableNonRequirement(ImmutableList<IQTree> children) {
         ImmutableMultimap<Variable, ImmutableSet<Variable>> childRequirementMultimap = children.stream()
                 .map(IQTree::getVariableNonRequirement)
@@ -79,15 +84,10 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         if (candidates.isEmpty())
             return VariableNonRequirement.empty();
 
-        ImmutableMultiset<Variable> childVariableMultiset = children.stream()
-                .flatMap(c -> c.getVariables().stream())
-                .collect(ImmutableCollectors.toMultiset());
+        ImmutableSet<Variable> notSharedVariables = NaryIQTreeTools.singleOccurrenceVariables(
+                children.stream()
+                        .flatMap(c -> c.getVariables().stream()));
 
-        ImmutableSet<Variable> notSharedVariables = childVariableMultiset.entrySet().stream()
-                // Only coming from one child
-                .filter(e -> e.getCount() == 1)
-                .map(Multiset.Entry::getElement)
-                .collect(ImmutableCollectors.toSet());
 
         VariableNonRequirement nonRequirementBeforeFilter = VariableNonRequirement.of(
                 candidates.entrySet().stream()

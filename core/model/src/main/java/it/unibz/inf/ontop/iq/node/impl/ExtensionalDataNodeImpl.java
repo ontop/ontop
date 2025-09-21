@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -125,18 +126,11 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     private boolean areDeterminantsPresentAndNotNull(ImmutableSet<Attribute> determinants) {
-        ImmutableList<Optional<? extends VariableOrGroundTerm>> arguments = determinants.stream()
-                .map(this::getArgument)
-                .collect(ImmutableCollectors.toList());
-
         VariableNullability variableNullability = getVariableNullability();
 
+        var arguments = getArguments(determinants);
         return arguments.stream().allMatch(Optional::isPresent)
-                && getVariableStreamFrom(arguments).noneMatch(variableNullability::isPossiblyNullable);
-    }
-
-    private Optional<? extends VariableOrGroundTerm> getArgument(Attribute a) {
-        return Optional.ofNullable(argumentMap.get(a.getIndex() - 1));
+                && getVariableSetFrom(arguments).stream().noneMatch(variableNullability::isPossiblyNullable);
     }
 
     /**
@@ -158,16 +152,16 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     private VariableNullability computeVariableNullability() {
-        ImmutableMultiset<? extends VariableOrGroundTerm> argMultiset = ImmutableMultiset.copyOf(argumentMap.values());
+        ImmutableSet<Variable> singleOccurrenceVariables = NaryIQTreeTools.singleOccurrenceVariables(
+                getVariableStreamFrom(argumentMap.values().stream()));
 
-        // NB: DB column indexes start at 1.
-        ImmutableSet<ImmutableSet<Variable>> nullableGroups = argumentMap.entrySet().stream()
-                .filter(e -> relationDefinition.getAttribute(e.getKey() + 1).isNullable())
-                .map(Map.Entry::getValue)
-                .filter(v -> v instanceof Variable)
-                .map(v -> (Variable) v)
-                // An implicit filter condition makes them non-nullable
-                .filter(v -> argMultiset.count(v) < 2)
+        ImmutableSet<ImmutableSet<Variable>> nullableGroups = getVariableStreamFrom(
+                argumentMap.entrySet().stream()
+                        // NB: DB column indexes start at 1.
+                        .filter(e -> relationDefinition.getAttribute(e.getKey() + 1).isNullable())
+                        .map(Map.Entry::getValue))
+                // An implicit filter condition makes a variable non-nullable
+                .filter(singleOccurrenceVariables::contains)
                 .map(ImmutableSet::of)
                 .collect(ImmutableCollectors.toSet());
 
@@ -191,9 +185,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     private Optional<ImmutableSet<Variable>> convertUniqueConstraint(UniqueConstraint uniqueConstraint) {
-        ImmutableList<Optional<? extends VariableOrGroundTerm>> arguments = uniqueConstraint.getDeterminants().stream()
-                .map(this::getArgument)
-                .collect(ImmutableCollectors.toList());
+        var arguments = getArguments(uniqueConstraint.getDeterminants());
 
         if (!arguments.stream().allMatch(Optional::isPresent))
             return Optional.empty();
@@ -211,13 +203,8 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     private Optional<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> convertFunctionalDependency(FunctionalDependency functionalDependency) {
-        ImmutableList<Optional<? extends VariableOrGroundTerm>> determinants = functionalDependency.getDeterminants().stream()
-                .map(this::getArgument)
-                .collect(ImmutableCollectors.toList());
-
-        ImmutableList<Optional<? extends VariableOrGroundTerm>> dependents = functionalDependency.getDependents().stream()
-                .map(this::getArgument)
-                .collect(ImmutableCollectors.toList());
+        var determinants = getArguments(functionalDependency.getDeterminants());
+        var dependents = getArguments(functionalDependency.getDependents());
 
         if (!determinants.stream().allMatch(Optional::isPresent) || dependents.stream().noneMatch(Optional::isPresent))
             return Optional.empty();
@@ -225,16 +212,24 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
         return Optional.of(Maps.immutableEntry(getVariableSetFrom(determinants), getVariableSetFrom(dependents)));
     }
 
-    private static ImmutableSet<Variable> getVariableSetFrom(ImmutableList<Optional<? extends VariableOrGroundTerm>> list) {
-        return getVariableStreamFrom(list).collect(ImmutableCollectors.toSet());
+
+    private ImmutableList<Optional<? extends VariableOrGroundTerm>> getArguments(ImmutableSet<Attribute> attributes) {
+        return attributes.stream()
+                .map(a -> Optional.ofNullable(argumentMap.get(a.getIndex() - 1)))
+                .collect(ImmutableCollectors.toList());
     }
 
-    private static Stream<Variable> getVariableStreamFrom(ImmutableList<Optional<? extends VariableOrGroundTerm>> list) {
-        return list.stream()
-                .flatMap(Optional::stream)
+    private static ImmutableSet<Variable> getVariableSetFrom(ImmutableList<Optional<? extends VariableOrGroundTerm>> list) {
+        return getVariableStreamFrom(list.stream().flatMap(Optional::stream))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private static Stream<Variable> getVariableStreamFrom(Stream<? extends VariableOrGroundTerm> stream) {
+        return stream
                 .filter(t -> t instanceof Variable)
                 .map(v -> (Variable)v);
     }
+
 
     /**
      * Only co-occuring variables are required.
@@ -245,16 +240,9 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     private VariableNonRequirement computeVariableNonRequirement() {
-        ImmutableMultiset<Variable> multiset = argumentMap.values().stream()
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable)t)
-                .collect(ImmutableCollectors.toMultiset());
-
         return VariableNonRequirement.of(
-                multiset.entrySet().stream()
-                        .filter(e -> e.getCount() == 1)
-                        .map(Multiset.Entry::getElement)
-                        .collect(ImmutableCollectors.toSet()));
+                NaryIQTreeTools.singleOccurrenceVariables(
+                        getVariableStreamFrom(argumentMap.values().stream())));
     }
 
 
@@ -289,9 +277,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     private ImmutableSet<Variable> computeVariables() {
-        return argumentMap.values().stream()
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable)t)
+        return getVariableStreamFrom(argumentMap.values().stream())
                 .collect(ImmutableCollectors.toSet());
     }
 

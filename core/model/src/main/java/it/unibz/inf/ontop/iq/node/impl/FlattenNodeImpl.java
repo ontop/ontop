@@ -246,8 +246,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
      */
     @Override
     public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
-        return child.getVariableNonRequirement()
-                .filter((v, conds) -> !v.equals(flattenedVariable));
+        return child.getVariableNonRequirement().withRequiredVariables(getLocallyRequiredVariables());
     }
 
     @Override

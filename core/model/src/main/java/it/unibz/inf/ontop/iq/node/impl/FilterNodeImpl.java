@@ -125,7 +125,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
-        return applyFilterToVariableNonRequirement(child.getVariableNonRequirement());
+        return child.getVariableNonRequirement().withRequiredVariables(getLocallyRequiredVariables());
     }
 
     @Override

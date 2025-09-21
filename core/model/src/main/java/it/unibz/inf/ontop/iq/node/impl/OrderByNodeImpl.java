@@ -23,7 +23,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNode {
 
@@ -133,10 +132,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
      */
     @Override
     public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
-        ImmutableSet<Variable> localVariables = getLocalVariables();
-
-        return child.getVariableNonRequirement()
-                .filter((v, conds) -> !localVariables.contains(v));
+        return child.getVariableNonRequirement().withRequiredVariables(getLocallyRequiredVariables());
     }
 
     @Override
