@@ -16,8 +16,6 @@ public abstract class AbstractNestedDataTest extends AbstractDockerRDF4JTest {
     protected static final String OBDA_FILE = "/nested/nested.obda";
     protected static final String OWL_FILE = null;
 
-    Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-
     @Test
     public void testUniqueConstraintsPreserved() {
         String query = "PREFIX : <http://nested.example.org/>" +
@@ -43,7 +41,7 @@ public abstract class AbstractNestedDataTest extends AbstractDockerRDF4JTest {
         executeAndCompareValues(query, getFlattenWithPositionExpectedValues());
     }
 
-    protected ImmutableMultiset getFlattenWithPositionExpectedValues() {
+    protected ImmutableMultiset<String> getFlattenWithPositionExpectedValues() {
         return ImmutableMultiset.of( "\"1\"^^xsd:integer", "\"1\"^^xsd:integer", "\"1\"^^xsd:integer",
                 "\"2\"^^xsd:integer", "\"2\"^^xsd:integer", "\"2\"^^xsd:integer", "\"3\"^^xsd:integer");
     }
@@ -60,7 +58,7 @@ public abstract class AbstractNestedDataTest extends AbstractDockerRDF4JTest {
         executeAndCompareValues(query, getFlattenTimestampExpectedValues());
     }
 
-    protected ImmutableMultiset getFlattenTimestampExpectedValues() {
+    protected ImmutableMultiset<String> getFlattenTimestampExpectedValues() {
         return ImmutableMultiset.of( "\"2023-01-01T18:00:00\"^^xsd:dateTime", "\"2023-01-15T18:00:00\"^^xsd:dateTime", "\"2023-01-29T12:00:00\"^^xsd:dateTime",
                 "\"2023-02-12T18:00:00\"^^xsd:dateTime", "\"2023-02-26T18:00:00\"^^xsd:dateTime",
                 "\"2023-03-12T18:00:00\"^^xsd:dateTime", "\"2023-03-26T18:00:00\"^^xsd:dateTime");
@@ -78,7 +76,7 @@ public abstract class AbstractNestedDataTest extends AbstractDockerRDF4JTest {
         executeAndCompareValues(query, getFlattenIntegerExpectedValues());
     }
 
-    protected ImmutableMultiset getFlattenIntegerExpectedValues() {
+    protected ImmutableMultiset<String> getFlattenIntegerExpectedValues() {
         return ImmutableMultiset.of( "\"10000\"^^xsd:integer", "\"13000\"^^xsd:integer", "\"18000\"^^xsd:integer",
                 "\"0\"^^xsd:integer", "\"14000\"^^xsd:integer", "\"15000\"^^xsd:integer", "\"20000\"^^xsd:integer");
     }
@@ -96,7 +94,7 @@ public abstract class AbstractNestedDataTest extends AbstractDockerRDF4JTest {
         executeAndCompareValues(query, getFlatten2DArrayExpectedValues());
     }
 
-    protected ImmutableMultiset getFlatten2DArrayExpectedValues() {
+    protected ImmutableMultiset<String> getFlatten2DArrayExpectedValues() {
         return ImmutableMultiset.of( "\"Sam\"^^xsd:string", "\"Cynthia\"^^xsd:string", "\"Cynthia\"^^xsd:string", "\"Cynthia\"^^xsd:string", "\"Bob\"^^xsd:string",
                 "\"Bob\"^^xsd:string", "\"Bob\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Carl\"^^xsd:string");
     }
@@ -132,7 +130,7 @@ public abstract class AbstractNestedDataTest extends AbstractDockerRDF4JTest {
         executeAndCompareValues(query, getFlattenJsonExpectedValues());
     }
 
-    protected ImmutableMultiset getFlattenJsonExpectedValues() {
+    protected ImmutableMultiset<String> getFlattenJsonExpectedValues() {
         return ImmutableMultiset.of( "\"Mary\"^^xsd:string", "\"Carlos\"^^xsd:string", "\"John\"^^xsd:string", "\"Helena\"^^xsd:string", "\"Robert\"^^xsd:string",
                 "\"Joseph\"^^xsd:string", "\"Godfrey\"^^xsd:string");
     }
@@ -149,7 +147,7 @@ public abstract class AbstractNestedDataTest extends AbstractDockerRDF4JTest {
         executeAndCompareValues(query, getFlattenJsonPossiblyNullExpectedValues());
     }
 
-    protected ImmutableMultiset getFlattenJsonPossiblyNullExpectedValues() {
+    protected ImmutableMultiset<String> getFlattenJsonPossiblyNullExpectedValues() {
         return ImmutableMultiset.of( "\"28\"^^xsd:integer", "\"45\"^^xsd:integer", "\"60\"^^xsd:integer",
                 "\"48\"^^xsd:integer", "\"59\"^^xsd:integer");
     }
@@ -168,7 +166,7 @@ public abstract class AbstractNestedDataTest extends AbstractDockerRDF4JTest {
         executeAndCompareValues(query, getFlattenWithAggregateExpectedValues());
     }
 
-    protected ImmutableMultiset getFlattenWithAggregateExpectedValues() {
+    protected ImmutableMultiset<String> getFlattenWithAggregateExpectedValues() {
         return ImmutableMultiset.of("\"Carl: 15000.0000000000000000\"^^xsd:string", "\"Jim: 15666.666666666667\"^^xsd:string",
                 "\"Cynthia: 13000.0000000000000000\"^^xsd:string", "\"Sam: 10000.0000000000000000\"^^xsd:string",
                 "\"Bob: 17666.666666666667\"^^xsd:string");

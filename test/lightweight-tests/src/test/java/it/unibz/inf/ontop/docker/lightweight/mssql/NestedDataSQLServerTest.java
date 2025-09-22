@@ -30,14 +30,14 @@ public class NestedDataSQLServerTest extends AbstractNestedDataTest {
 
     //Since we don't have access to index values, some individuals are treated as equals even though they should not normally be equal.
     @Override
-    protected ImmutableMultiset getFlattenWithAggregateExpectedValues() {
+    protected ImmutableMultiset<String> getFlattenWithAggregateExpectedValues() {
         return ImmutableMultiset.of("\"Carl: 17500.000000\"^^xsd:string", "\"Jim: 12857.142857\"^^xsd:string",
                 "\"Cynthia: 12857.142857\"^^xsd:string", "\"Sam: 13666.666666\"^^xsd:string",
                 "\"Bob: 15200.000000\"^^xsd:string");
     }
 
     //Since we don't have access to index values, some individuals are treated as equals even though they should not normally be equal.
-    protected ImmutableMultiset getFlatten2DArrayExpectedValues() {
+    protected ImmutableMultiset<String> getFlatten2DArrayExpectedValues() {
         return ImmutableMultiset.of( "\"Sam\"^^xsd:string", "\"Cynthia\"^^xsd:string", "\"Cynthia\"^^xsd:string", "\"Cynthia\"^^xsd:string", "\"Bob\"^^xsd:string",
                 "\"Bob\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Carl\"^^xsd:string");
     }
