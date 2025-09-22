@@ -779,45 +779,26 @@ public class RDF4JTupleExprTranslator {
 
     private IQTree translateTriplePattern(VariableOrGroundTerm subject, VariableOrGroundTerm predicate, VariableOrGroundTerm object) {
 
-        if (dataset == null || dataset.getDefaultGraphs().isEmpty() && dataset.getNamedGraphs().isEmpty()) {
+        if (dataset == null || (dataset.getDefaultGraphs().isEmpty() && dataset.getNamedGraphs().isEmpty())) {
             return iqFactory.createIntensionalDataNode(
                     atomFactory.getIntensionalTripleAtom(subject, predicate, object));
         }
         else {
             Set<IRI> defaultGraphs = dataset.getDefaultGraphs();
-            int defaultGraphCount = defaultGraphs.size();
+            Variable graph = termFactory.getVariable("g" + UUID.randomUUID());
 
-            // From SPARQL 1.1 "If there is no FROM clause, but there is one or more FROM NAMED clauses,
-            // then the dataset includes an empty graph for the default graph."
-            if (defaultGraphCount == 0) {
-                return iqFactory.createEmptyNode(
-                        Stream.of(subject, predicate, object)
-                                .filter(t -> t instanceof Variable)
-                                .map(t -> (Variable) t)
-                                .collect(ImmutableCollectors.toSet()));
-            }
-            // NB: INSERT blocks cannot have more than 1 default graph. Important for the rest
-            else if (defaultGraphCount == 1) {
-                IRIConstant graph = termFactory.getConstantIRI(defaultGraphs.iterator().next().stringValue());
-                return iqFactory.createIntensionalDataNode(
-                        atomFactory.getIntensionalQuadAtom(subject, predicate, object, graph));
-            }
-            else {
-                Variable graph = termFactory.getVariable("g" + UUID.randomUUID());
+            IntensionalDataNode quadNode = iqFactory.createIntensionalDataNode(
+                    atomFactory.getIntensionalQuadAtom(subject, predicate, object, graph));
 
-                IntensionalDataNode quadNode = iqFactory.createIntensionalDataNode(
-                        atomFactory.getIntensionalQuadAtom(subject, predicate, object, graph));
+            FilterNode filterNode = getGraphFilter(graph, defaultGraphs);
 
-                FilterNode filterNode = getGraphFilter(graph, defaultGraphs);
+            ImmutableSet<Variable> projectedVariables = Sets.difference(quadNode.getVariables(), ImmutableSet.of(graph)).immutableCopy();
 
-                ImmutableSet<Variable> projectedVariables = Sets.difference(quadNode.getVariables(), ImmutableSet.of(graph)).immutableCopy();
-
-                // Merges the default trees -> removes duplicates
-                return iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
-                        iqFactory.createUnaryIQTree(
-                                iqFactory.createConstructionNode(projectedVariables),
-                                iqFactory.createUnaryIQTree(filterNode, quadNode)));
-            }
+            // Merges the default trees -> removes duplicates
+            return iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
+                    iqFactory.createUnaryIQTree(
+                            iqFactory.createConstructionNode(projectedVariables),
+                            iqFactory.createUnaryIQTree(filterNode, quadNode)));
         }
     }
 
@@ -826,24 +807,20 @@ public class RDF4JTupleExprTranslator {
         IntensionalDataNode dataNode = iqFactory.createIntensionalDataNode(
                 atomFactory.getIntensionalQuadAtom(subject, predicate, object, graph));
 
-        if (dataset == null)
-            return dataNode;
-        else if (!dataset.getNamedGraphs().isEmpty())
-            return iqFactory.createUnaryIQTree(getGraphFilter(graph, dataset.getNamedGraphs()), dataNode);
-        else
-            // Dataset specified but no named graphs - return empty result
-            return iqFactory.createEmptyNode(
-                    Stream.of(subject, predicate, object, graph)
-                            .filter(t -> t instanceof Variable)
-                            .map(t -> (Variable) t)
-                            .collect(ImmutableCollectors.toSet()));
+        return (dataset == null || (dataset.getDefaultGraphs().isEmpty() && dataset.getNamedGraphs().isEmpty()))
+            ? dataNode
+            : iqFactory.createUnaryIQTree(getGraphFilter(graph, dataset.getNamedGraphs()), dataNode);
     }
 
+    /**
+     * No default graph IRI --> no satisfiable filter
+     */
     private FilterNode getGraphFilter(VariableOrGroundTerm graph, Set<IRI> graphIris) {
         ImmutableExpression graphFilter = termFactory.getDisjunction(graphIris.stream()
                         .map(g -> termFactory.getConstantIRI(g.stringValue()))
                         .map(iriConstant -> termFactory.getStrictEquality(graph, iriConstant)))
-                .orElseThrow(() -> new MinorOntopInternalBugException("The empty case already handled"));
+                // No graph IRIs case
+                .orElseGet(() -> termFactory.getIsTrue(termFactory.getDBBooleanConstant(false)));
 
         return iqFactory.createFilterNode(graphFilter);
     }
