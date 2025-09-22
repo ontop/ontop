@@ -35,22 +35,17 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
     @Override
     public IQTree normalizeForOptimization(DistinctNode distinctNode, IQTree initialChild,
                                            VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        Context context = new Context(distinctNode, initialChild, variableGenerator, treeCache);
-        return context.normalize();
+        Context context = new Context(variableGenerator, treeCache);
+        return context.normalize(distinctNode, initialChild);
     }
 
     private class Context extends InjectiveBindingLiftContext {
 
-        private final DistinctNode distinctNode;
-        private final IQTree initialChild;
-
-        Context(DistinctNode distinctNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        Context(VariableGenerator variableGenerator, IQTreeCache treeCache) {
             super(variableGenerator, coreSingletons, treeCache);
-            this.distinctNode = distinctNode;
-            this.initialChild = initialChild;
         }
 
-        IQTree normalize() {
+        IQTree normalize(DistinctNode distinctNode, IQTree initialChild) {
             IQTree child = normalizeSubTreeRecursively(initialChild);
             if (child.isDistinct())
                 return child;
@@ -86,10 +81,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
             }
 
             return iqTreeTools.unaryIQTreeBuilder()
-                    .append(distinctNode,
-                            child.equals(initialChild)
-                                    ? treeCache.declareAsNormalizedForOptimizationWithoutEffect()
-                                    : treeCache.declareAsNormalizedForOptimizationWithEffect())
+                    .append(distinctNode, getNormalizedTreeCache(!child.equals(initialChild)))
                     .build(child);
         }
 
@@ -129,7 +121,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                             .append(state.getAncestors())
                             .append(
                                     iqTreeTools.createOptionalDistinctNode(!newChildTree.isDistinct()),
-                                    treeCache::declareAsNormalizedForOptimizationWithEffect)
+                                    () -> getNormalizedTreeCache(true))
                             .build(newChildTree));
         }
 
@@ -155,6 +147,11 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
             return unionChild;
         }
 
+        IQTreeCache getNormalizedTreeCache(boolean childChanged) {
+            return childChanged
+                ? treeCache.declareAsNormalizedForOptimizationWithEffect()
+                : treeCache.declareAsNormalizedForOptimizationWithoutEffect();
+        }
     }
 
     private boolean isConstructionNodeWithoutChildVariablesAndDeterministic(ConstructionNode constructionNode) {
