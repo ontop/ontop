@@ -826,9 +826,21 @@ public class RDF4JTupleExprTranslator {
         IntensionalDataNode dataNode = iqFactory.createIntensionalDataNode(
                 atomFactory.getIntensionalQuadAtom(subject, predicate, object, graph));
 
-        return (dataset == null || dataset.getNamedGraphs().isEmpty())
-            ? dataNode
-            : iqFactory.createUnaryIQTree(getGraphFilter(graph, dataset.getNamedGraphs()), dataNode);
+        if (dataset != null && !dataset.getNamedGraphs().isEmpty()) {
+            return iqFactory.createUnaryIQTree(getGraphFilter(graph, dataset.getNamedGraphs()), dataNode);
+        } else if (dataset == null) {
+            return dataNode;
+        } else if (dataset.getNamedGraphs().isEmpty()) {
+            // Dataset specified but no named graphs - return empty result
+            return iqFactory.createEmptyNode(
+                    Stream.of(subject, predicate, object)
+                            .filter(t -> t instanceof Variable)
+                            .map(t -> (Variable) t)
+                            .collect(ImmutableCollectors.toSet()));
+        } else {
+            // This should never happen
+            throw new IllegalStateException("Unexpected state: dataset has no named graphs but is not empty");
+        }
     }
 
     private FilterNode getGraphFilter(VariableOrGroundTerm graph, Set<IRI> graphIris) {

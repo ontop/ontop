@@ -25,11 +25,12 @@ public class EmptyNamedGraphsTest extends AbstractRDF4JTest {
 
     @Test
     public void queryGraphsWithNoFromNamedTest() {
-        String query = "SELECT * " +
+        String query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> " +
+                "SELECT * " +
                 "FROM <http://example.org/graphA>" +
                 "FROM <http://example.org/graphB>" +
                 "WHERE { GRAPH ?v {" +
-                " ?s ?p ?o" +
+                " ?v a foaf:Person" +
                 "} }";
 
         runQueryAndCompare(query, ImmutableSet.of());
@@ -60,11 +61,13 @@ public class EmptyNamedGraphsTest extends AbstractRDF4JTest {
 
     @Test
     public void queryAllNamedGraphsTest() {
-        String query = "SELECT * " +
+        String query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> " +
+                "SELECT * " +
                 "WHERE { GRAPH ?v {" +
-                " ?s ?p ?o" +
+                " ?s a foaf:Person" +
                 "} }";
 
-        runQueryAndCompare(query, ImmutableSet.of("http://example.org/graphA", "http://example.org/graphB", "http://example.org/graphC"));
+        runQueryAndCompare(query, ImmutableSet.of("http://example.org/graphA", "http://example.org/graphB",
+                "http://example.org/graphC"));
     }
 }
