@@ -31,22 +31,55 @@ public class ConstructionNormalizerImpl implements ConstructionNormalizer {
 
     @Override
     public IQTree normalizeForOptimization(ConstructionNode constructionNode, IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        IQTree liftedChild = child.normalizeForOptimization(variableGenerator);
-        IQTree shrunkChild = notRequiredVariableRemover.optimize(liftedChild, constructionNode.getChildVariables(), variableGenerator);
-        var shrunkChildConstruction = IQTreeTools.UnaryIQTreeDecomposition.of(shrunkChild, ConstructionNode.class);
-        if (shrunkChildConstruction.isPresent()) {
-            return mergeWithChild(constructionNode, shrunkChildConstruction.getNode(), shrunkChildConstruction.getChild(), treeCache, variableGenerator);
+        Context context = new Context(variableGenerator, treeCache);
+        return context.normalize(constructionNode, child);
+    }
+
+    private class Context extends NormalizationContext {
+        private final IQTreeCache treeCache;
+
+        Context(VariableGenerator variableGenerator, IQTreeCache treeCache) {
+            super(variableGenerator);
+            this.treeCache = treeCache;
         }
-        else if (shrunkChild.isDeclaredAsEmpty()) {
-            return iqFactory.createEmptyNode(constructionNode.getVariables());
-        }
-        /*
-         * If useless, returns the child
-         */
-        else if (shrunkChild.getVariables().equals(constructionNode.getVariables())) {
-            return shrunkChild;
-        }
-        else {
+
+        IQTree normalize(ConstructionNode constructionNode, IQTree child) {
+            IQTree shrunkChild = removeNonRequiredVariables(constructionNode,
+                                        normalizeSubTreeRecursively(child));
+
+            if (shrunkChild.isDeclaredAsEmpty()) {
+                return iqFactory.createEmptyNode(constructionNode.getVariables());
+            }
+
+            var shrunkChildConstruction = IQTreeTools.UnaryIQTreeDecomposition.of(shrunkChild, ConstructionNode.class);
+            if (shrunkChildConstruction.isPresent()) {
+                ConstructionNode childConstructionNode = shrunkChildConstruction.getNode();
+                IQTree grandChild = shrunkChildConstruction.getChild();
+
+                ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization substitutionNormalization = substitutionNormalizer.normalizeSubstitution(
+                        childConstructionNode.getSubstitution().compose(constructionNode.getSubstitution())
+                                .transform(t -> t.simplify(grandChild.getVariableNullability())),
+                        constructionNode.getVariables());
+
+                Substitution<ImmutableTerm> newSubstitution = substitutionNormalization.getNormalizedSubstitution();
+
+                ConstructionNode newConstructionNode = iqFactory.createConstructionNode(constructionNode.getVariables(), newSubstitution);
+
+                IQTree updatedGrandChild = substitutionNormalization.updateChild(grandChild, variableGenerator);
+                IQTree newGrandChild = normalizeSubTreeRecursively(removeNonRequiredVariables(newConstructionNode, updatedGrandChild));
+
+                return newGrandChild.getVariables().equals(newConstructionNode.getVariables())
+                        ? newGrandChild
+                        : iqFactory.createUnaryIQTree(newConstructionNode, newGrandChild, getNormalizedTreeCache());
+            }
+
+            /*
+             * If useless, returns the child
+             */
+            if (shrunkChild.getVariables().equals(constructionNode.getVariables())) {
+                return shrunkChild;
+            }
+
             ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(
                     constructionNode.getSubstitution().transform(t -> t.simplify(shrunkChild.getVariableNullability())),
                     constructionNode.getVariables());
@@ -57,45 +90,27 @@ public class ConstructionNormalizerImpl implements ConstructionNormalizer {
                 ConstructionNode newTopConstructionNode =
                         iqFactory.createConstructionNode(constructionNode.getVariables(), normalization.getNormalizedSubstitution());
 
-                IQTree newChild = notRequiredVariableRemover.optimize(
-                                updatedChild,
-                                newTopConstructionNode.getChildVariables(),
-                                variableGenerator)
-                        .normalizeForOptimization(variableGenerator);
+                IQTree newChild = normalizeSubTreeRecursively(
+                        removeNonRequiredVariables(newTopConstructionNode, updatedChild));
 
                 return iqFactory.createUnaryIQTree(
                         newTopConstructionNode,
                         newChild,
-                        treeCache.declareAsNormalizedForOptimizationWithEffect());
+                        getNormalizedTreeCache());
             }
-            else {
-                IQTree newChild = updatedChild
-                        .normalizeForOptimization(variableGenerator);
 
-                return iqTreeTools.unaryIQTreeBuilder(constructionNode.getVariables())
-                        .build(newChild);
-            }
+            IQTree newChild = normalizeSubTreeRecursively(updatedChild);
+
+            return iqTreeTools.unaryIQTreeBuilder(constructionNode.getVariables())
+                    .build(newChild);
         }
-    }
 
-    private IQTree mergeWithChild(ConstructionNode constructionNode, ConstructionNode childConstructionNode, IQTree grandChild, IQTreeCache treeCache, VariableGenerator variableGenerator) {
+        IQTree removeNonRequiredVariables(ConstructionNode constructionNode, IQTree tree) {
+            return notRequiredVariableRemover.optimize(tree, constructionNode.getChildVariables(), variableGenerator);
+        }
 
-        ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization substitutionNormalization = substitutionNormalizer.normalizeSubstitution(
-                childConstructionNode.getSubstitution().compose(constructionNode.getSubstitution())
-                        .transform(t -> t.simplify(grandChild.getVariableNullability())),
-                constructionNode.getVariables());
-
-        Substitution<ImmutableTerm> newSubstitution = substitutionNormalization.getNormalizedSubstitution();
-
-        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(constructionNode.getVariables(), newSubstitution);
-
-        IQTree updatedGrandChild = substitutionNormalization.updateChild(grandChild, variableGenerator);
-        IQTree newGrandChild = notRequiredVariableRemover.optimize(updatedGrandChild,
-                        newConstructionNode.getChildVariables(), variableGenerator)
-                .normalizeForOptimization(variableGenerator);
-
-        return newGrandChild.getVariables().equals(newConstructionNode.getVariables())
-                ? newGrandChild
-                : iqFactory.createUnaryIQTree(newConstructionNode, newGrandChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
+        IQTreeCache getNormalizedTreeCache() {
+            return treeCache.declareAsNormalizedForOptimizationWithEffect();
+        }
     }
 }

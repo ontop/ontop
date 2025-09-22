@@ -45,7 +45,6 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
     @Override
     public IQTree normalizeForOptimization(AggregationNode aggregationNode, IQTree child,
                                            VariableGenerator variableGenerator, IQTreeCache treeCache) {
-
         Context context = new Context(variableGenerator, treeCache);
         return context.normalize(aggregationNode, child);
     }
