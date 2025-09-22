@@ -30,7 +30,7 @@ public class EmptyNamedGraphsTest extends AbstractRDF4JTest {
                 "FROM <http://example.org/graphA>" +
                 "FROM <http://example.org/graphB>" +
                 "WHERE { GRAPH ?v {" +
-                " ?v a foaf:Person" +
+                " ?s a foaf:Person" +
                 "} }";
 
         runQueryAndCompare(query, ImmutableSet.of());
