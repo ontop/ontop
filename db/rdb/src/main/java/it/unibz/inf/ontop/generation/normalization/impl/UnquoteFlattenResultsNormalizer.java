@@ -70,7 +70,7 @@ public class UnquoteFlattenResultsNormalizer implements DialectExtraNormalizer {
                                             termFactory.getDBFunctionSymbolFactory().getDBMathBinaryOperator("-", termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType()),
                                             termFactory.getDBCharLength(newOutputVariable),
                                             termFactory.getDBIntegerConstant(2))))),
-                    rootNode.getOutputVariable(),
+                    newOutputVariable,
                     true);
             Substitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(rootNode.getOutputVariable(), resultSubstitution);
 
