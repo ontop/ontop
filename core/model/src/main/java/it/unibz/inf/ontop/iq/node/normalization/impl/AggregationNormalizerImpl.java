@@ -64,6 +64,10 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             this.child = child;
         }
 
+        Optional<FilterNode> sampleFilter() {
+            return sampleFilter;
+        }
+
         ImmutableSet<Variable> groupingVariables() {
             return aggregationNode.getGroupingVariables();
         }
@@ -76,8 +80,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             return aggregationNode;
         }
 
-        Optional<FilterNode> sampleFilter() {
-            return sampleFilter;
+        IQTree child() {
+            return child;
         }
 
         static AggregationSubTree of(AggregationNode aggregationNode, IQTree child) {
@@ -167,7 +171,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
          */
         State<ConstructionNode, AggregationSubTree> propagateNonGroupingBindingsIntoAggregationSubstitution(State<ConstructionNode, AggregationSubTree> state) {
             AggregationSubTree subTree = state.getSubTree();
-            var construction = UnaryIQTreeDecomposition.of(subTree.child, ConstructionNode.class);
+            var construction = UnaryIQTreeDecomposition.of(subTree.child(), ConstructionNode.class);
             if (!construction.isPresent())
                 return state;
 
@@ -207,7 +211,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
          */
         State<ConstructionNode, AggregationSubTree> liftGroupingBindings(State<ConstructionNode, AggregationSubTree> state) {
             AggregationSubTree subTree = state.getSubTree();
-            var construction = UnaryIQTreeDecomposition.of(subTree.child, ConstructionNode.class);
+            var construction = UnaryIQTreeDecomposition.of(subTree.child(), ConstructionNode.class);
             if (!construction.isPresent())
                 return state;
 
@@ -295,7 +299,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             // NB: use ImmutableSubstitution.simplifyValues()
             // NB: look at FunctionSymbol.isAggregation()
 
-            VariableNullability variableNullability = subTree.child.getVariableNullability();
+            VariableNullability variableNullability = subTree.child().getVariableNullability();
 
             // The simplification may do the "lifting" inside the functional term (having a non-aggregation
             // functional term above the aggregation one)
@@ -308,7 +312,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             if (liftedSubstitution.isEmpty()) {
                 AggregationNode newAggregationNode = iqFactory.createAggregationNode(subTree.groupingVariables(), newAggregationSubstitution);
-                return state.replace(subTree.replace(newAggregationNode, subTree.child));
+                return state.replace(subTree.replace(newAggregationNode, subTree.child()));
             }
 
             ConstructionNode liftedConstructionNode = iqFactory.createConstructionNode(
@@ -321,7 +325,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     newAggregationSubstitution.getDomain()).immutableCopy();
 
             AggregationNode newAggregationNode = iqFactory.createAggregationNode(newGroupingVariables, newAggregationSubstitution);
-            return state.lift(liftedConstructionNode, subTree.replace(newAggregationNode, subTree.child));
+            return state.lift(liftedConstructionNode, subTree.replace(newAggregationNode, subTree.child()));
         }
 
         IQTree asIQTree(State<ConstructionNode, AggregationSubTree> state) {
@@ -332,7 +336,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                             .append(state.getAncestors())
                             .append(subTree.sampleFilter())
                             .append(subTree.aggregationNode(), getNormalizedTreeCache())
-                            .build(subTree.child)); // from shrunk child - normalized?
+                            .build(subTree.child())); // from shrunk child - normalized?
         }
 
 
