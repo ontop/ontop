@@ -8,9 +8,8 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.FlattenNode;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBMathBinaryOperator;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -20,7 +19,7 @@ import javax.inject.Singleton;
 import java.util.stream.Stream;
 
 /**
- * For DBMS such as Oracle, that return the results of Flatten calls where items are of type `String` encased in quotation marks.
+ * For DBMS (such as Oracle) that return the results of Flatten calls where items are of type `String` encased in quotation marks.
  * These quotation marks have to be removed with an additional construction.
  */
 @Singleton
@@ -30,7 +29,6 @@ public class UnquoteFlattenResultsNormalizer implements DialectExtraNormalizer {
     private final SubstitutionFactory substitutionFactory;
     private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
-    private final Transformer transformer;
 
     @Inject
     protected UnquoteFlattenResultsNormalizer(IntermediateQueryFactory iqFactory,
@@ -41,17 +39,16 @@ public class UnquoteFlattenResultsNormalizer implements DialectExtraNormalizer {
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         this.iqTreeTools = iqTreeTools;
-        this.transformer = new Transformer();
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(transformer);
+        return tree.acceptVisitor(new Transformer(variableGenerator));
     }
 
-    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-        Transformer() {
-            super(UnquoteFlattenResultsNormalizer.this.iqFactory);
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
+        Transformer(VariableGenerator variableGenerator) {
+            super(UnquoteFlattenResultsNormalizer.this.iqFactory, variableGenerator);
         }
 
         /**
@@ -62,18 +59,24 @@ public class UnquoteFlattenResultsNormalizer implements DialectExtraNormalizer {
         @Override
         public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
             IQTree newChild = transformChild(child);
-            DBMathBinaryOperator minus = termFactory.getDBFunctionSymbolFactory().getDBMathBinaryOperator("-", termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType());
+            Variable newOutputVariable = variableGenerator.generateNewVariableFromVar(rootNode.getOutputVariable());
             ImmutableTerm resultSubstitution = termFactory.getDBCase(
                     Stream.of(Maps.immutableEntry(
-                            termFactory.getDBStartsWith(ImmutableList.of(rootNode.getOutputVariable(), termFactory.getDBStringConstant("\""))),
-                            termFactory.getDBSubString3(rootNode.getOutputVariable(), termFactory.getDBIntegerConstant(2), termFactory.getImmutableFunctionalTerm(minus, termFactory.getDBCharLength(rootNode.getOutputVariable()), termFactory.getDBIntegerConstant(2))))),
+                            termFactory.getDBStartsWith(ImmutableList.of(newOutputVariable, termFactory.getDBStringConstant("\""))),
+                            termFactory.getDBSubString3(
+                                    newOutputVariable,
+                                    termFactory.getDBIntegerConstant(2),
+                                    termFactory.getImmutableFunctionalTerm(
+                                            termFactory.getDBFunctionSymbolFactory().getDBMathBinaryOperator("-", termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType()),
+                                            termFactory.getDBCharLength(newOutputVariable),
+                                            termFactory.getDBIntegerConstant(2))))),
                     rootNode.getOutputVariable(),
                     true);
             Substitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(rootNode.getOutputVariable(), resultSubstitution);
 
             return iqTreeTools.unaryIQTreeBuilder()
-                    .append(iqFactory.createConstructionNode(rootNode.getVariables(child.getVariables()), newSubstitution))
-                    .append(rootNode)
+                    .append(iqTreeTools.createExtendingConstructionNode(rootNode.getVariables(child.getVariables()), newSubstitution))
+                    .append(iqFactory.createFlattenNode(newOutputVariable, rootNode.getFlattenedVariable(), rootNode.getIndexVariable(), rootNode.getFlattenedType()))
                     .build(newChild);
         }
     }
