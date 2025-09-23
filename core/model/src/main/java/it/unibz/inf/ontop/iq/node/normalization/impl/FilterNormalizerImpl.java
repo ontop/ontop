@@ -116,8 +116,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                             Optional.of(iqTreeTools.getConjunction(
                                     filterNode.getFilterCondition(), node.getOptionalFilterCondition())),
                             children);
-                    // will be final on the next call as the FILTER will be empty then
-                    return Optional.of(state.replace(UnarySubTree.of(Optional.empty(), newChild)));
+                    return Optional.of(state.replace(UnarySubTree.finalSubTree(newChild)));
                 }
             });
         }
@@ -161,7 +160,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                                 newChild));
             }
             catch (UnsatisfiableConditionException e) {
-                return State.initial(UnarySubTree.of(Optional.empty(), createEmptyNode()));
+                return State.initial(UnarySubTree.finalSubTree(createEmptyNode()));
             }
         }
     }
