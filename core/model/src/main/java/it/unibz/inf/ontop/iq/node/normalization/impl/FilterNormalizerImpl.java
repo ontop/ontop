@@ -46,17 +46,13 @@ public class FilterNormalizerImpl implements FilterNormalizer {
     @Override
     public IQTree normalizeForOptimization(FilterNode initialFilterNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
         Context context = new Context(initialChild.getVariables(), variableGenerator, treeCache);
-        return context.normalize(initialFilterNode, initialChild);
+        return context.normalize(NormalizationContext.UnarySubTree.of(initialFilterNode, initialChild));
     }
 
     private class Context extends NormalizationContext {
-        private final ImmutableSet<Variable> projectedVariables;
-        private final IQTreeCache treeCache;
 
         Context(ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator, IQTreeCache treeCache) {
-            super(variableGenerator);
-            this.projectedVariables = projectedVariables;
-            this.treeCache = treeCache;
+            super(projectedVariables, variableGenerator, treeCache, FilterNormalizerImpl.this.iqTreeTools);
         }
 
         /**
@@ -67,8 +63,8 @@ public class FilterNormalizerImpl implements FilterNormalizer {
          * only after lifting a single INNER JOIN, which terminates the lifting process.
          */
 
-        IQTree normalize(FilterNode initialFilterNode, IQTree initialChild) {
-            var initial = State.initial(UnarySubTree.of(initialFilterNode, initialChild));
+        IQTree normalize(UnarySubTree<FilterNode> initialSubTree) {
+            var initial = State.initial(initialSubTree);
             var state = initial.reachFixedPoint(MAX_NORMALIZATION_ITERATIONS,
                     this::normalizeAndLiftConstructionDistinctFilterInnerJoin,
                     this::simplifyAndPropagateDownConstraint);
@@ -133,13 +129,13 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             UnarySubTree<FilterNode> subTree = state.getSubTree();
             // deals with EMPTY and empty VALUES (but normalization of the child replaces it with EMPTY)
             if (subTree.getChild().isDeclaredAsEmpty())
-                return createEmpty();
+                return createEmptyNode();
 
             IQTree filterLevelTree = iqTreeTools.unaryIQTreeBuilder()
-                    .append(subTree.getOptionalNode(), this::getNormalizedTreeCache)
+                    .append(subTree.getOptionalNode(), () -> getNormalizedTreeCache(true))
                     .build(subTree.getChild());
 
-            return asIQTree(state.getAncestors(), filterLevelTree, iqTreeTools);
+            return asIQTree(state.getAncestors(), filterLevelTree);
         }
 
         State<UnaryOperatorNode, UnarySubTree<FilterNode>> simplifyAndPropagateDownConstraint(State<UnaryOperatorNode, UnarySubTree<FilterNode>> state) {
@@ -165,16 +161,8 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                                 newChild));
             }
             catch (UnsatisfiableConditionException e) {
-                return State.initial(UnarySubTree.of(Optional.empty(), createEmpty()));
+                return State.initial(UnarySubTree.of(Optional.empty(), createEmptyNode()));
             }
-        }
-
-        IQTree createEmpty() {
-            return iqFactory.createEmptyNode(projectedVariables);
-        }
-
-        IQTreeCache getNormalizedTreeCache() {
-            return treeCache.declareAsNormalizedForOptimizationWithEffect();
         }
     }
 }

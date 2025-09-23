@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -34,11 +35,8 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
 
     private class Context extends NormalizationContext {
 
-        private final IQTreeCache treeCache;
-
         Context(VariableGenerator variableGenerator, IQTreeCache treeCache) {
-            super(variableGenerator);
-            this.treeCache = treeCache;
+            super(ImmutableSet.of(), variableGenerator, treeCache, FlattenNormalizerImpl.this.iqTreeTools);
         }
 
         IQTree normalize(FlattenNode flattenNode, IQTree child) {
@@ -92,20 +90,16 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
 
                     return iqFactory.createUnaryIQTree(
                             newParentCn,
-                            iqFactory.createUnaryIQTree(flattenNode, updatedChild).normalizeForOptimization(variableGenerator),
-                            getNormalizedTreeCache());
+                            normalizeSubTreeRecursively(iqFactory.createUnaryIQTree(flattenNode, updatedChild)),
+                            // without effect!
+                            getNormalizedTreeCache(false));
                 }
             }
 
-            // Nothing can be lifted, declare the new tree normalized
-            return iqFactory.createUnaryIQTree(flattenNode, normalizedChild, getNormalizedTreeCache());
-        }
-
-        // Among the trees that are created, the outermost (aka output) tree is declared as normalized.
-        // The other ones (if any) are normalized immediately after they are created.
-        // without effect!
-        IQTreeCache getNormalizedTreeCache() {
-            return treeCache.declareAsNormalizedForOptimizationWithoutEffect();
+            // Among the trees that are created, the outermost (aka output) tree is declared as normalized.
+            // The other ones (if any) are normalized immediately after they are created.
+            // without effect!
+            return iqFactory.createUnaryIQTree(flattenNode, normalizedChild, getNormalizedTreeCache(false));
         }
     }
 }

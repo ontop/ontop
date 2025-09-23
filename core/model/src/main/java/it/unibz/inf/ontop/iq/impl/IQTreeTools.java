@@ -50,6 +50,10 @@ public class IQTreeTools {
         return iqFactory.createEmptyNode(ds.computeProjectedVariables());
     }
 
+    public EmptyNode createEmptyNode(ImmutableSet<Variable> projectedVariables) {
+        return iqFactory.createEmptyNode(projectedVariables);
+    }
+
     public IQ createMappingIQ(DistinctVariableOnlyDataAtom atom, Substitution<?> substitution, IQTree child) {
         return iqFactory.createIQ(atom,
                 iqFactory.createUnaryIQTree(

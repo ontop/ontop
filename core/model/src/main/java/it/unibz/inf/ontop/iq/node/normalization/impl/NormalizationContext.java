@@ -1,9 +1,13 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -13,24 +17,41 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 
 public class NormalizationContext {
     protected final VariableGenerator variableGenerator;
+    protected final ImmutableSet<Variable> projectedVariables;
+    protected final IQTreeTools iqTreeTools;
 
-    public NormalizationContext(VariableGenerator variableGenerator) {
+    private final IQTreeCache treeCache;
+
+    public NormalizationContext(ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator, IQTreeCache treeCache, IQTreeTools iqTreeTools) {
+        this.projectedVariables = projectedVariables;
         this.variableGenerator = variableGenerator;
+        this.iqTreeTools = iqTreeTools;
+        this.treeCache = treeCache;
     }
 
     protected IQTree normalizeSubTreeRecursively(IQTree child) {
         return child.normalizeForOptimization(variableGenerator);
     }
 
-    protected <T extends UnaryOperatorNode> IQTree asIQTree(UnaryOperatorSequence<T> ancestors, IQTree childTree, IQTreeTools iqTreeTools) {
+    protected IQTreeCache getNormalizedTreeCache(boolean changed) {
+        return changed
+                ? treeCache.declareAsNormalizedForOptimizationWithEffect()
+                : treeCache.declareAsNormalizedForOptimizationWithoutEffect();
+    }
+
+    protected EmptyNode createEmptyNode() {
+        return iqTreeTools.createEmptyNode(projectedVariables);
+    }
+
+    protected <T extends UnaryOperatorNode> IQTree asIQTree(UnaryOperatorSequence<T> ancestors, IQTree childTree) {
         if (ancestors.isEmpty())
             return childTree;
 
-        return iqTreeTools.unaryIQTreeBuilder()
-                .append(ancestors)
-                .build(childTree)
-                // Normalizes the ancestors (recursive)
-                .normalizeForOptimization(variableGenerator);
+        // Normalizes the ancestors (recursive)
+        return normalizeSubTreeRecursively(
+                iqTreeTools.unaryIQTreeBuilder()
+                        .append(ancestors)
+                        .build(childTree));
     }
 
     protected <T extends UnaryOperatorNode> UnarySubTree<T> normalizeChild(UnarySubTree<T> subTree) {

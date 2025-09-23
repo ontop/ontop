@@ -50,19 +50,17 @@ public class SliceNormalizerImpl implements SliceNormalizer {
     private class Context extends NormalizationContext {
         private final SliceNode sliceNode;
         private final IQTree initialChild;
-        private final IQTreeCache treeCache;
 
         Context(SliceNode sliceNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
-            super(variableGenerator);
+            super(initialChild.getVariables(), variableGenerator, treeCache, SliceNormalizerImpl.this.iqTreeTools);
             this.sliceNode = sliceNode;
             this.initialChild = initialChild;
-            this.treeCache = treeCache;
         }
 
         IQTree normalize() {
             OptionalLong limit = sliceNode.getLimit();
             if (limit.isPresent() && limit.getAsLong() == 0)
-                return iqFactory.createEmptyNode(initialChild.getVariables());
+                return createEmptyNode();
 
             IQTree newChild = normalizeSubTreeRecursively(initialChild);
 
@@ -77,7 +75,7 @@ public class SliceNormalizerImpl implements SliceNormalizer {
 
             var slice = IQTreeTools.UnaryIQTreeDecomposition.of(newChild, SliceNode.class);
             if (slice.isPresent())
-                return mergeWithSliceChild(slice.getNode(), slice.getChild(), treeCache);
+                return mergeWithSliceChild(slice.getNode(), slice.getChild());
 
             if (newChild instanceof EmptyNode)
                 return newChild;
@@ -118,10 +116,7 @@ public class SliceNormalizerImpl implements SliceNormalizer {
             if ((sliceNode.getOffset() == 0) && sliceNode.getLimit().isPresent() && !settings.isLimitOptimizationDisabled())
                 return normalizeLimitNoOffset((int)sliceNode.getLimit().getAsLong(), newChild, hasChildChanged);
 
-            return iqFactory.createUnaryIQTree(sliceNode, newChild,
-                    hasChildChanged.getAsBoolean()
-                            ? treeCache.declareAsNormalizedForOptimizationWithEffect()
-                            : treeCache.declareAsNormalizedForOptimizationWithoutEffect());
+            return iqFactory.createUnaryIQTree(sliceNode, newChild, getNormalizedTreeCache(hasChildChanged.getAsBoolean()));
         }
 
         private IQTree liftChildConstruction(ConstructionNode childConstructionNode, IQTree child) {
@@ -132,7 +127,7 @@ public class SliceNormalizerImpl implements SliceNormalizer {
                     iqFactory.createIQTreeCache(true));
         }
 
-        private IQTree mergeWithSliceChild(SliceNode newChildRoot, IQTree child, IQTreeCache treeCache) {
+        private IQTree mergeWithSliceChild(SliceNode newChildRoot, IQTree child) {
             long newOffset = sliceNode.getOffset() + newChildRoot.getOffset();
             final OptionalLong newLimit;
             if (newChildRoot.getLimit().isPresent()) {
@@ -149,7 +144,7 @@ public class SliceNormalizerImpl implements SliceNormalizer {
                     ? iqFactory.createSliceNode(newOffset, newLimit.getAsLong())
                     : iqFactory.createSliceNode(newOffset);
 
-            return iqFactory.createUnaryIQTree(newSliceNode, child, treeCache.declareAsNormalizedForOptimizationWithEffect());
+            return iqFactory.createUnaryIQTree(newSliceNode, child, getNormalizedTreeCache(true));
         }
 
         /**
@@ -195,10 +190,7 @@ public class SliceNormalizerImpl implements SliceNormalizer {
                 }
             }
 
-            return iqFactory.createUnaryIQTree(sliceNode, newChild,
-                    hasChildChanged.getAsBoolean()
-                            ? treeCache.declareAsNormalizedForOptimizationWithEffect()
-                            : treeCache.declareAsNormalizedForOptimizationWithoutEffect());
+            return iqFactory.createUnaryIQTree(sliceNode, newChild, getNormalizedTreeCache(hasChildChanged.getAsBoolean()));
         }
 
         private Optional<IQTree> simplifyUnionWithChildrenOfKnownCardinality(UnionNode childRoot,

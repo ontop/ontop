@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -11,6 +12,7 @@ import it.unibz.inf.ontop.iq.node.normalization.ConstructionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -31,16 +33,14 @@ public class ConstructionNormalizerImpl implements ConstructionNormalizer {
 
     @Override
     public IQTree normalizeForOptimization(ConstructionNode constructionNode, IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        Context context = new Context(variableGenerator, treeCache);
+        Context context = new Context(constructionNode.getVariables(), variableGenerator, treeCache);
         return context.normalize(constructionNode, child);
     }
 
     private class Context extends NormalizationContext {
-        private final IQTreeCache treeCache;
 
-        Context(VariableGenerator variableGenerator, IQTreeCache treeCache) {
-            super(variableGenerator);
-            this.treeCache = treeCache;
+        Context(ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+            super(projectedVariables, variableGenerator, treeCache, ConstructionNormalizerImpl.this.iqTreeTools);
         }
 
         IQTree normalize(ConstructionNode constructionNode, IQTree child) {
@@ -48,7 +48,7 @@ public class ConstructionNormalizerImpl implements ConstructionNormalizer {
                                         normalizeSubTreeRecursively(child));
 
             if (shrunkChild.isDeclaredAsEmpty()) {
-                return iqFactory.createEmptyNode(constructionNode.getVariables());
+                return createEmptyNode();
             }
 
             var shrunkChildConstruction = IQTreeTools.UnaryIQTreeDecomposition.of(shrunkChild, ConstructionNode.class);
@@ -70,7 +70,7 @@ public class ConstructionNormalizerImpl implements ConstructionNormalizer {
 
                 return newGrandChild.getVariables().equals(newConstructionNode.getVariables())
                         ? newGrandChild
-                        : iqFactory.createUnaryIQTree(newConstructionNode, newGrandChild, getNormalizedTreeCache());
+                        : iqFactory.createUnaryIQTree(newConstructionNode, newGrandChild, getNormalizedTreeCache(true));
             }
 
             /*
@@ -96,21 +96,16 @@ public class ConstructionNormalizerImpl implements ConstructionNormalizer {
                 return iqFactory.createUnaryIQTree(
                         newTopConstructionNode,
                         newChild,
-                        getNormalizedTreeCache());
+                        getNormalizedTreeCache(true));
             }
 
             IQTree newChild = normalizeSubTreeRecursively(updatedChild);
-
             return iqTreeTools.unaryIQTreeBuilder(constructionNode.getVariables())
                     .build(newChild);
         }
 
         IQTree removeNonRequiredVariables(ConstructionNode constructionNode, IQTree tree) {
             return notRequiredVariableRemover.optimize(tree, constructionNode.getChildVariables(), variableGenerator);
-        }
-
-        IQTreeCache getNormalizedTreeCache() {
-            return treeCache.declareAsNormalizedForOptimizationWithEffect();
         }
     }
 }

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -14,6 +15,7 @@ import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -35,14 +37,14 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
     @Override
     public IQTree normalizeForOptimization(DistinctNode distinctNode, IQTree initialChild,
                                            VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        Context context = new Context(variableGenerator, treeCache);
+        Context context = new Context(initialChild.getVariables(), variableGenerator, treeCache);
         return context.normalize(distinctNode, initialChild);
     }
 
     private class Context extends InjectiveBindingLiftContext {
 
-        Context(VariableGenerator variableGenerator, IQTreeCache treeCache) {
-            super(variableGenerator, coreSingletons, treeCache);
+        Context(ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+            super(projectedVariables, variableGenerator, coreSingletons, treeCache);
         }
 
         IQTree normalize(DistinctNode distinctNode, IQTree initialChild) {
@@ -145,12 +147,6 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                     return createLimit1(unionChild);
             }
             return unionChild;
-        }
-
-        IQTreeCache getNormalizedTreeCache(boolean childChanged) {
-            return childChanged
-                ? treeCache.declareAsNormalizedForOptimizationWithEffect()
-                : treeCache.declareAsNormalizedForOptimizationWithoutEffect();
         }
     }
 

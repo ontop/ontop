@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -9,35 +9,33 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.OrderByNormalizer;
 import it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.iq.node.normalization.impl.NormalizationContext.UnarySubTree;
+
 public class OrderByNormalizerImpl implements OrderByNormalizer {
 
-    private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
 
     @Inject
-    private OrderByNormalizerImpl(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
-        this.iqFactory = iqFactory;
+    private OrderByNormalizerImpl(IQTreeTools iqTreeTools) {
         this.iqTreeTools = iqTreeTools;
     }
 
     @Override
     public IQTree normalizeForOptimization(OrderByNode orderByNode, IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        Context context = new Context(orderByNode, child, variableGenerator, treeCache);
-        return context.normalize();
+        UnarySubTree<OrderByNode> initialSubTree = UnarySubTree.of(orderByNode, child);
+        Context context = new Context(initialSubTree.getChild().getVariables(), variableGenerator, treeCache);
+        return context.normalize(initialSubTree);
     }
 
     private class Context extends NormalizationContext {
-        private final UnarySubTree<OrderByNode> initialSubTree;
-        private final IQTreeCache treeCache;
 
-        Context(OrderByNode initialOrderByNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
-            super(variableGenerator);
-            this.initialSubTree = UnarySubTree.of(initialOrderByNode, initialChild);
-            this.treeCache = treeCache;
+        Context(ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+            super(projectedVariables, variableGenerator, treeCache, OrderByNormalizerImpl.this.iqTreeTools);
         }
 
         UnarySubTree<OrderByNode> simplify(UnarySubTree<OrderByNode> tree) {
@@ -57,7 +55,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
          * followed by an optional ORDER BY, followed by a child tree.
          */
 
-        IQTree normalize() {
+        IQTree normalize(UnarySubTree<OrderByNode> initialSubTree) {
             var initial = State.initial(simplify(normalizeChild(initialSubTree)));
 
             var state = initial.reachFinal(this::liftThroughOrderBy);
@@ -92,20 +90,16 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
             });
         }
 
-        IQTreeCache getNormalizedTreeCache() {
-            return treeCache.declareAsNormalizedForOptimizationWithEffect();
-        }
-
         IQTree asIQTree(State<UnaryOperatorNode, UnarySubTree<OrderByNode>> state) {
             UnarySubTree<OrderByNode> subTree = state.getSubTree();
             if (subTree.getChild().isDeclaredAsEmpty())
-                return iqFactory.createEmptyNode(initialSubTree.getChild().getVariables());
+                return createEmptyNode();
 
             IQTree orderByLevelTree = iqTreeTools.unaryIQTreeBuilder()
-                    .append(subTree.getOptionalNode(), this::getNormalizedTreeCache)
+                    .append(subTree.getOptionalNode(), () -> getNormalizedTreeCache(true))
                     .build(subTree.getChild());
 
-            return asIQTree(state.getAncestors(), orderByLevelTree, iqTreeTools);
+            return asIQTree(state.getAncestors(), orderByLevelTree);
         }
     }
 }

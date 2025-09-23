@@ -30,18 +30,13 @@ import java.util.function.Function;
  */
 public class InjectiveBindingLiftContext extends NormalizationContext {
 
-    protected final IQTreeTools iqTreeTools;
     protected final IntermediateQueryFactory iqFactory;
     protected final SubstitutionFactory substitutionFactory;
 
-    protected final IQTreeCache treeCache;
-
-    public InjectiveBindingLiftContext(VariableGenerator variableGenerator, CoreSingletons coreSingletons, IQTreeCache treeCache) {
-        super(variableGenerator);
-        this.iqTreeTools = coreSingletons.getIQTreeTools();
+    public InjectiveBindingLiftContext(ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator, CoreSingletons coreSingletons, IQTreeCache treeCache) {
+        super(projectedVariables, variableGenerator, treeCache, coreSingletons.getIQTreeTools());
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.iqFactory = coreSingletons.getIQFactory();
-        this.treeCache = treeCache;
     }
 
     protected Optional<State<ConstructionNode, UnarySubTree<ConstructionNode>>> liftBindings(State<ConstructionNode, UnarySubTree<ConstructionNode>> state) {

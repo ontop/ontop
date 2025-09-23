@@ -64,8 +64,9 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
     @Override
     public IQTree normalizeForOptimization(InnerJoinNode innerJoinNode, ImmutableList<IQTree> children,
                                            VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        Context context = new Context(innerJoinNode, children, variableGenerator, treeCache);
-        return context.normalize();
+        var initialInnerJoin = new InnerJoinSubTree(innerJoinNode.getOptionalFilterCondition(), children);
+        Context context = new Context(initialInnerJoin.projectedVariables(), variableGenerator, treeCache);
+        return context.normalize(initialInnerJoin);
     }
 
     /**
@@ -128,18 +129,12 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
 
     private class Context extends NormalizationContext {
-        private final InnerJoinSubTree initialInnerJoin;
-        private final ImmutableSet<Variable> projectedVariables;
-        private final IQTreeCache treeCache;
 
-        private Context(InnerJoinNode innerJoinNode, ImmutableList<IQTree> initialChildren, VariableGenerator variableGenerator, IQTreeCache treeCache) {
-            super(variableGenerator);
-            this.initialInnerJoin = new InnerJoinSubTree(innerJoinNode.getOptionalFilterCondition(), initialChildren);
-            this.projectedVariables = initialInnerJoin.projectedVariables();
-            this.treeCache = treeCache;
+        private Context(ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+            super(projectedVariables, variableGenerator, treeCache, InnerJoinNormalizerImpl.this.iqTreeTools);
         }
 
-        IQTree normalize() {
+        IQTree normalize(InnerJoinSubTree initialInnerJoin) {
             var initial = State.initial(initialInnerJoin);
             var state = initial.reachFixedPoint(MAX_ITERATIONS,
                             this::liftBindingsAndDistincts,
@@ -147,9 +142,6 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             return asIQTree(state);
         }
 
-        IQTreeCache getNormalizedTreeCache() {
-            return treeCache.declareAsNormalizedForOptimizationWithEffect();
-        }
 
         /**
          * Lifts bindings but children still project away irrelevant variables
@@ -187,7 +179,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
          * No child is interpreted as EMPTY
          */
         State<UnaryOperatorNode, InnerJoinSubTree> declareAsEmpty() {
-            EmptyNode emptyChild = iqFactory.createEmptyNode(projectedVariables);
+            EmptyNode emptyChild = createEmptyNode();
             return State.initial(new InnerJoinSubTree(Optional.empty(), ImmutableList.of(emptyChild)));
         }
 
@@ -258,8 +250,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
                         new DownPropagation(projectedVariables), simplifiedJoinCondition, childrenVariableNullability);
 
-                ImmutableList<IQTree> newChildren = extendedDownConstraint.propagate(
-                        subTree.children(), variableGenerator);
+                ImmutableList<IQTree> newChildren = extendedDownConstraint.propagate(subTree.children(), variableGenerator);
 
                 Optional<ImmutableExpression> newJoiningCondition = simplifiedJoinCondition.getOptionalExpression();
 
@@ -314,7 +305,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                             .orElseGet(() -> iqFactory.createNaryIQTree(
                                     iqFactory.createInnerJoinNode(subTree.joiningCondition()),
                                     subTree.children(),
-                                    getNormalizedTreeCache()));
+                                    getNormalizedTreeCache(true)));
             }
         }
 

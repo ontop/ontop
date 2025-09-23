@@ -66,8 +66,9 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
     @Override
     public IQTree normalizeForOptimization(LeftJoinNode ljNode, IQTree initialLeftChild, IQTree initialRightChild,
                                            VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        Context context = new Context(ljNode, initialLeftChild, initialRightChild, variableGenerator, treeCache);
-        return context.normalize();
+        LeftJoinSubTree initialSubTree = new LeftJoinSubTree(ljNode.getOptionalFilterCondition(), initialLeftChild, initialRightChild);
+        Context context = new Context(initialSubTree.projectedVariables(), variableGenerator, treeCache);
+        return context.normalize(initialSubTree);
     }
 
     /**
@@ -148,18 +149,12 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
     }
 
     private class Context extends NormalizationContext {
-        private final LeftJoinSubTree initialSubTree;
-        private final ImmutableSet<Variable> projectedVariables;
-        private final IQTreeCache treeCache;
 
-        private Context(LeftJoinNode ljNode, IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
-            super(variableGenerator);
-            this.initialSubTree = new LeftJoinSubTree(ljNode.getOptionalFilterCondition(), initialLeftChild, initialRightChild);
-            this.projectedVariables = initialSubTree.projectedVariables();
-            this.treeCache = treeCache;
+        private Context(ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+            super(projectedVariables, variableGenerator, treeCache, LeftJoinNormalizerImpl.this.iqTreeTools);
         }
 
-        IQTree normalize() {
+        IQTree normalize(LeftJoinSubTree initialSubTree) {
             // Non-final
             var state = State.initial(initialSubTree);
 
@@ -274,8 +269,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         // lifts the filter from the join, but stops recursion on the next iteration
                         return Optional.of(state.lift(
                                 iqFactory.createFilterNode(joinCondition.get()),
-                                subTree.replaceLeft(iqTreeTools.createInnerJoinTree(leftGrandChildren)
-                                        .normalizeForOptimization(variableGenerator))));
+                                subTree.replaceLeft(normalizeSubTreeRecursively(
+                                        iqTreeTools.createInnerJoinTree(leftGrandChildren)))));
                     }
                     return done();
                 }
@@ -484,14 +479,10 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             }
         }
 
-        IQTreeCache getNormalizedTreeCache() {
-            return treeCache.declareAsNormalizedForOptimizationWithEffect();
-        }
-
         protected IQTree asIQTree(State<UnaryOperatorNode, LeftJoinSubTree> state) {
             LeftJoinSubTree subTree = state.getSubTree();
             if (subTree.isEmpty())
-                return iqFactory.createEmptyNode(projectedVariables);
+                return createEmptyNode();
 
             IQTree ljLevelTree;
             if (subTree.isRightChildEmpty()) {
@@ -499,14 +490,14 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         subTree.rightSpecificVariables().stream()
                                 .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant())));
 
-                ljLevelTree = iqFactory.createUnaryIQTree(paddingConstructionNode, subTree.leftChild(), getNormalizedTreeCache());
+                ljLevelTree = iqFactory.createUnaryIQTree(paddingConstructionNode, subTree.leftChild(), getNormalizedTreeCache(true));
             }
             else if (subTree.rightChild() instanceof TrueNode) {
                 ljLevelTree = subTree.leftChild();
             }
             else {
                 ljLevelTree = iqFactory.createBinaryNonCommutativeIQTree(
-                        iqFactory.createLeftJoinNode(subTree.ljCondition()), subTree.leftChild(), subTree.rightChild(), getNormalizedTreeCache());
+                        iqFactory.createLeftJoinNode(subTree.ljCondition()), subTree.leftChild(), subTree.rightChild(), getNormalizedTreeCache(true));
             }
 
             // Normalizes the ancestors
