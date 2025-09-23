@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
-import java.util.function.BooleanSupplier;
 
 @Singleton
 public class SliceNormalizerImpl implements SliceNormalizer {
@@ -43,7 +42,7 @@ public class SliceNormalizerImpl implements SliceNormalizer {
         Context context = new Context(initialChild.getVariables(), variableGenerator, treeCache);
         return context.normalize(sliceNode, initialChild);
     }
-    
+
     private class Context extends NormalizationContext {
 
         Context(ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator, IQTreeCache treeCache) {
@@ -57,45 +56,60 @@ public class SliceNormalizerImpl implements SliceNormalizer {
 
             IQTree newChild = normalizeSubTreeRecursively(initialChild);
 
-            return normalizeForOptimization(sliceNode, newChild, () -> !newChild.equals(initialChild));
+            var initial = State.<ConstructionNode, UnarySubTree<SliceNode>>initial(UnarySubTree.of(sliceNode, newChild));
+            var state = initial.reachFinal(this::simplifySlice);
+
+            return asIQTree(state);
         }
 
-        private IQTree normalizeForOptimization(SliceNode sliceNode, IQTree newChild, BooleanSupplier hasChildChanged) {
+        IQTree asIQTree(State<ConstructionNode, UnarySubTree<SliceNode>> state) {
+            UnarySubTree<SliceNode> subTree = state.getSubTree();
+            if (subTree.getChild().isDeclaredAsEmpty())
+                return createEmptyNode();
 
-            var construction = IQTreeTools.UnaryIQTreeDecomposition.of(newChild, ConstructionNode.class);
+            IQTree sliceLevelTree = iqTreeTools.unaryIQTreeBuilder()
+                    .append(subTree.getOptionalNode(), () -> getNormalizedTreeCache(true))
+                    .build(subTree.getChild());
+
+            return asIQTree(state.getAncestors(), sliceLevelTree);
+        }
+
+        private Optional<State<ConstructionNode, UnarySubTree<SliceNode>>> simplifySlice(State<ConstructionNode, UnarySubTree<SliceNode>> state) {
+            var subTree = state.getSubTree();
+            if (subTree.getOptionalNode().isEmpty())
+                return Optional.empty();
+
+            var sliceNode = subTree.getOptionalNode().get();
+
+            var construction = IQTreeTools.UnaryIQTreeDecomposition.of(subTree.getChild(), ConstructionNode.class);
             if (construction.isPresent()) {
-                return iqFactory.createUnaryIQTree(
-                        construction.getNode(),
-                        // recursive normalization of SLICE!
-                        normalizeSubTreeRecursively(iqFactory.createUnaryIQTree(sliceNode, construction.getChild())),
-                        iqFactory.createIQTreeCache(true));
+                return Optional.of(state.lift(construction.getNode(), UnarySubTree.of(subTree.getOptionalNode(), construction.getChild())));
             }
 
-            var slice = IQTreeTools.UnaryIQTreeDecomposition.of(newChild, SliceNode.class);
+            var slice = IQTreeTools.UnaryIQTreeDecomposition.of(subTree.getChild(), SliceNode.class);
             if (slice.isPresent())
-                return mergeWithSliceChild(sliceNode, slice.getNode(), slice.getChild());
+                return Optional.of(state.replace(UnarySubTree.of(mergeWithSliceChild(subTree.getOptionalNode().get(), slice.getNode()), slice.getChild())));
 
-            if (newChild instanceof EmptyNode)
-                return newChild;
+            if (subTree.getChild() instanceof EmptyNode)
+                return Optional.of(state.replace(UnarySubTree.of(Optional.empty(), subTree.getChild())));
 
-            if ((newChild instanceof TrueNode)
-                    || IQTreeTools.UnaryIQTreeDecomposition.of(newChild, AggregationNode.class)
+            if ((subTree.getChild() instanceof TrueNode)
+                    || IQTreeTools.UnaryIQTreeDecomposition.of(subTree.getChild(), AggregationNode.class)
                     .getOptionalNode()
                     .map(AggregationNode::getGroupingVariables)
                     .filter(ImmutableSet::isEmpty)
                     .isPresent())
-                return sliceNode.getOffset() > 0
-                        ? iqFactory.createEmptyNode(newChild.getVariables())
-                        : newChild;
+                return Optional.of(state.replace(UnarySubTree.of(Optional.empty(),
+                        sliceNode.getOffset() > 0
+                                ? createEmptyNode()
+                                : subTree.getChild())));
 
-            if (newChild instanceof ValuesNode) {
-                ValuesNode valuesNode = (ValuesNode) newChild;
+            if (subTree.getChild() instanceof ValuesNode) {
+                ValuesNode valuesNode = (ValuesNode) subTree.getChild();
                 ImmutableList<ImmutableMap<Variable, Constant>> values = valuesNode.getValueMaps();
-                if (values.size() <= sliceNode.getOffset())
-                    return iqFactory.createEmptyNode(newChild.getVariables());
-
-                // only necessary to mark VALUES as normalized
-                return normalizeSubTreeRecursively(
+                IQTree newTree = (values.size() <= sliceNode.getOffset())
+                    ? createEmptyNode()
+                    : normalizeSubTreeRecursively(
                         iqFactory.createValuesNode(
                                 valuesNode.getVariables(),
                                 // TODO: complain if the offset or the limit are too big to be cast as integers
@@ -105,15 +119,17 @@ public class SliceNormalizerImpl implements SliceNormalizer {
                                                         ? (int)(sliceNode.getOffset() + sliceNode.getLimit().getAsLong())
                                                         : values.size(),
                                                 values.size()))));
+
+                return Optional.of(state.replace(UnarySubTree.of(Optional.empty(), newTree)));
             }
 
             if ((sliceNode.getOffset() == 0) && sliceNode.getLimit().isPresent() && !settings.isLimitOptimizationDisabled())
-                return normalizeLimitNoOffset(sliceNode, newChild, hasChildChanged);
+                return normalizeLimitNoOffset(state);
 
-            return iqFactory.createUnaryIQTree(sliceNode, newChild, getNormalizedTreeCache(hasChildChanged.getAsBoolean()));
+            return Optional.empty();
         }
 
-        private IQTree mergeWithSliceChild(SliceNode sliceNode, SliceNode innerSliceNode, IQTree child) {
+        private SliceNode mergeWithSliceChild(SliceNode sliceNode, SliceNode innerSliceNode) {
             long newOffset = sliceNode.getOffset() + innerSliceNode.getOffset();
             final OptionalLong newLimit;
             if (innerSliceNode.getLimit().isPresent()) {
@@ -126,31 +142,28 @@ public class SliceNormalizerImpl implements SliceNormalizer {
             else
                 newLimit = sliceNode.getLimit();
 
-            SliceNode newSliceNode = newLimit.isPresent()
+            return newLimit.isPresent()
                     ? iqFactory.createSliceNode(newOffset, newLimit.getAsLong())
                     : iqFactory.createSliceNode(newOffset);
-
-            return iqFactory.createUnaryIQTree(newSliceNode, child, getNormalizedTreeCache(true));
         }
 
         /**
          * Limit > 0, no offset and limit optimization is enabled
-         *
          */
-        private IQTree normalizeLimitNoOffset(SliceNode sliceNode, IQTree newChild, BooleanSupplier hasChildChanged) {
-            //noinspection OptionalGetWithoutIsPresent
-            int limit = (int)sliceNode.getLimit().getAsLong();
+        private Optional<State<ConstructionNode, UnarySubTree<SliceNode>>> normalizeLimitNoOffset(State<ConstructionNode, UnarySubTree<SliceNode>> state) {
+            var subTree = state.getSubTree();
 
-            var union = NaryIQTreeTools.UnionDecomposition.of(newChild);
+            var union = NaryIQTreeTools.UnionDecomposition.of(subTree.getChild());
             if (union.isPresent()) {
-                Optional<IQTree> newTree = union.getChildren().stream().anyMatch(c -> getKnownCardinality(c).isPresent())
-                        ? simplifyUnionWithChildrenOfKnownCardinality(sliceNode, union.getNode(), union.getTree())
-                        : pushLimitInUnionChildren(sliceNode, union.getNode(), union.getChildren());
-                if (newTree.isPresent())
-                    return newTree.get();
+                return union.getChildren().stream().anyMatch(c -> getKnownCardinality(c).isPresent())
+                        ? simplifyUnionWithChildrenOfKnownCardinality(state)
+                        : pushLimitInUnionChildren(state);
             }
 
-            var innerJoin = NaryIQTreeTools.InnerJoinDecomposition.of(newChild);
+            //noinspection OptionalGetWithoutIsPresent
+            int limit = (int)subTree.getOptionalNode().get().getLimit().getAsLong();
+
+            var innerJoin = NaryIQTreeTools.InnerJoinDecomposition.of(subTree.getChild());
             // TODO: consider a more general technique (distinct removal in sub-tree)
             if (innerJoin.isPresent() && limit <= 1) {
                 // Distinct-s can be eliminated
@@ -158,36 +171,32 @@ public class SliceNormalizerImpl implements SliceNormalizer {
                         (IQTreeTools.UnaryIQTreeDecomposition.of(innerJoin.getChildren(), DistinctNode.class));
 
                 if (!innerJoin.getChildren().equals(newJoinChildren)) {
-                    var updatedChildTree = iqFactory.createNaryIQTree(innerJoin.getNode(), newJoinChildren);
-                    return normalizeForOptimization(sliceNode, updatedChildTree, () -> true);
+                    var updatedChildTree = normalizeSubTreeRecursively(iqFactory.createNaryIQTree(innerJoin.getNode(), newJoinChildren));
+                    return Optional.of(state.replace(UnarySubTree.of(subTree.getOptionalNode(), updatedChildTree)));
                 }
             }
-            
-            var distinct = IQTreeTools.UnaryIQTreeDecomposition.of(newChild, DistinctNode.class);
+
+            var distinct = IQTreeTools.UnaryIQTreeDecomposition.of(subTree.getChild(), DistinctNode.class);
             if (distinct.isPresent()) {
                 if (limit <= 1)
                     // Distinct can be eliminated
-                    return normalizeForOptimization(sliceNode, distinct.getChild(), () -> true);
+                    return Optional.of(state.replace(UnarySubTree.of(subTree.getOptionalNode(), distinct.getChild())));
 
                 var innerUnion = NaryIQTreeTools.UnionDecomposition.of(distinct.getChild())
                         .filter(d -> d.getChildren().stream().anyMatch(IQTree::isDistinct));
                 if (innerUnion.isPresent()) {
-                    Optional<IQTree> newTree = simplifyDistinctUnionWithDistinctChildren(
-                            sliceNode, innerUnion.getNode(), innerUnion.getChildren());
-
-                    if (newTree.isPresent())
-                        return newTree.get();
+                    return simplifyDistinctUnionWithDistinctChildren(
+                            state, innerUnion.getNode(), innerUnion.getChildren());
                 }
             }
 
-            return iqFactory.createUnaryIQTree(sliceNode, newChild, getNormalizedTreeCache(hasChildChanged.getAsBoolean()));
+            return Optional.empty();
         }
 
-        private Optional<IQTree> simplifyUnionWithChildrenOfKnownCardinality(SliceNode sliceNode, UnionNode unionNode,
-                                                                             IQTree unionTree) {
-            //noinspection OptionalGetWithoutIsPresent
-            int limit = (int)sliceNode.getLimit().getAsLong();
-            ImmutableList<IQTree> children = unionTree.getChildren();
+        private Optional<State<ConstructionNode, UnarySubTree<SliceNode>>> simplifyUnionWithChildrenOfKnownCardinality(State<ConstructionNode, UnarySubTree<SliceNode>> state) {
+            var subTree = state.getSubTree();
+            var union = NaryIQTreeTools.UnionDecomposition.of(subTree.getChild());
+            var children = union.getTree().getChildren();
 
             ImmutableMultimap<IQTree, Integer> cardinalityMultimap = children.stream()
                     .flatMap(c -> getKnownCardinality(c).stream()
@@ -199,13 +208,17 @@ public class SliceNormalizerImpl implements SliceNormalizer {
             if (maxChildCardinality.isEmpty())
                 return Optional.empty();
 
+            //noinspection OptionalGetWithoutIsPresent
+            var sliceNode = subTree.getOptionalNode().get();
+            //noinspection OptionalGetWithoutIsPresent
+            int limit = (int)sliceNode.getLimit().getAsLong();
+
             if (maxChildCardinality.get() >= limit) {
                 IQTree largestChild = cardinalityMultimap.inverse().get(maxChildCardinality.get()).stream()
                         .findAny()
                         .orElseThrow(() -> new MinorOntopInternalBugException("There should be one child"));
 
-                return Optional.of(normalizeSubTreeRecursively(
-                        iqFactory.createUnaryIQTree(sliceNode, largestChild)));
+                return Optional.of(state.replace(UnarySubTree.of(subTree.getOptionalNode(), largestChild)));
             }
 
             int sum = cardinalityMultimap.values().stream().reduce(0, Integer::sum);
@@ -226,16 +239,16 @@ public class SliceNormalizerImpl implements SliceNormalizer {
                         break;
                 }
                 // Should have at least 2 children, otherwise it would have been already optimized
-                return Optional.of(
+                return Optional.of(state.replace(UnarySubTree.of(subTree.getOptionalNode(),
                         normalizeSubTreeRecursively(iqFactory.createNaryIQTree(
-                                        unionNode,
-                                        newChildrenBuilder.build())));
+                                        union.getNode(),
+                                        newChildrenBuilder.build())))));
             }
 
             int numberOfChildrenWithUnknownCardinality = children.size() - cardinalityMultimap.size();
             if (numberOfChildrenWithUnknownCardinality == 0)
-                // No more limit
-                return Optional.of(unionTree);
+                // No more limit (sum < limit)
+                return Optional.of(state.replace(UnarySubTree.of(Optional.empty(), subTree.getChild())));
 
             ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
                     c -> cardinalityMultimap.containsKey(c)
@@ -244,33 +257,37 @@ public class SliceNormalizerImpl implements SliceNormalizer {
                             iqFactory.createSliceNode(0, limit - sum), c));
 
             IQTree newUnionTree = normalizeSubTreeRecursively(
-                    iqFactory.createNaryIQTree(unionNode, newChildren));
+                    iqFactory.createNaryIQTree(union.getNode(), newChildren));
 
             if (numberOfChildrenWithUnknownCardinality == 1)
-                return Optional.of(newUnionTree);
+                return Optional.of(state.replace(UnarySubTree.of(Optional.empty(), newUnionTree)));
 
-            if (newUnionTree.equals(unionTree))
+            if (newUnionTree.equals(union.getTree()))
                 return Optional.empty();
 
-            return Optional.of(normalizeSubTreeRecursively(
-                    iqFactory.createUnaryIQTree(sliceNode, newUnionTree)));
+            return Optional.of(state.replace(UnarySubTree.of(subTree.getOptionalNode(), newUnionTree)));
         }
 
-        private Optional<IQTree> pushLimitInUnionChildren(SliceNode sliceNode, UnionNode unionNode, ImmutableList<IQTree> children) {
+        private Optional<State<ConstructionNode, UnarySubTree<SliceNode>>> pushLimitInUnionChildren(State<ConstructionNode, UnarySubTree<SliceNode>> state) {
+            var subTree = state.getSubTree();
+            var union =  NaryIQTreeTools.UnionDecomposition.of(subTree.getChild());
+            var children = union.getTree().getChildren();
+
             ImmutableList<IQTree> newUnionChildren = NaryIQTreeTools.transformChildren(children,
-                    c -> normalizeSubTreeRecursively(iqFactory.createUnaryIQTree(sliceNode, c)));
+                    c -> normalizeSubTreeRecursively(iqFactory.createUnaryIQTree(subTree.getOptionalNode().get(), c)));
 
             if (children.equals(newUnionChildren))
                 return Optional.empty();
 
-            return Optional.of(iqFactory.createUnaryIQTree(
-                    sliceNode,
-                    iqFactory.createNaryIQTree(unionNode, newUnionChildren)));
+            return Optional.of(state.replace(UnarySubTree.of(subTree.getOptionalNode(),
+                    normalizeSubTreeRecursively(
+                            iqFactory.createNaryIQTree(union.getNode(), newUnionChildren)))));
         }
 
-        private Optional<IQTree> simplifyDistinctUnionWithDistinctChildren(SliceNode sliceNode, UnionNode union, ImmutableList<IQTree> unionChildren) {
+        private Optional<State<ConstructionNode, UnarySubTree<SliceNode>>> simplifyDistinctUnionWithDistinctChildren(State<ConstructionNode, UnarySubTree<SliceNode>> state, UnionNode union, ImmutableList<IQTree> unionChildren) {
+            var subTree = state.getSubTree();
             //noinspection OptionalGetWithoutIsPresent
-            int limit = (int)sliceNode.getLimit().getAsLong();
+            int limit = (int)subTree.getOptionalNode().get().getLimit().getAsLong();
 
             Optional<IQTree> sufficientChild = unionChildren.stream()
                     .filter(IQTree::isDistinct)
@@ -282,13 +299,12 @@ public class SliceNormalizerImpl implements SliceNormalizer {
 
             if (sufficientChild.isPresent())
                 // Eliminates the distinct and the union
-                return Optional.of(normalizeSubTreeRecursively(
-                        iqFactory.createUnaryIQTree(sliceNode, sufficientChild.get())));
+                return Optional.of(state.replace(UnarySubTree.of(subTree.getOptionalNode(), sufficientChild.get())));
 
             // Scenario: LIMIT DISTINCT UNION [T1 ...] -> LIMIT DISTINCT UNION [LIMIT T1 ...] if T1 is distinct
             ImmutableList<IQTree> newUnionChildren = unionChildren.stream()
                     .map(c -> c.isDistinct()
-                            ? iqFactory.createUnaryIQTree(sliceNode, c)
+                            ? iqFactory.createUnaryIQTree(subTree.getOptionalNode().get(), c)
                             : c)
                     .map(this::normalizeSubTreeRecursively)
                     .collect(ImmutableCollectors.toList());
@@ -296,11 +312,10 @@ public class SliceNormalizerImpl implements SliceNormalizer {
             if (newUnionChildren.equals(unionChildren))
                     return Optional.empty();
 
-            return Optional.of(normalizeSubTreeRecursively(
-                    iqTreeTools.unaryIQTreeBuilder()
-                            .append(sliceNode)
+            return Optional.of(state.replace(UnarySubTree.of(subTree.getOptionalNode(),
+                    normalizeSubTreeRecursively(iqTreeTools.unaryIQTreeBuilder()
                             .append(iqFactory.createDistinctNode())
-                            .build(iqFactory.createNaryIQTree(union, newUnionChildren))));
+                            .build(iqFactory.createNaryIQTree(union, newUnionChildren))))));
         }
 
 
