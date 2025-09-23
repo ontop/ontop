@@ -75,6 +75,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(OrderByNormalizer.class);
         bindFromSettings(DistinctNormalizer.class);
         bindFromSettings(AggregationNormalizer.class);
+        bindFromSettings(UnionNormalizer.class);
         bindFromSettings(NotRequiredVariableRemover.class);
         bindFromSettings(NotYetTypedEqualityTransformer.class);
         bindFromSettings(NotYetTypedBinaryMathOperationTransformer.class);
