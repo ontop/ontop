@@ -92,13 +92,17 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
             });
         }
 
+        IQTreeCache getNormalizedTreeCache() {
+            return treeCache.declareAsNormalizedForOptimizationWithEffect();
+        }
+
         IQTree asIQTree(State<UnaryOperatorNode, UnarySubTree<OrderByNode>> state) {
             UnarySubTree<OrderByNode> subTree = state.getSubTree();
             if (subTree.getChild().isDeclaredAsEmpty())
                 return iqFactory.createEmptyNode(initialSubTree.getChild().getVariables());
 
             IQTree orderByLevelTree = iqTreeTools.unaryIQTreeBuilder()
-                    .append(subTree.getOptionalNode(), treeCache::declareAsNormalizedForOptimizationWithEffect)
+                    .append(subTree.getOptionalNode(), this::getNormalizedTreeCache)
                     .build(subTree.getChild());
 
             return asIQTree(state.getAncestors(), orderByLevelTree, iqTreeTools);

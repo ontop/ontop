@@ -147,6 +147,10 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             return asIQTree(state);
         }
 
+        IQTreeCache getNormalizedTreeCache() {
+            return treeCache.declareAsNormalizedForOptimizationWithEffect();
+        }
+
         /**
          * Lifts bindings but children still project away irrelevant variables
          * (needed for limiting as much as possible the number of variables on which DISTINCT is applied)
@@ -285,7 +289,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
         protected IQTree asIQTree(State<UnaryOperatorNode, InnerJoinSubTree> state) {
 
-            IQTree joinLevelTree = createJoinOrFilterOrEmptyOrLiftLeft(state.getSubTree(), treeCache.declareAsNormalizedForOptimizationWithEffect());
+            IQTree joinLevelTree = createJoinOrFilterOrEmptyOrLiftLeft(state.getSubTree());
             if (joinLevelTree.isDeclaredAsEmpty())
                 return joinLevelTree;
 
@@ -297,7 +301,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         }
 
 
-        private IQTree createJoinOrFilterOrEmptyOrLiftLeft(InnerJoinSubTree subTree, IQTreeCache normalizedTreeCache) {
+        private IQTree createJoinOrFilterOrEmptyOrLiftLeft(InnerJoinSubTree subTree) {
             switch (subTree.children().size()) {
                 case 0:
                     return iqFactory.createTrueNode();
@@ -310,7 +314,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                             .orElseGet(() -> iqFactory.createNaryIQTree(
                                     iqFactory.createInnerJoinNode(subTree.joiningCondition()),
                                     subTree.children(),
-                                    normalizedTreeCache));
+                                    getNormalizedTreeCache()));
             }
         }
 

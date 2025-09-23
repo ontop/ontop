@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -54,7 +55,8 @@ public class JoinLikeChildBindingLifter {
         ImmutableSet<Variable> otherChildrenVariables = IntStream.range(0, children.size())
                 .filter(i -> i != selectedChildPosition)
                 .mapToObj(children::get)
-                .flatMap(iq -> iq.getVariables().stream())
+                .map(IQTree::getVariables)
+                .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toSet());
 
         InjectiveSubstitution<Variable> freshRenaming = Sets.intersection(nonDownPropagableFragment.getDomain(), otherChildrenVariables).stream()
