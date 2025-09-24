@@ -239,14 +239,29 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                         .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
 
                 ImmutableSet<Variable> projectedVariables = projectedVariables(updatedLeftChild, updatedRightChild).immutableCopy();
-                var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, substitution);
 
                 return iqTreeTools.unaryIQTreeBuilder()
-                        .append(optionalConstructionNode)
+                        .append(iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, substitution))
                         .build(updatedLeftChild);
             }
             return iqFactory.createBinaryNonCommutativeIQTree(this, updatedLeftChild, updatedRightChild);
         }
+    }
+
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild,
+                                          VariableGenerator variableGenerator) {
+
+        DownPropagation dc = new DownPropagation(Optional.of(constraint), ImmutableSet.of());
+        if (dc.getConstraint()
+                .filter(c -> isRejectingRightSpecificNulls(c, leftChild, rightChild))
+                .isPresent()) {
+            IQTree innerJoinTree = transformIntoInnerJoinTree(leftChild, rightChild);
+            return dc.propagate(innerJoinTree, variableGenerator);
+        }
+
+        IQTree newLeftChild = dc.propagate(leftChild, variableGenerator);
+        return iqFactory.createBinaryNonCommutativeIQTree(this, newLeftChild, rightChild);
     }
 
     @Override
@@ -320,22 +335,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
         return rightConstraints.stream()
                 .anyMatch(c -> c.stream().noneMatch(variableNullabilityForRight::isPossiblyNullable));
-    }
-
-    @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild,
-                                          VariableGenerator variableGenerator) {
-
-        DownPropagation dc = new DownPropagation(Optional.of(constraint), ImmutableSet.of());
-        if (dc.getConstraint()
-                .filter(c -> isRejectingRightSpecificNulls(c, leftChild, rightChild))
-                .isPresent()) {
-            IQTree innerJoinTree = transformIntoInnerJoinTree(leftChild, rightChild);
-            return dc.propagate(innerJoinTree, variableGenerator);
-        }
-
-        IQTree newLeftChild = dc.propagate(leftChild, variableGenerator);
-        return iqFactory.createBinaryNonCommutativeIQTree(this, newLeftChild, rightChild);
     }
 
     @Override

@@ -256,15 +256,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children,
-                                          VariableGenerator variableGenerator) {
-        return iqFactory.createNaryIQTree(this,
-                NaryIQTreeTools.transformChildren(
-                        children,
-                        c -> c.propagateDownConstraint(constraint, variableGenerator)));
-    }
-
-    @Override
     public void validateNode(ImmutableList<IQTree> children) throws InvalidIntermediateQueryException {
         if (children.size() < 2) {
             throw new InvalidIntermediateQueryException("UNION node " + this
@@ -467,6 +458,16 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 return iqTreeTools.createUnionTree(ds.computeProjectedVariables(), updatedChildren);
         }
     }
+
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children,
+                                          VariableGenerator variableGenerator) {
+        return iqFactory.createNaryIQTree(this,
+                NaryIQTreeTools.transformChildren(
+                        children,
+                        c -> c.propagateDownConstraint(constraint, variableGenerator)));
+    }
+
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
