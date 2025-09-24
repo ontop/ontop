@@ -44,9 +44,9 @@ public class FilterNormalizerImpl implements FilterNormalizer {
      *  (so as to reduce the recursive pressure)
      */
     @Override
-    public IQTree normalizeForOptimization(FilterNode initialFilterNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        Context context = new Context(initialChild.getVariables(), variableGenerator, treeCache);
-        return context.normalize(NormalizationContext.UnarySubTree.of(initialFilterNode, initialChild));
+    public IQTree normalizeForOptimization(FilterNode filterNode, IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        Context context = new Context(child.getVariables(), variableGenerator, treeCache);
+        return context.normalize(filterNode, child);
     }
 
     private class Context extends NormalizationContext {
@@ -56,33 +56,31 @@ public class FilterNormalizerImpl implements FilterNormalizer {
         }
 
         /**
-         * A sequence of CONSTRUCT and DISTINCT,
-         * followed by an optional FILTER, followed by a child tree.
+         * A state is a sequence of CONSTRUCT and DISTINCT,
+         * followed by an optional FILTER, followed by a normalized child tree.
          *
          * The initial state has a non-empty FILTER, which can become empty
          * only after lifting a single INNER JOIN, which terminates the lifting process.
          */
 
-        IQTree normalize(UnarySubTree<FilterNode> initialSubTree) {
-            var initial = State.initial(initialSubTree);
+        IQTree normalize(FilterNode filterNode, IQTree child) {
+            var initial = State.initial(UnarySubTree.of(filterNode, normalizeSubTreeRecursively(child)));
             var state = initial.reachFixedPoint(MAX_NORMALIZATION_ITERATIONS,
-                    this::normalizeAndLiftConstructionDistinctFilterInnerJoin,
+                    this::liftThroughFilter,
                     this::simplifyAndPropagateDownConstraint);
             return asIQTree(state);
         }
 
-        State<UnaryOperatorNode, UnarySubTree<FilterNode>> normalizeAndLiftConstructionDistinctFilterInnerJoin(State<UnaryOperatorNode, UnarySubTree<FilterNode>> state) {
-            return state.replace(this::normalizeChild).reachFinal(this::liftThroughFilter);
+        State<UnaryOperatorNode, UnarySubTree<FilterNode>> liftThroughFilter(State<UnaryOperatorNode, UnarySubTree<FilterNode>> state) {
+            return state.reachFinal(this::liftThroughFilterStep);
         }
 
         /**
          * One-step lifting of CONSTRUCT, DISTINCT and FILTER nodes through the FILTER.
          * An INNER JOIN child node absorbs the FILTER, which terminates lifting
-         * (on the next iteration).
-         * The child is assumed to be normalized, so repeated applications are possible
-         * (without the need to normalize the child again).
+         * (on the next iteration). Note that the INNER JOIN needs to be normalized.
          */
-        Optional<State<UnaryOperatorNode, UnarySubTree<FilterNode>>> liftThroughFilter(State<UnaryOperatorNode, UnarySubTree<FilterNode>> state) {
+        Optional<State<UnaryOperatorNode, UnarySubTree<FilterNode>>> liftThroughFilterStep(State<UnaryOperatorNode, UnarySubTree<FilterNode>> state) {
             UnarySubTree<FilterNode> subTree = state.getSubTree();
             Optional<FilterNode> optionalFilterNode = subTree.getOptionalNode();
             if (optionalFilterNode.isEmpty())
@@ -112,13 +110,44 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
                 @Override
                 public Optional<State<UnaryOperatorNode, UnarySubTree<FilterNode>>> transformInnerJoin(NaryIQTree tree, InnerJoinNode node, ImmutableList <IQTree> children) {
-                    IQTree newChild = iqTreeTools.createInnerJoinTree(
-                            Optional.of(iqTreeTools.getConjunction(
-                                    filterNode.getFilterCondition(), node.getOptionalFilterCondition())),
-                            children);
+                    IQTree newChild = normalizeSubTreeRecursively(
+                            iqTreeTools.createInnerJoinTree(
+                                    Optional.of(iqTreeTools.getConjunction(
+                                            filterNode.getFilterCondition(), node.getOptionalFilterCondition())),
+                                    children));
                     return Optional.of(state.replace(UnarySubTree.finalSubTree(newChild)));
                 }
             });
+        }
+
+        State<UnaryOperatorNode, UnarySubTree<FilterNode>> simplifyAndPropagateDownConstraint(State<UnaryOperatorNode, UnarySubTree<FilterNode>> state) {
+            UnarySubTree<FilterNode> subTree = state.getSubTree();
+            if (subTree.getOptionalNode().isEmpty())
+                return state;
+
+            FilterNode filterNode = subTree.getOptionalNode().get();
+            IQTree child = subTree.getChild();
+            try {
+                var childVariableNullability = child.getVariableNullability();
+
+                // TODO: also consider the constraint for simplifying the condition
+                var simplifiedFilterCondition = conditionSimplifier.simplifyCondition(
+                        filterNode.getFilterCondition(), ImmutableList.of(child), childVariableNullability);
+
+                var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
+                        new DownPropagation(child.getVariables()), simplifiedFilterCondition, childVariableNullability);
+
+                var newChild = normalizeSubTreeRecursively(
+                        extendedDownConstraint.propagate(child, variableGenerator));
+
+                return state.lift(
+                        iqTreeTools.createOptionalConstructionNode(child::getVariables, simplifiedFilterCondition.getSubstitution()),
+                        UnarySubTree.of(iqTreeTools.createOptionalFilterNode(simplifiedFilterCondition.getOptionalExpression()),
+                                newChild));
+            }
+            catch (UnsatisfiableConditionException e) {
+                return State.initial(UnarySubTree.finalSubTree(createEmptyNode()));
+            }
         }
 
         /**
@@ -126,7 +155,6 @@ public class FilterNormalizerImpl implements FilterNormalizer {
          */
         IQTree asIQTree(State<UnaryOperatorNode, UnarySubTree<FilterNode>> state) {
             UnarySubTree<FilterNode> subTree = state.getSubTree();
-            // deals with EMPTY and empty VALUES (but normalization of the child replaces it with EMPTY)
             if (subTree.getChild().isDeclaredAsEmpty())
                 return createEmptyNode();
 
@@ -135,33 +163,6 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                     .build(subTree.getChild());
 
             return asIQTree(state.getAncestors(), filterLevelTree);
-        }
-
-        State<UnaryOperatorNode, UnarySubTree<FilterNode>> simplifyAndPropagateDownConstraint(State<UnaryOperatorNode, UnarySubTree<FilterNode>> state) {
-            UnarySubTree<FilterNode> subTree = state.getSubTree();
-            if (subTree.getOptionalNode().isEmpty())
-                return state;
-
-            try {
-                var childVariableNullability = subTree.getChild().getVariableNullability();
-
-                // TODO: also consider the constraint for simplifying the condition
-                var simplifiedFilterCondition = conditionSimplifier.simplifyCondition(
-                        subTree.getOptionalNode().get().getFilterCondition(), ImmutableList.of(subTree.getChild()), childVariableNullability);
-
-                var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
-                        new DownPropagation(projectedVariables), simplifiedFilterCondition, childVariableNullability);
-
-                var newChild = extendedDownConstraint.propagate(subTree.getChild(), variableGenerator);
-
-                return state.lift(
-                        iqTreeTools.createOptionalConstructionNode(subTree.getChild()::getVariables, simplifiedFilterCondition.getSubstitution()),
-                        UnarySubTree.of(iqTreeTools.createOptionalFilterNode(simplifiedFilterCondition.getOptionalExpression()),
-                                newChild));
-            }
-            catch (UnsatisfiableConditionException e) {
-                return State.initial(UnarySubTree.finalSubTree(createEmptyNode()));
-            }
         }
     }
 }
