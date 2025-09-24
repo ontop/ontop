@@ -332,7 +332,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                     if (tbox.classes().contains(iri)) {
                         OClass c = tbox.classes().get(iri);
                         OClass equivalent = (OClass) tbox.classesDAG().getCanonicalForm(c);
-                        return dataNode.newAtom(getAtom(arguments.get(0), equivalent));
+                        return iqFactory.createIntensionalDataNode(getAtom(arguments.get(0), equivalent));
                     }
                 }
                 else {
@@ -342,12 +342,12 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                         if (tbox.objectProperties().contains(iri)) {
                             ObjectPropertyExpression ope = tbox.objectProperties().get(iri);
                             ObjectPropertyExpression equivalent = tbox.objectPropertiesDAG().getCanonicalForm(ope);
-                            return dataNode.newAtom(getAtom(arguments.get(0), equivalent, arguments.get(2)));
+                            return iqFactory.createIntensionalDataNode(getAtom(arguments.get(0), equivalent, arguments.get(2)));
                         }
                         else if (tbox.dataProperties().contains(iri)) {
                             DataPropertyExpression dpe = tbox.dataProperties().get(iri);
                             DataPropertyExpression equivalent = tbox.dataPropertiesDAG().getCanonicalForm(dpe);
-                            return dataNode.newAtom(getAtom(arguments.get(0), equivalent, arguments.get(2)));
+                            return iqFactory.createIntensionalDataNode(getAtom(arguments.get(0), equivalent, arguments.get(2)));
                         }
                     }
                 }

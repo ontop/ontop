@@ -272,29 +272,17 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             return transformIntoInnerJoinTree(leftChild, rightChild)
                     .applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
 
-        IQTree newLeftChild = leftChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
-        IQTree newRightChild = rightChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
-
-        Optional<ImmutableExpression> newJoinCondition = getOptionalFilterCondition()
-                .map(descendingSubstitution::apply);
-
-        return iqTreeTools.createLeftJoinTree(newJoinCondition, newLeftChild, newRightChild);
+        return iqTreeTools.createLeftJoinTree(
+                getOptionalFilterCondition().map(descendingSubstitution::apply),
+                leftChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator),
+                rightChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree leftChild, IQTree rightChild, IQTreeCache treeCache) {
-        IQTree newLeftChild = leftChild.applyFreshRenaming(renamingSubstitution);
-        IQTree newRightChild = rightChild.applyFreshRenaming(renamingSubstitution);
-
+    public LeftJoinNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
         Optional<ImmutableExpression> newCondition = getOptionalFilterCondition()
                 .map(renamingSubstitution::apply);
-
-        LeftJoinNode newLeftJoinNode = newCondition.equals(getOptionalFilterCondition())
-                ? this
-                : iqFactory.createLeftJoinNode(newCondition);
-
-        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
-        return iqFactory.createBinaryNonCommutativeIQTree(newLeftJoinNode, newLeftChild, newRightChild, newTreeCache);
+        return iqFactory.createLeftJoinNode(newCondition);
     }
 
     @Override

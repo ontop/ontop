@@ -194,17 +194,9 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree child, IQTreeCache treeCache) {
-        IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
-
+    public FilterNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
         ImmutableExpression newCondition = renamingSubstitution.apply(getFilterCondition());
-
-        FilterNode newFilterNode = newCondition.equals(getFilterCondition())
-                ? this
-                : iqFactory.createFilterNode(newCondition);
-
-        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
-        return iqFactory.createUnaryIQTree(newFilterNode, newChild, newTreeCache);
+        return iqFactory.createFilterNode(newCondition);
     }
 
 }

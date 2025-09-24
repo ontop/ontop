@@ -174,28 +174,19 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
             VariableGenerator variableGenerator) {
 
-        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(
-                children,
-                c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
-
         return iqTreeTools.createInnerJoinTree(
                 getOptionalFilterCondition().map(descendingSubstitution::apply),
-                newChildren);
+                NaryIQTreeTools.transformChildren(
+                        children, c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator)));
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, ImmutableList<IQTree> children,
-                                     IQTreeCache treeCache) {
-        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
-                c -> c.applyFreshRenaming(renamingSubstitution));
+    public InnerJoinNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
 
         Optional<ImmutableExpression> newCondition = getOptionalFilterCondition()
                 .map(renamingSubstitution::apply);
 
-        InnerJoinNode newJoinNode = createInnerJoinNode(newCondition);
-
-        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
-        return iqFactory.createNaryIQTree(newJoinNode, newChildren, newTreeCache);
+        return createInnerJoinNode(newCondition);
     }
 
     @Override

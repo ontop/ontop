@@ -67,34 +67,24 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
 
-        Optional<OrderByNode> newOrderByNode = applySubstitution(descendingSubstitution);
-        IQTree newChild = child.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator);
-
         return iqTreeTools.unaryIQTreeBuilder()
-                .append(newOrderByNode)
-                .build(newChild);
+                .append(applySubstitution(descendingSubstitution))
+                .build(child.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator));
     }
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
 
-        Optional<OrderByNode> newOrderByNode = applySubstitution(descendingSubstitution);
-        IQTree newChild = child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
-
         return iqTreeTools.unaryIQTreeBuilder()
-                .append(newOrderByNode)
-                .build(newChild);
+                .append(applySubstitution(descendingSubstitution))
+                .build(child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree child, IQTreeCache treeCache) {
-        IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
-
-        OrderByNode newOrderByNode = applySubstitution(renamingSubstitution)
+    public OrderByNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return applySubstitution(renamingSubstitution)
                 .orElseThrow(() -> new MinorOntopInternalBugException("The order by was expected to be kept"));
-
-        return iqFactory.createUnaryIQTree(newOrderByNode, newChild, treeCache.applyFreshRenaming(renamingSubstitution));
     }
 
     @Override

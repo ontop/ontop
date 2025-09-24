@@ -15,8 +15,6 @@ public interface IntensionalDataNode extends LeafIQTree {
 
     DataAtom<AtomPredicate> getProjectionAtom();
 
-    IntensionalDataNode newAtom(DataAtom<AtomPredicate> newAtom);
-
     @Override
     default <T> T acceptVisitor(IQVisitor<T> visitor) {
         return visitor.transformIntensionalData(this);

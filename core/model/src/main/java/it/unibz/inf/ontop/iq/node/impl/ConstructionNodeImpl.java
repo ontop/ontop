@@ -500,15 +500,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree child, IQTreeCache treeCache) {
-        IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
-
-        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
+    public ConstructionNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return iqFactory.createConstructionNode(
                 substitutionFactory.apply(renamingSubstitution, projectedVariables),
                 substitutionFactory.rename(renamingSubstitution, substitution));
-
-        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
-        return iqFactory.createUnaryIQTree(newConstructionNode, newChild, newTreeCache);
     }
 
     @Override

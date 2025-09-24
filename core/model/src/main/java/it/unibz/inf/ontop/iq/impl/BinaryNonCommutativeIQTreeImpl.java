@@ -90,7 +90,11 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     @Override
     protected IQTree applyNonEmptyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        return getRootNode().applyFreshRenaming(renamingSubstitution, getLeftChild(), getRightChild(), getTreeCache());
+        return iqFactory.createBinaryNonCommutativeIQTree(
+                getRootNode().applyFreshRenaming(renamingSubstitution),
+                getLeftChild().applyFreshRenaming(renamingSubstitution),
+                getRightChild().applyFreshRenaming(renamingSubstitution),
+                getTreeCache().applyFreshRenaming(renamingSubstitution));
     }
 
     @Override

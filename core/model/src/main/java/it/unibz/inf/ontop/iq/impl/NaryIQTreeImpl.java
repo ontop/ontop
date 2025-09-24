@@ -74,7 +74,11 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
 
     @Override
     protected IQTree applyNonEmptyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        return getRootNode().applyFreshRenaming(renamingSubstitution, getChildren(), getTreeCache());
+        return iqFactory.createNaryIQTree(
+                getRootNode().applyFreshRenaming(renamingSubstitution),
+                NaryIQTreeTools.transformChildren(getChildren(),
+                        c -> c.applyFreshRenaming(renamingSubstitution)),
+                getTreeCache().applyFreshRenaming(renamingSubstitution));
     }
 
     @Override

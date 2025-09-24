@@ -31,7 +31,7 @@ public interface UnaryOperatorNode extends QueryNode {
     IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                         IQTree child, VariableGenerator variableGenerator);
 
-    IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree child, IQTreeCache treeCache);
+    UnaryOperatorNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
     VariableNullability getVariableNullability(IQTree child);
 

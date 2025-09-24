@@ -100,7 +100,7 @@ public class ExplicitEqualityTransformerImpl extends DelegatingIQTreeVariableGen
             return iqTreeTools.unaryIQTreeBuilder()
                     .append(iqFactory.createConstructionNode(dn.getVariables()))
                     .append(iqFactory.createFilterNode(filterExpression))
-                    .build(dn.newAtom(atom));
+                    .build(iqFactory.createIntensionalDataNode(atom));
         }
 
         @Override

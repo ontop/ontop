@@ -151,7 +151,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 descendingSubstitution.removeFromDomain(blockedSubstitution.getDomain()));
 
         UnaryIQTree flattenTree = iqFactory.createUnaryIQTree(
-                applySubstitution(newDescendingSubstitution),
+                applyDescendingSubstitution(newDescendingSubstitution),
                 propagateToChild.apply(newDescendingSubstitution));
 
         if (blockedSubstitution.isEmpty())
@@ -299,10 +299,8 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree child, IQTreeCache treeCache) {
-        IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
-        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
-        return iqFactory.createUnaryIQTree(applySubstitution(renamingSubstitution), newChild, newTreeCache);
+    public FlattenNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return applyDescendingSubstitution(renamingSubstitution);
     }
 
     @Override
@@ -330,7 +328,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     /**
      * Avoids creating an instance if unnecessary (a similar optimization is implemented for Filter Nodes)
      */
-    private FlattenNode applySubstitution(Substitution<? extends VariableOrGroundTerm> sub) {
+    private FlattenNode applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> sub) {
         Variable sFlattenedVar = applySubstitution(flattenedVariable, sub);
         Variable sOutputVar = applySubstitution(outputVariable, sub);
         Optional<Variable> sIndexVar = indexVariable.map(index -> applySubstitution(index, sub));

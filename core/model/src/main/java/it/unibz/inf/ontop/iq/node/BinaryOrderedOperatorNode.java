@@ -47,8 +47,7 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator);
 
-    IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree leftChild, IQTree rightChild,
-                              IQTreeCache treeCache);
+    BinaryNonCommutativeOperatorNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
     boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild);
 

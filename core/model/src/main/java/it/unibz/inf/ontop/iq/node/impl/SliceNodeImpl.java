@@ -92,10 +92,8 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree child, IQTreeCache treeCache) {
-        IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
-        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
-        return iqFactory.createUnaryIQTree(this, newChild, newTreeCache);
+    public SliceNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return this;
     }
 
     @Override

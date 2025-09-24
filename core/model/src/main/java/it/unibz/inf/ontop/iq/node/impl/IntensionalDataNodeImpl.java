@@ -56,11 +56,6 @@ public class IntensionalDataNodeImpl extends LeafIQTreeImpl implements Intension
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        return applyDescendingSubstitutionWithoutOptimizing(freshRenamingSubstitution);
-    }
-
-    @Override
     public VariableNullability getVariableNullability() {
         return coreUtilsFactory.createEmptyVariableNullability(getVariables());
     }
@@ -99,22 +94,22 @@ public class IntensionalDataNodeImpl extends LeafIQTreeImpl implements Intension
         return INTENSIONAL_DATA_NODE_STR + " " + getProjectionAtom();
     }
 
+
     @Override
-    public IntensionalDataNode newAtom(DataAtom<AtomPredicate> newAtom) {
-        return iqFactory.createIntensionalDataNode(newAtom);
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
+        return applyDescendingSubstitution(freshRenamingSubstitution);
     }
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
-        return applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution);
+        return applyDescendingSubstitution(descendingSubstitution);
     }
 
-    private IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+    private IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         DataAtom<AtomPredicate> atom = getProjectionAtom();
         DataAtom<AtomPredicate> newAtom = atomFactory.getDataAtom(atom.getPredicate(), substitutionFactory.onVariableOrGroundTerms().applyToTerms(descendingSubstitution, atom.getArguments()));
-        return newAtom(newAtom);
+        return iqFactory.createIntensionalDataNode(newAtom);
     }
 
     /**

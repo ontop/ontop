@@ -32,8 +32,7 @@ public interface NaryOperatorNode extends QueryNode {
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             ImmutableList<IQTree> children, VariableGenerator variableGenerator);
 
-    IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, ImmutableList<IQTree> children,
-                              IQTreeCache treeCache);
+    NaryOperatorNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
     VariableNullability getVariableNullability(ImmutableList<IQTree> children);
 
