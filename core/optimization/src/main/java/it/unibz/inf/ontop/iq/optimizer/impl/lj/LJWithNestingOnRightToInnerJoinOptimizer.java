@@ -122,9 +122,8 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements IQTreeVariableG
                     .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
             ImmutableExpression renamedCondition = renaming.apply(leftJoin.joinCondition().get());
-            Substitution<ImmutableFunctionalTerm> newSubstitution = renaming.builder()
-                    .transform(t -> termFactory.getIfElseNull(renamedCondition, t))
-                    .build();
+            Substitution<ImmutableFunctionalTerm> newSubstitution = renaming
+                    .transform(t -> termFactory.getIfElseNull(renamedCondition, t));
 
             IQTree result = iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(joinTree.getVariables(), newSubstitution),
