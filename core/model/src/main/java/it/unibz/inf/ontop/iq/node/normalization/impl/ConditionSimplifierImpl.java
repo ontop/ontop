@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
@@ -14,6 +15,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -36,13 +38,6 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
         this.iqTreeTools = iqTreeTools;
     }
 
-
-    @Override
-    public ExpressionAndSubstitution simplifyCondition(ImmutableExpression expression, ImmutableList<IQTree> children,
-                                                       VariableNullability variableNullability)
-            throws UnsatisfiableConditionException {
-        return simplifyCondition(Optional.of(expression), ImmutableSet.of(), children, variableNullability);
-    }
 
     @Override
     public ExpressionAndSubstitution simplifyCondition(Optional<ImmutableExpression> nonOptimizedExpression,
@@ -129,8 +124,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
         return new ExpressionAndSubstitutionImpl(newExpression, ascendingSubstitution);
     }
 
-    @Override
-    public DownPropagation extendAndSimplifyDownConstraint(DownPropagation downPropagation,
+    private DownPropagation extendAndSimplifyDownConstraint(DownPropagation downPropagation,
                                                            ExpressionAndSubstitution conditionSimplificationResults,
                                                            VariableNullability childVariableNullability) throws UnsatisfiableConditionException {
 
@@ -154,6 +148,50 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
         return new DownPropagation(conditionSimplificationResults.getOptionalExpression(), downSubstitution, downPropagation.getVariables());
     }
 
+    @Override
+    public ExpressionAndSubstitutionAndChildren simplifyAndPropagate(DownPropagation downPropagation, Optional<ImmutableExpression> expression, ImmutableList<IQTree> children,
+                                                                     VariableNullability variableNullability, VariableGenerator variableGenerator) throws UnsatisfiableConditionException {
+        // TODO: also consider the constraint for simplifying the condition
+        var unoptimizedExpression = downPropagation.applySubstitution(expression);
+
+        var simplifiedExpression = simplifyCondition(unoptimizedExpression, ImmutableSet.of(), children, variableNullability);
+
+        var extendedDownConstraint = extendAndSimplifyDownConstraint(downPropagation, simplifiedExpression, downPropagation.extendVariableNullability(variableNullability));
+
+        var updatedChildren = extendedDownConstraint.propagate(children, variableGenerator);
+
+        var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(downPropagation::computeProjectedVariables, simplifiedExpression.getSubstitution());
+
+        return new ExpressionAndSubstitutionAndChildrenImpl(optionalConstructionNode, simplifiedExpression.getOptionalExpression(), updatedChildren);
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private static class ExpressionAndSubstitutionAndChildrenImpl implements ExpressionAndSubstitutionAndChildren {
+        private final Optional<ConstructionNode> optionalConstructionNode;
+        private final Optional<ImmutableExpression> optionalExpression;
+        private final ImmutableList<IQTree> children;
+
+        private ExpressionAndSubstitutionAndChildrenImpl(Optional<ConstructionNode> optionalConstructionNode, Optional<ImmutableExpression> optionalExpression, ImmutableList<IQTree> children) {
+            this.optionalConstructionNode = optionalConstructionNode;
+            this.optionalExpression = optionalExpression;
+            this.children = children;
+        }
+
+        @Override
+        public Optional<ConstructionNode> getConstructionNode() {
+            return optionalConstructionNode;
+        }
+
+        @Override
+        public Optional<ImmutableExpression> getOptionalExpression() {
+            return optionalExpression;
+        }
+
+        @Override
+        public ImmutableList<IQTree> getChildren() {
+            return children;
+        }
+    }
 
     /**
      * Empty means true

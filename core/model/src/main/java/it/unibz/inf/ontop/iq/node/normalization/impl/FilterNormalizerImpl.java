@@ -130,20 +130,17 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             try {
                 var childVariableNullability = child.getVariableNullability();
 
-                // TODO: also consider the constraint for simplifying the condition
-                var simplifiedFilterCondition = conditionSimplifier.simplifyCondition(
-                        filterNode.getFilterCondition(), ImmutableList.of(child), childVariableNullability);
-
-                var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
-                        new DownPropagation(child.getVariables()), simplifiedFilterCondition, childVariableNullability);
-
-                var newChild = normalizeSubTreeRecursively(
-                        extendedDownConstraint.propagate(child, variableGenerator));
+                var simplification = conditionSimplifier.simplifyAndPropagate(
+                        new DownPropagation(child.getVariables()),
+                        Optional.of(filterNode.getFilterCondition()),
+                        ImmutableList.of(child),
+                        childVariableNullability,
+                        variableGenerator);
 
                 return state.lift(
-                        iqTreeTools.createOptionalConstructionNode(child::getVariables, simplifiedFilterCondition.getSubstitution()),
-                        UnarySubTree.of(iqTreeTools.createOptionalFilterNode(simplifiedFilterCondition.getOptionalExpression()),
-                                newChild));
+                        simplification.getConstructionNode(),
+                        UnarySubTree.of(iqTreeTools.createOptionalFilterNode(simplification.getOptionalExpression()),
+                                normalizeSubTreeRecursively(simplification.getChildren().get(0))));
             }
             catch (UnsatisfiableConditionException e) {
                 return State.initial(UnarySubTree.finalSubTree(createEmptyNode()));

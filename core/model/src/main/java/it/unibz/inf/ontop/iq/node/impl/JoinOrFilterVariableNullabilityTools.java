@@ -19,14 +19,12 @@ public class JoinOrFilterVariableNullabilityTools {
 
     private final TermNullabilityEvaluator nullabilityEvaluator;
     private final CoreUtilsFactory coreUtilsFactory;
-    private final IQTreeTools iqTreeTools;
 
     @Inject
     private JoinOrFilterVariableNullabilityTools(TermNullabilityEvaluator nullabilityEvaluator,
-                                                 CoreUtilsFactory coreUtilsFactory, IQTreeTools iqTreeTools) {
+                                                 CoreUtilsFactory coreUtilsFactory) {
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.coreUtilsFactory = coreUtilsFactory;
-        this.iqTreeTools = iqTreeTools;
     }
 
     public VariableNullability getChildrenVariableNullability(ImmutableList<IQTree> children) {

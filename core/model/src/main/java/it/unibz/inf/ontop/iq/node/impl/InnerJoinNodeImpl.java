@@ -134,29 +134,34 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                               VariableGenerator variableGenerator) {
 
         DownPropagation downPropagation = new DownPropagation(constraint, descendingSubstitution, NaryIQTreeTools.projectedVariables(children));
-
-        var unoptimizedExpression = downPropagation.applySubstitution(getOptionalFilterCondition());
-
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
                 downPropagation.computeProjectedVariables());
 
+        return propagateDownConstraint(downPropagation, children, simplifiedChildFutureVariableNullability, variableGenerator);
+    }
+
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children,
+                                          VariableGenerator variableGenerator) {
+
+        DownPropagation downPropagation = new DownPropagation(Optional.of(constraint), NaryIQTreeTools.projectedVariables(children));
+        VariableNullability extendedChildrenVariableNullability = downPropagation.extendVariableNullability(variableNullabilityTools.getChildrenVariableNullability(children));
+
+        return propagateDownConstraint(downPropagation, children, extendedChildrenVariableNullability, variableGenerator);
+    }
+
+    private IQTree propagateDownConstraint(DownPropagation downPropagation,ImmutableList<IQTree> children, VariableNullability variableNullability,
+                                           VariableGenerator variableGenerator) {
         try {
-            ExpressionAndSubstitution simplifiedJoinCondition = conditionSimplifier.simplifyCondition(
-                    unoptimizedExpression, ImmutableSet.of(), children, simplifiedChildFutureVariableNullability);
+            var simplification = conditionSimplifier.simplifyAndPropagate(downPropagation,
+                    getOptionalFilterCondition(), children, variableNullability, variableGenerator);
 
-            var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
-                    downPropagation, simplifiedJoinCondition, downPropagation.extendVariableNullability(simplifiedChildFutureVariableNullability));
-
-            ImmutableList<IQTree> newChildren = extendedDownConstraint.propagate(children, variableGenerator);
-
-            IQTree joinTree = iqTreeTools.createInnerJoinTree(
-                    simplifiedJoinCondition.getOptionalExpression(),
-                    newChildren);
+            NaryIQTree joinTree = iqFactory.createNaryIQTree(
+                    createInnerJoinNode(simplification.getOptionalExpression()),
+                    simplification.getChildren());
 
             return iqTreeTools.unaryIQTreeBuilder()
-                    .append(iqTreeTools.createOptionalConstructionNode(
-                            downPropagation::computeProjectedVariables,
-                            simplifiedJoinCondition.getSubstitution()))
+                    .append(simplification.getConstructionNode())
                     .build(joinTree);
         }
         catch (UnsatisfiableConditionException e) {
@@ -417,45 +422,10 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
 
-    @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children,
-                                          VariableGenerator variableGenerator) {
-
-        DownPropagation downPropagation = new DownPropagation(Optional.of(constraint), NaryIQTreeTools.projectedVariables(children));
-
-        VariableNullability extendedChildrenVariableNullability = downPropagation.extendVariableNullability(variableNullabilityTools.getChildrenVariableNullability(children));
-
-        try {
-            var simplifiedJoinCondition = conditionSimplifier.simplifyCondition(
-                    getOptionalFilterCondition(), ImmutableSet.of(), children, extendedChildrenVariableNullability);
-
-            var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
-                    downPropagation, simplifiedJoinCondition, extendedChildrenVariableNullability);
-
-            //TODO: propagate different constraints to different children
-            ImmutableList<IQTree> newChildren = extendedDownConstraint.propagate(
-                    children, variableGenerator);
-
-            InnerJoinNode newJoin = createInnerJoinNode(simplifiedJoinCondition.getOptionalExpression());
-
-            NaryIQTree joinTree = iqFactory.createNaryIQTree(newJoin, newChildren);
-
-            return iqTreeTools.unaryIQTreeBuilder()
-                    .append(iqTreeTools.createOptionalConstructionNode(
-                            downPropagation::computeProjectedVariables,
-                            simplifiedJoinCondition.getSubstitution()))
-                    .build(joinTree);
-        }
-        catch (UnsatisfiableConditionException e) {
-            return iqTreeTools.createEmptyNode(downPropagation);
-        }
-    }
 
     private InnerJoinNode createInnerJoinNode(Optional<ImmutableExpression> optionalExpression) {
          return optionalExpression.equals(getOptionalFilterCondition())
                 ? this
                 : iqFactory.createInnerJoinNode(optionalExpression);
     }
-
-
 }

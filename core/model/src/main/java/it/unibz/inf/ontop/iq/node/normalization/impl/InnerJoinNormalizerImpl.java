@@ -70,8 +70,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
     }
 
     /**
-     * A sequence of ConstructionNode and DistinctNode, followed by an InnerJoinNode,
-     * followed by its children trees
+     * A state is a sequence of CONSTRUCTION and DISTINCT,
+     * followed by an INNER JOIN, followed by its children trees
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static class InnerJoinSubTree {
@@ -244,21 +244,16 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 // cache in the state?
                 var childrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(subTree.children());
 
-                var simplifiedJoinCondition = conditionSimplifier.simplifyCondition(
-                        subTree.joiningCondition(), ImmutableSet.of(), subTree.children(), childrenVariableNullability);
+                var simplification = conditionSimplifier.simplifyAndPropagate(
+                        new DownPropagation(subTree.projectedVariables()),
+                        subTree.joiningCondition(),
+                        subTree.children(),
+                        childrenVariableNullability,
+                        variableGenerator);
 
-                var extendedDownConstraint = conditionSimplifier.extendAndSimplifyDownConstraint(
-                        new DownPropagation(projectedVariables), simplifiedJoinCondition, childrenVariableNullability);
-
-                ImmutableList<IQTree> newChildren = extendedDownConstraint.propagate(subTree.children(), variableGenerator);
-
-                Optional<ImmutableExpression> newJoiningCondition = simplifiedJoinCondition.getOptionalExpression();
-
-                Optional<ConstructionNode> newParent = iqTreeTools.createOptionalConstructionNode(
-                        subTree::projectedVariables,
-                        simplifiedJoinCondition.getSubstitution());
-
-                return state.lift(newParent, new InnerJoinSubTree(newJoiningCondition, newChildren));
+                return state.lift(
+                        simplification.getConstructionNode(),
+                        new InnerJoinSubTree(simplification.getOptionalExpression(), simplification.getChildren()));
             }
             catch (UnsatisfiableConditionException e) {
                 return declareAsEmpty();
