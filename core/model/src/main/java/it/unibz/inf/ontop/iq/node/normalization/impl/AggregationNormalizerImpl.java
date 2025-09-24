@@ -135,7 +135,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     return createEmptyNode();
 
                 Substitution<ImmutableTerm> newSubstitution = aggregationNode.getSubstitution()
-                        .transform(this::simplifyEmptyAggregate);
+                        .transform(this::simplifyAggregateOnEmptyBag);
 
                 return iqFactory.createUnaryIQTree(
                         iqFactory.createConstructionNode(aggregationNode.getVariables(), newSubstitution),
@@ -155,7 +155,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             return asIQTree(finalState);
         }
 
-        private ImmutableTerm simplifyEmptyAggregate(ImmutableFunctionalTerm aggregateTerm) {
+        private ImmutableTerm simplifyAggregateOnEmptyBag(ImmutableFunctionalTerm aggregateTerm) {
             FunctionSymbol functionSymbol = aggregateTerm.getFunctionSymbol();
             if (functionSymbol instanceof AggregationFunctionSymbol) {
                 return ((AggregationFunctionSymbol) functionSymbol).evaluateEmptyBag(termFactory);
