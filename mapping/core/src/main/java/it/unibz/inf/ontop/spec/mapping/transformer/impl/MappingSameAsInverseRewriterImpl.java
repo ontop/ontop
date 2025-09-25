@@ -4,7 +4,6 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -25,18 +24,18 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
 
     private final AtomFactory atomFactory;
     private final IntermediateQueryFactory iqFactory;
-    private final QueryTransformerFactory transformerFactory;
+    private final QueryRenamer queryRenamer;
     private final SubstitutionFactory substitutionFactory;
     private final boolean enabled;
 
     @Inject
     private MappingSameAsInverseRewriterImpl(AtomFactory atomFactory, IntermediateQueryFactory iqFactory,
-                                             QueryTransformerFactory transformerFactory,
+                                             QueryRenamer queryRenamer,
                                              SubstitutionFactory substitutionFactory,
                                              OntopMappingSettings settings) {
         this.atomFactory = atomFactory;
         this.iqFactory = iqFactory;
-        this.transformerFactory = transformerFactory;
+        this.queryRenamer = queryRenamer;
         this.substitutionFactory = substitutionFactory;
         this.enabled = settings.isSameAsInMappingsEnabled();
     }
@@ -77,6 +76,6 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
                 substitutionFactory.getSubstitution(originalSubject, newObject, originalObject, newSubject).injective();
 
         return assertion.copyOf(iqFactory.createIQ(newProjectionAtom,
-                transformerFactory.createRenamer(renamingSubstitution).transform(assertion.getQuery()).getTree()));
+                queryRenamer.applyInDepthRenaming(renamingSubstitution, assertion.getQuery()).getTree()));
     }
 }

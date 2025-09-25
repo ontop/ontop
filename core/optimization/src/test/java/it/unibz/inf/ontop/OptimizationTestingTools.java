@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -40,7 +41,7 @@ public class OptimizationTestingTools {
     public static final TermFactory TERM_FACTORY;
     public static final FunctionSymbolFactory FUNCTION_SYMBOL_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
-    public static final QueryTransformerFactory TRANSFORMER_FACTORY;
+    public static final QueryRenamer QUERY_RENAMER;
     public static final OptimizerFactory OPTIMIZER_FACTORY;
     public static final ExplicitEqualityTransformer EXPLICIT_EQUALITY_TRANSFORMER;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
@@ -127,7 +128,7 @@ public class OptimizationTestingTools {
         UNION_AND_BINDING_LIFT_OPTIMIZER = injector.getInstance(UnionAndBindingLiftOptimizer.class);
         EXPLICIT_EQUALITY_TRANSFORMER = injector.getInstance(ExplicitEqualityTransformer.class);
         PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER = injector.getInstance(BooleanExpressionPushDownTransformer.class);
-        TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
+        QUERY_RENAMER = injector.getInstance(QueryRenamer.class);
         OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
         GENERAL_STRUCTURAL_AND_SEMANTIC_IQ_OPTIMIZER = injector.getInstance(GeneralStructuralAndSemanticIQOptimizer.class);

@@ -5,11 +5,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -28,16 +28,16 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final CoreUtilsFactory coreUtilsFactory;
-    private final QueryTransformerFactory transformerFactory;
+    private final QueryRenamer queryRenamer;
     private final IQTreeTools iqTreeTools;
 
     @Inject
     private UnionBasedQueryMergerImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
-                                      CoreUtilsFactory coreUtilsFactory, QueryTransformerFactory transformerFactory, IQTreeTools iqTreeTools) {
+                                      CoreUtilsFactory coreUtilsFactory, QueryRenamer queryRenamer, IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
-        this.transformerFactory = transformerFactory;
+        this.queryRenamer = queryRenamer;
         this.iqTreeTools = iqTreeTools;
     }
 
@@ -84,7 +84,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                                     .removeFromDomain(disjointVariableSetRenaming.getRangeSet())
                                     .injective();
 
-                    return transformerFactory.createRenamer(renamingSubstitution).transform(def.getTree());
+                    return queryRenamer.applyInDepthRenaming(renamingSubstitution, def.getTree());
                 });
 
         ImmutableSet<Variable> unionVariables = projectionAtom.getVariables();

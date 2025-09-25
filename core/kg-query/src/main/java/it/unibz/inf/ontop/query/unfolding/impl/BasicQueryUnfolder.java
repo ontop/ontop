@@ -8,10 +8,10 @@ import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryRuntimeException;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
@@ -32,7 +32,7 @@ public class BasicQueryUnfolder extends AbstractIQOptimizer implements QueryUnfo
 
     private final Mapping mapping;
     private final SubstitutionFactory substitutionFactory;
-    private final QueryTransformerFactory transformerFactory;
+    private final QueryRenamer queryRenamer;
     private final UnionBasedQueryMerger queryMerger;
 
     private final IQTreeVariableGeneratorTransformer transformer;
@@ -44,12 +44,12 @@ public class BasicQueryUnfolder extends AbstractIQOptimizer implements QueryUnfo
     private BasicQueryUnfolder(@Assisted Mapping mapping,
                                IntermediateQueryFactory iqFactory,
                                SubstitutionFactory substitutionFactory,
-                               QueryTransformerFactory transformerFactory,
+                               QueryRenamer queryRenamer,
                                UnionBasedQueryMerger queryMerger) {
         super(iqFactory);
         this.mapping = mapping;
         this.substitutionFactory = substitutionFactory;
-        this.transformerFactory = transformerFactory;
+        this.queryRenamer = queryRenamer;
         this.queryMerger = queryMerger;
 
         this.transformer = IQTreeVariableGeneratorTransformer.of(BasicQueryUnfoldingTransformer::new);
@@ -67,7 +67,7 @@ public class BasicQueryUnfolder extends AbstractIQOptimizer implements QueryUnfo
             super(variableGenerator,
                     BasicQueryUnfolder.this.iqFactory,
                     BasicQueryUnfolder.this.substitutionFactory,
-                    BasicQueryUnfolder.this.transformerFactory);
+                    BasicQueryUnfolder.this.queryRenamer);
         }
 
         @Override

@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.Ontop;
@@ -29,7 +30,7 @@ import java.util.Optional;
 public class MappingCanonicalTransformerImpl implements MappingCanonicalTransformer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final QueryTransformerFactory transformerFactory;
+    private final QueryRenamer queryRenamer;
     private final SubstitutionFactory substitutionFactory;
     private final AtomFactory atomFactory;
     private final UnionBasedQueryMerger queryMerger;
@@ -39,10 +40,10 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
 
     @Inject
     private MappingCanonicalTransformerImpl(CoreSingletons coreSingletons,
-                                            QueryTransformerFactory transformerFactory,
+                                            QueryRenamer queryRenamer,
                                             UnionBasedQueryMerger queryMerger,
                                             OntopMappingSettings settings) {
-        this.transformerFactory = transformerFactory;
+        this.queryRenamer = queryRenamer;
         this.settings = settings;
         this.coreUtilsFactory = coreSingletons.getCoreUtilsFactory();
         this.iqFactory = coreSingletons.getIQFactory();
@@ -166,7 +167,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                 super(variableGenerator,
                         MappingCanonicalTransformerImpl.this.iqFactory,
                         MappingCanonicalTransformerImpl.this.substitutionFactory,
-                        MappingCanonicalTransformerImpl.this.transformerFactory);
+                        MappingCanonicalTransformerImpl.this.queryRenamer);
             }
 
             @Override

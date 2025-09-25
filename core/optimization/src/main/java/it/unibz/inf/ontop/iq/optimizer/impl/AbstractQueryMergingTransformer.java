@@ -2,10 +2,10 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -24,20 +24,20 @@ import java.util.Optional;
 public abstract class AbstractQueryMergingTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
     protected final SubstitutionFactory substitutionFactory;
-    protected final QueryTransformerFactory transformerFactory;
+    protected final QueryRenamer queryRenamer;
 
     protected AbstractQueryMergingTransformer(VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
         this(variableGenerator, coreSingletons.getIQFactory(), coreSingletons.getSubstitutionFactory(),
-                coreSingletons.getQueryTransformerFactory());
+                coreSingletons.getQueryRenamer());
     }
 
     protected AbstractQueryMergingTransformer(VariableGenerator variableGenerator,
                                               IntermediateQueryFactory iqFactory,
                                               SubstitutionFactory substitutionFactory,
-                                              QueryTransformerFactory transformerFactory) {
+                                              QueryRenamer queryRenamer) {
         super(iqFactory, variableGenerator);
         this.substitutionFactory = substitutionFactory;
-        this.transformerFactory = transformerFactory;
+        this.queryRenamer = queryRenamer;
     }
 
     @Override
@@ -62,7 +62,7 @@ public abstract class AbstractQueryMergingTransformer extends DefaultRecursiveIQ
         InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
                 variableGenerator, definition.getTree().getKnownVariables());
 
-        IQ renamedDefinition = transformerFactory.createRenamer(renamingSubstitution).transform(definition);
+        IQ renamedDefinition = queryRenamer.applyInDepthRenaming(renamingSubstitution, definition);
 
         Substitution<? extends VariableOrGroundTerm> descendingSubstitution = substitutionFactory.getSubstitution(
                 renamedDefinition.getProjectionAtom().getArguments(),

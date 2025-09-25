@@ -60,6 +60,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(AtomFactory.class);
         bindFromSettings(SubstitutionFactory.class);
         bindFromSettings(HomomorphismFactory.class);
+        bindFromSettings(QueryRenamer.class);
 
         bindFromSettings(TermNullabilityEvaluator.class);
         bindFromSettings(NoNullValueEnforcer.class);
@@ -126,11 +127,6 @@ public class OntopModelModule extends OntopAbstractModule {
                 IQ.class,
                 IQTreeCache.class);
         install(iqFactoryModule);
-
-        Module queryTransformerModule = buildFactory(ImmutableList.of(
-                        QueryRenamer.class),
-                QueryTransformerFactory.class);
-        install(queryTransformerModule);
 
         String idFactoryType = QuotedIDFactory.getIDFactoryType(SQLStandardQuotedIDFactory.class);
         bindFromSettings(Key.get(QuotedIDFactory.class, Names.named(idFactoryType)), SQLStandardQuotedIDFactory.class);

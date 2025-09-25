@@ -6,11 +6,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.rule.RuleExecutor;
@@ -27,7 +27,7 @@ public class RuleExecutorImpl implements RuleExecutor {
 
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
-    private final QueryTransformerFactory transformerFactory;
+    private final QueryRenamer queryRenamer;
     private final UnionBasedQueryMerger queryMerger;
     private final GeneralStructuralAndSemanticIQOptimizer generalStructuralAndSemanticIQOptimizer;
 
@@ -35,12 +35,12 @@ public class RuleExecutorImpl implements RuleExecutor {
 
     @Inject
     protected RuleExecutorImpl(IntermediateQueryFactory iqFactory,
-                               SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
+                               SubstitutionFactory substitutionFactory, QueryRenamer queryRenamer,
                                UnionBasedQueryMerger queryMerger,
                                GeneralStructuralAndSemanticIQOptimizer generalStructuralAndSemanticIQOptimizer) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
-        this.transformerFactory = transformerFactory;
+        this.queryRenamer = queryRenamer;
         this.queryMerger = queryMerger;
         this.generalStructuralAndSemanticIQOptimizer = generalStructuralAndSemanticIQOptimizer;
     }
@@ -56,7 +56,7 @@ public class RuleExecutorImpl implements RuleExecutor {
                         MappingAssertion::getIndex,
                         a -> a));
 
-        IQOptimizer mappingUnfolder = new MutableQueryUnfolder(mutableMappingMap, iqFactory, substitutionFactory, transformerFactory);
+        IQOptimizer mappingUnfolder = new MutableQueryUnfolder(mutableMappingMap, iqFactory, substitutionFactory, queryRenamer);
 
         for (IQ rule : rules) {
             Optional<IQ> additionalDefinition = optimize(mappingUnfolder.optimize(rule));

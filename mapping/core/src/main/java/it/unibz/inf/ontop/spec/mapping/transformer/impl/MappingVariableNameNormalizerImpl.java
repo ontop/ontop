@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -20,15 +19,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Singleton
 public class MappingVariableNameNormalizerImpl implements MappingVariableNameNormalizer {
 
-    private final QueryTransformerFactory transformerFactory;
+    private final QueryRenamer queryRenamer;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
 
     @Inject
-    private MappingVariableNameNormalizerImpl(QueryTransformerFactory transformerFactory,
+    private MappingVariableNameNormalizerImpl(QueryRenamer queryRenamer,
                                               SubstitutionFactory substitutionFactory,
                                               TermFactory termFactory) {
-        this.transformerFactory = transformerFactory;
+        this.queryRenamer = queryRenamer;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
     }
@@ -46,6 +45,6 @@ public class MappingVariableNameNormalizerImpl implements MappingVariableNameNor
                 .collect(substitutionFactory.toSubstitution(v -> termFactory.getVariable(v.getName() + "m" + suffix)))
                 .injective();
 
-        return transformerFactory.createRenamer(substitution).transform(query);
+        return queryRenamer.applyInDepthRenaming(substitution, query);
     }
 }

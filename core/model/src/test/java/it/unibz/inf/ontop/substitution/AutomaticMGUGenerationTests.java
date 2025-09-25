@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class AutomaticMGUGenerationTests  {
 
-	private final Logger						log			= LoggerFactory.getLogger(AutomaticMGUGenerationTests.class);
+	private final Logger log = LoggerFactory.getLogger(AutomaticMGUGenerationTests.class);
 
 	@Test
 	public void testGetMGUAtomAtomBoolean() throws Exception {

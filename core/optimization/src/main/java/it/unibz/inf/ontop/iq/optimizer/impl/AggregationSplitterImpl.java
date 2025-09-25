@@ -8,7 +8,6 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -16,6 +15,7 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.AggregationSplitter;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -36,7 +36,7 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
     private final IQTreeTools iqTreeTools;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
-    private final QueryTransformerFactory queryTransformerFactory;
+    private final QueryRenamer queryRenamer;
 
     private final IQTreeVariableGeneratorTransformer transformer;
 
@@ -46,7 +46,7 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.termFactory = coreSingletons.getTermFactory();
-        this.queryTransformerFactory = coreSingletons.getQueryTransformerFactory();
+        this.queryRenamer = coreSingletons.getQueryRenamer();
 
         this.transformer = IQTreeVariableGeneratorTransformer.of(
                 IQTree::normalizeForOptimization,
@@ -233,7 +233,7 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
             InjectiveSubstitution<Variable> renaming = nonGroupingVariables.stream()
                     .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
-            return queryTransformerFactory.createRenamer(renaming).transform(tree);
+            return queryRenamer.applyInDepthRenaming(renaming, tree);
         }
     }
 

@@ -3,13 +3,13 @@ package it.unibz.inf.ontop.spec.rule.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
@@ -31,18 +31,18 @@ public class MutableQueryUnfolder extends AbstractIQOptimizer {
 
     private final Map<MappingAssertionIndex, MappingAssertion> mutableMapping;
     private final SubstitutionFactory substitutionFactory;
-    private final QueryTransformerFactory transformerFactory;
+    private final QueryRenamer queryRenamer;
 
     private final IQTreeVariableGeneratorTransformer transformer;
 
     public MutableQueryUnfolder(Map<MappingAssertionIndex, MappingAssertion> mutableMapping,
                                 IntermediateQueryFactory iqFactory,
                                 SubstitutionFactory substitutionFactory,
-                                QueryTransformerFactory transformerFactory) {
+                                QueryRenamer queryRenamer) {
         super(iqFactory);
         this.mutableMapping = mutableMapping;
         this.substitutionFactory = substitutionFactory;
-        this.transformerFactory = transformerFactory;
+        this.queryRenamer = queryRenamer;
 
         this.transformer = IQTreeVariableGeneratorTransformer.of(MutableQueryUnfoldingTransformer::new);
     }
@@ -58,7 +58,7 @@ public class MutableQueryUnfolder extends AbstractIQOptimizer {
             super(variableGenerator,
                     MutableQueryUnfolder.this.iqFactory,
                     MutableQueryUnfolder.this.substitutionFactory,
-                    MutableQueryUnfolder.this.transformerFactory);
+                    MutableQueryUnfolder.this.queryRenamer);
         }
 
         @Override

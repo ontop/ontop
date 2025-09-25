@@ -7,10 +7,10 @@ import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedBinaryMathOperationTransformer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.iq.type.PartiallyTypedSimpleCastTransformer;
@@ -39,7 +39,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
     private final IQTreeTools iqTreeTools;
     private final OntopModelSettings settings;
     private final ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer;
-    private final QueryTransformerFactory queryTransformerFactory;
+    private final QueryRenamer queryRenamer;
     private final NotYetTypedEqualityTransformer notYetTypedEqualityTransformer;
     private final NotYetTypedBinaryMathOperationTransformer notYetTypedBinaryMathOperationTransformer;
     private final PartiallyTypedSimpleCastTransformer partiallyTypedSimpleCastTransformer;
@@ -57,7 +57,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
                                IQTreeTools iqTreeTools,
                                OntopModelSettings settings,
                                ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer,
-                               QueryTransformerFactory queryTransformerFactory,
+                               QueryRenamer queryRenamer,
                                NotYetTypedEqualityTransformer notYetTypedEqualityTransformer,
                                NotYetTypedBinaryMathOperationTransformer notYetTypedBinaryMathOperationTransformer,
                                PartiallyTypedSimpleCastTransformer partiallyTypedSimpleCastTransformer,
@@ -75,7 +75,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
         this.iqTreeTools = iqTreeTools;
         this.settings = settings;
         this.constructionSubstitutionNormalizer = constructionSubstitutionNormalizer;
-        this.queryTransformerFactory = queryTransformerFactory;
+        this.queryRenamer = queryRenamer;
         this.notYetTypedEqualityTransformer = notYetTypedEqualityTransformer;
         this.notYetTypedBinaryMathOperationTransformer = notYetTypedBinaryMathOperationTransformer;
         this.partiallyTypedSimpleCastTransformer = partiallyTypedSimpleCastTransformer;
@@ -134,8 +134,8 @@ public class CoreSingletonsImpl implements CoreSingletons {
     }
 
     @Override
-    public QueryTransformerFactory getQueryTransformerFactory() {
-        return queryTransformerFactory;
+    public QueryRenamer getQueryRenamer() {
+        return queryRenamer;
     }
 
     @Override
