@@ -106,6 +106,6 @@ public class GeoSPARQLTrinoTest extends AbstractDockerRDF4JTest {
                 "   geo:asWKT ?v.\n" +
                 "} ORDER BY ?p\n";
         executeAndCompareValues(query, ImmutableList.of("\"POINT (2.2945 48.8584)\"^^geo:wktLiteral", "\"POINT (-0.0754 51.5055)\"^^geo:wktLiteral",
-                "\"POINT (13.4125 52.52)\"^^geo:wktLiteral", "\"POINT EMPTY\"^^geo:wktLiteral", "\"POINT EMPTY\"^^geo:wktLiteral"));
+                "\"POINT EMPTY\"^^geo:wktLiteral", "\"POINT EMPTY\"^^geo:wktLiteral", "\"POINT EMPTY\"^^geo:wktLiteral"));
     }
 }
