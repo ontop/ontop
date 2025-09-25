@@ -120,10 +120,8 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
                                             "Was expecting a definition with value " + term))));
 
             //Define new ORDER BY node that uses variables from CONSTRUCT instead, where possible
-            return iqFactory.createOrderByNode(orderBy.getComparators().stream()
-                    .map(comp -> iqFactory.createOrderComparator(definedInConstruct
-                            .getOrDefault(comp.getTerm(), comp.getTerm()), comp.isAscending()))
-                    .collect(ImmutableCollectors.toList()));
+            return iqFactory.createOrderByNode(iqTreeTools.transformComparators(
+                    orderBy.getComparators(), t -> definedInConstruct.getOrDefault(t, t)));
         }
     }
 }

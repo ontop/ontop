@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -57,11 +58,10 @@ public class WrapProjectedOrOrderByExpressionNormalizer implements DialectExtraN
 
         @Override
         public OrderByNode transform(OrderByNode rootNode, UnaryIQTree tree) {
-            return iqFactory.createOrderByNode(
-                    rootNode.getComparators().stream()
-                            .map(c -> iqFactory.createOrderComparator(
-                                    (NonGroundTerm) transformTerm(c.getTerm()), c.isAscending()))
-                            .collect(ImmutableCollectors.toList()));
+            var transformedComparators = iqTreeTools.transformComparators(rootNode.getComparators(), this::transformTerm);
+            if (rootNode.getComparators().size() != transformedComparators.size())
+                throw new MinorOntopInternalBugException("expected same-length comparator lists");
+            return iqFactory.createOrderByNode(transformedComparators);
         }
 
         private ImmutableTerm transformTerm(ImmutableTerm term) {

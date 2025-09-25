@@ -65,7 +65,8 @@ public class EnforceNullOrderNormalizer implements DialectExtraNormalizer {
 
             Optional<OrderByNode.OrderComparator> additionalCondition = Optional.of(isNotNullCondition)
                     .filter(e -> e.evaluate(variableNullability).getExpression().isPresent())
-                    .map(e -> iqFactory.createOrderComparator((NonGroundTerm) e, condition.isAscending()));
+                    .map(e -> (NonGroundTerm) e)
+                    .map(t -> iqFactory.createOrderComparator(t, condition.isAscending()));
 
             return additionalCondition
                     .map(c -> Stream.of(c, condition))
