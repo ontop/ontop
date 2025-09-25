@@ -97,4 +97,15 @@ public class GeoSPARQLTrinoTest extends AbstractDockerRDF4JTest {
         executeAndCompareValues(query, ImmutableList.of("\"339241.362811672\"^^xsd:double"));
     }
 
+    @Test
+    public void testPointSimplification() {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "SELECT * WHERE {\n" +
+                "   ?p a :Point ; " +
+                "   geo:asWKT ?v.\n" +
+                "} ORDER BY ?p\n";
+        executeAndCompareValues(query, ImmutableList.of("\"POINT (2.2945 48.8584)\"^^geo:wktLiteral", "\"POINT (-0.0754 51.5055)\"^^geo:wktLiteral",
+                "\"POINT (13.4125 52.52)\"^^geo:wktLiteral", "\"POINT EMPTY\"^^geo:wktLiteral", "\"POINT EMPTY\"^^geo:wktLiteral"));
+    }
 }

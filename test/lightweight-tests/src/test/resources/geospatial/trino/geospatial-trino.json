@@ -41,6 +41,36 @@
         ]
       },
       "type": "BasicLens"
+    },
+    {
+      "name": [
+        "\"lenses\"",
+        "\"points\""
+      ],
+      "baseRelation": [
+        "\"points\""
+      ],
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "\"IdConstraint\"",
+            "determinants": [
+              "\"id\""
+            ],
+            "isPrimaryKey": true
+          }
+        ]
+      },
+      "columns": {
+        "added": [
+          {
+            "name": "point_wkt",
+            "expression": "ST_AsText(ST_GeometryFromText(CASE WHEN longitude IS NULL OR TRIM(longitude) = '' OR latitude IS NULL OR TRIM(latitude) = '' THEN 'POINT EMPTY' else CONCAT('POINT (', CAST(longitude AS VARCHAR),\n ' ', CAST(latitude AS VARCHAR), ')') END))"
+          }
+        ],
+        "hidden": []
+      },
+      "type": "BasicLens"
     }
   ]
 }

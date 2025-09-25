@@ -29,4 +29,8 @@ source		SELECT id, name, ST_ASTEXT(geom_from_txt) AS geom_from_txt FROM "lenses"
 mappingId	geoms1
 target		:{id} a :Geom ; geo:asWKT_from_txt {"geom_wkt"}^^geo:wktLiteral ; rdfs:label {"name"}^^xsd:string .
 source		SELECT id, name, ST_ASTEXT(geom) AS geom_wkt FROM "lenses"."geoms";
+
+mappingId   points
+target      :point/{id} a :Point ; geo:asWKT {"point_wkt"}^^geo:wktLiteral ; rdfs:label {"name"}^^xsd:string .
+source      SELECT id, name, point_wkt FROM "lenses"."points"
 ]]

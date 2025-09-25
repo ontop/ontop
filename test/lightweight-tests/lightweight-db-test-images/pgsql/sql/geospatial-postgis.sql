@@ -22,3 +22,10 @@ INSERT INTO "GEOGS" VALUES (1, 'POLYGON((2 2, 7 2, 7 5, 2 5, 2 2))', 'small rect
 
 CREATE TABLE "NEWGEOMS" ("id" INT PRIMARY KEY, "geom" GEOMETRY, "name" TEXT);
 INSERT INTO "NEWGEOMS" VALUES (11, 'POINT(2.2942 48.8583)', 'Near Eiffel Tower');
+
+CREATE TABLE "POINTS" ("id" INT PRIMARY KEY, "geom" GEOMETRY, "name" TEXT, "latitude" TEXT, "longitude" TEXT);
+INSERT INTO "POINTS" VALUES (1, 'POINT(2.2945 48.8584)', 'Eiffel Tower', '48.8584', '2.2945'),
+                            (2, 'POINT(-0.0754 51.5055)', 'Tower Bridge', '51.5055', '-0.0754'),
+                            (3, NULL, 'Unknown1', NULL, '12.4924'),
+                            (4, NULL, 'Unknown2','32.71234', ''),
+                            (5, NULL, 'Unknown3', NULL, NULL);
