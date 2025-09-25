@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 
 /**
  * Immutable.
@@ -47,7 +48,9 @@ public interface QueryNode {
         return false;
     }
 
-    @Override
+    QueryNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
+
+        @Override
     int hashCode();
 
     @Override

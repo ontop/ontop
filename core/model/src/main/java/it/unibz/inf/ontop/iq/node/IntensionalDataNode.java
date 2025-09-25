@@ -4,6 +4,8 @@ import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 
 /**
  * TODO: explain
@@ -14,6 +16,9 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 public interface IntensionalDataNode extends LeafIQTree {
 
     DataAtom<AtomPredicate> getProjectionAtom();
+
+    @Override
+    IntensionalDataNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
     @Override
     default <T> T acceptVisitor(IQVisitor<T> visitor) {

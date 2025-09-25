@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.node.normalization.OrderByNormalizer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -31,15 +32,17 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     private final ImmutableList<OrderComparator> comparators;
     private final OrderByNormalizer normalizer;
     private final IQTreeTools iqTreeTools;
+    private final SubstitutionFactory substitutionFactory;
 
 
     @AssistedInject
     private OrderByNodeImpl(@Assisted ImmutableList<OrderComparator> comparators, IntermediateQueryFactory iqFactory,
-                            OrderByNormalizer normalizer, IQTreeTools iqTreeTools) {
+                            OrderByNormalizer normalizer, IQTreeTools iqTreeTools, SubstitutionFactory substitutionFactory) {
         super(iqFactory);
         this.comparators = comparators;
         this.normalizer = normalizer;
         this.iqTreeTools = iqTreeTools;
+        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
@@ -83,8 +86,11 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
 
     @Override
     public OrderByNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        return applySubstitution(renamingSubstitution)
-                .orElseThrow(() -> new MinorOntopInternalBugException("The order by was expected to be kept"));
+        var f = substitutionFactory.onNonGroundTerms();
+        ImmutableList<OrderByNode.OrderComparator> newComparators = iqTreeTools.transformComparators(
+                comparators, t -> f.rename(renamingSubstitution, t));
+
+        return iqFactory.createOrderByNode(newComparators);
     }
 
     @Override

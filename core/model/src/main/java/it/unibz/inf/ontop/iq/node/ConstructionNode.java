@@ -5,6 +5,8 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 
 /**
@@ -18,6 +20,9 @@ public interface ConstructionNode extends ExtendedProjectionNode {
 
     @Override
     Substitution<ImmutableTerm> getSubstitution();
+
+    @Override
+    ConstructionNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
     @Override
     default <T> T acceptVisitor(UnaryIQTree tree, IQVisitor<T> visitor, IQTree child) {

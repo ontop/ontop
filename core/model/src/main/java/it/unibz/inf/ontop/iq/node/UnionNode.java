@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 
 /**
  * All its children are expected to project its projected variables
@@ -24,6 +25,9 @@ public interface UnionNode extends ExplicitVariableProjectionNode, NaryOperatorN
      * Makes the tree be distinct
      */
     IQTree makeDistinct(ImmutableList<IQTree> children);
+
+    @Override
+    UnionNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
     @Override
     default <T> T acceptVisitor(NaryIQTree tree, IQVisitor<T> visitor, ImmutableList<IQTree> children) {

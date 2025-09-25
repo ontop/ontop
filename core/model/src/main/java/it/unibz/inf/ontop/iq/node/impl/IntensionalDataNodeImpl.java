@@ -96,7 +96,7 @@ public class IntensionalDataNodeImpl extends LeafIQTreeImpl implements Intension
 
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
+    public IntensionalDataNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
         return applyDescendingSubstitution(freshRenamingSubstitution);
     }
 
@@ -106,7 +106,7 @@ public class IntensionalDataNodeImpl extends LeafIQTreeImpl implements Intension
         return applyDescendingSubstitution(descendingSubstitution);
     }
 
-    private IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+    private IntensionalDataNode applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         DataAtom<AtomPredicate> atom = getProjectionAtom();
         DataAtom<AtomPredicate> newAtom = atomFactory.getDataAtom(atom.getPredicate(), substitutionFactory.onVariableOrGroundTerms().applyToTerms(descendingSubstitution, atom.getArguments()));
         return iqFactory.createIntensionalDataNode(newAtom);

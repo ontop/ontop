@@ -5,7 +5,9 @@ import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -18,6 +20,9 @@ public interface ExtensionalDataNode extends LeafIQTree {
     RelationDefinition getRelationDefinition();
 
     ImmutableMap<Integer, ? extends VariableOrGroundTerm> getArgumentMap();
+
+    @Override
+    ExtensionalDataNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
     @Override
     default <T> T acceptVisitor(IQVisitor<T> visitor) {

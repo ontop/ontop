@@ -29,11 +29,8 @@ public interface ValuesNode extends LeafIQTree {
     @Override
     ValuesNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution);
 
-
     @Override
     default <T> T acceptVisitor(IQVisitor<T> visitor) {
         return visitor.transformValues(this);
     }
-
-
 }

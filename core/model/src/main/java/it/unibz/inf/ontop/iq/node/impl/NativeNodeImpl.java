@@ -98,7 +98,7 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
+    public NativeNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
         throw new UnsupportedOperationException("NativeNode does not support renaming (too late)");
     }
 

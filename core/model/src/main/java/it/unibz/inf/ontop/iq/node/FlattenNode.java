@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 
 import java.util.Optional;
 
@@ -74,6 +75,9 @@ public interface FlattenNode extends UnaryOperatorNode {
      * Set of variables returned by a tree with this node as root, given the variables provided by the children
      */
     ImmutableSet<Variable> getVariables(ImmutableSet<Variable> childVariables);
+
+    @Override
+    FlattenNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
     @Override
     default <T> T acceptVisitor(UnaryIQTree tree, IQVisitor<T> visitor, IQTree child) {
