@@ -23,14 +23,14 @@ public interface DownPropagation {
     static DownPropagation of(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator) {
         return descendingSubstitution.isEmpty()
                 ? new EmptyDownPropagation(projectedVariables, variableGenerator)
-                : new SubstitutionOnlyDownPropagation(descendingSubstitution, projectedVariables, variableGenerator);
+                : new FullDownPropagation(descendingSubstitution, Optional.empty(), projectedVariables, variableGenerator);
     }
 
     static DownPropagation ofNormalized(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator) throws UnsatisfiableDescendingSubstitutionException {
         var normalized = DownPropagationImpl.normalizeDescendingSubstitution(descendingSubstitution, projectedVariables);
         return normalized.isEmpty()
                 ? new EmptyDownPropagation(projectedVariables, variableGenerator)
-                : new SubstitutionOnlyDownPropagation(normalized.get(), projectedVariables, variableGenerator);
+                : new FullDownPropagation(normalized.get(), Optional.empty(), projectedVariables, variableGenerator);
     }
 
     static DownPropagation of(ImmutableExpression constraint, ImmutableSet<Variable> variables, VariableGenerator variableGenerator) {
@@ -78,10 +78,6 @@ public interface DownPropagation {
     }
 
     ImmutableList<IQTree> propagate(ImmutableList<IQTree> children, VariableGenerator variableGenerator);
-
-    DownPropagation normalize(TermFactory termFactory) throws UnsatisfiableDescendingSubstitutionException;
-
-    Optional<InjectiveSubstitution<Variable>> transformIntoFreshRenaming();
 
     /**
      * Typically thrown when a "null" variable is propagated down
@@ -157,16 +153,6 @@ class EmptyDownPropagation extends AbstractDownPropagation implements DownPropag
     public ImmutableList<IQTree> propagate(ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
         throw new UnsupportedOperationException();
     }
-
-    @Override
-    public DownPropagation normalize(TermFactory termFactory) throws UnsatisfiableDescendingSubstitutionException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Optional<InjectiveSubstitution<Variable>> transformIntoFreshRenaming() {
-        throw new UnsupportedOperationException();
-    }
 }
 
 class ConstraintOnlyDownPropagation extends AbstractDownPropagation implements DownPropagation {
@@ -228,25 +214,18 @@ class ConstraintOnlyDownPropagation extends AbstractDownPropagation implements D
     public ImmutableList<IQTree> propagate(ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
         throw new UnsupportedOperationException();
     }
-
-    @Override
-    public DownPropagation normalize(TermFactory termFactory) throws UnsatisfiableDescendingSubstitutionException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Optional<InjectiveSubstitution<Variable>> transformIntoFreshRenaming() {
-        throw new UnsupportedOperationException();
-    }
 }
 
-class SubstitutionOnlyDownPropagation extends AbstractDownPropagation implements DownPropagation {
+
+class FullDownPropagation extends AbstractDownPropagation implements DownPropagation {
     private final Substitution<? extends VariableOrGroundTerm> substitution;
+    private final Optional<ImmutableExpression> constraint;
     private final ImmutableSet<Variable> variables;
 
-    SubstitutionOnlyDownPropagation(Substitution<? extends VariableOrGroundTerm> substitution, ImmutableSet<Variable> variables, VariableGenerator variableGenerator) {
+    FullDownPropagation(Substitution<? extends VariableOrGroundTerm> substitution, Optional<ImmutableExpression> constraint, ImmutableSet<Variable> variables, VariableGenerator variableGenerator) {
         super(variableGenerator);
         this.substitution = substitution;
+        this.constraint = constraint;
         this.variables = variables;
     }
 
@@ -272,7 +251,7 @@ class SubstitutionOnlyDownPropagation extends AbstractDownPropagation implements
 
     @Override
     public Optional<ImmutableExpression> getConstraint() {
-        return Optional.empty();
+        return constraint;
     }
 
     @Override
@@ -282,31 +261,90 @@ class SubstitutionOnlyDownPropagation extends AbstractDownPropagation implements
 
     @Override
     public VariableNullability extendVariableNullability(VariableNullability variableNullability) {
-        return variableNullability;
+        return constraint.map(c -> variableNullability.extendToExternalVariables(c.getVariableStream()))
+                .orElse(variableNullability);
     }
 
     @Override
     public IQTree propagate(IQTree child, VariableGenerator variableGenerator) {
-        return child.applyDescendingSubstitution(substitution, Optional.empty(), this.variableGenerator);
+        return child.applyDescendingSubstitution(substitution, constraint, this.variableGenerator);
     }
 
     @Override
     public IQTree propagate(IQTree child) {
-        return child.applyDescendingSubstitution(substitution, Optional.empty(), variableGenerator);
+        return child.applyDescendingSubstitution(substitution, constraint, variableGenerator);
     }
 
     @Override
     public ImmutableList<IQTree> propagate(ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
         throw new UnsupportedOperationException();
     }
+}
+
+class RenamingDownPropagation extends AbstractDownPropagation implements DownPropagation {
+    private final InjectiveSubstitution<Variable> substitution;
+    private final Optional<ImmutableExpression> constraint;
+    private final ImmutableSet<Variable> variables;
+
+    RenamingDownPropagation(InjectiveSubstitution<Variable> substitution, Optional<ImmutableExpression> constraint, ImmutableSet<Variable> variables, VariableGenerator variableGenerator) {
+        super(variableGenerator);
+        this.substitution = substitution;
+        this.constraint = constraint;
+        this.variables = variables;
+    }
 
     @Override
-    public DownPropagation normalize(TermFactory termFactory) throws UnsatisfiableDescendingSubstitutionException {
+    public ImmutableSet<Variable> getVariables() {
+        return variables;
+    }
+
+    @Override
+    public ImmutableSet<Variable> computeProjectedVariables() {
+        return DownPropagation.computeProjectedVariables(substitution, variables);
+    }
+
+    @Override
+    public Optional<Substitution<? extends VariableOrGroundTerm>> getOptionalDescendingSubstitution() {
+        return Optional.of(substitution);
+    }
+
+    @Override
+    public Optional<ImmutableExpression> applySubstitution(Optional<ImmutableExpression> optionalExpression) {
+        return optionalExpression.map(substitution::apply);
+    }
+
+    @Override
+    public Optional<ImmutableExpression> getConstraint() {
+        return constraint;
+    }
+
+    @Override
+    public DownPropagation withConstraint(Optional<ImmutableExpression> constraint) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Optional<InjectiveSubstitution<Variable>> transformIntoFreshRenaming() {
+    public VariableNullability extendVariableNullability(VariableNullability variableNullability) {
+        return constraint.map(c -> variableNullability.extendToExternalVariables(c.getVariableStream()))
+                .orElse(variableNullability);
+    }
+
+    @Override
+    public IQTree propagate(IQTree child, VariableGenerator variableGenerator) {
+        IQTree r = child.applyFreshRenaming(substitution);
+        return constraint.map(c -> r.propagateDownConstraint(c, this.variableGenerator))
+                .orElse(r);
+    }
+
+    @Override
+    public IQTree propagate(IQTree child) {
+        IQTree r = child.applyFreshRenaming(substitution);
+        return constraint.map(c -> r.propagateDownConstraint(c, this.variableGenerator))
+                .orElse(r);
+    }
+
+    @Override
+    public ImmutableList<IQTree> propagate(ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
         throw new UnsupportedOperationException();
     }
 }
@@ -404,8 +442,7 @@ class DownPropagationImpl implements DownPropagation {
     }
 
 
-    public DownPropagation normalize(TermFactory termFactory) throws UnsatisfiableDescendingSubstitutionException {
-        var descendingSubstitution = optionalDescendingSubstitution.get();
+    public static DownPropagation normalize(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, Optional<ImmutableExpression> constraint, ImmutableSet<Variable> projectedVariables, TermFactory termFactory) throws UnsatisfiableDescendingSubstitutionException {
         var normalizedSubstitution = normalizeDescendingSubstitution(descendingSubstitution, projectedVariables);
 
         if (constraint.isEmpty())
@@ -422,9 +459,8 @@ class DownPropagationImpl implements DownPropagation {
     /**
      * If the substitution is a fresh renaming, returns it as an injective substitution
      */
-    public Optional<InjectiveSubstitution<Variable>> transformIntoFreshRenaming() {
+    public static Optional<InjectiveSubstitution<Variable>> transformIntoFreshRenaming(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
 
-        var descendingSubstitution = optionalDescendingSubstitution.get();
         Substitution<Variable> var2VarFragment = descendingSubstitution.restrictRangeTo(Variable.class);
 
         int size = descendingSubstitution.getDomain().size();

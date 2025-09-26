@@ -134,15 +134,13 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
 
-        DownPropagation ds = DownPropagation.of(constraint, descendingSubstitution, getVariables());
-
         try {
-            DownPropagation downPropagation = ds.normalize(termFactory);
+            DownPropagation downPropagation = DownPropagationImpl.normalize(descendingSubstitution, constraint, getVariables(), termFactory);
 
             var optionalDescendingSubstitution = downPropagation.getOptionalDescendingSubstitution();
             if (optionalDescendingSubstitution.isPresent()) {
                 // transform into a renaming as applying a renaming is cheaper
-                var optionalFreshRenaming = ds.transformIntoFreshRenaming();
+                var optionalFreshRenaming = DownPropagationImpl.transformIntoFreshRenaming(optionalDescendingSubstitution.get(), downPropagation.getVariables());
                 if (optionalFreshRenaming.isPresent()) {
                     // non-empty because it comes from the normalized substitution
                     var selectedSubstitution = optionalFreshRenaming.get();
@@ -157,7 +155,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
                     .orElseGet(() -> downPropagation.propagate(this, variableGenerator));
         }
         catch (DownPropagation.UnsatisfiableDescendingSubstitutionException e) {
-            return iqTreeTools.createEmptyNode(ds);
+            return iqTreeTools.createEmptyNode(DownPropagation.computeProjectedVariables(descendingSubstitution, getVariables()));
         }
     }
 
