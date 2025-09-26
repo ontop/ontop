@@ -4,9 +4,11 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -25,19 +27,22 @@ public abstract class AbstractQueryMergingTransformer extends DefaultRecursiveIQ
 
     protected final SubstitutionFactory substitutionFactory;
     protected final QueryRenamer queryRenamer;
+    protected final TermFactory termFactory;
 
     protected AbstractQueryMergingTransformer(VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
         this(variableGenerator, coreSingletons.getIQFactory(), coreSingletons.getSubstitutionFactory(),
-                coreSingletons.getQueryRenamer());
+                coreSingletons.getQueryRenamer(), coreSingletons.getTermFactory());
     }
 
     protected AbstractQueryMergingTransformer(VariableGenerator variableGenerator,
                                               IntermediateQueryFactory iqFactory,
                                               SubstitutionFactory substitutionFactory,
-                                              QueryRenamer queryRenamer) {
+                                              QueryRenamer queryRenamer,
+                                              TermFactory termFactory) {
         super(iqFactory, variableGenerator);
         this.substitutionFactory = substitutionFactory;
         this.queryRenamer = queryRenamer;
+        this.termFactory = termFactory;
     }
 
     @Override
@@ -68,8 +73,8 @@ public abstract class AbstractQueryMergingTransformer extends DefaultRecursiveIQ
                 renamedDefinition.getProjectionAtom().getArguments(),
                 dataNode.getProjectionAtom().getArguments());
 
-        return renamedDefinition.getTree()
-                .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator)
+        DownPropagation dp = DownPropagation.of(descendingSubstitution, Optional.empty(), renamedDefinition.getTree().getVariables(), variableGenerator, termFactory, iqFactory);
+        return dp.propagate(renamedDefinition.getTree())
                 .normalizeForOptimization(variableGenerator);
     }
 }

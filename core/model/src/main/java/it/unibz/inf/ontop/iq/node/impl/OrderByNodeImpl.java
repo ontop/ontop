@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -70,9 +71,10 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
 
+        DownPropagation dp = DownPropagation.of(descendingSubstitution,  constraint, child.getVariables(), variableGenerator, termFactory, iqFactory);
         return iqTreeTools.unaryIQTreeBuilder()
                 .append(applySubstitution(descendingSubstitution))
-                .build(child.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator));
+                .build(dp.propagate(child));
     }
 
     @Override

@@ -240,7 +240,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                         iqFactory.createConstructionNode(projectedVariablesBeforeRenaming, substitutionBeforeRenaming),
                         construction.getTail());
 
-                IQTree partiallyPaddedChild = childBeforeRenaming.applyDescendingSubstitution(renamingSubstitution, Optional.empty(), variableGenerator);
+                IQTree partiallyPaddedChild = childBeforeRenaming.applyFreshRenaming(renamingSubstitution);
                 ImmutableTerm liftedDefinition = renamingSubstitution.applyToTerm(originalDefinition);
 
                 return new ChildDefinitionLift(partiallyPaddedChild, renamingSubstitution.getRangeSet(), liftedDefinition);

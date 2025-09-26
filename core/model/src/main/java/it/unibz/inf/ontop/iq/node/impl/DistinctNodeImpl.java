@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -49,8 +50,8 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, IQTree child,
                                               VariableGenerator variableGenerator) {
-        return iqFactory.createUnaryIQTree(this,
-                child.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator));
+        DownPropagation dp = DownPropagation.of(descendingSubstitution, constraint, child.getVariables(), variableGenerator, termFactory, iqFactory);
+        return iqFactory.createUnaryIQTree(this, dp.propagate(child));
     }
 
     @Override

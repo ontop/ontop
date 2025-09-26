@@ -219,7 +219,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                 variableNullabilityTools.getChildrenVariableNullability(
                                         ImmutableList.of(leftGrandChild, subTree.rightChild())));
 
-                        IQTree rightSubTree = subTree.rightChild().applyDescendingSubstitution(bindingLift.getDescendingSubstitution(), bindingLift.getCondition(), variableGenerator);
+                        DownPropagation dp = DownPropagation.of(bindingLift.getDescendingSubstitution(), bindingLift.getCondition(), subTree.rightChild().getVariables(), variableGenerator, termFactory, iqFactory);
+                        IQTree rightSubTree = dp.propagate(subTree.rightChild());
 
                         ImmutableSet<Variable> leftVariables = projectedVariables(subTree.leftChild(), leftGrandChild).immutableCopy();
 
@@ -464,8 +465,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     return state.replace(t -> t.replaceRight(optionalCondition, t.rightChild()));
                 }
 
-                IQTree updatedRightChild = subTree.rightChild().applyDescendingSubstitution(
-                        downSubstitution, optionalCondition, variableGenerator);
+                DownPropagation dp = DownPropagation.of(downSubstitution, optionalCondition, subTree.rightChild().getVariables(), variableGenerator, termFactory, iqFactory);
+                IQTree updatedRightChild = dp.propagate(subTree.rightChild());
 
                 var rightProvenance = new OptionalRightProvenance(
                         updatedRightChild, downSubstitution, subTree.leftChild().getVariables());

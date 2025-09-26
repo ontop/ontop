@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
@@ -77,8 +78,8 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     @Override
     public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
-        return iqFactory.createUnaryIQTree(this,
-                child.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator));
+        DownPropagation dp = DownPropagation.of(descendingSubstitution, constraint, child.getVariables(), variableGenerator, termFactory, iqFactory);
+        return iqFactory.createUnaryIQTree(this, dp.propagate(child));
     }
 
     @Override

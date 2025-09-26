@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
@@ -32,17 +33,20 @@ public class MutableQueryUnfolder extends AbstractIQOptimizer {
     private final Map<MappingAssertionIndex, MappingAssertion> mutableMapping;
     private final SubstitutionFactory substitutionFactory;
     private final QueryRenamer queryRenamer;
+    private final TermFactory termFactory;
 
     private final IQTreeVariableGeneratorTransformer transformer;
 
     public MutableQueryUnfolder(Map<MappingAssertionIndex, MappingAssertion> mutableMapping,
                                 IntermediateQueryFactory iqFactory,
                                 SubstitutionFactory substitutionFactory,
-                                QueryRenamer queryRenamer) {
+                                QueryRenamer queryRenamer,
+                                TermFactory termFactory) {
         super(iqFactory);
         this.mutableMapping = mutableMapping;
         this.substitutionFactory = substitutionFactory;
         this.queryRenamer = queryRenamer;
+        this.termFactory = termFactory;
 
         this.transformer = IQTreeVariableGeneratorTransformer.of(MutableQueryUnfoldingTransformer::new);
     }
@@ -58,7 +62,8 @@ public class MutableQueryUnfolder extends AbstractIQOptimizer {
             super(variableGenerator,
                     MutableQueryUnfolder.this.iqFactory,
                     MutableQueryUnfolder.this.substitutionFactory,
-                    MutableQueryUnfolder.this.queryRenamer);
+                    MutableQueryUnfolder.this.queryRenamer,
+                    MutableQueryUnfolder.this.termFactory);
         }
 
         @Override
