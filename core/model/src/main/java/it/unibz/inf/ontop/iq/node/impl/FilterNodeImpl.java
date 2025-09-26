@@ -72,6 +72,21 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         return iqFactory.createUnaryIQTree(this, newChild);
     }
 
+    @Override
+    public FilterNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        ImmutableExpression newCondition = renamingSubstitution.apply(getFilterCondition());
+        return iqFactory.createFilterNode(newCondition);
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child,
+            VariableGenerator variableGenerator) {
+
+        return iqFactory.createUnaryIQTree(
+                iqFactory.createFilterNode(descendingSubstitution.apply(getFilterCondition())),
+                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
+    }
 
     @Override
     public IQTree applyDescendingSubstitution(
@@ -87,10 +102,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
-        var downConstraint = new DownPropagation(Optional.of(constraint), child.getVariables());
-        VariableNullability extendedChildVariableNullability = downConstraint.extendVariableNullability(child.getVariableNullability());
+        var downPropagation = new DownPropagation(Optional.of(constraint), child.getVariables());
+        VariableNullability extendedChildVariableNullability = downPropagation.extendVariableNullability(child.getVariableNullability());
 
-        return propagateDownConstraint(downConstraint, child, extendedChildVariableNullability, variableGenerator);
+        return propagateDownConstraint(downPropagation, child, extendedChildVariableNullability, variableGenerator);
     }
 
     private IQTree propagateDownConstraint(DownPropagation downConstraint, IQTree child, VariableNullability extendedChildVariableNullability, VariableGenerator variableGenerator) {
@@ -181,22 +196,6 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     @Override
     public IQTree normalizeForOptimization(IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
         return normalizer.normalizeForOptimization(this, initialChild, variableGenerator, treeCache);
-    }
-
-    @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child,
-            VariableGenerator variableGenerator) {
-
-        return iqFactory.createUnaryIQTree(
-                iqFactory.createFilterNode(descendingSubstitution.apply(getFilterCondition())),
-                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
-    }
-
-    @Override
-    public FilterNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        ImmutableExpression newCondition = renamingSubstitution.apply(getFilterCondition());
-        return iqFactory.createFilterNode(newCondition);
     }
 
 }

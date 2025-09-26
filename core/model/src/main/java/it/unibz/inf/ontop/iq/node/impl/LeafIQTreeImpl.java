@@ -78,9 +78,8 @@ public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTre
             VariableGenerator variableGenerator) {
         DownPropagation ds = new DownPropagation(descendingSubstitution, getVariables());
         try {
-            return ds.normalizeDescendingSubstitution()
-                    .map(s -> applyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
-                    .orElse(this);
+            return ds.applyNormalizedDescendingSubstitution(this,
+                            (t, s) -> applyDescendingSubstitutionWithoutOptimizing(s, variableGenerator));
         }
         catch (DownPropagation.UnsatisfiableDescendingSubstitutionException e) {
             return iqTreeTools.createEmptyNode(ds);
@@ -91,7 +90,7 @@ public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTre
     public IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
         return this;
     }
-    
+
     @Override
     public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions() {
         return ImmutableSet.of(substitutionFactory.getSubstitution());

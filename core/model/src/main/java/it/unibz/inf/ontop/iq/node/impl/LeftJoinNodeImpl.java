@@ -200,9 +200,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild,
             VariableGenerator variableGenerator) {
 
-        if (constraint
-                .filter(c -> isRejectingRightSpecificNulls(c, leftChild, rightChild))
-                .isPresent()
+        if (isRejectingRightSpecificNulls(constraint, leftChild, rightChild)
                 || containsEqualityRightSpecificVariable(descendingSubstitution, leftChild, rightChild))
             return transformIntoInnerJoinTree(leftChild, rightChild)
                 .applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator);
@@ -253,9 +251,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                                           VariableGenerator variableGenerator) {
 
         DownPropagation dc = new DownPropagation(Optional.of(constraint), ImmutableSet.of());
-        if (dc.getConstraint()
-                .filter(c -> isRejectingRightSpecificNulls(c, leftChild, rightChild))
-                .isPresent()) {
+        if (isRejectingRightSpecificNulls(dc.getConstraint(), leftChild, rightChild)) {
             IQTree innerJoinTree = transformIntoInnerJoinTree(leftChild, rightChild);
             return dc.propagate(innerJoinTree, variableGenerator);
         }
@@ -455,7 +451,11 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return new ExpressionAndSubstitutionImpl(newExpression, downSubstitution);
     }
 
-    private boolean isRejectingRightSpecificNulls(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild) {
+    private boolean isRejectingRightSpecificNulls(Optional<ImmutableExpression> optionalConstraint, IQTree leftChild, IQTree rightChild) {
+        if (optionalConstraint.isEmpty())
+            return false;
+
+        var constraint =  optionalConstraint.get();
 
         Set<Variable> nullVariables = Sets.intersection(
                 rightSpecificVariables(leftChild, rightChild),

@@ -75,7 +75,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
         return getCachedValue(treeCache::getVariables, this::computeVariables, treeCache::setVariables);
     }
 
-    protected ImmutableSet<Variable> computeVariables() {
+    private ImmutableSet<Variable> computeVariables() {
         if (rootNode instanceof ExplicitVariableProjectionNode)
             return ((ExplicitVariableProjectionNode) rootNode).getVariables();
         ImmutableSet<Variable> childVariables = children.stream()
@@ -139,15 +139,21 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
         try {
             DownPropagation downPropagation = ds.normalize(termFactory);
 
-            return downPropagation.getOptionalDescendingSubstitution()
-                    .flatMap(s -> ds.extractFreshRenaming())
-                    // Fresh renaming
-                    .map(this::applyRestrictedFreshRenaming)
-                    .map(t -> downPropagation.propagateDownOptionalConstraint(t, variableGenerator))
-                    // Regular substitution
-                    .or(() -> downPropagation.getOptionalDescendingSubstitution()
-                            // applyRegularDescendingSubstitution!
-                            .map(s -> applyRegularDescendingSubstitution(s, downPropagation.getConstraint(), variableGenerator)))
+            var optionalDescendingSubstitution = downPropagation.getOptionalDescendingSubstitution();
+            if (optionalDescendingSubstitution.isPresent()) {
+                // transform into a renaming as applying a renaming is cheaper
+                var optionalFreshRenaming = ds.transformIntoFreshRenaming();
+                if (optionalFreshRenaming.isPresent()) {
+                    // non-empty because it comes from the normalized substitution
+                    var selectedSubstitution = optionalFreshRenaming.get();
+                    IQTree r = applyNonEmptyFreshRenaming(selectedSubstitution);
+                    return downPropagation.propagateDownOptionalConstraint(r, variableGenerator);
+                }
+            }
+
+            return optionalDescendingSubstitution
+                    // applyRegularDescendingSubstitution!
+                    .map(s -> applyRegularDescendingSubstitution(s, downPropagation.getConstraint(), variableGenerator))
                     .orElseGet(() -> downPropagation.propagateDownOptionalConstraint(this, variableGenerator));
         }
         catch (DownPropagation.UnsatisfiableDescendingSubstitutionException e) {
@@ -157,10 +163,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
 
     @Override
     public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        return applyRestrictedFreshRenaming(freshRenamingSubstitution.restrictDomainTo(getVariables()));
-    }
-
-    private IQTree applyRestrictedFreshRenaming(InjectiveSubstitution<Variable> selectedSubstitution) {
+        InjectiveSubstitution<Variable> selectedSubstitution = freshRenamingSubstitution.restrictDomainTo(getVariables());
         return selectedSubstitution.isEmpty()
                 ? this
                 : applyNonEmptyFreshRenaming(selectedSubstitution);
@@ -273,9 +276,8 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
             VariableGenerator variableGenerator) {
         DownPropagation ds = new DownPropagation(descendingSubstitution, getVariables());
         try {
-            return ds.normalizeDescendingSubstitution()
-                    .map(s -> doApplyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
-                    .orElse(this);
+            return ds.applyNormalizedDescendingSubstitution(this,
+                    (t, s) -> t.doApplyDescendingSubstitutionWithoutOptimizing(s, variableGenerator));
         }
         catch (DownPropagation.UnsatisfiableDescendingSubstitutionException e) {
             return iqTreeTools.createEmptyNode(ds);

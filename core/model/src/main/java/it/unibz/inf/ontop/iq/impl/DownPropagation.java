@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -115,7 +116,7 @@ public class DownPropagation {
      * If a "null" variable is propagated down, throws an UnsatisfiableDescendingSubstitutionException.
      *
      */
-    public Optional<Substitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution()
+    private Optional<Substitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution()
             throws UnsatisfiableDescendingSubstitutionException {
 
         var descendingSubstitution = optionalDescendingSubstitution.get();
@@ -128,6 +129,14 @@ public class DownPropagation {
             throw new UnsatisfiableDescendingSubstitutionException();
 
         return Optional.of(reducedSubstitution);
+    }
+
+    /**
+     * Called only when there is no constraint
+     */
+    public <T extends IQTree> IQTree applyNormalizedDescendingSubstitution(T tree, BiFunction<T, Substitution<? extends VariableOrGroundTerm>, IQTree> function) throws UnsatisfiableDescendingSubstitutionException {
+        var normalizedSubstitution = normalizeDescendingSubstitution();
+        return normalizedSubstitution.map(s -> function.apply(tree, s)).orElse(tree);
     }
 
 
@@ -144,7 +153,8 @@ public class DownPropagation {
         if (constraint.isEmpty())
             return new DownPropagation(constraint, normalizedSubstitution, projectedVariables);
 
-        ImmutableSet<?> newVariables = getVar2VarFragment().apply(projectedVariables);
+        var descendingSubstitution = optionalDescendingSubstitution.get();
+        ImmutableSet<?> newVariables = descendingSubstitution.restrictRangeTo(Variable.class).apply(projectedVariables);
 
         return new DownPropagation(
                 termFactory.getConjunction(constraint.get().flattenAND()
@@ -152,19 +162,14 @@ public class DownPropagation {
                 normalizedSubstitution, projectedVariables);
     }
 
-    private Substitution<Variable> getVar2VarFragment() {
-        var descendingSubstitution = optionalDescendingSubstitution.get();
-        return descendingSubstitution.restrictRangeTo(Variable.class);
-    }
-
     /**
      * If the substitution is a fresh renaming, returns it as an injective substitution
      */
-    public Optional<InjectiveSubstitution<Variable>> extractFreshRenaming() {
-
-        Substitution<Variable> var2VarFragment = getVar2VarFragment();
+    public Optional<InjectiveSubstitution<Variable>> transformIntoFreshRenaming() {
 
         var descendingSubstitution = optionalDescendingSubstitution.get();
+        Substitution<Variable> var2VarFragment = descendingSubstitution.restrictRangeTo(Variable.class);
+
         int size = descendingSubstitution.getDomain().size();
 
         if (var2VarFragment.getDomain().size() != size
