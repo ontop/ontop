@@ -37,8 +37,8 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
 
     @AssistedInject
     private OrderByNodeImpl(@Assisted ImmutableList<OrderComparator> comparators, IntermediateQueryFactory iqFactory,
-                            OrderByNormalizer normalizer, IQTreeTools iqTreeTools, SubstitutionFactory substitutionFactory) {
-        super(iqFactory);
+                            OrderByNormalizer normalizer, IQTreeTools iqTreeTools, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+        super(iqFactory, termFactory);
         this.comparators = comparators;
         this.normalizer = normalizer;
         this.iqTreeTools = iqTreeTools;

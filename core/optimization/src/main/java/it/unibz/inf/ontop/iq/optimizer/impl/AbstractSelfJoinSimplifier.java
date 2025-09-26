@@ -108,7 +108,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                         nonExtensionalChildrenWithConstraint.stream())
                 .collect(ImmutableCollectors.toList());
 
-        DownPropagation dp = DownPropagation.of(unifier, NaryIQTreeTools.projectedVariables(newChildren), variableGenerator);
+        DownPropagation dp = DownPropagation.of(unifier, Optional.empty(), NaryIQTreeTools.projectedVariables(newChildren), variableGenerator, termFactory, iqFactory);
         ImmutableList<IQTree> newChildrenPropagated = NaryIQTreeTools.transformChildren(newChildren, dp::propagate);
 
         Optional<ImmutableExpression> newExpression = termFactory.getConjunction(

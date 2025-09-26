@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -133,7 +132,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                               Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
                                               VariableGenerator variableGenerator) {
 
-        DownPropagation downPropagation = DownPropagation.of(descendingSubstitution, constraint, NaryIQTreeTools.projectedVariables(children), variableGenerator);
+        DownPropagation downPropagation = DownPropagation.of(descendingSubstitution, constraint, NaryIQTreeTools.projectedVariables(children), variableGenerator, termFactory, iqFactory);
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
                 downPropagation.computeProjectedVariables());
 
@@ -144,7 +143,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children,
                                           VariableGenerator variableGenerator) {
 
-        DownPropagation downPropagation = DownPropagation.of(constraint, NaryIQTreeTools.projectedVariables(children), variableGenerator);
+        DownPropagation downPropagation = DownPropagation.of(Optional.of(constraint), NaryIQTreeTools.projectedVariables(children), variableGenerator, termFactory);
         VariableNullability extendedChildrenVariableNullability = downPropagation.extendVariableNullability(variableNullabilityTools.getChildrenVariableNullability(children));
 
         return propagateDownConstraint(downPropagation, children, extendedChildrenVariableNullability);

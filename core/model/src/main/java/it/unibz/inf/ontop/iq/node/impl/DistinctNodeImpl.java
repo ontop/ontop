@@ -26,8 +26,8 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     private final DistinctNormalizer normalizer;
 
     @Inject
-    private DistinctNodeImpl(IntermediateQueryFactory iqFactory, DistinctNormalizer normalizer) {
-        super(iqFactory);
+    private DistinctNodeImpl(IntermediateQueryFactory iqFactory, DistinctNormalizer normalizer, TermFactory termFactory) {
+        super(iqFactory, termFactory);
         this.normalizer = normalizer;
     }
 

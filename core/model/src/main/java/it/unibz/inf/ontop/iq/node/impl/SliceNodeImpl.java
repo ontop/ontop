@@ -14,10 +14,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.SliceNormalizer;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -43,8 +40,8 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
     @AssistedInject
     private SliceNodeImpl(@Assisted("offset") long offset, @Assisted("limit") long limit,
-                          IntermediateQueryFactory iqFactory, SliceNormalizer sliceNormalizer) {
-        super(iqFactory);
+                          IntermediateQueryFactory iqFactory, SliceNormalizer sliceNormalizer, TermFactory termFactory) {
+        super(iqFactory, termFactory);
         if (offset < 0)
             throw new IllegalArgumentException("The offset must not be negative");
         if (limit < 0)
@@ -55,8 +52,8 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @AssistedInject
-    private SliceNodeImpl(@Assisted long offset, IntermediateQueryFactory iqFactory, SliceNormalizer sliceNormalizer) {
-        super(iqFactory);
+    private SliceNodeImpl(@Assisted long offset, IntermediateQueryFactory iqFactory, SliceNormalizer sliceNormalizer, TermFactory termFactory) {
+        super(iqFactory, termFactory);
         if (offset < 0)
             throw new IllegalArgumentException("The offset must not be negative");
         this.offset = offset;

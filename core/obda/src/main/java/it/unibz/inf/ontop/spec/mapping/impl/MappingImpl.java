@@ -133,9 +133,10 @@ public class MappingImpl implements Mapping {
                         ? termFactory.getIRIFunctionalTerm(lexicalTerm)
                         : termFactory.getBnodeFunctionalTerm(lexicalTerm));
 
-        DownPropagation dp = DownPropagation.of(strictEquality, variableGenerator);
-        IQTree prunedIQTree = dp.propagate(mergedDefinition.getTree());
-        return iqFactory.createIQ(projectionAtom, prunedIQTree)
+        IQTree mergedTree = mergedDefinition.getTree();
+        DownPropagation dp = DownPropagation.of(Optional.of(strictEquality), mergedTree.getVariables(), variableGenerator, termFactory);
+        IQTree prunedTree = dp.propagate(mergedTree);
+        return iqFactory.createIQ(projectionAtom, prunedTree)
                 .normalizeForOptimization();
     }
 

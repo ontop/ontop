@@ -77,7 +77,7 @@ public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTre
             Optional<ImmutableExpression> constraint,
             VariableGenerator variableGenerator) {
         try {
-            DownPropagation ds = DownPropagation.ofNormalized(descendingSubstitution, getVariables(), variableGenerator);
+            DownPropagation ds = DownPropagation.ofNormalized(descendingSubstitution, getVariables(), variableGenerator, iqFactory);
             return ds.getOptionalDescendingSubstitution()
                     .map(s -> applyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
                     .orElse(this);

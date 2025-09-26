@@ -50,7 +50,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         return applyDescendingSubstitution(
                 descendingSubstitution,
                 child,
-                r -> propagateDescendingSubstitutionToChild(child, r, constraint, variableGenerator),
+                r -> propagateDescendingSubstitutionToChild(child, r, constraint, getVariables(), variableGenerator),
                 variableGenerator);
     }
 
@@ -63,9 +63,10 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     private IQTree propagateDescendingSubstitutionToChild(IQTree child,
                                                           PropagationResults tauFPropagationResults,
                                                           Optional<ImmutableExpression> constraint,
+                                                          ImmutableSet<Variable> variables,
                                                           VariableGenerator variableGenerator) throws UnsatisfiableConditionException {
 
-        DownPropagation initialDownPropagation = DownPropagation.of(tauFPropagationResults.delta, constraint, ImmutableSet.of(), variableGenerator);
+        DownPropagation initialDownPropagation = DownPropagation.of(tauFPropagationResults.delta, constraint, variables, variableGenerator, termFactory, iqFactory);
         DownPropagation downPropagation = getConstraintForChild(tauFPropagationResults.theta, initialDownPropagation, child);
 
         return downPropagation.propagate(child);
@@ -88,9 +89,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                                DescendingSubstitutionChildUpdateFunction updateChildFct,
                                                VariableGenerator variableGenerator) {
 
-        DownPropagation ds = DownPropagation.of(tau, getVariables(), variableGenerator);
-
         try {
+            DownPropagation ds = DownPropagation.ofNormalized(tau, getVariables(), variableGenerator, iqFactory);
             PropagationResults tauPropagationResults = propagateTau(ds, child.getVariables());
 
             IQTree newChild = updateChildFct.apply(tauPropagationResults);
@@ -104,8 +104,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                     .append(iqTreeTools.createOptionalFilterNode(tauPropagationResults.filter))
                     .build(newChild);
         }
-        catch (UnsatisfiableConditionException e) {
-            return iqTreeTools.createEmptyNode(ds);
+        catch (UnsatisfiableConditionException | DownPropagation.UnsatisfiableDescendingSubstitutionException e) {
+            return iqTreeTools.createEmptyNode(DownPropagation.computeProjectedVariables(tau, getVariables()));
         }
     }
 
@@ -210,7 +210,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
-        DownPropagation initial = DownPropagation.of(constraint, getVariables(), variableGenerator);
+        DownPropagation initial = DownPropagation.of(Optional.of(constraint), getVariables(), variableGenerator, termFactory);
         try {
             DownPropagation dp = getConstraintForChild(getSubstitution(), initial, child);
 
@@ -235,7 +235,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
             : evaluateCondition(thetaConstraint.get(),
                 dp.extendVariableNullability(child.getVariableNullability()));
 
-        return dp.withConstraint(newConstraint);
+        return dp.withConstraint(newConstraint, child.getVariables(), termFactory);
     }
 
     @Override

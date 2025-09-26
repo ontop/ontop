@@ -510,7 +510,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
         public State<UnaryOperatorNode, LeftJoinSubTree> propagateDownLJCondition(State<UnaryOperatorNode, LeftJoinSubTree> state) {
             LeftJoinSubTree subTree = state.getSubTree();
-            DownPropagation dc = DownPropagation.of(subTree.ljCondition(), variableGenerator);
+            DownPropagation dc = DownPropagation.of(subTree.ljCondition(), subTree.rightChild().getVariables(), variableGenerator, termFactory);
             IQTree newRightChild = dc.propagate(subTree.rightChild());
             return state.replace(subTree.replaceRight(newRightChild));
         }

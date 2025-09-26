@@ -348,7 +348,8 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
             DownPropagation dp = DownPropagation.of(
                     termFactory.getConjunction(constraint.flattenAND()
                         .filter(c -> !c.equals(firstStrictEquality))),
-                    variableGenerator);
+                    getVariables(),
+                    variableGenerator, termFactory);
 
             return dp.propagate(optionalReshapedTree.get());
         }
@@ -360,7 +361,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                                 .collect(ImmutableCollectors.toList())));
 
         ImmutableList<ImmutableExpression> otherStrictEqualities = strictEqualities.subList(1, strictEqualities.size());
-        DownPropagation dp = DownPropagation.of(termFactory.getConjunction(otherStrictEqualities.stream()), variableGenerator);
+        DownPropagation dp = DownPropagation.of(termFactory.getConjunction(otherStrictEqualities.stream()), getVariables(), variableGenerator, termFactory);
         return dp.propagate(filteredValuesNode);
     }
 

@@ -134,7 +134,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
 
-        DownPropagation downPropagation = DownPropagation.ofNormalized(descendingSubstitution, constraint, getVariables(), variableGenerator, termFactory, iqFactory);
+        DownPropagation downPropagation = DownPropagation.of(descendingSubstitution, constraint, getVariables(), variableGenerator, termFactory, iqFactory);
 
         if (downPropagation instanceof RenamingDownPropagation)
             return downPropagation.propagate(this);
@@ -259,7 +259,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             VariableGenerator variableGenerator) {
         try {
-            DownPropagation ds = DownPropagation.ofNormalized(descendingSubstitution, getVariables(), variableGenerator);
+            DownPropagation ds = DownPropagation.ofNormalized(descendingSubstitution, getVariables(), variableGenerator, iqFactory);
             return ds.getOptionalDescendingSubstitution()
                     .map(s -> doApplyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
                     .orElse(this);

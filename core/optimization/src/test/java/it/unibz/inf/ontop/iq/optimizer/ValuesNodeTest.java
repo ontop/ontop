@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.node.ValuesNode;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -690,9 +691,10 @@ public class ValuesNodeTest {
         System.out.println(initialTree);
         System.out.println('\n' + "Expected tree:");
         System.out.println(expectedTree);
-        DownPropagation dp = DownPropagation.of(
-                ((FilterNode) initialTree.getRootNode()).getFilterCondition(),
-                CORE_UTILS_FACTORY.createVariableGenerator(initialTree.getKnownVariables()));
+        ImmutableExpression constraint = ((FilterNode) initialTree.getRootNode()).getFilterCondition();
+        ImmutableSet<Variable> variables = initialTree.getVariables();
+        VariableGenerator variableGenerator = CORE_UTILS_FACTORY.createVariableGenerator(initialTree.getKnownVariables());
+        DownPropagation dp = DownPropagation.of(Optional.of(constraint), variables, variableGenerator, TERM_FACTORY);
         IQTree resultingTree = dp.propagate(initialTree);
         System.out.println('\n' + "Resulting tree:");
         System.out.println(resultingTree);
