@@ -134,8 +134,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                         DownPropagation.of(Optional.empty(), child.getVariables(), variableGenerator),
                         Optional.of(filterNode.getFilterCondition()),
                         ImmutableList.of(child),
-                        childVariableNullability,
-                        variableGenerator);
+                        childVariableNullability);
 
                 return state.lift(
                         simplification.getConstructionNode(),

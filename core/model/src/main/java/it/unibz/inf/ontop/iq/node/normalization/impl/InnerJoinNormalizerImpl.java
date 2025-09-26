@@ -248,8 +248,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                         DownPropagation.of(Optional.empty(), subTree.projectedVariables(), variableGenerator),
                         subTree.joiningCondition(),
                         subTree.children(),
-                        childrenVariableNullability,
-                        variableGenerator);
+                        childrenVariableNullability);
 
                 return state.lift(
                         simplification.getConstructionNode(),

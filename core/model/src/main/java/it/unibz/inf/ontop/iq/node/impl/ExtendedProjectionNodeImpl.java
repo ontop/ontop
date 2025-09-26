@@ -65,10 +65,10 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                                           Optional<ImmutableExpression> constraint,
                                                           VariableGenerator variableGenerator) throws UnsatisfiableConditionException {
 
-        DownPropagation initialDownPropagation = DownPropagation.of(constraint, tauFPropagationResults.delta, ImmutableSet.of());
+        DownPropagation initialDownPropagation = DownPropagation.of(tauFPropagationResults.delta, constraint, ImmutableSet.of(), variableGenerator);
         DownPropagation downPropagation = getConstraintForChild(tauFPropagationResults.theta, initialDownPropagation, child);
 
-        return downPropagation.propagate(child, variableGenerator);
+        return downPropagation.propagate(child);
     }
 
     @Override

@@ -133,11 +133,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                               Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
                                               VariableGenerator variableGenerator) {
 
-        DownPropagation downPropagation = DownPropagation.of(constraint, descendingSubstitution, NaryIQTreeTools.projectedVariables(children));
+        DownPropagation downPropagation = DownPropagation.of(descendingSubstitution, constraint, NaryIQTreeTools.projectedVariables(children), variableGenerator);
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
                 downPropagation.computeProjectedVariables());
 
-        return propagateDownConstraint(downPropagation, children, simplifiedChildFutureVariableNullability, variableGenerator);
+        return propagateDownConstraint(downPropagation, children, simplifiedChildFutureVariableNullability);
     }
 
     @Override
@@ -147,14 +147,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         DownPropagation downPropagation = DownPropagation.of(constraint, NaryIQTreeTools.projectedVariables(children), variableGenerator);
         VariableNullability extendedChildrenVariableNullability = downPropagation.extendVariableNullability(variableNullabilityTools.getChildrenVariableNullability(children));
 
-        return propagateDownConstraint(downPropagation, children, extendedChildrenVariableNullability, variableGenerator);
+        return propagateDownConstraint(downPropagation, children, extendedChildrenVariableNullability);
     }
 
-    private IQTree propagateDownConstraint(DownPropagation downPropagation,ImmutableList<IQTree> children, VariableNullability variableNullability,
-                                           VariableGenerator variableGenerator) {
+    private IQTree propagateDownConstraint(DownPropagation downPropagation,ImmutableList<IQTree> children, VariableNullability variableNullability) {
         try {
             var simplification = conditionSimplifier.simplifyAndPropagate(downPropagation,
-                    getOptionalFilterCondition(), children, variableNullability, variableGenerator);
+                    getOptionalFilterCondition(), children, variableNullability);
 
             NaryIQTree joinTree = iqFactory.createNaryIQTree(
                     createInnerJoinNode(simplification.getOptionalExpression()),

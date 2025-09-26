@@ -93,11 +93,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
 
-        DownPropagation downPropagation = DownPropagation.of(constraint, descendingSubstitution, child.getVariables());
+        DownPropagation downPropagation = DownPropagation.of(descendingSubstitution, constraint, child.getVariables(), variableGenerator);
         VariableNullability simplifiedFutureChildVariableNullability = coreUtilsFactory.createSimplifiedVariableNullability(
                 downPropagation.computeProjectedVariables().stream());
 
-        return propagateDownConstraint(downPropagation, child, simplifiedFutureChildVariableNullability, variableGenerator);
+        return propagateDownConstraint(downPropagation, child, simplifiedFutureChildVariableNullability);
     }
 
     @Override
@@ -105,13 +105,13 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         var downPropagation = DownPropagation.of(constraint, child.getVariables(), variableGenerator);
         VariableNullability extendedChildVariableNullability = downPropagation.extendVariableNullability(child.getVariableNullability());
 
-        return propagateDownConstraint(downPropagation, child, extendedChildVariableNullability, variableGenerator);
+        return propagateDownConstraint(downPropagation, child, extendedChildVariableNullability);
     }
 
-    private IQTree propagateDownConstraint(DownPropagation downConstraint, IQTree child, VariableNullability extendedChildVariableNullability, VariableGenerator variableGenerator) {
+    private IQTree propagateDownConstraint(DownPropagation downConstraint, IQTree child, VariableNullability extendedChildVariableNullability) {
         try {
             var simplification = conditionSimplifier.simplifyAndPropagate(downConstraint,
-                    Optional.of(getFilterCondition()), ImmutableList.of(child), extendedChildVariableNullability, variableGenerator);
+                    Optional.of(getFilterCondition()), ImmutableList.of(child), extendedChildVariableNullability);
 
             return iqTreeTools.unaryIQTreeBuilder()
                     .append(simplification.getConstructionNode())

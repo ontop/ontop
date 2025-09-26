@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
@@ -15,7 +16,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -137,32 +137,27 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
         Optional<ImmutableExpression> optionalSubstitutedConstraint =
                 downPropagation.getConstraint().map(conditionSimplificationResults.getSubstitution()::apply);
 
-        if (optionalSubstitutedConstraint.isPresent()) {
-            ImmutableExpression conjunction = iqTreeTools.getConjunction(
-                    conditionSimplificationResults.getOptionalExpression(),
-                    optionalSubstitutedConstraint.get());
+        Optional<ImmutableExpression> newConstraint = optionalSubstitutedConstraint.isPresent()
+                ? evaluateCondition(iqTreeTools.getConjunction(
+                        conditionSimplificationResults.getOptionalExpression(),
+                        optionalSubstitutedConstraint.get()), childVariableNullability)
+                : conditionSimplificationResults.getOptionalExpression();
 
-            return DownPropagation.of(evaluateCondition(conjunction, childVariableNullability), downSubstitution, downPropagation.getVariables());
-        }
-
-        return DownPropagation.of(conditionSimplificationResults.getOptionalExpression(), downSubstitution, downPropagation.getVariables());
+        return DownPropagation.of(downSubstitution, newConstraint, downPropagation.getVariables(), downPropagation.getVariableGenerator());
     }
 
     @Override
     public ExpressionAndSubstitutionAndChildren simplifyAndPropagate(DownPropagation downPropagation, Optional<ImmutableExpression> expression, ImmutableList<IQTree> children,
-                                                                     VariableNullability variableNullability, VariableGenerator variableGenerator) throws UnsatisfiableConditionException {
+                                                                     VariableNullability variableNullability) throws UnsatisfiableConditionException {
         // TODO: also consider the constraint for simplifying the condition
-        var unoptimizedExpression = downPropagation.applySubstitution(expression);
+        var simplification = simplifyCondition(downPropagation.applySubstitution(expression), ImmutableSet.of(), children, variableNullability);
 
-        var simplifiedExpression = simplifyCondition(unoptimizedExpression, ImmutableSet.of(), children, variableNullability);
+        var extendedDownConstraint = extendAndSimplifyDownConstraint(downPropagation, simplification, downPropagation.extendVariableNullability(variableNullability));
 
-        var extendedDownConstraint = extendAndSimplifyDownConstraint(downPropagation, simplifiedExpression, downPropagation.extendVariableNullability(variableNullability));
-
-        var updatedChildren = extendedDownConstraint.propagate(children, variableGenerator);
-
-        var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(downPropagation::computeProjectedVariables, simplifiedExpression.getSubstitution());
-
-        return new ExpressionAndSubstitutionAndChildrenImpl(optionalConstructionNode, simplifiedExpression.getOptionalExpression(), updatedChildren);
+        return new ExpressionAndSubstitutionAndChildrenImpl(
+                iqTreeTools.createOptionalConstructionNode(downPropagation::computeProjectedVariables, simplification.getSubstitution()),
+                simplification.getOptionalExpression(),
+                NaryIQTreeTools.transformChildren(children, extendedDownConstraint::propagate));
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

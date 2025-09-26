@@ -134,29 +134,15 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
 
-        try {
-            DownPropagation downPropagation = DownPropagationImpl.normalize(descendingSubstitution, constraint, getVariables(), termFactory);
+        DownPropagation downPropagation = DownPropagation.ofNormalized(descendingSubstitution, constraint, getVariables(), variableGenerator, termFactory, iqFactory);
 
-            var optionalDescendingSubstitution = downPropagation.getOptionalDescendingSubstitution();
-            if (optionalDescendingSubstitution.isPresent()) {
-                // transform into a renaming as applying a renaming is cheaper
-                var optionalFreshRenaming = DownPropagationImpl.transformIntoFreshRenaming(optionalDescendingSubstitution.get(), downPropagation.getVariables());
-                if (optionalFreshRenaming.isPresent()) {
-                    // non-empty because it comes from the normalized substitution
-                    var selectedSubstitution = optionalFreshRenaming.get();
-                    IQTree r = applyNonEmptyFreshRenaming(selectedSubstitution);
-                    return downPropagation.propagate(r, variableGenerator);
-                }
-            }
+        if (downPropagation instanceof RenamingDownPropagation)
+            return downPropagation.propagate(this);
 
-            return optionalDescendingSubstitution
-                    // applyRegularDescendingSubstitution!
-                    .map(s -> applyRegularDescendingSubstitution(s, downPropagation.getConstraint(), variableGenerator))
-                    .orElseGet(() -> downPropagation.propagate(this, variableGenerator));
-        }
-        catch (DownPropagation.UnsatisfiableDescendingSubstitutionException e) {
-            return iqTreeTools.createEmptyNode(DownPropagation.computeProjectedVariables(descendingSubstitution, getVariables()));
-        }
+        return downPropagation.getOptionalDescendingSubstitution()
+                // applyRegularDescendingSubstitution!
+                .map(s -> applyRegularDescendingSubstitution(s, downPropagation.getConstraint(), variableGenerator))
+                .orElseGet(() -> downPropagation.propagate(this));
     }
 
     @Override

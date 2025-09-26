@@ -442,10 +442,10 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                                               Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
                                               VariableGenerator variableGenerator) {
 
-        DownPropagation ds = DownPropagation.of(constraint, descendingSubstitution, getVariables());
+        DownPropagation ds = DownPropagation.ofNormalized(descendingSubstitution, constraint, getVariables(), variableGenerator, termFactory, iqFactory);
 
         ImmutableList<IQTree> updatedChildren = children.stream()
-                .map(c -> ds.propagate(c, variableGenerator))
+                .map(ds::propagate)
                 .filter(c -> !c.isDeclaredAsEmpty())
                 .collect(ImmutableCollectors.toList());
 
