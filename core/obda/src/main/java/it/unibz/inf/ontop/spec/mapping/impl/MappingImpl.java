@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
@@ -132,7 +133,8 @@ public class MappingImpl implements Mapping {
                         ? termFactory.getIRIFunctionalTerm(lexicalTerm)
                         : termFactory.getBnodeFunctionalTerm(lexicalTerm));
 
-        IQTree prunedIQTree = mergedDefinition.getTree().propagateDownConstraint(strictEquality, variableGenerator);
+        DownPropagation dp = DownPropagation.of(strictEquality, variableGenerator);
+        IQTree prunedIQTree = dp.propagate(mergedDefinition.getTree());
         return iqFactory.createIQ(projectionAtom, prunedIQTree)
                 .normalizeForOptimization();
     }

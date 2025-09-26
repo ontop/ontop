@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.node.QueryModifierNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -11,6 +12,8 @@ import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
+
+import java.util.Optional;
 
 
 public abstract class QueryModifierNodeImpl implements QueryModifierNode, QueryNode {
@@ -33,7 +36,8 @@ public abstract class QueryModifierNodeImpl implements QueryModifierNode, QueryN
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
-        return iqFactory.createUnaryIQTree(this, child.propagateDownConstraint(constraint, variableGenerator));
+        DownPropagation dp = DownPropagation.of(constraint, variableGenerator);
+        return iqFactory.createUnaryIQTree(this, dp.propagate(child));
     }
 
     @Override

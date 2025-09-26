@@ -142,10 +142,10 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                     conditionSimplificationResults.getOptionalExpression(),
                     optionalSubstitutedConstraint.get());
 
-            return new DownPropagation(evaluateCondition(conjunction, childVariableNullability), downSubstitution, downPropagation.getVariables());
+            return DownPropagation.of(evaluateCondition(conjunction, childVariableNullability), downSubstitution, downPropagation.getVariables());
         }
 
-        return new DownPropagation(conditionSimplificationResults.getOptionalExpression(), downSubstitution, downPropagation.getVariables());
+        return DownPropagation.of(conditionSimplificationResults.getOptionalExpression(), downSubstitution, downPropagation.getVariables());
     }
 
     @Override

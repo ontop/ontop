@@ -134,7 +134,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
 
-        DownPropagation ds = new DownPropagation(constraint, descendingSubstitution, getVariables());
+        DownPropagation ds = DownPropagation.of(constraint, descendingSubstitution, getVariables());
 
         try {
             DownPropagation downPropagation = ds.normalize(termFactory);
@@ -147,14 +147,14 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
                     // non-empty because it comes from the normalized substitution
                     var selectedSubstitution = optionalFreshRenaming.get();
                     IQTree r = applyNonEmptyFreshRenaming(selectedSubstitution);
-                    return downPropagation.propagateDownOptionalConstraint(r, variableGenerator);
+                    return downPropagation.propagate(r, variableGenerator);
                 }
             }
 
             return optionalDescendingSubstitution
                     // applyRegularDescendingSubstitution!
                     .map(s -> applyRegularDescendingSubstitution(s, downPropagation.getConstraint(), variableGenerator))
-                    .orElseGet(() -> downPropagation.propagateDownOptionalConstraint(this, variableGenerator));
+                    .orElseGet(() -> downPropagation.propagate(this, variableGenerator));
         }
         catch (DownPropagation.UnsatisfiableDescendingSubstitutionException e) {
             return iqTreeTools.createEmptyNode(ds);
@@ -274,13 +274,14 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             VariableGenerator variableGenerator) {
-        DownPropagation ds = new DownPropagation(descendingSubstitution, getVariables());
         try {
-            return ds.applyNormalizedDescendingSubstitution(this,
-                    (t, s) -> t.doApplyDescendingSubstitutionWithoutOptimizing(s, variableGenerator));
+            DownPropagation ds = DownPropagation.ofNormalized(descendingSubstitution, getVariables(), variableGenerator);
+            return ds.getOptionalDescendingSubstitution()
+                    .map(s -> doApplyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
+                    .orElse(this);
         }
         catch (DownPropagation.UnsatisfiableDescendingSubstitutionException e) {
-            return iqTreeTools.createEmptyNode(ds);
+            return iqTreeTools.createEmptyNode(DownPropagation.computeProjectedVariables(descendingSubstitution, getVariables()));
         }
     }
 

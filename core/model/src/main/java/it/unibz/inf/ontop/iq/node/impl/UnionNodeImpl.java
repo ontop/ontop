@@ -442,7 +442,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                                               Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
                                               VariableGenerator variableGenerator) {
 
-        DownPropagation ds = new DownPropagation(constraint, descendingSubstitution, getVariables());
+        DownPropagation ds = DownPropagation.of(constraint, descendingSubstitution, getVariables());
 
         ImmutableList<IQTree> updatedChildren = children.stream()
                 .map(c -> ds.propagate(c, variableGenerator))
@@ -462,10 +462,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children,
                                           VariableGenerator variableGenerator) {
+        DownPropagation dp = DownPropagation.of(constraint, variableGenerator);
         return iqFactory.createNaryIQTree(this,
-                NaryIQTreeTools.transformChildren(
-                        children,
-                        c -> c.propagateDownConstraint(constraint, variableGenerator)));
+                NaryIQTreeTools.transformChildren(children, dp::propagate));
     }
 
 
@@ -474,8 +473,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
             VariableGenerator variableGenerator) {
 
-        DownPropagation ds = new DownPropagation(descendingSubstitution, getVariables());
-        return iqTreeTools.createUnionTree(ds.computeProjectedVariables(),
+        return iqTreeTools.createUnionTree(DownPropagation.computeProjectedVariables(descendingSubstitution, getVariables()),
                 NaryIQTreeTools.transformChildren(children,
                         c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator)));
     }

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
@@ -13,6 +14,8 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.Optional;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.TABLE1_AR1;
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.TABLE1_AR2;
@@ -687,9 +690,10 @@ public class ValuesNodeTest {
         System.out.println(initialTree);
         System.out.println('\n' + "Expected tree:");
         System.out.println(expectedTree);
-        IQTree resultingTree = initialTree.propagateDownConstraint(
+        DownPropagation dp = DownPropagation.of(
                 ((FilterNode) initialTree.getRootNode()).getFilterCondition(),
                 CORE_UTILS_FACTORY.createVariableGenerator(initialTree.getKnownVariables()));
+        IQTree resultingTree = dp.propagate(initialTree);
         System.out.println('\n' + "Resulting tree:");
         System.out.println(resultingTree);
         return resultingTree.equals(expectedTree);

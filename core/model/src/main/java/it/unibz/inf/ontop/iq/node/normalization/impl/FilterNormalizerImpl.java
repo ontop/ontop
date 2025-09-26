@@ -131,7 +131,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 var childVariableNullability = child.getVariableNullability();
 
                 var simplification = conditionSimplifier.simplifyAndPropagate(
-                        new DownPropagation(child.getVariables()),
+                        DownPropagation.of(Optional.empty(), child.getVariables(), variableGenerator),
                         Optional.of(filterNode.getFilterCondition()),
                         ImmutableList.of(child),
                         childVariableNullability,

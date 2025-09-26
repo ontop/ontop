@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
@@ -107,8 +108,8 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                         nonExtensionalChildrenWithConstraint.stream())
                 .collect(ImmutableCollectors.toList());
 
-        DownPropagation dc = new DownPropagation(unifier, ImmutableSet.of());
-        ImmutableList<IQTree> newChildrenPropagated = dc.propagate(newChildren, variableGenerator);
+        DownPropagation dp = DownPropagation.of(unifier, NaryIQTreeTools.projectedVariables(newChildren), variableGenerator);
+        ImmutableList<IQTree> newChildrenPropagated = NaryIQTreeTools.transformChildren(newChildren, dp::propagate);
 
         Optional<ImmutableExpression> newExpression = termFactory.getConjunction(
                 innerJoinNode.getOptionalFilterCondition(),

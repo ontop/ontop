@@ -245,7 +245,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 var childrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(subTree.children());
 
                 var simplification = conditionSimplifier.simplifyAndPropagate(
-                        new DownPropagation(subTree.projectedVariables()),
+                        DownPropagation.of(Optional.empty(), subTree.projectedVariables(), variableGenerator),
                         subTree.joiningCondition(),
                         subTree.children(),
                         childrenVariableNullability,

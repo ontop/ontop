@@ -93,7 +93,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
 
-        DownPropagation downPropagation = new DownPropagation(constraint, descendingSubstitution, child.getVariables());
+        DownPropagation downPropagation = DownPropagation.of(constraint, descendingSubstitution, child.getVariables());
         VariableNullability simplifiedFutureChildVariableNullability = coreUtilsFactory.createSimplifiedVariableNullability(
                 downPropagation.computeProjectedVariables().stream());
 
@@ -102,7 +102,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
-        var downPropagation = new DownPropagation(Optional.of(constraint), child.getVariables());
+        var downPropagation = DownPropagation.of(constraint, child.getVariables(), variableGenerator);
         VariableNullability extendedChildVariableNullability = downPropagation.extendVariableNullability(child.getVariableNullability());
 
         return propagateDownConstraint(downPropagation, child, extendedChildVariableNullability, variableGenerator);

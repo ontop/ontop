@@ -112,10 +112,9 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         IQTree filterTree = iqFactory.createUnaryIQTree(filterNode, newSubTree)
                 .applyFreshRenaming(renamingSubstitution);
 
-        DownPropagation ds = new DownPropagation(descendingSubstitution, getVariables());
-
         return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(ds.computeProjectedVariables()),
+                iqFactory.createConstructionNode(
+                        DownPropagation.computeProjectedVariables(descendingSubstitution, getVariables())),
                 filterTree);
     }
 

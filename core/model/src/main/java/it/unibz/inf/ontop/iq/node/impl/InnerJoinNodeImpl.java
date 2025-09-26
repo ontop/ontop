@@ -133,7 +133,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                               Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
                                               VariableGenerator variableGenerator) {
 
-        DownPropagation downPropagation = new DownPropagation(constraint, descendingSubstitution, NaryIQTreeTools.projectedVariables(children));
+        DownPropagation downPropagation = DownPropagation.of(constraint, descendingSubstitution, NaryIQTreeTools.projectedVariables(children));
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
                 downPropagation.computeProjectedVariables());
 
@@ -144,7 +144,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children,
                                           VariableGenerator variableGenerator) {
 
-        DownPropagation downPropagation = new DownPropagation(Optional.of(constraint), NaryIQTreeTools.projectedVariables(children));
+        DownPropagation downPropagation = DownPropagation.of(constraint, NaryIQTreeTools.projectedVariables(children), variableGenerator);
         VariableNullability extendedChildrenVariableNullability = downPropagation.extendVariableNullability(variableNullabilityTools.getChildrenVariableNullability(children));
 
         return propagateDownConstraint(downPropagation, children, extendedChildrenVariableNullability, variableGenerator);
