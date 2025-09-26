@@ -36,7 +36,6 @@ public class OntopMappingModule extends OntopAbstractModule {
         bindFromSettings(MappingOntologyComplianceValidator.class);
         bindFromSettings(MappingSameAsInverseRewriter.class);
         bindFromSettings(MappingCQCOptimizer.class);
-        bindFromSettings(QueryUnionSplitter.class);
         bindFromSettings(MappingCaster.class);
         bindFromSettings(MappingDistinctTransformer.class);
         bindFromSettings(MappingValuesWrapper.class);

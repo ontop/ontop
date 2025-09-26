@@ -112,10 +112,6 @@ public interface IQTree {
 
     void validate() throws InvalidIntermediateQueryException;
 
-    /**
-     * If subTreeToReplace is not found, has no effect (besides creating a novel copy).
-     */
-    IQTree replaceSubTree(IQTree subTreeToReplace, IQTree newSubTree);
 
     /**
      * Returns a set of substitutions that define how the projected variables are constructed.

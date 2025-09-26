@@ -114,11 +114,6 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    protected IQTree createIQTree(ImmutableList<IQTree> newChildren) {
-        return iqFactory.createNaryIQTree(getRootNode(), newChildren);
-    }
-
-    @Override
     protected ImmutableSet<Substitution<NonVariableTerm>> computePossibleVariableDefinitions() {
         return getRootNode().getPossibleVariableDefinitions(getChildren());
     }

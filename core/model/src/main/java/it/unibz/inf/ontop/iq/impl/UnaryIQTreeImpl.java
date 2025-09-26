@@ -93,11 +93,6 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    protected IQTree createIQTree(ImmutableList<IQTree> newChildren) {
-        return iqFactory.createUnaryIQTree(getRootNode(), newChildren.get(0));
-    }
-
-    @Override
     protected ImmutableSet<Substitution<NonVariableTerm>> computePossibleVariableDefinitions() {
             return getRootNode().getPossibleVariableDefinitions(getChild());
     }

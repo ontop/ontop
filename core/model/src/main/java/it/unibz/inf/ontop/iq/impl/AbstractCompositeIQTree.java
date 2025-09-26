@@ -285,20 +285,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
     protected abstract IQTree doApplyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator);
 
     @Override
-    public IQTree replaceSubTree(IQTree subTreeToReplace, IQTree newSubTree) {
-        if (equals(subTreeToReplace))
-            return newSubTree;
-
-        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(
-                getChildren(),
-                c -> c.replaceSubTree(subTreeToReplace, newSubTree));
-
-        return createIQTree(newChildren);
-    }
-
-    protected abstract IQTree createIQTree(ImmutableList<IQTree> newChildren);
-
-    @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
         IQTree newTree = doPropagateDownConstraint(constraint, variableGenerator);
         return equals(newTree)

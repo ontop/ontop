@@ -131,12 +131,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    protected IQTree createIQTree(ImmutableList<IQTree> newChildren) {
-        return iqFactory.createBinaryNonCommutativeIQTree(getRootNode(),
-                newChildren.get(0), newChildren.get(1));
-    }
-
-    @Override
     protected ImmutableSet<Substitution<NonVariableTerm>> computePossibleVariableDefinitions() {
         return getRootNode().getPossibleVariableDefinitions(getLeftChild(), getRightChild());
     }

@@ -91,14 +91,7 @@ public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTre
     public IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
         return this;
     }
-
-    @Override
-    public IQTree replaceSubTree(IQTree subTreeToReplace, IQTree newSubTree) {
-        return equals(subTreeToReplace)
-                ? newSubTree
-                : this;
-    }
-
+    
     @Override
     public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions() {
         return ImmutableSet.of(substitutionFactory.getSubstitution());
