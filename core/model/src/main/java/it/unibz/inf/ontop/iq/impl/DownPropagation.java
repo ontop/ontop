@@ -111,20 +111,25 @@ public interface DownPropagation {
      * If a "null" variable is propagated down, throws an UnsatisfiableDescendingSubstitutionException.
      *
      */
-    private static Optional<Substitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables)
+    private static <T extends VariableOrGroundTerm> Optional<Substitution<T>> normalizeDescendingSubstitution(Substitution<T> descendingSubstitution, ImmutableSet<Variable> projectedVariables)
             throws UnsatisfiableDescendingSubstitutionException {
 
-        Substitution<? extends VariableOrGroundTerm> reducedSubstitution = descendingSubstitution.restrictDomainTo(projectedVariables);
+        Optional<Substitution<T>> reducedSubstitution = reduceDescendingSubstitution(descendingSubstitution, projectedVariables);
+
+        if (reducedSubstitution.isPresent() && reducedSubstitution.get().rangeAnyMatch(ImmutableTerm::isNull))
+            throw new UnsatisfiableDescendingSubstitutionException();
+
+        return reducedSubstitution;
+    }
+
+    static <T extends VariableOrGroundTerm> Optional<Substitution<T>> reduceDescendingSubstitution(Substitution<T> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
+        Substitution<T> reducedSubstitution = descendingSubstitution.restrictDomainTo(projectedVariables);
 
         if (reducedSubstitution.isEmpty())
             return Optional.empty();
 
-        if (reducedSubstitution.rangeAnyMatch(ImmutableTerm::isNull))
-            throw new UnsatisfiableDescendingSubstitutionException();
-
         return Optional.of(reducedSubstitution);
     }
-
 
     static Optional<ImmutableExpression> normalizeConstraint(Optional<ImmutableExpression> optionalConstraint, Supplier<ImmutableSet<Variable>> projectedVariablesSupplier, TermFactory termFactory) {
         if (optionalConstraint.isPresent()) {
@@ -144,7 +149,7 @@ public interface DownPropagation {
     /**
      * If the substitution is a fresh renaming, returns it as an injective substitution
      */
-    private static Optional<InjectiveSubstitution<Variable>> transformIntoFreshRenaming(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
+    static Optional<InjectiveSubstitution<Variable>> transformIntoFreshRenaming(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
 
         Substitution<Variable> var2VarFragment = descendingSubstitution.restrictRangeTo(Variable.class);
 
@@ -375,7 +380,15 @@ class FullDownPropagation extends AbstractDownPropagation implements DownPropaga
 
     @Override
     public DownPropagation withConstraint(Optional<ImmutableExpression> constraint,  ImmutableSet<Variable> variables, TermFactory termFactory) {
-        return new FullDownPropagation(substitution, DownPropagation.normalizeConstraint(constraint, () -> variables, termFactory), variables, variableGenerator, termFactory);
+        var reducedSubstitution = DownPropagation.reduceDescendingSubstitution(substitution, variables);
+        if (reducedSubstitution.isPresent()) {
+            var normalizedConstraint = DownPropagation.normalizeConstraint(constraint, () -> variables, termFactory);
+            var renaming = DownPropagation.transformIntoFreshRenaming(reducedSubstitution.get(), variables);
+            return renaming.isPresent()
+                    ? new RenamingDownPropagation(renaming.get(), normalizedConstraint, variables, variableGenerator, termFactory)
+                     :new FullDownPropagation(substitution, normalizedConstraint, variables, variableGenerator, termFactory);
+        }
+        return DownPropagation.of(constraint, variables, variableGenerator, termFactory);
     }
 
     @Override
@@ -393,8 +406,8 @@ class FullDownPropagation extends AbstractDownPropagation implements DownPropaga
     public DownPropagation reduceScope(ImmutableSet<Variable> variables) {
         if (!this.variables.containsAll(variables))
             throw new IllegalArgumentException("Variables " +  variables + " are not included in " + this.variables);
-        // TODO: normalise sub
-        return new FullDownPropagation(substitution, DownPropagation.normalizeConstraint(constraint, () -> variables, termFactory), variables, variableGenerator, termFactory);
+
+        return withConstraint(constraint, variables, termFactory);
     }
 }
 
@@ -433,7 +446,12 @@ class RenamingDownPropagation extends AbstractDownPropagation implements DownPro
 
     @Override
     public DownPropagation withConstraint(Optional<ImmutableExpression> constraint, ImmutableSet<Variable> variables, TermFactory termFactory) {
-        return new RenamingDownPropagation(substitution, DownPropagation.normalizeConstraint(constraint, () -> variables, termFactory), variables, variableGenerator, termFactory);
+        var reducedSubstitution = DownPropagation.reduceDescendingSubstitution(substitution, variables);
+        if (reducedSubstitution.isPresent()) {
+            var normalizedConstraint = DownPropagation.normalizeConstraint(constraint, () -> variables, termFactory);
+            return new RenamingDownPropagation(reducedSubstitution.get().injective(), normalizedConstraint, variables, variableGenerator, termFactory);
+        }
+        return DownPropagation.of(constraint, variables, variableGenerator, termFactory);
     }
 
     @Override
@@ -445,7 +463,11 @@ class RenamingDownPropagation extends AbstractDownPropagation implements DownPro
     @Override
     public IQTree propagate(IQTree tree) {
         IQTree r = tree.applyFreshRenaming(substitution);
-        return constraint.map(c -> r.propagateDownConstraint(new RenamingDownPropagation(substitution, constraint, (ImmutableSet)substitution.apply(variables), variableGenerator, termFactory)))
+        return constraint.map(c -> r.propagateDownConstraint(
+                new ConstraintOnlyDownPropagation(
+                        c,
+                        DownPropagation.computeProjectedVariables(substitution, variables),
+                        variableGenerator, termFactory)))
                 .orElse(r);
     }
 
@@ -453,8 +475,8 @@ class RenamingDownPropagation extends AbstractDownPropagation implements DownPro
     public DownPropagation reduceScope(ImmutableSet<Variable> variables) {
         if (!this.variables.containsAll(variables))
             throw new IllegalArgumentException("Variables " +  variables + " are not included in " + this.variables);
-        // TODO: normalise sub
-        return new RenamingDownPropagation(substitution, DownPropagation.normalizeConstraint(constraint, () -> variables, termFactory), variables, variableGenerator, termFactory);
+
+        return withConstraint(constraint, variables, termFactory);
     }
 }
 
