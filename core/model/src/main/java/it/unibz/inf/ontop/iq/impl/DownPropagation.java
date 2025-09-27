@@ -287,6 +287,10 @@ class EmptyDownPropagation extends AbstractDownPropagation implements DownPropag
     public DownPropagation reduceScope(ImmutableSet<Variable> variables) {
         if (!this.variables.containsAll(variables))
             throw new IllegalArgumentException("Variables " +  variables + " are not included in " + this.variables);
+
+        if (this.variables.size() == variables.size())
+            return this;
+
         return new EmptyDownPropagation(variables, variableGenerator);
     }
 }
@@ -340,6 +344,10 @@ class ConstraintOnlyDownPropagation extends AbstractDownPropagation implements D
     public DownPropagation reduceScope(ImmutableSet<Variable> variables) {
         if (!this.variables.containsAll(variables))
             throw new IllegalArgumentException("Variables " +  variables + " are not included in " + this.variables);
+
+        if (this.variables.size() == variables.size())
+            return this;
+
         return DownPropagation.of(Optional.of(constraint), variables, variableGenerator, termFactory);
     }
 }
@@ -399,13 +407,16 @@ class FullDownPropagation extends AbstractDownPropagation implements DownPropaga
 
     @Override
     public IQTree propagate(IQTree tree) {
-        return tree.applyDescendingSubstitution(substitution, constraint, variableGenerator);
+        return tree.applyDescendingSubstitution(this);
     }
 
     @Override
     public DownPropagation reduceScope(ImmutableSet<Variable> variables) {
         if (!this.variables.containsAll(variables))
             throw new IllegalArgumentException("Variables " +  variables + " are not included in " + this.variables);
+
+        if (this.variables.size() == variables.size())
+            return this;
 
         return withConstraint(constraint, variables, termFactory);
     }
@@ -475,6 +486,9 @@ class RenamingDownPropagation extends AbstractDownPropagation implements DownPro
     public DownPropagation reduceScope(ImmutableSet<Variable> variables) {
         if (!this.variables.containsAll(variables))
             throw new IllegalArgumentException("Variables " +  variables + " are not included in " + this.variables);
+
+        if (this.variables.size() == variables.size())
+            return this;
 
         return withConstraint(constraint, variables, termFactory);
     }

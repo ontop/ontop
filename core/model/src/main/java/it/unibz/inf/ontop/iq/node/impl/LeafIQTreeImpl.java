@@ -72,18 +72,15 @@ public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTre
      * NB: the constraint is irrelevant here
      */
     @Override
-    public final IQTree applyDescendingSubstitution(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint,
-            VariableGenerator variableGenerator) {
+    public final IQTree applyDescendingSubstitution(DownPropagation dp) {
         try {
-            DownPropagation ds = DownPropagation.ofNormalized(descendingSubstitution, getVariables(), variableGenerator, iqFactory);
+            DownPropagation ds = DownPropagation.ofNormalized(dp.getOptionalDescendingSubstitution().get(), getVariables(), dp.getVariableGenerator(), iqFactory);
             return ds.getOptionalDescendingSubstitution()
-                    .map(s -> applyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
+                    .map(s -> applyDescendingSubstitutionWithoutOptimizing(s, dp.getVariableGenerator()))
                     .orElse(this);
         }
         catch (DownPropagation.UnsatisfiableDescendingSubstitutionException e) {
-            return iqFactory.createEmptyNode(DownPropagation.computeProjectedVariables(descendingSubstitution, getVariables()));
+            return iqFactory.createEmptyNode(DownPropagation.computeProjectedVariables(dp.getOptionalDescendingSubstitution().get(), getVariables()));
         }
     }
 

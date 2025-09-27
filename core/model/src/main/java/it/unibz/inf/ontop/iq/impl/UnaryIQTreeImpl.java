@@ -66,9 +66,8 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                        Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
-        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChild(), variableGenerator);
+    public IQTree applyDescendingSubstitution(DownPropagation dp) {
+        return getRootNode().applyDescendingSubstitution(dp.getOptionalDescendingSubstitution().get(), dp.getConstraint(), getChild(), dp.getVariableGenerator());
     }
 
     @Override

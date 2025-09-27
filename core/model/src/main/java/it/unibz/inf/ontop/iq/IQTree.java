@@ -51,11 +51,7 @@ public interface IQTree {
      * Designed to be called DURING the "structural/semantic optimization" phase.
      *
      */
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    IQTree applyDescendingSubstitution(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint,
-            VariableGenerator variableGenerator);
+    IQTree applyDescendingSubstitution(DownPropagation dp);
 
     /**
      * Particular type of descending substitution: only renaming some variables by external ones.
