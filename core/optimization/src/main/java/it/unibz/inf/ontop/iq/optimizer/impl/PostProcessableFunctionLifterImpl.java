@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.PostProcessableFunctionLifter;
@@ -240,7 +241,8 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                         iqFactory.createConstructionNode(projectedVariablesBeforeRenaming, substitutionBeforeRenaming),
                         construction.getTail());
 
-                IQTree partiallyPaddedChild = childBeforeRenaming.applyFreshRenaming(renamingSubstitution);
+                DownPropagation dp = DownPropagation.of(renamingSubstitution, childBeforeRenaming.getVariables());
+                IQTree partiallyPaddedChild = dp.propagate(childBeforeRenaming);
                 ImmutableTerm liftedDefinition = renamingSubstitution.applyToTerm(originalDefinition);
 
                 return new ChildDefinitionLift(partiallyPaddedChild, renamingSubstitution.getRangeSet(), liftedDefinition);

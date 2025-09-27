@@ -145,16 +145,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
                 .orElseGet(() -> downPropagation.propagate(this));
     }
 
-    @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        InjectiveSubstitution<Variable> selectedSubstitution = freshRenamingSubstitution.restrictDomainTo(getVariables());
-        return selectedSubstitution.isEmpty()
-                ? this
-                : applyNonEmptyFreshRenaming(selectedSubstitution);
-    }
-
-    protected abstract IQTree applyNonEmptyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution);
-
 
     protected abstract IQTree applyRegularDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                                  Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator);

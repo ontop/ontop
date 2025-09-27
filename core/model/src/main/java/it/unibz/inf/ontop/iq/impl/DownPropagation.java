@@ -60,6 +60,13 @@ public interface DownPropagation {
                 : new EmptyDownPropagation(variables, variableGenerator);
     }
 
+    static DownPropagation of(InjectiveSubstitution<Variable> substitution, ImmutableSet<Variable> variables) {
+        InjectiveSubstitution<Variable> restriction = substitution.restrictDomainTo(variables);
+        return restriction.isEmpty()
+                ? new EmptyDownPropagation(variables, null)
+                : new RenamingDownPropagation(substitution, Optional.empty(), variables, null);
+    }
+
 
     static ImmutableSet<Variable> computeProjectedVariables(Substitution<? extends VariableOrGroundTerm> substitution, ImmutableSet<Variable> projectedVariables) {
         ImmutableSet<Variable> newVariables = substitution.restrictDomainTo(projectedVariables).getRangeVariables();
@@ -204,7 +211,7 @@ abstract class AbstractDownPropagation implements DownPropagation {
     protected final ImmutableSet<Variable> variables;
 
     AbstractDownPropagation(ImmutableSet<Variable> variables, VariableGenerator variableGenerator) {
-        this.variableGenerator = Objects.requireNonNull(variableGenerator);
+        this.variableGenerator = variableGenerator;
         this.variables = variables;
     }
 
@@ -399,7 +406,7 @@ class RenamingDownPropagation extends AbstractDownPropagation implements DownPro
     @Override
     public IQTree propagate(IQTree child) {
         IQTree r = child.applyFreshRenaming(substitution);
-        return constraint.map(c -> r.propagateDownConstraint(c, this.variableGenerator))
+        return constraint.map(c -> r.propagateDownConstraint(c, variableGenerator))
                 .orElse(r);
     }
 }

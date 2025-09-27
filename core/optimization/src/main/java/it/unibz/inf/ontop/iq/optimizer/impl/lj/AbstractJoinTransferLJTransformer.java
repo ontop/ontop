@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
@@ -330,8 +331,9 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
                         .map(n -> n.extensionalDataNode)
                         .collect(ImmutableCollectors.toSet()));
 
-        return rightChild.acceptVisitor(transformer)
-                .applyFreshRenaming(renamingSubstitution);
+        IQTree transformedTree = rightChild.acceptVisitor(transformer);
+        DownPropagation dp = DownPropagation.of(renamingSubstitution, transformedTree.getVariables());
+        return dp.propagate(transformedTree);
     }
 
     protected static class SelectedNode {

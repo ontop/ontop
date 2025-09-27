@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
@@ -125,9 +126,10 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements IQTreeVariableG
             Substitution<ImmutableFunctionalTerm> newSubstitution = renaming
                     .transform(t -> termFactory.getIfElseNull(renamedCondition, t));
 
+            DownPropagation dp = DownPropagation.of(renaming, joinTree.getVariables());
             IQTree result = iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(joinTree.getVariables(), newSubstitution),
-                    joinTree.applyFreshRenaming(renaming));
+                    dp.propagate(joinTree));
 
             return Optional.of(result.normalizeForOptimization(variableGenerator));
         }

@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
@@ -164,7 +165,7 @@ public class ExplicitEqualityTransformerImpl extends DelegatingIQTreeVariableGen
 
         private ImmutableList<IQTree> updateJoinChildren(ImmutableList<InjectiveSubstitution<Variable>> substitutions, ImmutableList<IQTree> children) {
             return IntStream.range(0, substitutions.size())
-                    .mapToObj(i -> children.get(i).applyFreshRenaming(substitutions.get(i)))
+                    .mapToObj(i -> DownPropagation.of(substitutions.get(i), children.get(i).getVariables()).propagate(children.get(i)))
                     .map(this::transformChild)
                     .collect(ImmutableCollectors.toList());
         }
