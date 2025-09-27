@@ -6,6 +6,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
@@ -315,8 +316,8 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
                         e -> sourceAtomArguments.get(e.getKey()),
                         Map.Entry::getValue));
 
-        IQTree substitutedDefinition = renamedDefinition.getTree()
-                .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);
+        DownPropagation dp = DownPropagation.of(descendingSubstitution, Optional.empty(), renamedDefinition.getTree().getVariables(), variableGenerator, null, iqFactory);
+        IQTree substitutedDefinition = dp.propagate(renamedDefinition.getTree());
 
         return iqFactory.createUnaryIQTree(
                         iqFactory.createConstructionNode(dataNode.getVariables()),

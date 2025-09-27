@@ -134,7 +134,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                                               Optional<ImmutableExpression> constraint, IQTree child,
                                               VariableGenerator variableGenerator) {
         return applyDescendingSubstitution(descendingSubstitution, variableGenerator,
-                (s) -> child.applyDescendingSubstitution(s, constraint, variableGenerator));
+                (s) -> DownPropagation.of(s, constraint, child.getVariables(), variableGenerator, termFactory, iqFactory).propagate(child));
     }
 
     private IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
