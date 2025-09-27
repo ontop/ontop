@@ -280,6 +280,8 @@ class EmptyDownPropagation extends AbstractDownPropagation implements DownPropag
 
     @Override
     public DownPropagation reduceScope(ImmutableSet<Variable> variables) {
+        if (!this.variables.containsAll(variables))
+            throw new IllegalArgumentException("Variables " +  variables + " are not included in " + this.variables);
         return new EmptyDownPropagation(variables, variableGenerator);
     }
 }
@@ -331,6 +333,8 @@ class ConstraintOnlyDownPropagation extends AbstractDownPropagation implements D
 
     @Override
     public DownPropagation reduceScope(ImmutableSet<Variable> variables) {
+        if (!this.variables.containsAll(variables))
+            throw new IllegalArgumentException("Variables " +  variables + " are not included in " + this.variables);
         return DownPropagation.of(Optional.of(constraint), variables, variableGenerator, termFactory);
     }
 }
@@ -387,6 +391,8 @@ class FullDownPropagation extends AbstractDownPropagation implements DownPropaga
 
     @Override
     public DownPropagation reduceScope(ImmutableSet<Variable> variables) {
+        if (!this.variables.containsAll(variables))
+            throw new IllegalArgumentException("Variables " +  variables + " are not included in " + this.variables);
         // TODO: normalise sub
         return new FullDownPropagation(substitution, DownPropagation.normalizeConstraint(constraint, () -> variables, termFactory), variables, variableGenerator, termFactory);
     }
@@ -439,12 +445,14 @@ class RenamingDownPropagation extends AbstractDownPropagation implements DownPro
     @Override
     public IQTree propagate(IQTree tree) {
         IQTree r = tree.applyFreshRenaming(substitution);
-        return constraint.map(c -> r.propagateDownConstraint(this))
+        return constraint.map(c -> r.propagateDownConstraint(new RenamingDownPropagation(substitution, constraint, (ImmutableSet)substitution.apply(variables), variableGenerator, termFactory)))
                 .orElse(r);
     }
 
     @Override
     public DownPropagation reduceScope(ImmutableSet<Variable> variables) {
+        if (!this.variables.containsAll(variables))
+            throw new IllegalArgumentException("Variables " +  variables + " are not included in " + this.variables);
         // TODO: normalise sub
         return new RenamingDownPropagation(substitution, DownPropagation.normalizeConstraint(constraint, () -> variables, termFactory), variables, variableGenerator, termFactory);
     }
