@@ -101,8 +101,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
-        var downPropagation = DownPropagation.of(Optional.of(constraint), child.getVariables(), variableGenerator, termFactory);
+    public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
+        var downPropagation = dp.reduceScope(child.getVariables());
         VariableNullability extendedChildVariableNullability = downPropagation.extendVariableNullability(child.getVariableNullability());
 
         return propagateDownConstraint(downPropagation, child, extendedChildVariableNullability);

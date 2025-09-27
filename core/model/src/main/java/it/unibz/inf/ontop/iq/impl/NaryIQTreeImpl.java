@@ -109,8 +109,11 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    protected IQTree doPropagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
-        return getRootNode().propagateDownConstraint(constraint, getChildren(), variableGenerator);
+    public IQTree propagateDownConstraint(DownPropagation dp) {
+        IQTree newTree = getRootNode().propagateDownConstraint(dp, getChildren());
+        return equals(newTree)
+                ? this
+                : newTree;
     }
 
     @Override

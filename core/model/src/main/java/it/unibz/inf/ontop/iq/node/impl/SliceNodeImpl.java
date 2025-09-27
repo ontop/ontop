@@ -178,7 +178,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
      * Stops constraints
      */
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
+    public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
         return iqFactory.createUnaryIQTree(this, child);
     }
 }

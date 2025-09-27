@@ -88,7 +88,7 @@ public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTre
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
+    public IQTree propagateDownConstraint(DownPropagation dp) {
         return this;
     }
 

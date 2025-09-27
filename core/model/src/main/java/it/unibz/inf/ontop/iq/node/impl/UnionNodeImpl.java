@@ -460,11 +460,8 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children,
-                                          VariableGenerator variableGenerator) {
-        DownPropagation dp = DownPropagation.of(Optional.of(constraint), getVariables(), variableGenerator, termFactory);
-        return iqFactory.createNaryIQTree(this,
-                NaryIQTreeTools.transformChildren(children, dp::propagate));
+    public IQTree propagateDownConstraint(DownPropagation dp, ImmutableList<IQTree> children) {
+        return iqFactory.createNaryIQTree(this, NaryIQTreeTools.transformChildren(children, dp::propagateToChild));
     }
 
 

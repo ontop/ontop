@@ -209,8 +209,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
-        DownPropagation initial = DownPropagation.of(Optional.of(constraint), getVariables(), variableGenerator, termFactory);
+    public IQTree propagateDownConstraint(DownPropagation initial, IQTree child) {
         try {
             DownPropagation dp = getConstraintForChild(getSubstitution(), initial, child);
 

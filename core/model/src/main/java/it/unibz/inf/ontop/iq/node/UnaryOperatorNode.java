@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -42,7 +43,7 @@ public interface UnaryOperatorNode extends QueryNode {
     @Deprecated
     IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator);
 
-    IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator);
+    IQTree propagateDownConstraint(DownPropagation dp, IQTree child);
 
     <T> T acceptVisitor(UnaryIQTree tree, IQVisitor<T> visitor, IQTree child);
 

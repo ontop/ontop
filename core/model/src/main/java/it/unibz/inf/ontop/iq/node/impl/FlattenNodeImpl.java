@@ -276,9 +276,8 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
-        DownPropagation dp = DownPropagation.of(Optional.of(constraint), child.getVariables(), variableGenerator, termFactory);
-        return iqFactory.createUnaryIQTree(this, dp.propagate(child));
+    public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
+        return iqFactory.createUnaryIQTree(this, dp.propagateToChild(child));
     }
 
     @Override

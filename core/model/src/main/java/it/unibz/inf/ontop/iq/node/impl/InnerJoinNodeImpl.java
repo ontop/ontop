@@ -140,13 +140,9 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children,
-                                          VariableGenerator variableGenerator) {
-
-        DownPropagation downPropagation = DownPropagation.of(Optional.of(constraint), NaryIQTreeTools.projectedVariables(children), variableGenerator, termFactory);
-        VariableNullability extendedChildrenVariableNullability = downPropagation.extendVariableNullability(variableNullabilityTools.getChildrenVariableNullability(children));
-
-        return propagateDownConstraint(downPropagation, children, extendedChildrenVariableNullability);
+    public IQTree propagateDownConstraint(DownPropagation dp, ImmutableList<IQTree> children) {
+        VariableNullability extendedChildrenVariableNullability = dp.extendVariableNullability(variableNullabilityTools.getChildrenVariableNullability(children));
+        return propagateDownConstraint(dp, children, extendedChildrenVariableNullability);
     }
 
     private IQTree propagateDownConstraint(DownPropagation downPropagation,ImmutableList<IQTree> children, VariableNullability variableNullability) {

@@ -155,7 +155,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
         return new ExpressionAndSubstitutionAndChildrenImpl(
                 iqTreeTools.createOptionalConstructionNode(downPropagation::computeProjectedVariables, simplification.getSubstitution()),
                 simplification.getOptionalExpression(),
-                NaryIQTreeTools.transformChildren(children, extendedDownConstraint::propagate));
+                NaryIQTreeTools.transformChildren(children, extendedDownConstraint::propagateToChild));
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

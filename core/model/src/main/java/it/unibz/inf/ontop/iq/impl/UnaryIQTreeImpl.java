@@ -82,14 +82,18 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
         return getVariables().contains(variable) && getRootNode().isConstructed(variable, getChild());
     }
 
+
     @Override
     protected boolean computeIsDistinct() {
         return getRootNode().isDistinct(this, getChild());
     }
 
     @Override
-    protected IQTree doPropagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
-        return getRootNode().propagateDownConstraint(constraint, getChild(), variableGenerator);
+    public IQTree propagateDownConstraint(DownPropagation dp) {
+        IQTree newTree = getRootNode().propagateDownConstraint(dp, getChild());
+        return equals(newTree)
+                ? this
+                : newTree;
     }
 
     @Override

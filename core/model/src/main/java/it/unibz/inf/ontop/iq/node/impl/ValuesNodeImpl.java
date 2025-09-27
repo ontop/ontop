@@ -317,7 +317,8 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
+    public IQTree propagateDownConstraint(DownPropagation initialDp) {
+        ImmutableExpression constraint = initialDp.getConstraint().get();
         if (constraint.isGround())
             return this;
 
@@ -342,14 +343,14 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
         ImmutableExpression firstStrictEquality = strictEqualities.get(0);
 
-        Optional<IQTree> optionalReshapedTree = tryToReshapeValuesNodeToConstructFunctionalTerm(firstStrictEquality, variableGenerator);
+        Optional<IQTree> optionalReshapedTree = tryToReshapeValuesNodeToConstructFunctionalTerm(firstStrictEquality, initialDp.getVariableGenerator());
         if (optionalReshapedTree.isPresent()) {
             // Propagates down other constraints
             DownPropagation dp = DownPropagation.of(
                     termFactory.getConjunction(constraint.flattenAND()
                         .filter(c -> !c.equals(firstStrictEquality))),
                     getVariables(),
-                    variableGenerator, termFactory);
+                    initialDp.getVariableGenerator(), termFactory);
 
             return dp.propagate(optionalReshapedTree.get());
         }
@@ -361,7 +362,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                                 .collect(ImmutableCollectors.toList())));
 
         ImmutableList<ImmutableExpression> otherStrictEqualities = strictEqualities.subList(1, strictEqualities.size());
-        DownPropagation dp = DownPropagation.of(termFactory.getConjunction(otherStrictEqualities.stream()), getVariables(), variableGenerator, termFactory);
+        DownPropagation dp = DownPropagation.of(termFactory.getConjunction(otherStrictEqualities.stream()), getVariables(), initialDp.getVariableGenerator(), termFactory);
         return dp.propagate(filteredValuesNode);
     }
 

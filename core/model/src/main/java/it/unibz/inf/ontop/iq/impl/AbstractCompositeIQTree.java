@@ -10,13 +10,11 @@ import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -243,18 +241,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
     protected abstract IQTree doApplyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator);
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
-        IQTree newTree = doPropagateDownConstraint(constraint, variableGenerator);
-        return equals(newTree)
-                ? this
-                : newTree;
-    }
-
-    protected abstract IQTree doPropagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator);
-
-    @Override
     public boolean isDeclaredAsEmpty() {
         return false;
     }
-
 }
