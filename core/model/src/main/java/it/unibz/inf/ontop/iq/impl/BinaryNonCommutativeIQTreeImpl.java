@@ -99,7 +99,10 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp) {
-        return getRootNode().applyDescendingSubstitution(dp.getOptionalDescendingSubstitution().get(), dp.getConstraint(), getLeftChild(), getRightChild(), dp.getVariableGenerator());
+        if (!dp.getVariables().equals(getVariables()))
+            throw new IllegalStateException("VARIABLE SET MISMATCH: " + dp.getVariables() + " v " + getVariables());
+
+        return getRootNode().applyDescendingSubstitution(dp, getLeftChild(), getRightChild());
     }
 
 

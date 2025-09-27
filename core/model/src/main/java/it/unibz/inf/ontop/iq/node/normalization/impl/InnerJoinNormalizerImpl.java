@@ -216,7 +216,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 Substitution<? extends VariableOrGroundTerm> descendingSubstitution = bindingLift.getDescendingSubstitution();
                 DownPropagation dp = DownPropagation.of(descendingSubstitution, newCondition, NaryIQTreeTools.projectedVariables(provisionalNewChildren), variableGenerator, termFactory, iqFactory);
                 ImmutableList<IQTree> newChildren = provisionalNewChildren.stream()
-                        .map(dp::propagate)
+                        .map(dp::propagateToChild)
                         .map(c -> normalization.updateChild(c, variableGenerator))
                         .collect(ImmutableCollectors.toList());
 

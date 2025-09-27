@@ -195,19 +195,16 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
      * NB: the constraint is only propagated to the left child
      */
     @Override
-    public IQTree applyDescendingSubstitution(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild,
-            VariableGenerator variableGenerator) {
+    public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree leftChild, IQTree rightChild) {
 
-        if (isRejectingRightSpecificNulls(constraint, leftChild, rightChild)
+        var descendingSubstitution = dp.getOptionalDescendingSubstitution().get();
+
+        if (isRejectingRightSpecificNulls(dp.getConstraint(), leftChild, rightChild)
                 || containsEqualityRightSpecificVariable(descendingSubstitution, leftChild, rightChild)) {
-            DownPropagation dp = DownPropagation.of(descendingSubstitution, constraint, projectedVariables(leftChild, rightChild).immutableCopy(), variableGenerator, termFactory, iqFactory);
             return dp.propagate(transformIntoInnerJoinTree(leftChild, rightChild));
         }
 
-        DownPropagation dp = DownPropagation.of(descendingSubstitution, constraint, leftChild.getVariables(), variableGenerator, termFactory, iqFactory);
-        IQTree updatedLeftChild = dp.propagate(leftChild);
+        IQTree updatedLeftChild = dp.propagateToChild(leftChild);
 
         Optional<ImmutableExpression> initialExpression = getOptionalFilterCondition();
         if (initialExpression.isPresent()) {
@@ -218,7 +215,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 Substitution<? extends VariableOrGroundTerm> rightDescendingSubstitution =
                         substitutionFactory.onVariableOrGroundTerms().compose(expressionAndCondition.getSubstitution(), descendingSubstitution);
 
-                DownPropagation dpR = DownPropagation.of(rightDescendingSubstitution, Optional.empty(), rightChild.getVariables(), variableGenerator, termFactory, iqFactory);
+                DownPropagation dpR = DownPropagation.of(rightDescendingSubstitution, Optional.empty(), rightChild.getVariables(), dp.getVariableGenerator(), termFactory, iqFactory);
                 IQTree updatedRightChild = dpR.propagate(rightChild);
 
                 return updatedRightChild.isDeclaredAsEmpty()
@@ -232,7 +229,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             }
         }
         else {
-            DownPropagation dpR = DownPropagation.of(descendingSubstitution, Optional.empty(), rightChild.getVariables(), variableGenerator, termFactory, iqFactory);
+            DownPropagation dpR = dp.withConstraint(Optional.empty(), rightChild.getVariables(), termFactory);
             IQTree updatedRightChild = dpR.propagate(rightChild);
             if (updatedRightChild.isDeclaredAsEmpty()) {
 

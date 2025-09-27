@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -42,7 +41,7 @@ public interface DownPropagation {
             return new EmptyDownPropagation(projectedVariables, variableGenerator);
         }
         catch (UnsatisfiableDescendingSubstitutionException e) {
-            return new InconsistentDownPropagation(iqFactory.createEmptyNode(computeProjectedVariables(descendingSubstitution, projectedVariables)));
+            return new InconsistentDownPropagation(projectedVariables, iqFactory.createEmptyNode(computeProjectedVariables(descendingSubstitution, projectedVariables)));
         }
     }
 
@@ -165,15 +164,17 @@ public interface DownPropagation {
 }
 
 class InconsistentDownPropagation implements DownPropagation {
+    private final ImmutableSet<Variable> variables;
     private final EmptyNode emptyNode;
 
-    InconsistentDownPropagation(EmptyNode emptyNode) {
+    InconsistentDownPropagation(ImmutableSet<Variable> variables, EmptyNode emptyNode) {
+        this.variables = variables;
         this.emptyNode = emptyNode;
     }
 
     @Override
     public ImmutableSet<Variable> getVariables() {
-        return emptyNode.getVariables();
+        return variables;
     }
 
     @Override
@@ -218,7 +219,13 @@ class InconsistentDownPropagation implements DownPropagation {
 
     @Override
     public DownPropagation reduceScope(ImmutableSet<Variable> variables) {
-        throw new UnsupportedOperationException();
+        if (!getVariables().containsAll(variables))
+            throw new IllegalArgumentException("Variables " +  variables + " are not included in " + getVariables());
+
+        if (!variables.containsAll(emptyNode.getVariables()))
+            throw new IllegalArgumentException("Variables " +  variables + " does not contain all " + emptyNode);
+
+        return this;
     }
 }
 

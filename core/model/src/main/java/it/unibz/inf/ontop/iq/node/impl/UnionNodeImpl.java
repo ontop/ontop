@@ -438,11 +438,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
-                                              VariableGenerator variableGenerator) {
+    public IQTree applyDescendingSubstitution(DownPropagation dp, ImmutableList<IQTree> children) {
 
-        DownPropagation ds = DownPropagation.of(descendingSubstitution, constraint, getVariables(), variableGenerator, termFactory, iqFactory);
+        DownPropagation ds = DownPropagation.of(dp.getOptionalDescendingSubstitution().get(), dp.getConstraint(), getVariables(), dp.getVariableGenerator(), termFactory, iqFactory);
 
         ImmutableList<IQTree> updatedChildren = children.stream()
                 .map(ds::propagate)

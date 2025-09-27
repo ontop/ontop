@@ -40,9 +40,7 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     IQTree liftIncompatibleDefinitions(Variable variable, IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator);
 
-    IQTree applyDescendingSubstitution(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator);
+    IQTree applyDescendingSubstitution(DownPropagation dp, IQTree leftChild, IQTree rightChild);
 
     IQTree applyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
