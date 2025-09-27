@@ -3,14 +3,10 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.DownPropagation;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.SliceNormalizer;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -18,14 +14,9 @@ import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.BooleanSupplier;
-
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 
 public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
@@ -75,11 +66,17 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         return sliceNormalizer.normalizeForOptimization(this, child, variableGenerator, treeCache);
     }
 
+    /**
+     * Stops constraints
+     */
     @Override
-    public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
-        DownPropagation dp = DownPropagation.of(descendingSubstitution, constraint, child.getVariables(), variableGenerator, termFactory, iqFactory);
-        return iqFactory.createUnaryIQTree(this, dp.propagate(child));
+    public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
+        return iqFactory.createUnaryIQTree(this, child);
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
+        return iqFactory.createUnaryIQTree(this, dp.propagateToChild(child));
     }
 
     @Override
@@ -172,13 +169,5 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         return SLICE_STR
                 + (offset > 0 ? " offset=" + offset : "")
                 + (limit.isEmpty() ? "" : " limit=" + limit);
-    }
-
-    /**
-     * Stops constraints
-     */
-    @Override
-    public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
-        return iqFactory.createUnaryIQTree(this, child);
     }
 }

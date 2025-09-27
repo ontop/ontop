@@ -438,36 +438,31 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
+    public IQTree propagateDownConstraint(DownPropagation dp, ImmutableList<IQTree> children) {
+        return iqFactory.createNaryIQTree(this, NaryIQTreeTools.transformChildren(children, dp::propagateToChild));
+    }
+
+    @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, ImmutableList<IQTree> children) {
 
-        DownPropagation ds = DownPropagation.of(dp.getOptionalDescendingSubstitution().get(), dp.getConstraint(), getVariables(), dp.getVariableGenerator(), termFactory, iqFactory);
-
         ImmutableList<IQTree> updatedChildren = children.stream()
-                .map(ds::propagate)
+                .map(dp::propagateToChild)
                 .filter(c -> !c.isDeclaredAsEmpty())
                 .collect(ImmutableCollectors.toList());
 
         switch (updatedChildren.size()) {
             case 0:
-                return iqFactory.createEmptyNode(ds.computeProjectedVariables());
+                return iqFactory.createEmptyNode(dp.computeProjectedVariables());
             case 1:
                 return updatedChildren.get(0);
             default:
-                return iqTreeTools.createUnionTree(ds.computeProjectedVariables(), updatedChildren);
+                return iqTreeTools.createUnionTree(dp.computeProjectedVariables(), updatedChildren);
         }
     }
 
-    @Override
-    public IQTree propagateDownConstraint(DownPropagation dp, ImmutableList<IQTree> children) {
-        return iqFactory.createNaryIQTree(this, NaryIQTreeTools.transformChildren(children, dp::propagateToChild));
-    }
-
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
-            VariableGenerator variableGenerator) {
-
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
         return iqTreeTools.createUnionTree(DownPropagation.computeProjectedVariables(descendingSubstitution, getVariables()),
                 NaryIQTreeTools.transformChildren(children,
                         c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator)));

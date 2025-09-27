@@ -32,11 +32,6 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
         this.normalizer = normalizer;
     }
 
-    @Override
-    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        return normalizer.normalizeForOptimization(this, child, variableGenerator, treeCache);
-    }
-
     /**
      * TODO: implement it seriously! (is currently blocking)
      */
@@ -47,24 +42,24 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, IQTree child,
-                                              VariableGenerator variableGenerator) {
-        DownPropagation dp = DownPropagation.of(descendingSubstitution, constraint, child.getVariables(), variableGenerator, termFactory, iqFactory);
-        return iqFactory.createUnaryIQTree(this, dp.propagate(child));
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        return normalizer.normalizeForOptimization(this, child, variableGenerator, treeCache);
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child,
-            VariableGenerator variableGenerator) {
-        return iqFactory.createUnaryIQTree(this,
-                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
+    public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
+        return iqFactory.createUnaryIQTree(this, dp.propagateToChild(child));
     }
 
     @Override
     public DistinctNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
         return this;
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
+        return iqFactory.createUnaryIQTree(this,
+                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
     }
 
     @Override

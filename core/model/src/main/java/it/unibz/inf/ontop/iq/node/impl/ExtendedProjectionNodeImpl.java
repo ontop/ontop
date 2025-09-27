@@ -43,15 +43,13 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
 
     @Override
-    public IQTree applyDescendingSubstitution(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
+    public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
 
         return applyDescendingSubstitution(
-                descendingSubstitution,
+                dp.getOptionalDescendingSubstitution().get(),
                 child,
-                r -> propagateDescendingSubstitutionToChild(child, r, constraint, getVariables(), variableGenerator),
-                variableGenerator);
+                r -> propagateDescendingSubstitutionToChild(child, r, dp.getConstraint(), getVariables(), dp.getVariableGenerator()),
+                dp.getVariableGenerator());
     }
 
     /**

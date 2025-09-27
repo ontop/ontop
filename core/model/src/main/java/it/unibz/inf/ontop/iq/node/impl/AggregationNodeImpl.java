@@ -57,11 +57,11 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
 
     @Override
-    public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, IQTree child,
-                                              VariableGenerator variableGenerator) {
-        return applyDescendingSubstitutionOrBlock(descendingSubstitution,
-                s -> super.applyDescendingSubstitution(s, constraint, child, variableGenerator), variableGenerator);
+    public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
+        return applyDescendingSubstitutionOrBlock(
+                dp.getOptionalDescendingSubstitution().get(),
+                s -> super.applyDescendingSubstitution(DownPropagation.of(s, dp.getConstraint(), dp.getVariables(), dp.getVariableGenerator(), termFactory, iqFactory), child),
+                dp.getVariableGenerator());
     }
 
     @Override

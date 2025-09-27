@@ -130,11 +130,16 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, IQTree child,
-                                              VariableGenerator variableGenerator) {
-        return applyDescendingSubstitution(descendingSubstitution, variableGenerator,
-                (s) -> DownPropagation.of(s, constraint, child.getVariables(), variableGenerator, termFactory, iqFactory).propagate(child));
+    public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
+        return iqFactory.createUnaryIQTree(this,
+                dp.reduceScope(Sets.difference(child.getVariables(), getLocallyRequiredVariables()).immutableCopy())
+                        .propagate(child));
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
+        return applyDescendingSubstitution(dp.getOptionalDescendingSubstitution().get(), dp.getVariableGenerator(),
+                (s) -> DownPropagation.of(s, dp.getConstraint(), child.getVariables(), dp.getVariableGenerator(), termFactory, iqFactory).propagate(child));
     }
 
     private IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
@@ -273,13 +278,6 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     @Override
     public VariableNullability getVariableNullability(IQTree child) {
         return child.getVariableNullability().extendToExternalVariables(getLocallyDefinedVariables().stream());
-    }
-
-    @Override
-    public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
-        return iqFactory.createUnaryIQTree(this,
-                dp.reduceScope(Sets.difference(child.getVariables(), getLocallyRequiredVariables()).immutableCopy())
-                        .propagate(child));
     }
 
     @Override

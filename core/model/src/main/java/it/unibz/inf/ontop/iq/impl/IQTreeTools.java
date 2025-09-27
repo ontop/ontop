@@ -65,10 +65,10 @@ public class IQTreeTools {
         return expression.map(iqFactory::createFilterNode);
     }
 
-    public Optional<OrderByNode> createOptionalOrderByNode(Optional<ImmutableList<OrderByNode.OrderComparator>> comparators) {
-        return comparators
-                .filter(cs -> !cs.isEmpty())
-                .map(iqFactory::createOrderByNode);
+    public Optional<OrderByNode> createOptionalOrderByNode(ImmutableList<OrderByNode.OrderComparator> comparators) {
+        return comparators.isEmpty()
+                ? Optional.empty()
+                : Optional.of(iqFactory.createOrderByNode(comparators));
     }
 
     public ImmutableList<OrderByNode.OrderComparator> transformComparators(ImmutableList<OrderByNode.OrderComparator> comparators, Function<? super NonGroundTerm, ImmutableTerm> transformer) {

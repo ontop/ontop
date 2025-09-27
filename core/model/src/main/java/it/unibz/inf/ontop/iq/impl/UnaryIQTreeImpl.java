@@ -67,7 +67,10 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp) {
-        return getRootNode().applyDescendingSubstitution(dp.getOptionalDescendingSubstitution().get(), dp.getConstraint(), getChild(), dp.getVariableGenerator());
+        if (!dp.getVariables().equals(getVariables()))
+            throw new IllegalStateException("VARIABLE SET MISMATCH: " + dp.getVariables() + " v " + getVariables());
+
+        return getRootNode().applyDescendingSubstitution(dp, getChild());
     }
 
     @Override

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
@@ -31,10 +30,10 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     private static final String ORDER_BY_NODE_STR = "ORDER BY";
 
     private final ImmutableList<OrderComparator> comparators;
+
     private final OrderByNormalizer normalizer;
     private final IQTreeTools iqTreeTools;
     private final SubstitutionFactory substitutionFactory;
-
 
     @AssistedInject
     private OrderByNodeImpl(@Assisted ImmutableList<OrderComparator> comparators, IntermediateQueryFactory iqFactory,
@@ -53,8 +52,8 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
 
     @Override
     public Optional<OrderByNode> applySubstitution(Substitution<? extends ImmutableTerm> substitution) {
-        ImmutableList<OrderComparator> newComparators = iqTreeTools.transformComparators(comparators, substitution::applyToTerm);
-        return iqTreeTools.createOptionalOrderByNode(Optional.of(newComparators));
+        return iqTreeTools.createOptionalOrderByNode(
+                iqTreeTools.transformComparators(comparators, substitution::applyToTerm));
     }
 
     @Override
@@ -68,19 +67,14 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
-
-        DownPropagation dp = DownPropagation.of(descendingSubstitution,  constraint, child.getVariables(), variableGenerator, termFactory, iqFactory);
+    public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
         return iqTreeTools.unaryIQTreeBuilder()
-                .append(applySubstitution(descendingSubstitution))
-                .build(dp.propagate(child));
+                .append(applySubstitution(dp.getOptionalDescendingSubstitution().get()))
+                .build(dp.propagateToChild(child));
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
-
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
         return iqTreeTools.unaryIQTreeBuilder()
                 .append(applySubstitution(descendingSubstitution))
                 .build(child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
@@ -88,10 +82,9 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
 
     @Override
     public OrderByNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        var f = substitutionFactory.onNonGroundTerms();
-        ImmutableList<OrderByNode.OrderComparator> newComparators = iqTreeTools.transformComparators(
-                comparators, t -> f.rename(renamingSubstitution, t));
-
+        var factory = substitutionFactory.onNonGroundTerms();
+        var newComparators = iqTreeTools.transformComparators(
+                comparators, t -> factory.rename(renamingSubstitution, t));
         return iqFactory.createOrderByNode(newComparators);
     }
 

@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -40,13 +41,14 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
 
         UnarySubTree<OrderByNode> simplify(UnarySubTree<OrderByNode> tree) {
             var variableNullability = tree.getChild().getVariableNullability();
-            var optionalNewComparators = tree.getOptionalNode()
+            var newComparators = tree.getOptionalNode()
                     .map(o -> iqTreeTools.transformComparators(
                             o.getComparators(),
-                            t -> t.simplify(variableNullability)));
+                            t -> t.simplify(variableNullability)))
+                    .orElseGet(ImmutableList::of);
 
             return UnarySubTree.of(
-                    iqTreeTools.createOptionalOrderByNode(optionalNewComparators),
+                    iqTreeTools.createOptionalOrderByNode(newComparators),
                     tree.getChild());
         }
 

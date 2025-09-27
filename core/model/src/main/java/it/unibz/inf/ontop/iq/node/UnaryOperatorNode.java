@@ -26,8 +26,7 @@ public interface UnaryOperatorNode extends QueryNode {
 
     IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache);
 
-    IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                       Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator);
+    IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child);
 
     IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                         IQTree child, VariableGenerator variableGenerator);
