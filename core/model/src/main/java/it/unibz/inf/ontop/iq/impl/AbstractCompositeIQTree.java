@@ -129,25 +129,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
         return toString().hashCode();
     }
 
-    @Override
-    public IQTree applyDescendingSubstitution(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
-
-        DownPropagation downPropagation = DownPropagation.of(descendingSubstitution, constraint, getVariables(), variableGenerator, termFactory, iqFactory);
-
-        if (downPropagation instanceof RenamingDownPropagation)
-            return downPropagation.propagate(this);
-
-        return downPropagation.getOptionalDescendingSubstitution()
-                // applyRegularDescendingSubstitution!
-                .map(s -> applyRegularDescendingSubstitution(s, downPropagation.getConstraint(), variableGenerator))
-                .orElseGet(() -> downPropagation.propagate(this));
-    }
-
-
-    protected abstract IQTree applyRegularDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                                 Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator);
 
     @Override
     public final void validate() throws InvalidIntermediateQueryException {

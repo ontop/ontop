@@ -115,7 +115,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
     private PropagationResults propagateTau(DownPropagation dp, ImmutableSet<Variable> childVariables) throws UnsatisfiableConditionException {
 
-        Substitution<? extends VariableOrGroundTerm> tau = dp.getOptionalDescendingSubstitution().get();
+        Substitution<? extends VariableOrGroundTerm> tau = dp.getOptionalDescendingSubstitution().orElseGet(substitutionFactory::getSubstitution);
         ImmutableSet<Variable> projectedVariables = dp.getVariables();
         Substitution<? extends ImmutableTerm> substitution = getSubstitution();
 
