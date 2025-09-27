@@ -119,9 +119,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         return JOIN_NODE_STR + getOptionalFilterString();
     }
 
-    /**
-     * TODO: refactor
-     */
     @Override
     public IQTree normalizeForOptimization(ImmutableList<IQTree> children, VariableGenerator variableGenerator, IQTreeCache treeCache) {
         return normalizer.normalizeForOptimization(this, children, variableGenerator, treeCache);
@@ -171,11 +168,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public InnerJoinNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-
-        Optional<ImmutableExpression> newCondition = getOptionalFilterCondition()
-                .map(renamingSubstitution::apply);
-
-        return createInnerJoinNode(newCondition);
+        return createInnerJoinNode(getOptionalFilterCondition().map(renamingSubstitution::apply));
     }
 
     @Override

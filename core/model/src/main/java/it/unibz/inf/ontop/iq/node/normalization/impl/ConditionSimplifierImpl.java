@@ -133,22 +133,13 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
         // TODO: also consider the constraint for simplifying the condition
         var simplification = simplifyCondition(downPropagation.applySubstitution(expression), ImmutableSet.of(), children, variableNullability);
 
-        VariableNullability childVariableNullability = downPropagation.extendVariableNullability(variableNullability);
-
         Substitution<? extends VariableOrGroundTerm> downSubstitution =
                 downPropagation.getOptionalDescendingSubstitution()
                                 .map(ds ->
                 substitutionFactory.onVariableOrGroundTerms().compose(ds, simplification.getSubstitution()))
                         .orElseGet(simplification::getSubstitution);
 
-        Optional<ImmutableExpression> optionalSubstitutedConstraint =
-                downPropagation.getConstraint().map(simplification.getSubstitution()::apply);
-
-        Optional<ImmutableExpression> newConstraint = optionalSubstitutedConstraint.isPresent()
-                ? evaluateCondition(iqTreeTools.getConjunction(
-                        simplification.getOptionalExpression(),
-                        optionalSubstitutedConstraint.get()), childVariableNullability)
-                : simplification.getOptionalExpression();
+        Optional<ImmutableExpression> newConstraint = iqTreeTools.updateDownPropagationConstraint(downPropagation, simplification.getSubstitution(), simplification.getOptionalExpression(), () -> variableNullability);
 
         var extendedDownConstraint = DownPropagation.of(downSubstitution, newConstraint, downPropagation.getVariables(), downPropagation.getVariableGenerator(), termFactory, iqFactory);
 

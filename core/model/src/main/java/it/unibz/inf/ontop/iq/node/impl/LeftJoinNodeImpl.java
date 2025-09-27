@@ -166,10 +166,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
 
     @Override
-    public IQTree normalizeForOptimization(IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator,
-                              IQTreeCache treeCache) {
-        return ljNormalizer.normalizeForOptimization(this, initialLeftChild, initialRightChild,
-                variableGenerator, treeCache);
+    public IQTree normalizeForOptimization(IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        return ljNormalizer.normalizeForOptimization(this, initialLeftChild, initialRightChild, variableGenerator, treeCache);
     }
 
     @Override
@@ -229,10 +227,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             }
         }
         else {
-            DownPropagation dpR = dp.withConstraint(Optional.empty(), rightChild.getVariables(), termFactory);
-            IQTree updatedRightChild = dpR.propagate(rightChild);
+            IQTree updatedRightChild = dp.propagateToChildWithConstraint(Optional.empty(), rightChild);
             if (updatedRightChild.isDeclaredAsEmpty()) {
-
                 Substitution<?> substitution = rightSpecificVariables(updatedLeftChild, updatedRightChild).stream()
                         .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
 
@@ -250,8 +246,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     public IQTree propagateDownConstraint(DownPropagation dp, IQTree leftChild, IQTree rightChild) {
 
         if (isRejectingRightSpecificNulls(dp.getConstraint(), leftChild, rightChild)) {
-            IQTree innerJoinTree = transformIntoInnerJoinTree(leftChild, rightChild);
-            return dp.propagate(innerJoinTree);
+            return dp.propagate(transformIntoInnerJoinTree(leftChild, rightChild));
         }
 
         IQTree newLeftChild = dp.propagateToChild(leftChild);

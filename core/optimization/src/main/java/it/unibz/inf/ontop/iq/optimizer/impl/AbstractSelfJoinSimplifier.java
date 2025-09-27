@@ -109,7 +109,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 .collect(ImmutableCollectors.toList());
 
         DownPropagation dp = DownPropagation.of(unifier, Optional.empty(), NaryIQTreeTools.projectedVariables(newChildren), variableGenerator, termFactory, iqFactory);
-        ImmutableList<IQTree> newChildrenPropagated = NaryIQTreeTools.transformChildren(newChildren, dp::propagate);
+        ImmutableList<IQTree> newChildrenPropagated = NaryIQTreeTools.transformChildren(newChildren, dp::propagateToChild);
 
         Optional<ImmutableExpression> newExpression = termFactory.getConjunction(
                 innerJoinNode.getOptionalFilterCondition(),
@@ -125,10 +125,8 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 substitutionNormalizer.normalizeSubstitution(unifier, tree.getVariables());
         IQTree normalizedNewTree = normalization.updateChild(newTree, variableGenerator);
 
-        Substitution<ImmutableTerm> normalizedTopSubstitution = normalization.getNormalizedSubstitution();
-
         return Optional.of(iqTreeTools.unaryIQTreeBuilder()
-                .append(iqTreeTools.createOptionalConstructionNode(tree.getVariables(), normalizedTopSubstitution, normalizedNewTree))
+                .append(iqTreeTools.createOptionalConstructionNode(tree.getVariables(), normalization.getNormalizedSubstitution(), normalizedNewTree))
                 .build(normalizedNewTree));
     }
 

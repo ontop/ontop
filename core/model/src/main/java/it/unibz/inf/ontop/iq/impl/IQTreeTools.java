@@ -9,6 +9,8 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
+import it.unibz.inf.ontop.iq.node.normalization.impl.ConditionSimplifierImpl;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
@@ -323,5 +325,16 @@ public class IQTreeTools {
     public static <T extends QueryNode> boolean contains(IQTree tree, Class<T> nodeClass) {
         return nodeClass.isInstance(tree.getRootNode()) ||
                 tree.getChildren().stream().anyMatch(t -> contains(t, nodeClass));
+    }
+
+
+    public Optional<ImmutableExpression> updateDownPropagationConstraint(DownPropagation dp, Substitution<? extends ImmutableTerm> substitution, Optional<ImmutableExpression> optionalExpression, Supplier<VariableNullability> variableNullabilitySupplier) throws UnsatisfiableConditionException {
+        Optional<ImmutableExpression> optionalSubstitutedConstraint = dp.getConstraint().map(substitution::apply);
+
+        return optionalSubstitutedConstraint.isPresent()
+                ? ConditionSimplifierImpl.evaluateCondition(getConjunction(
+                optionalExpression,
+                optionalSubstitutedConstraint.get()), dp.extendVariableNullability(variableNullabilitySupplier.get()))
+                : optionalExpression;
     }
 }
