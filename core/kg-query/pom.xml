@@ -9,6 +9,7 @@
     </parent>
 
     <artifactId>ontop-kg-query</artifactId>
+    <name>Ontop KG Query</name>
 
     <dependencies>
         <dependency>

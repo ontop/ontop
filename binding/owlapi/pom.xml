@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-owlapi</artifactId>
+    <name>Ontop OWLAPI Binding</name>
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>

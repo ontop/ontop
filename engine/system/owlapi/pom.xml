@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-system-owlapi</artifactId>
+    <name>Ontop System OWLAPI</name>
 
     <properties>
         <!-- filtering currently not used -->

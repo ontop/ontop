@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-system-sql-core</artifactId>
+    <name>Ontop System SQL Core</name>
 
     <properties>
         <!-- filtering currently not used -->

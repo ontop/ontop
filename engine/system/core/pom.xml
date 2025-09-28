@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-system-core</artifactId>
+    <name>Ontop System Core</name>
 
     <properties>
         <filter.main.resources>true</filter.main.resources>

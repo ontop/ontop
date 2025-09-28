@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-distribution</artifactId>
+    <name>Ontop Distribution</name>
     <description>Builds the distribution files for quest and the core apis.</description>
 
     <properties>

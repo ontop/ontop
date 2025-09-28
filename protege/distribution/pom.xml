@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-protege-distribution</artifactId>
+    <name>Ontop Protégé Distribution</name>
     <description>Builds the distribution files for quest and the core apis.</description>
 
     <properties>

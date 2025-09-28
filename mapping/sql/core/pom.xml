@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-mapping-sql-core</artifactId>
+    <name>Ontop Mapping SQL Core</name>
 
     <properties>
         <!-- filtering currently not used -->

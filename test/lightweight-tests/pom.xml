@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-lightweight-tests</artifactId>
+    <name>Ontop Lightweight Tests</name>
     <description>Ontop lightweight testing module. It contains series of standardized tests that can be run by
         every database engine.</description>
 

@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-obda-core</artifactId>
+    <name>Ontop OBDA Core</name>
 
     <properties>
         <reuseForks>false</reuseForks>

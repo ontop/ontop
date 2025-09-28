@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-mapping-sql</artifactId>
+    <name>Ontop Mapping SQL</name>
     <packaging>pom</packaging>
 
     <modules>

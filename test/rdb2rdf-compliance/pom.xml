@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-rdb2rdf-compliance</artifactId>
+    <name>Ontop RDF2RDF Compliance Tets</name>
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>

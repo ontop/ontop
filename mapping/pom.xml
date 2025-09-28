@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-mapping</artifactId>
+    <name>Ontop Mapping</name>
     <packaging>pom</packaging>
 
     <modules>

@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-test</artifactId>
+    <name>Ontop Tests</name>
     <packaging>pom</packaging>
 
     <modules>

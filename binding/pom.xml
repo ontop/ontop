@@ -11,6 +11,7 @@
 
     <artifactId>ontop-binding</artifactId>
     <packaging>pom</packaging>
+    <name>Ontop API Binding</name>
 
     <modules>
         <module>owlapi</module>
