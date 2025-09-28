@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-reformulation</artifactId>
+    <name>Ontop Reformulation</name>
     <packaging>pom</packaging>
 
     <modules>

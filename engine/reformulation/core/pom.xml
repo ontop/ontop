@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-reformulation-core</artifactId>
+    <name>Ontop Reformulation Core</name>
 
     <properties>
         <!-- filtering currently not used -->

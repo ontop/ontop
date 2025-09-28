@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-docker-tests</artifactId>
+    <name>Ontop Docker Tests</name>
     <description>Ontop docker testing module. It contains the test that can be run by the docker.</description>
 
     <properties>

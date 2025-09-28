@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-mapping-sql-all</artifactId>
+    <name>Ontop Mapping SQL All</name>
 
     <properties>
         <!-- filtering currently not used -->

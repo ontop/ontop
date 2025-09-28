@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-semantic-index</artifactId>
+    <name>Ontop Semantic Index</name>
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>

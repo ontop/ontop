@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-rdf4j</artifactId>
+    <name>Ontop RDF4J Binding</name>
     <description>This is the rdf4j API implementation based on Ontop</description>
 
     <dependencies>

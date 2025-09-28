@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-model</artifactId>
+    <name>Ontop Model</name>
 
     <properties>
         <!-- filtering currently not used -->

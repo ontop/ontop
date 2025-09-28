@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-endpoint-core</artifactId>
+    <name>Ontop SPARQL Endpoint Core</name>
 
     <dependencies>
         <dependency>

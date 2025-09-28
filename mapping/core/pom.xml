@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-mapping-core</artifactId>
+    <name>Ontop Mapping Core</name>
 
     <properties>
         <!-- filtering currently not used -->

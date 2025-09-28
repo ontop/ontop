@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-mapping-owlapi</artifactId>
+    <name>Ontop Mapping OWLAPI</name>
 
     <properties>
         <!-- filtering currently not used -->

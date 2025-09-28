@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-db</artifactId>
+    <name>Ontop DB</name>
     <packaging>pom</packaging>
 
     <modules>

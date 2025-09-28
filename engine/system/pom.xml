@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-system</artifactId>
+    <name>Ontop System</name>
     <packaging>pom</packaging>
 
     <modules>

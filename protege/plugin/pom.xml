@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-protege-plugin</artifactId>
+    <name>Ontop Protégé Plugin</name>
     <description>Ontop OBDA plugin for protégé</description>
 
     <organization>

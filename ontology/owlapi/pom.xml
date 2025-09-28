@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-ontology-owlapi</artifactId>
+    <name>Ontop Ontology OWLAPI</name>
 
     <properties>
         <!-- filtering currently not used -->

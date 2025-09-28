@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-mapping-r2rml</artifactId>
+    <name>Ontop Mapping R2RML</name>
 
     <dependencies>
         <dependency>

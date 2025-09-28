@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-optimization</artifactId>
+    <name>Ontop Optimization</name>
 
     <properties>
         <reuseForks>false</reuseForks>

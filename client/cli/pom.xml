@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-cli</artifactId>
+    <name>Ontop CLI</name>
 
     <dependencies>
         <dependency>

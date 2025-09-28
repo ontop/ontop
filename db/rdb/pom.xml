@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>ontop-rdb</artifactId>
+    <name>Ontop RDB</name>
 
     <properties>
         <!-- filtering currently not used -->
