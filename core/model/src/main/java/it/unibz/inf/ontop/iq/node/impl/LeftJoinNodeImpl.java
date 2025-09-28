@@ -260,29 +260,41 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 IQTree updatedRightChild = rightChild.applyDescendingSubstitution(rightDescendingSubstitution, Optional.empty(), variableGenerator);
 
                 return updatedRightChild.isDeclaredAsEmpty()
-                        ? updatedLeftChild
+                        ? paddingWithNull(updatedLeftChild, updatedRightChild)
                         : iqFactory.createBinaryNonCommutativeIQTree(
                                 iqFactory.createLeftJoinNode(expressionAndCondition.getOptionalExpression()),
                                 updatedLeftChild, updatedRightChild);
             } catch (UnsatisfiableConditionException e) {
-                return updatedLeftChild;
+                ImmutableSet<Variable> newlyProjectedVariables = iqTreeTools
+                        .computeNewProjectedVariables(descendingSubstitution,
+                                Sets.union(leftChild.getVariables(), rightChild.getVariables()).immutableCopy());
+
+                Substitution<?> paddingSubstitution = Sets.difference(newlyProjectedVariables, updatedLeftChild.getVariables()).stream()
+                        .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
+
+                return iqTreeTools.createConstructionNodeTreeIfNontrivial(updatedLeftChild, paddingSubstitution,
+                        () -> newlyProjectedVariables);
             }
         }
         else {
             IQTree updatedRightChild = rightChild.applyDescendingSubstitution(descendingSubstitution, Optional.empty(),
                     variableGenerator);
             if (updatedRightChild.isDeclaredAsEmpty()) {
-                ImmutableSet<Variable> leftVariables = updatedLeftChild.getVariables();
-                ImmutableSet<Variable> projectedVariables = Sets.union(leftVariables,
-                        updatedRightChild.getVariables()).immutableCopy();
-
-                Substitution<?> substitution = Sets.difference(projectedVariables, leftVariables).stream()
-                        .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
-
-                return iqTreeTools.createConstructionNodeTreeIfNontrivial(updatedLeftChild, substitution, () -> projectedVariables);
+                return paddingWithNull(updatedLeftChild, updatedRightChild);
             }
             return iqFactory.createBinaryNonCommutativeIQTree(this, updatedLeftChild, updatedRightChild);
         }
+    }
+
+    private IQTree paddingWithNull(IQTree leftChild, IQTree emptyRightChild) {
+        ImmutableSet<Variable> leftVariables = leftChild.getVariables();
+        ImmutableSet<Variable> projectedVariables = Sets.union(leftVariables,
+                emptyRightChild.getVariables()).immutableCopy();
+
+        Substitution<?> substitution = Sets.difference(projectedVariables, leftVariables).stream()
+                .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
+
+        return iqTreeTools.createConstructionNodeTreeIfNontrivial(leftChild, substitution, () -> projectedVariables);
     }
 
     @Override
