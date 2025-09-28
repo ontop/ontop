@@ -6135,6 +6135,128 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, initialIQ);
     }
 
+    @Test
+    public void testPaddingForUnsatisfiableRight1() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(A, C));
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(0, C));
+
+        var leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                dataNode1,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, C),
+                                SUBSTITUTION_FACTORY.getSubstitution(A, TWO)),
+                        dataNode2));
+
+        var filterTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(A, ONE)),
+                leftJoinTree);
+
+        var initialIQ = IQ_FACTORY.createIQ(projectionAtom, filterTree);
+
+        var newDataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, ONE));
+        var expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                        SUBSTITUTION_FACTORY.getSubstitution(A, ONE, C, NULL)),
+                newDataNode1);
+
+        optimizeAndCompare(initialIQ, IQ_FACTORY.createIQ(projectionAtom, expectedTree));
+    }
+
+    @Test
+    public void testPaddingForUnsatisfiableRight2() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(A, C));
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(0, C));
+
+        var rightVariables = ImmutableSet.of(A, C);
+
+        var rightChild = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(rightVariables),
+                ImmutableList.of(
+                    IQ_FACTORY.createUnaryIQTree(
+                            IQ_FACTORY.createConstructionNode(rightVariables,
+                                    SUBSTITUTION_FACTORY.getSubstitution(A, TWO)),
+                            dataNode2),
+                     IQ_FACTORY.createUnaryIQTree(
+                            IQ_FACTORY.createConstructionNode(rightVariables,
+                                    SUBSTITUTION_FACTORY.getSubstitution(A, TERM_FACTORY.getDBIntegerConstant(3))),
+                            dataNode2)
+                        ));
+
+        var leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                dataNode1,
+                rightChild);
+
+        var filterTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(A, ONE)),
+                leftJoinTree);
+
+        var initialIQ = IQ_FACTORY.createIQ(projectionAtom, filterTree);
+
+        var newDataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, ONE));
+
+        var expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                        SUBSTITUTION_FACTORY.getSubstitution(A, ONE, C, NULL)),
+                newDataNode1);
+
+        optimizeAndCompare(initialIQ, IQ_FACTORY.createIQ(projectionAtom, expectedTree));
+    }
+
+    @Test
+    public void testPaddingForUnsatisfiableRight3() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(A, C));
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(0, C));
+
+        var rightVariables = ImmutableSet.of(A, C);
+
+        var rightChild = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(rightVariables),
+                ImmutableList.of(
+                        IQ_FACTORY.createUnaryIQTree(
+                                IQ_FACTORY.createConstructionNode(rightVariables,
+                                        SUBSTITUTION_FACTORY.getSubstitution(A, TWO)),
+                                dataNode2),
+                        IQ_FACTORY.createUnaryIQTree(
+                                IQ_FACTORY.createConstructionNode(rightVariables,
+                                        SUBSTITUTION_FACTORY.getSubstitution(A, TERM_FACTORY.getDBIntegerConstant(3))),
+                                dataNode2)
+                ));
+
+        var ljCondition = TERM_FACTORY.getDBNumericInequality(InequalityLabel.LT, C, TERM_FACTORY.getDBIntegerConstant(10));
+
+        var leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(ljCondition),
+                dataNode1,
+                rightChild);
+
+        var filterTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(A, ONE)),
+                leftJoinTree);
+
+        var initialIQ = IQ_FACTORY.createIQ(projectionAtom, filterTree);
+
+        var newDataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, ONE));
+
+        var expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                        SUBSTITUTION_FACTORY.getSubstitution(A, ONE, C, NULL)),
+                newDataNode1);
+
+        optimizeAndCompare(initialIQ, IQ_FACTORY.createIQ(projectionAtom, expectedTree));
+    }
+
+
 
     private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
         LOGGER.debug("Initial query: "+ initialIQ);
