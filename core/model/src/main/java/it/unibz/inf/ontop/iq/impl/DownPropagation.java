@@ -15,26 +15,34 @@ import java.util.function.Supplier;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface DownPropagation {
 
+    /**
+     * Excludes the variables that are not projected by the IQTree
+     *
+     * If a "null" variable is propagated down, throws an UnsatisfiableDescendingSubstitutionException.
+     *
+     */
+
     static DownPropagation of(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                               Optional<ImmutableExpression> constraint,
                               ImmutableSet<Variable> projectedVariables,
                               VariableGenerator variableGenerator,
                               TermFactory termFactory) throws InconsistentDownPropagationException {
-            var optionalNormalizedSubstitution = normalizeDescendingSubstitution(descendingSubstitution, projectedVariables);
+
+        var optionalReducedSubstitution = reduceDescendingSubstitution(descendingSubstitution, projectedVariables);
+
+        if (optionalReducedSubstitution.isPresent()) {
+            var reducedSubstitution = optionalReducedSubstitution.get();
+            if (reducedSubstitution.rangeAnyMatch(ImmutableTerm::isNull))
+                throw new InconsistentDownPropagationException();
+
             var optionalNormalizedConstraint = normalizeConstraint(constraint, () -> getVariables(descendingSubstitution, projectedVariables), termFactory);
+            var renaming = transformIntoFreshRenaming(reducedSubstitution, projectedVariables);
+            return renaming.isPresent()
+                    ? new RenamingDownPropagation(renaming.get(), optionalNormalizedConstraint, projectedVariables, variableGenerator, termFactory)
+                    : new FullDownPropagation(reducedSubstitution, optionalNormalizedConstraint, projectedVariables, variableGenerator, termFactory);
+        }
 
-            if (optionalNormalizedSubstitution.isPresent()) {
-                var renaming = transformIntoFreshRenaming(optionalNormalizedSubstitution.get(), projectedVariables);
-                if (renaming.isPresent())
-                    return new RenamingDownPropagation(renaming.get(), optionalNormalizedConstraint, projectedVariables, variableGenerator, termFactory);
-
-                return new FullDownPropagation(optionalNormalizedSubstitution.get(), optionalNormalizedConstraint, projectedVariables, variableGenerator, termFactory);
-            }
-
-            if (optionalNormalizedConstraint.isPresent())
-                return new ConstraintOnlyDownPropagation(optionalNormalizedConstraint.get(), projectedVariables, variableGenerator, termFactory);
-
-            return new EmptyDownPropagation(projectedVariables, variableGenerator, termFactory);
+        return of(constraint, getVariables(descendingSubstitution, projectedVariables), variableGenerator, termFactory);
     }
 
     static DownPropagation of(Optional<ImmutableExpression> optionalConstraint, ImmutableSet<Variable> variables, VariableGenerator variableGenerator, TermFactory termFactory) {
@@ -87,27 +95,9 @@ public interface DownPropagation {
     DownPropagation reduceScope(ImmutableSet<Variable> variables);
 
     /**
-     * Typically thrown when a "null" variable is propagated down
-     *
+     * Thrown when a "null" variable is propagated down or when the constraint is inconsistent
      */
     class InconsistentDownPropagationException extends Exception {
-    }
-
-    /**
-     * Excludes the variables that are not projected by the IQTree
-     *
-     * If a "null" variable is propagated down, throws an UnsatisfiableDescendingSubstitutionException.
-     *
-     */
-    private static <T extends VariableOrGroundTerm> Optional<Substitution<T>> normalizeDescendingSubstitution(Substitution<T> descendingSubstitution, ImmutableSet<Variable> projectedVariables)
-            throws InconsistentDownPropagationException {
-
-        Optional<Substitution<T>> reducedSubstitution = reduceDescendingSubstitution(descendingSubstitution, projectedVariables);
-
-        if (reducedSubstitution.isPresent() && reducedSubstitution.get().rangeAnyMatch(ImmutableTerm::isNull))
-            throw new InconsistentDownPropagationException();
-
-        return reducedSubstitution;
     }
 
     static <T extends VariableOrGroundTerm> Optional<Substitution<T>> reduceDescendingSubstitution(Substitution<T> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {

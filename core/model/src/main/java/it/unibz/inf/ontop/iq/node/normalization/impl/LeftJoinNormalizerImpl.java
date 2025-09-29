@@ -455,24 +455,19 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         subTree.ljCondition(), subTree.leftChild().getVariables(), ImmutableList.of(subTree.rightChild()),
                         variableNullabilityTools.getChildrenVariableNullability(subTree.children()));
 
-                Substitution<? extends VariableOrGroundTerm> downSubstitution =
-                        simplificationResults.getSubstitution()
-                                .restrictDomainTo(subTree.rightChild().getVariables());
-
-                var optionalCondition = simplificationResults.getOptionalExpression();
-                if (downSubstitution.isEmpty()) {
-                    return state.replace(t -> t.replaceRight(optionalCondition, t.rightChild()));
+                DownPropagation dp = DownPropagation.of(simplificationResults.getSubstitution(), simplificationResults.getOptionalExpression(), subTree.rightChild().getVariables(), variableGenerator, termFactory);
+                if (dp.getOptionalDescendingSubstitution().isEmpty()) {
+                    return state.replace(t -> t.replaceRight(simplificationResults.getOptionalExpression(), t.rightChild()));
                 }
 
-                DownPropagation dp = DownPropagation.of(downSubstitution, optionalCondition, subTree.rightChild().getVariables(), variableGenerator, termFactory);
                 IQTree updatedRightChild = dp.propagate(subTree.rightChild());
 
                 var rightProvenance = new OptionalRightProvenance(
-                        updatedRightChild, downSubstitution, subTree.leftChild().getVariables());
+                        updatedRightChild, dp.getOptionalDescendingSubstitution().get(), subTree.leftChild().getVariables());
 
                 return state.lift(
                         createConstructionNode(subTree, rightProvenance.computeLiftableSubstitution()),
-                        subTree.replaceRight(optionalCondition, rightProvenance.getRightTree()));
+                        subTree.replaceRight(simplificationResults.getOptionalExpression(), rightProvenance.getRightTree()));
             }
             catch (DownPropagation.InconsistentDownPropagationException e) {
                 return state.replace(t -> t.replaceRight(Optional.empty(), createEmptyRightChild(t)));
