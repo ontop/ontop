@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
@@ -507,8 +508,23 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    protected Optional<ConstructionNode> computeNewProjectionNode(ImmutableSet<Variable> newProjectedVariables,
-                                                                        Substitution<ImmutableTerm> theta, IQTree newChild) {
-        return iqTreeTools.createOptionalConstructionNode(newProjectedVariables, theta, newChild);
+    public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
+        return applyDescendingSubstitution(
+                dp.getOptionalDescendingSubstitution().get(),
+                child,
+                dp.getVariableGenerator(),
+                r -> propagateDescendingSubstitutionToChild(child, r, dp),
+                iqTreeTools::createOptionalConstructionNode);
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                                               IQTree child, VariableGenerator variableGenerator) {
+        return applyDescendingSubstitution(
+                descendingSubstitution,
+                child,
+                variableGenerator,
+                r -> propagateDescendingSubstitutionToChildWithoutOptimizing(r.delta, child, variableGenerator),
+                iqTreeTools::createOptionalConstructionNode);
     }
 }

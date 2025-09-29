@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -22,7 +21,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements AggregationNode {
@@ -61,27 +59,35 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
         return applyDescendingSubstitutionOrBlock(
                 dp.getOptionalDescendingSubstitution().get(),
-                s -> {
-                    try {
-                        return super.applyDescendingSubstitution(
-                                DownPropagation.of(s, dp.getConstraint(), dp.getVariables(), dp.getVariableGenerator(), termFactory), child);
-                    } catch (DownPropagation.InconsistentDownPropagationException e) {
-                        throw new MinorOntopInternalBugException("cannot happen", e);
-                    }
-                },
-                dp.getVariableGenerator());
+                child,
+                dp.getVariableGenerator(),
+                r -> propagateDescendingSubstitutionToChild(child, r, dp),
+                this::createAggregationNode);
     }
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                                IQTree child, VariableGenerator variableGenerator) {
-        return applyDescendingSubstitutionOrBlock(descendingSubstitution,
-                s -> super.applyDescendingSubstitutionWithoutOptimizing(s, child, variableGenerator), variableGenerator);
+        return applyDescendingSubstitutionOrBlock(
+                descendingSubstitution,
+                child,
+                variableGenerator,
+                r -> propagateDescendingSubstitutionToChildWithoutOptimizing(r.delta, child, variableGenerator),
+                this::createAggregationNode);
+    }
+
+    private Optional<AggregationNode> createAggregationNode(ImmutableSet<Variable> newProjectedVariables,
+                                                            Substitution<ImmutableTerm> theta, IQTree newChild) {
+        return Optional.of(iqFactory.createAggregationNode(
+                Sets.difference(newProjectedVariables, theta.getDomain()).immutableCopy(),
+                theta.transform(t -> (ImmutableFunctionalTerm)t)));
     }
 
     private IQTree applyDescendingSubstitutionOrBlock(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                      Function<Substitution<? extends VariableOrGroundTerm>, IQTree> applyNonBlockedSubstitutionFct,
-                                                      VariableGenerator variableGenerator) {
+                                                      IQTree child,
+                                                      VariableGenerator variableGenerator,
+                                                      DescendingSubstitutionChildUpdateFunction updateChildFct,
+                                                      ExtendedProjectionNodeConstructor ctr) {
 
         ImmutableSet<Variable> aggregationVariables = substitution.getDomain();
 
@@ -95,15 +101,13 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         ImmutableSet<Variable> blockedVariables = descendingVar2Var.getRangeSet().stream()
                 .flatMap(v -> extractBlockedDomainVars(v, descendingVar2Var.getPreImage(t -> t.equals(v)), aggregationVariables).stream())
                 .collect(ImmutableCollectors.toSet());
-
         Substitution<Variable> blockedVariableSubstitution = descendingVar2Var.restrictDomainTo(blockedVariables);
 
         Substitution<? extends VariableOrGroundTerm> blockedSubstitution =
                 substitutionFactory.union(blockedGroundTermSubstitution, blockedVariableSubstitution);
 
         Substitution<? extends VariableOrGroundTerm> nonBlockedSubstitution = descendingSubstitution.removeFromDomain(blockedSubstitution.getDomain());
-
-        IQTree newSubTree = applyNonBlockedSubstitutionFct.apply(nonBlockedSubstitution);
+        IQTree newSubTree = applyDescendingSubstitution(nonBlockedSubstitution, child, variableGenerator, updateChildFct, ctr);
 
         if (blockedSubstitution.isEmpty())
             return newSubTree;
@@ -147,13 +151,6 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         return Sets.difference(aggregationDomainVariables, ImmutableSet.of(dominantVariable));
     }
 
-    @Override
-    protected Optional<AggregationNode> computeNewProjectionNode(ImmutableSet<Variable> newProjectedVariables,
-                                                                        Substitution<ImmutableTerm> theta, IQTree newChild) {
-        return Optional.of(iqFactory.createAggregationNode(
-                Sets.difference(newProjectedVariables, theta.getDomain()).immutableCopy(),
-                theta.transform(t -> (ImmutableFunctionalTerm)t)));
-    }
 
     @Override
     public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {

@@ -40,15 +40,6 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     }
 
 
-    @Override
-    public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
-
-        return applyDescendingSubstitution(
-                dp.getOptionalDescendingSubstitution().get(),
-                child,
-                r -> propagateDescendingSubstitutionToChild(child, r, dp),
-                dp.getVariableGenerator());
-    }
 
     /**
      *
@@ -56,7 +47,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
      *
      * Returns the new child
      */
-    private IQTree propagateDescendingSubstitutionToChild(IQTree child,
+    protected final IQTree propagateDescendingSubstitutionToChild(IQTree child,
                                                           PropagationResults tauFPropagationResults,
                                                           DownPropagation dp0) throws DownPropagation.InconsistentDownPropagationException {
 
@@ -67,22 +58,18 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         return dp.propagateToChildWithConstraint(newConstraint, child);
     }
 
-    @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
-        return applyDescendingSubstitution(
-                descendingSubstitution,
-                child,
-                r -> Optional.of(r.delta)
-                        .filter(delta -> !delta.isEmpty())
-                        .map(d -> child.applyDescendingSubstitutionWithoutOptimizing(d, variableGenerator))
-                        .orElse(child),
-                variableGenerator);
+    protected final IQTree propagateDescendingSubstitutionToChildWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
+        return Optional.of(descendingSubstitution)
+                .filter(delta -> !delta.isEmpty())
+                .map(d -> child.applyDescendingSubstitutionWithoutOptimizing(d, variableGenerator))
+                .orElse(child);
     }
 
-    private IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> tau, IQTree child,
-                                               DescendingSubstitutionChildUpdateFunction updateChildFct,
-                                               VariableGenerator variableGenerator) {
+    protected final IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> tau,
+                                                       IQTree child,
+                                                       VariableGenerator variableGenerator,
+                                                       DescendingSubstitutionChildUpdateFunction updateChildFct,
+                                                       ExtendedProjectionNodeConstructor ctr) {
 
         try {
             DownPropagation ds = DownPropagation.of(tau, Optional.empty(), getVariables(), variableGenerator, null);
@@ -90,7 +77,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
             IQTree newChild = updateChildFct.apply(tauPropagationResults);
 
-            Optional<? extends ExtendedProjectionNode> projectionNode = computeNewProjectionNode(
+            Optional<? extends ExtendedProjectionNode> projectionNode = ctr.create(
                     ds.computeProjectedVariables(),
                     tauPropagationResults.theta,
                     newChild);
@@ -104,9 +91,6 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
             return iqTreeTools.createEmptyNode(DownPropagation.computeProjectedVariables(tau, getVariables()));
         }
     }
-
-    protected abstract Optional<? extends ExtendedProjectionNode> computeNewProjectionNode(
-            ImmutableSet<Variable> newProjectedVariables, Substitution<ImmutableTerm> theta, IQTree newChild);
 
 
     private PropagationResults propagateTau(DownPropagation dp, ImmutableSet<Variable> childVariables) throws DownPropagation.InconsistentDownPropagationException {
@@ -232,10 +216,16 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
     @FunctionalInterface
     protected interface DescendingSubstitutionChildUpdateFunction {
-
         IQTree apply(PropagationResults tauFPropagationResults)
                 throws DownPropagation.InconsistentDownPropagationException;
     }
+
+    @FunctionalInterface
+    protected interface ExtendedProjectionNodeConstructor {
+        Optional<? extends ExtendedProjectionNode> create(
+                ImmutableSet<Variable> newProjectedVariables, Substitution<ImmutableTerm> theta, IQTree newChild);
+    }
+
 
     protected static class PropagationResults {
 
