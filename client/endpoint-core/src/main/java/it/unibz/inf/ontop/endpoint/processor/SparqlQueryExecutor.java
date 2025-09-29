@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.resultio.BooleanQueryResultWriter;
@@ -32,6 +34,7 @@ import java.util.Collections;
 
 public class SparqlQueryExecutor {
 
+    private static final Logger logger = LoggerFactory.getLogger(SparqlQueryExecutor.class);
     private static final String CONTENT_TYPE = "Content-Type";
     private static final int BAD_REQUEST = 400;
     private static final int NOT_ACCEPTABLE = 406;
@@ -47,7 +50,13 @@ public class SparqlQueryExecutor {
                              String[] defaultGraphUri, String[] namedGraphUri, HttpServletResponse response) {
 
         ImmutableMultimap<String, String> httpHeaders = extractHttpHeaders(request);
-
+        
+        // Check if we need to modify JDBC URL for Authorization header
+        String authHeader = request.getHeader("Authorization");
+        
+        // Set thread-local Authorization header for JDBC processing
+        AuthorizationContext.setAuthorizationHeader(authHeader);
+        
         try (OntopRepositoryConnection connection = repository.getConnection()) {
             Query q = connection.prepareQuery(QueryLanguage.SPARQL, query, httpHeaders);
             OutputStream bao = response.getOutputStream();
@@ -132,6 +141,9 @@ public class SparqlQueryExecutor {
         }
         catch (IOException ex) {
             throw new Error(ex);
+        } finally {
+            // Clean up thread-local context
+            AuthorizationContext.clear();
         }
     }
 
@@ -160,4 +172,6 @@ public class SparqlQueryExecutor {
         repository.getHttpCacheHeaders().getMap()
                 .forEach(response::setHeader);
     }
+
+
 }
