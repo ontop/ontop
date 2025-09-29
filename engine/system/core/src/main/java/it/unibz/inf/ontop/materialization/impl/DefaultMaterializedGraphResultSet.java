@@ -7,6 +7,7 @@ import com.google.common.collect.UnmodifiableIterator;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.query.SelectQuery;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
 
@@ -51,6 +53,7 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
     private final List<IRI> possiblyIncompleteClassesAndProperties;
     private VocabularyEntry lastSeenPredicate;
     private IRIConstant lastSeenPredicateIRI;
+    private final QueryContext queryContext;
 
     private final IRIConstant rdfTypeIRI;
 
@@ -59,7 +62,8 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
                                       OntopQueryEngine queryEngine,
                                       KGQueryFactory kgQueryFactory,
                                       TermFactory termFactory,
-                                      org.apache.commons.rdf.api.RDF rdfFactory) {
+                                      org.apache.commons.rdf.api.RDF rdfFactory,
+                                      QueryContext.Factory queryContextFactory) {
 
         this.termFactory = termFactory;
         this.vocabulary = vocabulary;
@@ -68,6 +72,7 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
         this.queryEngine = queryEngine;
         this.canBeIncomplete = params.canMaterializationBeIncomplete();
         this.kgQueryFactory = kgQueryFactory;
+        this.queryContext = queryContextFactory.create(ImmutableMap.of());
         this.possiblyIncompleteClassesAndProperties = new ArrayList<>();
 
         counter = 0;
@@ -127,7 +132,7 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
                 SelectQuery query = kgQueryFactory.createSelectQuery(predicate.getSelectQuery());
 
                 tmpStatement = ontopConnection.createStatement();
-                tmpContextResultSet = tmpStatement.execute(query);
+                tmpContextResultSet = tmpStatement.execute(query, queryContext);
 
                 if (tmpContextResultSet.hasNext()) {
                     lastSeenPredicate = predicate;

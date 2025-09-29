@@ -16,6 +16,9 @@ public interface MaterializationParams {
      */
     boolean canMaterializationBeIncomplete();
 
+    boolean areDuplicatesAllowed();
+
+    boolean useLegacyMaterializer();
 
     static Builder<?> defaultBuilder() {
         return new MaterializationParamsImpl.DefaultBuilder();
@@ -24,6 +27,10 @@ public interface MaterializationParams {
     interface Builder<B extends Builder<B>> {
 
         B enableIncompleteMaterialization(boolean enable);
+
+        B allowDuplicates(boolean allow);
+
+        B useLegacyMaterializer(boolean useLegacyMaterializer);
 
         MaterializationParams build();
     }

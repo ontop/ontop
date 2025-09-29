@@ -22,7 +22,10 @@ public interface RDF4JMaterializer {
 
     /**
      * Materializes a sub-set of the saturated RDF graph corresponding the selected vocabulary
+     *
+     * DEPRECATED as only supported by the legacy materializer
      */
+    @Deprecated
     MaterializationGraphQuery materialize(@Nonnull ImmutableSet<IRI> selectedVocabulary)
             throws RepositoryException;
 

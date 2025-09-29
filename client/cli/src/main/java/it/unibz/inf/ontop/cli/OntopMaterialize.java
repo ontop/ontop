@@ -63,7 +63,6 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
     
     @Option(type = OptionType.COMMAND, override = true, name = {"-o", "--output"},
             title = "output", description = "output file (default) or prefix (only for --separate-files)")
-    //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     private String outputFile;
 
     @Option(type = OptionType.COMMAND, name = {"-f", "--format"}, title = "output format",
@@ -80,13 +79,21 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
     public Compression compression = Compression.no_compression;
 
     @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "output to separate files",
-            description = "generating separate files for different classes/properties. This is useful for" +
-                    " materializing large OBDA setting. Default: false.")
+            description = "DEPRECATED. Generating separate files for different classes/properties. " +
+                    "Force using the legacy materializer. Default: false.")
     public boolean separate = false;
 
     @Option(type = OptionType.COMMAND, name = {"--no-streaming"}, title = "do not execute streaming of results",
             description = "All the SQL results of one big query will be stored in memory. Not recommended. Default: false.")
     private boolean noStream = false;
+
+    @Option(type = OptionType.COMMAND, name = {"--legacy"}, title = "use the legacy materializer",
+            description = "Uses the legacy materializer (was the main materializer until 5.4.0)")
+    private boolean useLegacyMaterializer = false;
+
+    @Option(type = OptionType.COMMAND, name = {"--allow-duplicates"}, title = "allow duplicates in the materialized RDF graph",
+            description = " Duplicates may appear in the output file as DISTINCTs are removed from the generated SQL queries. Default: false.")
+    private boolean allowDuplicates = false;
 
     public OntopMaterialize() {
     }
@@ -107,9 +114,13 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
         try {
             Builder<?> configurationBuilder = createAndInitConfigurationBuilder();
 
+            boolean mustUseLegacyMaterializer = useLegacyMaterializer || separate ;
+
             return RDF4JMaterializer.defaultMaterializer(
                     configurationBuilder.build(),
                     MaterializationParams.defaultBuilder()
+                            .allowDuplicates(allowDuplicates)
+                            .useLegacyMaterializer(mustUseLegacyMaterializer)
                             .build()
             );
         } catch (OBDASpecificationException e) {

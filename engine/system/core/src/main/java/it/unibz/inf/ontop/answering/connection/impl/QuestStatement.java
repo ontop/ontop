@@ -200,20 +200,36 @@ public abstract class QuestStatement implements OntopStatement {
 	}
 
 	@Override
+	public <R extends OBDAResultSet> R execute(KGQuery<R> inputQuery, QueryContext queryContext) throws OntopConnectionException,
+			OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
+		return execute(inputQuery, ImmutableMap.of(), queryContext);
+	}
+
+	@Override
 	public <R extends OBDAResultSet> R execute(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders)
 			throws OntopConnectionException, OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
 
+		ImmutableMap<String, String> normalizedHttpHeaders = normalizeHttpHeaders(httpHeaders);
+		QueryContext queryContext = queryContextFactory.create(normalizedHttpHeaders);
+
+		return execute(inputQuery, normalizedHttpHeaders, queryContext);
+	}
+
+	private <R extends OBDAResultSet> R execute(KGQuery<R> inputQuery, ImmutableMap<String, String> normalizedHttpHeaders,
+												QueryContext context)
+			throws OntopReformulationException, OntopQueryEvaluationException {
+
 		if (inputQuery instanceof SelectQuery) {
-			return (R) executeInThread((SelectQuery) inputQuery, httpHeaders, (inputQuery1, queryContext, queryLogger) -> executeSelectQuery(inputQuery1, queryContext, queryLogger));
+			return (R) executeInThread((SelectQuery) inputQuery, normalizedHttpHeaders, context, (inputQuery1, queryContext, queryLogger) -> executeSelectQuery(inputQuery1, queryContext, queryLogger));
 		}
 		else if (inputQuery instanceof AskQuery) {
-			return (R) executeInThread((AskQuery) inputQuery, httpHeaders, (inputQuery1, queryContext, queryLogger) -> executeBooleanQuery(inputQuery1, queryContext, queryLogger));
+			return (R) executeInThread((AskQuery) inputQuery, normalizedHttpHeaders, context, (inputQuery1, queryContext, queryLogger) -> executeBooleanQuery(inputQuery1, queryContext, queryLogger));
 		}
 		else if (inputQuery instanceof DescribeQuery) {
-			return (R) executeInThread((DescribeQuery) inputQuery, httpHeaders, (describeQuery, queryContext, queryLogger) -> executeDescribeQuery(describeQuery, queryContext, queryLogger));
+			return (R) executeInThread((DescribeQuery) inputQuery, normalizedHttpHeaders, context, (describeQuery, queryContext, queryLogger) -> executeDescribeQuery(describeQuery, queryContext, queryLogger));
 		}
 		else if (inputQuery instanceof ConstructQuery) {
-			return (R) executeInThread((ConstructQuery) inputQuery, httpHeaders, (constructQuery, queryContext, queryLogger) -> executeConstructQuery(constructQuery, queryContext, queryLogger));
+			return (R) executeInThread((ConstructQuery) inputQuery, normalizedHttpHeaders, context, (constructQuery, queryContext, queryLogger) -> executeConstructQuery(constructQuery, queryContext, queryLogger));
 		}
 		else {
 			throw new OntopUnsupportedInputQueryException("Unsupported query type: " + inputQuery);
@@ -224,16 +240,12 @@ public abstract class QuestStatement implements OntopStatement {
 	 * Internal method to start a new query execution thread type defines the
 	 * query type SELECT, ASK, CONSTRUCT, or DESCRIBE
 	 */
-	private <R extends OBDAResultSet, Q extends KGQuery<R>> R executeInThread(Q inputQuery, ImmutableMultimap<String, String> httpHeaders,
-																			  Evaluator<R, Q> evaluator)
+	private <R extends OBDAResultSet, Q extends KGQuery<R>> R executeInThread(Q inputQuery, ImmutableMap<String, String> normalizedHttpHeaders,
+																			  QueryContext queryContext, Evaluator<R, Q> evaluator)
 			throws OntopReformulationException, OntopQueryEvaluationException {
-
-		ImmutableMap<String, String> normalizedHttpHeaders = normalizeHttpHeaders(httpHeaders);
 
 		QueryLogger queryLogger = queryLoggerFactory.create(normalizedHttpHeaders);
 		queryLogger.setSparqlQuery(inputQuery.getOriginalString());
-
-		QueryContext queryContext = queryContextFactory.create(normalizedHttpHeaders);
 
 		CountDownLatch monitor = new CountDownLatch(1);
 
