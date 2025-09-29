@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.DownPropagation;
@@ -316,12 +317,15 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
                         e -> sourceAtomArguments.get(e.getKey()),
                         Map.Entry::getValue));
 
-        DownPropagation dp = DownPropagation.of(descendingSubstitution, Optional.empty(), renamedDefinition.getTree().getVariables(), variableGenerator, null, iqFactory);
-        IQTree substitutedDefinition = dp.propagate(renamedDefinition.getTree());
-
-        return iqFactory.createUnaryIQTree(
-                        iqFactory.createConstructionNode(dataNode.getVariables()),
-                        substitutedDefinition)
-                .normalizeForOptimization(variableGenerator);
+        try {
+            DownPropagation dp = DownPropagation.of(descendingSubstitution, Optional.empty(), renamedDefinition.getTree().getVariables(), variableGenerator, null);
+            return iqFactory.createUnaryIQTree(
+                            iqFactory.createConstructionNode(dataNode.getVariables()),
+                            dp.propagate(renamedDefinition.getTree()))
+                    .normalizeForOptimization(variableGenerator);
+        }
+        catch (DownPropagation.InconsistentDownPropagationException e) {
+            throw new MinorOntopInternalBugException("ExtensionalDataNode cannot contain NULLs", e);
+        }
     }
 }

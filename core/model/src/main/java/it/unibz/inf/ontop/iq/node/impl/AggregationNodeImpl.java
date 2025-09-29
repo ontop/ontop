@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -60,7 +61,14 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
         return applyDescendingSubstitutionOrBlock(
                 dp.getOptionalDescendingSubstitution().get(),
-                s -> super.applyDescendingSubstitution(DownPropagation.of(s, dp.getConstraint(), dp.getVariables(), dp.getVariableGenerator(), termFactory, iqFactory), child),
+                s -> {
+                    try {
+                        return super.applyDescendingSubstitution(
+                                DownPropagation.of(s, dp.getConstraint(), dp.getVariables(), dp.getVariableGenerator(), termFactory), child);
+                    } catch (DownPropagation.InconsistentDownPropagationException e) {
+                        throw new MinorOntopInternalBugException("cannot happen", e);
+                    }
+                },
                 dp.getVariableGenerator());
     }
 

@@ -9,12 +9,13 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.impl.ConditionSimplifierImpl;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
@@ -29,11 +30,15 @@ public class IQTreeTools {
 
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
+    private final QueryRenamer queryRenamer;
 
     @Inject
-    private IQTreeTools(IntermediateQueryFactory iqFactory, TermFactory termFactory) {
+    private IQTreeTools(IntermediateQueryFactory iqFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory, QueryRenamer queryRenamer) {
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
+        this.queryRenamer = queryRenamer;
     }
 
     public static ImmutableSet<Variable> computeStrictDependentsFromFunctionalDependencies(IQTree tree) {
@@ -328,7 +333,7 @@ public class IQTreeTools {
     }
 
 
-    public Optional<ImmutableExpression> updateDownPropagationConstraint(DownPropagation dp, Substitution<? extends ImmutableTerm> substitution, Optional<ImmutableExpression> optionalExpression, Supplier<VariableNullability> variableNullabilitySupplier) throws UnsatisfiableConditionException {
+    public Optional<ImmutableExpression> updateDownPropagationConstraint(DownPropagation dp, Substitution<? extends ImmutableTerm> substitution, Optional<ImmutableExpression> optionalExpression, Supplier<VariableNullability> variableNullabilitySupplier) throws DownPropagation.InconsistentDownPropagationException {
         Optional<ImmutableExpression> optionalSubstitutedConstraint = dp.getConstraint().map(substitution::apply);
 
         return optionalSubstitutedConstraint.isPresent()

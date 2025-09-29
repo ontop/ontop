@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -19,12 +18,12 @@ public interface ConditionSimplifier {
     ExpressionAndSubstitution simplifyCondition(Optional<ImmutableExpression> expression,
                                                 ImmutableSet<Variable> nonLiftableVariables, ImmutableList<IQTree> children,
                                                 VariableNullability variableNullability)
-                    throws UnsatisfiableConditionException;
+                    throws DownPropagation.InconsistentDownPropagationException;
 
 
     ExpressionAndSubstitutionAndChildren simplifyAndPropagate(DownPropagation downPropagation, Optional<ImmutableExpression> expression, ImmutableList<IQTree> children,
                                                               VariableNullability variableNullability)
-            throws UnsatisfiableConditionException;
+            throws DownPropagation.InconsistentDownPropagationException;
 
 
     interface ExpressionAndSubstitution {

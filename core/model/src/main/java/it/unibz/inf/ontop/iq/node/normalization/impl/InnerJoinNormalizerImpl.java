@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
-import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
@@ -214,7 +213,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                         .map(normalization::updateExpression);
 
                 Substitution<? extends VariableOrGroundTerm> descendingSubstitution = bindingLift.getDescendingSubstitution();
-                DownPropagation dp = DownPropagation.of(descendingSubstitution, newCondition, NaryIQTreeTools.projectedVariables(provisionalNewChildren), variableGenerator, termFactory, iqFactory);
+                DownPropagation dp = DownPropagation.of(descendingSubstitution, newCondition, NaryIQTreeTools.projectedVariables(provisionalNewChildren), variableGenerator, termFactory);
                 ImmutableList<IQTree> newChildren = provisionalNewChildren.stream()
                         .map(dp::propagateToChild)
                         .map(c -> normalization.updateChild(c, variableGenerator))
@@ -225,7 +224,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
                 return Optional.of(state.lift(newParent, new InnerJoinSubTree(newCondition, newChildren)));
             }
-            catch (UnsatisfiableConditionException e) {
+            catch (DownPropagation.InconsistentDownPropagationException e) {
                 return Optional.of(declareAsEmpty());
             }
         }
@@ -255,7 +254,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                         simplification.getConstructionNode(),
                         new InnerJoinSubTree(simplification.getOptionalExpression(), simplification.getChildren()));
             }
-            catch (UnsatisfiableConditionException e) {
+            catch (DownPropagation.InconsistentDownPropagationException e) {
                 return declareAsEmpty();
             }
         }

@@ -104,7 +104,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                     .append(iqTreeTools.createOptionalFilterNode(simplification.getOptionalExpression()))
                     .build(simplification.getChildren().get(0));
         }
-        catch (UnsatisfiableConditionException e) {
+        catch (DownPropagation.InconsistentDownPropagationException e) {
             return iqTreeTools.createEmptyNode(dp);
         }
     }

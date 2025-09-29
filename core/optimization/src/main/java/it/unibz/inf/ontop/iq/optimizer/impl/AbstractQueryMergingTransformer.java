@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -73,8 +74,13 @@ public abstract class AbstractQueryMergingTransformer extends DefaultRecursiveIQ
                 renamedDefinition.getProjectionAtom().getArguments(),
                 dataNode.getProjectionAtom().getArguments());
 
-        DownPropagation dp = DownPropagation.of(descendingSubstitution, Optional.empty(), renamedDefinition.getTree().getVariables(), variableGenerator, termFactory, iqFactory);
-        return dp.propagate(renamedDefinition.getTree())
-                .normalizeForOptimization(variableGenerator);
+        try {
+            DownPropagation dp = DownPropagation.of(descendingSubstitution, Optional.empty(), renamedDefinition.getTree().getVariables(), variableGenerator, termFactory);
+            return dp.propagate(renamedDefinition.getTree())
+                    .normalizeForOptimization(variableGenerator);
+        }
+        catch (DownPropagation.InconsistentDownPropagationException e) {
+            throw new MinorOntopInternalBugException("IntensionalDataNode cannot contains NULLs" + dataNode, e);
+        }
     }
 }

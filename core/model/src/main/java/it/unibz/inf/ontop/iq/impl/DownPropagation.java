@@ -2,9 +2,7 @@ package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -21,9 +19,7 @@ public interface DownPropagation {
                               Optional<ImmutableExpression> constraint,
                               ImmutableSet<Variable> projectedVariables,
                               VariableGenerator variableGenerator,
-                              TermFactory termFactory,
-                              IntermediateQueryFactory iqFactory) {
-        try {
+                              TermFactory termFactory) throws InconsistentDownPropagationException {
             var optionalNormalizedSubstitution = normalizeDescendingSubstitution(descendingSubstitution, projectedVariables);
             var optionalNormalizedConstraint = normalizeConstraint(constraint, () -> getVariables(descendingSubstitution, projectedVariables), termFactory);
 
@@ -39,17 +35,6 @@ public interface DownPropagation {
                 return new ConstraintOnlyDownPropagation(optionalNormalizedConstraint.get(), projectedVariables, variableGenerator, termFactory);
 
             return new EmptyDownPropagation(projectedVariables, variableGenerator, termFactory);
-        }
-        catch (UnsatisfiableDescendingSubstitutionException e) {
-            return new InconsistentDownPropagation(projectedVariables, iqFactory.createEmptyNode(computeProjectedVariables(descendingSubstitution, projectedVariables)));
-        }
-    }
-
-    static DownPropagation ofNormalized(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator, IntermediateQueryFactory iqFactory) throws UnsatisfiableDescendingSubstitutionException {
-        var r = of(descendingSubstitution, Optional.empty(), projectedVariables, variableGenerator, null, iqFactory); // null are not going to be used
-        if (r instanceof InconsistentDownPropagation)
-            throw  new UnsatisfiableDescendingSubstitutionException();
-        return r;
     }
 
     static DownPropagation of(Optional<ImmutableExpression> optionalConstraint, ImmutableSet<Variable> variables, VariableGenerator variableGenerator, TermFactory termFactory) {
@@ -105,7 +90,7 @@ public interface DownPropagation {
      * Typically thrown when a "null" variable is propagated down
      *
      */
-    class UnsatisfiableDescendingSubstitutionException extends Exception {
+    class InconsistentDownPropagationException extends Exception {
     }
 
     /**
@@ -115,12 +100,12 @@ public interface DownPropagation {
      *
      */
     private static <T extends VariableOrGroundTerm> Optional<Substitution<T>> normalizeDescendingSubstitution(Substitution<T> descendingSubstitution, ImmutableSet<Variable> projectedVariables)
-            throws UnsatisfiableDescendingSubstitutionException {
+            throws InconsistentDownPropagationException {
 
         Optional<Substitution<T>> reducedSubstitution = reduceDescendingSubstitution(descendingSubstitution, projectedVariables);
 
         if (reducedSubstitution.isPresent() && reducedSubstitution.get().rangeAnyMatch(ImmutableTerm::isNull))
-            throw new UnsatisfiableDescendingSubstitutionException();
+            throw new InconsistentDownPropagationException();
 
         return reducedSubstitution;
     }
@@ -167,71 +152,6 @@ public interface DownPropagation {
 
 }
 
-class InconsistentDownPropagation implements DownPropagation {
-    private final ImmutableSet<Variable> variables;
-    private final EmptyNode emptyNode;
-
-    InconsistentDownPropagation(ImmutableSet<Variable> variables, EmptyNode emptyNode) {
-        this.variables = variables;
-        this.emptyNode = emptyNode;
-    }
-
-    @Override
-    public ImmutableSet<Variable> getVariables() {
-        return variables;
-    }
-
-    @Override
-    public VariableGenerator getVariableGenerator() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ImmutableSet<Variable> computeProjectedVariables() {
-        return emptyNode.getVariables();
-    }
-
-    @Override
-    public Optional<Substitution<? extends VariableOrGroundTerm>> getOptionalDescendingSubstitution() {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<ImmutableExpression> applySubstitution(Optional<ImmutableExpression> optionalExpression) {
-        return optionalExpression;
-    }
-
-    @Override
-    public Optional<ImmutableExpression> getConstraint() {
-        return Optional.empty();
-    }
-
-    @Override
-    public DownPropagation withConstraint(Optional<ImmutableExpression> constraint, ImmutableSet<Variable> variables) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public VariableNullability extendVariableNullability(VariableNullability variableNullability) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public IQTree propagate(IQTree tree) {
-        return emptyNode;
-    }
-
-    @Override
-    public DownPropagation reduceScope(ImmutableSet<Variable> variables) {
-        if (!getVariables().containsAll(variables))
-            throw new IllegalArgumentException("Variables " +  variables + " are not included in " + getVariables());
-
-        if (!variables.containsAll(emptyNode.getVariables()))
-            throw new IllegalArgumentException("Variables " +  variables + " does not contain all " + emptyNode);
-
-        return this;
-    }
-}
 
 abstract class AbstractDownPropagation implements DownPropagation {
     protected final VariableGenerator variableGenerator;

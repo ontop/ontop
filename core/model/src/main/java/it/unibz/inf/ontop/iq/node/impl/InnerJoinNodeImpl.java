@@ -150,7 +150,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     .append(simplification.getConstructionNode())
                     .build(joinTree);
         }
-        catch (UnsatisfiableConditionException e) {
+        catch (DownPropagation.InconsistentDownPropagationException e) {
             return iqTreeTools.createEmptyNode(downPropagation);
         }
     }

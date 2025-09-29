@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
-import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.FilterNormalizer;
 import it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -141,7 +140,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                         UnarySubTree.of(iqTreeTools.createOptionalFilterNode(simplification.getOptionalExpression()),
                                 normalizeSubTreeRecursively(simplification.getChildren().get(0))));
             }
-            catch (UnsatisfiableConditionException e) {
+            catch (DownPropagation.InconsistentDownPropagationException e) {
                 return State.initial(UnarySubTree.finalSubTree(createEmptyNode()));
             }
         }

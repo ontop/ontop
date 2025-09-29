@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
@@ -47,7 +46,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                                        ImmutableSet<Variable> nonLiftableVariables,
                                                        ImmutableList<IQTree> children,
                                                        VariableNullability variableNullability)
-            throws UnsatisfiableConditionException {
+            throws DownPropagation.InconsistentDownPropagationException {
 
         if (nonOptimizedExpression.isPresent()) {
             Optional<ImmutableExpression> optionalExpression = evaluateCondition(nonOptimizedExpression.get(), variableNullability);
@@ -72,7 +71,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
     private ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression,
                                                                            ImmutableSet<Variable> nonLiftableVariables,
                                                                            ImmutableList<IQTree> children, VariableNullability variableNullability)
-            throws UnsatisfiableConditionException {
+            throws DownPropagation.InconsistentDownPropagationException {
 
         ImmutableSet<ImmutableExpression> expressions = expression.flattenAND()
                 .collect(ImmutableCollectors.toSet());
@@ -88,7 +87,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                 .build()
                 // TODO: merge priorityRenaming with the orientate() method
                 .map(u -> substitutionFactory.onNonFunctionalTerms().compose(substitutionFactory.getPrioritizingRenaming(u, nonLiftableVariables), u))
-                .orElseThrow(UnsatisfiableConditionException::new);
+                .orElseThrow(DownPropagation.InconsistentDownPropagationException::new);
 
         ImmutableSet<Variable> rejectedByChildrenVariablesEqToConstant = normalizedUnifier.getDomain().stream()
                 .filter(v -> children.stream()
@@ -129,7 +128,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
     @Override
     public ExpressionAndSubstitutionAndChildren simplifyAndPropagate(DownPropagation downPropagation, Optional<ImmutableExpression> expression, ImmutableList<IQTree> children,
-                                                                     VariableNullability variableNullability) throws UnsatisfiableConditionException {
+                                                                     VariableNullability variableNullability) throws DownPropagation.InconsistentDownPropagationException {
         // TODO: also consider the constraint for simplifying the condition
         var simplification = simplifyCondition(downPropagation.applySubstitution(expression), ImmutableSet.of(), children, variableNullability);
 
@@ -141,7 +140,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
         Optional<ImmutableExpression> newConstraint = iqTreeTools.updateDownPropagationConstraint(downPropagation, simplification.getSubstitution(), simplification.getOptionalExpression(), () -> variableNullability);
 
-        var extendedDownConstraint = DownPropagation.of(downSubstitution, newConstraint, downPropagation.getVariables(), downPropagation.getVariableGenerator(), termFactory, iqFactory);
+        var extendedDownConstraint = DownPropagation.of(downSubstitution, newConstraint, downPropagation.getVariables(), downPropagation.getVariableGenerator(), termFactory);
 
         return new ExpressionAndSubstitutionAndChildrenImpl(
                 iqTreeTools.createOptionalConstructionNode(downPropagation::computeProjectedVariables, simplification.getSubstitution()),
@@ -181,11 +180,11 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
      * Empty means true
      */
     public static Optional<ImmutableExpression> evaluateCondition(ImmutableExpression expression,
-                                                                  VariableNullability variableNullability) throws UnsatisfiableConditionException {
+                                                                  VariableNullability variableNullability) throws DownPropagation.InconsistentDownPropagationException {
         ImmutableExpression.Evaluation results = expression.evaluate2VL(variableNullability);
 
         if (results.isEffectiveFalse())
-            throw new UnsatisfiableConditionException();
+            throw new DownPropagation.InconsistentDownPropagationException();
 
         return results.getExpression();
     }

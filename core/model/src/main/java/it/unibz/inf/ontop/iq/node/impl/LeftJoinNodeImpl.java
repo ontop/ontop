@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.impl.ConditionSimplifierImpl;
 import it.unibz.inf.ontop.iq.node.normalization.impl.ExpressionAndSubstitutionImpl;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -213,7 +214,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 Substitution<? extends VariableOrGroundTerm> rightDescendingSubstitution =
                         substitutionFactory.onVariableOrGroundTerms().compose(expressionAndCondition.getSubstitution(), descendingSubstitution);
 
-                DownPropagation dpR = DownPropagation.of(rightDescendingSubstitution, Optional.empty(), rightChild.getVariables(), dp.getVariableGenerator(), termFactory, iqFactory);
+                DownPropagation dpR = DownPropagation.of(rightDescendingSubstitution, Optional.empty(), rightChild.getVariables(), dp.getVariableGenerator(), termFactory);
                 IQTree updatedRightChild = dpR.propagate(rightChild);
 
                 return updatedRightChild.isDeclaredAsEmpty()
@@ -222,7 +223,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                                 expressionAndCondition.getOptionalExpression(),
                                 updatedLeftChild, updatedRightChild);
             }
-            catch (UnsatisfiableConditionException e) {
+            catch (DownPropagation.InconsistentDownPropagationException e) {
                 return updatedLeftChild;
             }
         }
@@ -383,19 +384,16 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             ImmutableExpression initialExpression,
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             ImmutableSet<Variable> leftChildVariables, ImmutableSet<Variable> rightChildVariables)
-            throws UnsatisfiableConditionException {
+            throws DownPropagation.InconsistentDownPropagationException {
 
         ImmutableExpression expression = descendingSubstitution.apply(initialExpression);
         // No proper variable nullability information is given for optimizing during descending substitution
         // (too complicated)
         // Therefore, please consider normalizing afterwards
-        ImmutableExpression.Evaluation results = expression.evaluate2VL(
+        var result = ConditionSimplifierImpl.evaluateCondition(expression,
                 coreUtilsFactory.createSimplifiedVariableNullability(expression));
 
-        if (results.isEffectiveFalse())
-            throw new UnsatisfiableConditionException();
-
-        return results.getExpression()
+        return result
                 .map(e -> convertIntoExpressionAndSubstitution(e, leftChildVariables, rightChildVariables))
                 .orElseGet(() ->
                         new ExpressionAndSubstitutionImpl(Optional.empty(), descendingSubstitution.restrictRangeTo(VariableOrGroundTerm.class)));

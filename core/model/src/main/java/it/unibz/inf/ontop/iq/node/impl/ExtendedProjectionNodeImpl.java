@@ -58,9 +58,9 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
      */
     private IQTree propagateDescendingSubstitutionToChild(IQTree child,
                                                           PropagationResults tauFPropagationResults,
-                                                          DownPropagation dp0) throws UnsatisfiableConditionException {
+                                                          DownPropagation dp0) throws DownPropagation.InconsistentDownPropagationException {
 
-        DownPropagation dp = DownPropagation.of(tauFPropagationResults.delta, dp0.getConstraint(), dp0.getVariables(), dp0.getVariableGenerator(), termFactory, iqFactory);
+        DownPropagation dp = DownPropagation.of(tauFPropagationResults.delta, dp0.getConstraint(), dp0.getVariables(), dp0.getVariableGenerator(), termFactory);
 
         var newConstraint = iqTreeTools.updateDownPropagationConstraint(dp0, tauFPropagationResults.theta, Optional.empty(), child::getVariableNullability);
 
@@ -85,7 +85,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                                VariableGenerator variableGenerator) {
 
         try {
-            DownPropagation ds = DownPropagation.ofNormalized(tau, getVariables(), variableGenerator, iqFactory);
+            DownPropagation ds = DownPropagation.of(tau, Optional.empty(), getVariables(), variableGenerator, null);
             PropagationResults tauPropagationResults = propagateTau(ds, child.getVariables());
 
             IQTree newChild = updateChildFct.apply(tauPropagationResults);
@@ -100,7 +100,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                     .append(iqTreeTools.createOptionalFilterNode(tauPropagationResults.filter))
                     .build(newChild);
         }
-        catch (UnsatisfiableConditionException | DownPropagation.UnsatisfiableDescendingSubstitutionException e) {
+        catch (DownPropagation.InconsistentDownPropagationException e) {
             return iqTreeTools.createEmptyNode(DownPropagation.computeProjectedVariables(tau, getVariables()));
         }
     }
@@ -109,7 +109,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
             ImmutableSet<Variable> newProjectedVariables, Substitution<ImmutableTerm> theta, IQTree newChild);
 
 
-    private PropagationResults propagateTau(DownPropagation dp, ImmutableSet<Variable> childVariables) throws UnsatisfiableConditionException {
+    private PropagationResults propagateTau(DownPropagation dp, ImmutableSet<Variable> childVariables) throws DownPropagation.InconsistentDownPropagationException {
 
         // tau is the descendingSubstitution
         // theta is the CONSTRUCT substitution
@@ -130,7 +130,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 .build()
                 .map(eta -> substitutionFactory.onNonFunctionalTerms()
                         .compose(substitutionFactory.getPrioritizingRenaming(eta, projectedVariablesAfterTauC), eta))
-                .orElseThrow(UnsatisfiableConditionException::new);
+                .orElseThrow(DownPropagation.InconsistentDownPropagationException::new);
 
         Substitution<NonFunctionalTerm> thetaCBar = newEta.restrictDomainTo(projectedVariablesAfterTauC);
 
@@ -214,7 +214,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
             IQTree newChild = dp.propagateToChildWithConstraint(newConstraint, child);
             return iqFactory.createUnaryIQTree(this, newChild);
         }
-        catch (UnsatisfiableConditionException e) {
+        catch (DownPropagation.InconsistentDownPropagationException e) {
             return iqTreeTools.createEmptyNode(dp);
         }
     }
@@ -234,7 +234,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     protected interface DescendingSubstitutionChildUpdateFunction {
 
         IQTree apply(PropagationResults tauFPropagationResults)
-                throws UnsatisfiableConditionException;
+                throws DownPropagation.InconsistentDownPropagationException;
     }
 
     protected static class PropagationResults {

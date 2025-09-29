@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
@@ -139,7 +140,13 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
         return applyDescendingSubstitution(dp.getOptionalDescendingSubstitution().get(), dp.getVariableGenerator(),
-                (s) -> DownPropagation.of(s, dp.getConstraint(), child.getVariables(), dp.getVariableGenerator(), termFactory, iqFactory).propagate(child));
+                (s) -> {
+                    try {
+                        return DownPropagation.of(s, dp.getConstraint(), child.getVariables(), dp.getVariableGenerator(), termFactory).propagate(child);
+                    } catch (DownPropagation.InconsistentDownPropagationException e) {
+                        throw new MinorOntopInternalBugException("cannot happen", e);
+                    }
+                });
     }
 
     private IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,

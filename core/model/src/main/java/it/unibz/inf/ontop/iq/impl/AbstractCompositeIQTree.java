@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -228,12 +229,12 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             VariableGenerator variableGenerator) {
         try {
-            DownPropagation ds = DownPropagation.ofNormalized(descendingSubstitution, getVariables(), variableGenerator, iqFactory);
+            DownPropagation ds = DownPropagation.of(descendingSubstitution, Optional.empty(), getVariables(), variableGenerator, null);
             return ds.getOptionalDescendingSubstitution()
                     .map(s -> doApplyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
                     .orElse(this);
         }
-        catch (DownPropagation.UnsatisfiableDescendingSubstitutionException e) {
+        catch (DownPropagation.InconsistentDownPropagationException e) {
             return iqTreeTools.createEmptyNode(DownPropagation.computeProjectedVariables(descendingSubstitution, getVariables()));
         }
     }

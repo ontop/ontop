@@ -6,9 +6,9 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.*;
@@ -44,7 +44,7 @@ public class JoinLikeChildBindingLifter {
                                          ImmutableSet<Variable> nonLiftableVariables,
                                          Optional<ImmutableExpression> initialJoiningCondition,
                                          VariableGenerator variableGenerator,
-                                         VariableNullability variableNullability) throws UnsatisfiableConditionException {
+                                         VariableNullability variableNullability) throws DownPropagation.InconsistentDownPropagationException {
 
         Substitution<ImmutableTerm> substitution = selectedChildConstructionNode.getSubstitution();
 

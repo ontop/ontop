@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
-import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer.RightProvenance;
@@ -219,7 +218,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                 variableNullabilityTools.getChildrenVariableNullability(
                                         ImmutableList.of(leftGrandChild, subTree.rightChild())));
 
-                        DownPropagation dp = DownPropagation.of(bindingLift.getDescendingSubstitution(), bindingLift.getCondition(), subTree.rightChild().getVariables(), variableGenerator, termFactory, iqFactory);
+                        DownPropagation dp = DownPropagation.of(bindingLift.getDescendingSubstitution(), bindingLift.getCondition(), subTree.rightChild().getVariables(), variableGenerator, termFactory);
                         IQTree rightSubTree = dp.propagate(subTree.rightChild());
 
                         ImmutableSet<Variable> leftVariables = projectedVariables(subTree.leftChild(), leftGrandChild).immutableCopy();
@@ -238,7 +237,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                 createConstructionNode(subTree, ascendingSubstitution),
                                 new LeftJoinSubTree(bindingLift.getCondition(), leftGrandChild, rightProvenance.getRightTree())));
                     }
-                    catch (UnsatisfiableConditionException e) {
+                    catch (DownPropagation.InconsistentDownPropagationException e) {
                         // Replaces the LJ by the left child and stops recursion!
                         return Optional.of(state.lift(
                                 createConstructionNode(subTree, constructionNode.getSubstitution()),
@@ -465,7 +464,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     return state.replace(t -> t.replaceRight(optionalCondition, t.rightChild()));
                 }
 
-                DownPropagation dp = DownPropagation.of(downSubstitution, optionalCondition, subTree.rightChild().getVariables(), variableGenerator, termFactory, iqFactory);
+                DownPropagation dp = DownPropagation.of(downSubstitution, optionalCondition, subTree.rightChild().getVariables(), variableGenerator, termFactory);
                 IQTree updatedRightChild = dp.propagate(subTree.rightChild());
 
                 var rightProvenance = new OptionalRightProvenance(
@@ -475,7 +474,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         createConstructionNode(subTree, rightProvenance.computeLiftableSubstitution()),
                         subTree.replaceRight(optionalCondition, rightProvenance.getRightTree()));
             }
-            catch (UnsatisfiableConditionException e) {
+            catch (DownPropagation.InconsistentDownPropagationException e) {
                 return state.replace(t -> t.replaceRight(Optional.empty(), createEmptyRightChild(t)));
             }
         }

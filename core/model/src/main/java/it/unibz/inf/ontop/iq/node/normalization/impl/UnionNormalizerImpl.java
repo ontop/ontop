@@ -419,12 +419,16 @@ public class UnionNormalizerImpl implements UnionNormalizer {
                 .transform(t -> (VariableOrGroundTerm)t)
                 .build();
 
-        DownPropagation dp = DownPropagation.of(descendingSubstitution, Optional.empty(), liftedGrandChild.getVariables(), variableGenerator, termFactory, iqFactory);
-        IQTree newChild = dp.propagate(liftedGrandChild);
+        try {
+            DownPropagation dp = DownPropagation.of(descendingSubstitution, Optional.empty(), liftedGrandChild.getVariables(), variableGenerator, termFactory);
+            IQTree newChild = dp.propagate(liftedGrandChild);
 
-        var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, newTheta);
-        return iqTreeTools.unaryIQTreeBuilder()
-                .append(optionalConstructionNode)
-                .build(newChild);
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, newTheta))
+                    .build(newChild);
+        }
+        catch (DownPropagation.InconsistentDownPropagationException e) {
+            throw new MinorOntopInternalBugException("cannot happen", e);
+        }
     }
 }

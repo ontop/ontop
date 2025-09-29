@@ -108,26 +108,31 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                         nonExtensionalChildrenWithConstraint.stream())
                 .collect(ImmutableCollectors.toList());
 
-        DownPropagation dp = DownPropagation.of(unifier, Optional.empty(), NaryIQTreeTools.projectedVariables(newChildren), variableGenerator, termFactory, iqFactory);
-        ImmutableList<IQTree> newChildrenPropagated = NaryIQTreeTools.transformChildren(newChildren, dp::propagateToChild);
+        try {
+            DownPropagation dp = DownPropagation.of(unifier, Optional.empty(), NaryIQTreeTools.projectedVariables(newChildren), variableGenerator, termFactory);
+            ImmutableList<IQTree> newChildrenPropagated = NaryIQTreeTools.transformChildren(newChildren, dp::propagateToChild);
 
-        Optional<ImmutableExpression> newExpression = termFactory.getConjunction(
-                innerJoinNode.getOptionalFilterCondition(),
-                optimizationStates.stream()
-                        .flatMap(s -> s.newExpressions.stream()));
+            Optional<ImmutableExpression> newExpression = termFactory.getConjunction(
+                    innerJoinNode.getOptionalFilterCondition(),
+                    optimizationStates.stream()
+                            .flatMap(s -> s.newExpressions.stream()));
 
-        Optional<ImmutableExpression> newExpressionWithUnifier = newExpression.map(unifier::apply);
+            Optional<ImmutableExpression> newExpressionWithUnifier = newExpression.map(unifier::apply);
 
-        IQTree newTree = iqTreeTools.createOptionalInnerJoinTree(newExpressionWithUnifier, newChildrenPropagated)
-                .orElseThrow(() -> new MinorOntopInternalBugException("Should have been detected before"));
+            IQTree newTree = iqTreeTools.createOptionalInnerJoinTree(newExpressionWithUnifier, newChildrenPropagated)
+                    .orElseThrow(() -> new MinorOntopInternalBugException("Should have been detected before"));
 
-        ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
-                substitutionNormalizer.normalizeSubstitution(unifier, tree.getVariables());
-        IQTree normalizedNewTree = normalization.updateChild(newTree, variableGenerator);
+            ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
+                    substitutionNormalizer.normalizeSubstitution(unifier, tree.getVariables());
+            IQTree normalizedNewTree = normalization.updateChild(newTree, variableGenerator);
 
-        return Optional.of(iqTreeTools.unaryIQTreeBuilder()
-                .append(iqTreeTools.createOptionalConstructionNode(tree.getVariables(), normalization.getNormalizedSubstitution(), normalizedNewTree))
-                .build(normalizedNewTree));
+            return Optional.of(iqTreeTools.unaryIQTreeBuilder()
+                    .append(iqTreeTools.createOptionalConstructionNode(tree.getVariables(), normalization.getNormalizedSubstitution(), normalizedNewTree))
+                    .build(normalizedNewTree));
+        }
+        catch (DownPropagation.InconsistentDownPropagationException e) {
+            throw new MinorOntopInternalBugException("cannot happen:", e);
+        }
     }
 
     protected abstract boolean canEliminateNodes();
