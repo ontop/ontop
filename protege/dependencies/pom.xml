@@ -6,10 +6,11 @@
     <parent>
         <artifactId>ontop-protege</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>5.4.0-SNAPSHOT</version>
+        <version>5.4.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-protege-dependencies</artifactId>
+    <name>Ontop Protégé Dependencies</name>
     <description>Ontop OBDA plugin for protégé - shaded dependencies</description>
 
     <dependencies>
