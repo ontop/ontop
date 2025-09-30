@@ -124,6 +124,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
 
             ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
                     substitutionNormalizer.normalizeSubstitution(unifier, tree.getVariables());
+
             IQTree normalizedNewTree = normalization.updateChild(newTree, variableGenerator);
 
             return Optional.of(iqTreeTools.unaryIQTreeBuilder()

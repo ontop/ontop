@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
@@ -122,7 +121,7 @@ public class ExplicitEqualityTransformerImpl extends DelegatingIQTreeVariableGen
 
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            ImmutableList<InjectiveSubstitution<Variable>> substitutions = computeSubstitutions(children);
+            ImmutableList<InjectiveSubstitution<Variable>> substitutions = computeRenamings(children);
             if (substitutions.stream().allMatch(Substitution::isEmpty))
                 return super.transformInnerJoin(tree, rootNode, children);
 
@@ -137,7 +136,7 @@ public class ExplicitEqualityTransformerImpl extends DelegatingIQTreeVariableGen
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             ImmutableList<IQTree> children = ImmutableList.of(leftChild, rightChild);
-            ImmutableList<InjectiveSubstitution<Variable>> substitutions = computeSubstitutions(children);
+            ImmutableList<InjectiveSubstitution<Variable>> substitutions = computeRenamings(children);
             if (substitutions.stream().allMatch(Substitution::isEmpty))
                 return super.transformLeftJoin(tree, rootNode, leftChild, rightChild);
 
@@ -149,7 +148,7 @@ public class ExplicitEqualityTransformerImpl extends DelegatingIQTreeVariableGen
                         iqTreeTools.createLeftJoinTree(updatedJoinCondition, updatedChildren.get(0), updatedChildren.get(1)));
         }
 
-        private ImmutableList<InjectiveSubstitution<Variable>> computeSubstitutions(ImmutableList<IQTree> children) {
+        private ImmutableList<InjectiveSubstitution<Variable>> computeRenamings(ImmutableList<IQTree> children) {
             if (children.size() < 2) {
                 throw new ExplicitEqualityTransformerInternalException("At least 2 children are expected");
             }
@@ -165,7 +164,7 @@ public class ExplicitEqualityTransformerImpl extends DelegatingIQTreeVariableGen
 
         private ImmutableList<IQTree> updateJoinChildren(ImmutableList<InjectiveSubstitution<Variable>> substitutions, ImmutableList<IQTree> children) {
             return IntStream.range(0, substitutions.size())
-                    .mapToObj(i -> iqTreeTools.createDownPropagation(substitutions.get(i), children.get(i).getVariables()).propagate(children.get(i)))
+                    .mapToObj(i -> iqTreeTools.applyDownPropagation(substitutions.get(i), children.get(i)))
                     .map(this::transformChild)
                     .collect(ImmutableCollectors.toList());
         }

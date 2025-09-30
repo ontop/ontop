@@ -62,7 +62,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
         return iqFactory.createUnaryIQTree(
                 getRootNode().applyFreshRenaming(renamingSubstitution),
-                iqTreeTools.createDownPropagation(renamingSubstitution, getChild().getVariables()).propagate(getChild()),
+                iqTreeTools.applyDownPropagation(renamingSubstitution, getChild()),
                 getTreeCache().applyFreshRenaming(renamingSubstitution));
     }
 

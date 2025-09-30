@@ -98,7 +98,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         // tau is the descendingSubstitution
         // theta is the CONSTRUCT substitution
 
-        Substitution<? extends VariableOrGroundTerm> tau = dp.getOptionalDescendingSubstitution().orElseGet(substitutionFactory::getSubstitution);
+        Substitution<? extends VariableOrGroundTerm> tau = dp.getOptionalDescendingSubstitution().get();
         ImmutableSet<Variable> projectedVariables = dp.getVariables();
         Substitution<? extends ImmutableTerm> substitution = getSubstitution();
 

@@ -353,9 +353,9 @@ public class IQTreeTools {
      */
 
     public DownPropagation createDownPropagation(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                              Optional<ImmutableExpression> constraint,
-                              ImmutableSet<Variable> projectedVariables,
-                              VariableGenerator variableGenerator) throws DownPropagation.InconsistentDownPropagationException {
+                                                 Optional<ImmutableExpression> constraint,
+                                                 ImmutableSet<Variable> projectedVariables,
+                                                 VariableGenerator variableGenerator) throws DownPropagation.InconsistentDownPropagationException {
 
         var optionalReducedSubstitution = AbstractDownPropagation.reduceDescendingSubstitution(descendingSubstitution, projectedVariables);
 
@@ -383,12 +383,26 @@ public class IQTreeTools {
         return new ConstraintOnlyDownPropagation(optionalNormalizedConstraint, variables, variableGenerator, termFactory);
     }
 
-    public DownPropagation createDownPropagation(InjectiveSubstitution<Variable> substitution, ImmutableSet<Variable> variables) {
-        InjectiveSubstitution<Variable> restriction = substitution.restrictDomainTo(variables);
-        return restriction.isEmpty()
-                ? new ConstraintOnlyDownPropagation(Optional.empty(), variables, null, null)
-                : new RenamingDownPropagation(restriction, Optional.empty(), variables, null, null);
+
+    /**
+     * Applies renaming to the projected variables in the tree.
+     *
+     * @param renaming
+     * @param tree
+     * @return
+     */
+
+    public IQTree applyDownPropagation(InjectiveSubstitution<Variable> renaming, IQTree tree) {
+        DownPropagation dp = createDownPropagation(renaming, tree.getVariables());
+        return dp.propagate(tree);
     }
 
+    private DownPropagation createDownPropagation(InjectiveSubstitution<Variable> renaming, ImmutableSet<Variable> variables) {
+        InjectiveSubstitution<Variable> restriction = renaming.restrictDomainTo(variables);
+        // variable generator is null as it is not used in the implementation of propagation
+        return restriction.isEmpty()
+                ? new ConstraintOnlyDownPropagation(Optional.empty(), variables, null, termFactory)
+                : new RenamingDownPropagation(restriction, Optional.empty(), variables, null, termFactory);
+    }
 
 }

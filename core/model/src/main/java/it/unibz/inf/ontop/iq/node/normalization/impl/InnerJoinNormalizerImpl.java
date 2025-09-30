@@ -211,8 +211,12 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 Optional<ImmutableExpression> newCondition = bindingLift.getCondition()
                         .map(normalization::updateExpression);
 
-                Substitution<? extends VariableOrGroundTerm> descendingSubstitution = bindingLift.getDescendingSubstitution();
-                DownPropagation dp = iqTreeTools.createDownPropagation(descendingSubstitution, newCondition, NaryIQTreeTools.projectedVariables(provisionalNewChildren), variableGenerator);
+                DownPropagation dp = iqTreeTools.createDownPropagation(
+                        bindingLift.getDescendingSubstitution(),
+                        newCondition,
+                        NaryIQTreeTools.projectedVariables(provisionalNewChildren),
+                        variableGenerator);
+
                 ImmutableList<IQTree> newChildren = provisionalNewChildren.stream()
                         .map(dp::propagateToChild)
                         .map(c -> normalization.updateChild(c, variableGenerator))

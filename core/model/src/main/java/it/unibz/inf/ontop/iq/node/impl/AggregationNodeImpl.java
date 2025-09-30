@@ -121,8 +121,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         InjectiveSubstitution<Variable> renamingSubstitution = filterNode.getLocalVariables().stream()
                 .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
-        DownPropagation dp = iqTreeTools.createDownPropagation(renamingSubstitution, newSubTree.getVariables());
-        IQTree filterTree = dp.propagate(iqFactory.createUnaryIQTree(filterNode, newSubTree));
+        IQTree filterTree = iqTreeTools.applyDownPropagation(renamingSubstitution, iqFactory.createUnaryIQTree(filterNode, newSubTree));
 
         return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(

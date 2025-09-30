@@ -218,7 +218,12 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                 variableNullabilityTools.getChildrenVariableNullability(
                                         ImmutableList.of(leftGrandChild, subTree.rightChild())));
 
-                        DownPropagation dp = iqTreeTools.createDownPropagation(bindingLift.getDescendingSubstitution(), bindingLift.getCondition(), subTree.rightChild().getVariables(), variableGenerator);
+                        DownPropagation dp = iqTreeTools.createDownPropagation(
+                                bindingLift.getDescendingSubstitution(),
+                                bindingLift.getCondition(),
+                                subTree.rightChild().getVariables(),
+                                variableGenerator);
+
                         IQTree rightSubTree = dp.propagate(subTree.rightChild());
 
                         ImmutableSet<Variable> leftVariables = projectedVariables(subTree.leftChild(), leftGrandChild).immutableCopy();

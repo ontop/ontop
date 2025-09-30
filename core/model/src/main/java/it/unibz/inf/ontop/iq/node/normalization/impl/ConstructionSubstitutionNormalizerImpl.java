@@ -63,8 +63,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
         @Override
         public IQTree updateChild(IQTree child, VariableGenerator variableGenerator) {
-            DownPropagation dp = iqTreeTools.createDownPropagation(downRenamingSubstitution, child.getVariables());
-            return dp.propagate(child);
+            return iqTreeTools.applyDownPropagation(downRenamingSubstitution, child);
         }
 
         @Override

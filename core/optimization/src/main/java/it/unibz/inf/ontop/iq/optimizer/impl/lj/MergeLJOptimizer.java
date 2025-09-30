@@ -166,9 +166,9 @@ public class MergeLJOptimizer extends DelegatingIQTreeVariableGeneratorTransform
                     newLocalRightTreeBeforeRenaming = localRightProvenance.getRightTree();
                 }
 
-                DownPropagation dp = iqTreeTools.createDownPropagation(renaming, newLocalRightTreeBeforeRenaming.getVariables());
+                IQTree newLocalRightChild = iqTreeTools.applyDownPropagation(renaming, newLocalRightTreeBeforeRenaming);
                 IQTree newLocalTree = iqTreeTools.createLeftJoinTree(
-                        Optional.empty(), leftLJ.leftChild(), dp.propagate(newLocalRightTreeBeforeRenaming));
+                        Optional.empty(), leftLJ.leftChild(), newLocalRightChild);
 
                 IQTree newLJTree = ancestors.stream()
                         .reduce(newLocalTree, (t, a) ->

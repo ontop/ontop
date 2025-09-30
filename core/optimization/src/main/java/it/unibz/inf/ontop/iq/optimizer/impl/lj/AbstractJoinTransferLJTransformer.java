@@ -332,8 +332,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
                         .collect(ImmutableCollectors.toSet()));
 
         IQTree transformedTree = rightChild.acceptVisitor(transformer);
-        DownPropagation dp = iqTreeTools.createDownPropagation(renamingSubstitution, transformedTree.getVariables());
-        return dp.propagate(transformedTree);
+        return iqTreeTools.applyDownPropagation(renamingSubstitution, transformedTree);
     }
 
     protected static class SelectedNode {

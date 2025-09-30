@@ -177,11 +177,9 @@ public abstract class JsonLens extends JsonOpenObject {
                 .collect(substitutionFactory.toSubstitution(
                         v -> termFactory.getImmutableFunctionalTerm(iriSafenessDeclarationFunctionSymbol, renaming.get(v))));
 
-        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(initialProjectedVariables, substitution);
-
         return iqFactory.createUnaryIQTree(
-                        newConstructionNode,
-                        iqTreeTools.createDownPropagation(renaming, iqTreeBeforeIRISafeConstraints.getVariables()).propagate(iqTreeBeforeIRISafeConstraints))
+                        iqFactory.createConstructionNode(initialProjectedVariables, substitution),
+                        iqTreeTools.applyDownPropagation(renaming, iqTreeBeforeIRISafeConstraints))
                 .normalizeForOptimization(variableGenerator);
     }
 

@@ -241,8 +241,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                         iqFactory.createConstructionNode(projectedVariablesBeforeRenaming, substitutionBeforeRenaming),
                         construction.getTail());
 
-                DownPropagation dp = iqTreeTools.createDownPropagation(renamingSubstitution, childBeforeRenaming.getVariables());
-                IQTree partiallyPaddedChild = dp.propagate(childBeforeRenaming);
+                IQTree partiallyPaddedChild = iqTreeTools.applyDownPropagation(renamingSubstitution, childBeforeRenaming);
                 ImmutableTerm liftedDefinition = renamingSubstitution.applyToTerm(originalDefinition);
 
                 return new ChildDefinitionLift(partiallyPaddedChild, renamingSubstitution.getRangeSet(), liftedDefinition);
