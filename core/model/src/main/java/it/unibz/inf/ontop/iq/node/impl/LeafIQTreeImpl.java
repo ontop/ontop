@@ -73,15 +73,8 @@ public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTre
      */
     @Override
     public final IQTree applyDescendingSubstitution(DownPropagation dp) {
-        try {
-            DownPropagation ds = iqTreeTools.createDownPropagation(dp.getOptionalDescendingSubstitution().get(), Optional.empty(), getVariables(), dp.getVariableGenerator());
-            return ds.getOptionalDescendingSubstitution()
-                    .map(s -> applyDescendingSubstitutionWithoutOptimizing(s, dp.getVariableGenerator()))
-                    .orElse(this);
-        }
-        catch (DownPropagation.InconsistentDownPropagationException e) {
-            return iqFactory.createEmptyNode(DownPropagation.computeProjectedVariables(dp.getOptionalDescendingSubstitution().get(), getVariables()));
-        }
+        return dp.<IQTree, LeafIQTree>withSubstitution(this,
+                (ds, t) -> t.applyDescendingSubstitutionWithoutOptimizing(ds, dp.getVariableGenerator()));
     }
 
     @Override

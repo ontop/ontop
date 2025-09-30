@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.node.normalization.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -29,15 +28,13 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
-    private final IntermediateQueryFactory iqFactory;
 
     @Inject
     private ConditionSimplifierImpl(SubstitutionFactory substitutionFactory,
-                                    TermFactory termFactory, IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
+                                    TermFactory termFactory, IQTreeTools iqTreeTools) {
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.iqTreeTools = iqTreeTools;
-        this.iqFactory = iqFactory;
     }
 
 

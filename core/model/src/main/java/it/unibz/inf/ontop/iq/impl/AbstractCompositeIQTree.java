@@ -229,10 +229,9 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             VariableGenerator variableGenerator) {
         try {
-            DownPropagation ds = iqTreeTools.createDownPropagation(descendingSubstitution, Optional.empty(), getVariables(), variableGenerator);
-            return ds.getOptionalDescendingSubstitution()
-                    .map(s -> doApplyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
-                    .orElse(this);
+            DownPropagation dp = iqTreeTools.createDownPropagation(descendingSubstitution, Optional.empty(), getVariables(), variableGenerator);
+            return dp.<IQTree, AbstractCompositeIQTree<N>>withSubstitution(this,
+                    (ds, t) -> t.doApplyDescendingSubstitutionWithoutOptimizing(ds, variableGenerator));
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {
             return iqTreeTools.createEmptyNode(DownPropagation.computeProjectedVariables(descendingSubstitution, getVariables()));

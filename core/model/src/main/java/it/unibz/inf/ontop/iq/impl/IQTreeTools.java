@@ -365,9 +365,9 @@ public class IQTreeTools {
                 throw new DownPropagation.InconsistentDownPropagationException();
 
             var optionalNormalizedConstraint = AbstractDownPropagation.normalizeConstraint(constraint, () -> getVariables(descendingSubstitution, projectedVariables), termFactory);
-            var renaming = AbstractDownPropagation.transformIntoFreshRenaming(reducedSubstitution, projectedVariables);
-            return renaming.isPresent()
-                    ? new RenamingDownPropagation(renaming.get(), optionalNormalizedConstraint, projectedVariables, variableGenerator, termFactory)
+            var optionalRenaming = AbstractDownPropagation.transformIntoFreshRenaming(reducedSubstitution, projectedVariables);
+            return optionalRenaming.isPresent()
+                    ? new RenamingDownPropagation(optionalRenaming.get(), optionalNormalizedConstraint, projectedVariables, variableGenerator, termFactory)
                     : new FullDownPropagation(reducedSubstitution, optionalNormalizedConstraint, projectedVariables, variableGenerator, termFactory);
         }
 
@@ -387,7 +387,7 @@ public class IQTreeTools {
         InjectiveSubstitution<Variable> restriction = substitution.restrictDomainTo(variables);
         return restriction.isEmpty()
                 ? new ConstraintOnlyDownPropagation(Optional.empty(), variables, null, null)
-                : new RenamingDownPropagation(substitution, Optional.empty(), variables, null, null);
+                : new RenamingDownPropagation(restriction, Optional.empty(), variables, null, null);
     }
 
 

@@ -40,12 +40,12 @@ public class RenamingDownPropagation extends AbstractDownPropagation implements 
 
     @Override
     protected DownPropagation withConstraint(Optional<ImmutableExpression> optionalConstraint, ImmutableSet<Variable> variables) {
-        var reducedSubstitution = AbstractDownPropagation.reduceDescendingSubstitution(substitution, variables);
-        if (reducedSubstitution.isPresent()) {
-            var normalizedConstraint = AbstractDownPropagation.normalizeConstraint(optionalConstraint, () -> variables, termFactory);
-            return new RenamingDownPropagation(reducedSubstitution.get().injective(), normalizedConstraint, variables, variableGenerator, termFactory);
+        var optionalReducedSubstitution = reduceDescendingSubstitution(substitution, variables);
+        var optionalNormalizedConstraint = normalizeConstraint(optionalConstraint, () -> variables, termFactory);
+        if (optionalReducedSubstitution.isPresent()) {
+            return new RenamingDownPropagation(optionalReducedSubstitution.get().injective(), optionalNormalizedConstraint, variables, variableGenerator, termFactory);
         }
-        return new ConstraintOnlyDownPropagation(optionalConstraint, variables, variableGenerator, termFactory);
+        return new ConstraintOnlyDownPropagation(optionalNormalizedConstraint, variables, variableGenerator, termFactory);
     }
 
     @Override

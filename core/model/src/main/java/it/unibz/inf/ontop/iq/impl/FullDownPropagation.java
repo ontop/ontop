@@ -39,15 +39,15 @@ public class FullDownPropagation extends AbstractDownPropagation implements Down
 
     @Override
     protected DownPropagation withConstraint(Optional<ImmutableExpression> optionalConstraint,  ImmutableSet<Variable> variables) {
-        var reducedSubstitution = AbstractDownPropagation.reduceDescendingSubstitution(substitution, variables);
-        if (reducedSubstitution.isPresent()) {
-            var normalizedConstraint = AbstractDownPropagation.normalizeConstraint(optionalConstraint, () -> variables, termFactory);
-            var renaming = AbstractDownPropagation.transformIntoFreshRenaming(reducedSubstitution.get(), variables);
-            return renaming.isPresent()
-                    ? new RenamingDownPropagation(renaming.get(), normalizedConstraint, variables, variableGenerator, termFactory)
-                    : new FullDownPropagation(substitution, normalizedConstraint, variables, variableGenerator, termFactory);
+        var optionalReducedSubstitution = reduceDescendingSubstitution(substitution, variables);
+        var optionalNormalizedConstraint = normalizeConstraint(optionalConstraint, () -> variables, termFactory);
+        if (optionalReducedSubstitution.isPresent()) {
+            var optionalRenaming = transformIntoFreshRenaming(optionalReducedSubstitution.get(), variables);
+            return optionalRenaming.isPresent()
+                    ? new RenamingDownPropagation(optionalRenaming.get(), optionalNormalizedConstraint, variables, variableGenerator, termFactory)
+                    : new FullDownPropagation(optionalReducedSubstitution.get(), optionalNormalizedConstraint, variables, variableGenerator, termFactory);
         }
-        return new ConstraintOnlyDownPropagation(optionalConstraint, variables, variableGenerator, termFactory);
+        return new ConstraintOnlyDownPropagation(optionalNormalizedConstraint, variables, variableGenerator, termFactory);
     }
 
     @Override

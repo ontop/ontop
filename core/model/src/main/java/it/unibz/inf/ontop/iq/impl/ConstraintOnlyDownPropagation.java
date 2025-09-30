@@ -37,7 +37,9 @@ public class ConstraintOnlyDownPropagation extends AbstractDownPropagation imple
 
     @Override
     protected DownPropagation withConstraint(Optional<ImmutableExpression> optionalConstraint,  ImmutableSet<Variable> variables) {
-        return new ConstraintOnlyDownPropagation(optionalConstraint, variables, variableGenerator, termFactory);
+        return new ConstraintOnlyDownPropagation(
+                normalizeConstraint(optionalConstraint, () -> variables, termFactory),
+                variables, variableGenerator, termFactory);
     }
 
     @Override
