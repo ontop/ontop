@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 public class FullDownPropagation extends AbstractDownPropagation implements DownPropagation {
     private final Substitution<? extends VariableOrGroundTerm> substitution;
@@ -32,12 +33,12 @@ public class FullDownPropagation extends AbstractDownPropagation implements Down
     }
 
     @Override
-    public Optional<ImmutableExpression> applySubstitution(Optional<ImmutableExpression> optionalExpression) {
-        return optionalExpression.map(substitution::apply);
+    public <R, T extends R> R withSubstitution(T value, BiFunction<Substitution<? extends VariableOrGroundTerm>, T, R> function) {
+        return function.apply(substitution, value);
     }
 
     @Override
-    public DownPropagation withConstraint(Optional<ImmutableExpression> optionalConstraint,  ImmutableSet<Variable> variables) {
+    protected DownPropagation withConstraint(Optional<ImmutableExpression> optionalConstraint,  ImmutableSet<Variable> variables) {
         var reducedSubstitution = AbstractDownPropagation.reduceDescendingSubstitution(substitution, variables);
         if (reducedSubstitution.isPresent()) {
             var normalizedConstraint = AbstractDownPropagation.normalizeConstraint(optionalConstraint, () -> variables, termFactory);

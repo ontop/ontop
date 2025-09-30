@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface DownPropagation {
@@ -22,11 +23,9 @@ public interface DownPropagation {
 
     Optional<Substitution<? extends VariableOrGroundTerm>> getOptionalDescendingSubstitution();
 
-    Optional<ImmutableExpression> applySubstitution(Optional<ImmutableExpression> optionalExpression);
+    <R, T extends R> R withSubstitution(T value, BiFunction<Substitution<? extends VariableOrGroundTerm>, T, R> function);
 
     Optional<ImmutableExpression> getConstraint();
-
-    DownPropagation withConstraint(Optional<ImmutableExpression> constraint, ImmutableSet<Variable> variables);
 
     VariableNullability extendVariableNullability(VariableNullability variableNullability);
 

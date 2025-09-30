@@ -130,15 +130,18 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
     public ExpressionAndSubstitutionAndChildren simplifyAndPropagate(DownPropagation downPropagation, Optional<ImmutableExpression> expression, ImmutableList<IQTree> children,
                                                                      VariableNullability variableNullability) throws DownPropagation.InconsistentDownPropagationException {
         // TODO: also consider the constraint for simplifying the condition
-        var simplification = simplifyCondition(downPropagation.applySubstitution(expression), ImmutableSet.of(), children, variableNullability);
+        var simplification = simplifyCondition(
+                downPropagation.withSubstitution(expression,
+                        (ds, e) -> e.map(ds::apply)),
+                ImmutableSet.of(),
+                children,
+                variableNullability);
 
-        Substitution<? extends VariableOrGroundTerm> downSubstitution =
-                downPropagation.getOptionalDescendingSubstitution()
-                                .map(ds ->
-                substitutionFactory.onVariableOrGroundTerms().compose(ds, simplification.getSubstitution()))
-                        .orElseGet(simplification::getSubstitution);
+        var downSubstitution =
+                downPropagation.withSubstitution(simplification.getSubstitution(),
+                        (ds, s) -> substitutionFactory.onVariableOrGroundTerms().compose(ds, s));
 
-        Optional<ImmutableExpression> newConstraint = iqTreeTools.updateDownPropagationConstraint(downPropagation, simplification.getSubstitution(), simplification.getOptionalExpression(), () -> variableNullability);
+        var newConstraint = iqTreeTools.updateDownPropagationConstraint(downPropagation, simplification.getSubstitution(), simplification.getOptionalExpression(), () -> variableNullability);
 
         var extendedDownConstraint = iqTreeTools.createDownPropagation(downSubstitution, newConstraint, downPropagation.getVariables(), downPropagation.getVariableGenerator());
 

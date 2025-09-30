@@ -70,6 +70,8 @@ public abstract class AbstractDownPropagation implements DownPropagation {
         return withConstraint(constraint, tree.getVariables()).propagate(tree);
     }
 
+    protected abstract DownPropagation withConstraint(Optional<ImmutableExpression> constraint, ImmutableSet<Variable> variables);
+
 
     /**
      * If the substitution is a fresh renaming, returns it as an injective substitution
