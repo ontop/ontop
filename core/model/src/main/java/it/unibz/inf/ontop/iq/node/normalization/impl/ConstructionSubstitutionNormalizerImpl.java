@@ -88,10 +88,5 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
         public Optional<ConstructionNode> createOptionalConstructionNode() {
             return iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, normalizedSubstitution);
         }
-
-        @Override
-        public Optional<ConstructionNode> createOptionalConstructionNode(IQTree child) {
-            return iqTreeTools.createOptionalConstructionNode(projectedVariables, normalizedSubstitution, child);
-        }
     }
 }

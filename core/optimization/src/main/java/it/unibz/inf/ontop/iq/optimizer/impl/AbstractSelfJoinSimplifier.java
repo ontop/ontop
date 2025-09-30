@@ -127,8 +127,8 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
 
             IQTree normalizedNewTree = normalization.applyDownRenamingSubstitution(newTree);
 
-            return Optional.of(iqTreeTools.unaryIQTreeBuilder()
-                    .append(normalization.createOptionalConstructionNode(normalizedNewTree))
+            return Optional.of(iqTreeTools.unaryIQTreeBuilder(tree.getVariables())
+                    .append(normalization.createOptionalConstructionNode())
                     .build(normalizedNewTree));
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {

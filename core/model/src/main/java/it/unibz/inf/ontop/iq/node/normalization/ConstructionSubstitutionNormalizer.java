@@ -36,7 +36,5 @@ public interface ConstructionSubstitutionNormalizer {
          */
 
         Optional<ConstructionNode> createOptionalConstructionNode();
-
-        Optional<ConstructionNode> createOptionalConstructionNode(IQTree child);
     }
 }
