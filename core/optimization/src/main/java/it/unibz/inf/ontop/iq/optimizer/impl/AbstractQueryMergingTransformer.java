@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -29,24 +28,21 @@ public abstract class AbstractQueryMergingTransformer extends DefaultRecursiveIQ
 
     protected final SubstitutionFactory substitutionFactory;
     protected final QueryRenamer queryRenamer;
-    protected final TermFactory termFactory;
     protected final IQTreeTools iqTreeTools;
 
     protected AbstractQueryMergingTransformer(VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
         this(variableGenerator, coreSingletons.getIQFactory(), coreSingletons.getSubstitutionFactory(),
-                coreSingletons.getQueryRenamer(), coreSingletons.getTermFactory(), coreSingletons.getIQTreeTools());
+                coreSingletons.getQueryRenamer(), coreSingletons.getIQTreeTools());
     }
 
     protected AbstractQueryMergingTransformer(VariableGenerator variableGenerator,
                                               IntermediateQueryFactory iqFactory,
                                               SubstitutionFactory substitutionFactory,
                                               QueryRenamer queryRenamer,
-                                              TermFactory termFactory,
                                               IQTreeTools iqTreeTools) {
         super(iqFactory, variableGenerator);
         this.substitutionFactory = substitutionFactory;
         this.queryRenamer = queryRenamer;
-        this.termFactory = termFactory;
         this.iqTreeTools = iqTreeTools;
     }
 

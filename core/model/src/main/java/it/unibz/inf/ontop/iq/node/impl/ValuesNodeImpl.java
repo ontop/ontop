@@ -346,12 +346,10 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         Optional<IQTree> optionalReshapedTree = tryToReshapeValuesNodeToConstructFunctionalTerm(firstStrictEquality, initialDp.getVariableGenerator());
         if (optionalReshapedTree.isPresent()) {
             // Propagates down other constraints
-            DownPropagation dp = initialDp.withConstraint(
+            return initialDp.propagateWithConstraint(
                     termFactory.getConjunction(constraint.flattenAND()
                         .filter(c -> !c.equals(firstStrictEquality))),
-                    getVariables());
-
-            return dp.propagate(optionalReshapedTree.get());
+                    optionalReshapedTree.get());
         }
 
         IQTree filteredValuesNode = filterValuesNodeEntries(termFactory.getConjunction(
@@ -361,8 +359,9 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                                 .collect(ImmutableCollectors.toList())));
 
         ImmutableList<ImmutableExpression> otherStrictEqualities = strictEqualities.subList(1, strictEqualities.size());
-        DownPropagation dp = initialDp.withConstraint(termFactory.getConjunction(otherStrictEqualities.stream()), getVariables());
-        return dp.propagate(filteredValuesNode);
+        return initialDp.propagateWithConstraint(
+                termFactory.getConjunction(otherStrictEqualities.stream()),
+                filteredValuesNode);
     }
 
     /**

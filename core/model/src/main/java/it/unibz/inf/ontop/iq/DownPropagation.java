@@ -11,12 +11,8 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface DownPropagation {
-    static ImmutableSet<Variable> computeProjectedVariables(Substitution<? extends VariableOrGroundTerm> substitution, ImmutableSet<Variable> projectedVariables) {
-        ImmutableSet<Variable> newVariables = substitution.restrictDomainTo(projectedVariables).getRangeVariables();
-        return Sets.union(newVariables, Sets.difference(projectedVariables, substitution.getDomain())).immutableCopy();
-    }
-
 
     ImmutableSet<Variable> getVariables();
 
@@ -36,13 +32,9 @@ public interface DownPropagation {
 
     IQTree propagate(IQTree tree);
 
-    default IQTree propagateToChild(IQTree child) {
-        return reduceScope(child.getVariables()).propagate(child);
-    }
+    IQTree propagateToChild(IQTree child);
 
-    default IQTree propagateToChildWithConstraint(Optional<ImmutableExpression> constraint, IQTree tree) {
-        return withConstraint(constraint, tree.getVariables()).propagate(tree);
-    }
+    IQTree propagateWithConstraint(Optional<ImmutableExpression> constraint, IQTree tree);
 
     DownPropagation reduceScope(ImmutableSet<Variable> variables);
 
@@ -52,4 +44,9 @@ public interface DownPropagation {
     class InconsistentDownPropagationException extends Exception {
     }
 
+    static ImmutableSet<Variable> computeProjectedVariables(Substitution<? extends VariableOrGroundTerm> substitution, ImmutableSet<Variable> projectedVariables) {
+        ImmutableSet<Variable> newVariables = substitution.restrictDomainTo(projectedVariables).getRangeVariables();
+        return Sets.union(newVariables, Sets.difference(projectedVariables, substitution.getDomain())).immutableCopy();
+    }
+    
 }

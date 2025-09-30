@@ -228,7 +228,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             }
         }
         else {
-            IQTree updatedRightChild = dp.propagateToChildWithConstraint(Optional.empty(), rightChild);
+            IQTree updatedRightChild = dp.propagateWithConstraint(Optional.empty(), rightChild);
             if (updatedRightChild.isDeclaredAsEmpty()) {
                 Substitution<?> substitution = rightSpecificVariables(updatedLeftChild, updatedRightChild).stream()
                         .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));

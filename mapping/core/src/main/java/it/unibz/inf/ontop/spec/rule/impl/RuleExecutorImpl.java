@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.rule.RuleExecutor;
@@ -32,7 +31,6 @@ public class RuleExecutorImpl implements RuleExecutor {
     private final QueryRenamer queryRenamer;
     private final UnionBasedQueryMerger queryMerger;
     private final GeneralStructuralAndSemanticIQOptimizer generalStructuralAndSemanticIQOptimizer;
-    private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RuleExecutorImpl.class);
@@ -42,13 +40,12 @@ public class RuleExecutorImpl implements RuleExecutor {
                                SubstitutionFactory substitutionFactory, QueryRenamer queryRenamer,
                                UnionBasedQueryMerger queryMerger,
                                GeneralStructuralAndSemanticIQOptimizer generalStructuralAndSemanticIQOptimizer,
-                               TermFactory termFactory, IQTreeTools iqTreeTools) {
+                               IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.queryRenamer = queryRenamer;
         this.queryMerger = queryMerger;
         this.generalStructuralAndSemanticIQOptimizer = generalStructuralAndSemanticIQOptimizer;
-        this.termFactory = termFactory;
         this.iqTreeTools = iqTreeTools;
     }
 
@@ -63,7 +60,7 @@ public class RuleExecutorImpl implements RuleExecutor {
                         MappingAssertion::getIndex,
                         a -> a));
 
-        IQOptimizer mappingUnfolder = new MutableQueryUnfolder(mutableMappingMap, iqFactory, substitutionFactory, queryRenamer, termFactory, iqTreeTools);
+        IQOptimizer mappingUnfolder = new MutableQueryUnfolder(mutableMappingMap, iqFactory, substitutionFactory, queryRenamer, iqTreeTools);
 
         for (IQ rule : rules) {
             Optional<IQ> additionalDefinition = optimize(mappingUnfolder.optimize(rule));

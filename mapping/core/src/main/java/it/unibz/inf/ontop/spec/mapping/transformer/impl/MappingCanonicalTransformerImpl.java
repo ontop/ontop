@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.*;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.Ontop;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
@@ -38,7 +37,6 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     private final CoreUtilsFactory coreUtilsFactory;
     private final OntopMappingSettings settings;
     private final IQTreeTools iqTreeTools;
-    private final TermFactory termFactory;
 
     @Inject
     private MappingCanonicalTransformerImpl(CoreSingletons coreSingletons,
@@ -53,7 +51,6 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         this.atomFactory = coreSingletons.getAtomFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.queryMerger = queryMerger;
-        this.termFactory = coreSingletons.getTermFactory();
     }
 
     @Override
@@ -171,7 +168,6 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                         MappingCanonicalTransformerImpl.this.iqFactory,
                         MappingCanonicalTransformerImpl.this.substitutionFactory,
                         MappingCanonicalTransformerImpl.this.queryRenamer,
-                        MappingCanonicalTransformerImpl.this.termFactory,
                         MappingCanonicalTransformerImpl.this.iqTreeTools);
             }
 

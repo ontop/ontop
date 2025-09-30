@@ -55,7 +55,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         var newConstraint = iqTreeTools.updateDownPropagationConstraint(dp0, tauFPropagationResults.theta, Optional.empty(), child::getVariableNullability);
 
-        return dp.propagateToChildWithConstraint(newConstraint, child);
+        return dp.propagateWithConstraint(newConstraint, child);
     }
 
     protected final IQTree propagateDescendingSubstitutionToChildWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
@@ -195,7 +195,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
         try {
             var newConstraint = iqTreeTools.updateDownPropagationConstraint(dp, getSubstitution(), Optional.empty(), child::getVariableNullability);
-            IQTree newChild = dp.propagateToChildWithConstraint(newConstraint, child);
+            IQTree newChild = dp.propagateWithConstraint(newConstraint, child);
             return iqFactory.createUnaryIQTree(this, newChild);
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {

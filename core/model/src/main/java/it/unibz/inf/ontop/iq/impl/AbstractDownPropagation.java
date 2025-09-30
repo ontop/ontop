@@ -60,6 +60,16 @@ public abstract class AbstractDownPropagation implements DownPropagation {
         return withConstraint(optionalConstraint, variables);
     }
 
+    @Override
+    public IQTree propagateToChild(IQTree child) {
+        return reduceScope(child.getVariables()).propagate(child);
+    }
+
+    @Override
+    public IQTree propagateWithConstraint(Optional<ImmutableExpression> constraint, IQTree tree) {
+        return withConstraint(constraint, tree.getVariables()).propagate(tree);
+    }
+
 
     /**
      * If the substitution is a fresh renaming, returns it as an injective substitution
