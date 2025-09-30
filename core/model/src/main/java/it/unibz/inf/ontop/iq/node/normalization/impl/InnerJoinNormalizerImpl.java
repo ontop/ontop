@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
 import it.unibz.inf.ontop.iq.visit.impl.IQStateDefaultTransformer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -209,7 +208,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                         .normalizeSubstitution(bindingLift.getAscendingSubstitution(), projectedVariables);
 
                 Optional<ImmutableExpression> newCondition = bindingLift.getCondition()
-                        .map(normalization::updateExpression);
+                        .map(normalization.getDownRenamingSubstitution()::apply);
 
                 DownPropagation dp = iqTreeTools.createDownPropagation(
                         bindingLift.getDescendingSubstitution(),
@@ -219,11 +218,11 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
                 ImmutableList<IQTree> newChildren = provisionalNewChildren.stream()
                         .map(dp::propagateToChild)
-                        .map(c -> normalization.updateChild(c, variableGenerator))
+                        .map(c -> iqTreeTools.applyDownPropagation(normalization.getDownRenamingSubstitution(), c))
                         .collect(ImmutableCollectors.toList());
 
                 Optional<ConstructionNode> newParent =
-                        iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, normalization.getNormalizedSubstitution());
+                        iqTreeTools.createOptionalConstructionNode(() -> normalization.getProjectedVariables(), normalization.getNormalizedSubstitution());
 
                 return Optional.of(state.lift(newParent, new InnerJoinSubTree(newCondition, newChildren)));
             }

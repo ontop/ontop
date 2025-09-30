@@ -15,13 +15,10 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
-import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-
-import java.util.stream.IntStream;
 
 @Singleton
 public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemover {
@@ -99,9 +96,9 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
             ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(
                     rootNode.getSubstitution(), variablesToKeep);
 
-            ConstructionNode newConstructionNode = iqFactory.createConstructionNode(variablesToKeep,
+            ConstructionNode newConstructionNode = iqFactory.createConstructionNode(normalization.getProjectedVariables(),
                     normalization.getNormalizedSubstitution());
-            IQTree newChild = normalization.updateChild(child, variableGenerator);
+            IQTree newChild = iqTreeTools.applyDownPropagation(normalization.getDownRenamingSubstitution(), child);
 
             // New removal opportunities may appear in the subtree ("RECURSIVE")
             return iqFactory.createUnaryIQTree(newConstructionNode, newChild)

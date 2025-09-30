@@ -112,6 +112,7 @@ public class JsonSQLLens extends JsonLens {
         AtomFactory atomFactory = coreSingletons.getAtomFactory();
         ConstructionSubstitutionNormalizer substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
+        IQTreeTools iqTreeTools = coreSingletons.getIQTreeTools();
 
         IQTree initialChild;
         RAExpression raExpression;
@@ -131,15 +132,12 @@ public class JsonSQLLens extends JsonLens {
 
         ImmutableSet<Variable> projectedVariables = ascendingSubstitution.getDomain();
 
-        VariableGenerator variableGenerator = coreSingletons.getCoreUtilsFactory().createVariableGenerator(
-                Sets.union(initialChild.getKnownVariables(), projectedVariables));
-
         ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(ascendingSubstitution, projectedVariables);
 
-        IQTree updatedChild = normalization.updateChild(initialChild, variableGenerator);
+        IQTree updatedChild = iqTreeTools.applyDownPropagation(normalization.getDownRenamingSubstitution(), initialChild);
 
         IQTree iqTree = iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(projectedVariables, normalization.getNormalizedSubstitution()),
+                iqFactory.createConstructionNode(normalization.getProjectedVariables(), normalization.getNormalizedSubstitution()),
                 updatedChild);
 
         NotYetTypedEqualityTransformer notYetTypedEqualityTransformer = coreSingletons.getNotYetTypedEqualityTransformer();

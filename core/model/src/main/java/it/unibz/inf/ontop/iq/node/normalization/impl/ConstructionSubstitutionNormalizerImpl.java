@@ -46,34 +46,37 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
                 .transform(ImmutableTerm::simplify)
                 .build();
 
-        return new ConstructionSubstitutionNormalizationImpl(newAscendingSubstitution, downRenamingSubstitution);
+        return new ConstructionSubstitutionNormalizationImpl(newAscendingSubstitution, projectedVariables, downRenamingSubstitution);
     }
 
 
     private class ConstructionSubstitutionNormalizationImpl implements ConstructionSubstitutionNormalization {
 
         private final Substitution<ImmutableTerm> normalizedSubstitution;
+        private final ImmutableSet<Variable> projectedVariables;
         private final InjectiveSubstitution<Variable> downRenamingSubstitution;
 
-        private ConstructionSubstitutionNormalizationImpl(Substitution<ImmutableTerm> normalizedSubstitution,
+        private ConstructionSubstitutionNormalizationImpl(Substitution<ImmutableTerm> normalizedSubstitution, ImmutableSet<Variable> projectedVariables,
                                                           InjectiveSubstitution<Variable> downRenamingSubstitution) {
             this.normalizedSubstitution = normalizedSubstitution;
+            this.projectedVariables = projectedVariables;
             this.downRenamingSubstitution = downRenamingSubstitution;
         }
 
-        @Override
-        public IQTree updateChild(IQTree child, VariableGenerator variableGenerator) {
-            return iqTreeTools.applyDownPropagation(downRenamingSubstitution, child);
-        }
-
-        @Override
-        public ImmutableExpression updateExpression(ImmutableExpression expression) {
-            return downRenamingSubstitution.apply(expression);
-        }
 
         @Override
         public Substitution<ImmutableTerm> getNormalizedSubstitution() {
             return normalizedSubstitution;
+        }
+
+        @Override
+        public ImmutableSet<Variable> getProjectedVariables() {
+            return projectedVariables;
+        }
+
+        @Override
+        public InjectiveSubstitution<Variable> getDownRenamingSubstitution() {
+            return downRenamingSubstitution;
         }
     }
 }

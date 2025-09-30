@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -60,8 +59,9 @@ public class ConstructionNormalizerImpl implements ConstructionNormalizer {
             }
 
             ConstructionNode getConstructionNode() {
-                Substitution<ImmutableTerm> newSubstitution = substitutionNormalization.getNormalizedSubstitution();
-                return iqFactory.createConstructionNode(projectedVariables, newSubstitution);
+                return iqFactory.createConstructionNode(
+                        substitutionNormalization.getProjectedVariables(),
+                        substitutionNormalization.getNormalizedSubstitution());
             }
 
             boolean isNormalizedSubstitutionEmpty() {
@@ -69,7 +69,7 @@ public class ConstructionNormalizerImpl implements ConstructionNormalizer {
             }
 
             IQTree getUpdatedChild() {
-                return substitutionNormalization.updateChild(child, variableGenerator);
+                return iqTreeTools.applyDownPropagation(substitutionNormalization.getDownRenamingSubstitution(), child);
             }
         }
 

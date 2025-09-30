@@ -125,10 +125,10 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
             ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
                     substitutionNormalizer.normalizeSubstitution(unifier, tree.getVariables());
 
-            IQTree normalizedNewTree = normalization.updateChild(newTree, variableGenerator);
+            IQTree normalizedNewTree = iqTreeTools.applyDownPropagation(normalization.getDownRenamingSubstitution(), newTree);
 
             return Optional.of(iqTreeTools.unaryIQTreeBuilder()
-                    .append(iqTreeTools.createOptionalConstructionNode(tree.getVariables(), normalization.getNormalizedSubstitution(), normalizedNewTree))
+                    .append(iqTreeTools.createOptionalConstructionNode(normalization.getProjectedVariables(), normalization.getNormalizedSubstitution(), normalizedNewTree))
                     .build(normalizedNewTree));
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {
