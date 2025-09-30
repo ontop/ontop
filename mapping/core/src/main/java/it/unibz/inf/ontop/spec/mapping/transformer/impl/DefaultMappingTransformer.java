@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.optimizer.DisjunctionOfEqualitiesMergingSimplifier;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
@@ -48,6 +49,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
 
     private final UnionBasedQueryMerger queryMerger;
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private DefaultMappingTransformer(MappingVariableNameNormalizer mappingVariableNameNormalizer,
@@ -63,7 +65,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
                                       TermFactory termFactory,
                                       RuleExecutor ruleExecutor,
                                       UnionBasedQueryMerger queryMerger,
-                                      IntermediateQueryFactory iqFactory) {
+                                      IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
         this.mappingVariableNameNormalizer = mappingVariableNameNormalizer;
         this.mappingSaturator = mappingSaturator;
         this.factConverter = inserter;
@@ -78,6 +80,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
         this.ruleExecutor = ruleExecutor;
         this.queryMerger = queryMerger;
         this.iqFactory = iqFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -124,7 +127,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
                 .collect(ImmutableCollectors.toTable());
 
 
-        return new MappingImpl(propertyDefinitions, classDefinitions, termFactory, queryMerger, iqFactory);
+        return new MappingImpl(propertyDefinitions, classDefinitions, termFactory, queryMerger, iqFactory, iqTreeTools);
     }
 
     private static Table.Cell<RDFAtomPredicate, IRI, IQ> asCell(MappingAssertion assertion) {

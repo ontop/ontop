@@ -7,6 +7,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
@@ -19,8 +20,6 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-
-import java.util.Optional;
 
 
 public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<BinaryNonCommutativeOperatorNode>
@@ -90,10 +89,11 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     @Override
     public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        DownPropagation dp = iqTreeTools.createDownPropagation(renamingSubstitution, getVariables());
         return iqFactory.createBinaryNonCommutativeIQTree(
                 getRootNode().applyFreshRenaming(renamingSubstitution),
-                DownPropagation.of(renamingSubstitution, getLeftChild().getVariables()).propagate(getLeftChild()),
-                DownPropagation.of(renamingSubstitution, getRightChild().getVariables()).propagate(getRightChild()),
+                dp.propagateToChild(getLeftChild()),
+                dp.propagateToChild(getRightChild()),
                 getTreeCache().applyFreshRenaming(renamingSubstitution));
     }
 

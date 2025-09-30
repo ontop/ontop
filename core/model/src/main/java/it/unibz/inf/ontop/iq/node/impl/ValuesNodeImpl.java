@@ -6,10 +6,10 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.UnaryIQTreeBuilder;
 import it.unibz.inf.ontop.iq.node.*;
@@ -346,11 +346,10 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         Optional<IQTree> optionalReshapedTree = tryToReshapeValuesNodeToConstructFunctionalTerm(firstStrictEquality, initialDp.getVariableGenerator());
         if (optionalReshapedTree.isPresent()) {
             // Propagates down other constraints
-            DownPropagation dp = DownPropagation.of(
+            DownPropagation dp = initialDp.withConstraint(
                     termFactory.getConjunction(constraint.flattenAND()
                         .filter(c -> !c.equals(firstStrictEquality))),
-                    getVariables(),
-                    initialDp.getVariableGenerator(), termFactory);
+                    getVariables());
 
             return dp.propagate(optionalReshapedTree.get());
         }
@@ -362,7 +361,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                                 .collect(ImmutableCollectors.toList())));
 
         ImmutableList<ImmutableExpression> otherStrictEqualities = strictEqualities.subList(1, strictEqualities.size());
-        DownPropagation dp = DownPropagation.of(termFactory.getConjunction(otherStrictEqualities.stream()), getVariables(), initialDp.getVariableGenerator(), termFactory);
+        DownPropagation dp = initialDp.withConstraint(termFactory.getConjunction(otherStrictEqualities.stream()), getVariables());
         return dp.propagate(filteredValuesNode);
     }
 

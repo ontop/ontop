@@ -14,9 +14,11 @@ import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -342,4 +344,51 @@ public class IQTreeTools {
                 optionalSubstitutedConstraint.get()), dp.extendVariableNullability(variableNullabilitySupplier.get()))
                 : optionalExpression;
     }
+
+    /**
+     * Excludes the variables that are not projected by the IQTree
+     *
+     * If a "null" variable is propagated down, throws an UnsatisfiableDescendingSubstitutionException.
+     *
+     */
+
+    public DownPropagation createDownPropagation(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                              Optional<ImmutableExpression> constraint,
+                              ImmutableSet<Variable> projectedVariables,
+                              VariableGenerator variableGenerator) throws DownPropagation.InconsistentDownPropagationException {
+
+        var optionalReducedSubstitution = AbstractDownPropagation.reduceDescendingSubstitution(descendingSubstitution, projectedVariables);
+
+        if (optionalReducedSubstitution.isPresent()) {
+            var reducedSubstitution = optionalReducedSubstitution.get();
+            if (reducedSubstitution.rangeAnyMatch(ImmutableTerm::isNull))
+                throw new DownPropagation.InconsistentDownPropagationException();
+
+            var optionalNormalizedConstraint = AbstractDownPropagation.normalizeConstraint(constraint, () -> getVariables(descendingSubstitution, projectedVariables), termFactory);
+            var renaming = AbstractDownPropagation.transformIntoFreshRenaming(reducedSubstitution, projectedVariables);
+            return renaming.isPresent()
+                    ? new RenamingDownPropagation(renaming.get(), optionalNormalizedConstraint, projectedVariables, variableGenerator, termFactory)
+                    : new FullDownPropagation(reducedSubstitution, optionalNormalizedConstraint, projectedVariables, variableGenerator, termFactory);
+        }
+
+        return createDownPropagation(constraint, getVariables(descendingSubstitution, projectedVariables), variableGenerator);
+    }
+
+    private static ImmutableSet<Variable> getVariables(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
+        return (ImmutableSet)descendingSubstitution.restrictRangeTo(Variable.class).apply(projectedVariables);
+    }
+
+    public DownPropagation createDownPropagation(Optional<ImmutableExpression> optionalConstraint, ImmutableSet<Variable> variables, VariableGenerator variableGenerator) {
+        var optionalNormalizedConstraint = AbstractDownPropagation.normalizeConstraint(optionalConstraint, () -> variables, termFactory);
+        return new ConstraintOnlyDownPropagation(optionalNormalizedConstraint, variables, variableGenerator, termFactory);
+    }
+
+    public DownPropagation createDownPropagation(InjectiveSubstitution<Variable> substitution, ImmutableSet<Variable> variables) {
+        InjectiveSubstitution<Variable> restriction = substitution.restrictDomainTo(variables);
+        return restriction.isEmpty()
+                ? new ConstraintOnlyDownPropagation(Optional.empty(), variables, null, null)
+                : new RenamingDownPropagation(substitution, Optional.empty(), variables, null, null);
+    }
+
+
 }

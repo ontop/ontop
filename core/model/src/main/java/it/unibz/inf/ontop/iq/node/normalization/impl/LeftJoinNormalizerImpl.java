@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
-import it.unibz.inf.ontop.iq.impl.DownPropagation;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
@@ -218,7 +218,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                 variableNullabilityTools.getChildrenVariableNullability(
                                         ImmutableList.of(leftGrandChild, subTree.rightChild())));
 
-                        DownPropagation dp = DownPropagation.of(bindingLift.getDescendingSubstitution(), bindingLift.getCondition(), subTree.rightChild().getVariables(), variableGenerator, termFactory);
+                        DownPropagation dp = iqTreeTools.createDownPropagation(bindingLift.getDescendingSubstitution(), bindingLift.getCondition(), subTree.rightChild().getVariables(), variableGenerator);
                         IQTree rightSubTree = dp.propagate(subTree.rightChild());
 
                         ImmutableSet<Variable> leftVariables = projectedVariables(subTree.leftChild(), leftGrandChild).immutableCopy();
@@ -455,7 +455,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         subTree.ljCondition(), subTree.leftChild().getVariables(), ImmutableList.of(subTree.rightChild()),
                         variableNullabilityTools.getChildrenVariableNullability(subTree.children()));
 
-                DownPropagation dp = DownPropagation.of(simplificationResults.getSubstitution(), simplificationResults.getOptionalExpression(), subTree.rightChild().getVariables(), variableGenerator, termFactory);
+                DownPropagation dp = iqTreeTools.createDownPropagation(simplificationResults.getSubstitution(), simplificationResults.getOptionalExpression(), subTree.rightChild().getVariables(), variableGenerator);
                 if (dp.getOptionalDescendingSubstitution().isEmpty()) {
                     return state.replace(t -> t.replaceRight(simplificationResults.getOptionalExpression(), t.rightChild()));
                 }
@@ -505,8 +505,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
         public State<UnaryOperatorNode, LeftJoinSubTree> propagateDownLJCondition(State<UnaryOperatorNode, LeftJoinSubTree> state) {
             LeftJoinSubTree subTree = state.getSubTree();
-            DownPropagation dc = DownPropagation.of(subTree.ljCondition(), subTree.rightChild().getVariables(), variableGenerator, termFactory);
-            IQTree newRightChild = dc.propagate(subTree.rightChild());
+            DownPropagation dc = iqTreeTools.createDownPropagation(subTree.ljCondition(), subTree.projectedVariables(), variableGenerator);
+            IQTree newRightChild = dc.propagateToChild(subTree.rightChild());
             return state.replace(subTree.replaceRight(newRightChild));
         }
 

@@ -66,7 +66,7 @@ public class LensUnfolderImpl extends AbstractIQOptimizer implements LensUnfolde
             return ExtensionalDataNodeImpl.merge(dataNode, definition, variableGenerator,
                     coreSingletons.getSubstitutionFactory(),
                     coreSingletons.getQueryRenamer(),
-                    iqFactory);
+                    iqFactory, coreSingletons.getIQTreeTools());
         }
     }
 }

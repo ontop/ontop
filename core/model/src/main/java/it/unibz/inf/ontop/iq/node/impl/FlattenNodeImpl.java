@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.impl.DownPropagation;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
@@ -142,8 +142,9 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         return applyDescendingSubstitution(dp.getOptionalDescendingSubstitution().get(), dp.getVariableGenerator(),
                 (s) -> {
                     try {
-                        return DownPropagation.of(s, dp.getConstraint(), child.getVariables(), dp.getVariableGenerator(), termFactory).propagate(child);
-                    } catch (DownPropagation.InconsistentDownPropagationException e) {
+                        return iqTreeTools.createDownPropagation(s, dp.getConstraint(), child.getVariables(), dp.getVariableGenerator()).propagate(child);
+                    }
+                    catch (DownPropagation.InconsistentDownPropagationException e) {
                         throw new MinorOntopInternalBugException("cannot happen", e);
                     }
                 });

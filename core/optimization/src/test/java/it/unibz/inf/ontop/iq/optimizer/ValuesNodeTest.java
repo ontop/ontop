@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.DownPropagation;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
@@ -694,7 +694,7 @@ public class ValuesNodeTest {
         ImmutableExpression constraint = ((FilterNode) initialTree.getRootNode()).getFilterCondition();
         ImmutableSet<Variable> variables = initialTree.getVariables();
         VariableGenerator variableGenerator = CORE_UTILS_FACTORY.createVariableGenerator(initialTree.getKnownVariables());
-        DownPropagation dp = DownPropagation.of(Optional.of(constraint), variables, variableGenerator, TERM_FACTORY);
+        DownPropagation dp = IQ_TREE_TOOLS.createDownPropagation(Optional.of(constraint), variables, variableGenerator);
         IQTree resultingTree = dp.propagate(initialTree);
         System.out.println('\n' + "Resulting tree:");
         System.out.println(resultingTree);

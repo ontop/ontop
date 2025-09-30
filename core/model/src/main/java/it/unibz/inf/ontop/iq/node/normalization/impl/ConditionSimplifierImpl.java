@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.DownPropagation;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
@@ -140,7 +140,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
         Optional<ImmutableExpression> newConstraint = iqTreeTools.updateDownPropagationConstraint(downPropagation, simplification.getSubstitution(), simplification.getOptionalExpression(), () -> variableNullability);
 
-        var extendedDownConstraint = DownPropagation.of(downSubstitution, newConstraint, downPropagation.getVariables(), downPropagation.getVariableGenerator(), termFactory);
+        var extendedDownConstraint = iqTreeTools.createDownPropagation(downSubstitution, newConstraint, downPropagation.getVariables(), downPropagation.getVariableGenerator());
 
         return new ExpressionAndSubstitutionAndChildrenImpl(
                 iqTreeTools.createOptionalConstructionNode(downPropagation::computeProjectedVariables, simplification.getSubstitution()),

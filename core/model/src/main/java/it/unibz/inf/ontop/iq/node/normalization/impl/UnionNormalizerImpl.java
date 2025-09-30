@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
-import it.unibz.inf.ontop.iq.impl.DownPropagation;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
@@ -420,7 +420,7 @@ public class UnionNormalizerImpl implements UnionNormalizer {
                 .build();
 
         try {
-            DownPropagation dp = DownPropagation.of(descendingSubstitution, Optional.empty(), liftedGrandChild.getVariables(), variableGenerator, termFactory);
+            DownPropagation dp = iqTreeTools.createDownPropagation(descendingSubstitution, Optional.empty(), liftedGrandChild.getVariables(), variableGenerator);
             IQTree newChild = dp.propagate(liftedGrandChild);
 
             return iqTreeTools.unaryIQTreeBuilder()

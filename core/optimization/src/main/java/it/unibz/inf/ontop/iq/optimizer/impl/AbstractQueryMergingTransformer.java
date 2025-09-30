@@ -5,7 +5,8 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.DownPropagation;
+import it.unibz.inf.ontop.iq.DownPropagation;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
@@ -29,21 +30,24 @@ public abstract class AbstractQueryMergingTransformer extends DefaultRecursiveIQ
     protected final SubstitutionFactory substitutionFactory;
     protected final QueryRenamer queryRenamer;
     protected final TermFactory termFactory;
+    protected final IQTreeTools iqTreeTools;
 
     protected AbstractQueryMergingTransformer(VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
         this(variableGenerator, coreSingletons.getIQFactory(), coreSingletons.getSubstitutionFactory(),
-                coreSingletons.getQueryRenamer(), coreSingletons.getTermFactory());
+                coreSingletons.getQueryRenamer(), coreSingletons.getTermFactory(), coreSingletons.getIQTreeTools());
     }
 
     protected AbstractQueryMergingTransformer(VariableGenerator variableGenerator,
                                               IntermediateQueryFactory iqFactory,
                                               SubstitutionFactory substitutionFactory,
                                               QueryRenamer queryRenamer,
-                                              TermFactory termFactory) {
+                                              TermFactory termFactory,
+                                              IQTreeTools iqTreeTools) {
         super(iqFactory, variableGenerator);
         this.substitutionFactory = substitutionFactory;
         this.queryRenamer = queryRenamer;
         this.termFactory = termFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -75,7 +79,7 @@ public abstract class AbstractQueryMergingTransformer extends DefaultRecursiveIQ
                 dataNode.getProjectionAtom().getArguments());
 
         try {
-            DownPropagation dp = DownPropagation.of(descendingSubstitution, Optional.empty(), renamedDefinition.getTree().getVariables(), variableGenerator, termFactory);
+            DownPropagation dp = iqTreeTools.createDownPropagation(descendingSubstitution, Optional.empty(), renamedDefinition.getTree().getVariables(), variableGenerator);
             return dp.propagate(renamedDefinition.getTree())
                     .normalizeForOptimization(variableGenerator);
         }

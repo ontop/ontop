@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.impl.DownPropagation;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.AggregationNormalizer;
@@ -121,7 +121,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         InjectiveSubstitution<Variable> renamingSubstitution = filterNode.getLocalVariables().stream()
                 .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
-        DownPropagation dp = DownPropagation.of(renamingSubstitution, newSubTree.getVariables());
+        DownPropagation dp = iqTreeTools.createDownPropagation(renamingSubstitution, newSubTree.getVariables());
         IQTree filterTree = dp.propagate(iqFactory.createUnaryIQTree(filterNode, newSubTree));
 
         return iqFactory.createUnaryIQTree(

@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
@@ -34,6 +35,7 @@ public class MutableQueryUnfolder extends AbstractIQOptimizer {
     private final SubstitutionFactory substitutionFactory;
     private final QueryRenamer queryRenamer;
     private final TermFactory termFactory;
+    private final IQTreeTools iqTreeTools;
 
     private final IQTreeVariableGeneratorTransformer transformer;
 
@@ -41,12 +43,13 @@ public class MutableQueryUnfolder extends AbstractIQOptimizer {
                                 IntermediateQueryFactory iqFactory,
                                 SubstitutionFactory substitutionFactory,
                                 QueryRenamer queryRenamer,
-                                TermFactory termFactory) {
+                                TermFactory termFactory, IQTreeTools iqTreeTools) {
         super(iqFactory);
         this.mutableMapping = mutableMapping;
         this.substitutionFactory = substitutionFactory;
         this.queryRenamer = queryRenamer;
         this.termFactory = termFactory;
+        this.iqTreeTools = iqTreeTools;
 
         this.transformer = IQTreeVariableGeneratorTransformer.of(MutableQueryUnfoldingTransformer::new);
     }
@@ -63,7 +66,8 @@ public class MutableQueryUnfolder extends AbstractIQOptimizer {
                     MutableQueryUnfolder.this.iqFactory,
                     MutableQueryUnfolder.this.substitutionFactory,
                     MutableQueryUnfolder.this.queryRenamer,
-                    MutableQueryUnfolder.this.termFactory);
+                    MutableQueryUnfolder.this.termFactory,
+                    MutableQueryUnfolder.this.iqTreeTools);
         }
 
         @Override

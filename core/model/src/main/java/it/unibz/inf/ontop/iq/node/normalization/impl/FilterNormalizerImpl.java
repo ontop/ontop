@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.impl.DownPropagation;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
@@ -130,7 +130,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 var childVariableNullability = child.getVariableNullability();
 
                 var simplification = conditionSimplifier.simplifyAndPropagate(
-                        DownPropagation.of(Optional.empty(), child.getVariables(), variableGenerator, null),
+                        iqTreeTools.createDownPropagation(Optional.empty(), child.getVariables(), variableGenerator),
                         Optional.of(filterNode.getFilterCondition()),
                         ImmutableList.of(child),
                         childVariableNullability);

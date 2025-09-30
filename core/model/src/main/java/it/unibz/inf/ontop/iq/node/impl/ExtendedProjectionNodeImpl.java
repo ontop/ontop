@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.DownPropagation;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtendedProjectionNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -51,7 +51,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                                           PropagationResults tauFPropagationResults,
                                                           DownPropagation dp0) throws DownPropagation.InconsistentDownPropagationException {
 
-        DownPropagation dp = DownPropagation.of(tauFPropagationResults.delta, dp0.getConstraint(), dp0.getVariables(), dp0.getVariableGenerator(), termFactory);
+        DownPropagation dp = iqTreeTools.createDownPropagation(tauFPropagationResults.delta, dp0.getConstraint(), dp0.getVariables(), dp0.getVariableGenerator());
 
         var newConstraint = iqTreeTools.updateDownPropagationConstraint(dp0, tauFPropagationResults.theta, Optional.empty(), child::getVariableNullability);
 
@@ -72,7 +72,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                                        ExtendedProjectionNodeConstructor ctr) {
 
         try {
-            DownPropagation ds = DownPropagation.of(tau, Optional.empty(), getVariables(), variableGenerator, null);
+            DownPropagation ds = iqTreeTools.createDownPropagation(tau, Optional.empty(), getVariables(), variableGenerator);
             PropagationResults tauPropagationResults = propagateTau(ds, child.getVariables());
 
             IQTree newChild = updateChildFct.apply(tauPropagationResults);

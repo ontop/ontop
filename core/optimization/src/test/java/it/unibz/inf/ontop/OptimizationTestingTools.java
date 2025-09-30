@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
@@ -35,6 +36,7 @@ import java.util.stream.IntStream;
 public class OptimizationTestingTools {
 
     public static final IntermediateQueryFactory IQ_FACTORY;
+    public static final IQTreeTools IQ_TREE_TOOLS;
     public static final JoinLikeOptimizer JOIN_LIKE_OPTIMIZER;
     public static final AtomFactory ATOM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
@@ -118,6 +120,7 @@ public class OptimizationTestingTools {
 
         Injector injector = defaultConfiguration.getInjector();
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
+        IQ_TREE_TOOLS = injector.getInstance(IQTreeTools.class);
         JOIN_LIKE_OPTIMIZER = injector.getInstance(JoinLikeOptimizer.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);

@@ -17,7 +17,8 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.DownPropagation;
+import it.unibz.inf.ontop.iq.DownPropagation;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
@@ -164,6 +165,7 @@ public abstract class JsonLens extends JsonOpenObject {
         TermFactory termFactory = coreSingletons.getTermFactory();
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
+        IQTreeTools iqTreeTools = coreSingletons.getIQTreeTools();
 
         InjectiveSubstitution<Variable> renaming = iriSafeVariables.stream()
                 .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
@@ -179,7 +181,7 @@ public abstract class JsonLens extends JsonOpenObject {
 
         return iqFactory.createUnaryIQTree(
                         newConstructionNode,
-                        DownPropagation.of(renaming, iqTreeBeforeIRISafeConstraints.getVariables()).propagate(iqTreeBeforeIRISafeConstraints))
+                        iqTreeTools.createDownPropagation(renaming, iqTreeBeforeIRISafeConstraints.getVariables()).propagate(iqTreeBeforeIRISafeConstraints))
                 .normalizeForOptimization(variableGenerator);
     }
 

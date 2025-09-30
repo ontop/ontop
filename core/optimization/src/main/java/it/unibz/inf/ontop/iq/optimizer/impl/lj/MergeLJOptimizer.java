@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.DownPropagation;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
@@ -166,7 +166,7 @@ public class MergeLJOptimizer extends DelegatingIQTreeVariableGeneratorTransform
                     newLocalRightTreeBeforeRenaming = localRightProvenance.getRightTree();
                 }
 
-                DownPropagation dp = DownPropagation.of(renaming, newLocalRightTreeBeforeRenaming.getVariables());
+                DownPropagation dp = iqTreeTools.createDownPropagation(renaming, newLocalRightTreeBeforeRenaming.getVariables());
                 IQTree newLocalTree = iqTreeTools.createLeftJoinTree(
                         Optional.empty(), leftLJ.leftChild(), dp.propagate(newLocalRightTreeBeforeRenaming));
 

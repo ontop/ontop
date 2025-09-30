@@ -2,9 +2,8 @@ package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.DownPropagation;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -21,10 +20,12 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubstitutionNormalizer {
 
     private final SubstitutionFactory substitutionFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
-    private ConstructionSubstitutionNormalizerImpl(SubstitutionFactory substitutionFactory) {
+    private ConstructionSubstitutionNormalizerImpl(SubstitutionFactory substitutionFactory, IQTreeTools iqTreeTools) {
         this.substitutionFactory = substitutionFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     /**
@@ -49,7 +50,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
     }
 
 
-    private static class ConstructionSubstitutionNormalizationImpl implements ConstructionSubstitutionNormalization {
+    private class ConstructionSubstitutionNormalizationImpl implements ConstructionSubstitutionNormalization {
 
         private final Substitution<ImmutableTerm> normalizedSubstitution;
         private final InjectiveSubstitution<Variable> downRenamingSubstitution;
@@ -62,7 +63,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
         @Override
         public IQTree updateChild(IQTree child, VariableGenerator variableGenerator) {
-            DownPropagation dp = DownPropagation.of(downRenamingSubstitution, child.getVariables());
+            DownPropagation dp = iqTreeTools.createDownPropagation(downRenamingSubstitution, child.getVariables());
             return dp.propagate(child);
         }
 

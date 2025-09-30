@@ -3,10 +3,10 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.impl.AbstractIQTree;
-import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.*;
@@ -74,7 +74,7 @@ public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTre
     @Override
     public final IQTree applyDescendingSubstitution(DownPropagation dp) {
         try {
-            DownPropagation ds = DownPropagation.of(dp.getOptionalDescendingSubstitution().get(), Optional.empty(), getVariables(), dp.getVariableGenerator(), null);
+            DownPropagation ds = iqTreeTools.createDownPropagation(dp.getOptionalDescendingSubstitution().get(), Optional.empty(), getVariables(), dp.getVariableGenerator());
             return ds.getOptionalDescendingSubstitution()
                     .map(s -> applyDescendingSubstitutionWithoutOptimizing(s, dp.getVariableGenerator()))
                     .orElse(this);

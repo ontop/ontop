@@ -6,6 +6,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -61,7 +62,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
         return iqFactory.createUnaryIQTree(
                 getRootNode().applyFreshRenaming(renamingSubstitution),
-                DownPropagation.of(renamingSubstitution, getChild().getVariables()).propagate(getChild()),
+                iqTreeTools.createDownPropagation(renamingSubstitution, getChild().getVariables()).propagate(getChild()),
                 getTreeCache().applyFreshRenaming(renamingSubstitution));
     }
 

@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.impl.DownPropagation;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
@@ -293,7 +293,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
             IQ iq = ((Lens) relationDefinition).getIQ();
 
             IQTree renamedTree = merge(this, iq, coreUtilsFactory.createVariableGenerator(this.getKnownVariables()),
-                    substitutionFactory, queryRenamer, iqFactory);
+                    substitutionFactory, queryRenamer, iqFactory, iqTreeTools);
 
             return renamedTree.getPossibleVariableDefinitions();
         }
@@ -302,7 +302,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
     public static IQTree merge(ExtensionalDataNode dataNode, IQ definition, VariableGenerator variableGenerator,
                                SubstitutionFactory substitutionFactory, QueryRenamer queryRenamer,
-                               IntermediateQueryFactory iqFactory) {
+                               IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
         InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
                 variableGenerator, definition.getTree().getKnownVariables());
 
@@ -318,7 +318,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
                         Map.Entry::getValue));
 
         try {
-            DownPropagation dp = DownPropagation.of(descendingSubstitution, Optional.empty(), renamedDefinition.getTree().getVariables(), variableGenerator, null);
+            DownPropagation dp = iqTreeTools.createDownPropagation(descendingSubstitution, Optional.empty(), renamedDefinition.getTree().getVariables(), variableGenerator);
             return iqFactory.createUnaryIQTree(
                             iqFactory.createConstructionNode(dataNode.getVariables()),
                             dp.propagate(renamedDefinition.getTree()))

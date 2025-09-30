@@ -171,7 +171,8 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                         MappingCanonicalTransformerImpl.this.iqFactory,
                         MappingCanonicalTransformerImpl.this.substitutionFactory,
                         MappingCanonicalTransformerImpl.this.queryRenamer,
-                        MappingCanonicalTransformerImpl.this.termFactory);
+                        MappingCanonicalTransformerImpl.this.termFactory,
+                        MappingCanonicalTransformerImpl.this.iqTreeTools);
             }
 
             @Override

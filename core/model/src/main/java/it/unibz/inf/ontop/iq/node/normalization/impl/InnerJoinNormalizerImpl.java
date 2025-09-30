@@ -6,7 +6,6 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.impl.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
@@ -213,7 +212,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                         .map(normalization::updateExpression);
 
                 Substitution<? extends VariableOrGroundTerm> descendingSubstitution = bindingLift.getDescendingSubstitution();
-                DownPropagation dp = DownPropagation.of(descendingSubstitution, newCondition, NaryIQTreeTools.projectedVariables(provisionalNewChildren), variableGenerator, termFactory);
+                DownPropagation dp = iqTreeTools.createDownPropagation(descendingSubstitution, newCondition, NaryIQTreeTools.projectedVariables(provisionalNewChildren), variableGenerator);
                 ImmutableList<IQTree> newChildren = provisionalNewChildren.stream()
                         .map(dp::propagateToChild)
                         .map(c -> normalization.updateChild(c, variableGenerator))
@@ -245,7 +244,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 var childrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(subTree.children());
 
                 var simplification = conditionSimplifier.simplifyAndPropagate(
-                        DownPropagation.of(Optional.empty(), subTree.projectedVariables(), variableGenerator, termFactory),
+                        iqTreeTools.createDownPropagation(Optional.empty(), subTree.projectedVariables(), variableGenerator),
                         subTree.joiningCondition(),
                         subTree.children(),
                         childrenVariableNullability);
