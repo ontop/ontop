@@ -202,13 +202,11 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                         variableGenerator,
                         variableNullabilityTools.getChildrenVariableNullability(provisionalNewChildren));
 
-                var projectedVariables = subTree.projectedVariables();
-
                 ConstructionSubstitutionNormalization normalization = substitutionNormalizer
-                        .normalizeSubstitution(bindingLift.getAscendingSubstitution(), projectedVariables);
+                        .normalizeSubstitution(bindingLift.getAscendingSubstitution(), subTree.projectedVariables());
 
                 Optional<ImmutableExpression> newCondition = bindingLift.getCondition()
-                        .map(normalization.getDownRenamingSubstitution()::apply);
+                        .map(normalization::applyDownRenamingSubstitution);
 
                 DownPropagation dp = iqTreeTools.createDownPropagation(
                         bindingLift.getDescendingSubstitution(),
@@ -218,11 +216,10 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
                 ImmutableList<IQTree> newChildren = provisionalNewChildren.stream()
                         .map(dp::propagateToChild)
-                        .map(c -> iqTreeTools.applyDownPropagation(normalization.getDownRenamingSubstitution(), c))
+                        .map(normalization::applyDownRenamingSubstitution)
                         .collect(ImmutableCollectors.toList());
 
-                Optional<ConstructionNode> newParent =
-                        iqTreeTools.createOptionalConstructionNode(() -> normalization.getProjectedVariables(), normalization.getNormalizedSubstitution());
+                Optional<ConstructionNode> newParent = normalization.createOptionalConstructionNode();
 
                 return Optional.of(state.lift(newParent, new InnerJoinSubTree(newCondition, newChildren)));
             }

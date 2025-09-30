@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.spec.sqlparser.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,14 +129,14 @@ public class JsonSQLLens extends JsonLens {
                         e -> termFactory.getVariable(e.getKey().getName()),
                         Map.Entry::getValue));
 
-        ImmutableSet<Variable> projectedVariables = ascendingSubstitution.getDomain();
+        ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(
+                ascendingSubstitution,
+                ascendingSubstitution.getDomain());
 
-        ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(ascendingSubstitution, projectedVariables);
-
-        IQTree updatedChild = iqTreeTools.applyDownPropagation(normalization.getDownRenamingSubstitution(), initialChild);
+        IQTree updatedChild = normalization.applyDownRenamingSubstitution(initialChild);
 
         IQTree iqTree = iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(normalization.getProjectedVariables(), normalization.getNormalizedSubstitution()),
+                normalization.createConstructionNode(),
                 updatedChild);
 
         NotYetTypedEqualityTransformer notYetTypedEqualityTransformer = coreSingletons.getNotYetTypedEqualityTransformer();
@@ -145,8 +144,8 @@ public class JsonSQLLens extends JsonLens {
 
         IQTree finalTree = addIRISafeConstraints(transformedTree, dbParameters);
 
-        AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
-        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, ImmutableList.copyOf(projectedVariables));
+        AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, ascendingSubstitution.getDomain().size(), coreSingletons);
+        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, ImmutableList.copyOf(ascendingSubstitution.getDomain()));
 
         return iqFactory.createIQ(projectionAtom, finalTree)
                 .normalizeForOptimization();

@@ -2,9 +2,11 @@ package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -14,6 +16,8 @@ import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Optional;
+
 /**
  * TODO: find a better name
  */
@@ -21,11 +25,13 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
     private final SubstitutionFactory substitutionFactory;
     private final IQTreeTools iqTreeTools;
+    private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    private ConstructionSubstitutionNormalizerImpl(SubstitutionFactory substitutionFactory, IQTreeTools iqTreeTools) {
+    private ConstructionSubstitutionNormalizerImpl(SubstitutionFactory substitutionFactory, IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
         this.substitutionFactory = substitutionFactory;
         this.iqTreeTools = iqTreeTools;
+        this.iqFactory = iqFactory;
     }
 
     /**
@@ -63,20 +69,29 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
             this.downRenamingSubstitution = downRenamingSubstitution;
         }
 
-
         @Override
-        public Substitution<ImmutableTerm> getNormalizedSubstitution() {
-            return normalizedSubstitution;
+        public IQTree applyDownRenamingSubstitution(IQTree tree) {
+            return iqTreeTools.applyDownPropagation(downRenamingSubstitution, tree);
         }
 
         @Override
-        public ImmutableSet<Variable> getProjectedVariables() {
-            return projectedVariables;
+        public ImmutableExpression applyDownRenamingSubstitution(ImmutableExpression expression) {
+            return downRenamingSubstitution.apply(expression);
         }
 
         @Override
-        public InjectiveSubstitution<Variable> getDownRenamingSubstitution() {
-            return downRenamingSubstitution;
+        public ConstructionNode createConstructionNode() {
+            return iqFactory.createConstructionNode(projectedVariables, normalizedSubstitution);
+        }
+
+        @Override
+        public Optional<ConstructionNode> createOptionalConstructionNode() {
+            return iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, normalizedSubstitution);
+        }
+
+        @Override
+        public Optional<ConstructionNode> createOptionalConstructionNode(IQTree child) {
+            return iqTreeTools.createOptionalConstructionNode(projectedVariables, normalizedSubstitution, child);
         }
     }
 }

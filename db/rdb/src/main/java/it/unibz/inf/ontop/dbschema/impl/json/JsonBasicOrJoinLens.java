@@ -173,12 +173,9 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
                 .append(optionalFilter)
                 .build(parentTree);
 
-        IQTree updatedParentDataNode = iqTreeTools.applyDownPropagation(normalization.getDownRenamingSubstitution(), filterTree);
+        IQTree updatedParentDataNode = normalization.applyDownRenamingSubstitution(filterTree);
 
-        var optionalConstructionNode = iqTreeTools.createOptionalConstructionNode(
-                normalization.getProjectedVariables(),
-                normalization.getNormalizedSubstitution(),
-                updatedParentDataNode);
+        var optionalConstructionNode = normalization.createOptionalConstructionNode(updatedParentDataNode);
 
         IQTree iqTreeBeforeIRISafeConstraints = iqTreeTools.unaryIQTreeBuilder()
                 .append(optionalConstructionNode)

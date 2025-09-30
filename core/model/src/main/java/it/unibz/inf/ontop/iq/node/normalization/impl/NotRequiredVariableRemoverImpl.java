@@ -91,14 +91,12 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-            ImmutableSet<Variable> variablesToKeep = getVariablesToKeep(tree);
 
             ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(
-                    rootNode.getSubstitution(), variablesToKeep);
+                    rootNode.getSubstitution(), getVariablesToKeep(tree));
 
-            ConstructionNode newConstructionNode = iqFactory.createConstructionNode(normalization.getProjectedVariables(),
-                    normalization.getNormalizedSubstitution());
-            IQTree newChild = iqTreeTools.applyDownPropagation(normalization.getDownRenamingSubstitution(), child);
+            ConstructionNode newConstructionNode = normalization.createConstructionNode();
+            IQTree newChild = normalization.applyDownRenamingSubstitution(child);
 
             // New removal opportunities may appear in the subtree ("RECURSIVE")
             return iqFactory.createUnaryIQTree(newConstructionNode, newChild)

@@ -244,8 +244,7 @@ public class JsonUnionLens extends JsonLens {
         ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
                 substitutionNormalizer.normalizeSubstitution(substitution, allProjectedVariables);
 
-        ConstructionNode constructionNode = iqFactory.createConstructionNode(
-                normalization.getProjectedVariables(), normalization.getNormalizedSubstitution());
+        ConstructionNode constructionNode = normalization.createConstructionNode();
         return iqFactory.createUnaryIQTree(constructionNode, child);
     }
 
