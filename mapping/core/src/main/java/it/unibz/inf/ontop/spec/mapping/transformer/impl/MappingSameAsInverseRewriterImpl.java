@@ -76,6 +76,6 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
                 substitutionFactory.getSubstitution(originalSubject, newObject, originalObject, newSubject).injective();
 
         return assertion.copyOf(iqFactory.createIQ(newProjectionAtom,
-                queryRenamer.applyInDepthRenaming(renamingSubstitution, assertion.getQuery()).getTree()));
+                queryRenamer.applyInDepthRenaming(renamingSubstitution, assertion.getQuery().getTree())));
     }
 }

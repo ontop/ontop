@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -28,16 +27,14 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final CoreUtilsFactory coreUtilsFactory;
-    private final QueryRenamer queryRenamer;
     private final IQTreeTools iqTreeTools;
 
     @Inject
     private UnionBasedQueryMergerImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
-                                      CoreUtilsFactory coreUtilsFactory, QueryRenamer queryRenamer, IQTreeTools iqTreeTools) {
+                                      CoreUtilsFactory coreUtilsFactory, IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
-        this.queryRenamer = queryRenamer;
         this.iqTreeTools = iqTreeTools;
     }
 
@@ -56,41 +53,25 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
         VariableGenerator variableGenerator =  coreUtilsFactory.createVariableGenerator(firstDefinition.getTree().getKnownVariables());
 
-        Stream<IQTree> renamedDefinitionsStream = predicateDefinitions.stream()
+        ImmutableList<IQTree> renamedDefinitions = Stream.concat(
+                Stream.of(firstDefinition.getTree()),
+                predicateDefinitions.stream()
                 .skip(1)
                 .map(def -> {
                     if (!def.getProjectionAtom().getPredicate().equals(projectionAtom.getPredicate()))
                         throw new IllegalStateException("Bug: unexpected incompatible atoms");
 
-                    // Updates the variable generator
-                    InjectiveSubstitution<Variable> disjointVariableSetRenaming =
-                            substitutionFactory.generateNotConflictingRenaming(variableGenerator, def.getTree().getKnownVariables());
+                    IQ freshDef = iqTreeTools.getFreshInstance(def, variableGenerator);
 
-                    ImmutableList<Variable> sourceProjectionAtomArguments =
-                            substitutionFactory.apply(disjointVariableSetRenaming, def.getProjectionAtom().getArguments());
-
-                    InjectiveSubstitution<Variable> headSubstitution =
-                            substitutionFactory.getSubstitution(sourceProjectionAtomArguments, projectionAtom.getArguments())
+                    InjectiveSubstitution<Variable> headSubstitution = substitutionFactory.getSubstitution(
+                            freshDef.getProjectionAtom().getArguments(), projectionAtom.getArguments())
                                     .injective();
 
-                    InjectiveSubstitution<Variable> renamingSubstitution =
-                            /*
-                              fresh variables are excluded from the domain of the renaming substitution
-                               since they are in use in the sub-query.
-
-                               NB: this guarantees that the renaming substitution is injective
-                             */
-                            substitutionFactory.onVariables().compose(headSubstitution, disjointVariableSetRenaming)
-                                    .removeFromDomain(disjointVariableSetRenaming.getRangeSet())
-                                    .injective();
-
-                    return queryRenamer.applyInDepthRenaming(renamingSubstitution, def.getTree());
-                });
+                    return iqTreeTools.applyDownPropagation(headSubstitution, freshDef.getTree());
+                }))
+                .collect(ImmutableCollectors.toList());
 
         ImmutableSet<Variable> unionVariables = projectionAtom.getVariables();
-
-        ImmutableList<IQTree> renamedDefinitions = Stream.concat(Stream.of(firstDefinition.getTree()), renamedDefinitionsStream)
-                .collect(ImmutableCollectors.toList());
 
         IQTree unionTree = iqTreeTools.createUnionTree(unionVariables,
                 NaryIQTreeTools.transformChildren(renamedDefinitions,
@@ -98,5 +79,4 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
         return Optional.of(iqFactory.createIQ(projectionAtom, unionTree));
     }
-
 }

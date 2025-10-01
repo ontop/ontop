@@ -405,11 +405,19 @@ public class IQTreeTools {
                 : new RenamingDownPropagation(restriction, Optional.empty(), variables, null, termFactory);
     }
 
+    /**
+     * Creates a fresh copy of a given IQ
+     * and updated the variable generator with the fresh variable names.
+     *
+     * @param iq IQ
+     * @param variableGenerator a variable generator
+     * @return a fresh copy of the IQ
+     */
+
     public IQ getFreshInstance(IQ iq, VariableGenerator variableGenerator) {
         InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
                 variableGenerator, iq.getTree().getKnownVariables());
 
         return queryRenamer.applyInDepthRenaming(renamingSubstitution, iq);
     }
-
 }
