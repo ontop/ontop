@@ -59,12 +59,12 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
         Stream<IQTree> renamedDefinitionsStream = predicateDefinitions.stream()
                 .skip(1)
                 .map(def -> {
+                    if (!def.getProjectionAtom().getPredicate().equals(projectionAtom.getPredicate()))
+                        throw new IllegalStateException("Bug: unexpected incompatible atoms");
+
                     // Updates the variable generator
                     InjectiveSubstitution<Variable> disjointVariableSetRenaming =
                             substitutionFactory.generateNotConflictingRenaming(variableGenerator, def.getTree().getKnownVariables());
-
-                    if (!def.getProjectionAtom().getPredicate().equals(projectionAtom.getPredicate()))
-                        throw new IllegalStateException("Bug: unexpected incompatible atoms");
 
                     ImmutableList<Variable> sourceProjectionAtomArguments =
                             substitutionFactory.apply(disjointVariableSetRenaming, def.getProjectionAtom().getArguments());

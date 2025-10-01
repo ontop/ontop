@@ -10,9 +10,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -27,22 +25,19 @@ import java.util.Optional;
 public abstract class AbstractQueryMergingTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
     protected final SubstitutionFactory substitutionFactory;
-    protected final QueryRenamer queryRenamer;
     protected final IQTreeTools iqTreeTools;
 
     protected AbstractQueryMergingTransformer(VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
         this(variableGenerator, coreSingletons.getIQFactory(), coreSingletons.getSubstitutionFactory(),
-                coreSingletons.getQueryRenamer(), coreSingletons.getIQTreeTools());
+                coreSingletons.getIQTreeTools());
     }
 
     protected AbstractQueryMergingTransformer(VariableGenerator variableGenerator,
                                               IntermediateQueryFactory iqFactory,
                                               SubstitutionFactory substitutionFactory,
-                                              QueryRenamer queryRenamer,
                                               IQTreeTools iqTreeTools) {
         super(iqFactory, variableGenerator);
         this.substitutionFactory = substitutionFactory;
-        this.queryRenamer = queryRenamer;
         this.iqTreeTools = iqTreeTools;
     }
 
@@ -65,10 +60,7 @@ public abstract class AbstractQueryMergingTransformer extends DefaultRecursiveIQ
         if (!definition.getProjectionAtom().getPredicate().equals(dataNode.getProjectionAtom().getPredicate()))
             throw new IllegalStateException("Incompatible predicates");
 
-        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
-                variableGenerator, definition.getTree().getKnownVariables());
-
-        IQ renamedDefinition = queryRenamer.applyInDepthRenaming(renamingSubstitution, definition);
+        IQ renamedDefinition = iqTreeTools.getFreshInstance(definition, variableGenerator);
 
         Substitution<? extends VariableOrGroundTerm> descendingSubstitution = substitutionFactory.getSubstitution(
                 renamedDefinition.getProjectionAtom().getArguments(),

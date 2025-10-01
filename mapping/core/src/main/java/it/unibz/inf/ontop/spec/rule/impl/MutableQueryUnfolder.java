@@ -32,7 +32,6 @@ public class MutableQueryUnfolder extends AbstractIQOptimizer {
 
     private final Map<MappingAssertionIndex, MappingAssertion> mutableMapping;
     private final SubstitutionFactory substitutionFactory;
-    private final QueryRenamer queryRenamer;
     private final IQTreeTools iqTreeTools;
 
     private final IQTreeVariableGeneratorTransformer transformer;
@@ -45,7 +44,6 @@ public class MutableQueryUnfolder extends AbstractIQOptimizer {
         super(iqFactory);
         this.mutableMapping = mutableMapping;
         this.substitutionFactory = substitutionFactory;
-        this.queryRenamer = queryRenamer;
         this.iqTreeTools = iqTreeTools;
 
         this.transformer = IQTreeVariableGeneratorTransformer.of(MutableQueryUnfoldingTransformer::new);
@@ -62,7 +60,6 @@ public class MutableQueryUnfolder extends AbstractIQOptimizer {
             super(variableGenerator,
                     MutableQueryUnfolder.this.iqFactory,
                     MutableQueryUnfolder.this.substitutionFactory,
-                    MutableQueryUnfolder.this.queryRenamer,
                     MutableQueryUnfolder.this.iqTreeTools);
         }
 

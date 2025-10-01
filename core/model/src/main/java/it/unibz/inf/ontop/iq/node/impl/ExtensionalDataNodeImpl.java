@@ -64,8 +64,6 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     @Nullable
     private Boolean isDistinct;
 
-    private final QueryRenamer queryRenamer;
-
     /**
      * See {@link IntermediateQueryFactory#createExtensionalDataNode(RelationDefinition, ImmutableMap)}
      */
@@ -74,9 +72,8 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     private ExtensionalDataNodeImpl(@Assisted RelationDefinition relationDefinition,
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
-                                    CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory,
-                                    QueryRenamer queryRenamer) {
-        this(relationDefinition, argumentMap, null, iqTreeTools, iqFactory, coreUtilsFactory, substitutionFactory, queryRenamer);
+                                    CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
+        this(relationDefinition, argumentMap, null, iqTreeTools, iqFactory, coreUtilsFactory, substitutionFactory);
     }
 
     /**
@@ -87,13 +84,11 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                     @Assisted @Nullable VariableNullability variableNullability,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
-                                    CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory,
-                                    QueryRenamer queryRenamer) {
+                                    CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
         super(iqTreeTools, iqFactory, substitutionFactory, coreUtilsFactory);
         this.relationDefinition = relationDefinition;
         this.argumentMap = argumentMap;
         this.variableNullability = variableNullability;
-        this.queryRenamer = queryRenamer;
     }
 
 
@@ -293,7 +288,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
             IQ iq = ((Lens) relationDefinition).getIQ();
 
             IQTree renamedTree = merge(this, iq, coreUtilsFactory.createVariableGenerator(this.getKnownVariables()),
-                    substitutionFactory, queryRenamer, iqFactory, iqTreeTools);
+                    substitutionFactory, iqFactory, iqTreeTools);
 
             return renamedTree.getPossibleVariableDefinitions();
         }
@@ -301,16 +296,12 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     public static IQTree merge(ExtensionalDataNode dataNode, IQ definition, VariableGenerator variableGenerator,
-                               SubstitutionFactory substitutionFactory, QueryRenamer queryRenamer,
+                               SubstitutionFactory substitutionFactory,
                                IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
-        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
-                variableGenerator, definition.getTree().getKnownVariables());
 
-        IQ renamedDefinition = queryRenamer.applyInDepthRenaming(renamingSubstitution, definition);
+        IQ renamedDefinition = iqTreeTools.getFreshInstance(definition, variableGenerator);
 
-        ImmutableList<Variable> sourceAtomArguments = substitutionFactory.apply(
-                renamingSubstitution,
-                renamedDefinition.getProjectionAtom().getArguments());
+        ImmutableList<Variable> sourceAtomArguments = renamedDefinition.getProjectionAtom().getArguments();
 
         Substitution<VariableOrGroundTerm> descendingSubstitution = dataNode.getArgumentMap().entrySet().stream()
                 .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries(

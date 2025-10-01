@@ -30,7 +30,6 @@ import java.util.Optional;
 public class MappingCanonicalTransformerImpl implements MappingCanonicalTransformer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final QueryRenamer queryRenamer;
     private final SubstitutionFactory substitutionFactory;
     private final AtomFactory atomFactory;
     private final UnionBasedQueryMerger queryMerger;
@@ -40,10 +39,8 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
 
     @Inject
     private MappingCanonicalTransformerImpl(CoreSingletons coreSingletons,
-                                            QueryRenamer queryRenamer,
                                             UnionBasedQueryMerger queryMerger,
                                             OntopMappingSettings settings) {
-        this.queryRenamer = queryRenamer;
         this.settings = settings;
         this.coreUtilsFactory = coreSingletons.getCoreUtilsFactory();
         this.iqFactory = coreSingletons.getIQFactory();
@@ -167,7 +164,6 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                 super(variableGenerator,
                         MappingCanonicalTransformerImpl.this.iqFactory,
                         MappingCanonicalTransformerImpl.this.substitutionFactory,
-                        MappingCanonicalTransformerImpl.this.queryRenamer,
                         MappingCanonicalTransformerImpl.this.iqTreeTools);
             }
 

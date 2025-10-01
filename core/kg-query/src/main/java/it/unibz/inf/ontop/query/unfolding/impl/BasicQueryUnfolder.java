@@ -33,7 +33,6 @@ public class BasicQueryUnfolder extends AbstractIQOptimizer implements QueryUnfo
 
     private final Mapping mapping;
     private final SubstitutionFactory substitutionFactory;
-    private final QueryRenamer queryRenamer;
     private final UnionBasedQueryMerger queryMerger;
     private final IQTreeTools iqTreeTools;
 
@@ -46,13 +45,11 @@ public class BasicQueryUnfolder extends AbstractIQOptimizer implements QueryUnfo
     private BasicQueryUnfolder(@Assisted Mapping mapping,
                                IntermediateQueryFactory iqFactory,
                                SubstitutionFactory substitutionFactory,
-                               QueryRenamer queryRenamer,
                                UnionBasedQueryMerger queryMerger,
                                IQTreeTools iqTreeTools) {
         super(iqFactory);
         this.mapping = mapping;
         this.substitutionFactory = substitutionFactory;
-        this.queryRenamer = queryRenamer;
         this.queryMerger = queryMerger;
         this.iqTreeTools = iqTreeTools;
 
@@ -71,7 +68,6 @@ public class BasicQueryUnfolder extends AbstractIQOptimizer implements QueryUnfo
             super(variableGenerator,
                     BasicQueryUnfolder.this.iqFactory,
                     BasicQueryUnfolder.this.substitutionFactory,
-                    BasicQueryUnfolder.this.queryRenamer,
                     BasicQueryUnfolder.this.iqTreeTools);
         }
 

@@ -405,4 +405,11 @@ public class IQTreeTools {
                 : new RenamingDownPropagation(restriction, Optional.empty(), variables, null, termFactory);
     }
 
+    public IQ getFreshInstance(IQ iq, VariableGenerator variableGenerator) {
+        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
+                variableGenerator, iq.getTree().getKnownVariables());
+
+        return queryRenamer.applyInDepthRenaming(renamingSubstitution, iq);
+    }
+
 }
