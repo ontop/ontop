@@ -38,14 +38,11 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
     // Non final
     private boolean hasBeenSuccessfullyValidate;
 
-    private final TermFactory termFactory;
-
     protected AbstractCompositeIQTree(N rootNode, ImmutableList<IQTree> children,
                                       IQTreeCache treeCache, IQTreeTools iqTreeTools,
                                       IntermediateQueryFactory iqFactory, TermFactory termFactory,
                                       SubstitutionFactory substitutionFactory) {
         super(iqTreeTools, iqFactory);
-        this.termFactory = termFactory;
         if (children.isEmpty())
             throw new IllegalArgumentException("A composite IQ must have at least one child");
         this.rootNode = rootNode;

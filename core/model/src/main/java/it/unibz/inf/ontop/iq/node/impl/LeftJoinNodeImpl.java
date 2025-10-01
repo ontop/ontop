@@ -262,17 +262,19 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             return transformIntoInnerJoinTree(leftChild, rightChild)
                     .applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
 
-        return iqTreeTools.createLeftJoinTree(
-                getOptionalFilterCondition().map(descendingSubstitution::apply),
+        return iqFactory.createBinaryNonCommutativeIQTree(
+                applySubstitution(descendingSubstitution),
                 leftChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator),
                 rightChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
     }
 
     @Override
     public LeftJoinNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        Optional<ImmutableExpression> newCondition = getOptionalFilterCondition()
-                .map(renamingSubstitution::apply);
-        return iqFactory.createLeftJoinNode(newCondition);
+        return applySubstitution(renamingSubstitution);
+    }
+
+    private LeftJoinNode applySubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+        return iqFactory.createLeftJoinNode(getOptionalFilterCondition().map(descendingSubstitution::apply));
     }
 
     @Override

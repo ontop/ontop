@@ -98,15 +98,15 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     }
 
     @Override
-    public NativeNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        throw new UnsupportedOperationException("NativeNode does not support renaming (too late)");
-    }
-
-    @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             VariableGenerator variableGenerator) {
         throw new UnsupportedOperationException("NativeNode does not support descending substitutions (too late)");
+    }
+
+    @Override
+    public NativeNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
+        throw new UnsupportedOperationException("NativeNode does not support renaming (too late)");
     }
 
     /**

@@ -53,6 +53,15 @@ public interface IQTree {
     IQTree applyDescendingSubstitution(DownPropagation dp);
 
     /**
+     * TODO: explain
+     *
+     * The constraint is used for pruning. It remains enforced by
+     * a parent tree.
+     *
+     */
+    IQTree propagateDownConstraint(DownPropagation dp);
+
+    /**
      * Particular type of descending substitution: only renaming some variables by external ones.
      *
      * Isolated from regular descending substitutions as it preserves the properties of the tree
@@ -92,14 +101,6 @@ public interface IQTree {
 
     VariableNullability getVariableNullability();
 
-    /**
-     * TODO: explain
-     *
-     * The constraint is used for pruning. It remains enforced by
-     * a parent tree.
-     *
-     */
-    IQTree propagateDownConstraint(DownPropagation dp);
 
     /**
      * TODO: find a better name

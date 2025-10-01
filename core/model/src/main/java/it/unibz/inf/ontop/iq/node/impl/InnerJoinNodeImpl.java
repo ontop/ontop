@@ -127,22 +127,25 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     public IQTree applyDescendingSubstitution(DownPropagation dp, ImmutableList<IQTree> children) {
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
                 dp.computeProjectedVariables());
-        return propagateDownConstraint(dp, children, simplifiedChildFutureVariableNullability);
+        return propagateDown(dp, children, simplifiedChildFutureVariableNullability);
     }
 
     @Override
     public IQTree propagateDownConstraint(DownPropagation dp, ImmutableList<IQTree> children) {
         VariableNullability extendedChildrenVariableNullability = dp.extendVariableNullability(variableNullabilityTools.getChildrenVariableNullability(children));
-        return propagateDownConstraint(dp, children, extendedChildrenVariableNullability);
+        return propagateDown(dp, children, extendedChildrenVariableNullability);
     }
 
-    private IQTree propagateDownConstraint(DownPropagation downPropagation,ImmutableList<IQTree> children, VariableNullability variableNullability) {
+    private IQTree propagateDown(DownPropagation dp, ImmutableList<IQTree> children, VariableNullability variableNullability) {
         try {
-            var simplification = conditionSimplifier.simplifyAndPropagate(downPropagation,
-                    getOptionalFilterCondition(), children, variableNullability);
+            var simplification = conditionSimplifier.simplifyAndPropagate(
+                    dp,
+                    getOptionalFilterCondition(),
+                    children,
+                    variableNullability);
 
-            NaryIQTree joinTree = iqFactory.createNaryIQTree(
-                    createInnerJoinNode(simplification.getOptionalExpression()),
+            NaryIQTree joinTree = iqTreeTools.createInnerJoinTree(
+                    simplification.getOptionalExpression(),
                     simplification.getChildren());
 
             return iqTreeTools.unaryIQTreeBuilder()
@@ -150,7 +153,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     .build(joinTree);
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {
-            return iqTreeTools.createEmptyNode(downPropagation);
+            return iqTreeTools.createEmptyNode(dp);
         }
     }
 
@@ -159,15 +162,19 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
             VariableGenerator variableGenerator) {
 
-        return iqTreeTools.createInnerJoinTree(
-                getOptionalFilterCondition().map(descendingSubstitution::apply),
+        return iqFactory.createNaryIQTree(
+                applyDescendingSubstitution(descendingSubstitution),
                 NaryIQTreeTools.transformChildren(
                         children, c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator)));
     }
 
     @Override
     public InnerJoinNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        return createInnerJoinNode(getOptionalFilterCondition().map(renamingSubstitution::apply));
+        return applyDescendingSubstitution(renamingSubstitution);
+    }
+
+    private InnerJoinNode applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+        return iqFactory.createInnerJoinNode(getOptionalFilterCondition().map(descendingSubstitution::apply));
     }
 
     @Override
@@ -393,11 +400,4 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         return mutableMultimap;
     }
 
-
-
-    private InnerJoinNode createInnerJoinNode(Optional<ImmutableExpression> optionalExpression) {
-         return optionalExpression.equals(getOptionalFilterCondition())
-                ? this
-                : iqFactory.createInnerJoinNode(optionalExpression);
-    }
 }

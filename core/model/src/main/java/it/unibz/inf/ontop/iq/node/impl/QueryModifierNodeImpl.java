@@ -11,12 +11,9 @@ import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.utils.VariableGenerator;
-
-import java.util.Optional;
 
 
-public abstract class QueryModifierNodeImpl implements QueryModifierNode, QueryNode {
+public abstract class QueryModifierNodeImpl implements QueryModifierNode {
 
     protected final IntermediateQueryFactory iqFactory;
     protected final TermFactory termFactory;

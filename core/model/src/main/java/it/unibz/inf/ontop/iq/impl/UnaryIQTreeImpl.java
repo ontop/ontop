@@ -75,6 +75,17 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
+    public IQTree propagateDownConstraint(DownPropagation dp) {
+        if (!dp.getVariables().equals(getVariables()))
+            throw new IllegalStateException("VARIABLE SET MISMATCH: " + dp.getVariables() + " v " + getVariables());
+
+        IQTree newTree = getRootNode().propagateDownConstraint(dp, getChild());
+        return equals(newTree)
+                ? this
+                : newTree;
+    }
+
+    @Override
     protected IQTree doApplyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
         return getRootNode().applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, getChild(), variableGenerator);
@@ -89,14 +100,6 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @Override
     protected boolean computeIsDistinct() {
         return getRootNode().isDistinct(this, getChild());
-    }
-
-    @Override
-    public IQTree propagateDownConstraint(DownPropagation dp) {
-        IQTree newTree = getRootNode().propagateDownConstraint(dp, getChild());
-        return equals(newTree)
-                ? this
-                : newTree;
     }
 
     @Override

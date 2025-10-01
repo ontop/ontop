@@ -60,8 +60,9 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
     protected final IQTree propagateDescendingSubstitutionToChildWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
         return Optional.of(descendingSubstitution)
-                .filter(delta -> !delta.isEmpty())
-                .map(d -> child.applyDescendingSubstitutionWithoutOptimizing(d, variableGenerator))
+                .map(ds -> ds.restrictDomainTo(child.getVariables()))
+                .filter(ds -> !ds.isEmpty())
+                .map(ds -> child.applyDescendingSubstitutionWithoutOptimizing(ds, variableGenerator))
                 .orElse(child);
     }
 

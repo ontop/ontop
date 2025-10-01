@@ -72,7 +72,7 @@ public abstract class AbstractQueryMergingTransformer extends DefaultRecursiveIQ
                     .normalizeForOptimization(variableGenerator);
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {
-            throw new MinorOntopInternalBugException("IntensionalDataNode cannot contains NULLs" + dataNode, e);
+            throw new MinorOntopInternalBugException("IntensionalDataNode cannot contain NULLs" + dataNode, e);
         }
     }
 }

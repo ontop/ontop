@@ -81,17 +81,17 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
         VariableNullability extendedChildVariableNullability
                 = dp.extendVariableNullability(child.getVariableNullability());
-        return propagate(dp, child, extendedChildVariableNullability);
+        return propagateDown(dp, child, extendedChildVariableNullability);
     }
 
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
         VariableNullability simplifiedFutureChildVariableNullability =
                 coreUtilsFactory.createSimplifiedVariableNullability(dp.computeProjectedVariables().stream());
-        return propagate(dp, child, simplifiedFutureChildVariableNullability);
+        return propagateDown(dp, child, simplifiedFutureChildVariableNullability);
     }
 
-    private IQTree propagate(DownPropagation dp, IQTree child, VariableNullability variableNullability) {
+    private IQTree propagateDown(DownPropagation dp, IQTree child, VariableNullability variableNullability) {
         try {
             var simplification = conditionSimplifier.simplifyAndPropagate(
                     dp,
@@ -111,7 +111,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public FilterNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        return iqFactory.createFilterNode(renamingSubstitution.apply(getFilterCondition()));
+        return applyDescendingSubstitution(renamingSubstitution);
     }
 
     @Override
@@ -119,9 +119,14 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child,
             VariableGenerator variableGenerator) {
         return iqFactory.createUnaryIQTree(
-                iqFactory.createFilterNode(descendingSubstitution.apply(getFilterCondition())),
+                applyDescendingSubstitution(descendingSubstitution),
                 child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
     }
+
+    private FilterNode applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+        return iqFactory.createFilterNode(descendingSubstitution.apply(getFilterCondition()));
+    }
+
 
     @Override
     public void validateNode(IQTree child) throws InvalidIntermediateQueryException {

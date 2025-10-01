@@ -350,7 +350,6 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @FunctionalInterface
     interface PropagateToChild {
-
         IQTree apply(Substitution<? extends VariableOrGroundTerm> substitution);
     }
 }

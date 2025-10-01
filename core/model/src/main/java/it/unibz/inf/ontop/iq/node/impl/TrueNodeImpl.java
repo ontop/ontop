@@ -49,13 +49,13 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    public TrueNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
         return this;
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
+    public TrueNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
         return this;
     }
 

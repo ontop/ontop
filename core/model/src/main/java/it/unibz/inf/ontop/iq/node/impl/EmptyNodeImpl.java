@@ -43,15 +43,16 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     @Override
     public EmptyNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        ImmutableSet<Variable> newVariables = substitutionFactory.apply(freshRenamingSubstitution, projectedVariables);
-        return newVariables.equals(projectedVariables)
-                ? this
-                : iqFactory.createEmptyNode(newVariables);
+        return applyDescendingSubstitution(freshRenamingSubstitution);
     }
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
+        return applyDescendingSubstitution(descendingSubstitution);
+    }
+
+    private EmptyNode applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         return iqFactory.createEmptyNode(
                 DownPropagation.computeProjectedVariables(descendingSubstitution, projectedVariables));
     }

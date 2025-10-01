@@ -110,6 +110,21 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
         return iqFactory.createExtensionalDataNode(relationDefinition, newArguments);
     }
 
+    /**
+     * Optimized to re-use the variable nullability.
+     * Useful the data node has a lot of columns.
+     */
+    @Override
+    public ExtensionalDataNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
+        ImmutableMap<Integer, VariableOrGroundTerm> newArgumentMap = substitutionFactory.onVariableOrGroundTerms().applyToTerms(freshRenamingSubstitution, argumentMap);
+        return (variableNullability == null)
+                ? iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap)
+                : iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap,
+                variableNullability.applyFreshRenaming(freshRenamingSubstitution));
+    }
+
+
+
     @Override
     public synchronized boolean isDistinct() {
         return getCachedValue(() -> isDistinct, this::computeIsDistinct, v -> isDistinct = v);
@@ -127,19 +142,6 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
         var arguments = getArguments(determinants);
         return arguments.stream().allMatch(Optional::isPresent)
                 && getVariableSetFrom(arguments).stream().noneMatch(variableNullability::isPossiblyNullable);
-    }
-
-    /**
-     * Optimized to re-use the variable nullability.
-     * Useful the data node has a lot of columns.
-     */
-    @Override
-    public ExtensionalDataNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        ImmutableMap<Integer, VariableOrGroundTerm> newArgumentMap = substitutionFactory.onVariableOrGroundTerms().applyToTerms(freshRenamingSubstitution, argumentMap);
-        return (variableNullability == null)
-                ? iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap)
-                : iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap,
-                        variableNullability.applyFreshRenaming(freshRenamingSubstitution));
     }
 
     @Override
