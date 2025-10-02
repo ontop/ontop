@@ -405,6 +405,13 @@ public class IQTreeTools {
                 : new RenamingDownPropagation(restriction, Optional.empty(), variables, null, termFactory);
     }
 
+    public IQTree applyDownPropagationWithoutOptimization(IQTree tree, Substitution<? extends  VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
+       var reducedSubstitution = descendingSubstitution.restrictDomainTo(tree.getVariables());
+        if (reducedSubstitution.isEmpty())
+            return tree;
+        return tree.applyDescendingSubstitutionWithoutOptimizing(reducedSubstitution, variableGenerator);
+    }
+
     /**
      * Creates a fresh copy of a given IQ
      * and updated the variable generator with the fresh variable names.

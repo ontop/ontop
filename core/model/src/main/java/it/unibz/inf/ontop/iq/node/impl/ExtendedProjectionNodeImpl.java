@@ -58,14 +58,6 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         return dp.propagateWithConstraint(newConstraint, child);
     }
 
-    protected final IQTree propagateDescendingSubstitutionToChildWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
-        return Optional.of(descendingSubstitution)
-                .map(ds -> ds.restrictDomainTo(child.getVariables()))
-                .filter(ds -> !ds.isEmpty())
-                .map(ds -> child.applyDescendingSubstitutionWithoutOptimizing(ds, variableGenerator))
-                .orElse(child);
-    }
-
     protected final IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> tau,
                                                        IQTree child,
                                                        VariableGenerator variableGenerator,

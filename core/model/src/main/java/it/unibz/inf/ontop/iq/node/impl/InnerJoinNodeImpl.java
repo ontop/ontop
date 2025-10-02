@@ -158,14 +158,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
-            VariableGenerator variableGenerator) {
-
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                                               ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
         return iqFactory.createNaryIQTree(
                 applyDescendingSubstitution(descendingSubstitution),
                 NaryIQTreeTools.transformChildren(
-                        children, c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator)));
+                        children, c -> iqTreeTools.applyDownPropagationWithoutOptimization(c, descendingSubstitution, variableGenerator)));
     }
 
     @Override

@@ -255,17 +255,16 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator) {
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                                               IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator) {
         if (containsEqualityRightSpecificVariable(descendingSubstitution, leftChild, rightChild))
             return transformIntoInnerJoinTree(leftChild, rightChild)
                     .applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
 
         return iqFactory.createBinaryNonCommutativeIQTree(
                 applySubstitution(descendingSubstitution),
-                leftChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator),
-                rightChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
+                iqTreeTools.applyDownPropagationWithoutOptimization(leftChild, descendingSubstitution, variableGenerator),
+                iqTreeTools.applyDownPropagationWithoutOptimization(rightChild, descendingSubstitution, variableGenerator));
     }
 
     @Override

@@ -73,7 +73,7 @@ public interface IQTree {
     /**
      * Applies the descending substitution WITHOUT applying any additional optimization.
      *
-     * Designed to be called AFTER the "structural/semantic optimization" phase.
+     * Called only during SPARQL to IQTree translation.
      */
     IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                         VariableGenerator variableGenerator);

@@ -72,7 +72,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 descendingSubstitution,
                 child,
                 variableGenerator,
-                r -> propagateDescendingSubstitutionToChildWithoutOptimizing(r.delta, child, variableGenerator),
+                r -> iqTreeTools.applyDownPropagationWithoutOptimization(child, r.delta, variableGenerator),
                 this::createAggregationNode);
     }
 

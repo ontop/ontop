@@ -198,9 +198,8 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                                IQTree child, VariableGenerator variableGenerator) {
-
         return applyDescendingSubstitution(descendingSubstitution, variableGenerator,
-                s -> child.applyDescendingSubstitutionWithoutOptimizing(s, variableGenerator));
+                s -> iqTreeTools.applyDownPropagationWithoutOptimization(child, s, variableGenerator));
     }
 
     @Override

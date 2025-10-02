@@ -196,9 +196,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public ValuesNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        if (freshRenamingSubstitution.isEmpty())
-            return this;
-
         ImmutableSet<Variable> newVariables = substitutionFactory.apply(freshRenamingSubstitution, projectedVariables);
 
         var newUniqueConstraints = uniqueConstraints == null
@@ -216,9 +213,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                                VariableGenerator variableGenerator) {
-        if (descendingSubstitution.isEmpty())
-            return this;
-
         final UnaryIQTreeBuilder<UnaryOperatorNode> iqTreeBuilder;
         ValuesNode valuesNode = this;
 

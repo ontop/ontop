@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.DownPropagation;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.SliceNormalizer;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -28,12 +29,14 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final OptionalLong limit;
 
+    private final IQTreeTools iqTreeTools;
     private final SliceNormalizer sliceNormalizer;
 
     @AssistedInject
     private SliceNodeImpl(@Assisted("offset") long offset, @Assisted("limit") long limit,
-                          IntermediateQueryFactory iqFactory, SliceNormalizer sliceNormalizer, TermFactory termFactory) {
+                          IntermediateQueryFactory iqFactory, SliceNormalizer sliceNormalizer, TermFactory termFactory, IQTreeTools iqTreeTools) {
         super(iqFactory, termFactory);
+        this.iqTreeTools = iqTreeTools;
         if (offset < 0)
             throw new IllegalArgumentException("The offset must not be negative");
         if (limit < 0)
@@ -44,8 +47,9 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @AssistedInject
-    private SliceNodeImpl(@Assisted long offset, IntermediateQueryFactory iqFactory, SliceNormalizer sliceNormalizer, TermFactory termFactory) {
+    private SliceNodeImpl(@Assisted long offset, IntermediateQueryFactory iqFactory, SliceNormalizer sliceNormalizer, TermFactory termFactory, IQTreeTools iqTreeTools) {
         super(iqFactory, termFactory);
+        this.iqTreeTools = iqTreeTools;
         if (offset < 0)
             throw new IllegalArgumentException("The offset must not be negative");
         this.offset = offset;
@@ -80,10 +84,10 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                                               IQTree child, VariableGenerator variableGenerator) {
         return iqFactory.createUnaryIQTree(this,
-                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
+                iqTreeTools.applyDownPropagationWithoutOptimization(child, descendingSubstitution, variableGenerator));
     }
 
     @Override

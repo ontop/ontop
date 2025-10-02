@@ -74,10 +74,11 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                                               IQTree child, VariableGenerator variableGenerator) {
         return iqTreeTools.unaryIQTreeBuilder()
                 .append(applySubstitution(descendingSubstitution))
-                .build(child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
+                .build(iqTreeTools.applyDownPropagationWithoutOptimization(child, descendingSubstitution, variableGenerator));
     }
 
     @Override

@@ -222,22 +222,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
     protected abstract IQTree doNormalizeForOptimization(VariableGenerator variableGenerator, IQTreeCache treeCache);
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            VariableGenerator variableGenerator) {
-        try {
-            DownPropagation dp = iqTreeTools.createDownPropagation(descendingSubstitution, Optional.empty(), getVariables(), variableGenerator);
-            return dp.<IQTree, AbstractCompositeIQTree<N>>withSubstitution(this,
-                    (ds, t) -> t.doApplyDescendingSubstitutionWithoutOptimizing(ds, variableGenerator));
-        }
-        catch (DownPropagation.InconsistentDownPropagationException e) {
-            return iqTreeTools.createEmptyNode(DownPropagation.computeProjectedVariables(descendingSubstitution, getVariables()));
-        }
-    }
-
-    protected abstract IQTree doApplyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator);
-
-    @Override
     public boolean isDeclaredAsEmpty() {
         return false;
     }

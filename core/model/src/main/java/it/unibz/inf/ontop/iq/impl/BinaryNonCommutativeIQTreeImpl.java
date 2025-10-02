@@ -70,9 +70,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    protected IQTree doApplyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            VariableGenerator variableGenerator) {
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
         return getRootNode().applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, getLeftChild(), getRightChild(), variableGenerator);
     }
 

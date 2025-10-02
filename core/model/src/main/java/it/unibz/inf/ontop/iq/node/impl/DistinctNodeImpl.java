@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -23,12 +24,15 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctNode {
 
     private static final String DISTINCT_NODE_STR = "DISTINCT";
+
+    private final IQTreeTools iqTreeTools;
     private final DistinctNormalizer normalizer;
 
     @Inject
-    private DistinctNodeImpl(IntermediateQueryFactory iqFactory, DistinctNormalizer normalizer, TermFactory termFactory) {
+    private DistinctNodeImpl(IntermediateQueryFactory iqFactory, DistinctNormalizer normalizer, TermFactory termFactory, IQTreeTools iqTreeTools) {
         super(iqFactory, termFactory);
         this.normalizer = normalizer;
+        this.iqTreeTools = iqTreeTools;
     }
 
     /**
@@ -56,9 +60,10 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                                               IQTree child, VariableGenerator variableGenerator) {
         return iqFactory.createUnaryIQTree(this,
-                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
+                iqTreeTools.applyDownPropagationWithoutOptimization(child, descendingSubstitution, variableGenerator));
     }
 
     @Override

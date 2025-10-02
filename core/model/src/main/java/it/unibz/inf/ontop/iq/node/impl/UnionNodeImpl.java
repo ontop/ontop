@@ -439,12 +439,15 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     @Override
     public IQTree propagateDownConstraint(DownPropagation dp, ImmutableList<IQTree> children) {
-        return iqFactory.createNaryIQTree(this, NaryIQTreeTools.transformChildren(children, dp::propagateToChild));
+        return propagateDown(dp, children);
     }
 
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, ImmutableList<IQTree> children) {
+        return propagateDown(dp, children);
+    }
 
+    private IQTree propagateDown(DownPropagation dp, ImmutableList<IQTree> children) {
         ImmutableList<IQTree> updatedChildren = children.stream()
                 .map(dp::propagateToChild)
                 .filter(c -> !c.isDeclaredAsEmpty())
@@ -460,12 +463,12 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         }
     }
 
-
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                                               ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
         return iqFactory.createNaryIQTree(applyDescendingSubstitution(descendingSubstitution),
                 NaryIQTreeTools.transformChildren(children,
-                        c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator)));
+                        c -> iqTreeTools.applyDownPropagationWithoutOptimization(c, descendingSubstitution, variableGenerator)));
     }
 
     @Override

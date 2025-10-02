@@ -524,7 +524,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 descendingSubstitution,
                 child,
                 variableGenerator,
-                r -> propagateDescendingSubstitutionToChildWithoutOptimizing(r.delta, child, variableGenerator),
+                r -> iqTreeTools.applyDownPropagationWithoutOptimization(child, r.delta, variableGenerator),
                 iqTreeTools::createOptionalConstructionNode);
     }
 }
