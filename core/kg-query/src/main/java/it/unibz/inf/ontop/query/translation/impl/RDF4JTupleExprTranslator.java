@@ -440,12 +440,11 @@ public class RDF4JTupleExprTranslator {
 
     private IQTree createExistsSubtree(Exists exists, Variable rightProvenanceVar, TranslationResult leftTranslation) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
         TranslationResult rightTranslation = translate(exists.getSubQuery());
+        registerAdditionalVariables(leftTranslation, rightTranslation);
 
         checkIfExistsIsTranslatable(leftTranslation, rightTranslation, exists.getSubQuery());
 
         Sets.SetView<Variable> sharedVariables = getSharedVariables(rightTranslation, leftTranslation);
-        variableGenerator.registerAdditionalVariables(Sets.union(
-                leftTranslation.iqTree.getKnownVariables(), rightTranslation.iqTree.getKnownVariables()));
 
         InjectiveSubstitution<Variable> sharedVarsRenaming = getFreshRenamingSubstitution(sharedVariables);
 
@@ -523,8 +522,7 @@ public class RDF4JTupleExprTranslator {
     }
 
     private TranslationResult translateMinusOperation(TranslationResult leftTranslation, TranslationResult rightTranslation, Sets.SetView<Variable> sharedVariables) {
-        variableGenerator.registerAdditionalVariables(Sets.union(
-                leftTranslation.iqTree.getKnownVariables(), rightTranslation.iqTree.getKnownVariables()));
+        registerAdditionalVariables(leftTranslation, rightTranslation);
 
         InjectiveSubstitution<Variable> sharedVarsRenaming = getFreshRenamingSubstitution(sharedVariables);
 
@@ -582,18 +580,15 @@ public class RDF4JTupleExprTranslator {
     }
 
     private TranslationResult translateJoinLikeNode(BinaryTupleOperator join) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
-
         TranslationResult leftTranslation = translate(join.getLeftArg());
         TranslationResult rightTranslation = translate(join.getRightArg());
+        registerAdditionalVariables(leftTranslation, rightTranslation);
 
         Set<Variable> nullableVariablesLeftOrRight = Sets.union(leftTranslation.nullableVariables, rightTranslation.nullableVariables);
 
         Set<Variable> sharedVariables = getSharedVariables(leftTranslation, rightTranslation);
 
         Set<Variable> toCoalesce = Sets.intersection(sharedVariables, nullableVariablesLeftOrRight);
-
-        variableGenerator.registerAdditionalVariables(Sets.union(
-                leftTranslation.iqTree.getKnownVariables(), rightTranslation.iqTree.getKnownVariables()));
 
         // May update the variable generator!!
         InjectiveSubstitution<Variable> leftRenamingSubstitution = getFreshRenamingSubstitution(toCoalesce);
@@ -715,8 +710,7 @@ public class RDF4JTupleExprTranslator {
     private TranslationResult translate(Union union) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         TranslationResult leftTranslation = translate(union.getLeftArg());
         TranslationResult rightTranslation = translate(union.getRightArg());
-        variableGenerator.registerAdditionalVariables(Sets.union(
-                leftTranslation.iqTree.getKnownVariables(), rightTranslation.iqTree.getKnownVariables()));
+        registerAdditionalVariables(leftTranslation, rightTranslation);
 
         ImmutableSet<Variable> leftVariables = leftTranslation.iqTree.getVariables();
         ImmutableSet<Variable> rightVariables = rightTranslation.iqTree.getVariables();
@@ -940,6 +934,10 @@ public class RDF4JTupleExprTranslator {
 
     private IQTree applyInDepthRenaming(InjectiveSubstitution<Variable> renaming, IQTree tree) {
         return queryRenamer.applyInDepthRenaming(renaming, tree);
+    }
+
+    private void registerAdditionalVariables(TranslationResult left, TranslationResult right) {
+        variableGenerator.registerAdditionalVariables(Sets.union(left.iqTree.getKnownVariables(), right.iqTree.getKnownVariables()));
     }
 
     /**
