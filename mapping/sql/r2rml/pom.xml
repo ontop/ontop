@@ -6,10 +6,11 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-mapping-sql</artifactId>
-        <version>5.4.0-SNAPSHOT</version>
+        <version>5.4.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-mapping-r2rml</artifactId>
+    <name>Ontop Mapping R2RML</name>
 
     <dependencies>
         <dependency>

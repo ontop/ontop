@@ -6,10 +6,11 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-core</artifactId>
-        <version>5.4.0-SNAPSHOT</version>
+        <version>5.4.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-obda-core</artifactId>
+    <name>Ontop OBDA Core</name>
 
     <properties>
         <reuseForks>false</reuseForks>

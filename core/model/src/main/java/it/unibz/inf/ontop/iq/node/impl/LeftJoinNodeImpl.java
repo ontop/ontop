@@ -217,30 +217,43 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 DownPropagation dpR = iqTreeTools.createDownPropagation(rightDescendingSubstitution, Optional.empty(), rightChild.getVariables(), dp.getVariableGenerator());
                 IQTree updatedRightChild = dpR.propagate(rightChild);
 
-                return updatedRightChild.isDeclaredAsEmpty()
-                        ? updatedLeftChild
-                        : iqTreeTools.createLeftJoinTree(
-                                expressionAndCondition.getOptionalExpression(),
-                                updatedLeftChild, updatedRightChild);
+                if (updatedRightChild.isDeclaredAsEmpty())
+                        return paddingWithNull(updatedLeftChild, updatedRightChild);
+
+                return iqTreeTools.createLeftJoinTree(
+                        expressionAndCondition.getOptionalExpression(),
+                        updatedLeftChild, updatedRightChild);
             }
             catch (DownPropagation.InconsistentDownPropagationException e) {
-                return updatedLeftChild;
+                ImmutableSet<Variable> newlyProjectedVariables = DownPropagation.computeProjectedVariables(descendingSubstitution,
+                                projectedVariables(leftChild, rightChild).immutableCopy());
+
+                Substitution<?> paddingSubstitution = Sets.difference(newlyProjectedVariables, updatedLeftChild.getVariables()).stream()
+                        .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
+
+                return iqTreeTools.unaryIQTreeBuilder()
+                        .append(iqTreeTools.createOptionalConstructionNode(newlyProjectedVariables, paddingSubstitution, updatedLeftChild))
+                        .build(updatedLeftChild);
             }
         }
         else {
             IQTree updatedRightChild = dp.propagateWithConstraint(Optional.empty(), rightChild);
-            if (updatedRightChild.isDeclaredAsEmpty()) {
-                Substitution<?> substitution = rightSpecificVariables(updatedLeftChild, updatedRightChild).stream()
-                        .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
+            if (updatedRightChild.isDeclaredAsEmpty())
+                return paddingWithNull(updatedLeftChild, updatedRightChild);
 
-                ImmutableSet<Variable> projectedVariables = projectedVariables(updatedLeftChild, updatedRightChild).immutableCopy();
-
-                return iqTreeTools.unaryIQTreeBuilder()
-                        .append(iqTreeTools.createOptionalConstructionNode(() -> projectedVariables, substitution))
-                        .build(updatedLeftChild);
-            }
             return iqFactory.createBinaryNonCommutativeIQTree(this, updatedLeftChild, updatedRightChild);
         }
+    }
+
+    private IQTree paddingWithNull(IQTree leftChild, IQTree emptyRightChild) {
+        ImmutableSet<Variable> projectedVariables = projectedVariables(leftChild, emptyRightChild).immutableCopy();
+
+        Substitution<?> substitution = rightSpecificVariables(leftChild, emptyRightChild).stream()
+                .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
+
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(iqTreeTools.createOptionalConstructionNode(projectedVariables, substitution, leftChild))
+                .build(leftChild);
     }
 
     @Override
