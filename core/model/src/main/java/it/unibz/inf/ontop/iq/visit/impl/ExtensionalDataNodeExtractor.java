@@ -4,7 +4,7 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 
 import java.util.stream.Stream;
 
-public class ExtensionalDataNodeExtractor extends DefaultIQTreeToStreamVisitingTransformer<ExtensionalDataNode> {
+public class ExtensionalDataNodeExtractor extends DefaultIQTreeStreamVisitingTransformer<ExtensionalDataNode> {
 
     @Override
     public Stream<ExtensionalDataNode> transformExtensionalData(ExtensionalDataNode dataNode) {

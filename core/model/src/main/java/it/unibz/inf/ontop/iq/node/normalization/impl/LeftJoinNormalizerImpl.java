@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer.RightProvenance;
-import it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultIQTreeOptionalVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -203,7 +203,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             if (subTree.isRightChildEmpty()) // can result from lifting a CONSTRUCT
                 return Optional.empty();
 
-            return subTree.leftChild().acceptVisitor(new IQStateOptionalTransformer<>() {
+            return subTree.leftChild().acceptVisitor(new DefaultIQTreeOptionalVisitingTransformer<>() {
 
                 @Override
                 public Optional<State<UnaryOperatorNode, LeftJoinSubTree>> transformConstruction(UnaryIQTree liftedLeftChild, ConstructionNode constructionNode, IQTree leftGrandChild) {
@@ -288,7 +288,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .orElse(state);
         }
 
-        private class LiftRightChildStep extends IQStateOptionalTransformer<State<UnaryOperatorNode, LeftJoinSubTree>> {
+        private class LiftRightChildStep extends DefaultIQTreeOptionalVisitingTransformer<State<UnaryOperatorNode, LeftJoinSubTree>> {
 
             private final State<UnaryOperatorNode, LeftJoinSubTree> state;
             private final LeftJoinSubTree subTree;
@@ -403,7 +403,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                 ? Optional.empty()
                                 : Optional.of(createConstructionNode(subTree, substitutionFactory.getSubstitution()));
 
-                return rightGrandChild.acceptVisitor(new IQStateOptionalTransformer<>() {
+                return rightGrandChild.acceptVisitor(new DefaultIQTreeOptionalVisitingTransformer<>() {
                     @Override
                     public Optional<State<UnaryOperatorNode, LeftJoinSubTree>> transformDistinct(UnaryIQTree tree, DistinctNode distinctNode, IQTree rightGrandGrandChild) {
                         if (subTree.leftChild().isDistinct()) {

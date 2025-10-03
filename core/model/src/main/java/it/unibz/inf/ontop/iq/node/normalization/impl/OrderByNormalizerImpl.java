@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.OrderByNormalizer;
-import it.unibz.inf.ontop.iq.visit.impl.IQStateOptionalTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultIQTreeOptionalVisitingTransformer;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -77,7 +77,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
                 return Optional.empty();
 
             OrderByNode orderByNode = optionalOrderBy.get();
-            return subTree.getChild().acceptVisitor(new IQStateOptionalTransformer<>() {
+            return subTree.getChild().acceptVisitor(new DefaultIQTreeOptionalVisitingTransformer<>() {
                 @Override
                 public Optional<State<UnaryOperatorNode, UnarySubTree<OrderByNode>>> transformConstruction(UnaryIQTree tree, ConstructionNode node, IQTree newChild) {
                     Optional<OrderByNode> newOptionalOrderBy = orderByNode.applySubstitution(node.getSubstitution());

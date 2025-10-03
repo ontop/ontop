@@ -6,9 +6,8 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 
-public abstract class IQStateDefaultTransformer<T> implements IQVisitor<T> {
+public abstract class AbstractIQTreeVisitingTransformer<T> extends AbstractIQVisitor<T> {
 
     protected abstract T done();
 

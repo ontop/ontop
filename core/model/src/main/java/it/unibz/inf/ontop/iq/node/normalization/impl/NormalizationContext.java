@@ -104,7 +104,7 @@ public class NormalizationContext {
         }
     }
 
-    protected static class State<T extends UnaryOperatorNode, S> {
+    public static class State<T extends UnaryOperatorNode, S> {
         private final UnaryOperatorSequence<T> ancestors;
         private final S subTree;
 
