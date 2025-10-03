@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.AbstractIQVisitor;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultIQTreeOptionalVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -143,7 +144,7 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
     }
 
 
-    private class BooleanExpressionPusher extends AbstractIQVisitor<Optional<IQTree>> {
+    private class BooleanExpressionPusher extends DefaultIQTreeOptionalVisitingTransformer<IQTree> {
 
         private final ImmutableExpression expressionToPushDown;
 
@@ -200,7 +201,7 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
         @Override
         public Optional<IQTree> transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
             // blocks
-            return Optional.empty();
+            return done();
         }
 
         @Override
@@ -256,36 +257,6 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
 
         private UnaryIQTree wrapInFilter(ImmutableExpression expression, IQTree child) {
             return iqFactory.createUnaryIQTree(iqFactory.createFilterNode(expression), child);
-        }
-
-        @Override
-        public Optional<IQTree> transformIntensionalData(IntensionalDataNode dataNode) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<IQTree> transformExtensionalData(ExtensionalDataNode dataNode) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<IQTree> transformEmpty(EmptyNode node) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<IQTree> transformTrue(TrueNode node) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<IQTree> transformNative(NativeNode nativeNode) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<IQTree> transformValues(ValuesNode valuesNode) {
-            return Optional.empty();
         }
     }
 }

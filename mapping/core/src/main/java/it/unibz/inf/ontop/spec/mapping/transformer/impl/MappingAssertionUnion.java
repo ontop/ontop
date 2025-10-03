@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultIQTreeOptionalVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -261,7 +262,7 @@ public class MappingAssertionUnion {
 
     }
 
-    private class ConjunctiveIQExtractor implements IQVisitor<Optional<ConjunctiveIQ>> {
+    private class ConjunctiveIQExtractor extends DefaultIQTreeOptionalVisitingTransformer<ConjunctiveIQ> {
         private final DistinctVariableOnlyDataAtom projectionAtom;
         private final ConstructionNode constructionNode;
 
@@ -275,18 +276,8 @@ public class MappingAssertionUnion {
         }
 
         @Override
-        public Optional<ConjunctiveIQ> transformIntensionalData(IntensionalDataNode dataNode) {
-            return Optional.empty();
-        }
-
-        @Override
         public Optional<ConjunctiveIQ> transformExtensionalData(ExtensionalDataNode dataNode) {
             return newConjunctiveIQ(ImmutableList.of(dataNode), Optional.empty(), DisjunctionOfConjunctions.getTrue());
-        }
-
-        @Override
-        public Optional<ConjunctiveIQ> transformEmpty(EmptyNode node) {
-            return Optional.empty();
         }
 
         @Override
@@ -295,23 +286,8 @@ public class MappingAssertionUnion {
         }
 
         @Override
-        public Optional<ConjunctiveIQ> transformNative(NativeNode nativeNode) {
-            return Optional.empty();
-        }
-
-        @Override
         public Optional<ConjunctiveIQ> transformValues(ValuesNode valuesNode) {
             return newConjunctiveIQ(ImmutableList.of(), Optional.of(valuesNode), DisjunctionOfConjunctions.getTrue());
-        }
-
-        @Override
-        public Optional<ConjunctiveIQ> transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<ConjunctiveIQ> transformAggregation(UnaryIQTree tree, AggregationNode aggregationNode, IQTree child) {
-            return Optional.empty();
         }
 
         @Override
@@ -321,31 +297,6 @@ public class MappingAssertionUnion {
                 return newConjunctiveIQ(ImmutableList.of((ExtensionalDataNode) child), Optional.empty(), DisjunctionOfConjunctions.of(filter));
             if (child instanceof ValuesNode)
                 return newConjunctiveIQ(ImmutableList.of(), Optional.of((ValuesNode) child), DisjunctionOfConjunctions.of(filter));
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<ConjunctiveIQ> transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<ConjunctiveIQ> transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<ConjunctiveIQ> transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<ConjunctiveIQ> transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<ConjunctiveIQ> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             return Optional.empty();
         }
 
@@ -368,11 +319,6 @@ public class MappingAssertionUnion {
 
                 return newConjunctiveIQ(extensionalDataNodes, valuesNodes.stream().findFirst(), filter);
             }
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<ConjunctiveIQ> transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
             return Optional.empty();
         }
     }
