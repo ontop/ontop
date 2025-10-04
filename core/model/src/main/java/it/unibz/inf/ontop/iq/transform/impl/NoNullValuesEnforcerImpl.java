@@ -17,10 +17,11 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Adds NOT NULL filters to IQs in MappingAssertion (which is essentially a CQ).
+ * Simplifies functions like NULLIF in the top substitution
+ * (and propagates the non-nullability down).
  */
 
 public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
@@ -49,8 +50,8 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
         return iqTreeTools.createOptionalFilterNode(condition)
                 .map(n -> iqFactory.createUnaryIQTree(n, tree))
                 .map(t -> t.normalizeForOptimization(variableGenerator))
-                .map(this::declareTopVariablesNotNull)
-                .orElse(tree);
+                .map(t -> declareTopVariablesNotNull(t, t.getVariables()))
+                .orElseGet(() -> tree.normalizeForOptimization(variableGenerator));
     }
 
     /**
@@ -77,57 +78,38 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
      * In a bottom-up manner, NULLIF(b,0) would instead require to know that "b" is non-null *and different from 0*
      *  to simplify itself. Such information is only partially provided by the VariableNullability data structure.
      */
-    protected IQTree declareTopVariablesNotNull(IQTree tree) {
-        return tree.acceptVisitor(new NotNullTopVariablePropagator(tree.getVariables()));
-    }
+    protected IQTree declareTopVariablesNotNull(IQTree tree, ImmutableSet<Variable> nonNullVariables) {
+        return tree.acceptVisitor(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
 
-    protected class NotNullTopVariablePropagator extends DefaultNonRecursiveIQTreeTransformer {
+            @Override
+            public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
+                Substitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
 
-        protected final ImmutableSet<Variable> nonNullVariables;
+                ImmutableMap<Variable, FunctionalTermSimplification> updatedEntryMap = initialSubstitution.builder()
+                        .restrictDomainTo(nonNullVariables)
+                        .restrictRangeTo(ImmutableFunctionalTerm.class)
+                        .toMap((v, t) -> t.simplifyAsGuaranteedToBeNonNull());
 
-        protected NotNullTopVariablePropagator(ImmutableSet<Variable> nonNullVariables) {
-            this.nonNullVariables = nonNullVariables;
-        }
+                ConstructionNode newConstructionNode = iqTreeTools.replaceSubstitution(
+                        rootNode,
+                        s -> s.builder()
+                                .transformOrRetain(updatedEntryMap::get, (t, u) -> u.getSimplifiedTerm())
+                                .build());
 
-        @Override
-        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-            Substitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
+                ImmutableSet<Variable> simplifiableChildVariables = Sets.union(
+                        Sets.difference(rootNode.getVariables(), initialSubstitution.getDomain()),
+                        updatedEntryMap.values().stream()
+                                .flatMap(s -> s.getSimplifiableVariables().stream())
+                                .collect(ImmutableCollectors.toSet())).immutableCopy();
 
-            ImmutableMap<Variable, FunctionalTermSimplification> updatedEntryMap = initialSubstitution.builder()
-                    .restrictDomainTo(nonNullVariables)
-                    .restrictRangeTo(ImmutableFunctionalTerm.class)
-                    .toMap((v, t) -> t.simplifyAsGuaranteedToBeNonNull());
+                IQTree newChild = simplifiableChildVariables.isEmpty()
+                        ? child
+                        : declareTopVariablesNotNull(child, simplifiableChildVariables);  // "Recursive"
 
-            ConstructionNode newConstructionNode = iqTreeTools.replaceSubstitution(
-                    rootNode,
-                    s -> s.builder()
-                            .transformOrRetain(updatedEntryMap::get, (t, u) -> u.getSimplifiedTerm())
-                            .build());
-
-            Set<Variable> simplifiableChildVariables = Sets.union(
-                    Sets.difference(rootNode.getVariables(), initialSubstitution.getDomain()),
-                    updatedEntryMap.values().stream()
-                            .flatMap(s -> s.getSimplifiableVariables().stream())
-                            .collect(ImmutableCollectors.toSet()));
-
-            IQTree newChild = simplifiableChildVariables.isEmpty()
-                    ? child
-                    : declareTopVariablesNotNull(child);  // "Recursive"
-
-            return newConstructionNode.equals(rootNode) && (newChild == child)
-                    ? tree
-                    : iqFactory.createUnaryIQTree(newConstructionNode, newChild);
-        }
-
-        /**
-         * Propagates
-         */
-        @Override
-        public IQTree transformDistinct(UnaryIQTree tree, DistinctNode node, IQTree child) {
-            IQTree newChild = transformChild(child);
-            return newChild == child
-                    ? tree
-                    : iqFactory.createUnaryIQTree(node, newChild);
-        }
+                return newConstructionNode.equals(rootNode) && (newChild == child)
+                        ? tree
+                        : iqFactory.createUnaryIQTree(newConstructionNode, newChild);
+            }
+        });
     }
 }

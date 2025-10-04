@@ -160,8 +160,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             IQTree tree = assertion.getQuery().getTree();
             IQTree equalityTransformedTree = mappingEqualityTransformer.transform(tree);
             IQTree binaryMathOperationsTransformedTree = mappingBinaryMathOperationTransformer.transform(equalityTransformedTree);
-            IQTree normalizedTree = binaryMathOperationsTransformedTree.normalizeForOptimization(assertion.getQuery().getVariableGenerator());
-            IQTree noNullTree = noNullValueEnforcer.transform(normalizedTree);
+            IQTree noNullTree = noNullValueEnforcer.transform(binaryMathOperationsTransformedTree);
             if (noNullTree.isDeclaredAsEmpty())
                 continue;
 
@@ -183,7 +182,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     }
 
     private MappingAndDBParameters convert(SQLPPMapping ppMapping, OBDASpecInput specInput)
-            throws MetaMappingExpansionException, MetadataExtractionException, InvalidMappingSourceQueriesException {
+            throws MetadataExtractionException, InvalidMappingSourceQueriesException {
         try {
             return convert(ppMapping.getTripleMaps(), specInput.getConstraintFile(), specInput.getDBMetadataReader(),
                     specInput.getLensesReader());
