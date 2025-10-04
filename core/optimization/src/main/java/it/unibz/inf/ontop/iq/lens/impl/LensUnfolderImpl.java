@@ -35,7 +35,7 @@ public class LensUnfolderImpl extends AbstractIQOptimizer implements LensUnfolde
         if (maxLevel < 1)
             return tree;
 
-        IQVisitor<IQTree> transformer = new MaxLevelLensUnfoldingTransformer(maxLevel, variableGenerator);
+        var transformer = new MaxLevelLensUnfoldingTransformer(maxLevel, variableGenerator);
         return tree.acceptVisitor(transformer)
                 .normalizeForOptimization(variableGenerator);
     }

@@ -243,19 +243,15 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
         }
 
         private IQTree replaceNodeOnLeft(IQTree leftChild, ExtensionalDataNode leftNode, ExtensionalDataNode newLeftNode) {
-            if (leftChild.equals(leftNode))
-                return newLeftNode;
-
             if (leftNode.equals(newLeftNode))
                 return leftChild;
 
-            var replacer = new DataNodeOnLeftReplacer(leftNode, newLeftNode);
-            var newLeft = leftChild.acceptVisitor(replacer);
+            var newLeftChild = requiredDataNodeExtractor.replaceNodeOnTheLeft(leftChild, leftNode, newLeftNode);
 
-            if (!replacer.hasBeenReplaced())
+            if (newLeftChild == leftChild)
                 throw new MinorOntopInternalBugException(String.format("Could not replace %s on the left", leftNode));
 
-            return newLeft;
+            return newLeftChild;
         }
 
         /**
@@ -320,58 +316,6 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
                 .collect(ImmutableCollectors.toSet());
     }
 
-
-    /**
-     * To be kept in sync with RequiredExtensionalDataNodeExtractor.
-     * Not safe to run in parallel
-     */
-    private class DataNodeOnLeftReplacer extends DefaultNonRecursiveIQTreeTransformer {
-
-        private final ExtensionalDataNode nodeToBeReplaced;
-        private final ExtensionalDataNode replacingNode;
-        // mutable
-        private boolean found;
-
-        DataNodeOnLeftReplacer(ExtensionalDataNode nodeToBeReplaced,
-                               ExtensionalDataNode replacingNode) {
-            this.nodeToBeReplaced = nodeToBeReplaced;
-            this.replacingNode = replacingNode;
-            this.found = false;
-        }
-
-        public boolean hasBeenReplaced() {
-            return found;
-        }
-
-        @Override
-        public IQTree transformExtensionalData(ExtensionalDataNode dataNode) {
-            if (!found && dataNode.equals(nodeToBeReplaced)) {
-                found = true;
-                return replacingNode;
-            }
-            return dataNode;
-        }
-
-        @Override
-        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            if (found)
-                return tree;
-            var newLeft = transformChild(leftChild);
-            return newLeft.equals(leftChild)
-                    ? tree
-                    : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeft, rightChild);
-        }
-
-        @Override
-        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            if (found)
-                return tree;
-            var newChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
-            return newChildren.equals(children)
-                    ? tree
-                    : iqFactory.createNaryIQTree(rootNode, newChildren);
-        }
-    }
 
     protected static class DataNodeAndProvenanceVariables {
         public final ExtensionalDataNode dataNode;

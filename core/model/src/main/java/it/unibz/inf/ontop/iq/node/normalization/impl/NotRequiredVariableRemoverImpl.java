@@ -147,7 +147,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
                     ? child
                     : childVariablesToRemove.equals(variablesToRemove)
                         ? transformChild(child)
-                        : child.acceptVisitor(new VariableRemoverTransformer(childVariablesToRemove, variableGenerator));
+                        : (new VariableRemoverTransformer(childVariablesToRemove, variableGenerator)).transformChild(child);
         }
 
         @Override

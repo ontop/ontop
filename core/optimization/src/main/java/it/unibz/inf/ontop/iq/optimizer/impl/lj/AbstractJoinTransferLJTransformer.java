@@ -340,7 +340,6 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
         public final ImmutableList<Integer> determinantIndexes;
         public final ExtensionalDataNode extensionalDataNode;
 
-
         public SelectedNode(ImmutableList<Integer> determinantIndexes, ExtensionalDataNode extensionalDataNode) {
             this.determinantIndexes = determinantIndexes;
             this.extensionalDataNode = extensionalDataNode;
