@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.visit.impl.AbstractIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.AbstractIQTreeGenericVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class ReferenceValueReplacer {
 
         LOGGER.debug("Reference values to be replaced: {}", referenceToInputMap);
 
-        IQTree newTree = referenceIq.getTree().acceptVisitor(new AbstractIQTreeVisitingTransformer<>() {
+        IQTree newTree = referenceIq.getTree().acceptVisitor(new AbstractIQTreeGenericVisitingTransformer<>() {
             @Override
             protected IQTree done() {
                 throw new MinorOntopInternalBugException("Expected only ConstructionNodes, NativeNodes and EmptyNodes");

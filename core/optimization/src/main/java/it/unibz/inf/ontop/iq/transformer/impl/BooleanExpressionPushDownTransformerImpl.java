@@ -40,7 +40,7 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
 
     @Override
     public IQTree transform(IQTree tree) {
-        return tree.acceptVisitor(transformer);
+        return transformer.transform(tree);
     }
 
 
@@ -100,7 +100,7 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
         }
 
         private Optional<IQTree> pushExpressionDown(ImmutableExpression expression, IQTree child) {
-            return child.acceptVisitor(new BooleanExpressionPusher(expression));
+            return getTransformer(expression).transform(child);
         }
 
         private Optional<IQTree> pushExpressionDownIfContainsVariables(ImmutableExpression expression, IQTree tree) {
@@ -142,6 +142,9 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
         }
     }
 
+    private BooleanExpressionPusher getTransformer(ImmutableExpression expression) {
+        return new BooleanExpressionPusher(expression);
+    }
 
     private class BooleanExpressionPusher extends DefaultIQTreeOptionalVisitingTransformer<IQTree> {
 
@@ -154,15 +157,14 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
         @Override
         public Optional<IQTree> transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
             ImmutableExpression newExpression = rootNode.getSubstitution().apply(expressionToPushDown);
-            BooleanExpressionPusher newPusher = new BooleanExpressionPusher(newExpression);
-            return newPusher.visitPassingUnaryNode(rootNode, child);
+            return getTransformer(newExpression).transformPassingUnaryNode(rootNode, child);
         }
 
         @Override
         public Optional<IQTree> transformAggregation(UnaryIQTree tree, AggregationNode aggregationNode, IQTree child) {
             ImmutableSet<Variable> expressionVariables = expressionToPushDown.getVariables();
             return aggregationNode.getGroupingVariables().containsAll(expressionVariables)
-                    ? visitPassingUnaryNode(aggregationNode, child)
+                    ? transformPassingUnaryNode(aggregationNode, child)
                     : Optional.empty();
         }
 
@@ -189,12 +191,12 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
                     .anyMatch(v -> v.equals(rootNode.getOutputVariable()) ||
                             (indexVariable.isPresent() && v.equals(indexVariable.get())))
                     ? Optional.empty()
-                    : visitPassingUnaryNode(rootNode, child);
+                    : transformPassingUnaryNode(rootNode, child);
         }
 
         @Override
         public Optional<IQTree> transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-            return visitPassingUnaryNode(rootNode, child);
+            return transformPassingUnaryNode(rootNode, child);
         }
 
         @Override
@@ -205,10 +207,10 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
 
         @Override
         public Optional<IQTree> transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-            return visitPassingUnaryNode(rootNode, child);
+            return transformPassingUnaryNode(rootNode, child);
         }
 
-        private Optional<IQTree> visitPassingUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
+        private Optional<IQTree> transformPassingUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
             IQTree newChild = transform(child)
                     .orElseGet(() -> wrapInFilter(expressionToPushDown, child));
 

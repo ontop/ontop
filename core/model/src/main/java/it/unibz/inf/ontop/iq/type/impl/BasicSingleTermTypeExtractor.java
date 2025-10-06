@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.type.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.Attribute;
@@ -12,7 +11,7 @@ import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
-import it.unibz.inf.ontop.iq.visit.impl.AbstractIQTreeVisitor;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultIQTreeOptionalVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -38,7 +37,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
     }
 
     private Optional<TermType> extractTypeFromVariable(Variable variable, IQTree subTree) {
-        return subTree.acceptVisitor(new TermTypeVariableVisitor(variable));
+        return (new VariableTermTypeExtractor(variable)).transform(subTree);
     }
 
     private Optional<TermType> extractType(NonVariableTerm nonVariableTerm, IQTree subTree) {
@@ -74,17 +73,12 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
     }
 
 
-    private class TermTypeVariableVisitor extends AbstractIQTreeVisitor<Optional<TermType>> {
+    private class VariableTermTypeExtractor extends DefaultIQTreeOptionalVisitingTransformer<TermType> {
 
         private final Variable variable;
 
-        private TermTypeVariableVisitor(Variable variable) {
+        VariableTermTypeExtractor(Variable variable) {
             this.variable = variable;
-        }
-
-        @Override
-        public Optional<TermType> transformIntensionalData(IntensionalDataNode dataNode) {
-            return Optional.empty();
         }
 
         @Override
@@ -101,28 +95,15 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         }
 
         @Override
-        public Optional<TermType> transformEmpty(EmptyNode node) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<TermType> transformTrue(TrueNode node) {
-            return Optional.empty();
-        }
-
-        @Override
         public Optional<TermType> transformNative(NativeNode nativeNode) {
             return Optional.ofNullable(nativeNode.getTypeMap().get(variable));
         }
 
         @Override
         public Optional<TermType> transformValues(ValuesNode valuesNode) {
-            ImmutableSet<TermType> termTypes = valuesNode.getValueStream(variable)
+            return valuesNode.getValueStream(variable)
                     .map(Constant::getOptionalType)
                     .flatMap(Optional::stream)
-                    .collect(ImmutableCollectors.toSet());
-
-            return termTypes.stream()
                     .findAny();
         }
 

@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormaliz
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
-import it.unibz.inf.ontop.iq.visit.impl.AbstractIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.AbstractIQTreeGenericVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -347,7 +347,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         }
 
         InnerJoinSubTree getChildLift(IQTree tree) {
-            return tree.acceptVisitor(new AbstractIQTreeVisitingTransformer<>() {
+            return tree.acceptVisitor(new AbstractIQTreeGenericVisitingTransformer<>() {
                 @Override
                 protected InnerJoinSubTree done() {
                     return new InnerJoinSubTree(Optional.empty(), ImmutableList.of(tree));

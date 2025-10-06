@@ -265,7 +265,7 @@ public class MappingAssertionUnion {
         private final DistinctVariableOnlyDataAtom projectionAtom;
         private final ConstructionNode constructionNode;
 
-        private ConjunctiveIQExtractor(DistinctVariableOnlyDataAtom projectionAtom, ConstructionNode constructionNode) {
+        ConjunctiveIQExtractor(DistinctVariableOnlyDataAtom projectionAtom, ConstructionNode constructionNode) {
             this.projectionAtom = projectionAtom;
             this.constructionNode = constructionNode;
         }

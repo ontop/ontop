@@ -3,18 +3,24 @@ package it.unibz.inf.ontop.iq.transform.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.visit.impl.AbstractIQTreeVisitor;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 
 
 /**
- * Delegates the call to transformLeaf, transformUnaryNode,
- * transformNaryCommutativeNode or transformBinaryNonCommutativeNode
- * depending on the type of the node.
- *
+ * A superclass for {@code IQTreeVisitor}s that transform a given {@code IQTree} into an {@code IQTree}.
+ * <p>
+ * Delegates the calls to {@code transformLeaf}, {@code transformUnaryNode},
+ * {@code transformNaryCommutativeNode} or {@code transformBinaryNonCommutativeNode}
+ * depending on the type of the root node of the tree.
+ * <p>
  * To be extended by overriding the methods of interest.
  */
 
-public abstract class DefaultIQTreeVisitingTransformer extends AbstractIQTreeVisitor<IQTree> {
+public abstract class DefaultIQTreeVisitingTransformer implements IQTreeVisitor<IQTree> {
+
+    public final IQTree transform(IQTree tree) {
+        return tree.acceptVisitor(this);
+    }
 
     @Override
     public final IQTree transformNative(NativeNode nativeNode) {

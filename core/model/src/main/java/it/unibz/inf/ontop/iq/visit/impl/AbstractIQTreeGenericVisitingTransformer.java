@@ -6,8 +6,23 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 
-public abstract class AbstractIQTreeVisitingTransformer<T> extends AbstractIQTreeVisitor<T> {
+/**
+ * A superclass for {@code IQTreeVisitor}s that transform a given {@code IQTree} into a {@code T}.
+ * <p>
+ * The default implementation of all visitor methods is non-recursive and delegates to {@code done()}.
+ * <p>
+ * To be extended by overriding the methods of interest.
+ *
+ * @param <T>
+ */
+
+public abstract class AbstractIQTreeGenericVisitingTransformer<T> implements IQTreeVisitor<T> {
+
+    public final T transform(IQTree tree) {
+        return tree.acceptVisitor(this);
+    }
 
     protected abstract T done();
 

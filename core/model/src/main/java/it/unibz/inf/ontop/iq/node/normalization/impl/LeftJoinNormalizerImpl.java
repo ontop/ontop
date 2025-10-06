@@ -418,6 +418,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         }
                         return Optional.empty();
                     }
+
                     @Override
                     public Optional<State<UnaryOperatorNode, LeftJoinSubTree>> transformFilter(UnaryIQTree tree, FilterNode filterNode, IQTree rightGrandGrandChild) {
                         ImmutableExpression filterCondition = filterNode.getFilterCondition();
@@ -430,6 +431,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                 optionalProjectingAwayParent,
                                 subTree.replaceRight(Optional.of(newLJCondition), newRightChild)));
                     }
+
                     @Override
                     public Optional<State<UnaryOperatorNode, LeftJoinSubTree>> transformInnerJoin(NaryIQTree tree, InnerJoinNode joinNode, ImmutableList<IQTree> grandGrandChildren) {
                         Optional<ImmutableExpression> joinCondition = joinNode.getOptionalFilterCondition();

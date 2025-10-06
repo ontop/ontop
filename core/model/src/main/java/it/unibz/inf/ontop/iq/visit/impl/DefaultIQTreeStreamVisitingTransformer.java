@@ -6,7 +6,15 @@ import it.unibz.inf.ontop.iq.node.*;
 
 import java.util.stream.Stream;
 
-public class DefaultIQTreeStreamVisitingTransformer<T> extends AbstractIQTreeVisitingTransformer<Stream<T>> {
+/**
+ * A superclass for {@code IQTreeVisitor} that transforms a given {@code IQTree} into a {@code Stream<T>}
+ *
+ * The default implementation of all visitor methods is recursive:
+ * the leaves return the empty {@code Optional}, while all composite {@code IQTree}s concatenate the streams of their children.
+ *
+ * @param <T>
+ */
+public class DefaultIQTreeStreamVisitingTransformer<T> extends AbstractIQTreeGenericVisitingTransformer<Stream<T>> {
 
     @Override
     protected final Stream<T> done() {
