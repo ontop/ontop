@@ -14,46 +14,45 @@ import javax.inject.Singleton;
 import java.util.stream.Stream;
 
 
-/**
- * Looks for extensional data nodes that are required to provide tuples.
- *
- * For instance, excludes data atoms only appearing on the right of a LJ.
- *
- * MAY BE INCOMPLETE
- *
- */
-
-
 @Singleton
-public class RequiredExtensionalDataNodeExtractorImpl extends DefaultIQTreeStreamVisitingTransformer<ExtensionalDataNode>
-        implements RequiredExtensionalDataNodeExtractor {
+public class RequiredExtensionalDataNodeExtractorImpl implements RequiredExtensionalDataNodeExtractor {
+
+    private final Transformer transformer;
 
     @Inject
-    protected RequiredExtensionalDataNodeExtractorImpl() {
+    private RequiredExtensionalDataNodeExtractorImpl() {
+        this.transformer = new Transformer();
     }
 
-    @Override
-    public Stream<ExtensionalDataNode> transformExtensionalData(ExtensionalDataNode dataNode) {
-        return Stream.of(dataNode);
+    public Stream<ExtensionalDataNode> transform(IQTree tree) {
+        return transformer.transform(tree);
     }
 
-    @Override
-    public Stream<ExtensionalDataNode> transformAggregation(UnaryIQTree tree, AggregationNode aggregationNode, IQTree child) {
-        // blocks
-        return Stream.empty();
-    }
+    private static class Transformer extends DefaultIQTreeStreamVisitingTransformer<ExtensionalDataNode> {
 
-    @Override
-    public Stream<ExtensionalDataNode> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        // Only considers the left child
-        return transform(leftChild);
-    }
+        @Override
+        public Stream<ExtensionalDataNode> transformExtensionalData(ExtensionalDataNode dataNode) {
+            return Stream.of(dataNode);
+        }
 
-    /**
-     * TODO: try to extract some common data nodes
-     */
-    @Override
-    public Stream<ExtensionalDataNode> transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        return Stream.empty();
+        @Override
+        public Stream<ExtensionalDataNode> transformAggregation(UnaryIQTree tree, AggregationNode aggregationNode, IQTree child) {
+            // blocks
+            return Stream.empty();
+        }
+
+        @Override
+        public Stream<ExtensionalDataNode> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+            // Only considers the left child
+            return transform(leftChild);
+        }
+
+        /**
+         * TODO: try to extract some common data nodes
+         */
+        @Override
+        public Stream<ExtensionalDataNode> transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+            return Stream.empty();
+        }
     }
 }
