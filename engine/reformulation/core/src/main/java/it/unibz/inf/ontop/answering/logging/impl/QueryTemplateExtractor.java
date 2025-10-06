@@ -62,7 +62,7 @@ public class QueryTemplateExtractor {
         IQTree initialIQTree = iq.getTree();
         QueryTemplateTransformer transformer = new QueryTemplateTransformer(iq.getVariableGenerator());
 
-        IQTree newTree = initialIQTree.acceptVisitor(transformer);
+        IQTree newTree = transformer.transform(initialIQTree);
         ImmutableMap<GroundTerm, Variable> parameterMap = transformer.getParameterMap();
 
         if (parameterMap.isEmpty())

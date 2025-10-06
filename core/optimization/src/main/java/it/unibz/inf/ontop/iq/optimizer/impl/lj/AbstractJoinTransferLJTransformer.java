@@ -326,12 +326,20 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
     private IQTree replaceSelectedNodesAndRename(ImmutableSet<SelectedNode> selectedNodes, IQTree rightChild,
                                                  InjectiveSubstitution<Variable> renamingSubstitution) {
 
-        ReplaceNodeByTrueTransformer transformer = new ReplaceNodeByTrueTransformer(
-                selectedNodes.stream()
-                        .map(n -> n.extensionalDataNode)
-                        .collect(ImmutableCollectors.toSet()));
+        var dataNodesToReplace = selectedNodes.stream()
+                .map(n -> n.extensionalDataNode)
+                .collect(ImmutableCollectors.toSet());
 
-        IQTree transformedTree = rightChild.acceptVisitor(transformer);
+        var transformer = new DefaultRecursiveIQTreeVisitingTransformer(AbstractJoinTransferLJTransformer.this.iqFactory) {
+            @Override
+            public IQTree transformExtensionalData(ExtensionalDataNode dataNode) {
+                return dataNodesToReplace.contains(dataNode)
+                        ? iqFactory.createTrueNode()
+                        : dataNode;
+            }
+        };
+
+        IQTree transformedTree = transformer.transform(rightChild);
         return iqTreeTools.applyDownPropagation(renamingSubstitution, transformedTree);
     }
 
@@ -391,20 +399,4 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
     }
 
 
-    private class ReplaceNodeByTrueTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
-
-        private final ImmutableSet<ExtensionalDataNode> dataNodesToReplace;
-
-        ReplaceNodeByTrueTransformer(ImmutableSet<ExtensionalDataNode> dataNodesToReplace) {
-            super(AbstractJoinTransferLJTransformer.this.iqFactory);
-            this.dataNodesToReplace = dataNodesToReplace;
-        }
-
-        @Override
-        public IQTree transformExtensionalData(ExtensionalDataNode dataNode) {
-            return dataNodesToReplace.contains(dataNode)
-                    ? iqFactory.createTrueNode()
-                    : dataNode;
-        }
-    }
 }

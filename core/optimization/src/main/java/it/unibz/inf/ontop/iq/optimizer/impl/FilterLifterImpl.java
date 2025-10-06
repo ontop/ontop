@@ -34,7 +34,7 @@ public class FilterLifterImpl implements FilterLifter {
 
     @Override
     public IQTree transform(IQTree tree) {
-        return tree.acceptVisitor(transformer);
+        return transformer.transform(tree);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

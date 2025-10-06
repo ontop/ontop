@@ -48,7 +48,11 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(new Transformer(variableGenerator));
+        return getTransformer(variableGenerator).transform(tree);
+    }
+
+    private Transformer getTransformer(VariableGenerator variableGenerator) {
+        return new Transformer(variableGenerator);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {

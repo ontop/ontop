@@ -38,7 +38,7 @@ public class SubQueryFromComplexJoinExtraNormalizer implements DialectExtraNorma
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(transformer);
+        return transformer.transform(tree);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

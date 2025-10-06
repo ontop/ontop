@@ -17,21 +17,21 @@ Used to get rid of limits in sub-queries that are not necessary, for dialects li
 public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final EliminateLimitsFromSubQueriesTransformer eliminateLimitsFromSubQueriesTransformer;
+    private final Transformer transformer;
 
     @Inject
     protected EliminateLimitsFromSubQueriesNormalizer(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
-        this.eliminateLimitsFromSubQueriesTransformer = new EliminateLimitsFromSubQueriesTransformer();
+        this.transformer = new Transformer();
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(eliminateLimitsFromSubQueriesTransformer);
+        return transformer.transform(tree);
     }
 
-    private class EliminateLimitsFromSubQueriesTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
-        EliminateLimitsFromSubQueriesTransformer() {
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
+        Transformer() {
             super(EliminateLimitsFromSubQueriesNormalizer.this.iqFactory);
         }
 
@@ -42,7 +42,7 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
                 return super.transformSlice(tree, sliceNode, child);
 
             var subLimitTransformer = new SubLimitTransformer(sliceNode.getLimit().getAsLong());
-            return iqFactory.createUnaryIQTree(sliceNode, child.acceptVisitor(subLimitTransformer));
+            return iqFactory.createUnaryIQTree(sliceNode, subLimitTransformer.transform(child));
         }
     }
 
@@ -102,7 +102,7 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
         }
 
         private IQTree defaultToParentTransformer(IQTree tree) {
-            return tree.acceptVisitor(eliminateLimitsFromSubQueriesTransformer);
+            return tree.acceptVisitor(transformer);
         }
     }
 }

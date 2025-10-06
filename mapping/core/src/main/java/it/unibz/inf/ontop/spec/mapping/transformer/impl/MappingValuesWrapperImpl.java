@@ -154,5 +154,4 @@ public class MappingValuesWrapperImpl implements MappingValuesWrapper {
             super(name, baseTypesForValidation);
         }
     }
-
 }

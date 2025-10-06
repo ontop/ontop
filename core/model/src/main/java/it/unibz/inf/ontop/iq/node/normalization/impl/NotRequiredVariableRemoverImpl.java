@@ -43,7 +43,11 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         ImmutableSet<Variable> variablesToRemove = tree.getVariableNonRequirement()
                 .computeVariablesToRemove(variables, requiredVariables);
 
-        return tree.acceptVisitor(new VariableRemoverTransformer(variablesToRemove, variableGenerator));
+        return getTransformer(variablesToRemove, variableGenerator).transform(tree);
+    }
+
+    private VariableRemoverTransformer getTransformer(ImmutableSet<Variable> variablesToRemove, VariableGenerator variableGenerator) {
+        return new VariableRemoverTransformer(variablesToRemove, variableGenerator);
     }
 
     /**
@@ -147,7 +151,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
                     ? child
                     : childVariablesToRemove.equals(variablesToRemove)
                         ? transform(child)
-                        : (new VariableRemoverTransformer(childVariablesToRemove, variableGenerator)).transform(child);
+                        : getTransformer(childVariablesToRemove, variableGenerator).transform(child);
         }
 
         @Override

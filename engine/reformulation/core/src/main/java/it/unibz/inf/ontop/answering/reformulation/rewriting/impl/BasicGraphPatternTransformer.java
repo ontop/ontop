@@ -24,7 +24,7 @@ public abstract class BasicGraphPatternTransformer  {
     }
 
     public IQTree transform(IQTree tree) {
-        return tree.acceptVisitor(transformer);
+        return transformer.transform(tree);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
