@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.iq.transform.node.QueryNodeTransformer;
 import java.util.stream.IntStream;
 
 /**
- * Uses a HomogeneousQueryNodeTransformer
+ * @see it.unibz.inf.ontop.iq.transform.node.QueryNodeTransformer
  */
 public final class IQTreeVisitingNodeTransformer extends DefaultIQTreeVisitingTransformer {
 

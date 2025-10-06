@@ -9,14 +9,17 @@ import it.unibz.inf.ontop.iq.node.*;
 import java.util.function.Function;
 
 /**
- * Method transformLeaf simply returns the tree unchanged.
- * Method transformUnaryNode, transformNaryCommutativeNode
- * or transformBinaryNonCommutativeNode apply the transformer to
- * their children and if the result is different, creates a new subtree;
- * otherwise, the input tree is reused.
+ *  * A superclass for {@code IQTreeVisitor}s that transform a given {@code IQTree} into an {@code IQTree}.
  *
+ * Method {@code transformLeaf} returns the tree unchanged.
+ * Method {@code transformUnaryNode}, {@code transformNaryCommutativeNode}
+ * or {@code transformBinaryNonCommutativeNode} apply the transformer to
+ * their children and, if the result is different, creates a new subtree;
+ * otherwise, the input tree is reused (to reuse the {@code IQTreeCache} object).
+ * <p>
  * To be extended by overloading the methods of interest.
  */
+
 public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultIQTreeVisitingTransformer {
 
     protected final IntermediateQueryFactory iqFactory;
@@ -24,7 +27,6 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
     protected DefaultRecursiveIQTreeVisitingTransformer(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
     }
-
 
     @Override
     protected final IQTree transformLeaf(LeafIQTree leaf){

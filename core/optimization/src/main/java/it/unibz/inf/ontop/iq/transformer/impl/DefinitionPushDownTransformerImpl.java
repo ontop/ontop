@@ -42,12 +42,16 @@ public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTran
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.iqTreeTools = iqTreeTools;
-        this.transformer = new Transformer(request);
+        this.transformer = getTransformer(request);
     }
 
     @Override
     public IQTree transform(IQTree tree) {
-        return tree.acceptVisitor(transformer);
+        return transformer.transform(tree);
+    }
+
+    private Transformer getTransformer(DefinitionPushDownRequest request) {
+        return new Transformer(request);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -96,7 +100,7 @@ public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTran
                     .orElseGet(() -> iqFactory.createUnaryIQTree(
                             iqFactory.createConstructionNode(newProjectedVariables, initialSubstitution),
                             // "Recursive"
-                            child.acceptVisitor(new Transformer(newRequest))));
+                            getTransformer(newRequest).transform(child)));
         }
 
         /**
@@ -144,13 +148,8 @@ public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTran
                 return blockDefinition(tree);
 
             int i = selectedChild.getAsInt();
-            ImmutableList<IQTree> newChildren = IntStream.range(0, children.size())
-                            .mapToObj(j -> i == j
-                                    // Pushes down the definition to selected child
-                                    ? transform(children.get(j))
-                                    : children.get(j))
-                            .collect(ImmutableCollectors.toList());
-
+            // Pushes down the definition to selected child
+            var newChildren = NaryIQTreeTools.replaceChild(children, i, transform(children.get(i)));
             return iqFactory.createNaryIQTree(rootNode, newChildren);
         }
 

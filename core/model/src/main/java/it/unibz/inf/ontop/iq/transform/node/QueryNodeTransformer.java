@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.iq.node.*;
  *
  * The tree argument can be used for getting additional context information for transforming the node.
  *
- * @see DefaultQueryNodeTransformer
+ * @see it.unibz.inf.ontop.iq.transform.impl.IQTreeVisitingNodeTransformer
  */
 
 public interface QueryNodeTransformer {
