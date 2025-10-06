@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.transform.impl.CompositeIQTreeVariableGeneratorTran
 public class MySQLExtraNormalizer extends CompositeIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     @Inject
-    private MySQLExtraNormalizer(OnlyInPresenceOfDistinctProjectOrderByTermsNormalizer orderByNormalizer,
+    protected MySQLExtraNormalizer(OnlyInPresenceOfDistinctProjectOrderByTermsNormalizer orderByNormalizer,
                                  ReplaceProvenanceConstantByNonGroundTermNormalizer provenanceNormalizer,
                                  ConvertValuesToUnionNormalizer toUnionNormalizer) {
         super(orderByNormalizer,

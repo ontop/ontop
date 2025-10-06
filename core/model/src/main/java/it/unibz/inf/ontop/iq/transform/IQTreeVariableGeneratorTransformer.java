@@ -25,6 +25,9 @@ public interface IQTreeVariableGeneratorTransformer {
     }
 
     static IQTreeVariableGeneratorTransformer of(IQTreeVariableGeneratorTransformer... transformers) {
+        if (transformers.length == 1)
+            return transformers[0];
+
         ImmutableList<IQTreeVariableGeneratorTransformer> list = ImmutableList.copyOf(transformers);
         return (t, vg) -> {
             // non-final

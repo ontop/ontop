@@ -3,9 +3,7 @@ package it.unibz.inf.ontop.generation.normalization.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -14,7 +12,6 @@ import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransf
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
@@ -24,29 +21,16 @@ not support that, so instead we push the CONSTRUCT down into the ORDER BY so the
 the CONSTRUCT.
 Generally, an `AlwaysProjectOrderByTerms` normalizer is expected to be run before calling this normalizer.
  */
-public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormalizer {
 
-    private final IntermediateQueryFactory iqFactory;
-    private final IQTreeTools iqTreeTools;
-    private final Transformer transformer;
-    private final boolean onlyDistinct;
+public class PushProjectedOrderByTermsTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+        private final IQTreeTools iqTreeTools;
+        private final boolean onlyDistinct;
 
-    protected PushProjectedOrderByTermsNormalizer(boolean onlyDistinct,
-                                                  CoreSingletons coreSingletons) {
-        this.iqFactory = coreSingletons.getIQFactory();
-        this.onlyDistinct = onlyDistinct;
-        this.iqTreeTools = coreSingletons.getIQTreeTools();
-        this.transformer = new Transformer();
-    }
-
-    @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transformer.transform(tree);
-    }
-
-    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-        Transformer() {
-            super(PushProjectedOrderByTermsNormalizer.this.iqFactory);
+        protected PushProjectedOrderByTermsTransformer(boolean onlyDistinct,
+                    CoreSingletons coreSingletons) {
+            super(coreSingletons.getIQFactory());
+            this.iqTreeTools = coreSingletons.getIQTreeTools();
+            this.onlyDistinct = onlyDistinct;
         }
 
         @Override
@@ -124,4 +108,3 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
                     orderBy.getComparators(), t -> definedInConstruct.getOrDefault(t, t)));
         }
     }
-}

@@ -5,13 +5,11 @@ import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.term.impl.NonGroundExpressionImpl;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,25 +22,16 @@ CASE WHEN <expr1> OR|AND <expr2> THEN FALSE[TRUE] WHEN NOT <expr1> OR|AND <expr2
 for dialects such as Denodo that do not allow IS [NOT] NULL to be executed on conjunctions/disjunctions.
  */
 @Singleton
-public class SplitIsNullOverConjunctionDisjunctionNormalizer implements DialectExtraNormalizer {
-
-    private final CoreSingletons coreSingletons;
-    private final IQTreeTransformer expressionTransformer;
+public class SplitIsNullOverConjunctionDisjunctionNormalizer extends DialectExtraNormalizerBase implements DialectExtraNormalizer {
 
     @Inject
     protected SplitIsNullOverConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {
-        this.coreSingletons = coreSingletons;
-        this.expressionTransformer = new ExpressionTransformer().treeTransformer();
+        super(new ExpressionTransformer(coreSingletons).treeTransformer());
     }
 
-    @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return expressionTransformer.transform(tree);
-    }
+    private static class ExpressionTransformer extends AbstractTermTransformer {
 
-    private class ExpressionTransformer extends AbstractTermTransformer {
-
-        ExpressionTransformer() {
+        ExpressionTransformer(CoreSingletons coreSingletons) {
             super(coreSingletons.getIQFactory(), coreSingletons.getTermFactory());
         }
 

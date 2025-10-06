@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.generation.normalization.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
@@ -11,10 +10,8 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.node.JoinLikeNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 /**
  * When (left,inner) joins are having (left,inner) joins as children.
@@ -25,26 +22,17 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
  *
  */
 @Singleton
-public class SubQueryFromComplexJoinExtraNormalizer implements DialectExtraNormalizer {
-
-    private final IntermediateQueryFactory iqFactory;
-    private final Transformer transformer;
+public class SubQueryFromComplexJoinExtraNormalizer extends DialectExtraNormalizerBase {
 
     @Inject
     protected SubQueryFromComplexJoinExtraNormalizer(CoreSingletons coreSingletons) {
-        this.iqFactory = coreSingletons.getIQFactory();
-        this.transformer = new Transformer();
+        super(new Transformer(coreSingletons.getIQFactory())::transform);
     }
 
-    @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transformer.transform(tree);
-    }
+    private static class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-
-        Transformer() {
-            super(SubQueryFromComplexJoinExtraNormalizer.this.iqFactory);
+        Transformer(IntermediateQueryFactory iqFactory) {
+            super(iqFactory);
         }
 
         @Override

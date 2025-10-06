@@ -2,9 +2,7 @@ package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -15,7 +13,6 @@ import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
@@ -26,30 +23,22 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
  * (causing a MINUS encoded with a LJ and filter is null not to work)
  */
 @Singleton
-public class ReplaceProvenanceConstantByNonGroundTermNormalizer implements DialectExtraNormalizer {
-
-    private final TermFactory termFactory;
-    private final IntermediateQueryFactory iqFactory;
-    private final IQTreeTools iqTreeTools;
-    private final Transformer transformer;
+public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DialectExtraNormalizerBase {
 
     @Inject
     protected ReplaceProvenanceConstantByNonGroundTermNormalizer(CoreSingletons coreSingletons) {
-        this.termFactory = coreSingletons.getTermFactory();
-        this.iqTreeTools = coreSingletons.getIQTreeTools();
-        this.iqFactory = coreSingletons.getIQFactory();
-        this.transformer = new Transformer();
+        super(new Transformer(coreSingletons)::transform);
     }
 
-    @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transformer.transform(tree);
-    }
+    private static class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
+        private final TermFactory termFactory;
+        private final IQTreeTools iqTreeTools;
 
-        Transformer() {
-            super(ReplaceProvenanceConstantByNonGroundTermNormalizer.this.iqFactory);
+        Transformer(CoreSingletons coreSingletons) {
+            super(coreSingletons.getIQFactory());
+            this.termFactory = coreSingletons.getTermFactory();
+            this.iqTreeTools = coreSingletons.getIQTreeTools();
         }
 
         @Override

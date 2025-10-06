@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -17,17 +18,17 @@ Used to get rid of limits in sub-queries that are not necessary, for dialects li
 public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final Transformer transformer;
+    private final IQTreeTransformer parentTransformer;
 
     @Inject
     protected EliminateLimitsFromSubQueriesNormalizer(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
-        this.transformer = new Transformer();
+        this.parentTransformer = IQTreeTransformer.of(new Transformer());
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transformer.transform(tree);
+        return parentTransformer.transform(tree);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -61,48 +62,45 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             return withTransformedChildren(tree,
-                    transform(tree.getLeftChild()),
-                    defaultToParentTransformer(tree.getRightChild()));
+                    transform(leftChild),
+                    parentTransformer.transform(rightChild));
         }
 
-        /**If the child slice has a lower limit than the parent, we cannot drop it
-        *We once again only perform this normalization if there is no OFFSET
-         * */
+        /**
+         * If the child slice has a lower limit than the parent, we cannot drop it
+         * We once again only perform this normalization if there is no OFFSET
+         */
         @Override
         public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
             if (sliceNode.getOffset() != 0 || sliceNode.getLimit().isEmpty() || sliceNode.getLimit().getAsLong() < currentBounds)
-                return defaultToParentTransformer(tree);
+                return parentTransformer.transform(tree);
 
-            return transform(tree.getChildren().get(0));
+            return transform(child);
         }
 
         @Override
         public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-            return defaultToParentTransformer(tree);
+            return parentTransformer.transform(tree);
         }
 
         @Override
         public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-            return defaultToParentTransformer(tree);
+            return parentTransformer.transform(tree);
         }
 
         @Override
         public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-            return defaultToParentTransformer(tree);
+            return parentTransformer.transform(tree);
         }
 
         @Override
         public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
-            return defaultToParentTransformer(tree);
+            return parentTransformer.transform(tree);
         }
 
         @Override
         public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
-            return defaultToParentTransformer(tree);
-        }
-
-        private IQTree defaultToParentTransformer(IQTree tree) {
-            return tree.acceptVisitor(transformer);
+            return parentTransformer.transform(tree);
         }
     }
 }

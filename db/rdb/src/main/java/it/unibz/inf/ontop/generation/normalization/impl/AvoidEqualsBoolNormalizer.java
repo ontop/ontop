@@ -2,16 +2,13 @@ package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractDBNonStrictEqOperator;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.DefaultDBStrictEqFunctionSymbol;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
@@ -20,24 +17,15 @@ import java.util.Optional;
  * the generated queries under certain conditions. This normalizer searches such cases and replaces them by just `<expression>`.
  * `<expression> = false` is handled similarly.
  */
-public class AvoidEqualsBoolNormalizer implements DialectExtraNormalizer {
-
-    private final CoreSingletons coreSingletons;
-    private final IQTreeTransformer transformer;
+public class AvoidEqualsBoolNormalizer extends DialectExtraNormalizerBase {
 
     @Inject
     protected AvoidEqualsBoolNormalizer(CoreSingletons coreSingletons) {
-        this.coreSingletons = coreSingletons;
-        this.transformer = new TermTransformer().treeTransformer();
+        super(new TermTransformer(coreSingletons).treeTransformer());
     }
 
-    @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transformer.transform(tree);
-    }
-
-    private class TermTransformer extends AbstractTermTransformer {
-        TermTransformer() {
+    private static class TermTransformer extends AbstractTermTransformer {
+        TermTransformer(CoreSingletons coreSingletons) {
             super(coreSingletons.getIQFactory(), coreSingletons.getTermFactory());
         }
 

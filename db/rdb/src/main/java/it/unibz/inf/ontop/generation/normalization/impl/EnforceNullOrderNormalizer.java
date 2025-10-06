@@ -1,48 +1,32 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.DefaultQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class EnforceNullOrderNormalizer implements DialectExtraNormalizer {
-
-    private final IntermediateQueryFactory iqFactory;
-    private final TermFactory termFactory;
-    private final IQTreeTransformer transformer;
+public class EnforceNullOrderNormalizer extends DialectExtraNormalizerBase {
 
     @Inject
-    protected EnforceNullOrderNormalizer(IntermediateQueryFactory iqFactory,
-                                         TermFactory termFactory) {
-        this.iqFactory = iqFactory;
-        this.termFactory = termFactory;
-        this.transformer = new EnforceNullOrderIQTreeVisitingTransformer().treeTransformer();
+    protected EnforceNullOrderNormalizer(CoreSingletons coreSingletons) {
+        super(new EnforceNullOrderIQTreeVisitingTransformer(coreSingletons).treeTransformer());
     }
 
-    @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transformer.transform(tree);
-    }
+    private static class EnforceNullOrderIQTreeVisitingTransformer extends DefaultQueryNodeTransformer {
+        private final TermFactory termFactory;
 
-
-    private class EnforceNullOrderIQTreeVisitingTransformer extends DefaultQueryNodeTransformer {
-
-        EnforceNullOrderIQTreeVisitingTransformer() {
-            super(EnforceNullOrderNormalizer.this.iqFactory);
+        EnforceNullOrderIQTreeVisitingTransformer(CoreSingletons coreSingletons) {
+            super(coreSingletons.getIQFactory());
+            this.termFactory = coreSingletons.getTermFactory();
         }
 
         @Override
