@@ -44,7 +44,6 @@ public class OptimizationTestingTools {
     public static final FunctionSymbolFactory FUNCTION_SYMBOL_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final QueryRenamer QUERY_RENAMER;
-    public static final OptimizerFactory OPTIMIZER_FACTORY;
     public static final ExplicitEqualityTransformer EXPLICIT_EQUALITY_TRANSFORMER;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
     public static final BooleanExpressionPushDownTransformer PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER;
@@ -132,7 +131,6 @@ public class OptimizationTestingTools {
         EXPLICIT_EQUALITY_TRANSFORMER = injector.getInstance(ExplicitEqualityTransformer.class);
         PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER = injector.getInstance(BooleanExpressionPushDownTransformer.class);
         QUERY_RENAMER = injector.getInstance(QueryRenamer.class);
-        OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
         GENERAL_STRUCTURAL_AND_SEMANTIC_IQ_OPTIMIZER = injector.getInstance(GeneralStructuralAndSemanticIQOptimizer.class);
 

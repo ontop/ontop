@@ -3,8 +3,7 @@ package it.unibz.inf.ontop.iq.transformer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
@@ -17,7 +16,6 @@ import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -30,11 +28,8 @@ public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTran
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
 
-    private final Transformer transformer;
-
-    @AssistedInject
-    protected DefinitionPushDownTransformerImpl(@Assisted DefinitionPushDownRequest request,
-                                                IntermediateQueryFactory iqFactory,
+    @Inject
+    protected DefinitionPushDownTransformerImpl(IntermediateQueryFactory iqFactory,
                                                 SubstitutionFactory substitutionFactory,
                                                 TermFactory termFactory,
                                                 IQTreeTools iqTreeTools) {
@@ -42,12 +37,11 @@ public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTran
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.iqTreeTools = iqTreeTools;
-        this.transformer = getTransformer(request);
     }
 
     @Override
-    public IQTree transform(IQTree tree) {
-        return transformer.transform(tree);
+    public IQTree transform(IQTree tree, DefinitionPushDownRequest request) {
+        return getTransformer(request).transform(tree);
     }
 
     private Transformer getTransformer(DefinitionPushDownRequest request) {

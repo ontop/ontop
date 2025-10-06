@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
-import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.optimizer.splitter.PreventDistinctProjectionSplitter;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
@@ -60,12 +59,8 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(AllQueryContextFunctionSymbolEvaluator.class);
         bindFromSettings(NodeInGraphOptimizer.class);
         bindFromSettings(ExplicitEqualityTransformer.class);
+        bindFromSettings(DefinitionPushDownTransformer.class);
 
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
-
-        Module optimizerModule = buildFactory(ImmutableList.of(
-                DefinitionPushDownTransformer.class),
-                OptimizerFactory.class);
-        install(optimizerModule);
     }
 }
