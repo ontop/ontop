@@ -28,7 +28,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
 import static it.unibz.inf.ontop.iq.node.normalization.impl.NormalizationContext.State;
 
 
@@ -62,7 +61,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
         Context context = new Context(variableGenerator);
-        return context.lift(tree);
+        return context.transformer.transform(tree);
     }
 
 
@@ -75,23 +74,19 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             this.transformer = new Transformer();
         }
 
-        IQTree lift(IQTree tree) {
-            return tree.acceptVisitor(transformer);
-        }
-
         private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
             Transformer() {
-                super(PostProcessableFunctionLifterImpl.this.iqFactory,
-                        t -> t.normalizeForOptimization(variableGenerator));
+                super(PostProcessableFunctionLifterImpl.this.iqFactory);
             }
 
             @Override
             public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-                IQTree normalizedTree = super.transformUnion(tree, rootNode, children);
+                IQTree normalizedTree = super.transformUnion(tree, rootNode, children)
+                        .normalizeForOptimization(variableGenerator);
 
                 // Fix-point before pursing (recursive, potentially dangerous!)
                 if (!normalizedTree.equals(tree)) {
-                    return lift(normalizedTree);
+                    return transform(normalizedTree);
                 }
 
                 var initial = State.<ConstructionNode, UnionSubTree>initial(

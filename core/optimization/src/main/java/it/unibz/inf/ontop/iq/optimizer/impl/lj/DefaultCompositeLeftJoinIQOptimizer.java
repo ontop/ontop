@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.CompositeIQTreeVariableGeneratorTransformer;
 
@@ -16,10 +17,16 @@ public class DefaultCompositeLeftJoinIQOptimizer extends CompositeIQTreeVariable
             NullableFDSelfLJOptimizer nullableFDOptimizer) {
 
         super(cardinalitySensitiveJoinTransferLJOptimizer,
+                IQTree::normalizeForOptimization,
                 cardinalityInsensitiveJoinTransferLJOptimizer,
+                IQTree::normalizeForOptimization,
                 ljWithNestingOnRightToInnerJoinOptimizer,
+                IQTree::normalizeForOptimization,
                 mergeLJOptimizer,
+                IQTree::normalizeForOptimization,
                 cardinalityInsensitiveLJPruningOptimizer,
-                nullableFDOptimizer);
+                IQTree::normalizeForOptimization,
+                nullableFDOptimizer,
+                IQTree::normalizeForOptimization);
     }
 }

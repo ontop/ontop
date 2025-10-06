@@ -20,16 +20,11 @@ import java.util.function.Function;
 public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultIQTreeVisitingTransformer {
 
     protected final IntermediateQueryFactory iqFactory;
-    protected final Function<IQTree, IQTree> postTransformer;
 
     protected DefaultRecursiveIQTreeVisitingTransformer(IntermediateQueryFactory iqFactory) {
-        this(iqFactory,t -> t);
+        this.iqFactory = iqFactory;
     }
 
-    protected DefaultRecursiveIQTreeVisitingTransformer(IntermediateQueryFactory iqFactory, Function<IQTree, IQTree> postTransformer) {
-        this.iqFactory = iqFactory;
-        this.postTransformer = postTransformer;
-    }
 
     @Override
     protected final IQTree transformLeaf(LeafIQTree leaf){
@@ -49,7 +44,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
     protected final IQTree withTransformedChild(UnaryIQTree tree, IQTree newChild) {
         return newChild.equals(tree.getChild())
                 ? tree
-                : postTransformer.apply(iqFactory.createUnaryIQTree(tree.getRootNode(), newChild));
+                : iqFactory.createUnaryIQTree(tree.getRootNode(), newChild);
     }
 
     @Override
@@ -65,7 +60,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
     protected final IQTree withTransformedChildren(NaryIQTree tree, ImmutableList<IQTree> newChildren) {
         return newChildren.equals(tree.getChildren())
                 ? tree
-                : postTransformer.apply(iqFactory.createNaryIQTree(tree.getRootNode(), newChildren));
+                : iqFactory.createNaryIQTree(tree.getRootNode(), newChildren);
     }
 
     @Override
@@ -82,6 +77,6 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
     protected final IQTree withTransformedChildren(BinaryNonCommutativeIQTree tree, IQTree newLeftChild, IQTree newRightChild) {
         return newLeftChild.equals(tree.getLeftChild()) && newRightChild.equals(tree.getRightChild())
                 ? tree
-                : postTransformer.apply(iqFactory.createBinaryNonCommutativeIQTree(tree.getRootNode(), newLeftChild, newRightChild));
+                : iqFactory.createBinaryNonCommutativeIQTree(tree.getRootNode(), newLeftChild, newRightChild);
     }
 }

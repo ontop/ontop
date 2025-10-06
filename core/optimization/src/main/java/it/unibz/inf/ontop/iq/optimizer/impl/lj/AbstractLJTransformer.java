@@ -19,7 +19,7 @@ public abstract class AbstractLJTransformer extends DefaultRecursiveIQTreeVisiti
     protected final IQTreeTransformer searchingFromScratchTransformer;
 
     protected AbstractLJTransformer(IntermediateQueryFactory iqFactory, VariableGenerator variableGenerator, IQTreeTransformer searchingFromScratchTransformer) {
-        super(iqFactory, t -> t.normalizeForOptimization(variableGenerator), variableGenerator);
+        super(iqFactory, variableGenerator);
         this.searchingFromScratchTransformer = searchingFromScratchTransformer;
     }
 
@@ -31,10 +31,12 @@ public abstract class AbstractLJTransformer extends DefaultRecursiveIQTreeVisiti
 
         if (preventRecursiveOptimizationOnRightChild()
                 && !transformedRightChild.equals(rightChild))
-            return postTransformer.apply(iqFactory.createBinaryNonCommutativeIQTree(rootNode, transformedLeftChild, transformedRightChild));
+            return iqFactory.createBinaryNonCommutativeIQTree(rootNode, transformedLeftChild, transformedRightChild)
+                    .normalizeForOptimization(variableGenerator);
 
         return furtherTransformLeftJoin(rootNode, transformedLeftChild, transformedRightChild)
-                .orElseGet(() -> withTransformedChildren(tree, transformedLeftChild, transformedRightChild));
+                .orElseGet(() -> withTransformedChildren(tree, transformedLeftChild, transformedRightChild)
+                        .normalizeForOptimization(variableGenerator));
     }
 
     /**
