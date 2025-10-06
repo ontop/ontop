@@ -23,26 +23,30 @@ public class BasicFlattenLifterImpl implements BasicFlattenLifter {
 
     private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
+    private final Transformer transformer;
 
     @Inject
     private BasicFlattenLifterImpl(IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
         // no equality check
         this.iqFactory = iqFactory;
         this.iqTreeTools = iqTreeTools;
+        this.transformer = new Transformer();
     }
 
     @Override
     public IQTree transform(IQTree tree) {
-        return tree.acceptVisitor(new Transformer(tree));
+        // avoid lifting FLATTEN above the top-level CONSTRUCTION
+        var construction = IQTreeTools.UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(construction.getOptionalNode())
+                .build(transformer.transform(construction.getTail()));
     }
 
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-        private final IQTree topRoot;
 
-        Transformer(IQTree topRoot) {
+        Transformer() {
             super(BasicFlattenLifterImpl.this.iqFactory);
-            this.topRoot = topRoot;
         }
 
         @Override
@@ -74,8 +78,6 @@ public class BasicFlattenLifterImpl implements BasicFlattenLifter {
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode cn, IQTree child) {
             IQTree updatedChild = transform(child);
-            if (tree == topRoot) // prevents FLATTEN above the top CONSTRUCTION node in an IQ
-                return iqFactory.createUnaryIQTree(cn, updatedChild);
 
             LiftingState s = liftFlatten(updatedChild,
                     // cannot be lifted if required in the CONSTRUCTION substitution
